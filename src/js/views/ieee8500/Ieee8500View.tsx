@@ -25,19 +25,17 @@ class Ieee8500View extends BackboneReactComponent<Ieee8500MainModel, {}> {
 
     renderD3() {
 
-        console.log('trying to render d3');
-
-        console.log(this.props.model);
-
+        // This function may be called before all data has been received.
+        // Check that the data has been received before attempting to render.
         if (!this.props.model.hasData()) {
             return;
         }
 
-        console.log('    has data, rendering.');
-
+        // Compute the x and y bounds
         let xExtent = d3.extent(this.props.model.get('elements'), (d:any) => { return d.x; });   
         let yExtent = d3.extent(this.props.model.get('elements'), (d:any) => { return d.y; });
         
+        // Create an SVG element and a group
         let svg = d3.select('.view.ieee8500').append('svg')
             .style('width', '100%')
             .style('height', '100%')
@@ -46,12 +44,15 @@ class Ieee8500View extends BackboneReactComponent<Ieee8500MainModel, {}> {
             }))
             .append("g");
 
+        // Create an SVG group to hold the links
         let linkGroup = svg.append('g')
             .attr('class', 'links');
         
+        // Create an SVG group to hold the nodes
         let elementGroup = svg.append('g')
             .attr('class', 'elements');
 
+        // Draw a circle for each node
         let circles = elementGroup.selectAll('circle.element')
             .data(this.props.model.get('elements'))
             .enter().append('circle')
@@ -60,9 +61,11 @@ class Ieee8500View extends BackboneReactComponent<Ieee8500MainModel, {}> {
                 .attr('r', 50)
                 .attr('cx', (element:IElement) => element.x - xExtent[0])
                 .attr('cy', (element:IElement) => element.y - yExtent[0]);
-
+        
+        // Add tooltips to the node circles
         circles.append('title').text((element:IElement) => { return element.name});
 
+        // A line function for the links
         let line:any = d3.line()
             .x((d:any) => { return d.element.x - xExtent[0]})
             .y((d:any) => { return d.element.y - yExtent[0]})
@@ -91,6 +94,7 @@ class Ieee8500View extends BackboneReactComponent<Ieee8500MainModel, {}> {
                 })
                 .attr('d', line);
 
+        // An iterative way of drawing the links (vs. the functional way above).
         /*this.props.model.get('links').forEach((link:ILink) => {
             if (link.from.x == undefined 
                 || link.from.y == undefined 
