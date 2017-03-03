@@ -62,7 +62,7 @@ app.get('/data/ieee8500', (req, res) => {
 
         let existingElement = hashByName[name];
         if (!existingElement) {
-            existingElement = {name: name, type: type, data: {}};
+            existingElement = {name: name, type: type, data: {}, children: []};
             hashByName[name] = existingElement;
             elementsList.push(existingElement);
         }
@@ -79,18 +79,20 @@ app.get('/data/ieee8500', (req, res) => {
     let elements = [];
     let links = [];
 
+    // Create top-level elements
     [{index: 0, type: 'swing_nodes'},
-    {index: 1, type: 'capacitors'},
     {index: 3, type: 'transformers'},
     {index: 4, type: 'regulators'}].forEach((group) => {
         baseJson.feeder[group.index][group.type].forEach((element) => {
                 elements.push({
                     name: element.name, 
                     type: group.type, 
-                    data: element});
+                    data: element,
+                    children: []});
             })
     })
     
+    // Create the lines, creating nodes as needed along the way
     baseJson.feeder[2].overhead_lines.forEach((overheadLine) => {
 
         let fromNode = getOrCreateElement(overheadLine.from, 'node', knownElementsByName, elements);
@@ -101,6 +103,17 @@ app.get('/data/ieee8500', (req, res) => {
             from: fromNode,
             to: toNode,
             data: overheadLine
+        })
+    })
+
+    // Add the capacitors under the nodes
+    baseJson.feeder[1]['capacitors'].forEach((element) => {
+        let parent = knownElementsByName[element.parent];
+        parent.children.push({
+            name: element.name,
+            type: 'capacitors',
+            data: element,
+            children: []
         })
     })
 

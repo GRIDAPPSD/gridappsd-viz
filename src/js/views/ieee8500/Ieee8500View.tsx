@@ -6,7 +6,7 @@ import Ieee8500MainModel from '../../models/ieee8500/Ieee8500MainModel';
 import '../../../css/Ieee8500View.scss';
 
 // Properties required for elements. The server may send more.
-interface IElement {name:string, x:number, y:number}
+interface IElement {name:string, x:number, y:number, children:any[]}
 
 // Properties required for links. The server may send more.
 interface ILink {name:string, from: IElement, to:IElement, data:any}
@@ -58,9 +58,24 @@ class Ieee8500View extends BackboneReactComponent<Ieee8500MainModel, {}> {
             .enter().append('circle')
                 .filter((element:IElement) => { return element.x != undefined && element.y != undefined; })
                 .attr('class', (element:IElement) => 'element ' + element.name)
-                .attr('r', 50)
                 .attr('cx', (element:IElement) => element.x - xExtent[0])
-                .attr('cy', (element:IElement) => element.y - yExtent[0]);
+                .attr('cy', (element:IElement) => element.y - yExtent[0])
+                .attr('r', (element:IElement) => {
+                    if (element.children.length > 0 
+                        && element.children[0].type == 'capacitors') {
+                        return 150;
+                    }  else {
+                        return 50;
+                    }
+                })
+                .attr('fill', (element:IElement) => {
+                    if (element.children.length > 0 
+                        && element.children[0].type == 'capacitors') {
+                        return 'magenta';
+                    }  else {
+                        return 'black';
+                    }
+                });
         
         // Add tooltips to the node circles
         circles.append('title').text((element:IElement) => { return element.name});
