@@ -8,4 +8,67 @@
     path.link {
         stroke-width: 10px;
     }
+
+    text {
+        font-size: 300px;
+    }
+
+    .pnnl-table {
+        stroke: gray;
+        stroke-width: 1px;
+    }
+
+    rect.pnnl-table {
+        fill: cornsilk;
+    }
+
+    text.pnnl-table.header {
+        font-weight: bold;
+    }
+
+    text.pnnl-table.content {
+        color: #121212;
+    }
+
+    path.pnnl-table.header.gridline {
+        stroke-width: 2px;
+        stroke: #232323;
+    }
+
+    text.content.capacitor {
+        font-weight: bold;
+    }
+
+    text.content {
+        font-weight: bold;
+    }
+
+    text.small-header {
+        font-size: 250;
+    }
+
+    .capacitor.OPEN {
+        fill: limegreen;
+    }
+
+    .capacitor.CLOSED {
+        fill: darkred;
+    }
+
+    circle.element {
+        fill: black;
+    }
+
+    circle.element.mouseover {
+        stroke: darkgreen;
+        stroke-width: 50px;
+    }
+
+    g.pnnl-table.show {
+        opacity: 1;
+    }
+
+    g.pnnl-table.hide {
+        opacity: 0;
+    }
 }

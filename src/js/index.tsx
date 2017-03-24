@@ -12,7 +12,7 @@ import Ieee8500MainModel from './models/ieee8500/Ieee8500MainModel';
 import '../../node_modules/bootstrap/dist/css/bootstrap.min.css';
 import '../css/index.scss';
 
-let ieee8500MainModel = new Ieee8500MainModel({url: '/data/ieee8500'});
+let ieee8500MainModel = new Ieee8500MainModel();
 
 ReactDOM.render(
     <Router history={browserHistory}>

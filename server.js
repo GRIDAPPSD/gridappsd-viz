@@ -58,6 +58,14 @@ app.get(['/', '/ieee8500'], function(req, res) {
 */
 app.get('/data/ieee8500', (req, res) => {
 
+    let topologyJson = getIeee8500Topology();
+
+    res.json(topologyJson);
+
+}); 
+
+function getIeee8500Topology() {
+
     function getOrCreateElement(name, type, hashByName, elementsList) {
 
         let existingElement = hashByName[name];
@@ -79,10 +87,20 @@ app.get('/data/ieee8500', (req, res) => {
     let elements = [];
     let links = [];
 
+    let regulatorParents = {
+        reg_VREG3: 'nd_l2692633',
+        reg_VREG4: 'nd_m1089120',
+        reg_VREG2: 'nd_l2841632',
+        reg_FEEDER_REG: 'nd_m1209814'
+    };
+
     // Create top-level elements
-    [{index: 0, type: 'swing_nodes'},
-    {index: 3, type: 'transformers'},
-    {index: 4, type: 'regulators'}].forEach((group) => {
+    [
+        {index: 0, type: 'swing_nodes'},
+        {index: 3, type: 'transformers'}
+    ].forEach((group) => {
+        console.log(group);
+        console.log(baseJson.feeder[group.index]);
         baseJson.feeder[group.index][group.type].forEach((element) => {
                 elements.push({
                     name: element.name, 
@@ -107,11 +125,23 @@ app.get('/data/ieee8500', (req, res) => {
     })
 
     // Add the capacitors under the nodes
-    baseJson.feeder[1]['capacitors'].forEach((element) => {
+    baseJson.feeder[1].capacitors.forEach((element) => {
         let parent = knownElementsByName[element.parent];
         parent.children.push({
             name: element.name,
             type: 'capacitors',
+            data: element,
+            children: []
+        })
+    })
+
+    // Add the regulators under the nodes 
+    console.log(baseJson.feeder[4]);
+    baseJson.feeder[4].regulators.forEach((element) => {
+        let parent = knownElementsByName[regulatorParents[element.name]];
+        parent.children.push({
+            name: element.name,
+            type: 'regulators',
             data: element,
             children: []
         })
@@ -134,11 +164,113 @@ app.get('/data/ieee8500', (req, res) => {
     })
     console.log(numMissingNodes + ' nodes missing, ' + numFoundNodes + ' found');
 
-    res.json({
+    let topologyJson = {
         elements: elements,
         links: links
-    })
+    };
 
-}); 
+    return topologyJson;
+}
+
+let timeseriesData = null;
+let timeseriesIndex = 0;
+
+function getTimeseriesData(filename) {
+
+    const contents = fs.readFileSync(filename, 'utf-8');
+    const lines = contents.trim().split('\n');
+    let headers = [];
+    let data = [];
+    lines.forEach((line) => {
+        if (line.indexOf('# timestamp') == 0) {
+            headers = line.replace('# ', '').trim().split(',');
+        } else if (line.indexOf('#') != 0) {
+            const tokens = line.trim().split(',');
+            let datum = { };
+            for (var i = 0; i < tokens.length; i++) {
+                datum[headers[i]] = tokens[i];
+            }
+            data.push(datum);
+        }
+    });
+    return data;
+}
+
+function getAllTimeseriesData() {
+
+    const dataFileNames = ['cap_0',
+        'cap_1',
+        'cap_2',
+        'cap_3',
+        'EOL_1_1_V',
+        'EOL_1_2_V',
+        'EOL_2_1_V',
+        'EOL_2_2_V',
+        'EOL_3_1_V',
+        'EOL_4_1_V',
+        'feeder_power',
+        'feeder_reg_taps',
+        'reg_taps_2',
+        'reg_taps_3',
+        'reg_taps_4'];
+
+    let allData = {};
+    dataFileNames.forEach((filename) => {
+        let fileData = getTimeseriesData('./data/ieee8500/timeseries/' + filename + '.csv');
+        allData[filename] = fileData;
+    });
+
+    let timeseriesData = [];
+    let cap0Data = allData['cap_0'];
+    for (var i = 0; i < cap0Data.length; i++) {
+        let datum = {};
+        datum.timestamp = cap0Data[i].timestamp;
+        dataFileNames.forEach((filename) => {
+            datum[filename] = allData[filename][i];
+        })
+        timeseriesData.push(datum);
+    }
+
+    return timeseriesData;
+}
+
+function getTimeseriesToTopologyMapping() {
+    
+    return {
+        cap_0: 'cap_capbank0',
+        cap_1: 'cap_capbank1',
+        cap_2: 'cap_capbank2',
+        cap_3: 'cap_capbank3',
+        EOL_1_1_V: 'reg_FEEDER_REG',
+        EOL_1_2_V: 'reg_FEEDER_REG',
+        EOL_2_1_V: 'reg_VREG2',
+        EOL_2_2_V: 'reg_VREG2',
+        EOL_3_1_V: 'reg_VREG3',
+        EOL_4_1_V: 'reg_VREG4',
+        feeder_power: 'reg_FEEDER_REG',
+        feeder_reg_taps: 'reg_FEEDER_REG',
+        reg_taps_2: 'reg_VREG2',
+        reg_taps_3: 'reg_VREG3',
+        reg_taps_4: 'reg_VREG4'
+    }
+}
+
+app.get('/data/ieee8500/timeseries', (req, res) => {
+
+    if (timeseriesData == null) {
+        timeseriesData = getAllTimeseriesData();
+    }
+
+    if (timeseriesIndex >= timeseriesData.length) {
+        timeseriesIndex = 0;
+    } 
+
+    let json = {
+        timeseriesToTopologyMapping: getTimeseriesToTopologyMapping(),
+        data: timeseriesData[timeseriesIndex++]
+    };
+
+    res.json(json);
+});
 
 console.log('Server running at: localhost ' + httpPort);

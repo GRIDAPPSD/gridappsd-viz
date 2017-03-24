@@ -20,7 +20,7 @@ export class Header extends React.Component<HeaderProps, {}> {
                             <li><Link to="/ieee8500">IEEE 8500</Link></li>
                         </ul>
                         <ul className="nav navbar-nav navbar-right">
-                            <li><Link to="/help">Help</Link></li>
+                            <li className="timestamp">(Awaiting timeseries data...)</li>
                         </ul>
                     </div>
                 </div>

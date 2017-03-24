@@ -1,0 +1,129 @@
+{
+    "timeseriesToTopologyMapping": {
+        "cap_0": "cap_capbank0",
+        "cap_1": "cap_capbank1",
+        "cap_2": "cap_capbank2",
+        "cap_3": "cap_capbank3",
+        "EOL_1_1_V": "reg_FEEDER_REG",
+        "EOL_1_2_V": "reg_FEEDER_REG",
+        "EOL_2_1_V": "reg_VREG2",
+        "EOL_2_2_V": "reg_VREG2",
+        "EOL_3_1_V": "reg_VREG3",
+        "EOL_4_1_V": "reg_VREG4",
+        "feeder_power": "reg_FEEDER_REG",
+        "feeder_reg_taps": "reg_FEEDER_REG",
+        "reg_taps_2": "reg_VREG2",
+        "reg_taps_3": "reg_VREG3",
+        "reg_taps_4": "reg_VREG4"
+    },
+    "data": {
+        "timestamp": "2000-09-01 00:02:00 PDT",
+        "cap_0": {
+            "timestamp": "2000-09-01 00:02:00 PDT",
+            "switchA": "OPEN",
+            "switchB": "OPEN",
+            "switchC": "OPEN"
+        },
+        "cap_1": {
+            "timestamp": "2000-09-01 00:02:00 PDT",
+            "switchA": "OPEN",
+            "switchB": "OPEN",
+            "switchC": "OPEN"
+        },
+        "cap_2": {
+            "timestamp": "2000-09-01 00:02:00 PDT",
+            "switchA": "OPEN",
+            "switchB": "OPEN",
+            "switchC": "OPEN"
+        },
+        "cap_3": {
+            "timestamp": "2000-09-01 00:02:00 PDT",
+            "switchA": "CLOSED",
+            "switchB": "CLOSED",
+            "switchC": "CLOSED"
+        },
+        "EOL_1_1_V": {
+            "timestamp": "2000-09-01 00:02:00 PDT",
+            "voltage_A.real": "+5929.27",
+            "voltage_A.imag": "-3940.23",
+            "voltage_B.real": "-6421.8",
+            "voltage_B.imag": "-3094.93",
+            "voltage_C.real": "+432.175",
+            "voltage_C.imag": "+7244.78"
+        },
+        "EOL_1_2_V": {
+            "timestamp": "2000-09-01 00:02:00 PDT",
+            "voltage_A.real": "+6037.5",
+            "voltage_A.imag": "-4026.98",
+            "voltage_B.real": "-6423.41",
+            "voltage_B.imag": "-3148.14",
+            "voltage_C.real": "+532.496",
+            "voltage_C.imag": "+7211.14"
+        },
+        "EOL_2_1_V": {
+            "timestamp": "2000-09-01 00:02:00 PDT",
+            "voltage_A.real": "+5492.29",
+            "voltage_A.imag": "-3791.09",
+            "voltage_B.real": "-6136.61",
+            "voltage_B.imag": "-2738.05",
+            "voltage_C.real": "+461.086",
+            "voltage_C.imag": "+6908.76"
+        },
+        "EOL_2_2_V": {
+            "timestamp": "2000-09-01 00:02:00 PDT",
+            "voltage_A.real": "+5510.35",
+            "voltage_A.imag": "-3801.14",
+            "voltage_B.real": "-6140.31",
+            "voltage_B.imag": "-2743.96",
+            "voltage_C.real": "+460.384",
+            "voltage_C.imag": "+6916.35"
+        },
+        "EOL_3_1_V": {
+            "timestamp": "2000-09-01 00:02:00 PDT",
+            "voltage_A.real": "+5657.93",
+            "voltage_A.imag": "-3858.05",
+            "voltage_B.real": "-6271.15",
+            "voltage_B.imag": "-2871.46",
+            "voltage_C.real": "+464.966",
+            "voltage_C.imag": "+7077.63"
+        },
+        "EOL_4_1_V": {
+            "timestamp": "2000-09-01 00:02:00 PDT",
+            "voltage_A.real": "+5803.78",
+            "voltage_A.imag": "-4027.49",
+            "voltage_B.real": "-6274.34",
+            "voltage_B.imag": "-2915.32",
+            "voltage_C.real": "+650.943",
+            "voltage_C.imag": "+7040.44"
+        },
+        "feeder_power": {
+            "timestamp": "2000-09-01 00:02:00 PDT",
+            "power_in.real": "+3.6647e+006",
+            "power_in.imag": "+423029"
+        },
+        "feeder_reg_taps": {
+            "timestamp": "2000-09-01 00:02:00 PDT",
+            "tap_A": "-4",
+            "tap_B": "-4",
+            "tap_C": "-4"
+        },
+        "reg_taps_2": {
+            "timestamp": "2000-09-01 00:02:00 PDT",
+            "tap_A": "-1",
+            "tap_B": "-2",
+            "tap_C": "-3"
+        },
+        "reg_taps_3": {
+            "timestamp": "2000-09-01 00:02:00 PDT",
+            "tap_A": "-3",
+            "tap_B": "-3",
+            "tap_C": "-3"
+        },
+        "reg_taps_4": {
+            "timestamp": "2000-09-01 00:02:00 PDT",
+            "tap_A": "-3",
+            "tap_B": "-3",
+            "tap_C": "-3"
+        }
+    }
+}
