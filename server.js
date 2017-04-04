@@ -255,6 +255,64 @@ function getTimeseriesToTopologyMapping() {
     }
 }
 
+function getTimeseriesToPlotSeriesMapping() {
+    
+    return {
+
+        voltage_A: [
+            'EOL_1_1_V',
+            'EOL_1_2_V',
+            'EOL_2_1_V',
+            'EOL_2_2_V',
+            'EOL_3_1_V',
+            'EOL_4_1_V'
+        ],
+
+        voltage_B: [
+            'EOL_1_1_V',
+            'EOL_1_2_V',
+            'EOL_2_1_V',
+            'EOL_2_2_V',
+            'EOL_3_1_V',
+            'EOL_4_1_V'
+        ],
+
+        voltage_C: [
+            'EOL_1_1_V',
+            'EOL_1_2_V',
+            'EOL_2_1_V',
+            'EOL_2_2_V',
+            'EOL_3_1_V',
+            'EOL_4_1_V'
+        ],
+
+        power_in: [
+            'feeder_power'
+        ],
+
+        tap_A: [
+            'feeder_reg_taps',
+            'reg_taps_2',
+            'reg_taps_3',
+            'reg_taps_4'
+        ],
+
+        tap_B: [
+            'feeder_reg_taps',
+            'reg_taps_2',
+            'reg_taps_3',
+            'reg_taps_4'
+        ],
+
+        tap_C: [
+            'feeder_reg_taps',
+            'reg_taps_2',
+            'reg_taps_3',
+            'reg_taps_4'
+        ]
+    }
+}
+
 app.get('/data/ieee8500/timeseries', (req, res) => {
 
     if (timeseriesData == null) {
@@ -267,6 +325,7 @@ app.get('/data/ieee8500/timeseries', (req, res) => {
 
     let json = {
         timeseriesToTopologyMapping: getTimeseriesToTopologyMapping(),
+        timeseriesToPlotSeriesMapping: getTimeseriesToPlotSeriesMapping(),
         data: timeseriesData[timeseriesIndex++]
     };
 

@@ -1,7 +1,10 @@
 import * as React from 'react';
 import * as d3 from 'd3';
-import {BackboneReactComponent} from '../BackboneReactComponent';
-import Ieee8500MainModel from '../../models/ieee8500/Ieee8500MainModel';
+import * as Backbone from 'backbone';
+import {ControlledReactComponent} from '../ControlledReactComponent';
+import Ieee8500Controller from '../../controllers/ieee8500/Ieee8500Controller';
+import PlotView from '../common/PlotView';
+import Ieee8500PlotsView from './Ieee8500PlotsView';
 
 import '../../../css/Ieee8500View.scss';
 
@@ -11,9 +14,9 @@ interface IElement {name:string, x:number, y:number, rendering_x:number, renderi
 // Properties required for links. The server may send more.
 interface ILink {name:string, from: IElement, to:IElement, data:any}
 
-interface Ieee8500ViewState {isFirstCurTimeRendering: boolean, hasRenderedTopology: boolean, updateCount: number};
+interface Ieee8500ViewState {isFirstCurTimeRendering: boolean, hasRenderedTopology: boolean};
 
-class Ieee8500View extends BackboneReactComponent<Ieee8500MainModel, Ieee8500ViewState> {
+class Ieee8500View extends ControlledReactComponent<Ieee8500Controller, Ieee8500ViewState> {
 
     private rowHeight = 300;
     private rowPadding = 50;
@@ -25,25 +28,31 @@ class Ieee8500View extends BackboneReactComponent<Ieee8500MainModel, Ieee8500Vie
     // Note: getInitialState() is not used in ES6 classes.
     constructor(props:any) {
         super(props);
-        this.state = {isFirstCurTimeRendering: true, hasRenderedTopology: false, updateCount: 0};
+        this.state = {isFirstCurTimeRendering: true, hasRenderedTopology: false};
     }
 
     componentWillMount() {
         console.log('component will mount');
-        this.props.model.staticModel.on('change', this.renderTopology, this);
-        this.props.model.staticModel.fetch();
+        this.props.controller.model.staticModel.on('change', this.renderTopology, this);
+        this.props.controller.model.staticModel.fetch();
 
-        this.props.model.timeseriesModel.on('change', this.renderCurTimeData, this);
-        this.props.model.timeseriesModel.startPolling();
+        this.props.controller.model.timeseriesModel.on('change', this.renderCurTimeData, this);
+        this.props.controller.startPolling();
     }
 
     componentWillUnmount() {
-        this.props.model.staticModel.off('change', this.renderTopology, this);
-        this.props.model.timeseriesModel.off('change', this.renderCurTimeData, this);
+        this.props.controller.model.staticModel.off('change', this.renderTopology, this);
+        this.props.controller.model.timeseriesModel.off('change', this.renderCurTimeData, this);
     }
 
     render() {
+        console.log('---- render ieee8500view');
+
         return <div className="view ieee8500">
+                <div className="topology" />
+                <div className="plots">
+                    <Ieee8500PlotsView model={this.props.controller.model} />
+                </div>
         </div>
     }
 
@@ -53,12 +62,12 @@ class Ieee8500View extends BackboneReactComponent<Ieee8500MainModel, Ieee8500Vie
             return;
         }
 
-        const data = this.props.model.timeseriesModel.get('data');
-        const mapping = this.props.model.timeseriesModel.get('timeseriesToTopologyMapping');
+        const data = this.props.controller.model.timeseriesModel.get('curTime').data;
+        const mapping = this.props.controller.model.timeseriesModel.get('curTime').timeseriesToTopologyMapping;
 
         d3.select('.timestamp')
             .text(data.timestamp)
-            .on('click', () => this.props.model.timeseriesModel.stopPolling());
+            .on('click', () => this.props.controller.stopPolling());
 
         const isFirstCurTimeRendering = this.state.isFirstCurTimeRendering;
         const self = this;
@@ -104,10 +113,11 @@ class Ieee8500View extends BackboneReactComponent<Ieee8500MainModel, Ieee8500Vie
             } 
         })
         
-        self.setState({
-            isFirstCurTimeRendering: false, 
-            hasRenderedTopology: this.state.hasRenderedTopology,
-            updateCount: this.state.updateCount + 1});
+        if (self.state.isFirstCurTimeRendering) {
+            self.setState({
+                isFirstCurTimeRendering: false, 
+                hasRenderedTopology: this.state.hasRenderedTopology});
+        }
     }
 
     getChildName(child:IElement) {
@@ -239,7 +249,7 @@ class Ieee8500View extends BackboneReactComponent<Ieee8500MainModel, Ieee8500Vie
 
         curDataGroup.append('circle')
             .datum(element)
-            .attr('class', 'element regulator') // TODO: incorporate all switches?
+            .attr('class', 'element regulator ' + self.getChildName(element.children[0])) // TODO: incorporate all switches?
             .attr('cx', element.rendering_x)
             .attr('cy', element.rendering_y)
             .attr('r', 150)
@@ -367,14 +377,14 @@ class Ieee8500View extends BackboneReactComponent<Ieee8500MainModel, Ieee8500Vie
 
         // This function may be called before all data has been received.
         // Check that the data has been received before attempting to render.
-        if (!this.props.model.hasData()) {
+        if (!this.props.controller.model.hasData()) {
             return;
         }
 
-        console.log(this.props.model.attributes);
+        console.log(this.props.controller.model.attributes);
 
         const self = this;
-        const elementData = this.props.model.staticModel.get('elements');
+        const elementData = this.props.controller.model.staticModel.get('elements');
 
         // Compute the x and y bounds
         const xExtent = d3.extent(elementData, (d:any) => { return d.x; });   
@@ -391,7 +401,7 @@ class Ieee8500View extends BackboneReactComponent<Ieee8500MainModel, Ieee8500Vie
         })
         
         // Create an SVG element and a group
-        let svg = d3.select('.view.ieee8500').append('svg')
+        let svg = d3.select('.view.ieee8500 .topology').append('svg')
             .style('width', '100%')
             .style('height', '100%')
             .call(zoom)
@@ -481,7 +491,7 @@ class Ieee8500View extends BackboneReactComponent<Ieee8500MainModel, Ieee8500Vie
         // Draw the links. Right now, the server sends all from and to node info
         // with the link, but that may change.
         let lines = linkGroup.selectAll('path.link')
-            .data(this.props.model.staticModel.get('links'))
+            .data(this.props.controller.model.staticModel.get('links'))
             .enter().append('path')
                 .filter((link:ILink) => { return link.from.x != undefined && link.from.y != undefined && link.to.x != undefined && link.to.y != undefined; })
                 .datum((link:ILink) => [{link: link, element: link.from}, {link: link, element: link.to}])
@@ -529,10 +539,11 @@ class Ieee8500View extends BackboneReactComponent<Ieee8500MainModel, Ieee8500Vie
                 .append('title').text(link.name);
         }) */ 
 
-        this.setState({
-            hasRenderedTopology: true, 
-            isFirstCurTimeRendering: this.state.isFirstCurTimeRendering,
-            updateCount: this.state.updateCount});            
+        if (!this.state.hasRenderedTopology) {
+            this.setState({
+                hasRenderedTopology: true, 
+                isFirstCurTimeRendering: this.state.isFirstCurTimeRendering});  
+        }          
     }
 }
 

@@ -1,4 +1,26 @@
+$reg_FEEDER_REG_color: darkgreen;
+$reg_VREG2_color: darkblue;
+$reg_VREG3_color: darkred;
+$reg_VREG4_color: orange;
+
 .view.ieee8500 {
+
+    width: 100%;
+    height: 100%;
+    border-top: 2px #efefef solid; 
+
+    .topology {
+        float: left;
+        width: 70%;
+        height: 100%;
+    }
+
+    .plots {
+        float: right;
+        width: 30%;
+        height: 100%;
+        border-left: 2px #efefef solid;
+    }
 
     circle.element {
         stroke: gray;
@@ -9,7 +31,7 @@
         stroke-width: 10px;
     }
 
-    text {
+    .topology text {
         font-size: 300px;
     }
 
@@ -47,16 +69,12 @@
         font-size: 250;
     }
 
-    .capacitor.OPEN {
+    text.capacitor.OPEN {
         fill: limegreen;
     }
 
-    .capacitor.CLOSED {
+    text.capacitor.CLOSED {
         fill: darkred;
-    }
-
-    circle.element {
-        fill: black;
     }
 
     circle.element.mouseover {
@@ -70,5 +88,37 @@
 
     g.pnnl-table.hide {
         opacity: 0;
+    }
+
+    .reg_FEEDER_REG {
+        stroke: $reg_FEEDER_REG_color;
+    }
+
+    .reg_VREG2 {
+        stroke: $reg_VREG2_color; 
+    }
+
+    .reg_VREG3 {
+        stroke: $reg_VREG3_color;
+    }
+
+    .reg_VREG4 {
+        stroke: $reg_VREG4_color;
+    }
+
+    circle.reg_FEEDER_REG {
+        fill: $reg_FEEDER_REG_color;
+    }
+
+    circle.reg_VREG2 {
+        fill: $reg_VREG2_color; 
+    }
+
+    circle.reg_VREG3 {
+        fill: $reg_VREG3_color;
+    }
+
+    circle.reg_VREG4 {
+        fill: $reg_VREG4_color;
     }
 }

@@ -1,8 +1,12 @@
 import * as Backbone from 'backbone';
 
+/**
+ * Holds timeseries values.
+ * 
+ * history
+ * curTime
+ */
 class Ieee8500TimeseriesModel extends Backbone.Model {
-
-    private isPolling:boolean = false;
 
     constructor(props:any) {
         super(props);
@@ -11,36 +15,16 @@ class Ieee8500TimeseriesModel extends Backbone.Model {
     } 
 
     hasData():boolean {
-        return this.get('timestamp') != undefined;
+        return this.get('curTime') != undefined;
     }
 
     parse(response:any) {
         response.data.timestamp = new Date(response.data.timestamp);
-        console.log(response);
-        return response;
-    }
 
-    startPolling() {
-
-        this.isPolling = true;
-        this.poll();
-    }
-
-    poll() {
-
-        if (this.isPolling) {
-            
-            this.fetch();
-            let self = this;
-            setTimeout(
-                self.poll.bind(self),
-                250
-            )
-        }
-    }
-
-    stopPolling() {
-        this.isPolling = false;
+        // Wrap the response to differentiate it from the history
+        return {
+            curTime: response
+        };
     }
 }
 
