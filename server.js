@@ -276,7 +276,7 @@ function getTimeseriesToTopologyMappingNewFormat() {
         'nd_190-7361' : 'nd_190-7361',
         'nd_190-8581' : 'nd_190-8581',
         'nd_190-8593' : 'nd_190-8593',
-        'nd__hvmv_sub_lsb' : 'nd__hvmv_sub_lsb',
+        'nd__hvmv_sub_lsb' : 'reg_FEEDER_REG',
         'nd_l2673313' : 'nd_l2673313',
         'nd_l2876814' : 'nd_l2876814',
         'nd_l2955047' : 'nd_l2955047',
@@ -334,7 +334,15 @@ function getTimeseriesToPlotSeriesMappingNewFormat() {
             'nd_m1047574',
         ],
 
-        power_in: [
+        power_in_A: [
+            'xf_hvmv_sub'
+        ],
+
+        power_in_B: [
+            'xf_hvmv_sub'
+        ],
+
+        power_in_C: [
             'xf_hvmv_sub'
         ],
 
