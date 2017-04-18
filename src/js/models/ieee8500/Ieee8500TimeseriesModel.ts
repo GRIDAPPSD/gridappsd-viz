@@ -19,7 +19,7 @@ class Ieee8500TimeseriesModel extends Backbone.Model {
     }
 
     parse(response:any) {
-        response.data.timestamp = new Date(response.data.timestamp);
+        response.data.timestamp = new Date(Date.now());
 
         // Wrap the response to differentiate it from the history
         return {

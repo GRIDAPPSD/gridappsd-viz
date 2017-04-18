@@ -85,10 +85,10 @@ class Ieee8500MainModel extends Backbone.Model {
             
             let plotModel:PlotModel = self.plotModelsByName[plotName];
             mapping[plotName].forEach((seriesName:string) => {
-                let datum = curTime.data[seriesName];
+                let datum = curTime.data.output.ieee8500[seriesName];
                 plotModel.addData(
                     seriesName, 
-                    {xRaw: new Date(datum.timestamp), yRaw: self.getYRaw(plotName, datum)}, 
+                    {xRaw: new Date(Date.now()), yRaw: self.getYRaw(plotName, datum)}, 
                     false)
             })
             plotModel.trigger('change:data');
@@ -97,7 +97,10 @@ class Ieee8500MainModel extends Backbone.Model {
 
     private getYRaw(plotName:string, datum:any) {
         if (plotName.indexOf('voltage') >= 0
-            || plotName.indexOf('power_in') >= 0) {
+            || plotName.indexOf('power_in') >= 0) { 
+            // TODO: Format changed. Use a regex to parse a string like this:
+            // voltage: 6319.15-4782.82j V
+            // power_in: 1.75641e+06-808539j VA
             let real = Number(datum[plotName + '.real']);
             let imag = Number(datum[plotName + '.imag']);
             return Math.sqrt(Math.pow(real, 2) + Math.pow(real, 2));

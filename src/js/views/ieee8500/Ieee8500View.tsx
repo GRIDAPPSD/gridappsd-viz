@@ -43,6 +43,20 @@ class Ieee8500View extends ControlledReactComponent<Ieee8500Controller, Ieee8500
     componentWillUnmount() {
         this.props.controller.model.staticModel.off('change', this.renderTopology, this);
         this.props.controller.model.timeseriesModel.off('change', this.renderCurTimeData, this);
+        
+        // TODO: Remove. See componentDidMount for explanation.
+        d3.select('button.simulation.start').on('click', null);
+    }
+
+    componentDidMount() {
+        // TODO: Fix this. We're attaching to an event on another view. The play button 
+        // should be part of this view.
+        d3.select('button.simulation.start').on('click', this.onSimulationStartClick.bind(this));
+    }
+
+    onSimulationStartClick() {
+        console.log('Play!!');
+        this.props.controller.startSimulation();
     }
 
     render() {

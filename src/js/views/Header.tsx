@@ -1,5 +1,6 @@
 import * as React from 'react';
 import {Link} from 'react-router';
+import {Button, Glyphicon} from 'react-bootstrap';
 
 import '../../css/Header.scss';
 
@@ -21,6 +22,7 @@ export class Header extends React.Component<HeaderProps, {}> {
                         </ul>
                         <ul className="nav navbar-nav navbar-right">
                             <li className="timestamp">(Awaiting timeseries data...)</li>
+                            <li className="simulation start"><Button className="simulation start"><Glyphicon glyph="play" /></Button></li>
                         </ul>
                     </div>
                 </div>

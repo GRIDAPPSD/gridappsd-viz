@@ -33,12 +33,18 @@ module.exports = {
 
             // Use the Babel loader for plain JSX (vs. TSX) files
             {
-                test: /\.jsx?$/, 
+                test: /\.jsx$/, 
                 loader: 'babel-loader',
                 exclude: /node_modules/,
                 query: {
                     presets: ['es2015', 'react']
                 }
+            },
+
+            {
+                test: /\.js$/, 
+                loader: 'babel-loader',
+                exclude: /node_modules/,
             },
 
             // SASS CSS: http://sass-lang.com/
@@ -68,6 +74,7 @@ module.exports = {
         "react": "React",
         "react-dom": "ReactDOM",
         "backbone" : "Backbone",
-        "underscore" : "_"
+        "underscore" : "_",
+        "stomp" : "Stomp"
     }  
 };

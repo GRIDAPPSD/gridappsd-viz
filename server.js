@@ -234,6 +234,11 @@ function getAllTimeseriesData() {
     return timeseriesData;
 }
 
+function getAllTimeseriesDataNewFormat() {
+
+    return JSON.parse(fs.readFileSync('./data/ieee8500/timeseries/goss_output.json'));
+}
+
 function getTimeseriesToTopologyMapping() {
     
     return {
@@ -252,6 +257,107 @@ function getTimeseriesToTopologyMapping() {
         reg_taps_2: 'reg_VREG2',
         reg_taps_3: 'reg_VREG3',
         reg_taps_4: 'reg_VREG4'
+    }
+}
+
+function getTimeseriesToTopologyMappingNewFormat() {
+
+    return {
+        cap_capbank0a: 'cap_capbank0',
+        cap_capbank0b: 'cap_capbank0',
+        cap_capbank0c: 'cap_capbank0',
+        cap_capbank1a: 'cap_capbank1',
+        cap_capbank1b: 'cap_capbank1',
+        cap_capbank1c: 'cap_capbank1',
+        cap_capbank2a: 'cap_capbank2',
+        cap_capbank2b: 'cap_capbank2',
+        cap_capbank2c: 'cap_capbank2',
+        cap_capbank3: 'cap_capbank3', // Can we make this the same as the others?
+        'nd_190-7361' : 'nd_190-7361',
+        'nd_190-8581' : 'nd_190-8581',
+        'nd_190-8593' : 'nd_190-8593',
+        'nd__hvmv_sub_lsb' : 'nd__hvmv_sub_lsb',
+        'nd_l2673313' : 'nd_l2673313',
+        'nd_l2876814' : 'nd_l2876814',
+        'nd_l2955047' : 'nd_l2955047',
+        'nd_l3160107' : 'nd_l3160107',
+        'nd_l3254238' : 'nd_l3254238',
+        'nd_m1047574' : 'nd_m1047574',
+        reg_FEEDER_REG : 'reg_FEEDER_REG',
+        reg_VREG2 : 'reg_VREG2',
+        reg_VREG3 : 'reg_VREG3',
+        reg_VREG4 : 'reg_VREG4',
+        xf_hvmv_sub : 'reg_FEEDER_REG'        
+    }
+}
+
+function getTimeseriesToPlotSeriesMappingNewFormat() {
+
+    return {
+
+        voltage_A: [
+            'nd_190-7361',
+            'nd_190-8581',
+            'nd_190-8593',
+            'nd__hvmv_sub_lsb',
+            'nd_l2673313',
+            'nd_l2876814',
+            'nd_l2955047',
+            'nd_l3160107',
+            'nd_l3254238',
+            'nd_m1047574',
+        ],
+
+        voltage_B: [
+            'nd_190-7361',
+            'nd_190-8581',
+            'nd_190-8593',
+            'nd__hvmv_sub_lsb',
+            'nd_l2673313',
+            'nd_l2876814',
+            'nd_l2955047',
+            'nd_l3160107',
+            'nd_l3254238',
+            'nd_m1047574',
+        ],
+
+        voltage_C: [
+            'nd_190-7361',
+            'nd_190-8581',
+            'nd_190-8593',
+            'nd__hvmv_sub_lsb',
+            'nd_l2673313',
+            'nd_l2876814',
+            'nd_l2955047',
+            'nd_l3160107',
+            'nd_l3254238',
+            'nd_m1047574',
+        ],
+
+        power_in: [
+            'xf_hvmv_sub'
+        ],
+
+        tap_A: [
+            'reg_FEEDER_REG',
+            'reg_VREG2',
+            'reg_VREG3',
+            'reg_VREG4'
+        ],
+
+        tap_B: [
+            'reg_FEEDER_REG',
+            'reg_VREG2',
+            'reg_VREG3',
+            'reg_VREG4'
+        ],
+
+        tap_C: [
+            'reg_FEEDER_REG',
+            'reg_VREG2',
+            'reg_VREG3',
+            'reg_VREG4'
+        ]
     }
 }
 
@@ -316,7 +422,7 @@ function getTimeseriesToPlotSeriesMapping() {
 app.get('/data/ieee8500/timeseries', (req, res) => {
 
     if (timeseriesData == null) {
-        timeseriesData = getAllTimeseriesData();
+        timeseriesData = getAllTimeseriesDataNewFormat();
     }
 
     if (timeseriesIndex >= timeseriesData.length) {
@@ -324,8 +430,8 @@ app.get('/data/ieee8500/timeseries', (req, res) => {
     } 
 
     let json = {
-        timeseriesToTopologyMapping: getTimeseriesToTopologyMapping(),
-        timeseriesToPlotSeriesMapping: getTimeseriesToPlotSeriesMapping(),
+        timeseriesToTopologyMapping: getTimeseriesToTopologyMappingNewFormat(),
+        timeseriesToPlotSeriesMapping: getTimeseriesToPlotSeriesMappingNewFormat(),
         data: timeseriesData[timeseriesIndex++]
     };
 
