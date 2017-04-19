@@ -4,6 +4,7 @@ import {Router, Route, Link, browserHistory} from 'react-router';
 
 import Ieee8500View from './views/ieee8500/Ieee8500View';
 import MainController from './controllers/MainController';
+import DataSource from './interfaces/DataSource';
 import {Help} from './views/Help';
 import {Header} from './views/Header';
 import {MainView} from './views/MainView';
@@ -11,7 +12,12 @@ import {MainView} from './views/MainView';
 import '../../node_modules/bootstrap/dist/css/bootstrap.min.css';
 import '../css/index.scss';
 
-let mainController = new MainController();
+let dataSource = DataSource.RabinalWebsocket;
+if (window.location.href.indexOf('?poll') >= 0) {
+    dataSource = DataSource.PollingNode;
+}
+
+let mainController = new MainController(dataSource);
 
 ReactDOM.render(
     <Router history={browserHistory}>

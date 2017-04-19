@@ -1,4 +1,5 @@
 import Ieee8500MainModel from '../../models/ieee8500/Ieee8500MainModel';
+import DataSource from '../../interfaces/DataSource';
 import '../../libs/stomp.js';
 declare var Stomp:any;
 
@@ -7,6 +8,7 @@ class Ieee8500Controller {
     private _ieee8500MainModel:Ieee8500MainModel = new Ieee8500MainModel();
     private _isPolling:boolean = false;
     private _pollInterval:number = 250;
+    private _dataSource:DataSource;
 
     private _stompClient:any;
     private _websocketConnected:boolean = false;
@@ -19,8 +21,17 @@ class Ieee8500Controller {
         return this._ieee8500MainModel;
     }
 
-    constructor() {   
-        this.connectWebsocket();
+    get dataSource():DataSource {
+        return this._dataSource;
+    }
+
+    constructor(dataSource:DataSource) {  
+
+        this._dataSource = dataSource;
+
+        if (dataSource == DataSource.RabinalWebsocket) { 
+            this.connectWebsocket();
+        }
     }
 
     connectWebsocket() {

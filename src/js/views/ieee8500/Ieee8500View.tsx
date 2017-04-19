@@ -5,6 +5,7 @@ import {ControlledReactComponent} from '../ControlledReactComponent';
 import Ieee8500Controller from '../../controllers/ieee8500/Ieee8500Controller';
 import PlotView from '../common/PlotView';
 import Ieee8500PlotsView from './Ieee8500PlotsView';
+import DataSource from '../../interfaces/DataSource';
 
 import '../../../css/Ieee8500View.scss';
 
@@ -37,7 +38,10 @@ class Ieee8500View extends ControlledReactComponent<Ieee8500Controller, Ieee8500
         this.props.controller.model.staticModel.fetch();
 
         this.props.controller.model.timeseriesModel.on('change', this.renderCurTimeData, this);
-        this.props.controller.startPolling();
+
+        if (this.props.controller.dataSource == DataSource.PollingNode) {
+            this.props.controller.startPolling();
+        }
     }
 
     componentWillUnmount() {

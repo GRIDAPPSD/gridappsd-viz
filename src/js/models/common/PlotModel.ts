@@ -7,6 +7,8 @@ import PlotSeriesCollection from './PlotSeriesCollection';
 
 class PlotModel extends Backbone.Model {
 
+    private _maxNumItems = 20;
+
     get name():string {
         return this.get('name');
     }
@@ -26,7 +28,12 @@ class PlotModel extends Backbone.Model {
     }
 
     addData(seriesName:string, datum:any, triggerChange?:boolean) {
-        this.seriesCollection.getSeries(seriesName).data.push(datum);
+
+        let existingData = this.seriesCollection.getSeries(seriesName).data;
+        if (existingData.length >= this._maxNumItems) {
+            existingData.shift();
+        } 
+        existingData.push(datum);
         if (triggerChange) this.trigger('change:data');
     }
 
