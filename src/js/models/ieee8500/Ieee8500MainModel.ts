@@ -101,7 +101,7 @@ class Ieee8500MainModel extends Backbone.Model {
             // Use a regex to parse a string like this:
             // voltage: 6319.15-4782.82j V
             // power_in: 1.75641e+06-808539j VA
-            let regex = /[+|-]?(\d+\.\d+)[+|-](\d+\.\d+)j V/;
+            let regex = /[+|-]?(\d+\.?\d+?)[+|-](\d+\.?\d+?)j V/;
             let valueString = datum[plotName];
             let matches = valueString.match(regex);
             let real = Number(matches[1]);
