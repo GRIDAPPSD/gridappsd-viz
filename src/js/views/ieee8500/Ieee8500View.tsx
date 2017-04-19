@@ -95,7 +95,7 @@ class Ieee8500View extends ControlledReactComponent<Ieee8500Controller, Ieee8500
 
         // Group the data by element
         let dataByElementName:any = { };
-        Object.keys(data).forEach((timeseriesName) => {
+        Object.keys(data.output.ieee8500).forEach((timeseriesName) => {
             const elementName = mapping[timeseriesName];
             if (elementName) {
                 let dataForElement = dataByElementName[elementName];
@@ -103,32 +103,35 @@ class Ieee8500View extends ControlledReactComponent<Ieee8500Controller, Ieee8500
                     dataForElement = { };
                     dataByElementName[elementName] = dataForElement;
                 }
-                dataForElement[timeseriesName] = data[timeseriesName];                  
+                dataForElement[timeseriesName] = data.output.ieee8500[timeseriesName];                  
             }
         });
 
         // Now create/update the tables with all information for 
-        // eahc element
+        // each element
         Object.keys(dataByElementName).forEach((elementName) => {
             const dataForElement = dataByElementName[elementName];
-            const element:IElement = d3.select('g.' + elementName).datum() as IElement;
             const selector = 'g.' + elementName;
-            if (element.children.length > 0) {
-                if (element.children[0].type == 'capacitors') {
-                    let capData = dataForElement[Object.keys(dataForElement)[0]];
-                    if (self.state.isFirstCurTimeRendering) {
-                        self.appendCapacitorTable(selector, element, capData);
-                    } else {
-                        self.updateCapacitorTable(selector, element, capData);
+            const d3Node:any = d3.select(selector);
+            if (!d3Node.empty()) {
+                const element:IElement = d3Node.datum() as IElement;
+                if (element.children.length > 0) {
+                    if (element.children[0].type == 'capacitors') {
+                        let capData = dataForElement[Object.keys(dataForElement)[0]];
+                        if (self.state.isFirstCurTimeRendering) {
+                            self.appendCapacitorTable(selector, element, capData);
+                        } else {
+                            self.updateCapacitorTable(selector, element, capData);
+                        }
+                    }  else if (element.children[0].type == 'regulators') {
+                        if (self.state.isFirstCurTimeRendering) {
+                            self.appendRegulatorTable(selector, element, dataForElement);
+                        } else {
+                            self.updateRegulatorTable(selector, element, dataForElement);
+                        }
                     }
-                }  else if (element.children[0].type == 'regulators') {
-                    if (self.state.isFirstCurTimeRendering) {
-                        self.appendRegulatorTable(selector, element, dataForElement);
-                    } else {
-                        self.updateRegulatorTable(selector, element, dataForElement);
-                    }
-                }
-            } 
+                } 
+            }
         })
         
         if (self.state.isFirstCurTimeRendering) {
@@ -140,6 +143,17 @@ class Ieee8500View extends ControlledReactComponent<Ieee8500Controller, Ieee8500
 
     getChildName(child:IElement) {
         return child.name.replace(/(\D+)(\d)(a|b|c)$/, (match:any, p1:any, p2:any, p3:any) => [p1, p2].join(''));
+    }
+
+    hasDataWithPrefix(elementData:any, prefix:string):boolean {
+
+        let keys = Object.keys(elementData);
+        for(let i = 0; i < keys.length; i++) {
+            if (keys[i].indexOf(prefix) == 0) {
+                return true;
+            }
+        }
+        return false;
     }
 
     appendRegulatorTable(selector:string, element:IElement, dataForElement:any) {
@@ -157,15 +171,19 @@ class Ieee8500View extends ControlledReactComponent<Ieee8500Controller, Ieee8500
 
         // Get the voltages
         let hasPowerIn = false;
+        let powerId = '';
         let tapsId = '';
         let voltages:any[] = [];
         Object.keys(dataForElement).forEach((key) => {
-            if (key.indexOf('EOL') == 0) {
-                voltages.push({key: key, data: dataForElement[key], label: key.split('_')[2]});
-            } else if (key.indexOf('reg_taps') >= 0) {
+            let elementData = dataForElement[key];
+            if (self.hasDataWithPrefix(elementData, 'voltage')) {
+                voltages.push({key: key, data: elementData, label: key.split('_')[2]});
+            } else if (self.hasDataWithPrefix(elementData, 'tap')) {
                 tapsId = key;
-            } else if (key.indexOf('power') >= 0) {
-                hasPowerIn = true;
+            } else if (self.hasDataWithPrefix(elementData, 'power')) {
+                // TODO: Fix power in and uncomment the next line.
+                //hasPowerIn = true;
+                powerId = key;
             }
         });
 
@@ -176,7 +194,7 @@ class Ieee8500View extends ControlledReactComponent<Ieee8500Controller, Ieee8500
         // Get the power 
         let powerText = '';
         if (hasPowerIn) {
-            dataForElement.feeder_power['power_in.real'] + dataForElement.feeder_power['power_in.imag'] + 'i';
+            dataForElement[powerId]['power_in.real'] + dataForElement.powerId['power_in.imag'] + 'i';
         }
 
         // Get the taps
@@ -240,7 +258,7 @@ class Ieee8500View extends ControlledReactComponent<Ieee8500Controller, Ieee8500
                     .attr('class', 'pnnl-table content')
                     .attr('x', curX)
                     .attr('y', rowY)
-                    .text(voltages[i].data['voltage_' + phase + '.real'] + voltages[i].data['voltage_' + phase + '.imag'] + 'i');
+                    .text(voltages[i].data['voltage_' + phase]);
                 curX += columnWidths[i + 1];
             }
             g.append('text')
@@ -262,7 +280,7 @@ class Ieee8500View extends ControlledReactComponent<Ieee8500Controller, Ieee8500
                 .attr('class', 'pnnl-table content')
                 .attr('x', tableWidth / 5)
                 .attr('y', rowY)
-                .text(dataForElement.feeder_power['power_in.real'] + dataForElement.feeder_power['power_in.imag']);
+                .text(dataForElement[powerId]['power_in.real'] + dataForElement[powerId]['power_in.imag']);
         }
 
         curDataGroup.append('circle')

@@ -36,7 +36,7 @@ class PlotView extends BackboneReactComponent<PlotModel, {}> {
         const height = 200;
 
         let mainGroup = d3.select('.plot-view.' + this.props.model.name).append('svg')
-            .style('width', '100%')
+            .style('width', 400)
             .style('height', height)
             .append('g')
                 .attr('class', 'plot ' + this.props.model.name);
@@ -49,7 +49,7 @@ class PlotView extends BackboneReactComponent<PlotModel, {}> {
         //const width = d3.select('.plot-view').node().getBoundingClientRect().width;
 
         let height = 200; // TODO: pass in with props
-        let width = 300;
+        let width = 400;
         let margin = {top: 10, bottom: 50, left: 50, right: 10};
         let mainGroup = d3.select('g.plot.' + this.props.model.name);
 

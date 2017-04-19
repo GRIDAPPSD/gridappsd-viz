@@ -273,9 +273,9 @@ function getTimeseriesToTopologyMappingNewFormat() {
         cap_capbank2b: 'cap_capbank2',
         cap_capbank2c: 'cap_capbank2',
         cap_capbank3: 'cap_capbank3', // Can we make this the same as the others?
-        'nd_190-7361' : 'nd_190-7361',
-        'nd_190-8581' : 'nd_190-8581',
-        'nd_190-8593' : 'nd_190-8593',
+        'nd_190-7361' : 'reg_VREG4',
+        'nd_190-8581' : 'reg_VREG3',
+        'nd_190-8593' : 'reg_VREG2',
         'nd__hvmv_sub_lsb' : 'reg_FEEDER_REG',
         'nd_l2673313' : 'nd_l2673313',
         'nd_l2876814' : 'nd_l2876814',
