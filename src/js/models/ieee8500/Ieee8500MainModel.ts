@@ -27,8 +27,7 @@ class Ieee8500MainModel extends Backbone.Model {
         this.set('staticModel', new Ieee8500StaticModel({url: '/data/ieee8500'}));
         this.set('timeseriesModel', new Ieee8500TimeseriesModel({url: '/data/ieee8500/timeseries'}));
 
-        this.staticModel.on('change', () => this.trigger('change:staticModel'), this);
-        this.timeseriesModel.on('change', this.onTimeseriesChange, this);
+        this.staticModel.on('change', this.onStaticModelChange, this);
     }
 
     hasData():boolean {
@@ -36,11 +35,20 @@ class Ieee8500MainModel extends Backbone.Model {
         return this.staticModel.hasData();
     }
 
+    private onStaticModelChange() {
+
+        // We'll get the static model once. Don't even listen to timeseries events 
+        // until we have received the static model.
+        this.timeseriesModel.on('change', this.onTimeseriesChange, this);
+        this.trigger('change:staticModel');
+    }
+
     /**
      * When the time series model changes, update the plot models and 
      * trigger a change for the main model.
      */
     private onTimeseriesChange() {
+
         if (this._plotModelsByPlotName == undefined) {
             this.createPlotModels();
             this.trigger('change:plotModelsByName');
@@ -58,8 +66,8 @@ class Ieee8500MainModel extends Backbone.Model {
         this._plotModelsByPlotName = { };
 
         let self = this;
-        let mapping = this.timeseriesModel.get('curTime').timeseriesToPlotSeriesMapping;
-        let topologyMapping = this.timeseriesModel.get('curTime').timeseriesToTopologyMapping;
+        let mapping = this.staticModel.get('timeseriesToPlotSeriesMapping');
+        let topologyMapping = this.staticModel.get('timeseriesToTopologyMapping');
         console.log('mapping:');
         console.log(mapping);
         Object.keys(mapping).forEach((plotName) => {
@@ -80,7 +88,7 @@ class Ieee8500MainModel extends Backbone.Model {
 
         let self = this;
         let curTime = this.timeseriesModel.get('curTime');
-        let mapping = curTime.timeseriesToPlotSeriesMapping;
+        let mapping = this.staticModel.get('timeseriesToPlotSeriesMapping');
         Object.keys(mapping).forEach((plotName:string) => {
             
             let plotModel:PlotModel = self.plotModelsByName[plotName];

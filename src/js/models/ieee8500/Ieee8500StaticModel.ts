@@ -14,7 +14,7 @@ class Ieee8500StaticModel extends Backbone.Model {
     }
 
     hasData():boolean {
-        return this.get('elements') != undefined;
+        return this.get('topology') != undefined;
     }
 }
 

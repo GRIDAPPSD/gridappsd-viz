@@ -19,7 +19,8 @@ class Ieee8500PlotsView extends BackboneReactComponent<Ieee8500MainModel, {}> {
         console.log('------- rerender plots!!');
 
         let self = this;
-        if (!this.props.model.timeseriesModel.hasData()) {
+        if (!this.props.model.timeseriesModel.hasData()
+            || !this.props.model.plotModelsByName) {
             return <div className="plots-view"></div>
         }
 

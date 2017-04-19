@@ -60,7 +60,11 @@ app.get('/data/ieee8500', (req, res) => {
 
     let topologyJson = getIeee8500Topology();
 
-    res.json(topologyJson);
+    res.json({
+        topology: topologyJson,
+        timeseriesToTopologyMapping: getTimeseriesToTopologyMappingNewFormat(),
+        timeseriesToPlotSeriesMapping: getTimeseriesToPlotSeriesMappingNewFormat()
+    });
 
 }); 
 
@@ -438,8 +442,6 @@ app.get('/data/ieee8500/timeseries', (req, res) => {
     } 
 
     let json = {
-        timeseriesToTopologyMapping: getTimeseriesToTopologyMappingNewFormat(),
-        timeseriesToPlotSeriesMapping: getTimeseriesToPlotSeriesMappingNewFormat(),
         data: timeseriesData[timeseriesIndex++]
     };
 

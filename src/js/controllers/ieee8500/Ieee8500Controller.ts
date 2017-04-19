@@ -31,7 +31,7 @@ class Ieee8500Controller {
 
         if (dataSource == DataSource.RabinalWebsocket) { 
             this.connectWebsocket();
-        }
+        } 
     }
 
     connectWebsocket() {
@@ -76,12 +76,18 @@ class Ieee8500Controller {
 
     onSimulationStatusReceived(message:any) {
 
-        console.log('Simulation status received: ' + message);
+        console.log('Simulation status received.');
     }
 
     onFncsOutputReceived(message:any) {
+        
+        console.log('Fncs output recieved.');
 
-        console.log('Fncs output recieved: ' + message);
+        let data = JSON.parse(message.body);
+        if (data.output != null) {
+            data.output = JSON.parse(data.output);
+        }
+        this._ieee8500MainModel.timeseriesModel.set('curTime', {data: data, timestamp: new Date(Date.now())});
     }
 
     startSimulation() {

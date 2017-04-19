@@ -81,7 +81,11 @@ class Ieee8500View extends ControlledReactComponent<Ieee8500Controller, Ieee8500
         }
 
         const data = this.props.controller.model.timeseriesModel.get('curTime').data;
-        const mapping = this.props.controller.model.timeseriesModel.get('curTime').timeseriesToTopologyMapping;
+        const mapping = this.props.controller.model.staticModel.get('timeseriesToTopologyMapping');
+
+        if (!data.output) {
+            return;
+        }
 
         d3.select('.timestamp')
             .text(data.timestamp)
@@ -420,7 +424,7 @@ class Ieee8500View extends ControlledReactComponent<Ieee8500Controller, Ieee8500
         console.log(this.props.controller.model.attributes);
 
         const self = this;
-        const elementData = this.props.controller.model.staticModel.get('elements');
+        const elementData = this.props.controller.model.staticModel.get('topology').elements;
 
         // Compute the x and y bounds
         const xExtent = d3.extent(elementData, (d:any) => { return d.x; });   
@@ -527,7 +531,7 @@ class Ieee8500View extends ControlledReactComponent<Ieee8500Controller, Ieee8500
         // Draw the links. Right now, the server sends all from and to node info
         // with the link, but that may change.
         let lines = linkGroup.selectAll('path.link')
-            .data(this.props.controller.model.staticModel.get('links'))
+            .data(this.props.controller.model.staticModel.get('topology').links)
             .enter().append('path')
                 .filter((link:ILink) => { return link.from.x != undefined && link.from.y != undefined && link.to.x != undefined && link.to.y != undefined; })
                 .datum((link:ILink) => [{link: link, element: link.from}, {link: link, element: link.to}])
