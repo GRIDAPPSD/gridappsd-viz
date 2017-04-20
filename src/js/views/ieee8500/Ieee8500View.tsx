@@ -434,11 +434,10 @@ class Ieee8500View extends ControlledReactComponent<Ieee8500Controller, Ieee8500
 
         d3.selectAll('.view.ieee8500 > svg').remove();
 
-        let zoom = d3.zoom().on("zoom", function () {
-            //console.log(d3.event.transform);
-            svg.attr("transform", d3.event.transform);
-            //svg.attr('transform', 'translate(-58.490119536500515, 3.9252300834042444)scale(0.027139082025136048)')
-        })
+        let zoom = d3.zoom()
+            .on("zoom", function () {
+                svg.attr("transform", d3.event.transform);
+            })
         
         // Create an SVG element and a group
         let svg = d3.select('.view.ieee8500 .topology').append('svg')
@@ -446,9 +445,7 @@ class Ieee8500View extends ControlledReactComponent<Ieee8500Controller, Ieee8500
             .style('height', '100%')
             .call(zoom)
             .append('g')
-                //.attr('transform', 'translate(-58.490119536500515, 3.9252300834042444)scale(0.027139082025136048)');
-
-        //mainGroup.attr('transform', 'translate(-58.490119536500515, 3.9252300834042444)scale(0.027139082025136048)')
+                .attr('transform', 'translate(-146.50708757736504,-175.543766098824) scale(0.029921138526306484)');
 
         // Create an SVG group to hold the links
         let linkGroup = svg.append('g')
@@ -583,7 +580,8 @@ class Ieee8500View extends ControlledReactComponent<Ieee8500Controller, Ieee8500
             this.setState({
                 hasRenderedTopology: true, 
                 isFirstCurTimeRendering: this.state.isFirstCurTimeRendering});  
-        }          
+        }     
+
     }
 }
 
