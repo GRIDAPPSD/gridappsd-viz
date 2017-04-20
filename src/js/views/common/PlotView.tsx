@@ -27,7 +27,7 @@ class PlotView extends BackboneReactComponent<PlotModel, {}> {
         console.log('rendering plot: ' + this.props.model.name);
         
         return <div className={"plot-view " + this.props.model.name}>
-            <div className="title">{this.props.model.name}</div>
+            <h5 className="plot title">{this.props.model.name}</h5>
         </div>
     }
 
