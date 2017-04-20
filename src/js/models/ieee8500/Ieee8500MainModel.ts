@@ -88,6 +88,10 @@ class Ieee8500MainModel extends Backbone.Model {
 
         let self = this;
         let curTime = this.timeseriesModel.get('curTime');
+
+        // Handle null data from FNCS.
+        if (curTime.data.output == null) return;
+
         let mapping = this.staticModel.get('timeseriesToPlotSeriesMapping');
         Object.keys(mapping).forEach((plotName:string) => {
             

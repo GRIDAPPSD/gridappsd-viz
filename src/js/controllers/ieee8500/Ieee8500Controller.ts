@@ -87,7 +87,8 @@ class Ieee8500Controller {
         if (data.output != null) {
             data.output = JSON.parse(data.output);
         }
-        this._ieee8500MainModel.timeseriesModel.set('curTime', {data: data, timestamp: new Date(Date.now())});
+        data.timestamp = new Date(Date.now());
+        this._ieee8500MainModel.timeseriesModel.set('curTime', {data: data});
     }
 
     startSimulation() {
