@@ -124,7 +124,7 @@ class Ieee8500MainModel extends Backbone.Model {
             // How does the team want to combine these values into a single
             // stat to display in the plot? 
             // Or do they want to choose real or imaginary?
-            return Math.sqrt(Math.pow(real, 2) + Math.pow(real, 2));
+            return Math.sqrt(Math.pow(real, 2) + Math.pow(imag, 2));
         } else {
             return Number(datum[plotName]);
         }
