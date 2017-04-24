@@ -15,6 +15,9 @@ interface IElement {name:string, x:number, y:number, rendering_x:number, renderi
 // Properties required for links. The server may send more.
 interface ILink {name:string, from: IElement, to:IElement, data:any}
 
+// Processed regulator data used by the UI.
+interface IUiRegulatorData {name: string, hasPowerIn: boolean, powerId: string, tapsId: string, voltages: any[], taps: any, powerIns: any}
+
 interface Ieee8500ViewState {isFirstCurTimeRendering: boolean, hasRenderedTopology: boolean};
 
 class Ieee8500View extends ControlledReactComponent<Ieee8500Controller, Ieee8500ViewState> {
@@ -117,22 +120,35 @@ class Ieee8500View extends ControlledReactComponent<Ieee8500Controller, Ieee8500
             const dataForElement = dataByElementName[elementName];
             const selector = 'g.' + elementName;
             const d3Node:any = d3.select(selector);
+
+            // As long as we can find the d3 node we are looking for 
+            // (a cell in a table, most likely)
             if (!d3Node.empty()) {
                 const element:IElement = d3Node.datum() as IElement;
+
+                // If the datum has a child, which will hold the regulator or capacitor 
+                // info because a regulator or capacitor is a child of some parent node
                 if (element.children.length > 0) {
                     if (element.children[0].type == 'capacitors') {
-                        let capData = dataForElement[Object.keys(dataForElement)[0]];
+
                         if (self.state.isFirstCurTimeRendering) {
-                            self.appendCapacitorTable(selector, element, capData);
-                        } else {
-                            self.updateCapacitorTable(selector, element, capData);
+                            self.appendCapacitorTable(selector, element);
                         }
+
+                        // Update the table for each capacitor switch
+                        Object.keys(dataForElement).forEach((capKey) => {
+                            let capData = dataForElement[capKey];
+
+                            // Update cells in an existing display table
+                            self.updateCapacitorTable(selector, element, capData);
+                        });
+
                     }  else if (element.children[0].type == 'regulators') {
                         if (self.state.isFirstCurTimeRendering) {
                             self.appendRegulatorTable(selector, element, dataForElement);
-                        } else {
-                            self.updateRegulatorTable(selector, element, dataForElement);
-                        }
+                        } 
+
+                        self.updateRegulatorTable(selector, element, dataForElement);
                     }
                 } 
             }
@@ -160,6 +176,35 @@ class Ieee8500View extends ControlledReactComponent<Ieee8500Controller, Ieee8500
         return false;
     }
 
+    parseRegulatorData(element: IElement, dataForElement: any):IUiRegulatorData {
+
+        let self = this;
+        let hasPowerIn = false;
+        let powerId = '';
+        let tapsId = '';
+        let voltages:any[] = [];
+        Object.keys(dataForElement).forEach((key) => {
+            let elementData = dataForElement[key];
+            console.log(elementData);
+            console.log(self.hasDataWithPrefix(elementData, 'power'));
+            if (self.hasDataWithPrefix(elementData, 'voltage')) {
+                voltages.push({key: key, data: elementData, label: key.split('_')[2]});
+            } else if (self.hasDataWithPrefix(elementData, 'tap')) {
+                tapsId = key;
+            } else if (self.hasDataWithPrefix(elementData, 'power')) {
+                hasPowerIn = true;
+                powerId = key;
+            }
+        });
+
+        let taps = dataForElement[tapsId];
+        let powerIns = dataForElement[powerId];
+
+        let name = self.getChildName(element.children[0])
+
+        return {hasPowerIn: hasPowerIn, powerId: powerId, tapsId: tapsId, voltages: voltages, powerIns: powerIns, taps: taps, name: name};
+    }
+
     appendRegulatorTable(selector:string, element:IElement, dataForElement:any) {
 
         const self = this;
@@ -167,51 +212,33 @@ class Ieee8500View extends ControlledReactComponent<Ieee8500Controller, Ieee8500
         const rowPadding = self.rowPadding;
         const marginLeft = self.marginLeft;
         const roundRadius = self.roundRadius;
-        const columnWidths:number[] = [500, 3000, 3000, 1000];
+        const columnWidths:number[] = [500, 4500, 1000];
+
+        console.log(dataForElement);
 
         function getRowY(rowIndex:number):number {
             return (rowIndex + 1) * rowHeight + (rowIndex) * rowPadding;
         }
 
-        // Get the voltages
-        let hasPowerIn = false;
-        let powerId = '';
-        let tapsId = '';
-        let voltages:any[] = [];
-        Object.keys(dataForElement).forEach((key) => {
-            let elementData = dataForElement[key];
-            if (self.hasDataWithPrefix(elementData, 'voltage')) {
-                voltages.push({key: key, data: elementData, label: key.split('_')[2]});
-            } else if (self.hasDataWithPrefix(elementData, 'tap')) {
-                tapsId = key;
-            } else if (self.hasDataWithPrefix(elementData, 'power')) {
-                // TODO: Fix power in and uncomment the next line.
-                //hasPowerIn = true;
-                powerId = key;
-            }
-        });
-
-        const numRows = 6 + (hasPowerIn ? 2 : 0);
-        const tableWidth = 500 + voltages.length * 3000 + 1000;
-        const tableHeight = getRowY(numRows) - rowPadding;
-
-        // Get the power 
-        let powerText = '';
-        if (hasPowerIn) {
-            dataForElement[powerId]['power_in.real'] + dataForElement.powerId['power_in.imag'] + 'i';
+        let regulatorData = this.parseRegulatorData(element, dataForElement);
+        
+        if (regulatorData.hasPowerIn) {
+            columnWidths.push(4500);
         }
 
-        // Get the taps
-        let taps = dataForElement[tapsId];
+        const numRows = 6;
+        const tableWidth = d3.sum(columnWidths);
+        const tableHeight = getRowY(numRows) - rowPadding;
         
         const line:any = d3.line()
             .x((d:any) => d.x)
             .y((d:any) => d.y);
-
+        
+        // Create the table w/ the element name title
         let elementGroup = d3.select(selector);
         let curDataGroup = d3.select('g.curData');
         let g = curDataGroup.append('g')
-            .attr('class', 'pnnl-table show ' + self.getChildName(element.children[0]))
+            .attr('class', 'pnnl-table show ' + regulatorData.name)
             .attr('transform', 'translate(' + (element.rendering_x + 400) + ',' + (element.rendering_y - 1200) + ')');
         g.append('rect')
             .attr('class', 'pnnl-table')
@@ -231,65 +258,88 @@ class Ieee8500View extends ControlledReactComponent<Ieee8500Controller, Ieee8500
             .datum([{x: 0, y: rowHeight + rowPadding}, {x: tableWidth, y: rowHeight + rowPadding}])
             .attr('d', line);
         
+        // Add column headers
         let rowY = getRowY(2);
         let curX = columnWidths[0];
-        for (let i = 1; i <= voltages.length; i++) {
+
+        // Voltage
+        for (let i = 1; i <= regulatorData.voltages.length; i++) {
             g.append('text')
-                .attr('class', 'pnnl-table small-header')
+                .attr('class', 'pnnl-table small-header voltage voltage_' + i)
                 .attr('x', curX)
                 .attr('y', rowY)
                 .text('Voltage ' + i);
             curX += columnWidths[i];
         }
+
+        // Tap
         g.append('text')
-            .attr('class', 'pnnl-table small-header')
+            .attr('class', 'pnnl-table small-header tap')
             .attr('x', curX)
             .attr('y', rowY)
             .text('Tap');
+        curX += columnWidths[regulatorData.voltages.length + 1];
+
+        // Power in
+        if(regulatorData.hasPowerIn) {
+            g.append('text')
+                .attr('class', 'pnnl-table small-header power')
+                .attr('x', curX)
+                .attr('y', rowY)
+                .text('Power In');
+        }
         
+        // Add a row for each phase
         let phases = ['A', 'B', 'C'];
         for (let phaseIndex = 0; phaseIndex < phases.length; phaseIndex++) {
             const phase = phases[phaseIndex];
             rowY = getRowY(3 + phaseIndex);
+
+            // Row header
             g.append('text')
                 .attr('class', 'pnnl-table small-header')
                 .attr('x', marginLeft)
                 .attr('y', rowY)
                 .text(phase);
             curX = columnWidths[0];
-            for (let i = 0; i < voltages.length; i++) {
+
+            // Voltages
+            for (let i = 0; i < regulatorData.voltages.length; i++) {
                 g.append('text')
-                    .attr('class', 'pnnl-table content')
+                    .attr('class', 'pnnl-table content voltage voltage_' + i + ' phase' + phase)
                     .attr('x', curX)
                     .attr('y', rowY)
-                    .text(voltages[i].data['voltage_' + phase]);
+                    .text('-');
+                d3.select('g.pnnl-table.' + regulatorData.name + ' text.pnnl-table.content.voltage.voltage_' + i + '.phase' + phase)
+                    .text(regulatorData.voltages[i].data['voltage_' + phase]);
                 curX += columnWidths[i + 1];
             }
+
+            // Taps
             g.append('text')
-                .attr('class', 'pnnl-table content')
+                .attr('class', 'pnnl-table content tap phase' + phase)
                 .attr('x', curX)
                 .attr('y', rowY)
-                .text(taps['tap_' + phase]);
-        }
+                .text('-');
+            d3.select('g.pnnl-table.' + regulatorData.name + ' text.pnnl-table.content.tap.phase' + phase)
+                .text(regulatorData.taps['tap_' + phase]);
+            curX += columnWidths[regulatorData.voltages.length + 1];
 
-        if (hasPowerIn) {
-        
-            rowY = getRowY(7);
-            g.append('text')
-                .attr('class', 'pnnl-table small-header')
-                .attr('x', marginLeft)
-                .attr('y', rowY)
-                .text('Power in: ');
-            g.append('text')
-                .attr('class', 'pnnl-table content')
-                .attr('x', tableWidth / 5)
-                .attr('y', rowY)
-                .text(dataForElement[powerId]['power_in.real'] + dataForElement[powerId]['power_in.imag']);
+            // Power
+            if (regulatorData.hasPowerIn) {
+                g.append('text')
+                    .attr('class', 'pnnl-table content power phase' + phase)
+                    .attr('x', curX)
+                    .attr('y', rowY)
+                    .text('-');
+                d3.select('g.pnnl-table.' + regulatorData.name + ' text.pnnl-table.content.power.phase' + phase)
+                    .text(regulatorData.powerIns['power_in_' + phase]);
+            }
         }
 
         curDataGroup.append('circle')
             .datum(element)
-            .attr('class', 'element regulator ' + self.getChildName(element.children[0])) // TODO: incorporate all switches?
+            .attr('class', 'element regulator ' + regulatorData.name) // TODO: incorporate all switches?
             .attr('cx', element.rendering_x)
             .attr('cy', element.rendering_y)
             .attr('r', 150)
@@ -312,10 +362,32 @@ class Ieee8500View extends ControlledReactComponent<Ieee8500Controller, Ieee8500
 
     updateRegulatorTable(selector:string, element:IElement, dataForElement:any) {
 
+        let regulatorData = this.parseRegulatorData(element, dataForElement);
 
+        // Add a row for each phase
+        let phases = ['A', 'B', 'C'];
+        for (let phaseIndex = 0; phaseIndex < phases.length; phaseIndex++) {
+            const phase = phases[phaseIndex];
+
+            // Voltages
+            for (let i = 0; i < regulatorData.voltages.length; i++) {
+                d3.select('g.pnnl-table.' + regulatorData.name + ' text.pnnl-table.content.voltage.voltage_' + i + '.phase' + phase)
+                    .text(regulatorData.voltages[i].data['voltage_' + phase]);
+            }
+
+            // Taps
+            d3.select('g.pnnl-table.' + regulatorData.name + ' text.pnnl-table.content.tap.phase' + phase)
+                .text(regulatorData.taps['tap_' + phase]);
+
+            // Power
+            if (regulatorData.hasPowerIn) {
+                d3.select('g.pnnl-table.' + regulatorData.name + ' text.pnnl-table.content.power.phase' + phase)
+                    .text(regulatorData.powerIns['power_in_' + phase]);
+            }
+        }
     }
 
-    appendCapacitorTable(selector:string, element:IElement, curTimeData:any) {
+    appendCapacitorTable(selector:string, element:IElement) {
 
         const self = this;
         const rowHeight = self.rowHeight;
@@ -356,32 +428,32 @@ class Ieee8500View extends ControlledReactComponent<Ieee8500Controller, Ieee8500
             .attr('y', 2 * rowHeight + rowPadding)
             .text('Switch A');
         g.append('text')
-            .attr('class', 'pnnl-table content capacitor switchA ' + curTimeData.switchA)
+            .attr('class', 'pnnl-table content capacitor switchA ')
             .attr('x', tableWidth / 2 + marginLeft)
             .attr('y', 2 * rowHeight + rowPadding)
-            .text(curTimeData.switchA);
+            .text('-');
         g.append('text')
             .attr('x', marginLeft)
             .attr('y', 3 * rowHeight +  2 * rowPadding)
             .text('Switch B');
         g.append('text')
-            .attr('class', 'pnnl-table content capacitor switchB ' + curTimeData.switchB)
+            .attr('class', 'pnnl-table content capacitor switchB ')
             .attr('x', tableWidth / 2 + marginLeft)
             .attr('y', 3 * rowHeight + 2 * rowPadding)
-            .text(curTimeData.switchB);
+            .text('-');
         g.append('text')
             .attr('x', marginLeft)
             .attr('y', 4 * rowHeight + 3 * rowPadding)
             .text('Switch C');
         g.append('text')
-            .attr('class', 'pnnl-table content capacitor switchC ' + curTimeData.switchC)
+            .attr('class', 'pnnl-table content capacitor switchC ')
             .attr('x', tableWidth / 2 + marginLeft)
             .attr('y', 4 * rowHeight + 3 * rowPadding)
-            .text(curTimeData.switchC);
+            .text('-');
 
         curDataGroup.append('circle')
             .datum(element)
-            .attr('class', 'element capacitor ' + curTimeData.switchA) // TODO: incorporate all switches?
+            .attr('class', 'element capacitor')
             .attr('cx', element.rendering_x)
             .attr('cy', element.rendering_y)
             .attr('r', 150)
@@ -407,9 +479,12 @@ class Ieee8500View extends ControlledReactComponent<Ieee8500Controller, Ieee8500
         let elementGroup = d3.select(selector);
         
         ['A', 'B', 'C'].forEach((phase) => {
-            d3.select(selector + '.pnnl-table > text.pnnl-table.content.capacitor.switch' + phase)
-                .attr('class', 'pnnl-table content capacitor switch' + phase + ' ' + curTimeData['switch' + phase])
-                .text(curTimeData['switch' + phase]);
+            let value = curTimeData['switch' + phase];
+            if (value) {
+                d3.select(selector + '.pnnl-table text.pnnl-table.content.capacitor.switch' + phase)
+                    .attr('class', 'pnnl-table content capacitor switch' + phase + ' ' + value)
+                    .text(value);
+            }
         })
     }
 
