@@ -23,11 +23,15 @@ class PlotView extends BackboneReactComponent<PlotModel, {}> {
         this.initializeD3();
     }
 
+    getPlotLabel(plotName:string):string {
+        return plotName[0].toUpperCase() + plotName.substring(1).replace(/_/g, ' ');
+    }
+
     render() {
         //console.log('rendering plot: ' + this.props.model.name);
         
         return <div className={"plot-view " + this.props.model.name}>
-            <h5 className="plot title">{this.props.model.name}</h5>
+            <h5 className="plot title">{this.getPlotLabel(this.props.model.name)}</h5>
         </div>
     }
 
