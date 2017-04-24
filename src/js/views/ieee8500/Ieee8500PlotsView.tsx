@@ -16,8 +16,7 @@ class Ieee8500PlotsView extends BackboneReactComponent<Ieee8500MainModel, {}> {
     }
 
     render() {
-        console.log('------- rerender plots!!');
-
+        
         let self = this;
         if (!this.props.model.timeseriesModel.hasData()
             || !this.props.model.plotModelsByName) {
@@ -27,7 +26,7 @@ class Ieee8500PlotsView extends BackboneReactComponent<Ieee8500MainModel, {}> {
         return <div className="plots-view">
             {
                 Object.keys(this.props.model.plotModelsByName).map((plotName) => {
-                    return <PlotView model={self.props.model.plotModelsByName[plotName]} />
+                    return <PlotView key={plotName} model={self.props.model.plotModelsByName[plotName]} />
                 })
             }
         </div>
