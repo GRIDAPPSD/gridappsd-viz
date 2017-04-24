@@ -24,7 +24,7 @@ class PlotView extends BackboneReactComponent<PlotModel, {}> {
     }
 
     render() {
-        console.log('rendering plot: ' + this.props.model.name);
+        //console.log('rendering plot: ' + this.props.model.name);
         
         return <div className={"plot-view " + this.props.model.name}>
             <h5 className="plot title">{this.props.model.name}</h5>
@@ -44,7 +44,7 @@ class PlotView extends BackboneReactComponent<PlotModel, {}> {
 
     updateD3() {
 
-        console.log('rendering plots....');
+        //console.log('rendering plots....');
 
         //const width = d3.select('.plot-view').node().getBoundingClientRect().width;
 
@@ -60,9 +60,9 @@ class PlotView extends BackboneReactComponent<PlotModel, {}> {
         let x = d3.scaleTime().range([margin.left, width - margin.right]);
         let y = d3.scaleLinear().range([height - margin.bottom, margin.top]);
 
-        console.log(this.props.model.name);
-        console.log(this.props.model.getXDomain());
-        console.log(this.props.model.getYDomain());
+        //console.log(this.props.model.name);
+        //console.log(this.props.model.getXDomain());
+        //console.log(this.props.model.getYDomain());
 
         x.domain(this.props.model.getXDomain());
         y.domain(this.props.model.getYDomain());

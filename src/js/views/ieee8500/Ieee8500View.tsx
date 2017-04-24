@@ -94,8 +94,8 @@ class Ieee8500View extends ControlledReactComponent<Ieee8500Controller, Ieee8500
         const isFirstCurTimeRendering = this.state.isFirstCurTimeRendering;
         const self = this;
 
-        console.log(data);
-        console.log(mapping);
+        //console.log(data);
+        //console.log(mapping);
 
         // Group the data by element
         let dataByElementName:any = { };
@@ -421,7 +421,7 @@ class Ieee8500View extends ControlledReactComponent<Ieee8500Controller, Ieee8500
             return;
         }
 
-        console.log(this.props.controller.model.attributes);
+        //console.log(this.props.controller.model.attributes);
 
         const self = this;
         const elementData = this.props.controller.model.staticModel.get('topology').elements;
@@ -431,21 +431,30 @@ class Ieee8500View extends ControlledReactComponent<Ieee8500Controller, Ieee8500
         const yExtent = d3.extent(elementData, (d:any) => { return d.y; });
         const xOffset = -xExtent[0];
         const yOffset = -yExtent[0];
+        const zoomCenter = {x: -146.50708757736504, y: -175.543766098824, k: 0.029921138526306484};
 
         d3.selectAll('.view.ieee8500 > svg').remove();
 
         let zoom = d3.zoom()
             .on("zoom", function () {
-                svg.attr("transform", d3.event.transform);
+                if (svg) svg.attr("transform", d3.event.transform);
             })
+
+        function transform() {
+            // Set the zoom center
+            return d3.zoomIdentity
+                .translate(zoomCenter.x, zoomCenter.y)
+                .scale(zoomCenter.k)
+        }
         
         // Create an SVG element and a group
         let svg = d3.select('.view.ieee8500 .topology').append('svg')
             .style('width', '100%')
             .style('height', '100%')
             .call(zoom)
+            .call(zoom.transform, transform)
             .append('g')
-                .attr('transform', 'translate(-146.50708757736504,-175.543766098824) scale(0.029921138526306484)');
+                .attr('transform', 'translate(' + zoomCenter.x + ',' + zoomCenter.y + ') scale(' + zoomCenter.k + ')');
 
         // Create an SVG group to hold the links
         let linkGroup = svg.append('g')
