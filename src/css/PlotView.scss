@@ -1,3 +1,4 @@
+$axis-color: #676767;
 
 .plot-view {
 
@@ -7,11 +8,12 @@
 
     text {
         font-size: 10px;
+        fill: $axis-color;
     }
 
     path {
         fill: none;
-        stroke: black;
+        stroke: $axis-color;
         stroke-width: 1px;
     }
 
@@ -19,5 +21,7 @@
         margin-left: 5px;
     }
 
-
+    .axis .tick line {
+        stroke: $axis-color;
+    }
 }
