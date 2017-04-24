@@ -185,8 +185,6 @@ class Ieee8500View extends ControlledReactComponent<Ieee8500Controller, Ieee8500
         let voltages:any[] = [];
         Object.keys(dataForElement).forEach((key) => {
             let elementData = dataForElement[key];
-            console.log(elementData);
-            console.log(self.hasDataWithPrefix(elementData, 'power'));
             if (self.hasDataWithPrefix(elementData, 'voltage')) {
                 voltages.push({key: key, data: elementData, label: key.split('_')[2]});
             } else if (self.hasDataWithPrefix(elementData, 'tap')) {

@@ -113,8 +113,13 @@ class Ieee8500MainModel extends Backbone.Model {
             // Use a regex to parse a string like this:
             // voltage: 6319.15-4782.82j V
             // power_in: 1.75641e+06-808539j VA
-            let regex = /[+|-]?(\d+\.?\d+?)[+|-](\d+\.?\d+?)j V/;
+            // In Node, the same regex works for with e+06 and without. 
+            // For some reason, in Chrome, it doesn't. Using separate regexes for now.
             let valueString = datum[plotName];
+            let regex = /[+|-]?(\d+\.?\d+?e?[+|-]?\d+?)[+|-](\d+\.?\d+?)j V/; // TODO: doens't handle imaginary numbers with e+06, etc.
+            if (valueString.indexOf('e') < 0) {
+                regex = /[+|-]?(\d+\.?\d+?)[+|-](\d+\.?\d+?)j V/;
+            }
             let matches = valueString.match(regex);
             let real = Number(matches[1]);
             let imag = Number(matches[2]);
