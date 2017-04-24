@@ -223,7 +223,7 @@ class Ieee8500View extends ControlledReactComponent<Ieee8500Controller, Ieee8500
         let regulatorData = this.parseRegulatorData(element, dataForElement);
         
         if (regulatorData.hasPowerIn) {
-            columnWidths.push(4500);
+            columnWidths.push(5000);
         }
 
         const numRows = 6;
