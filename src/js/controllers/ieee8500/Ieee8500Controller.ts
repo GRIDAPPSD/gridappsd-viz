@@ -1,6 +1,8 @@
 import Ieee8500MainModel from '../../models/ieee8500/Ieee8500MainModel';
 import DataSource from '../../interfaces/DataSource';
 import '../../libs/stomp.js';
+import '../../../../runConfig.js';
+
 declare var Stomp:any;
 
 class Ieee8500Controller {
@@ -37,8 +39,9 @@ class Ieee8500Controller {
     connectWebsocket() {
 
         let self = this;
-        let url = 'ws://172.20.128.20:61614';
-        this._stompClient = Stomp.client(url, null);
+		//default gossServerUrl is ws://127.0.0.1:61614
+		var gossServerUrl='ws://127.0.0.1:61614';
+        this._stompClient = Stomp.client(gossServerUrl, null);
         this._stompClient.heartbeat.outgoing = 0;
         this._stompClient.heartbeat.incoming = 0;
         this._stompClient.connect(
