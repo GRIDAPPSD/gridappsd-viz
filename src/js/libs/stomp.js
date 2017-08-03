@@ -380,7 +380,7 @@
     window.Stomp = Stomp;
   } else {
     exports.Stomp = Stomp;
-    Stomp.WebSocketClass = require('./test/server.mock.js').StompServerMock;
+    //Stomp.WebSocketClass = require('./test/server.mock.js').StompServerMock;
   }
 
 }).call(this);
