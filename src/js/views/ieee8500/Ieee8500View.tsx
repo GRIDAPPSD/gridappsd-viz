@@ -510,6 +510,8 @@ class Ieee8500View extends ControlledReactComponent<Ieee8500Controller, Ieee8500
 
         let zoom = d3.zoom()
             .on("zoom", function () {
+                // Remember, SVG here is actually the first group 
+                // under the svg. Should really rename it!
                 if (svg) svg.attr("transform", d3.event.transform);
             })
 

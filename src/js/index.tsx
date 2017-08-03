@@ -24,6 +24,8 @@ ReactDOM.render(
         <Route path="/" component={MainView}>
             <Route path="ieee8500" components={{content: () => <Ieee8500View controller={mainController.ieee8500Controller} />}}>
             </Route>
+            <Route path="titanium" components={{content: () => <Ieee8500View controller={mainController.ieee8500Controller} />}}>
+            </Route>
             <Route path="help" components={{content: Help}}>
             </Route>
         </Route>

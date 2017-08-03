@@ -20,42 +20,6 @@ app.get(['/', '/ieee8500'], function(req, res) {
     res.render('index.html');
 });
 
-/** Input: 
- *  ieee8500_base.json
-    {feeder: [
-        {swing_nodes: [
-            {name:, phases:, nominal_voltage:}
-        ]},
-        {capacitors: [
-            {name:, parent:, phases:, kvar_A:, kvar_B:, kvar_C}
-        ]},
-        {overhead_lines: [
-            {name:, from:, to:, phases:, length:, configuration:}
-        ]},
-        {transformers: [
-            {name:, from:, to:, phases:, configuration:}
-        ]},
-        {regulators: [
-            {name:, from:, to:, phases:, configuration:}
-        ]}
-    ]}
-
-    ieee8500_xy.json
-    {coordinates: [
-        {node:, x:, y:}
-    ]}
-    
-    Output:
-    {elements: [
-        // May want to change this depending on use. 
-        // Right now, going with format used by D3 layout algorithms:
-        // https://bl.ocks.org/mbostock/4062045
-        {name:, type:, data:} 
-    ], 
-    links: [
-        {name:, from:, to:, data:}
-    ]}
-*/
 app.get('/data/ieee8500', (req, res) => {
 
     let topologyJson = getIeee8500Topology();
@@ -68,7 +32,24 @@ app.get('/data/ieee8500', (req, res) => {
 
 }); 
 
+app.get('/data/titanium', (req, res) => {
+
+    let topologyJson = getTitaniumTopology();
+
+    res.json({
+        topology: topologyJson
+    });
+})
+
+function getTitaniumTopology() {
+    return getTopology('./data/titanium/Titanium_base.json', './data/titanium/Titanium_xy.json');
+}
+
 function getIeee8500Topology() {
+    return getTopology('./data/ieee8500/ieee8500_base.json', './data/ieee8500/ieee8500_xy.json');
+}
+
+function getTopology(baseFilePath, xyFilePath) {
 
     function getOrCreateElement(name, type, hashByName, elementsList) {
 
@@ -81,10 +62,10 @@ function getIeee8500Topology() {
         return existingElement;
     }
 
-    let baseContents = fs.readFileSync('./data/ieee8500/ieee8500_base.json', 'utf-8');
+    let baseContents = fs.readFileSync(baseFilePath, 'utf-8');
     let baseJson = JSON.parse(baseContents);
 
-    let coordinateContents = fs.readFileSync('./data/ieee8500/ieee8500_xy.json', 'utf-8');
+    let coordinateContents = fs.readFileSync(xyFilePath, 'utf-8');
     let coordinateJson = JSON.parse(coordinateContents);
 
     let knownElementsByName = {};
@@ -131,24 +112,32 @@ function getIeee8500Topology() {
     // Add the capacitors under the nodes
     baseJson.feeder[1].capacitors.forEach((element) => {
         let parent = knownElementsByName[element.parent];
-        parent.children.push({
-            name: element.name,
-            type: 'capacitors',
-            data: element,
-            children: []
-        })
+        if (parent) {
+            parent.children.push({
+                name: element.name,
+                type: 'capacitors',
+                data: element,
+                children: []
+            })
+        } else {
+            console.log('Missing capacitor parent ' + element.parent);
+        }
     })
 
     // Add the regulators under the nodes 
     console.log(baseJson.feeder[4]);
     baseJson.feeder[4].regulators.forEach((element) => {
         let parent = knownElementsByName[regulatorParents[element.name]];
-        parent.children.push({
-            name: element.name,
-            type: 'regulators',
-            data: element,
-            children: []
-        })
+        if (parent) {
+            parent.children.push({
+                name: element.name,
+                type: 'regulators',
+                data: element,
+                children: []
+            })
+        } else {
+            console.log('Missing regulator parent ' + regulatorParents[element.name] + ' for ' + element.name);
+        }
     })
 
     let numMissingNodes = 0;

@@ -19,6 +19,7 @@ export class Header extends React.Component<HeaderProps, {}> {
                     <div className="collapse navbar-collapse">
                         <ul className="nav navbar-nav">
                             <li><Link to="/ieee8500">IEEE 8500</Link></li>
+                            <li><Link to="/titanium">Titanium</Link></li>
                         </ul>
                         <ul className="nav navbar-nav navbar-right">
                             <li className="timestamp">(Awaiting timeseries data...)</li>
