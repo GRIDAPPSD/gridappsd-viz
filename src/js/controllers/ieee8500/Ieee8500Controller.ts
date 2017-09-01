@@ -1,7 +1,6 @@
 import Ieee8500MainModel from '../../models/ieee8500/Ieee8500MainModel';
 import DataSource from '../../interfaces/DataSource';
 import '../../libs/stomp.js';
-import '../../../../runConfig.js';
 
 declare var Stomp:any;
 
