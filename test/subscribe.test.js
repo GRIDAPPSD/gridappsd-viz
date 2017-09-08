@@ -1,6 +1,6 @@
 
 const subscribe = require('./subscribe');
-import * as Ieee8500Controller from '../js/controllers/ieee8500/Ieee8500Controller';
+
 const subscribeUrls = {
   responseQueueTopic: '/temp-queue/response-queue',
   simulationStatusTopic: '/topic/goss/gridappsd/simulation/status/'  
