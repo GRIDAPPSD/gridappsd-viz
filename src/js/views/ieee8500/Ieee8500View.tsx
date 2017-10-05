@@ -504,7 +504,9 @@ class Ieee8500View extends ControlledReactComponent<Ieee8500Controller, Ieee8500
         const yExtent = d3.extent(elementData, (d:any) => { return d.y; });
         const xOffset = -xExtent[0];
         const yOffset = -yExtent[0];
-        const zoomCenter = {x: -146.50708757736504, y: -175.543766098824, k: 0.029921138526306484};
+        //const zoomCenter = {x: -146.50708757736504, y: -175.543766098824, k: 0.029921138526306484};
+        // zoom center for new topology file
+        const zoomCenter = {x: -35082.68104917289, y: -259387.84324810182, k: 0.021157439952773343};
 
         d3.selectAll('.view.ieee8500 > svg').remove();
 
@@ -547,7 +549,9 @@ class Ieee8500View extends ControlledReactComponent<Ieee8500Controller, Ieee8500
         let circles = elementGroup.selectAll('circle.element')
             .data(elementData)
             .enter().append('g')
-                .filter((element:IElement) => { return element.x != undefined && element.y != undefined; })
+               .filter((element:IElement) => { return element.x != undefined && element.y != undefined; })
+               .filter((element:IElement) => { return element.x != 0 && element.y != 0; })
+               // .filter((element:IElement) => { return !element.x  && !element.y; })
                 .each((element:IElement) => {
                     element.rendering_x = element.x + xOffset;
                     element.rendering_y = element.y + yOffset;
@@ -615,6 +619,8 @@ class Ieee8500View extends ControlledReactComponent<Ieee8500Controller, Ieee8500
             .data(this.props.controller.model.staticModel.get('topology').links)
             .enter().append('path')
                 .filter((link:ILink) => { return link.from.x != undefined && link.from.y != undefined && link.to.x != undefined && link.to.y != undefined; })
+                .filter((link:ILink) => { return link.from.x != 0 && link.from.y != 0 && link.to.x != 0 && link.to.y != 0; })
+               // .filter((link:ILink) => { return !link.from.x && !link.from.y && !link.to.x  && !link.to.y ; })
                 .datum((link:ILink) => [{link: link, element: link.from}, {link: link, element: link.to}])
                 .attr('class', (d:any) => 'link ' + d[0].link.name)
                 .attr('stroke', (d:any) => {

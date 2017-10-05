@@ -46,18 +46,20 @@ function getTitaniumTopology() {
 }
 
 function getIeee8500Topology() {
-    return getTopology('./data/ieee8500/ieee8500_base.json', './data/ieee8500/ieee8500_xy.json');
+    //return getTopology('./data/ieee8500/ieee8500_base.json', './data/ieee8500/ieee8500_xy.json');
+    //read model topology and x,y  coordinates from the new CIM format file
+    return getTopology('./data/ieee8500/ieee8500_symbols.json');
 }
 
-function getTopology(baseFilePath, xyFilePath) {
+function getTopology(baseFilePath) {
 
     function getOrCreateElement(name, type, hashByName, elementsList) {
-
         let existingElement = hashByName[name];
         if (!existingElement) {
             existingElement = {name: name, type: type, data: {}, children: []};
             hashByName[name] = existingElement;
             elementsList.push(existingElement);
+
         }
         return existingElement;
     }
@@ -65,8 +67,8 @@ function getTopology(baseFilePath, xyFilePath) {
     let baseContents = fs.readFileSync(baseFilePath, 'utf-8');
     let baseJson = JSON.parse(baseContents);
 
-    let coordinateContents = fs.readFileSync(xyFilePath, 'utf-8');
-    let coordinateJson = JSON.parse(coordinateContents);
+    //let coordinateContents = fs.readFileSync(xyFilePath, 'utf-8');
+    //let coordinateJson = JSON.parse(coordinateContents);
 
     let knownElementsByName = {};
     let elements = [];
@@ -97,9 +99,13 @@ function getTopology(baseFilePath, xyFilePath) {
     
     // Create the lines, creating nodes as needed along the way
     baseJson.feeder[2].overhead_lines.forEach((overheadLine) => {
-
+        
         let fromNode = getOrCreateElement(overheadLine.from, 'node', knownElementsByName, elements);
         let toNode = getOrCreateElement(overheadLine.to, 'node', knownElementsByName, elements);
+        fromNode.x = overheadLine.x1;
+        fromNode.y = overheadLine.y1;
+        toNode.x = overheadLine.x2;
+        toNode.y = overheadLine.y2;
 
         links.push({
             name: overheadLine.name,
@@ -127,7 +133,9 @@ function getTopology(baseFilePath, xyFilePath) {
     // Add the regulators under the nodes 
     console.log(baseJson.feeder[4]);
     baseJson.feeder[4].regulators.forEach((element) => {
+        console.log(element.name);
         let parent = knownElementsByName[regulatorParents[element.name]];
+        console.log(parent);
         if (parent) {
             parent.children.push({
                 name: element.name,
@@ -140,7 +148,7 @@ function getTopology(baseFilePath, xyFilePath) {
         }
     })
 
-    let numMissingNodes = 0;
+    /*let numMissingNodes = 0;
     let numFoundNodes = 0;
     coordinateJson.coordinates.forEach((coordinate) => {
 
@@ -156,7 +164,7 @@ function getTopology(baseFilePath, xyFilePath) {
         node.y = coordinate.y;
     })
     console.log(numMissingNodes + ' nodes missing, ' + numFoundNodes + ' found');
-
+    */
     let topologyJson = {
         elements: elements,
         links: links
