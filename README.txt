@@ -9,7 +9,7 @@ To set up your development environment for this application:
 
 5. > npm install 
 
-(Step 5 might not be necessary for this project)
+(Step 6 might not be necessary for this project)
 6. Copy the directory /lib/@types/react-router into /node_modules/@types, replacing the existing /node_modules/@types/react-router directory.  
     
     When npm installs @types/react-router, the wrong version of @types/history (4.5.0 vs. the necessary 2.0.0) is installed as a sub-dependency. 
@@ -38,8 +38,9 @@ To set up your development environment for this application:
 
     And start the server using this command:
     > nodemon server.js
+10. > Go to the url http://localhost:8082 on the web browser
 
-10. Development on this project will be much easier using Visual Studio Code, which understands TypeScript
+11. Development on this project will be much easier using Visual Studio Code, which understands TypeScript
    and will offer dot-complete, etc. You can download Visual Studio Code from here: https://code.visualstudio.com/
    
    Steps for Unit Tests
