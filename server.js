@@ -133,9 +133,7 @@ function getTopology(baseFilePath) {
     // Add the regulators under the nodes 
     console.log(baseJson.feeder[4]);
     baseJson.feeder[4].regulators.forEach((element) => {
-        console.log(element.name);
         let parent = knownElementsByName[regulatorParents[element.name]];
-        console.log(parent);
         if (parent) {
             parent.children.push({
                 name: element.name,
