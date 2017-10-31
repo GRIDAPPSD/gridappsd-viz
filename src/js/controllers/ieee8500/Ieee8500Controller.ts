@@ -39,8 +39,7 @@ class Ieee8500Controller {
 
         let self = this;
 		//default gossServerUrl is ws://127.0.0.1:61614
-        //var gossServerUrl='ws://127.0.0.1:61614';
-        var gossServerUrl='ws://130.20.106.209:61614';
+        var gossServerUrl='ws://127.0.0.1:61614';        
         this._stompClient = Stomp.client(gossServerUrl, null);
         this._stompClient.heartbeat.outgoing = 0;
         this._stompClient.heartbeat.incoming = 0;
