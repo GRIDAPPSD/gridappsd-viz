@@ -2,6 +2,7 @@ import * as Backbone from 'backbone';
 
 import Ieee8500StaticModel from './Ieee8500StaticModel';
 import Ieee8500TimeseriesModel from './Ieee8500TimeseriesModel';
+import Ieee8500MessageModel from './Ieee8500MessageModel';
 import PlotModel from '../common/PlotModel';
 
 class Ieee8500MainModel extends Backbone.Model {
@@ -16,6 +17,10 @@ class Ieee8500MainModel extends Backbone.Model {
         return this.get('timeseriesModel');
     }
 
+    get messageModel():Ieee8500MessageModel {
+        return this.get('messageModel');
+    }
+
     get plotModelsByName():any {
         return this._plotModelsByPlotName;
     }
@@ -25,6 +30,7 @@ class Ieee8500MainModel extends Backbone.Model {
         super();
 
         this.set('staticModel', new Ieee8500StaticModel({url: '/data/ieee8500'}));
+        this.set('messageModel', new Ieee8500MessageModel({url: '/data/ieee8500'}));
         this.set('timeseriesModel', new Ieee8500TimeseriesModel({url: '/data/ieee8500/timeseries'}));
 
         this.staticModel.on('change', this.onStaticModelChange, this);
