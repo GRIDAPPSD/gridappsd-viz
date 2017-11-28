@@ -1,6 +1,7 @@
 import * as React from 'react';
 import * as d3 from 'd3';
 import * as Backbone from 'backbone';
+import { Panel } from 'react-bootstrap';
 import {ControlledReactComponent} from '../ControlledReactComponent';
 import Ieee8500Controller from '../../controllers/ieee8500/Ieee8500Controller';
 import PlotView from '../common/PlotView';
@@ -18,7 +19,7 @@ interface ILink {name:string, from: IElement, to:IElement, data:any}
 // Processed regulator data used by the UI.
 interface IUiRegulatorData {name: string, hasPowerIn: boolean, powerId: string, tapsId: string, voltages: any[], taps: any, powerIns: any}
 
-interface Ieee8500ViewState {isFirstCurTimeRendering: boolean, hasRenderedTopology: boolean};
+interface Ieee8500ViewState {isFirstCurTimeRendering: boolean, isFirstSimStatusRendering: boolean, hasRenderedTopology: boolean};
 
 class Ieee8500View extends ControlledReactComponent<Ieee8500Controller, Ieee8500ViewState> {
 
@@ -32,7 +33,7 @@ class Ieee8500View extends ControlledReactComponent<Ieee8500Controller, Ieee8500
     // Note: getInitialState() is not used in ES6 classes.
     constructor(props:any) {
         super(props);
-        this.state = {isFirstCurTimeRendering: true, hasRenderedTopology: false};
+        this.state = {isFirstCurTimeRendering: true, isFirstSimStatusRendering: true, hasRenderedTopology: false};
     }
 
     componentWillMount() {
@@ -41,6 +42,7 @@ class Ieee8500View extends ControlledReactComponent<Ieee8500Controller, Ieee8500
         this.props.controller.model.staticModel.fetch();
 
         this.props.controller.model.timeseriesModel.on('change', this.renderCurTimeData, this);
+        this.props.controller.model.messageModel.on('change', this.renderSimulationData, this);
 
         if (this.props.controller.dataSource == DataSource.PollingNode) {
             this.props.controller.startPolling();
@@ -50,6 +52,7 @@ class Ieee8500View extends ControlledReactComponent<Ieee8500Controller, Ieee8500
     componentWillUnmount() {
         this.props.controller.model.staticModel.off('change', this.renderTopology, this);
         this.props.controller.model.timeseriesModel.off('change', this.renderCurTimeData, this);
+        this.props.controller.model.timeseriesModel.off('change', this.renderSimulationData, this);
         
         // TODO: Remove. See componentDidMount for explanation.
         d3.select('button.simulation.start').on('click', null);
@@ -74,9 +77,40 @@ class Ieee8500View extends ControlledReactComponent<Ieee8500Controller, Ieee8500
                 <div className="plots">
                     <Ieee8500PlotsView model={this.props.controller.model} />
                 </div>
+
+                <div className="messages">
+                <Panel header="Simulation Status" collapsible defaultExpanded>
+                    
+                    {
+                        this.props.controller.simulationMessage != undefined &&
+                            
+                        
+                        <div style={{maxHeight: 185.19, overflowY: scroll}}>{this.props.controller.simulationMessage.split('\n').map(function(item :any, key :any) {
+                            return (
+                                <span key={key}>
+                                {item}
+                                <br/>
+                                </span>
+                                )
+                            })}
+                        </div>
+                    }
+                </Panel>
+                </div>
         </div>
     }
 
+    renderSimulationData() {
+        const isFirstSimStatusRendering = this.state.isFirstSimStatusRendering;
+        const self = this;
+                
+        
+        self.setState({
+            isFirstSimStatusRendering: false, 
+            isFirstCurTimeRendering: true,
+            hasRenderedTopology: this.state.hasRenderedTopology});
+        
+    }
     renderCurTimeData() {
 
         if (!this.state.hasRenderedTopology) {
@@ -153,10 +187,11 @@ class Ieee8500View extends ControlledReactComponent<Ieee8500Controller, Ieee8500
                 } 
             }
         })
-        
+
         if (self.state.isFirstCurTimeRendering) {
             self.setState({
                 isFirstCurTimeRendering: false, 
+                isFirstSimStatusRendering: true,
                 hasRenderedTopology: this.state.hasRenderedTopology});
         }
     }
@@ -669,6 +704,7 @@ class Ieee8500View extends ControlledReactComponent<Ieee8500Controller, Ieee8500
         if (!this.state.hasRenderedTopology) {
             this.setState({
                 hasRenderedTopology: true, 
+                isFirstSimStatusRendering: true,
                 isFirstCurTimeRendering: this.state.isFirstCurTimeRendering});  
         }     
 

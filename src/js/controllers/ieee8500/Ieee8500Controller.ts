@@ -1,6 +1,7 @@
 import Ieee8500MainModel from '../../models/ieee8500/Ieee8500MainModel';
 import DataSource from '../../interfaces/DataSource';
 import '../../libs/stomp.js';
+import gossServerUrl from '../../../../runConfig';
 
 declare var Stomp:any;
 
@@ -10,6 +11,7 @@ class Ieee8500Controller {
     private _isPolling:boolean = false;
     private _pollInterval:number = 250;
     private _dataSource:DataSource;
+    private _simulationMessage:any;
 
     private _stompClient:any;
     private _websocketConnected:boolean = false;
@@ -26,6 +28,9 @@ class Ieee8500Controller {
         return this._dataSource;
     }
 
+    get simulationMessage() {
+        return this._simulationMessage;
+    }
     constructor(dataSource:DataSource) {  
 
         this._dataSource = dataSource;
@@ -38,8 +43,9 @@ class Ieee8500Controller {
     connectWebsocket() {
 
         let self = this;
-		//default gossServerUrl is ws://127.0.0.1:61614
-        var gossServerUrl='ws://127.0.0.1:61614';        
+      
+        //var gossServerUrl='ws://127.0.0.1:61614';
+        //var gossServerUrl='ws://130.20.106.209:61614';
         this._stompClient = Stomp.client(gossServerUrl, null);
         this._stompClient.heartbeat.outgoing = 0;
         this._stompClient.heartbeat.incoming = 0;
@@ -51,7 +57,7 @@ class Ieee8500Controller {
     }
 
     onWebsocketConnected() {
-        console.log('Websocket connected');
+        console.log('Websocket connected '+ gossServerUrl);
         this._websocketConnected = true;
 
         let self = this;
@@ -81,6 +87,15 @@ class Ieee8500Controller {
 
         console.log('Simulation status: ');
         console.log(message.body);
+        if(this._simulationMessage == undefined) {
+            this._simulationMessage = message.body;
+        }
+        else
+            this._simulationMessage =  this._simulationMessage + "\n" + message.body;
+
+        console.log(this._simulationMessage);
+
+        this._ieee8500MainModel.messageModel.set('msg', {data: this._simulationMessage});
     }
 
     onFncsOutputReceived(message:any) {
