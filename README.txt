@@ -16,8 +16,7 @@ To set up your development environment for this application:
     I tried getting around this using the following:
         a. npm shrinkwrap - didn't work, gave up on it, would need to learn more about how shrinkwrap works
         b. Installing @types/history myself - The versions could not be found, which seems to make no sense.
-        c. Committing /node_modules/@types/react-router to the repo and removing it from the package.json to
-           keep it from being replaced on npm install. The .gitignore except pattern wasn't working. Why?
+        c. Committing /node_modules/@types/react-router to the repo and removing it from the package.json to keep it from being replaced on npm install. The .gitignore except pattern wasn't working. Why?
 
 7. > cd <your path>/viz
 
