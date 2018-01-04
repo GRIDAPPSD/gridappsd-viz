@@ -1,2 +1,2 @@
-var gossServerUrl = 'ws://130.20.106.209:61614';
+var gossServerUrl = 'ws://127.0.0.1:61614';
 export default gossServerUrl;

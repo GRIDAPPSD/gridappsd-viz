@@ -102,10 +102,12 @@ function getTopology(baseFilePath) {
         
         let fromNode = getOrCreateElement(overheadLine.from, 'node', knownElementsByName, elements);
         let toNode = getOrCreateElement(overheadLine.to, 'node', knownElementsByName, elements);
-        fromNode.x = overheadLine.x1;
-        fromNode.y = overheadLine.y1;
-        toNode.x = overheadLine.x2;
-        toNode.y = overheadLine.y2;
+        if (overheadLine.x1 != 0.0 && overheadLine.y1 != 0.0 && overheadLine.x2 != 0.0 && overheadLine.y2 != 0.0) {
+            fromNode.x = overheadLine.x1;
+            fromNode.y = overheadLine.y1;
+            toNode.x = overheadLine.x2;
+            toNode.y = overheadLine.y2;
+        }
 
         links.push({
             name: overheadLine.name,
