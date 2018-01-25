@@ -7,6 +7,7 @@ import Ieee8500Controller from '../../controllers/ieee8500/Ieee8500Controller';
 import PlotView from '../common/PlotView';
 import Ieee8500PlotsView from './Ieee8500PlotsView';
 import DataSource from '../../interfaces/DataSource';
+import {Button, Glyphicon, DropdownButton, MenuItem} from 'react-bootstrap';
 
 import '../../../css/Ieee8500View.scss';
 
@@ -72,8 +73,31 @@ class Ieee8500View extends ControlledReactComponent<Ieee8500Controller, Ieee8500
     render() {
         console.log('---- render ieee8500view');
 
+
         return <div className="view ieee8500">
-                <div className="topology" />
+                <div className="topology" >                
+                    <nav className="navbar navbar">
+                        <div className="container-fluid">
+                        <div className="collapse navbar-collapse">
+                            <ul className="nav navbar-nav navbar-right">
+                                <li className="timestamp">(Awaiting timeseries data...)</li>
+                                <li className="application select">>
+                            <DropdownButton
+                                
+				                title="Select Application"
+				                id="dropdown-size-medium"
+                            >
+                                <MenuItem eventKey="1" active>VVO</MenuItem>
+
+                            </DropdownButton>
+                            </li>
+
+                                <li className="simulation start"><Button className="simulation start"><Glyphicon glyph="play" /></Button></li>
+                            </ul>
+                        </div>
+                        </div>
+                    </nav>
+                </div>
                 <div className="plots">
                     <Ieee8500PlotsView model={this.props.controller.model} />
                 </div>
@@ -96,6 +120,8 @@ class Ieee8500View extends ControlledReactComponent<Ieee8500Controller, Ieee8500
                         </div>
                     }
                 </Panel>
+
+
                 </div>
         </div>
     }
@@ -542,7 +568,8 @@ class Ieee8500View extends ControlledReactComponent<Ieee8500Controller, Ieee8500
         //const zoomCenter = {x: -146.50708757736504, y: -175.543766098824, k: 0.029921138526306484};
         // zoom center for new topology file
         //const zoomCenter = {x: -35082.68104917289, y: -259387.84324810182, k: 0.021157439952773343};
-        const zoomCenter = {x: -41.276503138827934, y: -22.758931780772514, k: 0.023313488363887445};
+       // const zoomCenter = {x: -41.276503138827934, y: -22.758931780772514, k: 0.023313488363887445};
+        const zoomCenter = {x: 9.164249877758323, y: -63.9658846761871, k: 0.02029557042757985};
         d3.selectAll('.view.ieee8500 > svg').remove();
 
         let zoom = d3.zoom()
