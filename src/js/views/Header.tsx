@@ -1,6 +1,6 @@
 import * as React from 'react';
-import {Link} from 'react-router';
-import {Button, Glyphicon, DropdownButton, MenuItem} from 'react-bootstrap';
+import { Link } from 'react-router-dom';
+import { Button, Glyphicon, DropdownButton, MenuItem } from 'react-bootstrap';
 
 import '../../css/Header.scss';
 
@@ -19,7 +19,7 @@ export class Header extends React.Component<HeaderProps, {}> {
                     <div className="collapse navbar-collapse">
                         <ul className="nav navbar-nav">
                             <li><Link to="/ieee8500">IEEE 8500</Link></li>
-                            </ul>
+                        </ul>
                     </div>
                 </div>
             </nav>

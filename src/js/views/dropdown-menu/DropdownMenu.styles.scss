@@ -1,0 +1,99 @@
+.app-dropdown-menu {
+    position: relative;
+    width: 200px;
+    display: inline-block;
+}
+
+.app-dropdown-menu-toggler {
+    border: 2px solid gray;
+    display: flex;
+    height: 35px;
+    width: 100%;
+    align-items: center;
+    border-radius: 3px;
+    cursor: pointer;
+    color: #000;
+    text-decoration: none;
+    position: relative;
+    .text {
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        overflow: hidden;
+        display: inline-block;
+        width: 85%;
+        position: relative;
+        transform: translateX(5px);
+        text-align: left;
+        vertical-align: middle;
+        color: #000;
+        font-size: initial;
+    }
+    i {
+        width: 13%;
+        position: relative;
+        z-index: 1;
+    }
+    i:before {
+        transition: transform 0.2s linear;
+        transform-origin: 50% 50%;
+        transform: rotate(0deg);
+        content: '\f078';
+    }
+    &:hover,
+    &:focus,
+    &:link {
+        text-decoration: none;
+        color: black;
+    }
+    &:focus {
+        box-shadow: 0px 0px 1px 2px #999 inset;
+        i:before {
+            transform: rotate(180deg);
+        }
+    }
+}
+
+.app-dropdown-menu-item-list {
+    margin: 0;
+    padding: 0;
+    position: absolute;
+    width: 98%;
+    left: 50%;
+    transform: translate(-50%, 7px);
+    box-shadow: 0 0 5px grey;
+    border-radius: 3px;
+    background-color: #fff;
+    z-index: 300;
+    overflow-x: hidden;
+    overflow-y: auto;
+    visibility: hidden;
+    opacity: 0;
+    transition: opacity 0.5s ease, visibility 0.5s ease;
+    &:empty {
+        box-shadow: none;
+    }
+}
+
+.app-dropdown-menu-item {
+    color: #000;
+    list-style-type: none;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    line-height: 30px;
+    font-weight: normal;
+    overflow: hidden;
+    margin: 0;
+    padding-left: 5px;
+    cursor: pointer;
+    &:hover {
+        background-color: lightblue;
+    }
+    .text {
+        font-weight: normal;
+    }
+}
+
+.app-dropdown-menu.expanded .app-dropdown-menu-item-list {
+    opacity: 1;
+    visibility: visible;
+}
