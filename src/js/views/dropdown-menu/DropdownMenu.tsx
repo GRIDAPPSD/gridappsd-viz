@@ -1,14 +1,15 @@
 import * as React from 'react';
+
 import { MenuItem } from './MenuItem';
 import './DropDownMenu.styles.scss';
 
 interface Props {
   menuItems: MenuItem[];
-  onMenuItemClick: (menuItem: MenuItem) => void;
+  onChange: (menuItem: MenuItem) => void;
   onOpen?: () => void;
   defaultItemIndex?: number;
   defaultLabel?: string;
-  reset: boolean;
+  reset?: boolean;
 }
 
 interface State {
@@ -23,8 +24,8 @@ export class DropdownMenu extends React.Component<Props, State> {
       currentLabel: this.props.defaultLabel || 'Select an item',
       expanded: false
     };
-    this.onOpen = this.onOpen.bind(this);
-    this.onClose = this.onClose.bind(this);
+    this._onOpen = this._onOpen.bind(this);
+    this._onClose = this._onClose.bind(this);
   }
   render() {
     return (
@@ -33,8 +34,8 @@ export class DropdownMenu extends React.Component<Props, State> {
           href='javascript:void(0)'
           className='app-dropdown-menu-toggler'
           title={this.state.currentLabel}
-          onBlur={this.onClose}
-          onFocus={this.onOpen}>
+          onBlur={this._onClose}
+          onFocus={this._onOpen}>
           <span className='text'>{this.state.currentLabel}</span>
           <i className='app-icon'></i>
         </a>
@@ -45,7 +46,7 @@ export class DropdownMenu extends React.Component<Props, State> {
               <li
                 key={menuItem.id}
                 className='app-dropdown-menu-item'
-                onClick={() => this.onMenuItemClicked(menuItem)}>
+                onClick={() => this._onChange(menuItem)}>
                 <span className="text">{menuItem.label}</span>
               </li>
             )
@@ -58,25 +59,28 @@ export class DropdownMenu extends React.Component<Props, State> {
     if (this.props.defaultItemIndex < 0 || this.props.defaultItemIndex >= this.props.menuItems.length)
       throw new Error('Default item index must be between 0 and ' + (this.props.menuItems.length - 1));
     if (this.props.defaultItemIndex !== undefined)
-      this.onMenuItemClicked(this.props.menuItems[this.props.defaultItemIndex]);
+      this._onChange(this.props.menuItems[this.props.defaultItemIndex]);
   }
-  onMenuItemClicked(menuItem: MenuItem) {
-    if (this.state.currentLabel !== menuItem.label) {
-      this.props.onMenuItemClick(menuItem);
-      this.setState({ currentLabel: menuItem.label });
-    }
-  }
+  
   componentWillReceiveProps(newProps: Props) {
     if (newProps.reset)
       this.setState({ currentLabel: this.props.defaultLabel || 'Select an item' });
   }
-  onOpen() {
+  private _onOpen() {
     if (this.props.onOpen)
       this.props.onOpen;
     this.setState({ expanded: true });
   }
-  onClose() {
+
+  private _onClose() {
     // Wait for the clicked item to fire before collapse or else it won't fire
     setTimeout(() => this.setState({ expanded: false }), 100);
+  }
+
+  private _onChange(menuItem: MenuItem) {
+    if (this.state.currentLabel !== menuItem.label) {
+      this.props.onChange(menuItem);
+      this.setState({ currentLabel: menuItem.label });
+    }
   }
 }

@@ -15,13 +15,13 @@ export class Drawer extends React.Component<Props, State> {
     this.state = {
       isOpened: false
     };
-    this.toggleDrawer = this.toggleDrawer.bind(this);
+    this.close = this.close.bind(this);
   }
   render() {
     return (
       <div className={'drawer' + (this.state.isOpened ? ' opened' : ' closed')}>
-        <div className={'backdrop' + (this.state.isOpened ? ' visible' : ' hidden')} onClick={this.toggleDrawer}></div>
-        <ul className="drawer-items" onClick={this.toggleDrawer}>
+        <div className={'backdrop' + (this.state.isOpened ? ' visible' : ' hidden')} onClick={this.close}></div>
+        <ul className="drawer-items" onClick={this.close}>
           {this.props.children}
         </ul>
         <section className="content">
@@ -31,15 +31,11 @@ export class Drawer extends React.Component<Props, State> {
     );
   }
 
-  toggleDrawer() {
-    this.setState({ isOpened: !this.state.isOpened });
-  }
-
   open() {
     this.setState({ isOpened: true });
   }
-
   close() {
     this.setState({ isOpened: false });
   }
+
 }

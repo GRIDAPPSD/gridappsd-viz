@@ -3,6 +3,8 @@
 .request-config-form {
     position: relative;
     padding-bottom: 20px;
+    overflow-y: auto;
+    max-height: 100%;
     .group {
         header {
             font-size: 25px;
@@ -20,6 +22,7 @@
             margin: 10px;
             margin-left: 25px;
             width: 200px;
+            vertical-align: top;
         }
         input {
             border: none;
@@ -53,11 +56,6 @@
         }
         .ripple input:focus~.ripple-bar {
             transform: scaleX(1);
-        }
-    }
-    .application-config {
-        label {
-            vertical-align: top;
         }
     }
     .done {

@@ -10,5 +10,4 @@ $APPBAR_HEIGHT: 60px;
 
 .drawer .content {
     height: calc(100vh - #{$APPBAR_HEIGHT});
-    overflow-y: auto;
 }

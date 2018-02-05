@@ -17,19 +17,19 @@ export class DrawerItemGroup extends React.Component<Props, State> {
     this.state = {
       isExpanded: true
     }
-    this.toggleExpand = this.toggleExpand.bind(this);
+    this._toggleExpand = this._toggleExpand.bind(this);
   }
   render() {
     return (
       <li className={'drawer-item drawer-item-group' + (this.state.isExpanded ? ' expanded' : ' collapsed')}>
-        <header onClick={this.toggleExpand}>
+        <header onClick={this._toggleExpand}>
           <span>{this.props.header}</span>
           <i className={'app-icon angle'} />
         </header>
         <ul className='nested-drawer-items' ref={elem => this._nestedDrawerItemList = elem}>
           {this.props.children}
-        </ul >
-      </li >
+        </ul>
+      </li>
     );
   }
 
@@ -38,7 +38,7 @@ export class DrawerItemGroup extends React.Component<Props, State> {
     this.setState({ isExpanded: false });
   }
 
-  toggleExpand(event: any) {
+  private _toggleExpand(event: any) {
     event.stopPropagation();
     if (this.state.isExpanded) {
       this._nestedDrawerItemList.style.height = '0';
