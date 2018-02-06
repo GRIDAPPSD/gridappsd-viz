@@ -77,7 +77,7 @@ class Ieee8500Controller {
   }
 
   sendControlMessage() {
-
+    console.log(this._simulationRequest);
     this._stompClient.send(this._simulationControlTopic,
       { "reply-to": "/temp-queue/response-queue" },
       JSON.stringify(this._simulationRequest));

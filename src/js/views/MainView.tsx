@@ -6,6 +6,7 @@ import Ieee8500View from '../views/ieee8500/Ieee8500View';
 import MainController from '../controllers/MainController';
 import DataSource from '../interfaces/DataSource';
 import { Help } from '../views/Help';
+import { Applications } from '../views/ApplicationsView';
 
 import '../../css/MainView.scss';
 import { AppBar } from './app-bar/AppBar';
@@ -61,6 +62,7 @@ export class MainView extends React.Component<MainViewProps, MainViewState> {
                 <Route exact path="/ieee8500" component={() => <Ieee8500View controller={mainController.ieee8500Controller} />} />
                 <Route exact path="/titanium" component={() => <Ieee8500View controller={mainController.ieee8500Controller} />} />
                 <Route exact path="/help" component={Help} />
+                <Route exact path="/applications" component={Applications} />
               </div>
             }>
             <DrawerItem onClick={this._showRequestConfigForm}>

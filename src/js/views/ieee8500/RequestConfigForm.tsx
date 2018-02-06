@@ -99,7 +99,7 @@ class RequestConfigFormContainer extends React.Component<Props, State> {
                   dispatch(new SetSimulator(menuItem.value));
                 }}
                 defaultItemIndex={0} />
-              <span className='inline-label'>Power Flow Solver Method</span>
+              <span className='inline-label'>Power Flow Solver Method:</span>
               <span className='inline-value'>NR</span>
               <button type='button' onClick={this._showSimulationOutputEditor} className='positive show-simulation-output'>Data</button>
             </div>
@@ -163,7 +163,7 @@ class RequestConfigFormContainer extends React.Component<Props, State> {
               <label>Model Creation Configuration</label>
               <textarea
                 name='load_scaling_factor'
-                defaultValue={JSON.stringify(requestConfig.simulation_config.model_creation_config.load_scaling_factor, null, 4)}></textarea>
+                defaultValue={JSON.stringify(requestConfig.simulation_config.model_creation_config, null, 4)}></textarea>
             </div>
 
           </div>
@@ -176,7 +176,7 @@ class RequestConfigFormContainer extends React.Component<Props, State> {
                   menuItems={[
                     // 0 is the index of this app inside requestConfig.application_config.applications array
                     new MenuItem('VVO', 'vvo', { index: 0, name: 'vvo' }),
-                    new MenuItem('Sample App', 'sample', { index: 1, name: 'sample' })
+                    new MenuItem('Sample App', 'sample_app', { index: 1, name: 'sample_app' })
                   ]}
                   onChange={menuItem => {
                     const configStr = DEFAULT_REQUEST_CONFIG.application_config.applications[menuItem.value.index].config_string;
