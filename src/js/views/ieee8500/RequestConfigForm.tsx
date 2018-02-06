@@ -1,12 +1,12 @@
 import * as React from 'react';
 import { connect } from 'react-redux';
 import { Link } from 'react-router-dom';
+import { Modal, Button, ModalTitle } from 'react-bootstrap';
 
 import './RequestConfigForm.styles.scss';
 import { DropdownMenu } from '../dropdown-menu/DropdownMenu';
 import { MenuItem } from '../dropdown-menu/MenuItem';
-import { SetGeographicalRegionName, SetSubGeographicalRegionName, SetLineName, SetSimulator, SetTimestepFrequency, SetTimestepIncrement, SetSimulationName, SetPowerFlowSolverMethod, SetApplicationConfiguration } from './actions';
-import { DEFAULT_REQUEST_CONFIG as requestConfig } from './reducers';
+import { SetGeographicalRegionName, SetSubGeographicalRegionName, SetLineName, SetSimulator, SetTimestepFrequency, SetTimestepIncrement, SetSimulationName, SetPowerFlowSolverMethod, UpdateApplicationConfiguration, SetOutputObjects } from './actions';
 import { RequestConfig } from '../../models/RequestConfig';
 import { AppState } from '../../models/AppState';
 
@@ -18,19 +18,25 @@ interface Props {
 }
 
 interface State {
-  selectedApp: string;
+  selectedAppIndex: number;
+  showSimulationOutput: boolean;
 }
 class RequestConfigFormContainer extends React.Component<Props, State> {
 
+  private _debounce = null;
+  
   constructor(props: any) {
     super(props);
     this.state = {
-      selectedApp: 'vvo'
+      selectedAppIndex: 0,
+      showSimulationOutput: false
     }
+    this._hideSimulationOutputEditor = this._hideSimulationOutputEditor.bind(this);
+    this._showSimulationOutputEditor = this._showSimulationOutputEditor.bind(this);
   }
   render() {
     if (this.props.show) {
-      const { dispatch } = this.props;
+      const { dispatch, requestConfig } = this.props;
       return (
         <form className='request-config-form'>
           <div className='group power-system-config'>
@@ -92,7 +98,9 @@ class RequestConfigFormContainer extends React.Component<Props, State> {
                   dispatch(new SetSimulator(menuItem.value));
                 }}
                 defaultItemIndex={0} />
-
+              <span className='inline-label'>Power Flow Solver Method</span>
+              <span className='inline-value'>NR</span>
+              <button type='button' onClick={this._showSimulationOutputEditor} className='positive show-simulation-output'>Data</button>
             </div>
             <div className='control'>
               <label>Timestep Frequency</label>
@@ -151,12 +159,6 @@ class RequestConfigFormContainer extends React.Component<Props, State> {
               />
             </div>
             <div className='control'>
-              <label>Simulation Output Objects</label>
-              <textarea
-                name='simulation_output'
-                defaultValue={requestConfig.simulation_config.simulation_output.output_objects[0].properties} />
-            </div>
-            <div className='control'>
               <label>Model Creation Configuration</label>
               <textarea
                 name='load_scaling_factor'
@@ -171,11 +173,12 @@ class RequestConfigFormContainer extends React.Component<Props, State> {
                 <label>Application Name</label>
                 <DropdownMenu
                   menuItems={[
-                    new MenuItem('VVO', 'vvo', 'vvo'),
-                    new MenuItem('Sample App', 'sample', 'sample')
+                    // 0 is the index of this app inside requestConfig.application_config.applications array
+                    new MenuItem('VVO', 'vvo', 0),
+                    new MenuItem('Sample App', 'sample', 1)
                   ]}
                   onChange={menuItem => {
-                    this.setState({ selectedApp: menuItem.value });
+                    this.setState({ selectedAppIndex: menuItem.value });
                   }}
                   defaultItemIndex={0}
                 />
@@ -183,12 +186,20 @@ class RequestConfigFormContainer extends React.Component<Props, State> {
               <div className='control'>
                 <label>Application Configuration</label>
                 <textarea
-                  name='vvo'
+                  name='app-config-str'
                   onChange={event => {
                     const newVal = (event.target as HTMLTextAreaElement).value;
-                    dispatch(new SetApplicationConfiguration(this.state.selectedApp, newVal));
+                    if (this._debounce) {
+                      clearTimeout(this._debounce)
+                      this._debounce = null;
+                    }
+                    else {
+                      this._debounce = setTimeout(() => {
+                        new UpdateApplicationConfiguration(this.state.selectedAppIndex, newVal)
+                      }, 500);
+                    }
                   }}
-                  defaultValue={JSON.stringify(JSON.parse(requestConfig.application_config.applications[0].config_string), null, 4)}></textarea>
+                  value={JSON.stringify(JSON.parse(requestConfig.application_config.applications[this.state.selectedAppIndex].config_string), null, 4)}></textarea>
               </div>
             </div>
           </div>
@@ -196,10 +207,38 @@ class RequestConfigFormContainer extends React.Component<Props, State> {
             to='/ieee8500'
             className='done app-icon'
             onClick={() => this.props.onSubmit(this.props.requestConfig)}></Link>
+          <Modal show={this.state.showSimulationOutput} onHide={this._hideSimulationOutputEditor}>
+            <Modal.Header>
+              <ModalTitle>Simulation Output Objects</ModalTitle>
+            </Modal.Header>
+            <Modal.Body>
+              <div className='control'>
+                <textarea
+                  name='simulation_output'
+                  onBlur={event => {
+                    const newValue = (event.target as HTMLTextAreaElement).value;
+                    dispatch(new SetOutputObjects(JSON.parse(newValue)));
+                  }}
+                  defaultValue={JSON.stringify(requestConfig.simulation_config.simulation_output.output_objects, null, 4)} />
+              </div>
+            </Modal.Body>
+            <Modal.Footer>
+              <Button onClick={this._hideSimulationOutputEditor}>Close</Button>
+              <Button bsStyle="primary" onClick={this._hideSimulationOutputEditor}>Save</Button>
+            </Modal.Footer>
+          </Modal>
         </form>
       );
     }
     return null;
+  }
+
+  private _hideSimulationOutputEditor() {
+    this.setState({ showSimulationOutput: false });
+  }
+
+  private _showSimulationOutputEditor() {
+    this.setState({ showSimulationOutput: true });
   }
 }
 

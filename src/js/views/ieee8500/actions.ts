@@ -1,4 +1,5 @@
 import { Action } from '../../models/Action';
+import { OutputObject } from '../../models/OutputObject';
 
 export const SET_GEOGRAPHICAL_REGION_NAME = 'SET_GEOGRAPHICAL_REGION_NAME';
 export const SET_SUBGEOGRAPHICAL_REGION_NAME = 'SET_SUBGEOGRAPHICAL_REGION_NAME';
@@ -9,11 +10,12 @@ export const SET_TIMESTEP_FREQUENCY = 'SET_TIMESTEP_FREQUENCY';
 export const SET_TIMESTEP_INCREMENT = 'SET_TIMESTEP_INCREMENT';
 export const SET_SIMULATION_NAME = 'SET_SIMULATION_NAME';
 export const SET_POWER_FLOW_SOLVER_METHOD = 'SET_POWER_FLOW_SOLVER_METHOD';
-export const SET_APPLICATION_CONFIGURATION = 'SET_APPLICATION_CONFIGURATION';
+export const UPDATE_APPLICATION_CONFIGURATION = 'UPDATE_APPLICATION_CONFIGURATION';
+export const SET_OUTPUT_OBJECTS = 'SET_OUTPUT_OBJECTS';
 
 export type RequestConfigActions = SetGeographicalRegionName | SetSubGeographicalRegionName |
   SetLineName | SetDuration | SetSimulator | SetTimestepFrequency | SetTimestepIncrement |
-  SetSimulationName | SetPowerFlowSolverMethod | SetApplicationConfiguration;
+  SetSimulationName | SetPowerFlowSolverMethod | UpdateApplicationConfiguration | SetOutputObjects;
 
 export class SetGeographicalRegionName extends Action {
   readonly type = SET_GEOGRAPHICAL_REGION_NAME;
@@ -78,9 +80,16 @@ export class SetPowerFlowSolverMethod extends Action {
   }
 }
 
-export class SetApplicationConfiguration extends Action {
-  readonly type = SET_APPLICATION_CONFIGURATION;
-  constructor(readonly app: string, readonly configStr: string) {
+export class UpdateApplicationConfiguration extends Action {
+  readonly type = UPDATE_APPLICATION_CONFIGURATION;
+  constructor(readonly index: number, readonly configStr: string) {
+    super();
+  }
+}
+
+export class SetOutputObjects extends Action {
+  readonly type = SET_OUTPUT_OBJECTS;
+  constructor(readonly outputObjects: OutputObject[]) {
     super();
   }
 }

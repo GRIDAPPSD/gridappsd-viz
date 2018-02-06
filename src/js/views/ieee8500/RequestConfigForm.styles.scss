@@ -58,6 +58,9 @@
             transform: scaleX(1);
         }
     }
+    .show-simulation-output {
+        margin-left: 20px;
+    }
     .done {
         position: fixed;
         bottom: 30px;
@@ -82,4 +85,11 @@
             transform: scale(1.1);
         }
     }
+}
+.modal .control textarea {
+    width: 100%;
+    height: 60vh;
+    box-shadow: 0 0 3px #000;
+    border-radius: 3px;
+    padding: 5px;
 }

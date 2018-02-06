@@ -1,3 +1,4 @@
+@import './constants';
 @font-face {
     src: url('./fontawesome.woff2');
     font-family: 'FontAwesome';
@@ -35,6 +36,42 @@
     animation-name: fadeout;
 }
 
+button.positive {
+    border: none;
+    border-radius: 3px;
+    box-shadow: 0 0 5px #000;
+    text-align: center;
+    cursor: pointer;
+    background-color: $BUTTON_POSITIVE;
+    color: #fff;
+    outline: none;
+    min-width: 100px;
+    line-height: 30px;
+    font-size: 15px;
+    background-position: center;
+    transition: background 0.6s;
+    &:hover {
+        background: $BUTTON_POSITIVE_HOVER radial-gradient(circle, transparent 1%, $BUTTON_POSITIVE_HOVER 1%) center/15000%;
+    }
+    &:active {
+        background-color: #add8e6;
+        background-size: 100%;
+        transition: background 0s;
+    }
+}
+
+.inline-label {
+    display: inline-block;
+    padding: 0 5px;
+    border-radius: 3px;
+    background-color: $MAIN_PRIMARY;
+    margin: auto 5px;
+    color: #fff;
+}
+.inline-value {
+    display: inline-block;
+    margin: auto 5px;
+}
 @keyframes fadein {
     from {
         visibility: hidden;

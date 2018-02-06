@@ -11,7 +11,8 @@ import {
   SET_TIMESTEP_INCREMENT,
   SET_SIMULATION_NAME,
   SET_POWER_FLOW_SOLVER_METHOD,
-  SET_APPLICATION_CONFIGURATION,
+  UPDATE_APPLICATION_CONFIGURATION,
+  SET_OUTPUT_OBJECTS,
   RequestConfigActions
 } from './actions';
 
@@ -35,40 +36,56 @@ export function requestConfig(config: RequestConfig = DEFAULT_REQUEST_CONFIG, ac
       return withNewSimulationConfig(config, 'simulation_name', action.value);
     case SET_POWER_FLOW_SOLVER_METHOD:
       return withNewSimulationConfig(config, 'power_flow_solver_method', action.value);
-    case SET_APPLICATION_CONFIGURATION:
-      const apps = config.application_config.applications.map(app => {
-        if (app.name !== action.app)
+    case SET_OUTPUT_OBJECTS:
+      return withNewSimulationConfig(config, 'simulation_output', { output_objects: action.outputObjects });
+    case UPDATE_APPLICATION_CONFIGURATION:
+      const apps = config.application_config.applications.map((app, index) => {
+        if (index !== action.index)
           return app;
         return { name: app.name, config_string: action.configStr };
       });
-      return {
-        ...config,
-        application_config: {
-          applications: apps
-        }
-      };
+      console.log(apps)
+      return withNewApplicationConfig(config, 'applications', apps);
     default:
       return config;
   }
 }
 
-function withNewPowerSystemConfig(config: RequestConfig, prop: string, value: string): RequestConfig {
-  return {
-    ...config,
-    power_system_config: {
-      ...config.power_system_config,
-      [prop]: value
-    }
-  };
+function withNewPowerSystemConfig(config: RequestConfig, prop: string, value: any): RequestConfig {
+  if (prop in config.power_system_config)
+    return {
+      ...config,
+      power_system_config: {
+        ...config.power_system_config,
+        [prop]: value
+      }
+    };
+  else
+    throw new Error(`Unknown property [${prop}] inside [config.power_system_config]`);
 }
-function withNewSimulationConfig(config: RequestConfig, prop: string, value: string): RequestConfig {
-  return {
-    ...config,
-    simulation_config: {
-      ...config.simulation_config,
-      [prop]: value
-    }
-  };
+function withNewSimulationConfig(config: RequestConfig, prop: string, value: any): RequestConfig {
+  if (prop in config.simulation_config)
+    return {
+      ...config,
+      simulation_config: {
+        ...config.simulation_config,
+        [prop]: value
+      }
+    };
+  else
+    throw new Error(`Unknown property [${prop}] inside [config.simulation_output]`);
+}
+function withNewApplicationConfig(config: RequestConfig, prop: string, value: any): RequestConfig {
+  if (prop in config.application_config)
+    return {
+      ...config,
+      application_config: {
+        ...config.application_config,
+        [prop]: value
+      }
+    };
+  else
+    throw new Error(`Unknown property [${prop}] inside [config.application_config]`);
 }
 
 export const DEFAULT_REQUEST_CONFIG: RequestConfig = {
@@ -187,6 +204,10 @@ export const DEFAULT_REQUEST_CONFIG: RequestConfig = {
     "applications": [
       {
         "name": "vvo", "config_string": "{\"static_inputs\": {\"ieee8500\" : {\"control_method\": \"ACTIVE\", \"capacitor_delay\": 60, \"regulator_delay\": 60, \"desired_pf\": 0.99, \"d_max\": 0.9, \"d_min\": 0.1,\"substation_link\": \"xf_hvmv_sub\",\"regulator_list\": [\"reg_FEEDER_REG\", \"reg_VREG2\", \"reg_VREG3\", \"reg_VREG4\"],\"regulator_configuration_list\": [\"rcon_FEEDER_REG\", \"rcon_VREG2\", \"rcon_VREG3\", \"rcon_VREG4\"],\"capacitor_list\": [\"cap_capbank0a\",\"cap_capbank0b\", \"cap_capbank0c\", \"cap_capbank1a\", \"cap_capbank1b\", \"cap_capbank1c\", \"cap_capbank2a\", \"cap_capbank2b\", \"cap_capbank2c\", \"cap_capbank3\"], \"voltage_measurements\": [\"nd_l2955047,1\", \"nd_l3160107,1\", \"nd_l2673313,2\", \"nd_l2876814,2\", \"nd_m1047574,3\", \"nd_l3254238,4\"],       \"maximum_voltages\": 7500, \"minimum_voltages\": 6500,\"max_vdrop\": 5200,\"high_load_deadband\": 100,\"desired_voltages\": 7000,   \"low_load_deadband\": 100,\"pf_phase\": \"ABC\"}}}"
+      },
+      {
+        name: 'sample',
+        config_string: '{}'
       }
     ]
 

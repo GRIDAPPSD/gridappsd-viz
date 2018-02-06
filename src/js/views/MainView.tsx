@@ -64,7 +64,6 @@ export class MainView extends React.Component<MainViewProps, MainViewState> {
               </div>
             }>
             <DrawerItem onClick={this._showRequestConfigForm}>
-              {/* <Link to='/ieee8500'>IEEE 8500</Link> */}
               <span>Simulations</span>
             </DrawerItem>
             <DrawerItem >
