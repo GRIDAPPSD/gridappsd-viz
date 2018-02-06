@@ -78,6 +78,7 @@ export class MainView extends React.Component<MainViewProps, MainViewState> {
   }
 
   private _requestConfigFormSubmitted(requestConfig: RequestConfig) {
+    console.log('Updated request config object:', requestConfig);
     mainController.ieee8500Controller.setSimulationRequest(requestConfig);
     this._hideRequestConfigForm();
   }

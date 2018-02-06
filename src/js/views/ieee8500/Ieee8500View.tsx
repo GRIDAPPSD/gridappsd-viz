@@ -1,10 +1,8 @@
 import * as React from 'react';
 import * as d3 from 'd3';
-// import * as Backbone from 'backbone';
 import { Panel } from 'react-bootstrap';
 import { ControlledReactComponent } from '../ControlledReactComponent';
 import Ieee8500Controller from '../../controllers/ieee8500/Ieee8500Controller';
-// import PlotView from '../common/PlotView';
 import Ieee8500PlotsView from './Ieee8500PlotsView';
 import DataSource from '../../interfaces/DataSource';
 import { Button, Glyphicon, DropdownButton, MenuItem as MenuItemComponent } from 'react-bootstrap';
@@ -15,7 +13,7 @@ import '../../../css/Ieee8500View.scss';
 interface IElement { name: string, x: number, y: number, rendering_x: number, rendering_y: number, rendering_baseClass: string, children: any[] }
 
 // Properties required for links. The server may send more.
-// interface ILink { name: string, from: IElement, to: IElement, data: any }
+interface ILink { name: string, from: IElement, to: IElement, data: any }
 
 // Processed regulator data used by the UI.
 interface IUiRegulatorData { name: string, hasPowerIn: boolean, powerId: string, tapsId: string, voltages: any[], taps: any, powerIns: any }
@@ -45,6 +43,8 @@ class Ieee8500View extends ControlledReactComponent<Ieee8500Controller, Ieee8500
       hasRenderedTopology: false,
       showModal: false
     };
+    this.showModal = this.showModal.bind(this);
+    this.closeModal = this.closeModal.bind(this);
   }
 
   componentWillMount() {
@@ -93,9 +93,11 @@ class Ieee8500View extends ControlledReactComponent<Ieee8500Controller, Ieee8500
                 <li className="timestamp">(Awaiting timeseries data...)</li>
                 <li className="application select">
                   <DropdownButton
+
                     title="Select Application"
-                    id="dropdown-size-medium">
-                    <MenuItemComponent eventKey="1" active>VVO</MenuItemComponent>
+                    id="dropdown-size-medium"
+                  >
+                    <MenuItemComponent eventKey="1" active onSelect={this.showModal}>VVO</MenuItemComponent>
 
                   </DropdownButton>
                 </li>
@@ -136,6 +138,12 @@ class Ieee8500View extends ControlledReactComponent<Ieee8500Controller, Ieee8500
     </div>
   }
 
+  showModal() {
+    this.setState({ ...this.state, showModal: true });
+  }
+  closeModal() {
+    this.setState({ ...this.state, showModal: false });
+  }
   renderSimulationData() {
     // const isFirstSimStatusRendering = this.state.isFirstSimStatusRendering;
     const self = this;
@@ -608,8 +616,8 @@ class Ieee8500View extends ControlledReactComponent<Ieee8500Controller, Ieee8500
       .attr('transform', 'translate(' + zoomCenter.x + ',' + zoomCenter.y + ') scale(' + zoomCenter.k + ')');
 
     // Create an SVG group to hold the links
-    // let linkGroup = svg.append('g')
-    //   .attr('class', 'links');
+    let linkGroup = svg.append('g')
+      .attr('class', 'links');
 
     // Create an SVG group to hold the nodes
     let elementGroup = svg.append('g')
@@ -618,6 +626,8 @@ class Ieee8500View extends ControlledReactComponent<Ieee8500Controller, Ieee8500
     // Create an svg group to hold the current data
     // let curDataGroup = svg.append('g')
     //   .attr('class', 'curData');
+    svg.append('g')
+      .attr('class', 'curData');
 
     // Draw a circle for each node
     let circles = elementGroup.selectAll('circle.element')
@@ -662,9 +672,10 @@ class Ieee8500View extends ControlledReactComponent<Ieee8500Controller, Ieee8500
       .attr('r', (element: IElement) => {
         // If the element has a capacitor child, 
         // color it differently
-        if (element.children.length == 0)
+        if (element.children.length == 0) {
           return 50;
-        else if (element.children[0].type == 'capacitors' || element.children[0].type == 'regulators') {
+        } else if (element.children[0].type == 'capacitors'
+          || element.children[0].type == 'regulators') {
           return 150;
         }
         return 50;
@@ -679,39 +690,40 @@ class Ieee8500View extends ControlledReactComponent<Ieee8500Controller, Ieee8500
       } else if (element.children[0].type == 'regulators') {
         return 'Regulator: ' + element.children[0].name;
       }
-      return 'Unknown';
+      return '';
     });
 
     // A line function for the links
-    // let line: any = d3.line()
-    //   .x((d: any) => { return d.element.x + xOffset })
-    //   .y((d: any) => { return d.element.y + yOffset })
+    let line: any = d3.line()
+      .x((d: any) => { return d.element.x + xOffset })
+      .y((d: any) => { return d.element.y + yOffset })
 
     // Draw the links. Right now, the server sends all from and to node info
     // with the link, but that may change.
     // let lines = linkGroup.selectAll('path.link')
-    //   .data(this.props.controller.model.staticModel.get('topology').links)
-    //   .enter().append('path')
-    //   .filter((link: ILink) => { return link.from.x != undefined && link.from.y != undefined && link.to.x != undefined && link.to.y != undefined; })
-    //   //.filter((link:ILink) => { return link.from.x != 0 && link.from.y != 0 && link.to.x != 0 && link.to.y != 0; })
-    //   // .filter((link:ILink) => { return !link.from.x && !link.from.y && !link.to.x  && !link.to.y ; })
-    //   .datum((link: ILink) => [{ link: link, element: link.from }, { link: link, element: link.to }])
-    //   .attr('class', (d: any) => 'link ' + d[0].link.name)
-    //   .attr('stroke', (d: any) => {
-    //     switch (d[0].link.data.phases) {
-    //       case 'A':
-    //         return 'blue';
-    //       case 'B':
-    //         return 'orange';
-    //       case 'C':
-    //         return 'green';
-    //       case 'ABC':
-    //         return 'black';
-    //       default:
-    //         return 'darkgray';
-    //     }
-    //   })
-    //   .attr('d', line);
+    linkGroup.selectAll('path.link')
+      .data(this.props.controller.model.staticModel.get('topology').links)
+      .enter().append('path')
+      .filter((link: ILink) => { return link.from.x != undefined && link.from.y != undefined && link.to.x != undefined && link.to.y != undefined; })
+      //.filter((link:ILink) => { return link.from.x != 0 && link.from.y != 0 && link.to.x != 0 && link.to.y != 0; })
+      // .filter((link:ILink) => { return !link.from.x && !link.from.y && !link.to.x  && !link.to.y ; })
+      .datum((link: ILink) => [{ link: link, element: link.from }, { link: link, element: link.to }])
+      .attr('class', (d: any) => 'link ' + d[0].link.name)
+      .attr('stroke', (d: any) => {
+        switch (d[0].link.data.phases) {
+          case 'A':
+            return 'blue';
+          case 'B':
+            return 'orange';
+          case 'C':
+            return 'green';
+          case 'ABC':
+            return 'black';
+          default:
+            return 'darkgray';
+        }
+      })
+      .attr('d', line);
 
     // An iterative way of drawing the links (vs. the functional way above).
     /*this.props.model.get('links').forEach((link:ILink) => {
