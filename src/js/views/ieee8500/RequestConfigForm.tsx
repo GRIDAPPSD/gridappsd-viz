@@ -9,6 +9,7 @@ import { MenuItem } from '../dropdown-menu/MenuItem';
 import { SetGeographicalRegionName, SetSubGeographicalRegionName, SetLineName, SetSimulator, SetTimestepFrequency, SetTimestepIncrement, SetSimulationName, SetPowerFlowSolverMethod, UpdateApplicationConfiguration, SetOutputObjects } from './actions';
 import { RequestConfig } from '../../models/RequestConfig';
 import { AppState } from '../../models/AppState';
+import { DEFAULT_REQUEST_CONFIG } from './reducers';
 
 interface Props {
   show: boolean;
@@ -18,18 +19,18 @@ interface Props {
 }
 
 interface State {
-  selectedAppIndex: number;
+  selectedAppName: string;
+  appConfigStr: string;
   showSimulationOutput: boolean;
 }
 class RequestConfigFormContainer extends React.Component<Props, State> {
 
-  private _debounce = null;
-  
   constructor(props: any) {
     super(props);
     this.state = {
-      selectedAppIndex: 0,
-      showSimulationOutput: false
+      selectedAppName: '',
+      showSimulationOutput: false,
+      appConfigStr: DEFAULT_REQUEST_CONFIG.application_config.applications[0].config_string
     }
     this._hideSimulationOutputEditor = this._hideSimulationOutputEditor.bind(this);
     this._showSimulationOutputEditor = this._showSimulationOutputEditor.bind(this);
@@ -174,11 +175,16 @@ class RequestConfigFormContainer extends React.Component<Props, State> {
                 <DropdownMenu
                   menuItems={[
                     // 0 is the index of this app inside requestConfig.application_config.applications array
-                    new MenuItem('VVO', 'vvo', 0),
-                    new MenuItem('Sample App', 'sample', 1)
+                    new MenuItem('VVO', 'vvo', { index: 0, name: 'vvo' }),
+                    new MenuItem('Sample App', 'sample', { index: 1, name: 'sample' })
                   ]}
                   onChange={menuItem => {
-                    this.setState({ selectedAppIndex: menuItem.value });
+                    const configStr = DEFAULT_REQUEST_CONFIG.application_config.applications[menuItem.value.index].config_string;
+                      this.setState({
+                        selectedAppName: menuItem.value.name,
+                        appConfigStr: configStr
+                      });
+                    dispatch(new UpdateApplicationConfiguration(menuItem.value.name, configStr));
                   }}
                   defaultItemIndex={0}
                 />
@@ -189,17 +195,10 @@ class RequestConfigFormContainer extends React.Component<Props, State> {
                   name='app-config-str'
                   onChange={event => {
                     const newVal = (event.target as HTMLTextAreaElement).value;
-                    if (this._debounce) {
-                      clearTimeout(this._debounce)
-                      this._debounce = null;
-                    }
-                    else {
-                      this._debounce = setTimeout(() => {
-                        new UpdateApplicationConfiguration(this.state.selectedAppIndex, newVal)
-                      }, 500);
-                    }
+                    this.setState({ appConfigStr: newVal });
                   }}
-                  value={JSON.stringify(JSON.parse(requestConfig.application_config.applications[this.state.selectedAppIndex].config_string), null, 4)}></textarea>
+                  value={JSON.stringify(JSON.parse(this.state.appConfigStr), null, 4)}>
+                </textarea>
               </div>
             </div>
           </div>

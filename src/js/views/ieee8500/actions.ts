@@ -82,7 +82,7 @@ export class SetPowerFlowSolverMethod extends Action {
 
 export class UpdateApplicationConfiguration extends Action {
   readonly type = UPDATE_APPLICATION_CONFIGURATION;
-  constructor(readonly index: number, readonly configStr: string) {
+  constructor(readonly appName: string, readonly configStr: string) {
     super();
   }
 }

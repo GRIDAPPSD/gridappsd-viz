@@ -39,13 +39,7 @@ export function requestConfig(config: RequestConfig = DEFAULT_REQUEST_CONFIG, ac
     case SET_OUTPUT_OBJECTS:
       return withNewSimulationConfig(config, 'simulation_output', { output_objects: action.outputObjects });
     case UPDATE_APPLICATION_CONFIGURATION:
-      const apps = config.application_config.applications.map((app, index) => {
-        if (index !== action.index)
-          return app;
-        return { name: app.name, config_string: action.configStr };
-      });
-      console.log(apps)
-      return withNewApplicationConfig(config, 'applications', apps);
+      return withNewApplicationConfig(config, 'applications', [{ name: action.appName, config_string: action.configStr }]);
     default:
       return config;
   }
