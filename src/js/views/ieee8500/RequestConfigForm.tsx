@@ -146,19 +146,7 @@ class RequestConfigFormContainer extends React.Component<Props, State> {
                 <span className='ripple-bar'></span>
               </span>
             </div>
-            <div className='control'>
-              <label>Power Flow Solver Method</label>
-              <DropdownMenu
-                menuItems={[
-                  new MenuItem('NR', 'NR', 'NR'),
-                  new MenuItem('FBS', 'FBS', 'FBS')
-                ]}
-                defaultItemIndex={0}
-                onChange={menuItem => {
-                  dispatch(new SetPowerFlowSolverMethod(menuItem.value));
-                }}
-              />
-            </div>
+            
             <div className='control'>
               <label>Model Creation Configuration</label>
               <textarea
