@@ -3,13 +3,17 @@ import { connect } from 'react-redux';
 import { Link } from 'react-router-dom';
 import { Modal, Button, ModalTitle } from 'react-bootstrap';
 
-import './RequestConfigForm.styles.scss';
 import { DropdownMenu } from '../dropdown-menu/DropdownMenu';
 import { MenuItem } from '../dropdown-menu/MenuItem';
-import { SetGeographicalRegionName, SetSubGeographicalRegionName, SetLineName, SetSimulator, SetTimestepFrequency, SetTimestepIncrement, SetSimulationName, SetPowerFlowSolverMethod, UpdateApplicationConfiguration, SetOutputObjects } from './actions';
+import {
+  SetGeographicalRegionName, SetSubGeographicalRegionName, SetLineName, SetSimulator,
+  SetTimestepFrequency, SetTimestepIncrement, SetSimulationName, UpdateApplicationConfiguration,
+  SetOutputObjects
+} from './actions';
 import { RequestConfig } from '../../models/RequestConfig';
 import { AppState } from '../../models/AppState';
 import { DEFAULT_REQUEST_CONFIG } from './reducers';
+import './RequestConfigForm.styles.scss';
 
 interface Props {
   show: boolean;
@@ -35,6 +39,7 @@ class RequestConfigFormContainer extends React.Component<Props, State> {
     this._hideSimulationOutputEditor = this._hideSimulationOutputEditor.bind(this);
     this._showSimulationOutputEditor = this._showSimulationOutputEditor.bind(this);
   }
+
   render() {
     if (this.props.show) {
       const { dispatch, requestConfig } = this.props;
@@ -99,8 +104,10 @@ class RequestConfigFormContainer extends React.Component<Props, State> {
                   dispatch(new SetSimulator(menuItem.value));
                 }}
                 defaultItemIndex={0} />
-              <span className='inline-label'>Power Flow Solver Method:</span>
-              <span className='inline-value'>NR</span>
+              <span className='inline-container'>
+                <span className='inline-label'>Power Flow Solver Method</span>
+                <span className='inline-value'>NR</span>
+              </span>
               <button type='button' onClick={this._showSimulationOutputEditor} className='positive show-simulation-output'>Data</button>
             </div>
             <div className='control'>
@@ -146,7 +153,7 @@ class RequestConfigFormContainer extends React.Component<Props, State> {
                 <span className='ripple-bar'></span>
               </span>
             </div>
-            
+
             <div className='control'>
               <label>Model Creation Configuration</label>
               <textarea
@@ -167,33 +174,46 @@ class RequestConfigFormContainer extends React.Component<Props, State> {
                     new MenuItem('Sample App', 'sample_app', { index: 1, name: 'sample_app' })
                   ]}
                   onChange={menuItem => {
-                    const configStr = DEFAULT_REQUEST_CONFIG.application_config.applications[menuItem.value.index].config_string;
-                      this.setState({
-                        selectedAppName: menuItem.value.name,
-                        appConfigStr: configStr
-                      });
+                    const configStr = JSON.stringify(JSON.parse(DEFAULT_REQUEST_CONFIG.application_config.applications[menuItem.value.index].config_string), null, 4);
+                    this.setState({
+                      selectedAppName: menuItem.value.name,
+                      appConfigStr: configStr
+                    });
                     dispatch(new UpdateApplicationConfiguration(menuItem.value.name, configStr));
                   }}
                   defaultItemIndex={0}
                 />
               </div>
-              <div className='control'>
+              <div className='control' style={{ display: 'flex' }}>
                 <label>Application Configuration</label>
-                <textarea
-                  name='app-config-str'
-                  onChange={event => {
-                    const newVal = (event.target as HTMLTextAreaElement).value;
-                    this.setState({ appConfigStr: newVal });
-                  }}
-                  value={JSON.stringify(JSON.parse(this.state.appConfigStr), null, 4)}>
-                </textarea>
+                <div
+                  className='config-str-editor'
+                  contentEditable
+                  suppressContentEditableWarning
+                  onBlur={event => {
+                    const newValue = (event.target as HTMLDivElement).textContent;
+                    try {
+                      // Check if the text entered is a valid JSON string
+                      const newConfigJson = JSON.parse(newValue);
+                      dispatch(new UpdateApplicationConfiguration(this.state.selectedAppName, JSON.stringify(newConfigJson)));
+                    }
+                    catch (e) {
+                      console.log(e);
+                    }
+                  }}>
+                  {
+                    JSON.stringify(JSON.parse(this.state.appConfigStr), null, 4)
+                  }
+                </div>
               </div>
             </div>
           </div>
-          <Link
-            to='/ieee8500'
-            className='done app-icon'
-            onClick={() => this.props.onSubmit(this.props.requestConfig)}></Link>
+          <div className='options'>
+            <Link
+              to='/ieee8500'
+              className='done fab'
+              onClick={() => this.props.onSubmit(this.props.requestConfig)} />
+          </div>
           <Modal show={this.state.showSimulationOutput} onHide={this._hideSimulationOutputEditor}>
             <Modal.Header>
               <ModalTitle>Simulation Output Objects</ModalTitle>

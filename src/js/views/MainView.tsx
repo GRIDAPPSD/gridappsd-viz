@@ -19,8 +19,6 @@ import { RequestConfig } from '../models/RequestConfig';
 
 export interface MainViewProps { }
 export interface MainViewState {
-  showRequestConfigForm: boolean;
-  openDrawer: boolean;
 }
 
 
@@ -38,14 +36,12 @@ export class MainView extends React.Component<MainViewProps, MainViewState> {
   constructor(props: any) {
     super(props);
     this.state = {
-      showRequestConfigForm: false,
-      openDrawer: false
     };
-    this._requestConfigFormSubmitted = this._requestConfigFormSubmitted.bind(this);
+    this._closeDrawer = this._closeDrawer.bind(this);
     this._openDrawer = this._openDrawer.bind(this);
-    this._showRequestConfigForm = this._showRequestConfigForm.bind(this);
-    this._hideRequestConfigForm = this._hideRequestConfigForm.bind(this);
+    this._requestConfigFormSubmitted = this._requestConfigFormSubmitted.bind(this);
   }
+
   render() {
     return (
       <BrowserRouter>
@@ -58,41 +54,36 @@ export class MainView extends React.Component<MainViewProps, MainViewState> {
             ref={drawer => this._drawer = drawer}
             content={
               <div style={{ position: 'relative', width: '100%', height: '100%' }}>
-                <RequestConfigForm show={this.state.showRequestConfigForm} onSubmit={this._requestConfigFormSubmitted} />
+                <Route exact path='/edit-request-config' component={() => <RequestConfigForm show={true} onSubmit={this._requestConfigFormSubmitted} />}/>
                 <Route exact path="/ieee8500" component={() => <Ieee8500View controller={mainController.ieee8500Controller} />} />
                 <Route exact path="/titanium" component={() => <Ieee8500View controller={mainController.ieee8500Controller} />} />
                 <Route exact path="/help" component={Help} />
                 <Route exact path="/applications" component={Applications} />
               </div>
             }>
-            <DrawerItem onClick={this._showRequestConfigForm}>
-              <span>Simulations</span>
+            <DrawerItem>
+              <Link to='/edit-request-config'>Simulations</Link>
             </DrawerItem>
             <DrawerItem >
               <Link to="/applications">Applications & Services </Link>
             </DrawerItem>
-
           </Drawer>
         </main>
       </BrowserRouter>
     );
   }
 
-  private _requestConfigFormSubmitted(requestConfig: RequestConfig) {
-    console.log('Updated request config object:', requestConfig);
-    mainController.ieee8500Controller.setSimulationRequest(requestConfig);
-    this._hideRequestConfigForm();
-  }
-  private _showRequestConfigForm() {
-    this.setState({ showRequestConfigForm: true });
-  }
-
-  private _hideRequestConfigForm() {
-    this.setState({ showRequestConfigForm: false });
+  private _closeDrawer() {
+    this._drawer.close();
   }
 
   private _openDrawer() {
     this._drawer.open();
+  }
+
+  private _requestConfigFormSubmitted(requestConfig: RequestConfig) {
+    console.log('Updated request config object:', requestConfig);
+    mainController.ieee8500Controller.setSimulationRequest(requestConfig);
   }
 
 }
