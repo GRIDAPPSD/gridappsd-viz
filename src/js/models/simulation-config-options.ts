@@ -1,97 +1,13 @@
-// views/ieee8500
-import { RequestConfig } from '../../models/RequestConfig';
-
-import {
-  SET_GEOGRAPHICAL_REGION_NAME,
-  SET_SUBGEOGRAPHICAL_REGION_NAME,
-  SET_LINE_NAME,
-  SET_DURATION,
-  SET_SIMULATOR,
-  SET_TIMESTEP_FREQUENCY,
-  SET_TIMESTEP_INCREMENT,
-  SET_SIMULATION_NAME,
-  SET_POWER_FLOW_SOLVER_METHOD,
-  UPDATE_APPLICATION_CONFIGURATION,
-  SET_OUTPUT_OBJECTS,
-  RequestConfigActions
-} from './actions';
-
-export function requestConfig(config: RequestConfig = DEFAULT_REQUEST_CONFIG, action: RequestConfigActions): RequestConfig {
-  switch (action.type) {
-    case SET_GEOGRAPHICAL_REGION_NAME:
-      return withNewPowerSystemConfig(config, 'GeographicalRegion_name', action.value);
-    case SET_SUBGEOGRAPHICAL_REGION_NAME:
-      return withNewPowerSystemConfig(config, 'SubGeographicalRegion_name', action.value);
-    case SET_LINE_NAME:
-      return withNewPowerSystemConfig(config, 'Line_name', action.value);
-    case SET_DURATION:
-      return withNewSimulationConfig(config, 'duration', action.value);
-    case SET_SIMULATOR:
-      return withNewSimulationConfig(config, 'simulator', action.value);
-    case SET_TIMESTEP_FREQUENCY:
-      return withNewSimulationConfig(config, 'timestep_frequency', action.value);
-    case SET_TIMESTEP_INCREMENT:
-      return withNewSimulationConfig(config, 'timestep_increment', action.value);
-    case SET_SIMULATION_NAME:
-      return withNewSimulationConfig(config, 'simulation_name', action.value);
-    case SET_POWER_FLOW_SOLVER_METHOD:
-      return withNewSimulationConfig(config, 'power_flow_solver_method', action.value);
-    case SET_OUTPUT_OBJECTS:
-      return withNewSimulationConfig(config, 'simulation_output', { output_objects: action.outputObjects });
-    case UPDATE_APPLICATION_CONFIGURATION:
-      return withNewApplicationConfig(config, 'applications', [{ name: action.appName, config_string: action.configStr }]);
-    default:
-      return config;
-  }
-}
-
-function withNewPowerSystemConfig(config: RequestConfig, prop: string, value: any): RequestConfig {
-  if (prop in config.power_system_config)
-    return {
-      ...config,
-      power_system_config: {
-        ...config.power_system_config,
-        [prop]: value
-      }
-    };
-  else
-    throw new Error(`Unknown property [${prop}] inside [config.power_system_config]`);
-}
-function withNewSimulationConfig(config: RequestConfig, prop: string, value: any): RequestConfig {
-  if (prop in config.simulation_config)
-    return {
-      ...config,
-      simulation_config: {
-        ...config.simulation_config,
-        [prop]: value
-      }
-    };
-  else
-    throw new Error(`Unknown property [${prop}] inside [config.simulation_output]`);
-}
-function withNewApplicationConfig(config: RequestConfig, prop: string, value: any): RequestConfig {
-  if (prop in config.application_config)
-    return {
-      ...config,
-      application_config: {
-        ...config.application_config,
-        [prop]: value
-      }
-    };
-  else
-    throw new Error(`Unknown property [${prop}] inside [config.application_config]`);
-}
-
-export const DEFAULT_REQUEST_CONFIG: RequestConfig = {
+export const SIMULATION_CONFIG_OPTIONS = {
   "power_system_config": {
-    "GeographicalRegion_name": "ieee8500nodecktassets_Region",
-    "SubGeographicalRegion_name": "ieee8500nodecktassets_SubRegion",
-    "Line_name": "ieee8500"
+    "GeographicalRegion_names": ["ieee8500nodecktassets_Region"],
+    "SubGeographicalRegion_names": ["ieee8500nodecktassets_SubRegion"],
+    "Line_names": ["ieee8500"]
   },
   "simulation_config": {
     "start_time": "2009-07-21 00:00:00",
     "duration": "120",
-    "simulator": "GridLAB-D",
+    "simulators": ["GridLAB-D"],
     "timestep_frequency": "1000",
     "timestep_increment": "1000",
     "simulation_name": "ieee8500",
@@ -200,10 +116,9 @@ export const DEFAULT_REQUEST_CONFIG: RequestConfig = {
         "name": "vvo", "config_string": "{\"static_inputs\": {\"ieee8500\" : {\"control_method\": \"ACTIVE\", \"capacitor_delay\": 60, \"regulator_delay\": 60, \"desired_pf\": 0.99, \"d_max\": 0.9, \"d_min\": 0.1,\"substation_link\": \"xf_hvmv_sub\",\"regulator_list\": [\"reg_FEEDER_REG\", \"reg_VREG2\", \"reg_VREG3\", \"reg_VREG4\"],\"regulator_configuration_list\": [\"rcon_FEEDER_REG\", \"rcon_VREG2\", \"rcon_VREG3\", \"rcon_VREG4\"],\"capacitor_list\": [\"cap_capbank0a\",\"cap_capbank0b\", \"cap_capbank0c\", \"cap_capbank1a\", \"cap_capbank1b\", \"cap_capbank1c\", \"cap_capbank2a\", \"cap_capbank2b\", \"cap_capbank2c\", \"cap_capbank3\"], \"voltage_measurements\": [\"nd_l2955047,1\", \"nd_l3160107,1\", \"nd_l2673313,2\", \"nd_l2876814,2\", \"nd_m1047574,3\", \"nd_l3254238,4\"],       \"maximum_voltages\": 7500, \"minimum_voltages\": 6500,\"max_vdrop\": 5200,\"high_load_deadband\": 100,\"desired_voltages\": 7000,   \"low_load_deadband\": 100,\"pf_phase\": \"ABC\"}}}"
       },
       {
-        name: 'sample_app',
-        config_string: '{}'
+        'name': 'sample_app',
+        'config_string': '{}'
       }
     ]
-
   }
 };

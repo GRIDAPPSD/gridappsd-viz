@@ -6,7 +6,7 @@ import thunk from 'redux-thunk';
 
 // import { Action } from './models/Action';
 
-import { rootReducer } from './root-reducer';
+import { rootReducer } from './reducers/rootReducer';
 import { MainView } from './views/MainView';
 
 import '../../node_modules/bootstrap/dist/css/bootstrap.min.css';

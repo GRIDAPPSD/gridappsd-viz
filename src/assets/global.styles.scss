@@ -81,25 +81,6 @@ button.positive {
     }
 }
 
-.inline-label {
-    display: inline-block;
-    margin: auto 5px;
-    color: #000;
-    font-weight: bold;
-    font-size: 13px;
-}
-
-.inline-value {
-    display: inline-block;
-    margin: auto 5px;
-}
-
-.inline-container {
-    display: inline-flex;
-    flex-flow: column nowrap;
-    vertical-align: top;
-}
-
 @keyframes fadein {
     from {
         visibility: hidden;

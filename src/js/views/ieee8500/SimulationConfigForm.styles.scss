@@ -1,5 +1,5 @@
 @import '../../../assets/constants';
-.request-config-form {
+.simulation-config-form {
     position: relative;
     padding-bottom: 20px;
     overflow-y: auto;
@@ -61,6 +61,25 @@
             transform: scaleX(1);
         }
     }
+    .inline-label {
+        display: inline-block;
+        margin: auto 5px;
+        color: #000;
+        font-weight: bold;
+        font-size: 13px;
+    }
+    
+    .inline-value {
+        display: inline-block;
+        margin: auto 5px;
+    }
+    
+    .inline-container {
+        display: inline-flex;
+        flex-flow: column nowrap;
+        vertical-align: top;
+    }
+    
     .show-simulation-output {
         margin-left: 20px;
     }

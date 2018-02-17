@@ -57,7 +57,7 @@
     margin: 0;
     padding: 0;
     position: absolute;
-    width: 100%;
+    min-width: 100%;
     left: 0;
     top: 40px;
     box-shadow: 0 0 10px grey;
@@ -82,8 +82,7 @@
     line-height: 30px;
     font-weight: normal;
     overflow: hidden;
-    margin: 0;
-    padding-left: 5px;
+    padding: 0 5px;
     cursor: pointer;
     &:hover {
         background-color: #add8e6;

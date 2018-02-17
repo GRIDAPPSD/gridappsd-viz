@@ -1,13 +1,23 @@
-$APPBAR_HEIGHT: 60px;
-.app-bar {
-    height: $APPBAR_HEIGHT;
-}
-
+@import '../assets/constants';
 .app-title {
     padding: 15px 15px;
     font-size: 18px;
 }
 
 .drawer .content {
-    height: calc(100vh - #{$APPBAR_HEIGHT});
+    height: calc(100vh - #{$APP_BAR_HEIGHT});
+}
+
+.previous-simulations .nested-drawer-items {
+    .drawer-item.simulation a {
+        display: flex;
+        flex-flow: column nowrap;
+        height: 100%;
+        line-height: initial;
+        justify-content: center;
+    }
+    .simulation-id {
+        display: inline-block;
+        font-size: 12px;
+    }
 }
