@@ -1,5 +1,7 @@
-import { RequestConfig } from "./RequestConfig";
+import { SimulationConfig } from "./SimulationConfig";
+import { Simulation } from "./Simulation";
 
 export interface AppState {
-  requestConfig: RequestConfig;
+  activeSimulationConfig: SimulationConfig;
+  previousSimulations: Simulation[];
 }

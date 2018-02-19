@@ -1,7 +1,7 @@
 import * as React from 'react';
 
 import { MenuItem } from './MenuItem';
-import './DropDownMenu.styles.scss';
+import './DropdownMenu.styles.scss';
 
 interface Props {
   menuItems: MenuItem[];

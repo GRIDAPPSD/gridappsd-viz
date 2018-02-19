@@ -1,6 +1,6 @@
 import { OutputObject} from './OutputObject';
 
-export interface RequestConfig {
+export interface SimulationConfig {
   power_system_config: {
     GeographicalRegion_name: string;
     SubGeographicalRegion_name: string;

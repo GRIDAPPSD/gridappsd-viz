@@ -3,19 +3,24 @@ import { connect } from 'react-redux';
 import { Link } from 'react-router-dom';
 import { Modal, Button, ModalTitle } from 'react-bootstrap';
 
-import './RequestConfigForm.styles.scss';
 import { DropdownMenu } from '../dropdown-menu/DropdownMenu';
 import { MenuItem } from '../dropdown-menu/MenuItem';
-import { SetGeographicalRegionName, SetSubGeographicalRegionName, SetLineName, SetSimulator, SetTimestepFrequency, SetTimestepIncrement, SetSimulationName, SetPowerFlowSolverMethod, UpdateApplicationConfiguration, SetOutputObjects } from './actions';
-import { RequestConfig } from '../../models/RequestConfig';
+import {
+  SetGeographicalRegionName, SetSubGeographicalRegionName, SetLineName, SetSimulator,
+  SetTimestepFrequency, SetTimestepIncrement, SetSimulationName, UpdateApplicationConfiguration,
+  SetOutputObjects
+} from '../../actions/simulation-config-actions';
+import { SimulationConfig } from '../../models/SimulationConfig';
 import { AppState } from '../../models/AppState';
-import { DEFAULT_REQUEST_CONFIG } from './reducers';
+// import { DEFAULT_REQUEST_CONFIG } from '../../reducers/activeSimulationConfig';
+import './SimulationConfigForm.styles.scss';
+import { SIMULATION_CONFIG_OPTIONS } from '../../models/simulation-config-options';
 
 interface Props {
   show: boolean;
-  onSubmit: (requestConfig: RequestConfig) => void;
+  onSubmit: (SimulationConfig: SimulationConfig) => void;
   dispatch: any;
-  requestConfig: RequestConfig;
+  activeSimulationConfig: SimulationConfig;
 }
 
 interface State {
@@ -23,54 +28,67 @@ interface State {
   appConfigStr: string;
   showSimulationOutput: boolean;
 }
-class RequestConfigFormContainer extends React.Component<Props, State> {
+class SimulationConfigFormContainer extends React.Component<Props, State> {
 
   constructor(props: any) {
     super(props);
     this.state = {
       selectedAppName: '',
       showSimulationOutput: false,
-      appConfigStr: DEFAULT_REQUEST_CONFIG.application_config.applications[0].config_string
+      appConfigStr: props.activeSimulationConfig.application_config.applications[0].config_string
     }
     this._hideSimulationOutputEditor = this._hideSimulationOutputEditor.bind(this);
     this._showSimulationOutputEditor = this._showSimulationOutputEditor.bind(this);
   }
+
+  componentWillReceiveProps(newProps: Props) {
+    if (this.props !== newProps)
+      this.setState({
+        appConfigStr: newProps.activeSimulationConfig.application_config.applications[0].config_string
+      });
+  }
   render() {
     if (this.props.show) {
-      const { dispatch, requestConfig } = this.props;
+      const { dispatch, activeSimulationConfig } = this.props;
       return (
-        <form className='request-config-form'>
+        <form className='simulation-config-form'>
           <div className='group power-system-config'>
             <header>Power System Configuration</header>
             <div className='controls'>
               <div className='control'>
                 <label>Geographical Region Name</label>
                 <DropdownMenu
-                  menuItems={[new MenuItem('ieee8500nodecktassets_Region', 'ieee8500nodecktassets_Region', 'ieee8500nodecktassets_Region')]}
+                  menuItems={
+                    _mapStringArrayToMenuItems(SIMULATION_CONFIG_OPTIONS.power_system_config.GeographicalRegion_names)
+                  }
                   onChange={menuItem => {
                     dispatch(new SetGeographicalRegionName(menuItem.value));
                   }}
-                  defaultItemIndex={0}
+                  defaultItemIndex={SIMULATION_CONFIG_OPTIONS.power_system_config.GeographicalRegion_names.indexOf(activeSimulationConfig.power_system_config.GeographicalRegion_name)}
                 />
               </div>
               <div className='control'>
                 <label>SubGeographical Region Name</label>
                 <DropdownMenu
-                  menuItems={[new MenuItem('ieee8500nodecktassets_SubRegion', 'ieee8500nodecktassets_SubRegion', 'ieee8500nodecktassets_SubRegion')]}
+                  menuItems={
+                    _mapStringArrayToMenuItems(SIMULATION_CONFIG_OPTIONS.power_system_config.SubGeographicalRegion_names)                    
+                  }
                   onChange={menuItem => {
                     dispatch(new SetSubGeographicalRegionName(menuItem.value));
                   }}
-                  defaultItemIndex={0}
+                  defaultItemIndex={SIMULATION_CONFIG_OPTIONS.power_system_config.SubGeographicalRegion_names.indexOf(activeSimulationConfig.power_system_config.SubGeographicalRegion_name)}
                 />
               </div>
               <div className='control'>
                 <label>Line Name</label>
                 <DropdownMenu
-                  menuItems={[new MenuItem('ieee8500', 'ieee8500', 'ieee8500')]}
+                  menuItems={
+                    _mapStringArrayToMenuItems(SIMULATION_CONFIG_OPTIONS.power_system_config.Line_names)
+                  }
                   onChange={menuItem => {
                     dispatch(new SetLineName(menuItem.value));
                   }}
-                  defaultItemIndex={0}
+                  defaultItemIndex={SIMULATION_CONFIG_OPTIONS.power_system_config.Line_names.indexOf(activeSimulationConfig.power_system_config.Line_name)}
                 />
               </div>
             </div>
@@ -84,7 +102,7 @@ class RequestConfigFormContainer extends React.Component<Props, State> {
                   type='number'
                   name='duration'
                   className='duration'
-                  defaultValue='120'
+                  defaultValue={activeSimulationConfig.simulation_config.duration}
                   onBlur={event => {
                     dispatch(new SetGeographicalRegionName((event.target as HTMLInputElement).value));
                   }} />
@@ -94,13 +112,17 @@ class RequestConfigFormContainer extends React.Component<Props, State> {
             <div className='control'>
               <label>Simulator</label>
               <DropdownMenu
-                menuItems={[new MenuItem('GridLAB-D', 'GridLAB-D', 'GridLAB-D')]}
+                menuItems={
+                  _mapStringArrayToMenuItems(SIMULATION_CONFIG_OPTIONS.simulation_config.simulators)
+                }
                 onChange={menuItem => {
                   dispatch(new SetSimulator(menuItem.value));
                 }}
-                defaultItemIndex={0} />
-              <span className='inline-label'>Power Flow Solver Method:</span>
-              <span className='inline-value'>NR</span>
+                defaultItemIndex={SIMULATION_CONFIG_OPTIONS.simulation_config.simulators.indexOf(activeSimulationConfig.simulation_config.simulator)} />
+              <span className='inline-container'>
+                <span className='inline-label'>Power Flow Solver Method</span>
+                <span className='inline-value'>NR</span>
+              </span>
               <button type='button' onClick={this._showSimulationOutputEditor} className='positive show-simulation-output'>Data</button>
             </div>
             <div className='control'>
@@ -146,12 +168,12 @@ class RequestConfigFormContainer extends React.Component<Props, State> {
                 <span className='ripple-bar'></span>
               </span>
             </div>
-            
+
             <div className='control'>
               <label>Model Creation Configuration</label>
               <textarea
                 name='load_scaling_factor'
-                defaultValue={JSON.stringify(requestConfig.simulation_config.model_creation_config, null, 4)}></textarea>
+                defaultValue={JSON.stringify(activeSimulationConfig.simulation_config.model_creation_config, null, 4)}></textarea>
             </div>
 
           </div>
@@ -162,38 +184,51 @@ class RequestConfigFormContainer extends React.Component<Props, State> {
                 <label>Application Name</label>
                 <DropdownMenu
                   menuItems={[
-                    // 0 is the index of this app inside requestConfig.application_config.applications array
+                    // 0 is the index of this app inside SimulationConfig.application_config.applications array
                     new MenuItem('VVO', 'vvo', { index: 0, name: 'vvo' }),
                     new MenuItem('Sample App', 'sample_app', { index: 1, name: 'sample_app' })
                   ]}
                   onChange={menuItem => {
-                    const configStr = DEFAULT_REQUEST_CONFIG.application_config.applications[menuItem.value.index].config_string;
-                      this.setState({
-                        selectedAppName: menuItem.value.name,
-                        appConfigStr: configStr
-                      });
+                    const configStr = JSON.stringify(JSON.parse(SIMULATION_CONFIG_OPTIONS.application_config.applications[menuItem.value.index].config_string), null, 4);
+                    this.setState({
+                      selectedAppName: menuItem.value.name,
+                      appConfigStr: configStr
+                    });
                     dispatch(new UpdateApplicationConfiguration(menuItem.value.name, configStr));
                   }}
-                  defaultItemIndex={0}
+                  defaultItemIndex={SIMULATION_CONFIG_OPTIONS.application_config.applications.findIndex(value => value.name === activeSimulationConfig.application_config.applications[0].name)}
                 />
               </div>
-              <div className='control'>
+              <div className='control' style={{ display: 'flex' }}>
                 <label>Application Configuration</label>
-                <textarea
-                  name='app-config-str'
-                  onChange={event => {
-                    const newVal = (event.target as HTMLTextAreaElement).value;
-                    this.setState({ appConfigStr: newVal });
-                  }}
-                  value={JSON.stringify(JSON.parse(this.state.appConfigStr), null, 4)}>
-                </textarea>
+                <div
+                  className='config-str-editor'
+                  contentEditable
+                  suppressContentEditableWarning
+                  onBlur={event => {
+                    const newValue = (event.target as HTMLDivElement).textContent;
+                    try {
+                      // Check if the text entered is a valid JSON string
+                      const newConfigJson = JSON.parse(newValue);
+                      dispatch(new UpdateApplicationConfiguration(this.state.selectedAppName, JSON.stringify(newConfigJson)));
+                    }
+                    catch (e) {
+                      console.log(e);
+                    }
+                  }}>
+                  {
+                    JSON.stringify(JSON.parse(this.state.appConfigStr), null, 4)
+                  }
+                </div>
               </div>
             </div>
           </div>
-          <Link
-            to='/ieee8500'
-            className='done app-icon'
-            onClick={() => this.props.onSubmit(this.props.requestConfig)}></Link>
+          <div className='options'>
+            <Link
+              to='/ieee8500'
+              className='done fab'
+              onClick={() => this.props.onSubmit(this.props.activeSimulationConfig)} />
+          </div>
           <Modal show={this.state.showSimulationOutput} onHide={this._hideSimulationOutputEditor}>
             <Modal.Header>
               <ModalTitle>Simulation Output Objects</ModalTitle>
@@ -206,7 +241,7 @@ class RequestConfigFormContainer extends React.Component<Props, State> {
                     const newValue = (event.target as HTMLTextAreaElement).value;
                     dispatch(new SetOutputObjects(JSON.parse(newValue)));
                   }}
-                  defaultValue={JSON.stringify(requestConfig.simulation_config.simulation_output.output_objects, null, 4)} />
+                  defaultValue={JSON.stringify(activeSimulationConfig.simulation_config.simulation_output.output_objects, null, 4)} />
               </div>
             </Modal.Body>
             <Modal.Footer>
@@ -231,7 +266,11 @@ class RequestConfigFormContainer extends React.Component<Props, State> {
 
 const mapStateToProps = (state: AppState): Props => {
   return {
-    requestConfig: state.requestConfig
+    activeSimulationConfig: state.activeSimulationConfig
   } as Props;
 }
-export const RequestConfigForm = connect(mapStateToProps)(RequestConfigFormContainer);
+export const SimulationConfigForm = connect(mapStateToProps)(SimulationConfigFormContainer);
+
+function _mapStringArrayToMenuItems(array: string[]): MenuItem[] {
+  return array.map(e => new MenuItem(e, e, e));
+}

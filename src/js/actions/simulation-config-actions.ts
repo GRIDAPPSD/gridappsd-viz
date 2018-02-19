@@ -1,5 +1,5 @@
-import { Action } from '../../models/Action';
-import { OutputObject } from '../../models/OutputObject';
+import { Action } from '../models/Action';
+import { OutputObject } from '../models/OutputObject';
 
 export const SET_GEOGRAPHICAL_REGION_NAME = 'SET_GEOGRAPHICAL_REGION_NAME';
 export const SET_SUBGEOGRAPHICAL_REGION_NAME = 'SET_SUBGEOGRAPHICAL_REGION_NAME';
@@ -13,7 +13,7 @@ export const SET_POWER_FLOW_SOLVER_METHOD = 'SET_POWER_FLOW_SOLVER_METHOD';
 export const UPDATE_APPLICATION_CONFIGURATION = 'UPDATE_APPLICATION_CONFIGURATION';
 export const SET_OUTPUT_OBJECTS = 'SET_OUTPUT_OBJECTS';
 
-export type RequestConfigActions = SetGeographicalRegionName | SetSubGeographicalRegionName |
+export type SimulationConfigActions = SetGeographicalRegionName | SetSubGeographicalRegionName |
   SetLineName | SetDuration | SetSimulator | SetTimestepFrequency | SetTimestepIncrement |
   SetSimulationName | SetPowerFlowSolverMethod | UpdateApplicationConfiguration | SetOutputObjects;
 

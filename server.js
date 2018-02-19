@@ -25,7 +25,7 @@ app.use((request, response, next) => {
 });
 
 app.get(['/', '/ieee8500'], function(req, res) {
-  res.sendFile(path.resolve(__dirname, 'index.html'));
+  res.sendFile(path.resolve(__dirname, 'dist', 'index.html'));
 });
 
 app.get('/data/ieee8500', (req, res) => {

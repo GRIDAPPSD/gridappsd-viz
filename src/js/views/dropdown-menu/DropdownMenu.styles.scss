@@ -57,10 +57,10 @@
     margin: 0;
     padding: 0;
     position: absolute;
-    width: 98%;
-    left: 50%;
-    transform: translate(-50%, 7px);
-    box-shadow: 0 0 2px grey;
+    min-width: 100%;
+    left: 0;
+    top: 40px;
+    box-shadow: 0 0 10px grey;
     border-radius: 3px;
     background-color: #fff;
     z-index: 300;
@@ -82,8 +82,7 @@
     line-height: 30px;
     font-weight: normal;
     overflow: hidden;
-    margin: 0;
-    padding-left: 5px;
+    padding: 0 5px;
     cursor: pointer;
     &:hover {
         background-color: #add8e6;
