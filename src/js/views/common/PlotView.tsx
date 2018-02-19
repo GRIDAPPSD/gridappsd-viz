@@ -39,7 +39,12 @@ class PlotView extends BackboneReactComponent<PlotModel, {}> {
 
         const height = 200;
 
-        let mainGroup = d3.select('.plot-view.' + this.props.model.name).append('svg')
+        // let mainGroup = d3.select('.plot-view.' + this.props.model.name).append('svg')
+        //     .style('width', 400)
+        //     .style('height', height)
+        //     .append('g')
+        //         .attr('class', 'plot ' + this.props.model.name);
+        d3.select('.plot-view.' + this.props.model.name).append('svg')
             .style('width', 400)
             .style('height', height)
             .append('g')
