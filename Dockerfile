@@ -1,17 +1,17 @@
 FROM node:boron
 
-WORKDIR /viz
+WORKDIR /gridappsd
 
-RUN npm install -g typescript 
-RUN npm install -g typings 
-RUN npm install -g webpack 
+RUN npm install -g typescript  \
+    && npm install -g typings  \
+    && npm install -g webpack 
 
-COPY ./viz/ /viz/viz/
+COPY . /gridappsd/viz/
 
-WORKDIR /viz/viz
+WORKDIR /gridappsd/viz
 
-RUN npm install 
-RUN webpack
+RUN npm install  \
+    && webpack
 
 ENV VIZ_PORT=8082
 ENV PORT=${VIZ_PORT}
