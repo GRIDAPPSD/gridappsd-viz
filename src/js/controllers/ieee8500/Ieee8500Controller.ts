@@ -217,34 +217,34 @@ class Ieee8500Controller {
           "name": "xf_hvmv_sub",
           "properties": ["power_in_A", "power_in_B", "power_in_C"]
         }, {
-          "name": "nd_l2955047",
+          "name": "l2955047",
           "properties": ["voltage_A", "voltage_B", "voltage_C"]
         }, {
-          "name": "nd_l2673313",
+          "name": "l2673313",
           "properties": ["voltage_A", "voltage_B", "voltage_C"]
         }, {
-          "name": "nd_l3160107",
+          "name": "l3160107",
           "properties": ["voltage_A", "voltage_B", "voltage_C"]
         }, {
-          "name": "nd_l2876814",
+          "name": "l2876814",
           "properties": ["voltage_A", "voltage_B", "voltage_C"]
         }, {
-          "name": "nd_l3254238",
+          "name": "l3254238",
           "properties": ["voltage_A", "voltage_B", "voltage_C"]
         }, {
-          "name": "nd_m1047574",
+          "name": "m1047574",
           "properties": ["voltage_A", "voltage_B", "voltage_C"]
         }, {
-          "name": "nd__hvmv_sub_lsb",
+          "name": "hvmv_sub_lsb",
           "properties": ["voltage_A", "voltage_B", "voltage_C"]
         }, {
-          "name": "nd_190-8593",
+          "name": "190-8593",
           "properties": ["voltage_A", "voltage_B", "voltage_C"]
         }, {
-          "name": "nd_190-8581",
+          "name": "190-8581",
           "properties": ["voltage_A", "voltage_B", "voltage_C"]
         }, {
-          "name": "nd_190-7361",
+          "name": "190-7361",
           "properties": ["voltage_A", "voltage_B", "voltage_C"]
         }]
       },
