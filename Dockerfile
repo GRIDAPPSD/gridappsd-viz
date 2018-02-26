@@ -2,7 +2,7 @@ FROM node:boron
 
 WORKDIR /gridappsd
 
-RUN npm install -g typescript typings webpack-cli webpack 
+RUN npm install -g typescript typings webpack@3.10.0
 
 COPY . /gridappsd/viz/
 
