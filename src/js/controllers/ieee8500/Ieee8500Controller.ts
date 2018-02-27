@@ -235,7 +235,7 @@ class Ieee8500Controller {
           "name": "m1047574",
           "properties": ["voltage_A", "voltage_B", "voltage_C"]
         }, {
-          "name": "hvmv_sub_lsb",
+          "name": "_hvmv_sub_lsb",
           "properties": ["voltage_A", "voltage_B", "voltage_C"]
         }, {
           "name": "190-8593",
