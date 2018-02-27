@@ -217,34 +217,34 @@ class Ieee8500Controller {
           "name": "xf_hvmv_sub",
           "properties": ["power_in_A", "power_in_B", "power_in_C"]
         }, {
-          "name": "nd_l2955047",
+          "name": "l2955047",
           "properties": ["voltage_A", "voltage_B", "voltage_C"]
         }, {
-          "name": "nd_l2673313",
+          "name": "l2673313",
           "properties": ["voltage_A", "voltage_B", "voltage_C"]
         }, {
-          "name": "nd_l3160107",
+          "name": "l3160107",
           "properties": ["voltage_A", "voltage_B", "voltage_C"]
         }, {
-          "name": "nd_l2876814",
+          "name": "l2876814",
           "properties": ["voltage_A", "voltage_B", "voltage_C"]
         }, {
-          "name": "nd_l3254238",
+          "name": "l3254238",
           "properties": ["voltage_A", "voltage_B", "voltage_C"]
         }, {
-          "name": "nd_m1047574",
+          "name": "m1047574",
           "properties": ["voltage_A", "voltage_B", "voltage_C"]
         }, {
-          "name": "nd__hvmv_sub_lsb",
+          "name": "_hvmv_sub_lsb",
           "properties": ["voltage_A", "voltage_B", "voltage_C"]
         }, {
-          "name": "nd_190-8593",
+          "name": "190-8593",
           "properties": ["voltage_A", "voltage_B", "voltage_C"]
         }, {
-          "name": "nd_190-8581",
+          "name": "190-8581",
           "properties": ["voltage_A", "voltage_B", "voltage_C"]
         }, {
-          "name": "nd_190-7361",
+          "name": "190-7361",
           "properties": ["voltage_A", "voltage_B", "voltage_C"]
         }]
       },
@@ -259,7 +259,7 @@ class Ieee8500Controller {
     "application_config": {
       "applications": [
         {
-          "name": "vvo", "config_string": "{\"static_inputs\": {\"ieee8500\" : {\"control_method\": \"ACTIVE\", \"capacitor_delay\": 60, \"regulator_delay\": 60, \"desired_pf\": 0.99, \"d_max\": 0.9, \"d_min\": 0.1,\"substation_link\": \"xf_hvmv_sub\",\"regulator_list\": [\"reg_FEEDER_REG\", \"reg_VREG2\", \"reg_VREG3\", \"reg_VREG4\"],\"regulator_configuration_list\": [\"rcon_FEEDER_REG\", \"rcon_VREG2\", \"rcon_VREG3\", \"rcon_VREG4\"],\"capacitor_list\": [\"cap_capbank0a\",\"cap_capbank0b\", \"cap_capbank0c\", \"cap_capbank1a\", \"cap_capbank1b\", \"cap_capbank1c\", \"cap_capbank2a\", \"cap_capbank2b\", \"cap_capbank2c\", \"cap_capbank3\"], \"voltage_measurements\": [\"nd_l2955047,1\", \"nd_l3160107,1\", \"nd_l2673313,2\", \"nd_l2876814,2\", \"nd_m1047574,3\", \"nd_l3254238,4\"],       \"maximum_voltages\": 7500, \"minimum_voltages\": 6500,\"max_vdrop\": 5200,\"high_load_deadband\": 100,\"desired_voltages\": 7000,   \"low_load_deadband\": 100,\"pf_phase\": \"ABC\"}}}"
+          "name": "vvo", "config_string": "{\"static_inputs\": {\"ieee8500\" : {\"control_method\": \"ACTIVE\", \"capacitor_delay\": 60, \"regulator_delay\": 60, \"desired_pf\": 0.99, \"d_max\": 0.9, \"d_min\": 0.1,\"substation_link\": \"xf_hvmv_sub\",\"regulator_list\": [\"reg_FEEDER_REG\", \"reg_VREG2\", \"reg_VREG3\", \"reg_VREG4\"],\"regulator_configuration_list\": [\"rcon_FEEDER_REG\", \"rcon_VREG2\", \"rcon_VREG3\", \"rcon_VREG4\"],\"capacitor_list\": [\"cap_capbank0a\",\"cap_capbank0b\", \"cap_capbank0c\", \"cap_capbank1a\", \"cap_capbank1b\", \"cap_capbank1c\", \"cap_capbank2a\", \"cap_capbank2b\", \"cap_capbank2c\", \"cap_capbank3\"], \"voltage_measurements\": [\"l2955047,1\", \"l3160107,1\", \"l2673313,2\", \"l2876814,2\", \"m1047574,3\", \"l3254238,4\"],       \"maximum_voltages\": 7500, \"minimum_voltages\": 6500,\"max_vdrop\": 5200,\"high_load_deadband\": 100,\"desired_voltages\": 7000,   \"low_load_deadband\": 100,\"pf_phase\": \"ABC\"}}}"
         }
       ]
 
