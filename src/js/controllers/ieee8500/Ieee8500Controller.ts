@@ -17,7 +17,7 @@ class Ieee8500Controller {
   // private _websocketConnected: boolean = false;
   private _simulationControlTopic = '/queue/goss.gridappsd.process.request.simulation';
   private _responseQueueTopic = '/temp-queue/response-queue';
-  private _simulationStatusTopic = '/topic/goss.gridappsd.simulation.status.';
+  private _simulationStatusTopic = '/topic/goss.gridappsd.simulation.log.';
   private _fncsOutputTopic = '/topic/goss.gridappsd.fncs.output';
 
   get model(): Ieee8500MainModel {
