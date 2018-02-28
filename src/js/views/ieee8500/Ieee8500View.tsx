@@ -170,7 +170,8 @@ class Ieee8500View extends ControlledReactComponent<Ieee8500Controller, Ieee8500
 
     // Group the data by element
     let dataByElementName: any = {};
-    Object.keys(data.output.ieee8500).forEach((timeseriesName) => {
+    let simId = Object.keys(data.output)[0]
+    Object.keys(data.output[simId]).forEach((timeseriesName) => {
       const elementName = mapping[timeseriesName];
       if (elementName) {
         let dataForElement = dataByElementName[elementName];
@@ -178,7 +179,7 @@ class Ieee8500View extends ControlledReactComponent<Ieee8500Controller, Ieee8500
           dataForElement = {};
           dataByElementName[elementName] = dataForElement;
         }
-        dataForElement[timeseriesName] = data.output.ieee8500[timeseriesName];
+        dataForElement[timeseriesName] = data.output[simId][timeseriesName];
       }
     });
 
