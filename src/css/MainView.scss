@@ -6,6 +6,7 @@
 
 .drawer .content {
     height: calc(100vh - #{$APP_BAR_HEIGHT});
+    overflow-y: auto;
 }
 
 .previous-simulations .nested-drawer-items {
