@@ -68,7 +68,12 @@ class Ieee8500View extends ControlledReactComponent<Ieee8500Controller, Ieee8500
     // TODO: Remove. See componentDidMount for explanation.
     d3.select('button.simulation.start').on('click', null);
   }
-
+  shouldComponentUpdate(newProps, nextState) {
+    console.log("newProps:", newProps, "this.props:",this.props, 'this.state:',this.state, 'nextState: ',nextState);
+    console.log('newProps.controller.model !== this.props.controller.model: ' + (newProps.controller.model !== this.props.controller.model, this.state !== nextState));
+    console.log('this.state !== nextState: ' + (this.state !== nextState));
+    return newProps.controller.model !== this.props.controller.model || this.state !== nextState;
+  }
   componentDidMount() {
     // TODO: Fix this. We're attaching to an event on another view. The play button 
     // should be part of this view.

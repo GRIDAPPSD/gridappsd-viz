@@ -89,73 +89,138 @@ function getTopology(baseFilePath) {
     reg_FEEDER_REG: 'nd_m1209814'
   };
 
+  const groupNames = ['swing_nodes', 'transformers', 'overhead_lines', 'capacitors', 'regulators'];
   // Create top-level elements
-  [
-    { index: 0, type: 'swing_nodes' },
-    { index: 3, type: 'transformers' }
-  ].forEach((group) => {
-    console.log(group);
-    console.log(baseJson.feeder[group.index]);
-    baseJson.feeder[group.index][group.type].forEach((element) => {
-      elements.push({
-        name: element.name,
-        type: group.type,
-        data: element,
-        children: []
-      });
-    })
-  })
+  for (const groupName of groupNames) {
+    const group = baseJson.feeder.filter(group => groupName in group)[0];
+    switch (Object.keys(group)[0]) {
+      case 'swing_nodes':
+      case 'transformers':
+        for (const element of group[groupName])
+          elements.push({
+            name: element.name,
+            type: group.type,
+            data: element,
+            children: []
+          });
+        break;
+      case 'capacitors':
+        for (const capacitor of group[groupName]) {
+          const parent = knownElementsByName[capacitor.parent];
+          if (parent)
+            parent.children.push({
+              name: capacitor.name,
+              type: 'capacitors',
+              data: capacitor,
+              children: []
+            });
+          else
+            console.log('Missing capacitor parent ' + capacitor.parent);
+        }
+        break;
+      case 'overhead_lines':
+        for (const overheadLine of group[groupName]) {
+          const fromNode = getOrCreateElement(overheadLine.from, 'node', knownElementsByName, elements);
+          const toNode = getOrCreateElement(overheadLine.to, 'node', knownElementsByName, elements);
+          if (overheadLine.x1 !== 0.0 && overheadLine.y1 !== 0.0 && overheadLine.x2 !== 0.0 && overheadLine.y2 !== 0.0) {
+            fromNode.x = overheadLine.x1;
+            fromNode.y = overheadLine.y1;
+            toNode.x = overheadLine.x2;
+            toNode.y = overheadLine.y2;
+          }
+          links.push({
+            name: overheadLine.name,
+            from: fromNode,
+            to: toNode,
+            data: overheadLine
+          });
+        }
+        break;
+      case 'regulators':
+        for (const regulator of group[groupName]) {
+          const parent = knownElementsByName[regulatorParents[regulator.name]];
+          if (parent)
+            parent.children.push({
+              name: regulator.name,
+              type: 'regulators',
+              data: regulator,
+              children: []
+            });
+          else
+            console.log('Missing regulator parent ' + regulatorParents[regulator.name] + ' for ' + regulator.name);
+        }
+        break;
+      default:
+        console.warn('What???');
+        break;
+    }
+  }
+  // [
+  //   { index: 0, type: 'swing_nodes' },
+  //   { index: 3, type: 'transformers' }
+  // ].forEach((group) => {
+  //   console.log(group);
+  //   console.log(baseJson.feeder[group.index]);
+  //   baseJson.feeder[group.index][group.type].forEach((element) => {
+  //     elements.push({
+  //       name: element.name,
+  //       type: group.type,
+  //       data: element,
+  //       children: []
+  //     });
+  //   })
+  // })
 
   // Create the lines, creating nodes as needed along the way
-  baseJson.feeder[2].overhead_lines.forEach((overheadLine) => {
+  // baseJson.feeder[2].overhead_lines.forEach((overheadLine) => {
 
-    let fromNode = getOrCreateElement(overheadLine.from, 'node', knownElementsByName, elements);
-    let toNode = getOrCreateElement(overheadLine.to, 'node', knownElementsByName, elements);
-    if (overheadLine.x1 != 0.0 && overheadLine.y1 != 0.0 && overheadLine.x2 != 0.0 && overheadLine.y2 != 0.0) {
-      fromNode.x = overheadLine.x1;
-      fromNode.y = overheadLine.y1;
-      toNode.x = overheadLine.x2;
-      toNode.y = overheadLine.y2;
-    }
+  //   let fromNode = getOrCreateElement(overheadLine.from, 'node', knownElementsByName, elements);
+  //   let toNode = getOrCreateElement(overheadLine.to, 'node', knownElementsByName, elements);
+  //   if (overheadLine.x1 != 0.0 && overheadLine.y1 != 0.0 && overheadLine.x2 != 0.0 && overheadLine.y2 != 0.0) {
+  //     fromNode.x = overheadLine.x1;
+  //     fromNode.y = overheadLine.y1;
+  //     toNode.x = overheadLine.x2;
+  //     toNode.y = overheadLine.y2;
+  //   }
 
-    links.push({
-      name: overheadLine.name,
-      from: fromNode,
-      to: toNode,
-      data: overheadLine
-    })
-  })
+  //   links.push({
+  //     name: overheadLine.name,
+  //     from: fromNode,
+  //     to: toNode,
+  //     data: overheadLine
+  //   })
+  // })
 
   // Add the capacitors under the nodes
-  baseJson.feeder[1].capacitors.forEach((element) => {
-    let parent = knownElementsByName[element.parent];
-    if (parent) {
-      parent.children.push({
-        name: element.name,
-        type: 'capacitors',
-        data: element,
-        children: []
-      })
-    } else {
-      console.log('Missing capacitor parent ' + element.parent);
-    }
-  })
+  // baseJson.feeder[1].capacitors.forEach((element) => {
+  //   let parent = knownElementsByName[element.parent];
+  //   if (parent) {
+  //     parent.children.push({
+  //       name: element.name,
+  //       type: 'capacitors',
+  //       data: element,
+  //       children: []
+  //     })
+  //   } else {
+  //     console.log('Missing capacitor parent ' + element.parent);
+  //   }
+  // })
 
   // Add the regulators under the nodes 
-  console.log(baseJson.feeder[4]);
-  baseJson.feeder[4].regulators.forEach((element) => {
-    let parent = knownElementsByName[regulatorParents[element.name]];
-    if (parent) {
-      parent.children.push({
-        name: element.name,
-        type: 'regulators',
-        data: element,
-        children: []
-      })
-    } else {
-      console.log('Missing regulator parent ' + regulatorParents[element.name] + ' for ' + element.name);
-    }
-  })
+  // console.log(baseJson.feeder[4]);
+  // baseJson.feeder[4].regulators.forEach((element) => {
+  //   let parent = knownElementsByName[regulatorParents[element.name]];
+  //   if (parent) {
+  //     parent.children.push({
+  //       name: element.name,
+  //       type: 'regulators',
+  //       data: element,
+  //       children: []
+  //     })
+  //   } else {
+  //     console.log('Missing regulator parent ' + regulatorParents[element.name] + ' for ' + element.name);
+  //   }
+  // })
 
   /*let numMissingNodes = 0;
   let numFoundNodes = 0;

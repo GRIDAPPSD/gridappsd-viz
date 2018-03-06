@@ -6,3 +6,8 @@ import 'react-bootstrap';
 import 'react-dom';
 import 'react-router-dom';
 import 'underscore';
+import 'rxjs/Observable';
+import 'rxjs/observable/dom/ajax';
+import 'rxjs/operators/map';
+import 'rxjs/operators/delay';
+import 'rxjs/operators/retry';
