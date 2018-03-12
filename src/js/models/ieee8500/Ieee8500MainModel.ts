@@ -99,11 +99,12 @@ class Ieee8500MainModel extends Backbone.Model {
         if (curTime.data.output == null) return;
 
         let mapping = this.staticModel.get('timeseriesToPlotSeriesMapping');
+        let simId = Object.keys(curTime.data.output)[0]
         Object.keys(mapping).forEach((plotName:string) => {
             
             let plotModel:PlotModel = self.plotModelsByName[plotName];
             mapping[plotName].forEach((seriesName:string) => {
-                let datum = curTime.data.output.ieee8500[seriesName];
+                let datum = curTime.data.output[simId][seriesName];
                 plotModel.addData(
                     seriesName, 
                     {xRaw: new Date(Date.now()), yRaw: self.getYRaw(plotName, datum)}, 

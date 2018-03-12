@@ -2,7 +2,7 @@ import * as Backbone from 'backbone';
 import * as d3 from 'd3';
 
 import IPlotDatum from './IPlotDatum';
-import PlotSeriesModel from './PlotSeriesModel';
+// import PlotSeriesModel from './PlotSeriesModel';
 import PlotSeriesCollection from './PlotSeriesCollection';
 
 class PlotModel extends Backbone.Model {

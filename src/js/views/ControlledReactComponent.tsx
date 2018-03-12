@@ -1,5 +1,5 @@
 import * as React from 'react';
-import * as Backbone from 'backbone';
+// import * as Backbone from 'backbone';
 
 import IHasModel from '../interfaces/IHasModel';
 
