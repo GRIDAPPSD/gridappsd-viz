@@ -21,6 +21,8 @@ import { AppState } from '../models/AppState';
 import { Simulation } from '../models/Simulation';
 import { AddSimulation, SetActiveSimulationConfig } from '../actions/simulation-actions';
 
+import { runConfig } from '../../../runConfig';
+
 export interface MainViewProps {
   dispatch: any;
   previousSimulations: Simulation[];
@@ -50,6 +52,7 @@ class MainViewContainer extends React.Component<MainViewProps, MainViewState> {
   }
 
   render() {
+    let config: runConfig = require('../../../runConfig.json');
     const { previousSimulations, dispatch } = this.props;
     return (
       <BrowserRouter>
@@ -57,6 +60,7 @@ class MainViewContainer extends React.Component<MainViewProps, MainViewState> {
           <AppBar>
             <DrawerOpener onClick={this._openDrawer} />
             <Link className="app-title" to="/">GridAPPS-D</Link>
+            <span>{config.version}</span>
           </AppBar>
           <Drawer
             ref={drawer => this._drawer = drawer}
