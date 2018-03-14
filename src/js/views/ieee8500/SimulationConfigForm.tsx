@@ -233,15 +233,15 @@ class SimulationConfigFormContainer extends React.Component<Props, State> {
                     const newValue = (event.target as HTMLDivElement).textContent;
                     try {
                       // Check if the text entered is a valid JSON string
-                      const newConfigJson = JSON.parse(newValue);
-                      dispatch(new UpdateApplicationConfiguration(this.state.selectedAppName, JSON.stringify(newConfigJson)));
+                      //const newConfigJson = JSON.parse(newValue);
+                      dispatch(new UpdateApplicationConfiguration(this.state.selectedAppName, newValue));
                     }
                     catch (e) {
                       console.log(e);
                     }
                   }}>
                   {
-                    JSON.stringify(JSON.parse(this.state.appConfigStr), null, 4)
+                    this.state.appConfigStr
                   }
                 </div>
               </div>
