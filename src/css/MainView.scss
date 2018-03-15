@@ -10,10 +10,9 @@
 }
 
 .previous-simulations .nested-drawer-items {
-    .drawer-item.simulation a {
+    .drawer-item.simulation{
         display: flex;
         flex-flow: column nowrap;
-        height: 100%;
         line-height: initial;
         justify-content: center;
     }

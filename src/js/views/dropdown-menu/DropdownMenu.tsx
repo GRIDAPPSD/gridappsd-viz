@@ -42,9 +42,9 @@ export class DropdownMenu extends React.Component<Props, State> {
 
         <ul className='app-dropdown-menu-item-list'>
           {
-            this.props.menuItems.map(menuItem =>
+            this.props.menuItems.map((menuItem, i) =>
               <li
-                key={menuItem.id}
+                key={i}
                 className='app-dropdown-menu-item'
                 onClick={() => this._onChange(menuItem)}>
                 <span className="text">{menuItem.label}</span>

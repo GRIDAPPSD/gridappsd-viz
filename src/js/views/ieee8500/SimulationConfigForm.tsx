@@ -15,6 +15,9 @@ import { AppState } from '../../models/AppState';
 // import { DEFAULT_REQUEST_CONFIG } from '../../reducers/activeSimulationConfig';
 import './SimulationConfigForm.styles.scss';
 import { SIMULATION_CONFIG_OPTIONS } from '../../models/simulation-config-options';
+import { request } from '../../utils';
+import { Subscription } from 'rxjs/Subscription';
+import { finalize } from 'rxjs/operators';
 
 interface Props {
   show: boolean;
@@ -27,6 +30,9 @@ interface State {
   selectedAppName: string;
   appConfigStr: string;
   showSimulationOutput: boolean;
+  regions: Array<{ regionName: string; regionID: string; index: number }>;
+  subregions: Array<{ subregionName: string; subregionID: string; index: number }>;
+  lines: Array<{ name: string; mRID: string; index: number }>;
 }
 class SimulationConfigFormContainer extends React.Component<Props, State> {
 
@@ -35,21 +41,39 @@ class SimulationConfigFormContainer extends React.Component<Props, State> {
     this.state = {
       selectedAppName: '',
       showSimulationOutput: false,
-      appConfigStr: props.activeSimulationConfig.application_config.applications[0].config_string
+      appConfigStr: props.activeSimulationConfig.application_config.applications[0].config_string,
+      regions: [],
+      subregions: [],
+      lines: []
     }
     this._hideSimulationOutputEditor = this._hideSimulationOutputEditor.bind(this);
     this._showSimulationOutputEditor = this._showSimulationOutputEditor.bind(this);
   }
 
+  componentDidMount() {
+    const sub: Subscription = request('data/test_feeder_index.json')
+      .pipe(finalize(() => sub.unsubscribe()))
+      .subscribe(data => {
+        this.setState({
+          regions: data.feeders.map((feeder, i) => ({ regionName: feeder.regionName, regionID: feeder.regionID, index: i })),
+          subregions: data.feeders.map((feeder, i) => ({ subregionName: feeder.subregionName, subregionID: feeder.subregionID, index: i })),
+          lines: data.feeders.map((feeder, i) => ({ name: feeder.name, mRID: feeder.mRID, index: i }))
+        });
+      });
+  }
   componentWillReceiveProps(newProps: Props) {
-    if (this.props !== newProps)
+    if (this.props !== newProps) {
+      
       this.setState({
         appConfigStr: newProps.activeSimulationConfig.application_config.applications[0].config_string
       });
+    }
   }
   render() {
-    if (this.props.show) {
+    if (this.props.show && this.state.regions.length > 0 && this.state.subregions.length > 0 && this.state.subregions.length > 0) {
       const { dispatch, activeSimulationConfig } = this.props;
+      const { regions, subregions, lines } = this.state;
+      console.log(this.props.activeSimulationConfig)
       return (
         <form className='simulation-config-form'>
           <div className='group power-system-config'>
@@ -58,37 +82,37 @@ class SimulationConfigFormContainer extends React.Component<Props, State> {
               <div className='control'>
                 <label>Geographical Region Name</label>
                 <DropdownMenu
-                  menuItems={
-                    _mapStringArrayToMenuItems(SIMULATION_CONFIG_OPTIONS.power_system_config.GeographicalRegion_names)
-                  }
+                  menuItems={regions.map(region => new MenuItem(region.regionName, region.regionID))}
                   onChange={menuItem => {
                     dispatch(new SetGeographicalRegionName(menuItem.value));
                   }}
-                  defaultItemIndex={SIMULATION_CONFIG_OPTIONS.power_system_config.GeographicalRegion_names.indexOf(activeSimulationConfig.power_system_config.GeographicalRegion_name)}
+                  defaultItemIndex={
+                    (regions.filter(region => region.regionID === activeSimulationConfig.power_system_config.GeographicalRegion_name)[0] || { index: 0 }).index
+                  }
                 />
               </div>
               <div className='control'>
                 <label>SubGeographical Region Name</label>
                 <DropdownMenu
-                  menuItems={
-                    _mapStringArrayToMenuItems(SIMULATION_CONFIG_OPTIONS.power_system_config.SubGeographicalRegion_names)                    
-                  }
+                  menuItems={subregions.map(subregion => new MenuItem(subregion.subregionName, subregion.subregionID))}
                   onChange={menuItem => {
                     dispatch(new SetSubGeographicalRegionName(menuItem.value));
                   }}
-                  defaultItemIndex={SIMULATION_CONFIG_OPTIONS.power_system_config.SubGeographicalRegion_names.indexOf(activeSimulationConfig.power_system_config.SubGeographicalRegion_name)}
+                  defaultItemIndex={
+                    (subregions.filter(subregion => subregion.subregionID === activeSimulationConfig.power_system_config.SubGeographicalRegion_name)[0] || { index: 0 }).index
+                  }
                 />
               </div>
               <div className='control'>
                 <label>Line Name</label>
                 <DropdownMenu
-                  menuItems={
-                    _mapStringArrayToMenuItems(SIMULATION_CONFIG_OPTIONS.power_system_config.Line_names)
-                  }
+                  menuItems={lines.map(line => new MenuItem(line.name, line.mRID))}
                   onChange={menuItem => {
                     dispatch(new SetLineName(menuItem.value));
                   }}
-                  defaultItemIndex={SIMULATION_CONFIG_OPTIONS.power_system_config.Line_names.indexOf(activeSimulationConfig.power_system_config.Line_name)}
+                  defaultItemIndex={
+                    (lines.filter(line => line.mRID === activeSimulationConfig.power_system_config.Line_name)[0] || { index: 0 }).index
+                  }
                 />
               </div>
             </div>
@@ -164,7 +188,7 @@ class SimulationConfigFormContainer extends React.Component<Props, State> {
                   onBlur={event => {
                     dispatch(new SetSimulationName((event.target as HTMLInputElement).value));
                   }}
-                  defaultValue='ieee8500' />
+                  defaultValue={activeSimulationConfig.simulation_config.simulation_name} />
                 <span className='ripple-bar'></span>
               </span>
             </div>
@@ -185,8 +209,8 @@ class SimulationConfigFormContainer extends React.Component<Props, State> {
                 <DropdownMenu
                   menuItems={[
                     // 0 is the index of this app inside SimulationConfig.application_config.applications array
-                    new MenuItem('VVO', 'vvo', { index: 0, name: 'vvo' }),
-                    new MenuItem('Sample App', 'sample_app', { index: 1, name: 'sample_app' })
+                    new MenuItem('VVO', { index: 0, name: 'vvo' }),
+                    new MenuItem('Sample App', { index: 1, name: 'sample_app' })
                   ]}
                   onChange={menuItem => {
                     const configStr = JSON.stringify(JSON.parse(SIMULATION_CONFIG_OPTIONS.application_config.applications[menuItem.value.index].config_string), null, 4);
@@ -272,5 +296,5 @@ const mapStateToProps = (state: AppState): Props => {
 export const SimulationConfigForm = connect(mapStateToProps)(SimulationConfigFormContainer);
 
 function _mapStringArrayToMenuItems(array: string[]): MenuItem[] {
-  return array.map(e => new MenuItem(e, e, e));
+  return array.map(e => new MenuItem(e, e));
 }

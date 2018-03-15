@@ -55,7 +55,7 @@ export class DrawerItemGroup extends React.Component<Props, State> {
       this.setState({ isExpanded: false });
     }
     else {
-      this._nestedDrawerItemList.style.height = this._nestedDrawerItemListHeight + 'px';
+      this._nestedDrawerItemList.style.height = (this._nestedDrawerItemListHeight * this._nestedDrawerItemList.childElementCount) + 'px';
       this.setState({ isExpanded: true });
     }
   }
