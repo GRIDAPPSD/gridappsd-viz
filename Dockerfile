@@ -16,3 +16,4 @@ ENV PORT=${VIZ_PORT}
 EXPOSE ${VIZ_PORT}
 
 CMD ["npm", "start"]
+
