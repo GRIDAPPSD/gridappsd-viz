@@ -1,9 +1,10 @@
 import Ieee8500MainModel from '../../models/ieee8500/Ieee8500MainModel';
 import DataSource from '../../interfaces/DataSource';
 import '../../libs/stomp.js';
-import gossServerUrl from '../../../../runConfig';
+import { runConfig } from '../../../../runConfig';
 
 declare var Stomp: any;
+let config: runConfig = require('../../../../runConfig.json');
 
 class Ieee8500Controller {
 
@@ -19,6 +20,7 @@ class Ieee8500Controller {
   private _responseQueueTopic = '/temp-queue/response-queue';
   private _simulationStatusTopic = '/topic/goss.gridappsd.simulation.log.';
   private _fncsOutputTopic = '/topic/goss.gridappsd.fncs.output';
+  
 
   get model(): Ieee8500MainModel {
     return this._ieee8500MainModel;
@@ -46,7 +48,7 @@ class Ieee8500Controller {
 
     //var gossServerUrl='ws://127.0.0.1:61614';
     //var gossServerUrl='ws://130.20.106.209:61614';
-    this._stompClient = Stomp.client(gossServerUrl, null);
+    this._stompClient = Stomp.client(config.gossServerUrl, null);
     this._stompClient.heartbeat.outgoing = 0;
     this._stompClient.heartbeat.incoming = 0;
     this._stompClient.connect(
@@ -57,7 +59,7 @@ class Ieee8500Controller {
   }
 
   onWebsocketConnected() {
-    console.log('Websocket connected ' + gossServerUrl);
+    console.log('Websocket connected ' + config.gossServerUrl);
     // this._websocketConnected = true;
 
     let self = this;
