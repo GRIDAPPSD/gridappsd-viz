@@ -10,7 +10,7 @@ usage () {
 IMAGE="gridappsd/viz:dev"
 
 # parse options
-while getopts t: option ; do
+while getopts bp option ; do
   case $option in
     b) # Pass gridappsd tag to docker-compose
       docker build -t $IMAGE .
