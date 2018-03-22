@@ -26,6 +26,7 @@ export interface MainViewProps {
   previousSimulations: Simulation[];
 }
 export interface MainViewState {
+  showSimulationConfigForm: boolean;
 }
 
 
@@ -43,6 +44,7 @@ class MainViewContainer extends React.Component<MainViewProps, MainViewState> {
   constructor(props: any) {
     super(props);
     this.state = {
+      showSimulationConfigForm: false
     };
     this._closeDrawer = this._closeDrawer.bind(this);
     this._openDrawer = this._openDrawer.bind(this);
@@ -62,15 +64,15 @@ class MainViewContainer extends React.Component<MainViewProps, MainViewState> {
             ref={drawer => this._drawer = drawer}
             content={
               <div style={{ position: 'relative', width: '100%', height: '100%' }}>
-                <Route exact path='/edit-simulation-config' component={() => <SimulationConfigForm show={true} onSubmit={this._simulationConfigFormSubmitted} />} />
+                <SimulationConfigForm show={this.state.showSimulationConfigForm} onSubmit={this._simulationConfigFormSubmitted} />
                 <Route exact path="/ieee8500" component={() => <Ieee8500View controller={mainController.ieee8500Controller} />} />
                 <Route exact path="/titanium" component={() => <Ieee8500View controller={mainController.ieee8500Controller} />} />
                 <Route exact path="/help" component={Help} />
                 <Route exact path="/applications" component={Applications} />
               </div>
             }>
-            <DrawerItem>
-              <Link to='/edit-simulation-config'>Simulations</Link>
+            <DrawerItem onClick={() => this.setState({ showSimulationConfigForm: true })}>
+              Simulations
             </DrawerItem>
             {
               previousSimulations.length > 0 &&
@@ -80,15 +82,17 @@ class MainViewContainer extends React.Component<MainViewProps, MainViewState> {
                     return (
                       <DrawerItem
                         key={index}
-                        className='simulation'>
-                        <Link
-                          to='/edit-simulation-config'
-                          onClick={() => {
-                            setTimeout(() => dispatch(new SetActiveSimulationConfig(simulation.config)), 100);
-                          }}>
-                          <span className='simulation-name'>{simulation.name}</span>
-                          <span className='simulation-id'>{simulation.id}</span>
-                        </Link>
+                        className='simulation'
+                        onClick={() => {
+                          dispatch(new SetActiveSimulationConfig(simulation.config));
+                          // If the form is currently showing,
+                          // Selecting a different existing simulation won't trigger rerender
+                          // so do this
+                          this.setState({ showSimulationConfigForm: false });
+                          setTimeout(() => this.setState({ showSimulationConfigForm: true }), 100);
+                        }}>
+                        <span className='simulation-name'>{simulation.name}</span>
+                        <span className='simulation-id'>{simulation.id}</span>
                       </DrawerItem>
                     );
                   })
@@ -113,6 +117,7 @@ class MainViewContainer extends React.Component<MainViewProps, MainViewState> {
   }
 
   private _simulationConfigFormSubmitted(simulationConfig: SimulationConfig) {
+    this.setState({ showSimulationConfigForm: false });
     console.log('Updated simulation config object:', simulationConfig);
     mainController.ieee8500Controller.setSimulationRequest(simulationConfig);
     this.props.dispatch(new AddSimulation({
