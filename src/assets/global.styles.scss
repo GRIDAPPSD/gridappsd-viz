@@ -34,8 +34,8 @@
     &:hover {
         transform: scale(1.1);
     }
-
 }
+
 .backdrop {
     background-color: rgba(50, 50, 50, 0.6);
     position: fixed;
@@ -79,6 +79,10 @@ button.positive {
         background-size: 100%;
         transition: background 0s;
     }
+}
+
+.btn {
+    outline: none;
 }
 
 @keyframes fadein {

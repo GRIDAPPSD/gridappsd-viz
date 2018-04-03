@@ -1,7 +1,8 @@
 import * as React from 'react';
 import { connect } from 'react-redux';
-import { Link } from 'react-router-dom';
+import { Link, withRouter } from 'react-router-dom';
 import { Modal, Button, ModalTitle } from 'react-bootstrap';
+import { StompSubscription } from '@stomp/stompjs';
 
 import { DropdownMenu } from '../dropdown-menu/DropdownMenu';
 import { MenuItem } from '../dropdown-menu/MenuItem';
@@ -15,15 +16,14 @@ import { AppState } from '../../models/AppState';
 // import { DEFAULT_REQUEST_CONFIG } from '../../reducers/activeSimulationConfig';
 import './SimulationConfigForm.styles.scss';
 import { SIMULATION_CONFIG_OPTIONS } from '../../models/simulation-config-options';
-import { request } from '../../utils';
-import { Subscription } from 'rxjs/Subscription';
-import { finalize } from 'rxjs/operators';
+import { MessageService } from '../../services/MessageService';
+import { RetrieveAllFeederModelsPayload } from '../../models/RetrieveAllFeederModelsPayload';
 
 interface Props {
-  show: boolean;
   onSubmit: (SimulationConfig: SimulationConfig) => void;
   dispatch: any;
   activeSimulationConfig: SimulationConfig;
+  show: boolean;
 }
 
 interface State {
@@ -34,6 +34,9 @@ interface State {
   subregions: Array<{ subregionName: string; subregionID: string; index: number }>;
   lines: Array<{ name: string; mRID: string; index: number }>;
 }
+
+const MESSAGE_SERVICE: MessageService = MessageService.getInstance();
+
 class SimulationConfigFormContainer extends React.Component<Props, State> {
 
   constructor(props: any) {
@@ -51,31 +54,22 @@ class SimulationConfigFormContainer extends React.Component<Props, State> {
   }
 
   componentDidMount() {
-    const sub: Subscription = request('data/test_feeder_index.json')
-      .pipe(finalize(() => sub.unsubscribe()))
-      .subscribe(data => {
-        this.setState({
-          regions: data.feeders.map((feeder, i) => ({ regionName: feeder.regionName, regionID: feeder.regionID, index: i })),
-          subregions: data.feeders.map((feeder, i) => ({ subregionName: feeder.subregionName, subregionID: feeder.subregionID, index: i })),
-          lines: data.feeders.map((feeder, i) => ({ name: feeder.name, mRID: feeder.mRID, index: i }))
-        });
-      });
+    this._fetchDataToPopulateForm();
   }
+
   componentWillReceiveProps(newProps: Props) {
     if (this.props !== newProps) {
-      
       this.setState({
         appConfigStr: newProps.activeSimulationConfig.application_config.applications[0].config_string
       });
     }
   }
   render() {
-    if (this.props.show && this.state.regions.length > 0 && this.state.subregions.length > 0 && this.state.subregions.length > 0) {
-      const { dispatch, activeSimulationConfig } = this.props;
+    if (this.state.regions.length > 0 && this.state.subregions.length > 0 && this.state.subregions.length > 0) {
+      const { dispatch, activeSimulationConfig, show } = this.props;
       const { regions, subregions, lines } = this.state;
-      console.log(this.props.activeSimulationConfig)
       return (
-        <form className='simulation-config-form'>
+        <form style={{ display: show ? 'block' : 'none' }} className='simulation-config-form'>
           <div className='group power-system-config'>
             <header>Power System Configuration</header>
             <div className='controls'>
@@ -249,7 +243,7 @@ class SimulationConfigFormContainer extends React.Component<Props, State> {
           </div>
           <div className='options'>
             <Link
-              to='/ieee8500'
+              to='/topology'
               className='done fab'
               onClick={() => this.props.onSubmit(this.props.activeSimulationConfig)} />
           </div>
@@ -279,6 +273,39 @@ class SimulationConfigFormContainer extends React.Component<Props, State> {
     return null;
   }
 
+  private _fetchDataToPopulateForm() {
+    if (sessionStorage.getItem('regions')) {
+      const regions = JSON.parse(sessionStorage.getItem('regions'));
+      const subregions = JSON.parse(sessionStorage.getItem('subregions'));
+      const lines = JSON.parse(sessionStorage.getItem('lines'));
+      this.setState({ regions, subregions, lines });
+    }
+    else {
+      const repeater = setInterval(() => {
+        if (MESSAGE_SERVICE.isActive()) {
+          const sub: StompSubscription = MESSAGE_SERVICE.onFeederModelsReceived((payload: RetrieveAllFeederModelsPayload) => {
+            const regions = [];
+            const subregions = [];
+            const lines = [];
+            let index = 0;
+            for (const binding of payload.data.results.bindings) {
+              addIfNotExists(regions, { regionName: binding.regionName.value, regionID: binding.regionID.value, index }, 'regionName');
+              addIfNotExists(subregions, { subregionName: binding.subregionName.value, subregionID: binding.subregionID.value, index }, 'subregionName');
+              addIfNotExists(lines, { name: binding.name.value, mRID: binding.mRID.value, index }, 'name');
+              index++;
+            }
+            this.setState({ regions, subregions, lines });
+            sub.unsubscribe();
+            sessionStorage.setItem('regions', JSON.stringify(regions));
+            sessionStorage.setItem('subregions', JSON.stringify(subregions));
+            sessionStorage.setItem('lines', JSON.stringify(lines));
+          });
+          MESSAGE_SERVICE.retrieveAllFeederModels();
+          clearInterval(repeater);
+        }
+      }, 500);
+    }
+  }
   private _hideSimulationOutputEditor() {
     this.setState({ showSimulationOutput: false });
   }
@@ -293,8 +320,13 @@ const mapStateToProps = (state: AppState): Props => {
     activeSimulationConfig: state.activeSimulationConfig
   } as Props;
 }
-export const SimulationConfigForm = connect(mapStateToProps)(SimulationConfigFormContainer);
+export const SimulationConfigForm = connect(mapStateToProps)(withRouter(SimulationConfigFormContainer));
 
 function _mapStringArrayToMenuItems(array: string[]): MenuItem[] {
   return array.map(e => new MenuItem(e, e));
+}
+
+function addIfNotExists(array: any[], object: any, key: string) {
+  if (array.every(e => e[key] !== object[key]))
+    array.push(object);
 }

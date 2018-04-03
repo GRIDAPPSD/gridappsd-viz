@@ -2,7 +2,6 @@ import * as React from 'react';
 import './Drawer.styles.scss';
 
 interface Props {
-  content: JSX.Element;
 }
 
 interface State {
@@ -24,9 +23,6 @@ export class Drawer extends React.Component<Props, State> {
         <ul className="drawer-items" onClick={this.close}>
           {this.props.children}
         </ul>
-        <section className="content">
-          {this.props.content}
-        </section>
       </div>
     );
   }

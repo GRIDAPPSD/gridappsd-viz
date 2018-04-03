@@ -1,9 +1,12 @@
 @import '../../../assets/constants';
 .simulation-config-form {
-    position: relative;
+    position: absolute;
+    top: $APP_BAR_HEIGHT;
     padding-bottom: 20px;
     overflow-y: auto;
-    max-height: 100%;
+    max-height: calc(100vh - #{$APP_BAR_HEIGHT});
+    background-color: #fff;
+    width: 100vw;
     .group {
         header {
             font-size: 25px;
@@ -30,7 +33,8 @@
             outline: none;
             padding: 5px;
         }
-        textarea, .config-str-editor {
+        textarea,
+        .config-str-editor {
             width: 600px;
             box-shadow: 0 0 3px #000;
             border-radius: 3px;
@@ -68,18 +72,15 @@
         font-weight: bold;
         font-size: 13px;
     }
-    
     .inline-value {
         display: inline-block;
         margin: auto 5px;
     }
-    
     .inline-container {
         display: inline-flex;
         flex-flow: column nowrap;
         vertical-align: top;
     }
-    
     .show-simulation-output {
         margin-left: 20px;
     }
