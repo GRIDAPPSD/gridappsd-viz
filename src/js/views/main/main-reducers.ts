@@ -1,5 +1,7 @@
-// views/ieee8500
-import { SimulationConfig } from '../models/SimulationConfig';
+import { Simulation } from '../../models/Simulation';
+import { SimulationActions, ADD_SIMULATION, SET_ACTIVE_SIMULATION_CONFIG, SetActiveSimulationConfig } from './main-actions';
+import { SetSimulationId, SET_SIMULATION_ID } from '../simulation-status-logger/simulation-status-logger-actions';
+import { SimulationConfig } from '../../models/SimulationConfig';
 
 import {
   SET_GEOGRAPHICAL_REGION_NAME,
@@ -14,9 +16,8 @@ import {
   UPDATE_APPLICATION_CONFIGURATION,
   SET_OUTPUT_OBJECTS,
   SimulationConfigActions
-} from '../actions/simulation-config-actions';
-import { DEFAULT_SIMULATION_CONFIG } from '../models/default-simulation-config';
-import { SET_ACTIVE_SIMULATION_CONFIG, SetActiveSimulationConfig } from '../actions/simulation-actions';
+} from '../topology/simulation-config-actions';
+import { DEFAULT_SIMULATION_CONFIG } from '../../models/default-simulation-config';
 
 export function activeSimulationConfig(config: SimulationConfig = DEFAULT_SIMULATION_CONFIG, action: SimulationConfigActions | SetActiveSimulationConfig): SimulationConfig {
   switch (action.type) {
@@ -46,6 +47,23 @@ export function activeSimulationConfig(config: SimulationConfig = DEFAULT_SIMULA
       return action.config;
     default:
       return config;
+  }
+}
+
+export function previousSimulations(state: Simulation[] = [], action: SimulationActions | SetSimulationId): Simulation[] {
+  switch (action.type) {
+    case ADD_SIMULATION:
+      return state.filter(sim => sim.name !== action.simulation.name).concat(action.simulation);
+    case SET_SIMULATION_ID:
+      const simulation = state.filter(simulation => simulation.name === action.simulationName)[0];
+      if (!simulation)
+        throw new Error(`Previous simulation not found for simulation name: ${action.simulationName}`);
+      simulation.id = action.simulationId;
+      const simulations = state.filter(simulation => simulation.name !== action.simulationName);
+      simulations.push({ ...simulation })
+      return simulations;
+    default:
+      return state;
   }
 }
 

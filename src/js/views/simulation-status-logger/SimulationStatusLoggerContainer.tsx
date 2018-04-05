@@ -3,13 +3,13 @@ import { connect } from 'react-redux';
 import { StompSubscription } from '@stomp/stompjs';
 
 import { SimulationStatusLogger } from './SimulationStatusLogger';
-
 import { SimulationControlService } from '../../services/SimulationControlService';
-import { AppState } from '../../models/AppState';
 import { SimulationConfig } from '../../models/SimulationConfig';
+import { AppState } from '../../models/AppState';
 
 interface Props {
-  simulationConfig: SimulationConfig;
+  dispatch: any;
+  activeSimulationConfig: SimulationConfig;
 }
 
 interface State {
@@ -18,12 +18,13 @@ interface State {
 }
 
 const mapStateToProps = (state: AppState): Props => ({
-  simulationConfig: state.activeSimulationConfig
+  activeSimulationConfig: state.activeSimulationConfig
 } as Props);
 
 const SIMULATION_CONTROL_SERVICE = SimulationControlService.getInstance();
 let simulationStartSubscription: StompSubscription = null;
 let simulationStatusLogSub: StompSubscription = null;
+let fncsSubscription: StompSubscription = null;
 
 export const SimulationStatusLoggerContainer = connect(mapStateToProps)(class SimulationStatusLoggerContainer extends React.Component<Props, State> {
 
@@ -44,6 +45,11 @@ export const SimulationStatusLoggerContainer = connect(mapStateToProps)(class Si
       simulationStatusLogSub.unsubscribe();
       simulationStatusLogSub = null;
     }
+    if (fncsSubscription) {
+      fncsSubscription.unsubscribe();
+      fncsSubscription = null;
+    }
+
     simulationStartSubscription = SIMULATION_CONTROL_SERVICE.onSimulationStarted(simulationId => {
       console.log('simulation ID: ' + simulationId);
       this.setState({ isFetching: true });
@@ -55,14 +61,12 @@ export const SimulationStatusLoggerContainer = connect(mapStateToProps)(class Si
         })
       );
     });
-    SIMULATION_CONTROL_SERVICE.startSimulation(this.props.simulationConfig);
-  }
 
-  componentWillReceiveProps(newProps: Props) {
-    if (this.props.simulationConfig !== newProps.simulationConfig) {
-      this.setState({ logMessages: [] });
-      SIMULATION_CONTROL_SERVICE.startSimulation(newProps.simulationConfig);
-    }
+    fncsSubscription = SIMULATION_CONTROL_SERVICE.onFncsOutputReceived(data => {
+      console.log('====================================')
+      console.log(data);
+      console.log('====================================')
+    });
   }
 
   render() {

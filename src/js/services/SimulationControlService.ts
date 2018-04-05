@@ -7,14 +7,19 @@ export class SimulationControlService {
 
   private static readonly _INSTANCE_: SimulationControlService = new SimulationControlService();
 
-  private readonly _simulationRequestTopic = 'goss.gridappsd.process.request.simulation';
+  private readonly _simulationRequestTopic = '/queue/goss.gridappsd.process.request.simulation';
   private readonly _simulationStatusTopic = '/topic/goss.gridappsd.simulation.log';
+  private readonly _fncsOutputTopic = '/topic/goss.gridappsd.fncs.output';
 
   private constructor() {
   }
 
   static getInstance(): SimulationControlService {
     return SimulationControlService._INSTANCE_;
+  }
+
+  onFncsOutputReceived(fn: (data: any) => void): StompSubscription {
+    return STOMP_CLIENT.subscribe(this._fncsOutputTopic, (message: Message) => fn(JSON.parse(message.body)));
   }
 
   onSimulationStarted(fn: (simulationId: string) => void): StompSubscription {

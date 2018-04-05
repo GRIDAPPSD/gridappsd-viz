@@ -1,6 +1,6 @@
-import { Action } from "../models/Action";
-import { Simulation } from "../models/Simulation";
-import { SimulationConfig } from "../models/SimulationConfig";
+import { Action } from '../../models/Action';
+import { Simulation } from '../../models/Simulation';
+import { SimulationConfig } from '../../models/SimulationConfig';
 
 export const ADD_SIMULATION = 'ADD_SIMULATION';
 export const SET_ACTIVE_SIMULATION_CONFIG = 'SET_ACTIVE_SIMULATION_CONFIG';

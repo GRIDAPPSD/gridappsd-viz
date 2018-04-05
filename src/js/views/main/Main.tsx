@@ -1,6 +1,8 @@
 import * as React from 'react';
 import { Route, BrowserRouter, Link } from 'react-router-dom';
 
+import { RUN_CONFIG } from '../../../../runConfig';
+
 import { Help } from '../Help';
 import { Applications } from '../ApplicationsView';
 
@@ -43,6 +45,7 @@ export class Main extends React.Component<Props, State> {
           <AppBar>
             <DrawerOpener onClick={() => this._drawer.open()} />
             <Link className='app-title' to='/'>GridAPPS-D</Link>
+            <span>{RUN_CONFIG.version}</span>
           </AppBar>
           <Drawer
             ref={drawer => this._drawer = drawer}>
@@ -85,7 +88,7 @@ export class Main extends React.Component<Props, State> {
               <section className='content'>
                 <section className='left'>
                   <TopologyModelRendererContainer match={match} />
-                  <SimulationStatusLoggerContainer/>
+                  <SimulationStatusLoggerContainer />
                 </section>
                 <section className='right'>
                   <div className='placehodler'></div>

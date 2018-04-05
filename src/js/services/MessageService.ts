@@ -1,17 +1,16 @@
 import { client, Client, Message, StompSubscription } from '@stomp/stompjs';
 
+import { RUN_CONFIG } from '../../../runConfig';
+
 import { RetrieveAllFeederModelsPayload } from '../models/RetrieveAllFeederModelsPayload';
 import { GetAllFeederModelsRequest, GetTopologyModelRequest } from './requests';
 import { GetTopologyModelRequestPayload } from '../models/GetTopologyModelRequestPayload';
 
-const GOSS_SERVER_WS_URL = 'ws://127.0.0.1:61614';
-
-// const SIMULATION_CONTROL_TOPIC = '/queue/goss.gridappsd.process.request.simulation';
 // const RESPONSE_QUEUE_TOPIC = '/temp-queue/response-queue';
 // const SIMULATION_STATUS_TOPIC = '/topic/goss.gridappsd.simulation.log.';
 // const FNCS_OUTPUT_TOPIC = '/topic/goss.gridappsd.fncs.output';
 
-export const STOMP_CLIENT: Client = client(GOSS_SERVER_WS_URL);
+export const STOMP_CLIENT: Client = client(RUN_CONFIG.gossServerUrl);
 
 export class MessageService {
 

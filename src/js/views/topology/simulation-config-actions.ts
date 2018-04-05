@@ -1,5 +1,5 @@
-import { Action } from '../models/Action';
-import { OutputObject } from '../models/OutputObject';
+import { Action } from '../../models/Action';
+import { OutputObject } from '../../models/OutputObject';
 
 export const SET_GEOGRAPHICAL_REGION_NAME = 'SET_GEOGRAPHICAL_REGION_NAME';
 export const SET_SUBGEOGRAPHICAL_REGION_NAME = 'SET_SUBGEOGRAPHICAL_REGION_NAME';

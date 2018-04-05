@@ -5,9 +5,13 @@ import { StompSubscription } from '@stomp/stompjs';
 import { TopologyModelRenderer } from './TopologyModelRenderer';
 import { MessageService } from '../../services/MessageService';
 import { TopologyModel } from '../../models/topology/TopologyModel';
-import './TopologyModelRenderer.styles.scss';
+import { SimulationControlService } from '../../services/SimulationControlService';
+import { AppState } from '../../models/AppState';
+import { SimulationConfig } from '../../models/SimulationConfig';
 
+import './TopologyModelRenderer.styles.scss';
 interface Props {
+  simulationConfig: SimulationConfig;
 }
 
 interface State {
@@ -15,10 +19,15 @@ interface State {
   isFetching: boolean;
 }
 
+const mapStateToProps = (state: AppState): Props => ({
+  simulationConfig: state.activeSimulationConfig
+} as Props);
+
 const MESSAGE_SERVICE = MessageService.getInstance();
+const SIMULATION_CONTROL_SERVICE = SimulationControlService.getInstance();
 let subscription: StompSubscription = null;
 
-export const TopologyModelRendererContainer = connect()(class TopologyModelRendererContainer extends React.Component<Props, State> {
+export const TopologyModelRendererContainer = connect(mapStateToProps)(class TopologyModelRendererContainer extends React.Component<Props, State> {
 
   constructor(props: any) {
     super(props);
@@ -43,7 +52,11 @@ export const TopologyModelRendererContainer = connect()(class TopologyModelRende
 
   render() {
     return (
-      <TopologyModelRenderer model={_transformModel(this.state.renderModel)} isFetching={this.state.isFetching}/>
+      <TopologyModelRenderer
+        model={_transformModel(this.state.renderModel)}
+        isFetching={this.state.isFetching}
+        onStartSimulation={() => SIMULATION_CONTROL_SERVICE.startSimulation(this.props.simulationConfig)}
+        />
     );
   }
 });

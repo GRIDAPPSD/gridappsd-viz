@@ -11,6 +11,7 @@ import { Wait } from '../wait/Wait';
 interface Props {
   model: { nodes: any[], links: any[] };
   isFetching: boolean;
+  onStartSimulation: () => void;
 }
 
 interface State {
@@ -42,7 +43,7 @@ export class TopologyModelRenderer extends React.Component<Props, State> {
     return (
       <div className='topology-model-renderer'>
         <header>
-          <Button onClick={console.log}><Glyphicon glyph='play' /></Button>
+          <Button onClick={this.props.onStartSimulation}><Glyphicon glyph='play' /></Button>
         </header>
         <svg ref={elem => this._svg = elem}>
           <g></g>
@@ -57,7 +58,6 @@ export class TopologyModelRenderer extends React.Component<Props, State> {
 
   private _render(model: { nodes: any[]; links: any[] }) {
     const elementData = model.nodes;
-    this._container = this._canvas.select<SVGGElement>('g');
 
     // Compute the x and y bounds
     const xExtent = extent(elementData, (d: any) => { return d.x; });
@@ -78,8 +78,6 @@ export class TopologyModelRenderer extends React.Component<Props, State> {
         .translate(zoomCenter.x, zoomCenter.y)
         .scale(zoomCenter.k)
     }
-
-    // Create an SVG element and a group
 
     this._canvas.call(zoomer).call(zoomer.transform, transform)
     this._container.attr('transform', `translate(${zoomCenter.x},${zoomCenter.y}) scale(${zoomCenter.k})`);

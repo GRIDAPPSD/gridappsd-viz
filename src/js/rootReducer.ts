@@ -1,7 +1,6 @@
 import { combineReducers } from 'redux';
 
-import { activeSimulationConfig } from './activeSimulationConfig';
-import { previousSimulations } from './previousSimulations';
+import { previousSimulations, activeSimulationConfig } from './views/main/main-reducers';
 
 export const rootReducer = combineReducers({
   activeSimulationConfig,

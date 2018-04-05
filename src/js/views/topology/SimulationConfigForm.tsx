@@ -10,10 +10,9 @@ import {
   SetGeographicalRegionName, SetSubGeographicalRegionName, SetLineName, SetSimulator,
   SetTimestepFrequency, SetTimestepIncrement, SetSimulationName, UpdateApplicationConfiguration,
   SetOutputObjects
-} from '../../actions/simulation-config-actions';
+} from './simulation-config-actions';
 import { SimulationConfig } from '../../models/SimulationConfig';
 import { AppState } from '../../models/AppState';
-// import { DEFAULT_REQUEST_CONFIG } from '../../reducers/activeSimulationConfig';
 import './SimulationConfigForm.styles.scss';
 import { SIMULATION_CONFIG_OPTIONS } from '../../models/simulation-config-options';
 import { MessageService } from '../../services/MessageService';

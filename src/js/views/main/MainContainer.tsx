@@ -4,7 +4,7 @@ import { connect } from 'react-redux';
 import { AppState } from '../../models/AppState';
 import { Simulation } from '../../models/Simulation';
 import { Main } from './Main';
-import { SetActiveSimulationConfig, AddSimulation } from '../../actions/simulation-actions';
+import { SetActiveSimulationConfig, AddSimulation } from './main-actions';
 import { SimulationConfig } from '../../models/SimulationConfig';
 import { MessageService } from '../../services/MessageService';
 
