@@ -19,7 +19,7 @@ class Ieee8500Controller {
   private _simulationControlTopic = '/queue/goss.gridappsd.process.request.simulation';
   private _responseQueueTopic = '/temp-queue/response-queue';
   private _simulationStatusTopic = '/topic/goss.gridappsd.simulation.log.';
-  private _fncsOutputTopic = '/topic/goss.gridappsd.fncs.output';
+  private _fncsOutputTopic = '/topic/goss.gridappsd.simulation.output.';
   
 
   get model(): Ieee8500MainModel {
@@ -63,14 +63,16 @@ class Ieee8500Controller {
     // this._websocketConnected = true;
 
     let self = this;
+    
+    let simulationId;
     this._stompClient.subscribe(this._responseQueueTopic,
       (responseQueueMessage: any) => {
-        let simulationId = JSON.parse(responseQueueMessage.body);
+        simulationId = JSON.parse(responseQueueMessage.body);
         console.log('Received simulation id: ' + simulationId);
         self._stompClient.subscribe(self._simulationStatusTopic + simulationId, self.onSimulationStatusReceived.bind(self));
       }
     );
-    this._stompClient.subscribe(this._fncsOutputTopic, this.onFncsOutputReceived.bind(this));
+    this._stompClient.subscribe(this._fncsOutputTopic + simulationId, this.onFncsOutputReceived.bind(this));
   }
 
   onWebsocketDisconnected() {
