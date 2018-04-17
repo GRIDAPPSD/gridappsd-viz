@@ -4,7 +4,8 @@ import { Route, BrowserRouter, Link } from 'react-router-dom';
 import { RUN_CONFIG } from '../../../../runConfig';
 
 import { Help } from '../Help';
-import { Applications } from '../ApplicationsView';
+import { ApplicationsView } from '../ApplicationsView';
+
 
 import { AppBar } from '../app-bar/AppBar';
 import { DrawerOpener } from '../drawer/DrawerOpener';
@@ -80,6 +81,9 @@ export class Main extends React.Component<Props, State> {
             <DrawerItem >
               <Link to='/applications'>Applications & Services</Link>
             </DrawerItem>
+            <DrawerItem >
+              <Link to='/browse'>Browse Database</Link>
+            </DrawerItem>
           </Drawer>
           <Route
             exact
@@ -96,7 +100,8 @@ export class Main extends React.Component<Props, State> {
               </section>
             } />
           <Route exact path='/help' component={Help} />
-          <Route exact path='/applications' component={Applications} />
+          <Route exact path='/applications' component={ApplicationsView} />
+       
           <SimulationConfigForm show={this.state.showSimulationConfigForm} onSubmit={(simulationConfig: SimulationConfig) => {
             this.setState({ showSimulationConfigForm: false });
             this.props.onSimulationConfigFormSubmitted(simulationConfig);

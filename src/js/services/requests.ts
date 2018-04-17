@@ -13,6 +13,16 @@ export class GetAllFeederModelsRequest implements MessageRequest {
   }
 }
 
+export class GetApplicationsAndServices implements MessageRequest {
+  get url(): string {
+    return 'goss.gridappsd.process.request.status.platform';
+  }
+
+  get requestBody(): string {
+    return `{"applications":true,"services": true,"appInstances":true,"serviceInstances":true}`;
+  }
+}
+
 interface GetTopologyModelRequestBody {
   configurationType: string;
   parameters: {

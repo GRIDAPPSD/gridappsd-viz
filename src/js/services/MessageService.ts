@@ -3,8 +3,9 @@ import { client, Client, Message, StompSubscription } from '@stomp/stompjs';
 import { RUN_CONFIG } from '../../../runConfig';
 
 import { RetrieveAllFeederModelsPayload } from '../models/RetrieveAllFeederModelsPayload';
-import { GetAllFeederModelsRequest, GetTopologyModelRequest } from './requests';
+import { GetAllFeederModelsRequest, GetTopologyModelRequest, GetApplicationsAndServices } from './requests';
 import { GetTopologyModelRequestPayload } from '../models/GetTopologyModelRequestPayload';
+import { GetApplicationsAndServicesPayload } from '../models/GetApplicationsAndServicesPayload';
 
 // const RESPONSE_QUEUE_TOPIC = '/temp-queue/response-queue';
 // const SIMULATION_STATUS_TOPIC = '/topic/goss.gridappsd.simulation.log.';
@@ -18,6 +19,7 @@ export class MessageService {
   private _isConnected = false;
   private readonly _getTopologyModelRequest = new GetTopologyModelRequest();
   private readonly _getAllFeederModelsRequest = new GetAllFeederModelsRequest();
+  private readonly _getApplicationsAndServices = new GetApplicationsAndServices();
 
   private constructor() {
     STOMP_CLIENT.heartbeat.outgoing = 0;
@@ -41,6 +43,14 @@ export class MessageService {
     );
   }
 
+  requestApplicationsAndServices() {
+    STOMP_CLIENT.send(
+      this._getApplicationsAndServices.url,
+      { 'reply-to': this._getApplicationsAndServices.url },
+      this._getApplicationsAndServices.requestBody
+    );
+  }
+
   requestTopologyModel() {
     STOMP_CLIENT.send(
       this._getTopologyModelRequest.url,
@@ -53,6 +63,13 @@ export class MessageService {
     return STOMP_CLIENT.subscribe(this._getAllFeederModelsRequest.url, (message: Message) => {
       const payload = JSON.parse(message.body);
       payload.data = JSON.parse(payload.data);
+      fn(payload);
+    });
+  }
+
+  onApplicationsAndServicesReceived(fn: (payload: GetApplicationsAndServicesPayload) => void): StompSubscription {
+    return STOMP_CLIENT.subscribe(this._getApplicationsAndServices.url, (message: Message) => {
+      const payload = JSON.parse(message.body);
       fn(payload);
     });
   }
