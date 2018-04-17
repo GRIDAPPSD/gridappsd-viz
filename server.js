@@ -362,8 +362,7 @@ function getTimeseriesToTopologyMappingNewFormat() {
     reg_FEEDER_REG: 'reg_FEEDER_REG',
     reg_VREG2: 'reg_VREG2',
     reg_VREG3: 'reg_VREG3',
-    reg_VREG4: 'reg_VREG4',
-    xf_hvmv_sub: 'reg_FEEDER_REG'
+    reg_VREG4: 'reg_VREG4'
   }
 }
 
@@ -408,18 +407,6 @@ function getTimeseriesToPlotSeriesMappingNewFormat() {
       'l3160107',
       'l3254238',
       'm1047574',
-    ],
-
-    power_in_A: [
-      'xf_hvmv_sub'
-    ],
-
-    power_in_B: [
-      'xf_hvmv_sub'
-    ],
-
-    power_in_C: [
-      'xf_hvmv_sub'
     ],
 
     tap_A: [
