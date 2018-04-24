@@ -1,8 +1,13 @@
 import { Message, StompSubscription } from '@stomp/stompjs';
 
-import { STOMP_CLIENT } from './MessageService';
+import { STOMP_CLIENT } from './stomp-client';
 import { SimulationConfig } from '../models/SimulationConfig';
+import { FncsOutputPayload } from '../models/message-requests/FncsOutputPayload';
 
+/**
+ * This class is responsible for communicating with the platform to process the simulation.
+ * Simulation is started when the play button is clicked
+ */
 export class SimulationControlService {
 
   private static readonly _INSTANCE_: SimulationControlService = new SimulationControlService();
@@ -18,16 +23,21 @@ export class SimulationControlService {
     return SimulationControlService._INSTANCE_;
   }
 
-  onFncsOutputReceived(fn: (data: any) => void): StompSubscription {
+  /**
+   * Add a listener to be invoked when the platform sends back a message containing the data from
+   * FNCS (Phoenix Server) topic
+   * @param fn 
+   */
+  onFncsOutputReceived(fn: (payload: FncsOutputPayload) => void): StompSubscription {
     return STOMP_CLIENT.subscribe(this._fncsOutputTopic, (message: Message) => fn(JSON.parse(message.body)));
   }
 
   onSimulationStarted(fn: (simulationId: string) => void): StompSubscription {
-    return STOMP_CLIENT.subscribe(this._simulationRequestTopic, (message: Message) => fn(JSON.parse(message.body)));
+    return STOMP_CLIENT.subscribe(this._simulationRequestTopic, (message: Message) => fn(message.body));
   }
 
   onSimulationStatusLogReceived(simulationId: string, fn: (simulationStatusLog: string) => void): StompSubscription {
-      return STOMP_CLIENT.subscribe(`${this._simulationStatusTopic}.${simulationId}`, (message: Message) => fn(message.body));
+    return STOMP_CLIENT.subscribe(`${this._simulationStatusTopic}.${simulationId}`, (message: Message) => fn(message.body));
   }
 
   startSimulation(simulationConfig: SimulationConfig) {

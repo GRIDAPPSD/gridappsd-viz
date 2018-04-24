@@ -1,0 +1,16 @@
+.plot {
+    border: 2px solid #add8e6;
+    border-radius: 2px;
+    background-color: #fff;
+    margin: 5px auto;
+    width: 95%;
+    header {
+        font-weight: bold;
+        text-transform: uppercase;
+        padding-left: 5px;
+    }
+    path.time-series-line {
+        fill: none;
+        stroke: blue;
+    }
+}

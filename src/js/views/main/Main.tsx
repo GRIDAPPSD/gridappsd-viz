@@ -2,10 +2,8 @@ import * as React from 'react';
 import { Route, BrowserRouter, Link } from 'react-router-dom';
 
 import { RUN_CONFIG } from '../../../../runConfig';
-
 import { Help } from '../Help';
 import { Applications } from '../ApplicationsView';
-
 import { AppBar } from '../app-bar/AppBar';
 import { DrawerOpener } from '../drawer/DrawerOpener';
 import { Drawer } from '../drawer/Drawer';
@@ -16,8 +14,10 @@ import { SimulationConfig } from '../../models/SimulationConfig';
 import { Simulation } from '../../models/Simulation';
 import { TopologyModelRendererContainer } from '../topology/TopologyModelRendererContainer';
 import { SimulationStatusLoggerContainer } from '../simulation-status-logger/SimulationStatusLoggerContainer';
+import { PlotContainer } from '../plot/PlotContainer';
 
 import './Main.styles.scss';
+import { DatabaseBrowser } from '../database-browser/DatabaseBrowser';
 
 interface Props {
   previousSimulations: Simulation[];
@@ -77,8 +77,11 @@ export class Main extends React.Component<Props, State> {
                 }
               </DrawerItemGroup>
             }
-            <DrawerItem >
+            <DrawerItem onClick={() => this.setState({ showSimulationConfigForm: false })}>
               <Link to='/applications'>Applications & Services</Link>
+            </DrawerItem>
+            <DrawerItem onClick={() => this.setState({ showSimulationConfigForm: false })}>
+              <Link to='/browse'>Browse Database</Link>
             </DrawerItem>
           </Drawer>
           <Route
@@ -91,12 +94,13 @@ export class Main extends React.Component<Props, State> {
                   <SimulationStatusLoggerContainer />
                 </section>
                 <section className='right'>
-                  <div className='placehodler'></div>
+                  <PlotContainer />
                 </section>
               </section>
             } />
           <Route exact path='/help' component={Help} />
           <Route exact path='/applications' component={Applications} />
+          <Route path='/browse' component={DatabaseBrowser} />
           <SimulationConfigForm show={this.state.showSimulationConfigForm} onSubmit={(simulationConfig: SimulationConfig) => {
             this.setState({ showSimulationConfigForm: false });
             this.props.onSimulationConfigFormSubmitted(simulationConfig);

@@ -21,12 +21,12 @@ const mapStateToProps = (state: AppState): Props => ({
   activeSimulationConfig: state.activeSimulationConfig
 } as Props);
 
-const SIMULATION_CONTROL_SERVICE = SimulationControlService.getInstance();
 let simulationStartSubscription: StompSubscription = null;
 let simulationStatusLogSub: StompSubscription = null;
-let fncsSubscription: StompSubscription = null;
 
 export const SimulationStatusLoggerContainer = connect(mapStateToProps)(class SimulationStatusLoggerContainer extends React.Component<Props, State> {
+
+  private readonly _simulationControlService = SimulationControlService.getInstance();
 
   constructor(props: any) {
     super(props);
@@ -45,15 +45,11 @@ export const SimulationStatusLoggerContainer = connect(mapStateToProps)(class Si
       simulationStatusLogSub.unsubscribe();
       simulationStatusLogSub = null;
     }
-    if (fncsSubscription) {
-      fncsSubscription.unsubscribe();
-      fncsSubscription = null;
-    }
 
-    simulationStartSubscription = SIMULATION_CONTROL_SERVICE.onSimulationStarted(simulationId => {
+    simulationStartSubscription = this._simulationControlService.onSimulationStarted(simulationId => {
       console.log('simulation ID: ' + simulationId);
       this.setState({ isFetching: true });
-      simulationStatusLogSub = SIMULATION_CONTROL_SERVICE.onSimulationStatusLogReceived(
+      simulationStatusLogSub = this._simulationControlService.onSimulationStatusLogReceived(
         simulationId,
         logMessage => this.setState({
           logMessages: this.state.logMessages.concat(logMessage),
@@ -62,11 +58,6 @@ export const SimulationStatusLoggerContainer = connect(mapStateToProps)(class Si
       );
     });
 
-    fncsSubscription = SIMULATION_CONTROL_SERVICE.onFncsOutputReceived(data => {
-      console.log('====================================')
-      console.log(data);
-      console.log('====================================')
-    });
   }
 
   render() {

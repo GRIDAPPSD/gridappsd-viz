@@ -81,6 +81,10 @@ button.positive {
     }
 }
 
+button:disabled {
+    pointer-events: none;
+}
+
 .btn {
     outline: none;
 }

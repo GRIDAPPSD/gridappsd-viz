@@ -1,4 +1,4 @@
-@import '../../../assets/constants';
+@import '../../../constants';
 .simulation-config-form {
     position: absolute;
     top: $APP_BAR_HEIGHT;
@@ -36,7 +36,7 @@
         textarea,
         .config-str-editor {
             width: 600px;
-            box-shadow: 0 0 3px #000;
+            box-shadow: 0 0 3px #555;
             border-radius: 3px;
             padding: 5px;
             height: 150px;
@@ -44,6 +44,7 @@
             overflow-y: auto;
             white-space: pre;
             vertical-align: top;
+            border: none;
         }
         .input-field {
             display: inline-block;

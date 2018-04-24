@@ -1,5 +1,5 @@
 import { Simulation } from '../../models/Simulation';
-import { SimulationActions, ADD_SIMULATION, SET_ACTIVE_SIMULATION_CONFIG, SetActiveSimulationConfig } from './main-actions';
+import { SimulationActions, ADD_SIMULATION, SET_ACTIVE_SIMULATION_CONFIG, SetActiveSimulationConfig, SetNewFncsOutput, SET_NEW_FNCS_OUTPUT } from './main-actions';
 import { SetSimulationId, SET_SIMULATION_ID } from '../simulation-status-logger/simulation-status-logger-actions';
 import { SimulationConfig } from '../../models/SimulationConfig';
 
@@ -16,8 +16,9 @@ import {
   UPDATE_APPLICATION_CONFIGURATION,
   SET_OUTPUT_OBJECTS,
   SimulationConfigActions
-} from '../topology/simulation-config-actions';
+} from '../topology/simulation-config-form-actions';
 import { DEFAULT_SIMULATION_CONFIG } from '../../models/default-simulation-config';
+import { FncsOutput } from '../../models/fncs-output/FncsOutput';
 
 export function activeSimulationConfig(config: SimulationConfig = DEFAULT_SIMULATION_CONFIG, action: SimulationConfigActions | SetActiveSimulationConfig): SimulationConfig {
   switch (action.type) {
@@ -47,6 +48,15 @@ export function activeSimulationConfig(config: SimulationConfig = DEFAULT_SIMULA
       return action.config;
     default:
       return config;
+  }
+}
+
+export function fncsOutput(output: FncsOutput = {} as FncsOutput, action: SetNewFncsOutput): FncsOutput {
+  switch (action.type) {
+    case SET_NEW_FNCS_OUTPUT:
+      return action.output;
+    default:
+      return output;
   }
 }
 

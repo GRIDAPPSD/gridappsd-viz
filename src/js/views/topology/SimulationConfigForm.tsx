@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { connect } from 'react-redux';
-import { Link, withRouter } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { Modal, Button, ModalTitle } from 'react-bootstrap';
 import { StompSubscription } from '@stomp/stompjs';
 
@@ -9,14 +9,15 @@ import { MenuItem } from '../dropdown-menu/MenuItem';
 import {
   SetGeographicalRegionName, SetSubGeographicalRegionName, SetLineName, SetSimulator,
   SetTimestepFrequency, SetTimestepIncrement, SetSimulationName, UpdateApplicationConfiguration,
-  SetOutputObjects
-} from './simulation-config-actions';
+  SetOutputObjects, StoreMRIDs
+} from './simulation-config-form-actions';
 import { SimulationConfig } from '../../models/SimulationConfig';
 import { AppState } from '../../models/AppState';
-import './SimulationConfigForm.styles.scss';
 import { SIMULATION_CONFIG_OPTIONS } from '../../models/simulation-config-options';
 import { MessageService } from '../../services/MessageService';
-import { RetrieveAllFeederModelsPayload } from '../../models/RetrieveAllFeederModelsPayload';
+import { GetAllFeederModelsRequestPayload } from '../../models/message-requests/GetAllFeederModelsRequest';
+
+import './SimulationConfigForm.styles.scss';
 
 interface Props {
   onSubmit: (SimulationConfig: SimulationConfig) => void;
@@ -34,9 +35,15 @@ interface State {
   lines: Array<{ name: string; mRID: string; index: number }>;
 }
 
-const MESSAGE_SERVICE: MessageService = MessageService.getInstance();
+const mapStateToProps = (state: AppState): Props => {
+  return {
+    activeSimulationConfig: state.activeSimulationConfig
+  } as Props;
+}
 
-class SimulationConfigFormContainer extends React.Component<Props, State> {
+export const SimulationConfigForm = connect(mapStateToProps)(class SimulationConfigFormContainer extends React.Component<Props, State> {
+
+  private readonly _messageService: MessageService = MessageService.getInstance();
 
   constructor(props: any) {
     super(props);
@@ -102,6 +109,14 @@ class SimulationConfigFormContainer extends React.Component<Props, State> {
                   menuItems={lines.map(line => new MenuItem(line.name, line.mRID))}
                   onChange={menuItem => {
                     dispatch(new SetLineName(menuItem.value));
+                    const repeater = setInterval(() => {
+                      if (this._messageService.isActive()) {
+                        // Ask the platform to send the model dict to our topic
+                        this._messageService.fetchCimDictionary(menuItem.value);
+                        console.log('fetching cim')
+                        clearInterval(repeater);
+                      }
+                    }, 500);
                   }}
                   defaultItemIndex={
                     (lines.filter(line => line.mRID === activeSimulationConfig.power_system_config.Line_name)[0] || { index: 0 }).index
@@ -130,7 +145,7 @@ class SimulationConfigFormContainer extends React.Component<Props, State> {
               <label>Simulator</label>
               <DropdownMenu
                 menuItems={
-                  _mapStringArrayToMenuItems(SIMULATION_CONFIG_OPTIONS.simulation_config.simulators)
+                  SIMULATION_CONFIG_OPTIONS.simulation_config.simulators.map(e => new MenuItem(e, e))
                 }
                 onChange={menuItem => {
                   dispatch(new SetSimulator(menuItem.value));
@@ -278,11 +293,12 @@ class SimulationConfigFormContainer extends React.Component<Props, State> {
       const subregions = JSON.parse(sessionStorage.getItem('subregions'));
       const lines = JSON.parse(sessionStorage.getItem('lines'));
       this.setState({ regions, subregions, lines });
+      this.props.dispatch(new StoreMRIDs(lines.map((line, index) => ({ displayName: line.name, value: line.mRID, index }))));
     }
     else {
       const repeater = setInterval(() => {
-        if (MESSAGE_SERVICE.isActive()) {
-          const sub: StompSubscription = MESSAGE_SERVICE.onFeederModelsReceived((payload: RetrieveAllFeederModelsPayload) => {
+        if (this._messageService.isActive()) {
+          const sub: StompSubscription = this._messageService.onFeederModelsReceived((payload: GetAllFeederModelsRequestPayload) => {
             const regions = [];
             const subregions = [];
             const lines = [];
@@ -298,8 +314,9 @@ class SimulationConfigFormContainer extends React.Component<Props, State> {
             sessionStorage.setItem('regions', JSON.stringify(regions));
             sessionStorage.setItem('subregions', JSON.stringify(subregions));
             sessionStorage.setItem('lines', JSON.stringify(lines));
+            this.props.dispatch(new StoreMRIDs(lines.map((line, index) => ({ displayName: line.name, value: line.mRID, index }))));
           });
-          MESSAGE_SERVICE.retrieveAllFeederModels();
+          this._messageService.fetchAllFeederModels();
           clearInterval(repeater);
         }
       }, 500);
@@ -312,18 +329,7 @@ class SimulationConfigFormContainer extends React.Component<Props, State> {
   private _showSimulationOutputEditor() {
     this.setState({ showSimulationOutput: true });
   }
-}
-
-const mapStateToProps = (state: AppState): Props => {
-  return {
-    activeSimulationConfig: state.activeSimulationConfig
-  } as Props;
-}
-export const SimulationConfigForm = connect(mapStateToProps)(withRouter(SimulationConfigFormContainer));
-
-function _mapStringArrayToMenuItems(array: string[]): MenuItem[] {
-  return array.map(e => new MenuItem(e, e));
-}
+});
 
 function addIfNotExists(array: any[], object: any, key: string) {
   if (array.every(e => e[key] !== object[key]))

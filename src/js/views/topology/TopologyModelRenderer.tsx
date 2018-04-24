@@ -3,14 +3,14 @@ import { Button, Glyphicon } from 'react-bootstrap';
 import { extent } from 'd3-array';
 import { line } from 'd3-shape';
 import { zoom, zoomIdentity } from 'd3-zoom';
-import { select, event as currentEvent, Selection} from 'd3-selection';
-
-import './TopologyModelRenderer.styles.scss';
+import { select, event as currentEvent, Selection } from 'd3-selection';
 import { Wait } from '../wait/Wait';
 
+import './TopologyModelRenderer.styles.scss';
+
 interface Props {
-  model: { nodes: any[], links: any[] };
-  isFetching: boolean;
+  topology: { nodes: any[], links: any[] };
+  showWait: boolean;
   onStartSimulation: () => void;
 }
 
@@ -19,10 +19,9 @@ interface State {
 
 export class TopologyModelRenderer extends React.Component<Props, State> {
 
-  private _canvas: Selection<SVGSVGElement, any, any, any> = null;72
+  private _canvas: Selection<SVGSVGElement, any, any, any> = null;
   private _container: Selection<SVGGElement, any, any, any> = null;
   private _svg: SVGSVGElement = null;
-
   constructor(props: any) {
     super(props);
     this.state = {
@@ -35,8 +34,8 @@ export class TopologyModelRenderer extends React.Component<Props, State> {
   }
 
   componentWillReceiveProps(newProps: Props) {
-    if (this.props.model !== newProps.model)
-      this._render(newProps.model);
+    if (this.props.topology !== newProps.topology)
+      this._render(newProps.topology);
   }
 
   render() {
@@ -48,7 +47,7 @@ export class TopologyModelRenderer extends React.Component<Props, State> {
         <svg ref={elem => this._svg = elem}>
           <g></g>
         </svg>
-        <Wait show={this.props.isFetching}/>
+        <Wait show={this.props.showWait} />
       </div>
     );
   }
@@ -158,7 +157,7 @@ export class TopologyModelRenderer extends React.Component<Props, State> {
     });
 
     // A line function for the links
-    let lineGenerator:any = line()
+    let lineGenerator: any = line()
       .x((d: any) => { return d.element.x + xOffset })
       .y((d: any) => { return d.element.y + yOffset })
 
@@ -223,6 +222,6 @@ export class TopologyModelRenderer extends React.Component<Props, State> {
     //     isFirstCurTimeRendering: this.state.isFirstCurTimeRendering
     //   });
     // }
-
   }
+
 }

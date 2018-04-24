@@ -1,4 +1,4 @@
-@import '../../../assets/constants';
+@import '../../../constants';
 $LEFT_CONTENT_WIDTH: 70vw;
 $RIGHT_CONTENT_WIDTH: 30vw;
 main {
@@ -19,6 +19,20 @@ main {
     }
     .right {
         width: $RIGHT_CONTENT_WIDTH;
+        overflow-y: auto;
+        max-height: calc(100vh - #{$APP_BAR_HEIGHT});
+        display: flex;
+        flex-flow: column nowrap;
+        align-items: center;
+    }
+}
+
+.drawer-item a {
+    display: block;
+    color: #000;
+    &:hover {
+        text-decoration: none;
+        color: #000;
     }
 }
 

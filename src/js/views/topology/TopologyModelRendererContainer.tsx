@@ -10,12 +10,14 @@ import { AppState } from '../../models/AppState';
 import { SimulationConfig } from '../../models/SimulationConfig';
 
 import './TopologyModelRenderer.styles.scss';
+import { RequestConfigurationType } from '../../models/message-requests/RequestConfigurationType';
+import { GetTopologyModelRequestPayload } from '../../models/message-requests/GetTopologyModelRequest';
 interface Props {
   simulationConfig: SimulationConfig;
 }
 
 interface State {
-  renderModel: TopologyModel;
+  topology: TopologyModel;
   isFetching: boolean;
 }
 
@@ -23,42 +25,49 @@ const mapStateToProps = (state: AppState): Props => ({
   simulationConfig: state.activeSimulationConfig
 } as Props);
 
-const MESSAGE_SERVICE = MessageService.getInstance();
-const SIMULATION_CONTROL_SERVICE = SimulationControlService.getInstance();
-let subscription: StompSubscription = null;
+let topologySubscription: StompSubscription = null;
 
 export const TopologyModelRendererContainer = connect(mapStateToProps)(class TopologyModelRendererContainer extends React.Component<Props, State> {
+
+  private readonly _messageService = MessageService.getInstance();
+  private readonly _simulationControlService = SimulationControlService.getInstance();
 
   constructor(props: any) {
     super(props);
     this.state = {
-      renderModel: null,
+      topology: null,
       isFetching: true
     };
   }
 
   componentDidMount() {
-    if (subscription) {
-      subscription.unsubscribe();
-      subscription = null;
+    if (topologySubscription) {
+      topologySubscription.unsubscribe();
+      topologySubscription = null;
     }
-    subscription = MESSAGE_SERVICE.onTopologyModelReceived((payload) => {
-      this.setState({
-        renderModel: payload.data,
-        isFetching: false
-      });
+
+    topologySubscription = this._messageService.onTopologyModelReceived((payload: GetTopologyModelRequestPayload) => {
+      console.log('TopologyRendererContainer:', payload);
+      if (payload.requestType === RequestConfigurationType.GRID_LAB_D_SYMBOLS) {
+        this.setState({
+          topology: payload.data,
+          isFetching: false
+        });
+      }
     });
+
   }
 
   render() {
     return (
       <TopologyModelRenderer
-        model={_transformModel(this.state.renderModel)}
-        isFetching={this.state.isFetching}
-        onStartSimulation={() => SIMULATION_CONTROL_SERVICE.startSimulation(this.props.simulationConfig)}
-        />
+        topology={_transformModel(this.state.topology)}
+        showWait={this.state.isFetching}
+        onStartSimulation={() => this._simulationControlService.startSimulation(this.props.simulationConfig)}
+      />
     );
   }
+
 });
 
 function _transformModel(model: TopologyModel): { nodes: any[], links: any[] } {
@@ -69,10 +78,10 @@ function _transformModel(model: TopologyModel): { nodes: any[], links: any[] } {
   const links = [];
 
   const regulatorParents = {
-    reg_VREG3: 'nd_l2692633',
-    reg_VREG4: 'nd_m1089120',
-    reg_VREG2: 'nd_l2841632',
-    reg_FEEDER_REG: 'nd_m1209814'
+    VREG3: 'nd_l2692633',
+    VREG4: 'nd_m1089120',
+    VREG2: 'nd_l2841632',
+    FEEDER_REG: 'nd_m1209814'
   };
 
   const groupNames = ['batteries', 'switches', 'solarpanels', 'swing_nodes', 'transformers', 'overhead_lines',
