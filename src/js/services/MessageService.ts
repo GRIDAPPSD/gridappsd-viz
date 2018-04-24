@@ -7,6 +7,12 @@ import { GetTopologyModelRequest, GetTopologyModelRequestPayload } from '../mode
 import { GetCimDictionaryRequest } from '../models/message-requests/GetCimDictionaryRequest';
 import { CimDictionary } from '../models/cim-dictionary/CimDictionary';
 import { QueryBlazeGraphRequest, QueryBlazeGraphRequestBody } from '../models/message-requests/QueryBlazeGraphRequest';
+import { GetApplicationsAndServices, GetApplicationsAndServicesPayload } from '../models/message-requests/GetApplicationsAndServicesRequest';
+
+// const RESPONSE_QUEUE_TOPIC = '/temp-queue/response-queue';
+// const SIMULATION_STATUS_TOPIC = '/topic/goss.gridappsd.simulation.log.';
+// const FNCS_OUTPUT_TOPIC = '/topic/goss.gridappsd.fncs.output';
+
 
 export class MessageService {
 
@@ -15,6 +21,7 @@ export class MessageService {
   private readonly _getAllFeederModelsRequest = new GetAllFeederModelsRequest();
   private readonly _getCimDictionaryRequest = new GetCimDictionaryRequest();
   private readonly _queryBlazeGraphRequest = new QueryBlazeGraphRequest();
+  private readonly _getApplicationsAndServices = new GetApplicationsAndServices();
   private _isConnected = false;
 
   private constructor() {
@@ -33,6 +40,14 @@ export class MessageService {
    */
   isActive(): boolean {
     return this._isConnected;
+  }
+
+  fetchApplicationsAndServices() {
+    STOMP_CLIENT.send(
+      this._getApplicationsAndServices.url,
+      { 'reply-to': this._getApplicationsAndServices.url },
+      this._getApplicationsAndServices.requestBody
+    );
   }
 
   /**
@@ -91,6 +106,13 @@ export class MessageService {
       { 'reply-to': this._getTopologyModelRequest.replyTo },
       JSON.stringify(this._getTopologyModelRequest.requestBody)
     );
+  }
+
+  onApplicationsAndServicesReceived(fn: (payload: GetApplicationsAndServicesPayload) => void): StompSubscription {
+    return STOMP_CLIENT.subscribe(this._getApplicationsAndServices.url, (message: Message) => {
+      const payload = JSON.parse(message.body);
+      fn(payload);
+    });
   }
 
   /**
