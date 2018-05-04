@@ -14,7 +14,7 @@ export class SimulationControlService {
 
   private readonly _simulationRequestTopic = '/queue/goss.gridappsd.process.request.simulation';
   private readonly _simulationStatusTopic = '/topic/goss.gridappsd.simulation.log';
-  private readonly _fncsOutputTopic = '/topic/goss.gridappsd.fncs.output';
+  private readonly _fncsOutputTopic = 'goss.gridappsd.simulation.output.>';
 
   private constructor() {
   }
