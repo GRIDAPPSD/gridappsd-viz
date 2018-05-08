@@ -56,7 +56,7 @@ export const MainContainer = connect(mapStateToProps)(class extends React.Compon
           }));
           this.props.dispatch(new SetActiveSimulationConfig(simulationConfig));
           // Wait until TopologyModelRendererContainer component is mounted before requesting the data
-          setTimeout(() => MESSAGE_SERVICE.fetchTopologyModel(), 1000);
+          setTimeout(() => MESSAGE_SERVICE.fetchTopologyModel(simulationConfig.power_system_config.Line_name), 1000);
         }}
       />
     );

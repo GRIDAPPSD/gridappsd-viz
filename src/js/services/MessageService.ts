@@ -100,7 +100,7 @@ export class MessageService {
    */
   fetchTopologyModel(mrid = '') {
     if (mrid !== '')
-      this._getCimDictionaryRequest.requestBody.parameters.model_id = mrid;
+      this._getTopologyModelRequest.requestBody.parameters.model_id = mrid;
     STOMP_CLIENT.send(
       this._getTopologyModelRequest.url,
       { 'reply-to': this._getTopologyModelRequest.replyTo },
