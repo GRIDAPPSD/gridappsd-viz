@@ -4,8 +4,8 @@ import { STOMP_CLIENT } from './stomp-client';
 
 import { GetAllFeederModelsRequest, GetAllFeederModelsRequestPayload } from '../models/message-requests/GetAllFeederModelsRequest';
 import { GetTopologyModelRequest, GetTopologyModelRequestPayload } from '../models/message-requests/GetTopologyModelRequest';
-import { GetCimDictionaryRequest } from '../models/message-requests/GetCimDictionaryRequest';
-import { CimDictionary } from '../models/cim-dictionary/CimDictionary';
+import { GetModelDictionaryRequest } from '../models/message-requests/GetModelDictionaryRequest';
+import { ModelDictionary } from '../models/model-dictionary/ModelDictionary';
 import { QueryBlazeGraphRequest, QueryBlazeGraphRequestBody } from '../models/message-requests/QueryBlazeGraphRequest';
 import { GetApplicationsAndServices, GetApplicationsAndServicesPayload } from '../models/message-requests/GetApplicationsAndServicesRequest';
 
@@ -19,7 +19,7 @@ export class MessageService {
   private static readonly _INSTANCE_: MessageService = new MessageService();
   private readonly _getTopologyModelRequest = new GetTopologyModelRequest();
   private readonly _getAllFeederModelsRequest = new GetAllFeederModelsRequest();
-  private readonly _getCimDictionaryRequest = new GetCimDictionaryRequest();
+  private readonly _getModelDictionaryRequest = new GetModelDictionaryRequest();
   private readonly _queryBlazeGraphRequest = new QueryBlazeGraphRequest();
   private readonly _getApplicationsAndServices = new GetApplicationsAndServices();
   private _isConnected = false;
@@ -65,16 +65,17 @@ export class MessageService {
 
   /**
    * Send a request to the platform request the model dictionary
+   * Start sending when Line name drowndown meny in simulation config form is changed
    * @param mrid The MRID for which to request the model dictionary
-   * @see {@link MessageRequest.onCimDictionaryReceived(fn: (payload: CimDictionary) => void)}
+   * @see {@link MessageRequest.onModelDictionaryReceived(fn: (payload: ModelDictionary) => void)}
    */
-  fetchCimDictionary(mrid = '') {
+  fetchModelDictionary(mrid = '') {
     if (mrid !== '')
-      this._getCimDictionaryRequest.requestBody.parameters.model_id = mrid;
+      this._getModelDictionaryRequest.requestBody.parameters.model_id = mrid;
     STOMP_CLIENT.send(
-      this._getCimDictionaryRequest.url,
-      { 'reply-to': this._getCimDictionaryRequest.replyTo },
-      JSON.stringify(this._getCimDictionaryRequest.requestBody)
+      this._getModelDictionaryRequest.url,
+      { 'reply-to': this._getModelDictionaryRequest.replyTo },
+      JSON.stringify(this._getModelDictionaryRequest.requestBody)
     );
   }
 
@@ -100,7 +101,7 @@ export class MessageService {
    */
   fetchTopologyModel(mrid = '') {
     if (mrid !== '')
-      this._getCimDictionaryRequest.requestBody.parameters.model_id = mrid;
+      this._getTopologyModelRequest.requestBody.parameters.model_id = mrid;
     STOMP_CLIENT.send(
       this._getTopologyModelRequest.url,
       { 'reply-to': this._getTopologyModelRequest.replyTo },
@@ -130,15 +131,15 @@ export class MessageService {
   /**
    * Set up the listener that will be invoked when the platform sends back the data in response to
    * a send request to {@link GetTopologyModelRequest.replyTo}
-   * @see {@link MessageRequest.fetchCimDictionary(mrid = '')}
+   * @see {@link MessageRequest.fetchModelDictionary(mrid = '')}
    * @param fn The listener to invoke when the response message arrives
    */
-  onCimDictionaryReceived(fn: (payload: CimDictionary) => void): StompSubscription {
+  onModelDictionaryReceived(fn: (payload: ModelDictionary) => void): StompSubscription {
     console.log('MainContainer')
-    return STOMP_CLIENT.subscribe(this._getCimDictionaryRequest.replyTo, (message: Message) => {
+    return STOMP_CLIENT.subscribe(this._getModelDictionaryRequest.replyTo, (message: Message) => {
       const payload = JSON.parse(message.body);
       payload.data = JSON.parse(payload.data);
-      payload.requestType = this._getCimDictionaryRequest.requestBody.configurationType;
+      payload.requestType = this._getModelDictionaryRequest.requestBody.configurationType;
       fn(payload);
     });
   }

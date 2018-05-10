@@ -112,7 +112,7 @@ export const SimulationConfigForm = connect(mapStateToProps)(class SimulationCon
                     const repeater = setInterval(() => {
                       if (this._messageService.isActive()) {
                         // Ask the platform to send the model dict to our topic
-                        this._messageService.fetchCimDictionary(menuItem.value);
+                        this._messageService.fetchModelDictionary(menuItem.value);
                         console.log('fetching cim')
                         clearInterval(repeater);
                       }
@@ -221,12 +221,14 @@ export const SimulationConfigForm = connect(mapStateToProps)(class SimulationCon
                     new MenuItem('Sample App', { index: 1, name: 'sample_app' })
                   ]}
                   onChange={menuItem => {
-                    const configStr = JSON.stringify(JSON.parse(SIMULATION_CONFIG_OPTIONS.application_config.applications[menuItem.value.index].config_string), null, 4);
-                    this.setState({
-                      selectedAppName: menuItem.value.name,
-                      appConfigStr: configStr
-                    });
-                    dispatch(new UpdateApplicationConfiguration(menuItem.value.name, configStr));
+                    if (SIMULATION_CONFIG_OPTIONS.application_config.applications[menuItem.value.index].config_string !== '') {
+                      const configStr = JSON.stringify(JSON.parse(SIMULATION_CONFIG_OPTIONS.application_config.applications[menuItem.value.index].config_string), null, 4);
+                      this.setState({
+                        selectedAppName: menuItem.value.name,
+                        appConfigStr: configStr
+                      });
+                      dispatch(new UpdateApplicationConfiguration(menuItem.value.name, configStr));
+                    }
                   }}
                   defaultItemIndex={SIMULATION_CONFIG_OPTIONS.application_config.applications.findIndex(value => value.name === activeSimulationConfig.application_config.applications[0].name)}
                 />

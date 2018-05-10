@@ -1,7 +1,7 @@
-import { SimulationConfig } from "./SimulationConfig";
-import { Simulation } from "./Simulation";
-import { MRID } from "./MRID";
-import { FncsOutput } from "./fncs-output/FncsOutput";
+import { SimulationConfig } from './SimulationConfig';
+import { Simulation } from './Simulation';
+import { MRID } from './MRID';
+import { FncsOutput } from './fncs-output/FncsOutput';
 
 export interface AppState {
   activeSimulationConfig: SimulationConfig;

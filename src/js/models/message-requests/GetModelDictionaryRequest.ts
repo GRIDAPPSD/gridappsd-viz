@@ -1,15 +1,15 @@
 import { MessageRequest } from './MessageRequest';
 import { RequestConfigurationType } from './RequestConfigurationType';
 
-export interface GetCimDictionaryRequestBody {
+export interface GetModelDictionaryRequestBody {
   configurationType: string;
   parameters: {
     model_id: string;
   };
 }
 
-export class GetCimDictionaryRequest implements MessageRequest {
-  private _requestBody: GetCimDictionaryRequestBody = null;
+export class GetModelDictionaryRequest implements MessageRequest {
+  private _requestBody: GetModelDictionaryRequestBody = null;
 
   constructor() {
     this._requestBody = {
@@ -27,11 +27,11 @@ export class GetCimDictionaryRequest implements MessageRequest {
     return '/cim_dictionary/' + this.url;
   }
 
-  get requestBody(): GetCimDictionaryRequestBody {
+  get requestBody(): GetModelDictionaryRequestBody {
     return this._requestBody;
   }
 
-  set requestBody(value: GetCimDictionaryRequestBody) {
+  set requestBody(value: GetModelDictionaryRequestBody) {
     this._requestBody = value;
   }
 }

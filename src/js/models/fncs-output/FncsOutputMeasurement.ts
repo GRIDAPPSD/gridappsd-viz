@@ -6,4 +6,6 @@ export interface FncsOutputMeasurement {
   phases: string;
   conductingEquipmentName: string;
   connectivityNode: string;
+  name: string;
+  type: string;
 }

@@ -60,8 +60,11 @@ export class Plot extends React.Component<Props, State> {
 
   private _init() {
     this._container = select(this._canvas).select('g');
-    this._timeScale = scaleTime().range([this._MARGIN.left, this._WIDTH - this._MARGIN.right]);
-    this._yScale = scaleLinear().range([this._HEIGHT - this._MARGIN.bottom, this._MARGIN.top]);
+    this._timeScale = scaleTime()
+      .range([this._MARGIN.left, this._WIDTH - this._MARGIN.right]);
+    this._timeScale.tickFormat(5, ':%S');
+    this._yScale = scaleLinear()
+      .range([this._HEIGHT - this._MARGIN.bottom, this._MARGIN.top]);
     this._lineGenerator = line<TimeSeriesDataPoint>()
       .x(dataPoint => this._timeScale(dataPoint.primitiveX))
       .y(dataPoint => this._yScale(dataPoint.primitiveY));
@@ -87,9 +90,8 @@ export class Plot extends React.Component<Props, State> {
 
     for (const timeSeries of this.props.plotModel.timeSeries) {
       this._container.append('path')
-        .attr('class', 'time-series-line' + ' ' + timeSeries.name)
+        .attr('class', 'time-series-line' + ' _' + timeSeries.name)
         .datum(timeSeries.points)
-        // .attr('class', self.props.model.name + ' ' + series.name + ' ' + series.topologyElementName)
         .attr('d', this._lineGenerator);
     }
   }
