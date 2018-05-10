@@ -92,6 +92,33 @@ function _transformModel(model: TopologyModel): { nodes: any[], links: any[] } {
   for (const groupName of groupNames) {
     switch (groupName) {
       case 'swing_nodes':
+      case 'batteries':
+        for (const element of feeder[groupName])
+          nodes.push({
+            name: element.name,
+            type: feeder[groupName].type,
+            data: element,
+            children: []
+          });
+        break;
+      case 'switches':
+      for (const element of feeder[groupName])
+        nodes.push({
+          name: element.name,
+          type: feeder[groupName].type,
+          data: element,
+          children: []
+        });
+      break;
+      case 'solarpanels':
+      for (const element of feeder[groupName])
+        nodes.push({
+          name: element.name,
+          type: feeder[groupName].type,
+          data: element,
+          children: []
+        });
+      break;
       case 'transformers':
         for (const element of feeder[groupName])
           nodes.push({

@@ -42,7 +42,7 @@ export const BlazeGraphContainer = connect(mapStateToProps)(class BlazeGraphCont
     }
     blazeGraphSubscription = this._messageService.onBlazeGraphDataReceived((payload) => {
       console.log(payload);
-      this.setState({ response: JSON.parse(payload.data) });
+      this.setState({ response: payload.data });
     });
 
   }
