@@ -4,9 +4,9 @@ import { SolarPanel } from '../topology/SolarPanel';
 import { Battery } from '../topology/Battery';
 import { Fuse } from '../topology/Fuse';
 import { Disconnector } from '../topology/Disconnector';
-import { CimDictionaryMeasurement } from './CimDictionaryMeasurement';
+import { ModelDictionaryMeasurement } from './ModelDictionaryMeasurement';
 
-export interface CimDictionary {
+export interface ModelDictionary {
   data: {
     feeders: Array<{
       name: string;
@@ -24,7 +24,7 @@ export interface CimDictionary {
       switches: Switch[];
       fuses: Fuse[];
       disconnectors: Disconnector[];
-      measurements: CimDictionaryMeasurement[];
+      measurements: ModelDictionaryMeasurement[];
     }>;
   }
   requestType: string;

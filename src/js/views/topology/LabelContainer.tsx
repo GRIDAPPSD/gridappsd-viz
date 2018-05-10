@@ -19,30 +19,30 @@ const mapStateToProps = (state: AppState): Props => ({
 })
 
 const ELEMENT_NAME_MAP = {
-  cap_capbank0a: 'capbank0',
-  cap_capbank0b: 'capbank0',
-  cap_capbank0c: 'capbank0',
-  cap_capbank1a: 'capbank1',
-  cap_capbank1b: 'capbank1',
-  cap_capbank1c: 'capbank1',
-  cap_capbank2a: 'capbank2',
-  cap_capbank2b: 'capbank2',
-  cap_capbank2c: 'capbank2',
-  cap_capbank3: 'capbank3', // Can we make this the same as the others?
-  '190-7361': 'reg_VREG4',
-  '190-8581': 'reg_VREG3',
-  '190-8593': 'reg_VREG2',
-  '_hvmv_sub_lsb': 'reg_FEEDER_REG',
-  'l2673313': 'nd_l2673313',
-  'l2876814': 'nd_l2876814',
-  'l2955047': 'nd_l2955047',
-  'l3160107': 'nd_l3160107',
-  'l3254238': 'nd_l3254238',
-  'm1047574': 'nd_m1047574',
-  reg_FEEDER_REG: 'reg_FEEDER_REG',
-  reg_VREG2: 'reg_VREG2',
-  reg_VREG3: 'reg_VREG3',
-  reg_VREG4: 'reg_VREG4'
+  capbank0a: 'capbank0',
+  capbank0b: 'capbank0',
+  capbank0c: 'capbank0',
+  capbank1a: 'capbank1',
+  capbank1b: 'capbank1',
+  capbank1c: 'capbank1',
+  capbank2a: 'capbank2',
+  capbank2b: 'capbank2',
+  capbank2c: 'capbank2',
+  capbank3: 'capbank3', // Can we make this the same as the others?
+  '190-7361': 'VREG4',
+  '190-8581': 'VREG3',
+  '190-8593': 'VREG2',
+  '_hvmv_sub_lsb': 'FEEDER_REG',
+  'l2673313': 'l2673313',
+  'l2876814': 'l2876814',
+  'l2955047': 'l2955047',
+  'l3160107': 'l3160107',
+  'l3254238': 'l3254238',
+  'm1047574': 'm1047574',
+  FEEDER_REG: 'FEEDER_REG',
+  VREG2: 'VREG2',
+  VREG3: 'VREG3',
+  VREG4: 'VREG4'
 };
 
 export const LabelContainer = connect(mapStateToProps)(class LabelContainer extends React.Component<Props, State> {

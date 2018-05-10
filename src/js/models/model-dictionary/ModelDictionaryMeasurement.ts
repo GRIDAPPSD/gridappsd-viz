@@ -1,4 +1,4 @@
-export interface CimDictionaryMeasurement {
+export interface ModelDictionaryMeasurement {
   name: string;
   mRID: string;
   ConductingEquipment_mRID: string;

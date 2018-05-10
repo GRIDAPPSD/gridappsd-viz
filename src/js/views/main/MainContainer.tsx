@@ -8,10 +8,10 @@ import { SetActiveSimulationConfig, AddSimulation, SetNewFncsOutput } from './ma
 import { SimulationConfig } from '../../models/SimulationConfig';
 import { MessageService } from '../../services/MessageService';
 import { SimulationControlService } from '../../services/SimulationControlService';
-import { CimDictionary } from '../../models/cim-dictionary/CimDictionary';
+import { ModelDictionary } from '../../models/model-dictionary/ModelDictionary';
 import { RequestConfigurationType } from '../../models/message-requests/RequestConfigurationType';
 import { FncsOutputMeasurement } from '../../models/fncs-output/FncsOutputMeasurement';
-import { CimDictionaryMeasurement } from '../../models/cim-dictionary/CimDictionaryMeasurement';
+import { ModelDictionaryMeasurement } from '../../models/model-dictionary/ModelDictionaryMeasurement';
 
 interface Props {
   previousSimulations: Simulation[];
@@ -28,7 +28,7 @@ const mapStateToProps = (state: AppState): Props => ({
 const MESSAGE_SERVICE = MessageService.getInstance();
 const SIMULATION_CONTROL_SERVICE = SimulationControlService.getInstance();
 let fncsSubscription = null;
-let cimDictionaryMeasurements: { [mRID: string]: CimDictionaryMeasurement } = null;
+let modelDictionaryMeasurements: { [mRID: string]: ModelDictionaryMeasurement } = null;
 
 export const MainContainer = connect(mapStateToProps)(class extends React.Component<Props, State> {
   constructor(props: any) {
@@ -65,37 +65,46 @@ export const MainContainer = connect(mapStateToProps)(class extends React.Compon
   private _setupTopicSubscribers() {
     const repeater = setInterval(() => {
       if (MESSAGE_SERVICE.isActive()) {
-        const cimDictionarySub = MESSAGE_SERVICE.onCimDictionaryReceived((payload: CimDictionary) => {
+        const modelDictionarySub = MESSAGE_SERVICE.onModelDictionaryReceived((payload: ModelDictionary) => {
           if (payload.requestType === RequestConfigurationType.CIM_DICTIONARY) {
-            cimDictionaryMeasurements = payload.data.feeders[0].measurements.reduce(
+            modelDictionaryMeasurements = payload.data.feeders[0].measurements.reduce(
               (result, measurement) => {
                 result[measurement.mRID] = measurement;
                 return result;
               },
               {}
             );
-            cimDictionarySub.unsubscribe();
+            console.log(modelDictionaryMeasurements);
+            modelDictionarySub.unsubscribe();
           }
         });
 
+        /*
+          PNV voltage
+          A: Current
+          pos: capacitor (On/off)
+          Look for the phase, pnv (a) voltage A
+        */
         fncsSubscription = SIMULATION_CONTROL_SERVICE.onFncsOutputReceived(payload => {
           console.log('Fncs Output from MainContainer:', payload)
-          if (cimDictionaryMeasurements)
+          if (modelDictionaryMeasurements && payload.output && Object.keys(payload.output).length !== 0)
             this.props.dispatch(new SetNewFncsOutput({
               simulationId: payload.output.simulation_id,
               command: payload.command,
               timestamp: payload.output.message.timestamp,
               measurements: payload.output.message.measurements.map(measurement => {
-                const measurementInCimDictionary = cimDictionaryMeasurements[measurement.measurement_mrid];
-                if (measurementInCimDictionary)
+                const measurementInModelDictionary = modelDictionaryMeasurements[measurement.measurement_mrid];
+                if (measurementInModelDictionary)
                   return {
+                    name: measurementInModelDictionary.ConductingEquipment_name,
+                    type: measurementInModelDictionary.measurementType,
                     magnitude: measurement.magnitude,
                     angle: measurement.angle,
                     value: measurement.value,
                     mRID: measurement.measurement_mrid,
-                    phases: measurementInCimDictionary.phases,
-                    conductingEquipmentName: measurementInCimDictionary.ConductingEquipment_name,
-                    connectivityNode: measurementInCimDictionary.ConductingEquipment_type
+                    phases: measurementInModelDictionary.phases,
+                    conductingEquipmentName: measurementInModelDictionary.ConductingEquipment_name,
+                    connectivityNode: measurementInModelDictionary.ConnectivityNode
                   } as FncsOutputMeasurement;
                 return null;
               }).filter(e => e !== null)

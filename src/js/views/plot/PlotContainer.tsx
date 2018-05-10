@@ -1,17 +1,17 @@
 import * as React from 'react';
 import { connect } from 'react-redux';
-import { StompSubscription } from '@stomp/stompjs';
 
 import { Plot } from './Plot';
 import { AppState } from '../../models/AppState';
-import { SimulationControlService } from '../../services/SimulationControlService';
 import { PlotModel } from '../../models/plot/PlotModel';
 import { TimeSeries } from '../../models/plot/TimeSeries';
 import { TimeSeriesDataPoint } from '../../models/plot/TimeSeriesDataPoint';
+import { FncsOutput } from '../../models/fncs-output/FncsOutput';
 
 
 interface Props {
   dispatch: any;
+  fncsOutput: FncsOutput;
 }
 
 interface State {
@@ -19,9 +19,9 @@ interface State {
 }
 
 const mapStateToProps = (state: AppState): Props => ({
+  fncsOutput: state.fncsOutput
 } as Props);
 
-const SIMULATION_CONTROL_SERVICE = SimulationControlService.getInstance();
 const PLOT_NAME_MAP = {
   voltage_A: [
     '190-7361',
@@ -61,30 +61,38 @@ const PLOT_NAME_MAP = {
     'l3254238',
     'm1047574',
   ],
+  power_in_A: [
+    'hvmv_sub'
+  ],
+  power_in_B: [
+    'hvmv_sub'
+  ],
+  power_in_C: [
+    'hvmv_sub'
+  ],
 
   tap_A: [
-    'reg_FEEDER_REG',
-    'reg_VREG2',
-    'reg_VREG3',
-    'reg_VREG4'
+    'FEEDER_REG',
+    'VREG2',
+    'VREG3',
+    'VREG4'
   ],
 
   tap_B: [
-    'reg_FEEDER_REG',
-    'reg_VREG2',
-    'reg_VREG3',
-    'reg_VREG4'
+    'FEEDER_REG',
+    'VREG2',
+    'VREG3',
+    'VREG4'
   ],
 
   tap_C: [
-    'reg_FEEDER_REG',
-    'reg_VREG2',
-    'reg_VREG3',
-    'reg_VREG4'
+    'FEEDER_REG',
+    'VREG2',
+    'VREG3',
+    'VREG4'
   ]
 };
 
-let fncsSubscription: StompSubscription = null;
 const TIME_SERIES: { [seriesName: string]: TimeSeries } = {};
 
 export const PlotContainer = connect(mapStateToProps)(class PlotContainer extends React.Component<Props, State> {
@@ -96,69 +104,69 @@ export const PlotContainer = connect(mapStateToProps)(class PlotContainer extend
     };
   }
 
-  componentDidMount() {
-    if (fncsSubscription) {
-      fncsSubscription.unsubscribe();
-      fncsSubscription = null;
+  componentWillReceiveProps(newProps: Props) {
+    if (this.props !== newProps) {
+      console.log(newProps.fncsOutput);
+      const plotModels = Object.entries(PLOT_NAME_MAP)
+        .map(([plotName, timeSeriesNames]) => this._buildPlotModel(plotName, timeSeriesNames, newProps.fncsOutput));
+      this.setState({ plotModels });
     }
-
-    fncsSubscription = SIMULATION_CONTROL_SERVICE.onFncsOutputReceived(data => {
-      console.log('Fncs Output from PlotContainer:', data);
-      if (0) {
-        const simulationId = Object.keys(data.output)[0];
-        const plotModels = Object.entries(PLOT_NAME_MAP)
-          .map(([plotName, timeSeriesNames]) => this._buildPlotModel(plotName, timeSeriesNames, data.output[simulationId]));
-        this.setState({ plotModels });
-      }
-    });
   }
-
   render() {
+    console.log(this.state.plotModels);
     return (
       this.state.plotModels.map(plotModel => <Plot key={plotModel.name} plotModel={plotModel} />)
     );
   }
 
-  private _buildPlotModel(plotName: string, timeSeriesNames: string[], fncsOutputForSimulation: any): PlotModel {
-    return timeSeriesNames.map(timeSeriesName => this._buildTimeSeries(timeSeriesName, plotName, fncsOutputForSimulation[timeSeriesName]))
+  private _buildPlotModel(plotName: string, timeSeriesNames: string[], fncsOutput: FncsOutput): PlotModel {
+    return timeSeriesNames.map(timeSeriesName => this._buildTimeSeries(timeSeriesName, plotName, fncsOutput))
       .reduce((plotModel: PlotModel, timeSeries: TimeSeries) => {
         plotModel.timeSeries.push(timeSeries);
         return plotModel;
       }, { name: plotName, timeSeries: [] });
   }
 
-  private _buildTimeSeries(timeSeriesName: string, plotName: string, timeSeriesData: any): TimeSeries {
-    const timeSeries: TimeSeries = TIME_SERIES[timeSeriesName] || { name: timeSeriesName, points: [] };
+  private _buildTimeSeries(timeSeriesName: string, plotName: string, fncsOutput: FncsOutput): TimeSeries {
+    const timeSeries: TimeSeries = TIME_SERIES[plotName + '_' + timeSeriesName] || { name: timeSeriesName, points: [] };
     if (timeSeries.points.length === 20)
       timeSeries.points.shift();
-    timeSeries.points.push(this._getDataPointForTimeSeries(plotName, timeSeriesData));
-    TIME_SERIES[timeSeriesName] = timeSeries;
+    timeSeries.points.push(this._getDataPointForTimeSeries(plotName, timeSeriesName, fncsOutput));
+    TIME_SERIES[plotName + '_' + timeSeriesName] = timeSeries;
     return timeSeries;
   }
 
-  private _getDataPointForTimeSeries(plotName: string, timeSeriesData: any): TimeSeriesDataPoint {
-    const dataPoint = { primitiveX: new Date(Date.now()), primitiveY: 0 };
-    if (plotName.includes('voltage') || plotName.includes('power_in')) {
-      // Use a regex to parse a string like this:
-      // voltage: 6319.15-4782.82j V
-      // power_in: 1.75641e+06-808539j VA
-      // In Node, the same regex works for with e+06 and without. 
-      // For some reason, in Chrome, it doesn't. Using separate regexes for now.
-      const valueString = timeSeriesData[plotName];
-      let regex = /[+|-]?(\d+\.?\d+?e?[+|-]?\d+?)[+|-](\d+\.?\d+?)j V/; // TODO: doens't handle imaginary numbers with e+06, etc.
-      if (valueString.indexOf('e') < 0) {
-        regex = /[+|-]?(\d+\.?\d+?)[+|-](\d+\.?\d+?)j V/;
+  private _getDataPointForTimeSeries(plotName: string, timeSeriesName: string, fncsOutput: FncsOutput): TimeSeriesDataPoint {
+    const dataPoint = { primitiveX: new Date(), primitiveY: 0 };
+    if (plotName.includes('voltage')) {
+      const measurement = fncsOutput.measurements.filter(
+        measurement => measurement.connectivityNode === timeSeriesName && plotName.includes(measurement.phases) && measurement.magnitude !== undefined
+      )[0];
+      if (measurement) {
+        console.log(plotName, measurement);
+        dataPoint.primitiveY = Math.sqrt(Math.pow(measurement.magnitude, 2) + Math.pow(measurement.angle, 2));
       }
-      const [, real, imag] = valueString.match(regex);
-      // TODO: This is not really a per-unit voltage. I don't know 
-      // what the nominal voltage would be.
-      // How does the team want to combine these values into a single
-      // stat to display in the plot? 
-      // Or do they want to choose real or imaginary?
-      dataPoint.primitiveY = Math.sqrt(Math.pow(+real, 2) + Math.pow(+imag, 2));
+      else
+        console.warn('No measurement found for time series "' + timeSeriesName + '", plot name "' + plotName + '", fncs output', fncsOutput);
     }
-    else
-      dataPoint.primitiveY = +timeSeriesData[plotName];
+    // else if (plotName.includes('power_in')) {
+    //   const measurement = fncsOutput.measurements.filter(
+    //     measurement => measurement.conductingEquipmentName === timeSeriesName && plotName.includes(measurement.phases) && measurement.magnitude !== undefined
+    //   )[0];
+    //   if (measurement && measurement.type === 'VA')
+    //     dataPoint.primitiveY = Math.sqrt(Math.pow(measurement.magnitude, 2) + Math.pow(measurement.angle, 2));
+    //   else
+    //     console.warn('No measurement found for time series "' + timeSeriesName + '", plot name "' + plotName + '", fncs output', fncsOutput);
+    // }
+    // else if (plotName.includes('tap')) {
+    //   const measurement = fncsOutput.measurements.filter(
+    //     measurement => measurement.conductingEquipmentName === timeSeriesName && plotName.includes(measurement.phases) && measurement.magnitude !== undefined
+    //   )[0];
+    //   if (measurement && measurement.type === 'pos')
+    //     dataPoint.primitiveY = measurement.value;
+    //   else
+    //     console.warn('No measurement found for time series "' + timeSeriesName + '", plot name "' + plotName + '", fncs output', fncsOutput);
+    // }
     return dataPoint;
   }
 });

@@ -29,7 +29,15 @@ export class SimulationControlService {
    * @param fn 
    */
   onFncsOutputReceived(fn: (payload: FncsOutputPayload) => void): StompSubscription {
-    return STOMP_CLIENT.subscribe(this._fncsOutputTopic, (message: Message) => fn(JSON.parse(message.body)));
+    return STOMP_CLIENT.subscribe(this._fncsOutputTopic, (message: Message) => {
+      const payload = JSON.parse(message.body);
+      if (payload.output) {
+        // TODO: payload.output uses single quotes for keys instead of double quotes which is invalid for JSON string
+        // Remove the replace() call when the backend creates a valid JSON string
+        payload.output = JSON.parse(payload.output.replace(/'/g, '"'));
+      }
+      fn(payload);
+    });
   }
 
   onSimulationStarted(fn: (simulationId: string) => void): StompSubscription {
