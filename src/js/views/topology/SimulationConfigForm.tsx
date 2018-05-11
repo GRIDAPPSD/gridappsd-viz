@@ -44,7 +44,6 @@ const mapStateToProps = (state: AppState): Props => {
 export const SimulationConfigForm = connect(mapStateToProps)(class SimulationConfigFormContainer extends React.Component<Props, State> {
 
   private readonly _messageService: MessageService = MessageService.getInstance();
-
   constructor(props: any) {
     super(props);
     this.state = {
@@ -109,11 +108,13 @@ export const SimulationConfigForm = connect(mapStateToProps)(class SimulationCon
                   menuItems={lines.map(line => new MenuItem(line.name, line.mRID))}
                   onChange={menuItem => {
                     dispatch(new SetLineName(menuItem.value));
+                    (document.querySelector('.simulation-name') as HTMLInputElement).value = menuItem.label;
+                    dispatch(new SetSimulationName(menuItem.label));
                     const repeater = setInterval(() => {
                       if (this._messageService.isActive()) {
                         // Ask the platform to send the model dict to our topic
                         this._messageService.fetchModelDictionary(menuItem.value);
-                        console.log('fetching cim')
+                        console.log('fetching model dictionary');
                         clearInterval(repeater);
                       }
                     }, 500);

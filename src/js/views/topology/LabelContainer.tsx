@@ -105,19 +105,29 @@ export const LabelContainer = connect(mapStateToProps)(class LabelContainer exte
                 if (ELEMENT_NAME_MAP[name].includes(m.phases) && voltagesAtPhases.findIndex(e => e.phases === m.phases) === -1)
                 voltagesAtPhases.push(m);
               });
+              const powers = fncsOutput.measurements.filter(m => m.conductingEquipmentName === 'hvmv_sub' && m.type === 'VA');
+              const powersAtPhases = [];
+              // Only get the measurements for phases A, B, C and discard measurements with duplicate phases
+              powers.forEach(m => {
+                if (ELEMENT_NAME_MAP[name].includes(m.phases) && powersAtPhases.findIndex(e => e.phases === m.phases) === -1)
+                  powersAtPhases.push(m);
+              });
+  
               let output = `
               <tr>
                 <th style='width:800px;display:inline-block;'></th>
                 <th>Voltage</th>
-                <th>Tap</th>
+                <th style='width:2000px;display:inline-block;text-align:center'>Tap</th>
+                ${name === 'FEEDER_REG' ? '<th>Power in</th>': ''}
               </tr>
               `;
               for (let i = 0; i < measurementsAtPhases.length; i++) {
                 output += `
                   <tr>
                     <td>${measurementsAtPhases[i].phases}</td>
-                    <td style='text-align:left'>${voltagesAtPhases[i].magnitude + '' + voltagesAtPhases[i].angle + 'V'}</td>
-                    <td>${measurementsAtPhases[i].value}</td>
+                    <td style='text-align:left'>${voltagesAtPhases[i].magnitude + '<span style="font-size:1200px">\u2220</span>' + (voltagesAtPhases[i].angle > 0 ? '+' + voltagesAtPhases[i].angle : voltagesAtPhases[i].angle) + ' V'}</td>
+                    <td style='text-align:center'>${measurementsAtPhases[i].value}</td>
+                    ${name === 'FEEDER_REG' ? '<td>' + powersAtPhases[i].magnitude + '<span style="font-size:1200px">\u2220</span>' + (voltagesAtPhases[i].angle > 0 ? '+' + voltagesAtPhases[i].angle : voltagesAtPhases[i].angle) + ' VA</td>' : ''}
                   </tr>
                 `;
               }

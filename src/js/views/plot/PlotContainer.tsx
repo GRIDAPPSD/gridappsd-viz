@@ -143,7 +143,7 @@ export const PlotContainer = connect(mapStateToProps)(class PlotContainer extend
         measurement => measurement.connectivityNode === timeSeriesName && plotName.includes(measurement.phases) && measurement.magnitude !== undefined
       )[0];
       if (measurement) {
-        dataPoint.primitiveY = Math.sqrt(Math.pow(measurement.magnitude, 2) + Math.pow(measurement.angle, 2));
+        dataPoint.primitiveY = measurement.magnitude;
       }
       else
         console.warn('No measurement found for time series "' + timeSeriesName + '", plot name "' + plotName + '", fncs output', fncsOutput);
@@ -154,7 +154,7 @@ export const PlotContainer = connect(mapStateToProps)(class PlotContainer extend
         measurement.magnitude !== undefined && measurement.type === 'VA'
       )[0];
       if (measurement)
-        dataPoint.primitiveY = Math.sqrt(Math.pow(measurement.magnitude, 2) + Math.pow(measurement.angle, 2));
+        dataPoint.primitiveY = measurement.magnitude;
       else
         console.warn('No measurement found for time series "' + timeSeriesName + '", plot name "' + plotName + '", fncs output', fncsOutput);
     }
