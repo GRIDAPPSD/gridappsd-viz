@@ -150,18 +150,20 @@ export const PlotContainer = connect(mapStateToProps)(class PlotContainer extend
     }
     else if (plotName.includes('power_in')) {
       const measurement = fncsOutput.measurements.filter(
-        measurement => measurement.conductingEquipmentName === timeSeriesName && plotName.includes(measurement.phases) && measurement.magnitude !== undefined
+        measurement => measurement.conductingEquipmentName === timeSeriesName && plotName.includes(measurement.phases) && 
+        measurement.magnitude !== undefined && measurement.type === 'VA'
       )[0];
-      if (measurement && measurement.type === 'PNV')
+      if (measurement)
         dataPoint.primitiveY = Math.sqrt(Math.pow(measurement.magnitude, 2) + Math.pow(measurement.angle, 2));
       else
         console.warn('No measurement found for time series "' + timeSeriesName + '", plot name "' + plotName + '", fncs output', fncsOutput);
     }
     else if (plotName.includes('tap')) {
       const measurement = fncsOutput.measurements.filter(
-        measurement => measurement.conductingEquipmentName === timeSeriesName && plotName.includes(measurement.phases) && measurement.value !== undefined
+        measurement => measurement.conductingEquipmentName === timeSeriesName && plotName.includes(measurement.phases) && 
+        measurement.value !== undefined && measurement.type === 'Pos'
       )[0];
-      if (measurement && measurement.type === 'Pos')
+      if (measurement)
         dataPoint.primitiveY = measurement.value;
       else
         console.warn('No measurement found for time series "' + timeSeriesName + '", plot name "' + plotName + '", fncs output', fncsOutput);

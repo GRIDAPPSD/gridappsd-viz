@@ -78,7 +78,7 @@ export const LabelContainer = connect(mapStateToProps)(class LabelContainer exte
           .append('table')
           .html(() => {
             // getting values for taps
-            const filteredMeasurements = fncsOutput.measurements.filter(m => m.name.includes(name) && m.type === 'Pos');
+            const filteredMeasurements = fncsOutput.measurements.filter(m => m.conductingEquipmentName.includes(name) && m.type === 'Pos');
             const measurementsAtPhases = [];
             // Only get the measurements for phases A, B, C and discard measurements with duplicate phases
             filteredMeasurements.forEach(m => {
