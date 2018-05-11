@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { connect } from 'react-redux';
-import { select, selectAll } from 'd3-selection';
+import { select } from 'd3-selection';
 
 import { AppState } from '../../models/AppState';
 import { FncsOutput } from '../../models/fncs-output/FncsOutput';
@@ -19,30 +19,14 @@ const mapStateToProps = (state: AppState): Props => ({
 })
 
 const ELEMENT_NAME_MAP = {
-  capbank0a: 'capbank0',
-  capbank0b: 'capbank0',
-  capbank0c: 'capbank0',
-  capbank1a: 'capbank1',
-  capbank1b: 'capbank1',
-  capbank1c: 'capbank1',
-  capbank2a: 'capbank2',
-  capbank2b: 'capbank2',
-  capbank2c: 'capbank2',
-  capbank3: 'capbank3', // Can we make this the same as the others?
-  '190-7361': 'VREG4',
-  '190-8581': 'VREG3',
-  '190-8593': 'VREG2',
-  '_hvmv_sub_lsb': 'FEEDER_REG',
-  'l2673313': 'l2673313',
-  'l2876814': 'l2876814',
-  'l2955047': 'l2955047',
-  'l3160107': 'l3160107',
-  'l3254238': 'l3254238',
-  'm1047574': 'm1047574',
-  FEEDER_REG: 'FEEDER_REG',
-  VREG2: 'VREG2',
-  VREG3: 'VREG3',
-  VREG4: 'VREG4'
+  capbank0: ['A', 'B', 'C'],
+  capbank1: ['A', 'B', 'C'],
+  capbank2: ['A', 'B', 'C'],
+  capbank3: ['A', 'B', 'C'],
+  VREG2: ['A', 'B', 'C'],
+  VREG3: ['A', 'B', 'C'],
+  VREG4: ['A', 'B', 'C'],
+  FEEDER_REG: ['A', 'B', 'C']
 };
 
 export const LabelContainer = connect(mapStateToProps)(class LabelContainer extends React.Component<Props, State> {
@@ -54,25 +38,16 @@ export const LabelContainer = connect(mapStateToProps)(class LabelContainer exte
   }
 
   componentWillReceiveProps(newProps: Props) {
-    if (newProps !== this.props)
-      console.log;
+    if (newProps !== this.props) {
+      this._updateLabels(newProps.fncsOutput);
+    }
   }
   render() {
-    console.log(this.props.fncsOutput);
-    this._updateLabels(this._getLabelsFromFncsOutput());
     return (
       null
     );
   }
 
-  private _getLabelsFromFncsOutput() {
-    return this.props.fncsOutput.measurements.reduce((labels, measurement) => {
-      if (measurement.conductingEquipmentName in ELEMENT_NAME_MAP)
-        labels[measurement.conductingEquipmentName] = measurement;
-      return labels;
-    }, {});
-  }
-  
   /*
     This is really ugly,
     initial design was to pass the labels as a prop to TopologyModelRenderer like below,
@@ -84,59 +59,74 @@ export const LabelContainer = connect(mapStateToProps)(class LabelContainer exte
         onStartSimulation={() => SIMULATION_CONTROL_SERVICE.startSimulation(this.props.simulationConfig)} />
     So do this to avoid it (but this is a container component)
   */
-  private _updateLabels(labels) {
-    console.log(labels);
-    const links = document.querySelector('.topology-model-renderer .links');
-    // TopologyModelRenderer is not done rendering yet
-    if (!links || links.childElementCount === 0)
-      setTimeout(() => this._updateLabels(labels), 1000);
-    else {
-      const elementNames = Object.keys(labels);
-      if (elementNames.length > 0) {
-        selectAll('.topology-model-renderer foreignObject').remove();
-        for (const elementName of elementNames) {
-          const boundElementSelection = select<SVGElement, any>('.topology-model-renderer .' + elementName);
-          if (!boundElementSelection.empty()) {
-            const boundDatum = boundElementSelection.datum();
-            const parentOfBoundElementSelection = select(boundElementSelection.node().parentElement);
-            parentOfBoundElementSelection.append('foreignObject')
-              .attr('width', 2000)
-              .attr('height', 2000)
-              .style('width', '2000px')
-              .attr('x', boundDatum.rendering_x)
-              .attr('y', boundDatum.rendering_y)
-              .append('xhtml:div')
-              .attr('class', 'label')
-              .html(`<header>${elementName}</header>`)
-              .append('table')
-              .html(() => {
-                return labels[elementName].sort((a, b) => a.pt_phase.localeCompare(b.pt_phase))
-                  .map((childElement, _, array) => {
-                    if (array.length === 1)
-                      return `
-                    <tr>
-                      <td>Switch A</td>
-                      <td>${childElement.switchA}</td>
-                    </tr>
-                    <tr>
-                      <td>Switch B</td>
-                      <td>${childElement.switchB}</td>
-                    </tr>
-                    <tr>
-                      <td>Switch C</td>
-                      <td>${childElement.switchC}</td>
-                    </tr>
-                  `
-                    return `<tr>
-                  <td>Switch ${childElement.pt_phase}</td>
-                  <td>${childElement['switch' + childElement.pt_phase]}</td>
-                </tr>`
-                  }).join('');
-              });
-          }
-        }
-      }
-    }
+  private _updateLabels(fncsOutput: FncsOutput) {
+    const topLevelGElementSelection = select('.topology-model-renderer svg > g');
+    topLevelGElementSelection.selectAll('foreignObject').remove();
+    Object.keys(ELEMENT_NAME_MAP).forEach(name => {
+      const boundElementSelection = select<SVGElement, any>('.topology-model-renderer .' + name);
+      if (!boundElementSelection.empty()) {
+        const boundDatum = boundElementSelection.datum();
+        topLevelGElementSelection.append('foreignObject')
+          .attr('width', 2000)
+          .attr('height', 2000)
+          .style('width', '2000px')
+          .attr('x', boundDatum.rendering_x)
+          .attr('y', boundDatum.rendering_y)
+          .append('xhtml:div')
+          .attr('class', 'label')
+          .html(`<header>${name}</header>`)
+          .append('table')
+          .html(() => {
+            // getting values for taps
+            const filteredMeasurements = fncsOutput.measurements.filter(m => m.conductingEquipmentName.includes(name) && m.type === 'Pos');
+            const measurementsAtPhases = [];
+            // Only get the measurements for phases A, B, C and discard measurements with duplicate phases
+            filteredMeasurements.forEach(m => {
+              if (ELEMENT_NAME_MAP[name].includes(m.phases) && measurementsAtPhases.findIndex(e => e.phases === m.phases) === -1)
+                measurementsAtPhases.push(m);
+            });
 
+            if (name.includes('capbank')) {
+              return measurementsAtPhases.map(node => (
+                `
+                <tr>
+                  <td>Switch ${node.phases}</td>
+                  <td>${node.value === 0 ? 'CLOSED' : 'OPEN'}</td>
+                </tr>
+                `
+              )).join('')
+            }
+            else {
+              // get measurements for voltages
+              const voltages = fncsOutput.measurements.filter(m => measurementsAtPhases[0].connectivityNode === m.connectivityNode && m.type === 'PNV');
+              const voltagesAtPhases = [];
+              // discard measures with phases that were already added
+              voltages.forEach(m => {
+                if (ELEMENT_NAME_MAP[name].includes(m.phases) && voltagesAtPhases.findIndex(e => e.phases === m.phases) === -1)
+                voltagesAtPhases.push(m);
+              });
+              let output = `
+              <tr>
+                <th style='width:800px;display:inline-block;'></th>
+                <th>Voltage</th>
+                <th>Tap</th>
+              </tr>
+              `;
+              for (let i = 0; i < measurementsAtPhases.length; i++) {
+                output += `
+                  <tr>
+                    <td>${measurementsAtPhases[i].phases}</td>
+                    <td style='text-align:left'>${voltagesAtPhases[i].magnitude + '' + voltagesAtPhases[i].angle + 'V'}</td>
+                    <td>${measurementsAtPhases[i].value}</td>
+                  </tr>
+                `;
+              }
+              return output;
+            }
+          });
+      }
+
+    });
   }
+
 });

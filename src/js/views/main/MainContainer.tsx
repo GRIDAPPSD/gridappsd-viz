@@ -96,7 +96,7 @@ export const MainContainer = connect(mapStateToProps)(class extends React.Compon
                 const measurementInModelDictionary = modelDictionaryMeasurements[measurement.measurement_mrid];
                 if (measurementInModelDictionary)
                   return {
-                    name: measurementInModelDictionary.ConductingEquipment_name,
+                    name: measurementInModelDictionary.name,
                     type: measurementInModelDictionary.measurementType,
                     magnitude: measurement.magnitude,
                     angle: measurement.angle,

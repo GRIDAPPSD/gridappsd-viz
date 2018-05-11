@@ -135,7 +135,6 @@ export class MessageService {
    * @param fn The listener to invoke when the response message arrives
    */
   onModelDictionaryReceived(fn: (payload: ModelDictionary) => void): StompSubscription {
-    console.log('MainContainer')
     return STOMP_CLIENT.subscribe(this._getModelDictionaryRequest.replyTo, (message: Message) => {
       const payload = JSON.parse(message.body);
      // payload.data = JSON.parse(payload.data);
