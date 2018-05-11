@@ -117,7 +117,7 @@ export const SIMULATION_CONFIG_OPTIONS = {
       },
       {
         'name': 'sample_app',
-        'config_string': '{}'
+        'config_string': ''
       }
     ]
   }
