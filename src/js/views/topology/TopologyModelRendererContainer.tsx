@@ -78,10 +78,10 @@ function _transformModel(model: TopologyModel): { nodes: any[], links: any[] } {
   const links = [];
 
   const regulatorParents = {
-    VREG3: 'nd_l2692633',
-    VREG4: 'nd_m1089120',
-    VREG2: 'nd_l2841632',
-    FEEDER_REG: 'nd_m1209814'
+    VREG3: 'l2692633',
+    VREG4: 'm1089120',
+    VREG2: 'l2841632',
+    FEEDER_REG: 'm1209814'
   };
 
   const groupNames = ['batteries', 'switches', 'solarpanels', 'swing_nodes', 'transformers', 'overhead_lines',

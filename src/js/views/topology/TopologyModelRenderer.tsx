@@ -5,6 +5,7 @@ import { line } from 'd3-shape';
 import { zoom, zoomIdentity } from 'd3-zoom';
 import { select, event as currentEvent, Selection } from 'd3-selection';
 import { Wait } from '../wait/Wait';
+import { LabelContainer } from './LabelContainer';
 
 import './TopologyModelRenderer.styles.scss';
 
@@ -46,6 +47,7 @@ export class TopologyModelRenderer extends React.Component<Props, State> {
         </header>
         <svg ref={elem => this._svg = elem}>
           <g></g>
+          <LabelContainer/>
         </svg>
         <Wait show={this.props.showWait} />
       </div>

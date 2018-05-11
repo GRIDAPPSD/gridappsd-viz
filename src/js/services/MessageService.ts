@@ -138,7 +138,6 @@ export class MessageService {
     console.log('MainContainer')
     return STOMP_CLIENT.subscribe(this._getModelDictionaryRequest.replyTo, (message: Message) => {
       const payload = JSON.parse(message.body);
-      payload.data = JSON.parse(payload.data);
       payload.requestType = this._getModelDictionaryRequest.requestBody.configurationType;
       fn(payload);
     });
@@ -153,7 +152,6 @@ export class MessageService {
   onFeederModelsReceived(fn: (payload: GetAllFeederModelsRequestPayload) => void): StompSubscription {
     return STOMP_CLIENT.subscribe(this._getAllFeederModelsRequest.replyTo, (message: Message) => {
       const payload = JSON.parse(message.body);
-      payload.data = JSON.parse(payload.data);
       fn(payload);
     });
   }
@@ -167,7 +165,6 @@ export class MessageService {
   onTopologyModelReceived(fn: (payload: GetTopologyModelRequestPayload) => void): StompSubscription {
     return STOMP_CLIENT.subscribe(this._getTopologyModelRequest.replyTo, (message: Message) => {
       const payload = JSON.parse(message.body);
-      payload.data = JSON.parse(payload.data);
       payload.requestType = this._getTopologyModelRequest.requestBody.configurationType;
       fn(payload);
     });

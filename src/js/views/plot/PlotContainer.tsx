@@ -143,30 +143,29 @@ export const PlotContainer = connect(mapStateToProps)(class PlotContainer extend
         measurement => measurement.connectivityNode === timeSeriesName && plotName.includes(measurement.phases) && measurement.magnitude !== undefined
       )[0];
       if (measurement) {
-        console.log(plotName, measurement);
         dataPoint.primitiveY = Math.sqrt(Math.pow(measurement.magnitude, 2) + Math.pow(measurement.angle, 2));
       }
       else
         console.warn('No measurement found for time series "' + timeSeriesName + '", plot name "' + plotName + '", fncs output', fncsOutput);
     }
-    // else if (plotName.includes('power_in')) {
-    //   const measurement = fncsOutput.measurements.filter(
-    //     measurement => measurement.conductingEquipmentName === timeSeriesName && plotName.includes(measurement.phases) && measurement.magnitude !== undefined
-    //   )[0];
-    //   if (measurement && measurement.type === 'VA')
-    //     dataPoint.primitiveY = Math.sqrt(Math.pow(measurement.magnitude, 2) + Math.pow(measurement.angle, 2));
-    //   else
-    //     console.warn('No measurement found for time series "' + timeSeriesName + '", plot name "' + plotName + '", fncs output', fncsOutput);
-    // }
-    // else if (plotName.includes('tap')) {
-    //   const measurement = fncsOutput.measurements.filter(
-    //     measurement => measurement.conductingEquipmentName === timeSeriesName && plotName.includes(measurement.phases) && measurement.magnitude !== undefined
-    //   )[0];
-    //   if (measurement && measurement.type === 'pos')
-    //     dataPoint.primitiveY = measurement.value;
-    //   else
-    //     console.warn('No measurement found for time series "' + timeSeriesName + '", plot name "' + plotName + '", fncs output', fncsOutput);
-    // }
+    else if (plotName.includes('power_in')) {
+      const measurement = fncsOutput.measurements.filter(
+        measurement => measurement.conductingEquipmentName === timeSeriesName && plotName.includes(measurement.phases) && measurement.magnitude !== undefined
+      )[0];
+      if (measurement && measurement.type === 'PNV')
+        dataPoint.primitiveY = Math.sqrt(Math.pow(measurement.magnitude, 2) + Math.pow(measurement.angle, 2));
+      else
+        console.warn('No measurement found for time series "' + timeSeriesName + '", plot name "' + plotName + '", fncs output', fncsOutput);
+    }
+    else if (plotName.includes('tap')) {
+      const measurement = fncsOutput.measurements.filter(
+        measurement => measurement.conductingEquipmentName === timeSeriesName && plotName.includes(measurement.phases) && measurement.value !== undefined
+      )[0];
+      if (measurement && measurement.type === 'Pos')
+        dataPoint.primitiveY = measurement.value;
+      else
+        console.warn('No measurement found for time series "' + timeSeriesName + '", plot name "' + plotName + '", fncs output', fncsOutput);
+    }
     return dataPoint;
   }
 });
