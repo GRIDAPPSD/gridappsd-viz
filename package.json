@@ -5,7 +5,7 @@
     "main": "index.js",
     "scripts": {
         "dev": "webpack-dev-server --progress --inline",
-        "webpack": "rm -rf dist && webpack --watch",
+        "webpack": "rm -rf dist && webpack",
         "test": "jest"
     },
     "author": "",

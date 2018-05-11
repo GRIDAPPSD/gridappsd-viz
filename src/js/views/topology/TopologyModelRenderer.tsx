@@ -13,6 +13,7 @@ interface Props {
   topology: { nodes: any[], links: any[] };
   showWait: boolean;
   onStartSimulation: () => void;
+  topologyName: string;
 }
 
 interface State {
@@ -23,6 +24,10 @@ export class TopologyModelRenderer extends React.Component<Props, State> {
   private _canvas: Selection<SVGSVGElement, any, any, any> = null;
   private _container: Selection<SVGGElement, any, any, any> = null;
   private _svg: SVGSVGElement = null;
+  private readonly _zoomConfigs = {
+    ieee8500: { x: 55.164249877758266, y: -139.96588467618716, k: 0.02029557042757985 },
+    ieee123: { x: 198.39621983106292, y: 25.86191550179683, k: 0.1024394509185199 }
+  }
   constructor(props: any) {
     super(props);
     this.state = {
@@ -47,7 +52,7 @@ export class TopologyModelRenderer extends React.Component<Props, State> {
         </header>
         <svg ref={elem => this._svg = elem}>
           <g></g>
-          <LabelContainer/>
+          <LabelContainer />
         </svg>
         <Wait show={this.props.showWait} />
       </div>
@@ -66,7 +71,7 @@ export class TopologyModelRenderer extends React.Component<Props, State> {
     const xOffset = -xExtent[0];
     const yOffset = -yExtent[0];
 
-    const zoomCenter = { x: 55.164249877758266, y: -139.96588467618716, k: 0.02029557042757985 };
+    const zoomCenter = this._zoomConfigs[this.props.topologyName];
     this._container.selectAll('g').remove();
     const zoomer = zoom()
       .on("zoom", () => {

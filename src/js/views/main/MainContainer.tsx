@@ -49,6 +49,7 @@ export const MainContainer = connect(mapStateToProps)(class extends React.Compon
         previousSimulations={this.props.previousSimulations}
         onPreviousSimulationSelected={(simulation: Simulation) => this.props.dispatch(new SetActiveSimulationConfig(simulation.config))}
         onSimulationConfigFormSubmitted={(simulationConfig: SimulationConfig) => {
+          console.log(simulationConfig);
           this.props.dispatch(new AddSimulation({
             name: simulationConfig.simulation_config.simulation_name,
             config: simulationConfig,
@@ -65,7 +66,7 @@ export const MainContainer = connect(mapStateToProps)(class extends React.Compon
   private _setupTopicSubscribers() {
     const repeater = setInterval(() => {
       if (MESSAGE_SERVICE.isActive()) {
-        const modelDictionarySub = MESSAGE_SERVICE.onModelDictionaryReceived((payload: ModelDictionary) => {
+        MESSAGE_SERVICE.onModelDictionaryReceived((payload: ModelDictionary) => {
           if (payload.requestType === RequestConfigurationType.CIM_DICTIONARY) {
             modelDictionaryMeasurements = payload.data.feeders[0].measurements.reduce(
               (result, measurement) => {
@@ -75,18 +76,10 @@ export const MainContainer = connect(mapStateToProps)(class extends React.Compon
               {}
             );
             console.log(modelDictionaryMeasurements);
-            modelDictionarySub.unsubscribe();
           }
         });
 
-        /*
-          PNV voltage
-          A: Current
-          pos: capacitor (On/off)
-          Look for the phase, pnv (a) voltage A
-        */
         fncsSubscription = SIMULATION_CONTROL_SERVICE.onFncsOutputReceived(payload => {
-          console.log('Fncs Output from MainContainer:', payload)
           if (modelDictionaryMeasurements && payload.output && Object.keys(payload.output).length !== 0)
             this.props.dispatch(new SetNewFncsOutput({
               simulationId: payload.output.simulation_id,

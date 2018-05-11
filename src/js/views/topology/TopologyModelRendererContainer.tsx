@@ -64,6 +64,7 @@ export const TopologyModelRendererContainer = connect(mapStateToProps)(class Top
         topology={_transformModel(this.state.topology)}
         showWait={this.state.isFetching}
         onStartSimulation={() => this._simulationControlService.startSimulation(this.props.simulationConfig)}
+        topologyName={this.props.simulationConfig.simulation_config.simulation_name}
       />
     );
   }
