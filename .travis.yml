@@ -12,7 +12,7 @@ before_install:
   - './.travis/main.sh'
   
 script:
-  - './build-docker.sh -b'
+  - './.travis/build-docker.sh -b'
 
 # only execute the following instructions in
 # the case of a success (failing at this point
@@ -23,10 +23,11 @@ script:
 # page of your repository and then change the 
 # environment in the settings pannel.
 after_success:
-  - if [[ "$TRAVIS_BRANCH" == "master" ]]; then
-      if [ x "$DOCKER_USERNAME" != x"" -a x "$DOCKER_PASSWORD" != x"" ]; then
+  - if [ "$TRAVIS_BRANCH" == "master" ]; then
+      
+      if [ -n "$DOCKER_USERNAME" ] && [ -n "$DOCKER_PASSWORD" ]; then
         docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD ;
-        ./build-docker.sh -p;
+        ./.travis/build-docker.sh -p;
       fi
     fi
 
