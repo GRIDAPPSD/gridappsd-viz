@@ -51,7 +51,8 @@ export class Plot extends React.Component<Props, State> {
           className='canvas'
           ref={elem => this._canvas = elem}
           width={this._WIDTH}
-          height={this._HEIGHT}>
+          height={this._HEIGHT}
+          viewBox={`0 0 ${this._WIDTH} ${this._HEIGHT}`}>
           <g />
         </svg>
       </div>
