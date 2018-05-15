@@ -34,11 +34,6 @@ export class SimulationControlService {
   onSimulationOutputReceived(fn: (payload: SimulationOutputPayload) => void): StompSubscription {
     return this._stompClient.subscribe(this._simulationOutputTopic, (message: Message) => {
       const payload = JSON.parse(message.body);
-      if (payload.output) {
-        // TODO: payload.output uses single quotes for keys instead of double quotes which is invalid for JSON string
-        // Remove the replace() call when the backend creates a valid JSON string
-        // payload.output = JSON.parse(payload.output.replace(/'/g, '"'));
-      }
       fn(payload);
     });
   }

@@ -78,9 +78,9 @@ export const LabelContainer = connect(mapStateToProps)(class LabelContainer exte
       if (!boundElementSelection.empty()) {
         const boundDatum = boundElementSelection.datum();
         topLevelGElementSelection.append('foreignObject')
-          .attr('width', 2000)
-          .attr('height', 2000)
-          // .style('width', '2000px')
+          .attr('width', 50000)
+          .attr('height', 50000)
+          .style('width', '50000px')
           .attr('x', boundDatum.rendering_x)
           .attr('y', boundDatum.rendering_y)
           .append('xhtml:div')
