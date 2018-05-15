@@ -1,6 +1,6 @@
 import { Message, StompSubscription } from '@stomp/stompjs';
 
-import { STOMP_CLIENT } from './stomp-client';
+import { StompClient } from './StompClient';
 
 import { GetAllFeederModelsRequest, GetAllFeederModelsRequestPayload } from '../models/message-requests/GetAllFeederModelsRequest';
 import { GetTopologyModelRequest, GetTopologyModelRequestPayload } from '../models/message-requests/GetTopologyModelRequest';
@@ -9,25 +9,19 @@ import { ModelDictionary } from '../models/model-dictionary/ModelDictionary';
 import { QueryBlazeGraphRequest, QueryBlazeGraphRequestBody } from '../models/message-requests/QueryBlazeGraphRequest';
 import { GetApplicationsAndServices, GetApplicationsAndServicesPayload } from '../models/message-requests/GetApplicationsAndServicesRequest';
 
-// const RESPONSE_QUEUE_TOPIC = '/temp-queue/response-queue';
-// const SIMULATION_STATUS_TOPIC = '/topic/goss.gridappsd.simulation.log.';
-// const FNCS_OUTPUT_TOPIC = '/topic/goss.gridappsd.fncs.output';
-
-
 export class MessageService {
 
+  private readonly _stompClient = StompClient.getInstance();
   private static readonly _INSTANCE_: MessageService = new MessageService();
   private readonly _getTopologyModelRequest = new GetTopologyModelRequest();
   private readonly _getAllFeederModelsRequest = new GetAllFeederModelsRequest();
   private readonly _getModelDictionaryRequest = new GetModelDictionaryRequest();
   private readonly _queryBlazeGraphRequest = new QueryBlazeGraphRequest();
   private readonly _getApplicationsAndServices = new GetApplicationsAndServices();
-  private _isConnected = false;
+  private readonly _modelDictionaryCache = {};
+  private readonly _topologyModelCache = {};
 
   private constructor() {
-    STOMP_CLIENT.heartbeat.outgoing = 0;
-    STOMP_CLIENT.heartbeat.incoming = 0;
-    STOMP_CLIENT.connect('system', 'manager', () => this._isConnected = true, () => this._isConnected = false);
   }
 
   static getInstance(): MessageService {
@@ -39,11 +33,11 @@ export class MessageService {
    * has been established
    */
   isActive(): boolean {
-    return this._isConnected;
+    return this._stompClient.isActive();
   }
 
   fetchApplicationsAndServices() {
-    STOMP_CLIENT.send(
+    this._stompClient.send(
       this._getApplicationsAndServices.url,
       { 'reply-to': this._getApplicationsAndServices.url },
       this._getApplicationsAndServices.requestBody
@@ -56,7 +50,7 @@ export class MessageService {
    * @see {@link MessageRequest.onFeederModelsReceived(fn: (payload: GetAllFeederModelsRequestPayload) => void)}
    */
   fetchAllFeederModels() {
-    STOMP_CLIENT.send(
+    this._stompClient.send(
       this._getAllFeederModelsRequest.url,
       { 'reply-to': this._getAllFeederModelsRequest.replyTo },
       this._getAllFeederModelsRequest.requestBody
@@ -69,10 +63,12 @@ export class MessageService {
    * @param mrid The MRID for which to request the model dictionary
    * @see {@link MessageRequest.onModelDictionaryReceived(fn: (payload: ModelDictionary) => void)}
    */
-  fetchModelDictionary(mrid = '') {
-    if (mrid !== '')
-      this._getModelDictionaryRequest.requestBody.parameters.model_id = mrid;
-    STOMP_CLIENT.send(
+  fetchModelDictionary(mrid: string) {
+    if (mrid in this._modelDictionaryCache)
+      return;
+    this._modelDictionaryCache[mrid] = true;
+    this._getModelDictionaryRequest.requestBody.parameters.model_id = mrid;
+    this._stompClient.send(
       this._getModelDictionaryRequest.url,
       { 'reply-to': this._getModelDictionaryRequest.replyTo },
       JSON.stringify(this._getModelDictionaryRequest.requestBody)
@@ -87,7 +83,7 @@ export class MessageService {
    */
   fetchDataFromBlazeGraph(requestBody: QueryBlazeGraphRequestBody) {
     this._queryBlazeGraphRequest.requestBody = requestBody;
-    STOMP_CLIENT.send(
+    this._stompClient.send(
       this._queryBlazeGraphRequest.url,
       { 'reply-to': this._queryBlazeGraphRequest.replyTo },
       JSON.stringify(this._queryBlazeGraphRequest.requestBody).replace(/\\"/g, '"')
@@ -99,10 +95,12 @@ export class MessageService {
    * @param mrid The selected MRID (Line name)
    * @see {@link MessageService.onTopologyModelReceived(fn: (payload: GetTopologyModelRequestPayload) => void)}
    */
-  fetchTopologyModel(mrid = '') {
-    if (mrid !== '')
-      this._getTopologyModelRequest.requestBody.parameters.model_id = mrid;
-    STOMP_CLIENT.send(
+  fetchTopologyModel(mrid: string) {
+    if (mrid in this._topologyModelCache)
+      return;
+    this._topologyModelCache[mrid] = true;
+    this._getTopologyModelRequest.requestBody.parameters.model_id = mrid;
+    this._stompClient.send(
       this._getTopologyModelRequest.url,
       { 'reply-to': this._getTopologyModelRequest.replyTo },
       JSON.stringify(this._getTopologyModelRequest.requestBody)
@@ -110,7 +108,7 @@ export class MessageService {
   }
 
   onApplicationsAndServicesReceived(fn: (payload: GetApplicationsAndServicesPayload) => void): StompSubscription {
-    return STOMP_CLIENT.subscribe(this._getApplicationsAndServices.url, (message: Message) => {
+    return this._stompClient.subscribe(this._getApplicationsAndServices.url, (message: Message) => {
       const payload = JSON.parse(message.body);
       fn(payload);
     });
@@ -123,7 +121,7 @@ export class MessageService {
    * @param fn The listener to invoke when the response message arrives
    */
   onBlazeGraphDataReceived(fn: (payload: any) => void): StompSubscription {
-    return STOMP_CLIENT.subscribe(this._queryBlazeGraphRequest.replyTo, (message: Message) => {
+    return this._stompClient.subscribe(this._queryBlazeGraphRequest.replyTo, (message: Message) => {
       fn(JSON.parse(message.body));
     });
   }
@@ -135,9 +133,9 @@ export class MessageService {
    * @param fn The listener to invoke when the response message arrives
    */
   onModelDictionaryReceived(fn: (payload: ModelDictionary) => void): StompSubscription {
-    return STOMP_CLIENT.subscribe(this._getModelDictionaryRequest.replyTo, (message: Message) => {
+    return this._stompClient.subscribe(this._getModelDictionaryRequest.replyTo, (message: Message) => {
       const payload = JSON.parse(message.body);
-      payload.data = JSON.parse(payload.data);
+      // payload.data = JSON.parse(payload.data);
       payload.requestType = this._getModelDictionaryRequest.requestBody.configurationType;
       fn(payload);
     });
@@ -150,9 +148,9 @@ export class MessageService {
    * @param fn The listener to invoke when the response message arrives
    */
   onFeederModelsReceived(fn: (payload: GetAllFeederModelsRequestPayload) => void): StompSubscription {
-    return STOMP_CLIENT.subscribe(this._getAllFeederModelsRequest.replyTo, (message: Message) => {
+    return this._stompClient.subscribe(this._getAllFeederModelsRequest.replyTo, (message: Message) => {
       const payload = JSON.parse(message.body);
-      payload.data = JSON.parse(payload.data);
+      // payload.data = JSON.parse(payload.data);
       fn(payload);
     });
   }
@@ -164,9 +162,9 @@ export class MessageService {
    * @param fn The listener to invoke when the response message arrives
    */
   onTopologyModelReceived(fn: (payload: GetTopologyModelRequestPayload) => void): StompSubscription {
-    return STOMP_CLIENT.subscribe(this._getTopologyModelRequest.replyTo, (message: Message) => {
+    return this._stompClient.subscribe(this._getTopologyModelRequest.replyTo, (message: Message) => {
       const payload = JSON.parse(message.body);
-      payload.data = JSON.parse(payload.data);
+      // payload.data = JSON.parse(payload.data);
       payload.requestType = this._getTopologyModelRequest.requestBody.configurationType;
       fn(payload);
     });

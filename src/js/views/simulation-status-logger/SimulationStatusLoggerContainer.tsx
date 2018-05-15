@@ -45,18 +45,22 @@ export const SimulationStatusLoggerContainer = connect(mapStateToProps)(class Si
       simulationStatusLogSub.unsubscribe();
       simulationStatusLogSub = null;
     }
-
-    simulationStartSubscription = this._simulationControlService.onSimulationStarted(simulationId => {
-      console.log('simulation ID: ' + simulationId);
-      this.setState({ isFetching: true });
-      simulationStatusLogSub = this._simulationControlService.onSimulationStatusLogReceived(
-        simulationId,
-        logMessage => this.setState({
-          logMessages: this.state.logMessages.concat(logMessage),
-          isFetching: false
-        })
-      );
-    });
+    const repeater = setInterval(() => {
+      if (this._simulationControlService.isActive()) {
+        simulationStartSubscription = this._simulationControlService.onSimulationStarted(simulationId => {
+          console.log('simulation ID: ' + simulationId);
+          this.setState({ isFetching: true });
+          simulationStatusLogSub = this._simulationControlService.onSimulationStatusLogReceived(
+            simulationId,
+            logMessage => this.setState({
+              logMessages: this.state.logMessages.concat(logMessage),
+              isFetching: false
+            })
+          );
+        });
+        clearInterval(repeater);
+      }
+    }, 500);
 
   }
 

@@ -50,7 +50,7 @@ export class TopologyModelRenderer extends React.Component<Props, State> {
         <header>
           <Button onClick={this.props.onStartSimulation}><Glyphicon glyph='play' /></Button>
         </header>
-        <svg ref={elem => this._svg = elem}>
+        <svg ref={elem => this._svg = elem} className={this.props.topologyName}>
           <g></g>
           <LabelContainer />
         </svg>
@@ -59,7 +59,7 @@ export class TopologyModelRenderer extends React.Component<Props, State> {
     );
   }
   private _getChildName(child) {
-    return child.name.replace(/(\D+)(\d)(a|b|c)$/, (match: any, p1: any, p2: any, p3: any) => [p1, p2].join(''));
+    return '_' + child.name.replace(/(\D+)(\d)(a|b|c)$/, (match: any, p1: any, p2: any, p3: any) => [p1, p2].join(''));
   }
 
   private _render(model: { nodes: any[]; links: any[] }) {
@@ -110,7 +110,9 @@ export class TopologyModelRenderer extends React.Component<Props, State> {
         element.rendering_x = element.x + xOffset;
         element.rendering_y = element.y + yOffset;
 
-        let className = 'element ' + element.name;
+        // Add an underscore to guard against names that contain only numbers which
+        // will make d3 complain because they are not valid selectors
+        let className = 'element _' + element.name;
         let isCapacitor = false;
         let isRegulator = false;
         element.children.forEach((child) => {

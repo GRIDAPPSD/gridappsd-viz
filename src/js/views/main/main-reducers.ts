@@ -1,5 +1,5 @@
 import { Simulation } from '../../models/Simulation';
-import { SimulationActions, ADD_SIMULATION, SET_ACTIVE_SIMULATION_CONFIG, SetActiveSimulationConfig, SetNewFncsOutput, SET_NEW_FNCS_OUTPUT } from './main-actions';
+import { SimulationActions, REPLACE_SIMULATION, SET_ACTIVE_SIMULATION_CONFIG, SetActiveSimulationConfig, SetNewSimulationOutput, SET_NEW_SIMULATION_OUTPUT } from './main-actions';
 import { SetSimulationId, SET_SIMULATION_ID } from '../simulation-status-logger/simulation-status-logger-actions';
 import { SimulationConfig } from '../../models/SimulationConfig';
 
@@ -18,7 +18,7 @@ import {
   SimulationConfigActions
 } from '../topology/simulation-config-form-actions';
 import { DEFAULT_SIMULATION_CONFIG } from '../../models/default-simulation-config';
-import { FncsOutput } from '../../models/fncs-output/FncsOutput';
+import { SimulationOutput } from '../../models/simulation-output/SimulationOutput';
 
 export function activeSimulationConfig(config: SimulationConfig = DEFAULT_SIMULATION_CONFIG, action: SimulationConfigActions | SetActiveSimulationConfig): SimulationConfig {
   switch (action.type) {
@@ -51,9 +51,9 @@ export function activeSimulationConfig(config: SimulationConfig = DEFAULT_SIMULA
   }
 }
 
-export function fncsOutput(output: FncsOutput = {} as FncsOutput, action: SetNewFncsOutput): FncsOutput {
+export function simulationOutput(output: SimulationOutput = {} as SimulationOutput, action: SetNewSimulationOutput): SimulationOutput {
   switch (action.type) {
-    case SET_NEW_FNCS_OUTPUT:
+    case SET_NEW_SIMULATION_OUTPUT:
       return action.output;
     default:
       return output;
@@ -62,7 +62,7 @@ export function fncsOutput(output: FncsOutput = {} as FncsOutput, action: SetNew
 
 export function previousSimulations(state: Simulation[] = [], action: SimulationActions | SetSimulationId): Simulation[] {
   switch (action.type) {
-    case ADD_SIMULATION:
+    case REPLACE_SIMULATION:
       return state.filter(sim => sim.name !== action.simulation.name).concat(action.simulation);
     case SET_SIMULATION_ID:
       const simulation = state.filter(simulation => simulation.name === action.simulationName)[0];

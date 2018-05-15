@@ -1,16 +1,16 @@
 import { Action } from '../../models/Action';
 import { Simulation } from '../../models/Simulation';
 import { SimulationConfig } from '../../models/SimulationConfig';
-import { FncsOutput } from '../../models/fncs-output/FncsOutput';
+import { SimulationOutput } from '../../models/simulation-output/SimulationOutput';
 
-export const ADD_SIMULATION = 'ADD_SIMULATION';
+export const REPLACE_SIMULATION = 'ADD_SIMULATION';
 export const SET_ACTIVE_SIMULATION_CONFIG = 'SET_ACTIVE_SIMULATION_CONFIG';
-export const SET_NEW_FNCS_OUTPUT = 'SET_NEW_FNCS_OUTPUT';
+export const SET_NEW_SIMULATION_OUTPUT = 'SET_NEW_SIMULATION_OUTPUT';
 
-export type SimulationActions = AddSimulation | SetActiveSimulationConfig | SetNewFncsOutput;
+export type SimulationActions = ReplaceSimulation | SetActiveSimulationConfig | SetNewSimulationOutput;
 
-export class AddSimulation extends Action {
-  readonly type = ADD_SIMULATION;
+export class ReplaceSimulation extends Action {
+  readonly type = REPLACE_SIMULATION;
 
   constructor(readonly simulation: Simulation) {
     super();
@@ -25,10 +25,10 @@ export class SetActiveSimulationConfig extends Action {
   }
 }
 
-export class SetNewFncsOutput extends Action {
-  readonly type = SET_NEW_FNCS_OUTPUT;
+export class SetNewSimulationOutput extends Action {
+  readonly type = SET_NEW_SIMULATION_OUTPUT;
 
-  constructor(readonly output: FncsOutput) {
+  constructor(readonly output: SimulationOutput) {
     super();
   }
 }

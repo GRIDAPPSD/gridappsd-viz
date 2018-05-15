@@ -4,31 +4,33 @@ import { connect } from 'react-redux';
 import { AppState } from '../../models/AppState';
 import { Simulation } from '../../models/Simulation';
 import { Main } from './Main';
-import { SetActiveSimulationConfig, AddSimulation, SetNewFncsOutput } from './main-actions';
+import { SetActiveSimulationConfig, ReplaceSimulation, SetNewSimulationOutput } from './main-actions';
 import { SimulationConfig } from '../../models/SimulationConfig';
 import { MessageService } from '../../services/MessageService';
 import { SimulationControlService } from '../../services/SimulationControlService';
 import { ModelDictionary } from '../../models/model-dictionary/ModelDictionary';
 import { RequestConfigurationType } from '../../models/message-requests/RequestConfigurationType';
-import { FncsOutputMeasurement } from '../../models/fncs-output/FncsOutputMeasurement';
+import { SimulationOutputMeasurement } from '../../models/simulation-output/SimulationOutputMeasurement';
 import { ModelDictionaryMeasurement } from '../../models/model-dictionary/ModelDictionaryMeasurement';
 
 interface Props {
   previousSimulations: Simulation[];
   dispatch: any;
+  currentSimulationName: string;
 }
 
 interface State {
 }
 
 const mapStateToProps = (state: AppState): Props => ({
-  previousSimulations: state.previousSimulations
+  previousSimulations: state.previousSimulations,
+  currentSimulationName: state.activeSimulationConfig.simulation_config.simulation_name
 } as Props);
 
 const MESSAGE_SERVICE = MessageService.getInstance();
 const SIMULATION_CONTROL_SERVICE = SimulationControlService.getInstance();
-let fncsSubscription = null;
-let modelDictionaryMeasurements: { [mRID: string]: ModelDictionaryMeasurement } = null;
+let simulationOutputSubscription = null;
+const MODEL_DIRECTIONARY_MEASUREMENTS_PER_SIMULATION_NAME: { [name: string]: { [mRID: string]: ModelDictionaryMeasurement } } = {};
 
 export const MainContainer = connect(mapStateToProps)(class extends React.Component<Props, State> {
   constructor(props: any) {
@@ -36,9 +38,9 @@ export const MainContainer = connect(mapStateToProps)(class extends React.Compon
   }
 
   componentDidMount() {
-    if (fncsSubscription) {
-      fncsSubscription.unsubscribe();
-      fncsSubscription = null;
+    if (simulationOutputSubscription) {
+      simulationOutputSubscription.unsubscribe();
+      simulationOutputSubscription = null;
     }
     this._setupTopicSubscribers();
   }
@@ -50,7 +52,7 @@ export const MainContainer = connect(mapStateToProps)(class extends React.Compon
         onPreviousSimulationSelected={(simulation: Simulation) => this.props.dispatch(new SetActiveSimulationConfig(simulation.config))}
         onSimulationConfigFormSubmitted={(simulationConfig: SimulationConfig) => {
           console.log(simulationConfig);
-          this.props.dispatch(new AddSimulation({
+          this.props.dispatch(new ReplaceSimulation({
             name: simulationConfig.simulation_config.simulation_name,
             config: simulationConfig,
             id: simulationConfig.simulation_config.simulation_name
@@ -68,20 +70,21 @@ export const MainContainer = connect(mapStateToProps)(class extends React.Compon
       if (MESSAGE_SERVICE.isActive()) {
         MESSAGE_SERVICE.onModelDictionaryReceived((payload: ModelDictionary) => {
           if (payload.requestType === RequestConfigurationType.CIM_DICTIONARY) {
-            modelDictionaryMeasurements = payload.data.feeders[0].measurements.reduce(
+            const modelDictionaryMeasurements = payload.data.feeders[0].measurements.reduce(
               (result, measurement) => {
                 result[measurement.mRID] = measurement;
                 return result;
               },
               {}
             );
-            console.log(modelDictionaryMeasurements);
+            MODEL_DIRECTIONARY_MEASUREMENTS_PER_SIMULATION_NAME[this.props.currentSimulationName] = modelDictionaryMeasurements;
           }
         });
 
-        fncsSubscription = SIMULATION_CONTROL_SERVICE.onFncsOutputReceived(payload => {
+        simulationOutputSubscription = SIMULATION_CONTROL_SERVICE.onSimulationOutputReceived(payload => {
+          const modelDictionaryMeasurements = MODEL_DIRECTIONARY_MEASUREMENTS_PER_SIMULATION_NAME[this.props.currentSimulationName];
           if (modelDictionaryMeasurements && payload.output && Object.keys(payload.output).length !== 0)
-            this.props.dispatch(new SetNewFncsOutput({
+            this.props.dispatch(new SetNewSimulationOutput({
               simulationId: payload.output.simulation_id,
               command: payload.command,
               timestamp: payload.output.message.timestamp,
@@ -98,7 +101,7 @@ export const MainContainer = connect(mapStateToProps)(class extends React.Compon
                     phases: measurementInModelDictionary.phases,
                     conductingEquipmentName: measurementInModelDictionary.ConductingEquipment_name,
                     connectivityNode: measurementInModelDictionary.ConnectivityNode
-                  } as FncsOutputMeasurement;
+                  } as SimulationOutputMeasurement;
                 return null;
               }).filter(e => e !== null)
             }));

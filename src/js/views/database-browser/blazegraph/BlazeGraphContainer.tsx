@@ -15,6 +15,7 @@ interface Props {
 
 interface State {
   response: any;
+  isFetching: boolean;
 }
 
 const mapStateToProps = (state: AppState) => ({
@@ -29,7 +30,8 @@ export const BlazeGraphContainer = connect(mapStateToProps)(class BlazeGraphCont
   constructor(props: any) {
     super(props);
     this.state = {
-      response: null
+      response: null,
+      isFetching: false
     };
 
     this._queryBlazeGraph = this._queryBlazeGraph.bind(this);
@@ -40,19 +42,29 @@ export const BlazeGraphContainer = connect(mapStateToProps)(class BlazeGraphCont
       blazeGraphSubscription.unsubscribe();
       blazeGraphSubscription = null;
     }
-    blazeGraphSubscription = this._messageService.onBlazeGraphDataReceived((payload) => {
-      console.log(payload);
-      this.setState({ response: JSON.parse(payload.data) });
-    });
+    const repeater = setInterval(() => {
+      if (this._messageService.isActive()) {
+        blazeGraphSubscription = this._messageService.onBlazeGraphDataReceived((payload) => {
+          console.log(payload);
+          this.setState({ response: payload.data }, () => this.setState({ isFetching: false }));
+        });
+        clearInterval(repeater);
+      }
+    }, 500);
 
   }
   render() {
     return (
-      <BlazeGraph mRIDs={this.props.mRIDs} onSubmit={this._queryBlazeGraph} response={this.state.response} />
+      <BlazeGraph
+        mRIDs={this.props.mRIDs}
+        onSubmit={this._queryBlazeGraph}
+        response={this.state.response}
+        isResponseReady={!this.state.isFetching} />
     );
   }
 
   private _queryBlazeGraph(requestBody: QueryBlazeGraphRequestBody) {
+    this.setState({ isFetching: true });
     const cleanedUpRequestBody = {
       requestType: requestBody.requestType,
       resultFormat: requestBody.resultFormat
