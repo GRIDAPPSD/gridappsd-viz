@@ -37,7 +37,7 @@ export class SimulationControlService {
       if (payload.output) {
         // TODO: payload.output uses single quotes for keys instead of double quotes which is invalid for JSON string
         // Remove the replace() call when the backend creates a valid JSON string
-        payload.output = JSON.parse(payload.output.replace(/'/g, '"'));
+        // payload.output = JSON.parse(payload.output.replace(/'/g, '"'));
       }
       fn(payload);
     });
