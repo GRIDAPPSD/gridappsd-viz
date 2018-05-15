@@ -45,13 +45,11 @@ export const BlazeGraphContainer = connect(mapStateToProps)(class BlazeGraphCont
     const repeater = setInterval(() => {
       if (this._messageService.isActive()) {
         blazeGraphSubscription = this._messageService.onBlazeGraphDataReceived((payload) => {
-          console.log(payload);
           this.setState({ response: payload.data }, () => this.setState({ isFetching: false }));
         });
         clearInterval(repeater);
       }
     }, 500);
-
   }
   render() {
     return (
