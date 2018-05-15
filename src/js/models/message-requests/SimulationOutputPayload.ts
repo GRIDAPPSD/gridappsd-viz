@@ -1,4 +1,4 @@
-export interface FncsOutputPayload {
+export interface SimulationOutputPayload {
   output: {
     simulation_id: string;
     message: {

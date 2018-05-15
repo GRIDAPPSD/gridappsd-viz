@@ -74,6 +74,9 @@
         padding: 5px;
         margin-left: 15px;
     }
+    .wait .dots {
+        transform: translateX(-70px);
+    }
     .request-editor,
     .response {
         max-height: 50%;

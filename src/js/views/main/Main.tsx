@@ -16,6 +16,7 @@ import { TopologyModelRendererContainer } from '../topology/TopologyModelRendere
 import { SimulationStatusLoggerContainer } from '../simulation-status-logger/SimulationStatusLoggerContainer';
 import { PlotContainer } from '../plot/PlotContainer';
 import { DatabaseBrowser } from '../database-browser/DatabaseBrowser';
+import { StompClientContainer } from '../stomp-client/StompClientContainer';
 
 import './Main.styles.scss';
 
@@ -70,7 +71,7 @@ export class Main extends React.Component<Props, State> {
                           setTimeout(() => this.setState({ showSimulationConfigForm: true }), 100);
                         }}>
                         <span className='simulation-name'>{simulation.name}</span>
-                        <span className='simulation-id'>{simulation.id}</span>
+                        <span className={'simulation-id ' + simulation.name}>{simulation.id}</span>
                       </DrawerItem>
                     );
                   })
@@ -82,6 +83,9 @@ export class Main extends React.Component<Props, State> {
             </DrawerItem>
             <DrawerItem onClick={() => this.setState({ showSimulationConfigForm: false })}>
               <Link to='/browse'>Browse Database</Link>
+            </DrawerItem>
+            <DrawerItem onClick={() => this.setState({ showSimulationConfigForm: false })}>
+              <Link to='/stomp-client'>STOMP Client</Link>
             </DrawerItem>
           </Drawer>
           <Route
@@ -100,6 +104,7 @@ export class Main extends React.Component<Props, State> {
             } />
           <Route exact path='/help' component={Help} />
           <Route exact path='/applications' component={ApplicationsView} />
+          <Route exact path='/stomp-client' component={StompClientContainer} />
           <Route path='/browse' component={DatabaseBrowser} />
        
           <SimulationConfigForm show={this.state.showSimulationConfigForm} onSubmit={(simulationConfig: SimulationConfig) => {

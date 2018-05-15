@@ -1,4 +1,4 @@
-export interface FncsOutputMeasurement {
+export interface SimulationOutputMeasurement {
   magnitude: number;
   angle: number;
   mRID: string;
