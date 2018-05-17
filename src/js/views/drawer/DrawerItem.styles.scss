@@ -8,4 +8,9 @@
     backface-visibility: hidden;
     padding-left: 10px;
     cursor: pointer;
+    user-select: none;
+    transition: background-color 0.2s linear;
+    &:hover {
+        background-color: #add8e6;
+    }
 }

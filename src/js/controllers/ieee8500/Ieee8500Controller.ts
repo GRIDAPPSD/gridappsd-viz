@@ -1,10 +1,9 @@
 import Ieee8500MainModel from '../../models/ieee8500/Ieee8500MainModel';
 import DataSource from '../../interfaces/DataSource';
 import '../../libs/stomp.js';
-import { runConfig } from '../../../../runConfig';
+import { RUN_CONFIG as config } from '../../../../runConfig';
 
 declare var Stomp: any;
-let config: runConfig = require('../../../../runConfig.json');
 
 class Ieee8500Controller {
 

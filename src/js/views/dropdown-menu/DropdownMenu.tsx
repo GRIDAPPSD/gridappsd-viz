@@ -35,6 +35,7 @@ export class DropdownMenu extends React.Component<Props, State> {
           className='app-dropdown-menu-toggler'
           title={this.state.currentLabel}
           onBlur={this._onClose}
+          tabIndex={0}
           onFocus={this._onOpen}>
           <span className='text'>{this.state.currentLabel}</span>
           <i className='app-icon'></i>
