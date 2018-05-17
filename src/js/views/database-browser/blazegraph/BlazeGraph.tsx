@@ -8,11 +8,13 @@ import { MenuItem } from '../../dropdown-menu/MenuItem';
 import { QueryBlazeGraphRequestType, QueryBlazeGraphRequestBody, QueryBlazeGraphRequestResultFormat } from '../../../models/message-requests/QueryBlazeGraphRequest';
 
 import './BlazeGraph.styles.scss';
+import { Wait } from '../../wait/Wait';
 
 interface Props {
   mRIDs: MRID[];
   onSubmit: (requestBody: QueryBlazeGraphRequestBody) => void;
   response: any;
+  isResponseReady: boolean;
 }
 
 interface State {
@@ -153,6 +155,7 @@ export class BlazeGraph extends React.Component<Props, State> {
               {JSON.stringify(this.state.response, null, 4)}
             </Response>
           }
+          <Wait show={!this.props.isResponseReady} />
         </>
       );
     }

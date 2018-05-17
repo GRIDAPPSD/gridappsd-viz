@@ -9,7 +9,7 @@ import { MenuItem } from '../dropdown-menu/MenuItem';
 import {
   SetGeographicalRegionName, SetSubGeographicalRegionName, SetLineName, SetSimulator,
   SetTimestepFrequency, SetTimestepIncrement, SetSimulationName, UpdateApplicationConfiguration,
-  SetOutputObjects, StoreMRIDs
+  SetOutputObjects, StoreMRIDs, SetDuration
 } from './simulation-config-form-actions';
 import { SimulationConfig } from '../../models/SimulationConfig';
 import { AppState } from '../../models/AppState';
@@ -108,13 +108,12 @@ export const SimulationConfigForm = connect(mapStateToProps)(class SimulationCon
                   menuItems={lines.map(line => new MenuItem(line.name, line.mRID))}
                   onChange={menuItem => {
                     dispatch(new SetLineName(menuItem.value));
-                    (document.querySelector('.simulation-name') as HTMLInputElement).value = menuItem.label;
+                    (document.querySelector('input.simulation-name') as HTMLInputElement).value = menuItem.label;
                     dispatch(new SetSimulationName(menuItem.label));
                     const repeater = setInterval(() => {
                       if (this._messageService.isActive()) {
                         // Ask the platform to send the model dict to our topic
                         this._messageService.fetchModelDictionary(menuItem.value);
-                        console.log('fetching model dictionary');
                         clearInterval(repeater);
                       }
                     }, 500);
@@ -137,7 +136,7 @@ export const SimulationConfigForm = connect(mapStateToProps)(class SimulationCon
                   className='duration'
                   defaultValue={activeSimulationConfig.simulation_config.duration}
                   onBlur={event => {
-                    dispatch(new SetGeographicalRegionName((event.target as HTMLInputElement).value));
+                    dispatch(new SetDuration((event.target as HTMLInputElement).value));
                   }} />
                 <span className='ripple-bar'></span>
               </span>
@@ -156,7 +155,7 @@ export const SimulationConfigForm = connect(mapStateToProps)(class SimulationCon
                 <span className='inline-label'>Power Flow Solver Method</span>
                 <span className='inline-value'>NR</span>
               </span>
-              <button type='button' onClick={this._showSimulationOutputEditor} className='positive show-simulation-output'>Data</button>
+              {/* <button type='button' onClick={this._showSimulationOutputEditor} className='positive show-simulation-output'>Data</button> */}
             </div>
             <div className='control'>
               <label>Timestep Frequency</label>
@@ -218,8 +217,8 @@ export const SimulationConfigForm = connect(mapStateToProps)(class SimulationCon
                 <DropdownMenu
                   menuItems={[
                     // 0 is the index of this app inside SimulationConfig.application_config.applications array
-                    new MenuItem('VVO', { index: 0, name: 'vvo' }),
-                    new MenuItem('Sample App', { index: 1, name: 'sample_app' })
+                    // new MenuItem('VVO', { index: 0, name: 'vvo' }),
+                    new MenuItem('Sample App', { index: 0, name: 'sample_app' })
                   ]}
                   onChange={menuItem => {
                     if (SIMULATION_CONFIG_OPTIONS.application_config.applications[menuItem.value.index].config_string !== '') {
@@ -262,7 +261,10 @@ export const SimulationConfigForm = connect(mapStateToProps)(class SimulationCon
             <Link
               to='/topology'
               className='done fab'
-              onClick={() => this.props.onSubmit(this.props.activeSimulationConfig)} />
+              onClick={() => {
+                this.props.onSubmit(this.props.activeSimulationConfig)
+                console.log(this.props.activeSimulationConfig);
+              }} />
           </div>
           <Modal show={this.state.showSimulationOutput} onHide={this._hideSimulationOutputEditor}>
             <Modal.Header>
