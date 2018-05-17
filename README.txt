@@ -20,7 +20,7 @@ To set up your development environment for this application:
 
 7. > cd <your path>/viz
 
-8. > webpack 
+8. > npm run webpack 
 
     Note: if webpack is not installed on your machine, you can install it globally with this command:
     > npm install webpack -g 
