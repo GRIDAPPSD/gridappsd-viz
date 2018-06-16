@@ -4,6 +4,12 @@
     font-family: 'FontAwesome';
 }
 
+body,
+main {
+    width: 100vw;
+    height: 100vh;
+}
+
 .app-icon {
     position: relative;
     display: inline-flex;
