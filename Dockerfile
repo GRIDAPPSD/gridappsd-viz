@@ -19,5 +19,7 @@ ENV VIZ_PORT=8082
 ENV PORT=${VIZ_PORT}
 EXPOSE ${VIZ_PORT}
 
+USER node
+
 CMD ["npm", "start"]
 
