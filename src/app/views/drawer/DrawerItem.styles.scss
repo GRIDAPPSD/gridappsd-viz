@@ -1,0 +1,16 @@
+.drawer-item {
+    list-style-type: none;
+    line-height: 55px;
+    font-size: 20px;
+    border-bottom: 1px solid #000;
+    transition: height 0.5s linear;
+    position: relative;
+    backface-visibility: hidden;
+    padding-left: 10px;
+    cursor: pointer;
+    user-select: none;
+    transition: background-color 0.2s linear;
+    &:hover {
+        background-color: #add8e6;
+    }
+}

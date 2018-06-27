@@ -1,13 +1,9 @@
-import 'backbone';
+import '@stomp/stompjs';
 import 'd3';
-import 'jquery';
 import 'react';
 import 'react-bootstrap';
 import 'react-dom';
+import 'react-redux';
 import 'react-router-dom';
-import 'underscore';
-import 'rxjs/Observable';
-import 'rxjs/observable/dom/ajax';
-import 'rxjs/operators/map';
-import 'rxjs/operators/delay';
-import 'rxjs/operators/retry';
+import 'redux';
+import 'redux-thunk';

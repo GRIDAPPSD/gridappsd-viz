@@ -1,0 +1,75 @@
+@import '../../../constants';
+.topology-model-renderer {
+    height: $TOPOLOGY_RENDERER_HEIGHT;
+    width: 100%;
+    position: relative;
+    &>header {
+        height: 50px;
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+        border-bottom: 2px solid #add8e6;
+        padding-right: 5px;
+        z-index: 1;
+    }
+    svg {
+        width: 100%;
+        height: calc(100% - 20px);
+    }
+    .wait {
+        height: calc(#{$TOPOLOGY_RENDERER_HEIGHT} + 30px);
+        z-index: 0;
+    }
+    circle.element {
+        stroke: gray;
+        stroke-width: 1px;
+    }
+    path.link {
+        stroke-width: 10px;
+    }
+    .label {
+        display: block;
+        width: -moz-max-content;
+        width: -webkit-max-content;
+        width: max-content;
+        color: #000;
+        font-weight: 700;
+        white-space: nowrap;
+        text-align: left;
+        background-color: #adde;
+        header {
+            text-align: center;
+        }
+        td:nth-child(2),
+        td:nth-child(3) {
+            text-align: right;
+        }
+    }
+    .ieee8500 .label {
+        font-size: 600px;
+        border: 100px solid #5f2a2a;
+        padding: 100px;
+        line-height: 1.3;
+        border-radius: .25em;
+        table {
+            width: 6000px;
+        }
+        header {
+            margin-bottom: 150px;
+        }
+
+    }
+    .ieee123 .label {
+        font-size: 120px;
+        border: 10px solid #5f2a2a;
+        padding: 10px;
+        line-height: 1.3;
+        border-radius: .25em;
+        table {
+            width: initial;
+        }
+        td:first-of-type {
+            width: 200px;
+        }
+    }
+}
