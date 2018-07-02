@@ -109,7 +109,9 @@ export const DEFAULT_SIMULATION_CONFIG: SimulationConfig = {
       "schedule_name": "ieeezipload",
       "z_fraction": "0",
       "i_fraction": "1",
-      "p_fraction": "0"
+      "p_fraction": "0",
+      "randomize_zipload_fractions": false,
+      "use_houses": false
     }
   },
   "application_config": {
