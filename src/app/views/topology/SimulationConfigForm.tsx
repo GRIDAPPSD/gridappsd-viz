@@ -8,14 +8,15 @@ import { DropdownMenu } from '../dropdown-menu/DropdownMenu';
 import { MenuItem } from '../dropdown-menu/MenuItem';
 import {
   SetGeographicalRegionName, SetSubGeographicalRegionName, SetLineName, SetSimulator,
-  SetTimestepFrequency, SetTimestepIncrement, SetSimulationName, UpdateApplicationConfiguration,
-  SetOutputObjects, StoreMRIDs, SetDuration, SetStartTime
+  SetSimulationName, UpdateApplicationConfiguration,
+  SetOutputObjects, StoreMRIDs, SetDuration, SetStartTime, ToggleRealtime
 } from './simulation-config-form-actions';
 import { SimulationConfig } from '../../models/SimulationConfig';
 import { AppState } from '../../models/AppState';
 import { SIMULATION_CONFIG_OPTIONS } from '../../models/simulation-config-options';
 import { MessageService } from '../../services/MessageService';
 import { GetAllFeederModelsRequestPayload } from '../../models/message-requests/GetAllFeederModelsRequest';
+import { CheckBox } from '../checkbox/CheckBox';
 
 import './SimulationConfigForm.styles.scss';
 
@@ -172,34 +173,18 @@ export const SimulationConfigForm = connect(mapStateToProps)(class SimulationCon
               {/* <button type='button' onClick={this._showSimulationOutputEditor} className='positive show-simulation-output'>Data</button> */}
             </div>
             <div className='control'>
-              <label>Timestep Frequency</label>
-              <span className='input-field ripple'>
-                <input
-                  type='number'
-                  name='timestep_frequency'
-                  className='timestep-frequency'
-                  onBlur={event => {
-                    dispatch(new SetTimestepFrequency((event.target as HTMLInputElement).value));
-                  }}
-                  defaultValue='1000' />
-                <span className='ripple-bar'></span>
-              </span>
+              <label>Realtime</label>
+              <CheckBox
+                label=''
+                name='realtime'
+                uncheckable={true}
+                onChange={input => {
+                  this.props.dispatch(new ToggleRealtime(input.checked))
+                }}
+                value='test'
+                checked={activeSimulationConfig.simulation_config.realtime} />
             </div>
-            <div className='control'>
-              <label>Timestep Increment</label>
-              <span className='input-field ripple'>
-                <input
-                  type='number'
-                  name='timestep_increment'
-                  className='timestep-increment'
-                  step='1000'
-                  onBlur={event => {
-                    dispatch(new SetTimestepIncrement((event.target as HTMLInputElement).value));
-                  }}
-                  defaultValue='1000' />
-                <span className='ripple-bar'></span>
-              </span>
-            </div>
+
             <div className='control'>
               <label>Simulation Name</label>
               <span className='input-field ripple'>
