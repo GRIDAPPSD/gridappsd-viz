@@ -11,7 +11,7 @@
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3), 0 -0.5px 1px rgba(0, 0, 0, 0.2);
     border-radius: 2px;
     padding: 10px;
-    background-color: #fff;
+    background-color: #555;
     z-index: 15;
     max-width: 300px;
     white-space: pre-wrap;
@@ -23,7 +23,7 @@
     pointer-events: none;
     font-family: 'Roboto', sans-serif;
     font-size: small;
-    color: #555;
+    color: #fff;
 }
 
 .gridappsd-tooltip__arrow {
@@ -36,7 +36,7 @@
     left: 0;
     &::after {
         content: '';
-        background-color: #fff;
+        background-color: #555;
         position: relative;
         border: 1px solid rgba(0, 0, 0, 0.1);
         width: inherit;

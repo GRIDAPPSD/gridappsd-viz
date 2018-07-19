@@ -10,7 +10,6 @@ interface Props {
 }
 
 interface State {
-  isVisible: boolean;
 }
 
 export class Tooltip extends React.Component<Props, State> {
@@ -19,7 +18,6 @@ export class Tooltip extends React.Component<Props, State> {
   constructor(props: any) {
     super(props);
     this.state = {
-      isVisible: props.show || false
     };
   }
 
