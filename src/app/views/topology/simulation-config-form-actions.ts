@@ -15,10 +15,12 @@ export const SET_START_TIME = 'SET_START_TIME';
 export const SET_SUBGEOGRAPHICAL_REGION_NAME = 'SET_SUBGEOGRAPHICAL_REGION_NAME';
 export const SET_TIMESTEP_FREQUENCY = 'SET_TIMESTEP_FREQUENCY';
 export const SET_TIMESTEP_INCREMENT = 'SET_TIMESTEP_INCREMENT';
+export const TOGGLE_REALTIME = 'TOGGLE_REALTIME';
 
 export type SimulationConfigActions = SetGeographicalRegionName | SetSubGeographicalRegionName |
   SetLineName | SetDuration | SetSimulator | SetTimestepFrequency | SetTimestepIncrement |
-  SetSimulationName | SetPowerFlowSolverMethod | UpdateApplicationConfiguration | SetOutputObjects | SetStartTime;
+  SetSimulationName | SetPowerFlowSolverMethod | UpdateApplicationConfiguration | SetOutputObjects | SetStartTime |
+  ToggleRealtime;
 
 
 export class UpdateApplicationConfiguration extends Action {
@@ -108,6 +110,13 @@ export class SetTimestepFrequency extends Action {
 export class SetTimestepIncrement extends Action {
   readonly type = SET_TIMESTEP_INCREMENT;
   constructor(readonly value: string) {
+    super();
+  }
+}
+
+export class ToggleRealtime extends Action {
+  readonly type = TOGGLE_REALTIME;
+  constructor(readonly state: boolean) {
     super();
   }
 }

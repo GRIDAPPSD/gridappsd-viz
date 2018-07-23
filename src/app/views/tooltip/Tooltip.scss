@@ -1,0 +1,48 @@
+.gridappsd-tooltip-overlay {
+    position: fixed;
+    width: 1000vw;
+    height: 1000vh;
+    display: none;
+    cursor: initial;
+}
+.gridappsd-tooltip {
+    display: none;
+    position: absolute;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3), 0 -0.5px 1px rgba(0, 0, 0, 0.2);
+    border-radius: 2px;
+    padding: 10px;
+    background-color: #555;
+    z-index: 15;
+    max-width: 300px;
+    white-space: pre-wrap;
+    left: calc(100% + 20px);
+    min-width: -moz-fit-content;
+    min-width: fit-content;
+    top: 50%;
+    transform: translateY(-50%);
+    pointer-events: none;
+    font-family: 'Roboto', sans-serif;
+    font-size: small;
+    color: #fff;
+}
+
+.gridappsd-tooltip__arrow {
+    overflow: hidden;
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%) translateX(-17px);
+    width: 20px;
+    height: 20px;
+    left: 0;
+    &::after {
+        content: '';
+        background-color: #555;
+        position: relative;
+        border: 1px solid rgba(0, 0, 0, 0.1);
+        width: inherit;
+        height: inherit;
+        display: inline-block;
+        transform: translateX(50%) rotate(45deg);
+        box-shadow: 0 0 1px rgba(0, 0, 0, 0.3);
+    }
+}

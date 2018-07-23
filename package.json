@@ -1,11 +1,11 @@
 {
-
     "name": "gridappsd-viz",
     "version": "1.0.0",
     "description": "",
     "main": "index.js",
     "scripts": {
-        "start": "webpack-dev-server --progress --inline",
+        "start": "node server.js",
+        "dev": "webpack-dev-server --progress --inline",
         "build": "rm -rf dist && webpack"
     },
     "author": "",

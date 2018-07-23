@@ -10,6 +10,7 @@ export const SIMULATION_CONFIG_OPTIONS = {
     "simulators": ["GridLAB-D"],
     "timestep_frequency": "1000",
     "timestep_increment": "1000",
+    "realtime": true,
     "simulation_name": "ieee8500",
     "power_flow_solver_method": "NR",
     "simulation_output": {

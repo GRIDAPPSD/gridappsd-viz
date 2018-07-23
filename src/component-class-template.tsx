@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import './filename.styles.scss';
+import './filename.scss';
 
 interface Props {
 }
