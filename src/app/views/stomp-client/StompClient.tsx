@@ -26,29 +26,32 @@ export class StompClient extends React.Component<Props, State> {
     return (
       <>
         <form className='stomp-client-form'>
-          <div className='control'>
-            <label>Topic</label>
-            <span className='input-field ripple'>
+          <div className='gridappsd-form-control'>
+            <label className='gridappsd-form-control__label'>Topic</label>
+            <span className='gridappsd-form-control__ripple-input-field'>
               <input
                 type='text'
                 name='topic'
-                className='topic'
+                className='topic gridappsd-form-control__ripple-input-field__input'
                 onChange={event => {
                   this.setState({ topic: (event.target as HTMLInputElement).value });
                 }}
                 value={this.state.topic} />
-              <span className='ripple-bar'></span>
+              <span className='gridappsd-form-control__ripple-input-field__ripple-bar'></span>
             </span>
           </div>
-          <div className='control'>
-            <label>Request</label>
+          <div className='gridappsd-form-control'>
+            <label className='gridappsd-form-control__label'>Request</label>
             <textarea
-              className='request-body'
+              className='request-body gridappsd-form-control__multiline-input'
               name='request-body'
               onChange={event => {
                 this.setState({ requestBody: (event.target as HTMLTextAreaElement).value });
               }}
               value={this.state.requestBody}></textarea>
+          </div>
+          <div className='gridappsd-form-control'>
+            <label className='gridappsd-form-control__label'></label>
             <button
               type='button'
               onClick={() => this.props.onRequestSubmitted(this.state.topic, this.state.requestBody)}
@@ -56,14 +59,14 @@ export class StompClient extends React.Component<Props, State> {
               Send request
             </button>
           </div>
-          <div className='control'>
-            <label>Response</label>
-            <div className='response'>
+          <div className='gridappsd-form-control'>
+            <label className='gridappsd-form-control__label'>Response</label>
+            <div className='response gridappsd-form-control__multiline-input'>
               {this.props.response}
             </div>
           </div>
         </form>
-        <Wait show={!this.props.isDone}/>
+        <Wait show={!this.props.isDone} />
       </>
     );
   }

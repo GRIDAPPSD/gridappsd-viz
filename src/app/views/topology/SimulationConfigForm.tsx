@@ -1,21 +1,21 @@
 import * as React from 'react';
 import { connect } from 'react-redux';
 import { Link } from 'react-router-dom';
-import { Modal, Button, ModalTitle } from 'react-bootstrap';
 import { StompSubscription } from '@stomp/stompjs';
 
 import { DropdownMenu } from '../dropdown-menu/DropdownMenu';
 import { MenuItem } from '../dropdown-menu/MenuItem';
 import {
-  SetGeographicalRegionName, SetSubGeographicalRegionName, SetLineName, SetSimulator,
-  SetTimestepFrequency, SetTimestepIncrement, SetSimulationName, UpdateApplicationConfiguration,
-  SetOutputObjects, StoreMRIDs, SetDuration, SetStartTime
+  SetGeographicalRegionName, SetSubGeographicalRegionName, SetLineName, SetSimulator, SetSimulationName,
+  UpdateApplicationConfiguration, StoreMRIDs, SetDuration, SetStartTime, ToggleRealtime
 } from './simulation-config-form-actions';
 import { SimulationConfig } from '../../models/SimulationConfig';
 import { AppState } from '../../models/AppState';
 import { SIMULATION_CONFIG_OPTIONS } from '../../models/simulation-config-options';
 import { MessageService } from '../../services/MessageService';
 import { GetAllFeederModelsRequestPayload } from '../../models/message-requests/GetAllFeederModelsRequest';
+import { CheckBox } from '../checkbox/CheckBox';
+import { Tooltip } from '../tooltip/Tooltip';
 
 import './SimulationConfigForm.styles.scss';
 
@@ -29,10 +29,10 @@ interface Props {
 interface State {
   selectedAppName: string;
   appConfigStr: string;
-  showSimulationOutput: boolean;
   regions: Array<{ regionName: string; regionID: string; index: number }>;
   subregions: Array<{ subregionName: string; subregionID: string; index: number }>;
   lines: Array<{ name: string; mRID: string; index: number }>;
+  showRealtimeHint: boolean;
 }
 
 const mapStateToProps = (state: AppState): Props => {
@@ -44,18 +44,17 @@ const mapStateToProps = (state: AppState): Props => {
 export const SimulationConfigForm = connect(mapStateToProps)(class SimulationConfigFormContainer extends React.Component<Props, State> {
 
   private readonly _messageService: MessageService = MessageService.getInstance();
+
   constructor(props: any) {
     super(props);
     this.state = {
       selectedAppName: '',
-      showSimulationOutput: false,
       appConfigStr: props.activeSimulationConfig.application_config.applications[0].config_string,
       regions: [],
       subregions: [],
-      lines: []
+      lines: [],
+      showRealtimeHint: false
     }
-    this._hideSimulationOutputEditor = this._hideSimulationOutputEditor.bind(this);
-    this._showSimulationOutputEditor = this._showSimulationOutputEditor.bind(this);
   }
 
   componentDidMount() {
@@ -75,11 +74,11 @@ export const SimulationConfigForm = connect(mapStateToProps)(class SimulationCon
       const { regions, subregions, lines } = this.state;
       return (
         <form style={{ display: show ? 'block' : 'none' }} className='simulation-config-form'>
-          <div className='group power-system-config'>
-            <header>Power System Configuration</header>
-            <div className='controls'>
-              <div className='control'>
-                <label>Geographical Region Name</label>
+          <div className='simulation-config-form__group'>
+            <header className='simulation-config-form__group__heading'>Power System Configuration</header>
+            <div className='gridappsd-form-controls'>
+              <div className='gridappsd-form-control'>
+                <label className='gridappsd-form-control__label'>Geographical Region Name</label>
                 <DropdownMenu
                   menuItems={regions.map(region => new MenuItem(region.regionName, region.regionID))}
                   onChange={menuItem => {
@@ -90,8 +89,8 @@ export const SimulationConfigForm = connect(mapStateToProps)(class SimulationCon
                   }
                 />
               </div>
-              <div className='control'>
-                <label>SubGeographical Region Name</label>
+              <div className='gridappsd-form-control'>
+                <label className='gridappsd-form-control__label'>SubGeographical Region Name</label>
                 <DropdownMenu
                   menuItems={subregions.map(subregion => new MenuItem(subregion.subregionName, subregion.subregionID))}
                   onChange={menuItem => {
@@ -102,8 +101,8 @@ export const SimulationConfigForm = connect(mapStateToProps)(class SimulationCon
                   }
                 />
               </div>
-              <div className='control'>
-                <label>Line Name</label>
+              <div className='gridappsd-form-control'>
+                <label className='gridappsd-form-control__label'>Line Name</label>
                 <DropdownMenu
                   menuItems={lines.map(line => new MenuItem(line.name, line.mRID))}
                   onChange={menuItem => {
@@ -125,38 +124,38 @@ export const SimulationConfigForm = connect(mapStateToProps)(class SimulationCon
               </div>
             </div>
           </div>
-          <div className='group simulation-config'>
-            <header>Simulation Configuration</header>
-            <div className='control'>
-              <label>Start time</label>
-              <span className='input-field ripple'>
+          <div className='simulation-config-form__group'>
+            <header className='simulation-config-form__group__heading'>Simulation Configuration</header>
+            <div className='gridappsd-form-control'>
+              <label className='gridappsd-form-control__label'>Start time</label>
+              <span className='gridappsd-form-control__ripple-input-field'>
                 <input
                   type='text'
                   name='start_time'
-                  className='start_time'
+                  className='start_time gridappsd-form-control__ripple-input-field__input'
                   defaultValue={activeSimulationConfig.simulation_config.start_time}
                   onBlur={event => {
                     dispatch(new SetStartTime((event.target as HTMLInputElement).value));
                   }} />
-                <span className='ripple-bar'></span>
+                <span className='gridappsd-form-control__ripple-input-field__ripple-bar'></span>
               </span>
             </div>
-            <div className='control'>
-              <label>Duration</label>
-              <span className='input-field ripple'>
+            <div className='gridappsd-form-control'>
+              <label className='gridappsd-form-control__label'>Duration</label>
+              <span className='gridappsd-form-control__ripple-input-field'>
                 <input
                   type='number'
                   name='duration'
-                  className='duration'
+                  className='duration gridappsd-form-control__ripple-input-field__input'
                   defaultValue={activeSimulationConfig.simulation_config.duration}
                   onBlur={event => {
                     dispatch(new SetDuration((event.target as HTMLInputElement).value));
                   }} />
-                <span className='ripple-bar'></span>
+                <span className='gridappsd-form-control__ripple-input-field__ripple-bar'></span>
               </span>
             </div>
-            <div className='control'>
-              <label>Simulator</label>
+            <div className='gridappsd-form-control'>
+              <label className='gridappsd-form-control__label'>Simulator</label>
               <DropdownMenu
                 menuItems={
                   SIMULATION_CONFIG_OPTIONS.simulation_config.simulators.map(e => new MenuItem(e, e))
@@ -165,69 +164,71 @@ export const SimulationConfigForm = connect(mapStateToProps)(class SimulationCon
                   dispatch(new SetSimulator(menuItem.value));
                 }}
                 defaultItemIndex={SIMULATION_CONFIG_OPTIONS.simulation_config.simulators.indexOf(activeSimulationConfig.simulation_config.simulator)} />
-              <span className='inline-container'>
-                <span className='inline-label'>Power Flow Solver Method</span>
-                <span className='inline-value'>NR</span>
-              </span>
-              {/* <button type='button' onClick={this._showSimulationOutputEditor} className='positive show-simulation-output'>Data</button> */}
-            </div>
-            <div className='control'>
-              <label>Timestep Frequency</label>
-              <span className='input-field ripple'>
-                <input
-                  type='number'
-                  name='timestep_frequency'
-                  className='timestep-frequency'
-                  onBlur={event => {
-                    dispatch(new SetTimestepFrequency((event.target as HTMLInputElement).value));
-                  }}
-                  defaultValue='1000' />
-                <span className='ripple-bar'></span>
+              <span style={{ display: 'inline-flex', flexFlow: 'column nowrap', verticalAlign: 'top' }}>
+                <span
+                  style={{
+                    display: 'inline-block',
+                    margin: 'auto 5px',
+                    color: '#000',
+                    fontWeight: 'bold',
+                    fontSize: '13px'
+                  }}>
+                  Power Flow Solver Method
+                </span>
+                <span style={{ display: 'inline-block', margin: 'auto 5px' }}>NR</span>
               </span>
             </div>
-            <div className='control'>
-              <label>Timestep Increment</label>
-              <span className='input-field ripple'>
-                <input
-                  type='number'
-                  name='timestep_increment'
-                  className='timestep-increment'
-                  step='1000'
-                  onBlur={event => {
-                    dispatch(new SetTimestepIncrement((event.target as HTMLInputElement).value));
-                  }}
-                  defaultValue='1000' />
-                <span className='ripple-bar'></span>
-              </span>
+            <div className='gridappsd-form-control'>
+              <label className='gridappsd-form-control__label'>Realtime</label>
+              <CheckBox
+                label=''
+                name='realtime'
+                uncheckable={true}
+                onChange={input => {
+                  this.props.dispatch(new ToggleRealtime(input.checked))
+                }}
+                value='test'
+                checked={activeSimulationConfig.simulation_config.realtime} />
+              <i
+                className='app-icon show-realtime-hint'
+                tabIndex={-1}
+                onClick={() => this.setState({ showRealtimeHint: true })}>
+                <Tooltip show={this.state.showRealtimeHint} onDismiss={() => this.setState({ showRealtimeHint: false })}>
+                  <div>Checked: Run in real time. Slower than simulation time</div>
+                  <div>Unchecked: Run in simulation time. Faster than real time</div>
+                </Tooltip>
+              </i>
             </div>
-            <div className='control'>
-              <label>Simulation Name</label>
-              <span className='input-field ripple'>
+
+            <div className='gridappsd-form-control'>
+              <label className='gridappsd-form-control__label'>Simulation Name</label>
+              <span className='gridappsd-form-control__ripple-input-field'>
                 <input
                   type='text'
                   name='simulation_name'
-                  className='simulation-name'
+                  className='simulation-name gridappsd-form-control__ripple-input-field__input'
                   onBlur={event => {
                     dispatch(new SetSimulationName((event.target as HTMLInputElement).value));
                   }}
                   defaultValue={activeSimulationConfig.simulation_config.simulation_name} />
-                <span className='ripple-bar'></span>
+                <span className='gridappsd-form-control__ripple-input-field__ripple-bar'></span>
               </span>
             </div>
 
-            <div className='control'>
-              <label>Model Creation Configuration</label>
+            <div className='gridappsd-form-control'>
+              <label className='gridappsd-form-control__label'>Model Creation Configuration</label>
               <textarea
+                className='gridappsd-form-control__multiline-input'
                 name='load_scaling_factor'
                 defaultValue={JSON.stringify(activeSimulationConfig.simulation_config.model_creation_config, null, 4)}></textarea>
             </div>
 
           </div>
-          <div className='group application-config'>
-            <header>Application Configuration</header>
+          <div className='simulation-config-form__group'>
+            <header className='simulation-config-form__group__heading'>Application Configuration</header>
             <div className='controls'>
-              <div className='control'>
-                <label>Application Name</label>
+              <div className='gridappsd-form-control'>
+                <label className='gridappsd-form-control__label'>Application Name</label>
                 <DropdownMenu
                   menuItems={[
                     // 0 is the index of this app inside SimulationConfig.application_config.applications array
@@ -247,10 +248,10 @@ export const SimulationConfigForm = connect(mapStateToProps)(class SimulationCon
                   defaultItemIndex={SIMULATION_CONFIG_OPTIONS.application_config.applications.findIndex(value => value.name === activeSimulationConfig.application_config.applications[0].name)}
                 />
               </div>
-              <div className='control' style={{ display: 'flex' }}>
-                <label>Application Configuration</label>
+              <div className='gridappsd-form-control' style={{ display: 'flex' }}>
+                <label className='gridappsd-form-control__label'>Application Configuration</label>
                 <div
-                  className='config-str-editor'
+                  className='gridappsd-form-control__multiline-input'
                   contentEditable
                   suppressContentEditableWarning
                   onBlur={event => {
@@ -271,35 +272,15 @@ export const SimulationConfigForm = connect(mapStateToProps)(class SimulationCon
               </div>
             </div>
           </div>
-          <div className='options'>
+          <div className='simulation-config-form__options'>
             <Link
               to='/topology'
-              className='done fab'
+              className='simulation-config-form__options__done fab'
               onClick={() => {
                 this.props.onSubmit(this.props.activeSimulationConfig)
                 console.log(this.props.activeSimulationConfig);
               }} />
           </div>
-          <Modal show={this.state.showSimulationOutput} onHide={this._hideSimulationOutputEditor}>
-            <Modal.Header>
-              <ModalTitle>Simulation Output Objects</ModalTitle>
-            </Modal.Header>
-            <Modal.Body>
-              <div className='control'>
-                <textarea
-                  name='simulation_output'
-                  onBlur={event => {
-                    const newValue = (event.target as HTMLTextAreaElement).value;
-                    dispatch(new SetOutputObjects(JSON.parse(newValue)));
-                  }}
-                  defaultValue={JSON.stringify(activeSimulationConfig.simulation_config.simulation_output.output_objects, null, 4)} />
-              </div>
-            </Modal.Body>
-            <Modal.Footer>
-              <Button onClick={this._hideSimulationOutputEditor}>Close</Button>
-              <Button bsStyle="primary" onClick={this._hideSimulationOutputEditor}>Save</Button>
-            </Modal.Footer>
-          </Modal>
         </form>
       );
     }
@@ -342,13 +323,6 @@ export const SimulationConfigForm = connect(mapStateToProps)(class SimulationCon
         }
       }, 500);
     }
-  }
-  private _hideSimulationOutputEditor() {
-    this.setState({ showSimulationOutput: false });
-  }
-
-  private _showSimulationOutputEditor() {
-    this.setState({ showSimulationOutput: true });
   }
 });
 

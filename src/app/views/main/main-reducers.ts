@@ -16,7 +16,8 @@ import {
   UPDATE_APPLICATION_CONFIGURATION,
   SET_OUTPUT_OBJECTS,
   SimulationConfigActions,
-  SET_START_TIME
+  SET_START_TIME,
+  TOGGLE_REALTIME
 } from '../topology/simulation-config-form-actions';
 import { DEFAULT_SIMULATION_CONFIG } from '../../models/default-simulation-config';
 import { SimulationOutput } from '../../models/simulation-output/SimulationOutput';
@@ -49,6 +50,8 @@ export function activeSimulationConfig(config: SimulationConfig = DEFAULT_SIMULA
       return withNewApplicationConfig(config, 'applications', [{ name: action.appName, config_string: action.configStr }]);
     case SET_ACTIVE_SIMULATION_CONFIG:
       return action.config;
+    case TOGGLE_REALTIME:
+      return withNewSimulationConfig(config, 'realtime', action.state);
     default:
       return config;
   }

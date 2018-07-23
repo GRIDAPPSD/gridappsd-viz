@@ -15,7 +15,6 @@ server.listen(httpPort);
 
 app.use(express.static(__dirname));
 app.use(express.static(path.resolve(__dirname, 'dist')));
-app.engine('html', require('ejs').renderFile);
 app.set('views', __dirname);
 
 app.use((request, response, next) => {

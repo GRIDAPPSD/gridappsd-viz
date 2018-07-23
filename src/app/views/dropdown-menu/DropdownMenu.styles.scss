@@ -15,6 +15,7 @@
     color: #000;
     text-decoration: none;
     position: relative;
+    outline: none;
     .text {
         white-space: nowrap;
         text-overflow: ellipsis;
@@ -44,6 +45,7 @@
     &:link {
         text-decoration: none;
         color: black;
+        outline: none;
     }
     &:focus {
         box-shadow: 0px 0px 1px 2px #999 inset;
