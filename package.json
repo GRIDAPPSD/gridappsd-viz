@@ -31,7 +31,6 @@
         "@types/react": "^16.0.28",
         "@types/react-bootstrap": "0.31.8",
         "@types/react-dom": "16.0.3",
-        "@types/react-router-dom": "^4.2.3",
         "@types/stompjs": "^2.3.2",
         "awesome-typescript-loader": "3.4.1",
         "css-loader": "0.28.11",
