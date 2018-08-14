@@ -8,9 +8,9 @@ export class AppBar extends React.Component<{}, {}> {
   }
   render() {
     return (
-      <section className="app-bar">
+      <nav className="app-bar">
         {this.props.children}
-      </section>
+      </nav>
     );
   }
 }

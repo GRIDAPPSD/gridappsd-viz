@@ -73,7 +73,10 @@ export class TopologyModelRenderer extends React.Component<Props, State> {
     const zoomCenter = this._zoomConfigs[this.props.topologyName];
     this._container.selectAll('g').remove();
     const zoomer = zoom()
-      .on('zoom', () => this._container.attr('transform', currentEvent.transform));
+      .on('zoom', () => {
+        this._container.attr('transform', currentEvent.transform);
+        console.log('done')
+      });
 
     this._canvas.call(zoomer)
       .call(zoomer.transform, zoomIdentity.translate(zoomCenter.x, zoomCenter.y).scale(zoomCenter.k));
