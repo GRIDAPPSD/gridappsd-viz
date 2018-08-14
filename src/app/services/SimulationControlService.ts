@@ -34,7 +34,7 @@ export class SimulationControlService {
   onSimulationOutputReceived(fn: (payload: SimulationOutputPayload) => void): StompSubscription {
     return this._stompClient.subscribe(this._simulationOutputTopic, (message: Message) => {
       const payload = JSON.parse(message.body);
-      payload.output = JSON.parse(payload.replace(/'/g, '"'));
+      // payload.output = JSON.parse(payload.replace(/'/g, '"'));
       fn(payload);
     });
   }
@@ -49,7 +49,7 @@ export class SimulationControlService {
 
   startSimulation(simulationConfig: SimulationConfig) {
     var startTime = new Date(simulationConfig.simulation_config.start_time);
-    var startEpoch = startTime.getTime()/1000.0;
+    var startEpoch = startTime.getTime() / 1000.0;
     simulationConfig.simulation_config.start_time = JSON.stringify(startEpoch);
     this._stompClient.send(
       this._simulationRequestTopic,

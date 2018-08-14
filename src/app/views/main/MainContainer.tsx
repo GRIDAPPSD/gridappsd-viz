@@ -85,12 +85,11 @@ export const MainContainer = connect(mapStateToProps)(class extends React.Compon
 
         simulationOutputSubscription = SIMULATION_CONTROL_SERVICE.onSimulationOutputReceived(payload => {
           const modelDictionaryMeasurements = MODEL_DIRECTIONARY_MEASUREMENTS_PER_SIMULATION_NAME[this.props.currentSimulationName];
-          if (modelDictionaryMeasurements && payload.output && Object.keys(payload.output).length !== 0)
+          if (modelDictionaryMeasurements && payload)
             this.props.dispatch(new SetNewSimulationOutput({
-              simulationId: payload.output.simulation_id,
-              command: payload.command,
-              timestamp: payload.output.message.timestamp,
-              measurements: payload.output.message.measurements.map(measurement => {
+              simulationId: payload.simulation_id,
+              timestamp: payload.message.timestamp,
+              measurements: payload.message.measurements.map(measurement => {
                 const measurementInModelDictionary = modelDictionaryMeasurements[measurement.measurement_mrid];
                 if (measurementInModelDictionary)
                   return {
