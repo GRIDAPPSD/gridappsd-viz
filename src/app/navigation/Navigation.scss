@@ -1,0 +1,31 @@
+.navigation__app-title {
+    padding: 15px 15px;
+    font-size: 18px;
+}
+
+.drawer-item a {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    color: #000;
+    &:hover {
+        text-decoration: none;
+        color: #000;
+    }
+}
+
+.edit-simulation-config-icon:before {
+    content: '\f298';
+}
+
+.show-application-and-services-icon::before {
+    content: '\f0a0';
+}
+
+.browse-database-icon::before {
+    content: '\f002';
+}
+
+.stomp-client-icon::before {
+    content: '\f120';
+}

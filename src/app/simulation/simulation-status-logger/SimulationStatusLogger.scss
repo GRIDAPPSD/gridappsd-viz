@@ -1,0 +1,48 @@
+.simulation-status-logger {
+    height: 35vh;
+    position: relative;
+    counter-reset: message-number;
+    background-color: transparent;
+    header {
+        height: 30px;
+        display: inline-flex;
+        align-items: center;
+        span {
+            pointer-events: none;
+            user-select: none;
+            display: inline-block;
+            border-top-left-radius: 3px;
+            border-top-right-radius: 3px;
+            margin-left: 2px;
+            background-color: #3f51b5;
+            padding: 7px 15px;
+            font-size: 13px;
+            color: #fff;
+            box-shadow: -1px -0.25px 1px #888, 1px 0 1px #888;
+        }
+    }
+    .simulation-status-logger-message:before {
+        counter-increment: message-number;
+        content: counter(message-number) ". "
+    }
+    .wait {
+        top: 30px;
+    }
+}
+
+.simulation-status-logger__drag-handle {
+    height: 3px;
+    cursor: row-resize;
+    height: 10px;
+    position: absolute;
+    width: 100%;
+}
+
+.simulation-status-logger__content {
+    max-height: calc(100% - 30px);
+    height: calc(100% - 30px);
+    overflow-y: auto;
+    white-space: pre;
+    background-color: #fff8f8;
+    border-top: 2px solid rgba(0, 0, 0, 0.08);
+}

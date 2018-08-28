@@ -45,7 +45,7 @@ export class MessageService {
   }
 
   /**
-   * Send a request to the topic to requesting all the feeders to populate the simulation
+   * Send a request to the topic requesting all the feeders to populate the simulation
    * configuration form
    * @see {@link MessageRequest.onFeederModelsReceived(fn: (payload: GetAllFeederModelsRequestPayload) => void)}
    */
@@ -58,16 +58,17 @@ export class MessageService {
   }
 
   /**
-   * Send a request to the platform request the model dictionary
-   * Start sending when Line name drowndown meny in simulation config form is changed
+   * Send a request to the platform requesting the model dictionary
+   * Start sending when Line name drowndown menu in simulation config form is changed
    * @param mrid The MRID for which to request the model dictionary
    * @see {@link MessageRequest.onModelDictionaryReceived(fn: (payload: ModelDictionary) => void)}
    */
-  fetchModelDictionary(mrid: string) {
+  fetchModelDictionary(mrid: string, simulationName: string) {
     if (mrid in this._modelDictionaryCache)
       return;
     this._modelDictionaryCache[mrid] = true;
     this._getModelDictionaryRequest.requestBody.parameters.model_id = mrid;
+    this._getModelDictionaryRequest.simulationName = simulationName;
     this._stompClient.send(
       this._getModelDictionaryRequest.url,
       { 'reply-to': this._getModelDictionaryRequest.replyTo },
@@ -132,11 +133,11 @@ export class MessageService {
    * @see {@link MessageRequest.fetchModelDictionary(mrid = '')}
    * @param fn The listener to invoke when the response message arrives
    */
-  onModelDictionaryReceived(fn: (payload: ModelDictionary) => void): StompSubscription {
+  onModelDictionaryReceived(fn: (payload: ModelDictionary, simulationName) => void): StompSubscription {
     return this._stompClient.subscribe(this._getModelDictionaryRequest.replyTo, (message: Message) => {
       const payload = JSON.parse(message.body);
       payload.requestType = this._getModelDictionaryRequest.requestBody.configurationType;
-      fn(payload);
+      fn(payload, this._getModelDictionaryRequest.simulationName);
     });
   }
 

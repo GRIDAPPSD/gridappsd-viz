@@ -1,0 +1,11 @@
+.simulation-control {
+    height: 50px;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    border-bottom: 2px solid rgba(0, 0, 0, 0.2);
+    background-color: #fff;
+    * {
+        margin: 0 5px;
+    }
+}

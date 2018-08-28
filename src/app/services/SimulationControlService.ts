@@ -12,7 +12,7 @@ export class SimulationControlService {
 
   private static readonly _INSTANCE_: SimulationControlService = new SimulationControlService();
   private readonly _stompClient = StompClient.getInstance();
-  private readonly _simulationRequestTopic = '/queue/goss.gridappsd.process.request.simulation';
+  private readonly _startSimulationTopic = '/queue/goss.gridappsd.process.request.simulation';
   private readonly _simulationStatusTopic = '/topic/goss.gridappsd.simulation.log';
   private readonly _simulationOutputTopic = '/topic/goss.gridappsd.simulation.output.>';
 
@@ -40,7 +40,7 @@ export class SimulationControlService {
   }
 
   onSimulationStarted(fn: (simulationId: string) => void): StompSubscription {
-    return this._stompClient.subscribe(this._simulationRequestTopic, (message: Message) => fn(message.body));
+    return this._stompClient.subscribe(this._startSimulationTopic, (message: Message) => fn(message.body));
   }
 
   onSimulationStatusLogReceived(simulationId: string, fn: (simulationStatusLog: string) => void): StompSubscription {
@@ -48,12 +48,12 @@ export class SimulationControlService {
   }
 
   startSimulation(simulationConfig: SimulationConfig) {
-    var startTime = new Date(simulationConfig.simulation_config.start_time);
-    var startEpoch = startTime.getTime() / 1000.0;
-    simulationConfig.simulation_config.start_time = JSON.stringify(startEpoch);
+    const startTime = new Date(simulationConfig.simulation_config.start_time);
+    const startEpoch = startTime.getTime() / 1000.0;
+    simulationConfig.simulation_config.start_time = String(startEpoch);
     this._stompClient.send(
-      this._simulationRequestTopic,
-      { 'reply-to': this._simulationRequestTopic },
+      this._startSimulationTopic,
+      { 'reply-to': this._startSimulationTopic },
       JSON.stringify(simulationConfig)
     );
   }

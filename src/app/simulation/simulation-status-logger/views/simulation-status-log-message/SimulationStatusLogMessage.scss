@@ -1,0 +1,20 @@
+.simulation-status-log-message {
+    display: flex;
+    align-items: center;
+    padding: 5px;
+    border-bottom: 2px solid #add8e6;
+}
+
+.simulation-status-log-message.highlight {
+    animation: highlight 2s ease;
+}
+
+.simulation-status-log-message__content {
+    display: inline-block;
+}
+
+@keyframes highlight {
+    to {
+        background-color: rgba(0, 0, 0, 0.2);
+    }
+}

@@ -1,0 +1,36 @@
+.simulation-configuration {
+    border-radius: 3px;
+    background-color: #fff;
+    box-shadow: 2px 10px 20px rgba(0, 0, 0, 0.2);
+    max-width: 90vw;
+}
+
+.simulation-configuration__body {
+    overflow-y: auto;
+    overflow-x: hidden;
+    max-height: 80vh;
+    padding: 10px;
+}
+
+.simulation-configuration__actions {
+    width: 100%;
+    padding: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    box-shadow: -2px 2px 10px rgba(0, 0, 0, 0.5);
+}
+
+.simulation-configuration__actions__cancel {
+    margin-right: 5px;
+}
+
+.realtime-checkbox-container .icon-button {
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    transform: translate(-17px, -3px);
+    background-color: #555;
+    color: #fff;
+    padding: 0;
+}

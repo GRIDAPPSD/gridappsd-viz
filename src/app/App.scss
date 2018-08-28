@@ -1,0 +1,20 @@
+.topology-renderer-simulation-status-logger-measurement-graphs {
+    display: flex;
+    overflow: hidden;
+}
+
+.topology-renderer-simulation-status-logger {
+    width: 70vw;
+    display: flex;
+    flex-flow: column nowrap;
+    border-right: 2px solid rgba(0, 0, 0, 0.08);
+}
+
+.measurement-graphs {
+    width: 30vw;
+    overflow-y: auto;
+    display: flex;
+    flex-flow: column nowrap;
+    align-items: center;
+    height: calc(100vh - 60px);
+}

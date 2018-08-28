@@ -1,9 +1,6 @@
 import '@stomp/stompjs';
 import 'd3';
 import 'react';
-import 'react-bootstrap';
 import 'react-dom';
-import 'react-redux';
 import 'react-router-dom';
-import 'redux';
-import 'redux-thunk';
+import 'rxjs';

@@ -1,0 +1,28 @@
+.stomp-client-form {
+    max-height: calc(100vh - 60px);
+    background-color: #fff;
+    width: 100vw;
+    position: relative;
+    label {
+        width: 100px;
+    }
+}
+
+.stomp-client-form__topic input,
+.stomp-client-form__request-body .gridappsd-form-control__multiline-input {
+    width: 80vw;
+}
+
+.stomp-client__send-request {
+    margin-left: 120px;
+    display: block;
+}
+
+.gridappsd-form-control__multiline-input.response {
+    height: 47vh;
+    white-space: pre;
+    max-height: 47vh;
+    padding: 5px;
+    overflow: auto;
+    width: 80vw;
+}
