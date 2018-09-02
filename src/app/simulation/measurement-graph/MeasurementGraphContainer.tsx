@@ -146,9 +146,8 @@ export class MeasurementGraphContainer extends React.Component<Props, State> {
       const measurement = measurements.filter(
         measurement => measurement.connectivityNode === timeSeriesName && graphName.includes(measurement.phases) && measurement.magnitude !== undefined
       )[0];
-      if (measurement) {
+      if (measurement)
         dataPoint.primitiveY = measurement.magnitude;
-      }
       else
         console.warn(`No measurement found for time series "${timeSeriesName}", plot name "${graphName}"`);
     }

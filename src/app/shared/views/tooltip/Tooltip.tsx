@@ -57,45 +57,13 @@ export class Tooltip extends React.Component<Props, State> {
 
   show() {
     this._addTooltip(this._createDefaultTooltipContainer());
-    this._tooltip.classList.add('fade-in');
-    this._tooltipRect = this._tooltip.getBoundingClientRect();
-
-    switch (this.props.position) {
-      case 'top':
-        this._showTop(this._anchor.getBoundingClientRect());
-        break;
-      case 'right':
-        this._showRight(this._anchor.getBoundingClientRect());
-        break;
-      case 'bottom':
-        this._showBottom(this._anchor.getBoundingClientRect());
-        break;
-      case 'left':
-        this._showLeft(this._anchor.getBoundingClientRect());
-        break;
-    }
+    this._show();
   }
 
   showAt(anchor: HTMLElement, container: HTMLElement = this._createDefaultTooltipContainer()) {
     this._addTooltip(container);
     this._anchor = anchor;
-    this._tooltip.classList.add('fade-in');
-    this._tooltipRect = this._tooltip.getBoundingClientRect();
-
-    switch (this.props.position) {
-      case 'top':
-        this._showTop(this._anchor.getBoundingClientRect());
-        break;
-      case 'right':
-        this._showRight(this._anchor.getBoundingClientRect());
-        break;
-      case 'bottom':
-        this._showBottom(this._anchor.getBoundingClientRect());
-        break;
-      case 'left':
-        this._showLeft(this._anchor.getBoundingClientRect());
-        break;
-    }
+    this._show();
   }
 
   private _addTooltip(container: HTMLElement) {
@@ -124,6 +92,29 @@ export class Tooltip extends React.Component<Props, State> {
     return this._tooltipContainer;
   }
 
+  private _show() {
+    // Wrap in a setTimeout because React might have set this._tooltip to
+    // the DOM element yet
+    setTimeout(() => {
+      this._tooltip.classList.add('fade-in');
+      this._tooltipRect = this._tooltip.getBoundingClientRect();
+      switch (this.props.position) {
+        case 'top':
+          this._showTop(this._anchor.getBoundingClientRect());
+          break;
+        case 'right':
+          this._showRight(this._anchor.getBoundingClientRect());
+          break;
+        case 'bottom':
+          this._showBottom(this._anchor.getBoundingClientRect());
+          break;
+        case 'left':
+          this._showLeft(this._anchor.getBoundingClientRect());
+          break;
+      }
+    }, 0);
+  }
+
   private _showTop(originRect: ClientRect) {
     setTimeout(() => {
       const left = originRect.left + (originRect.width - this._tooltipRect.width) / 2;
@@ -133,18 +124,8 @@ export class Tooltip extends React.Component<Props, State> {
         this._tooltip.classList.add('bottom');
         top = top + originRect.height + this._tooltipRect.height + 25;
       }
-      // if (left < 0) {
-      //   this._tooltip.className = 'gridappsd-tooltip';
-      //   this._showRight(originRect);
-      // }
-      // else if (this._tooltipRect.right > document.body.clientWidth) {
-      //   this._tooltip.className = 'gridappsd-tooltip';
-      //   this._showLeft(originRect);
-      // }
-      // else {
       this._tooltip.style.left = left + 'px';
       this._tooltip.style.top = top + 'px';
-      // }
     }, 0);
 
   }
@@ -172,18 +153,8 @@ export class Tooltip extends React.Component<Props, State> {
         this._tooltip.classList.add('top');
         top = top - originRect.height - this._tooltipRect.height - 30;
       }
-      // if (left < 0) {
-      //   this._tooltip.className = 'gridappsd-tooltip';
-      //   this._showRight(originRect);
-      // }
-      // else if (this._tooltipRect.right > document.body.clientWidth) {
-      //   this._tooltip.className = 'gridappsd-tooltip';
-      //   this._showLeft(originRect);
-      // }
-      // else {
       this._tooltip.style.left = left + 'px';
       this._tooltip.style.top = top + 'px';
-      // }
     }, 0);
 
   }

@@ -34,7 +34,6 @@ export class SimulationControlService {
   onSimulationOutputReceived(fn: (payload: SimulationOutputPayload) => void): StompSubscription {
     return this._stompClient.subscribe(this._simulationOutputTopic, (message: Message) => {
       const payload = JSON.parse(message.body);
-      // payload.output = JSON.parse(payload.replace(/'/g, '"'));
       fn(payload);
     });
   }

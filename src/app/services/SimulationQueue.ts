@@ -21,8 +21,6 @@ export class SimulationQueue {
   }
 
   getActiveSimulation(): Simulation {
-    if (!this._activeSimulation)
-      throw new Error('No current active simulation');
     return this._activeSimulation;
   }
 
@@ -42,6 +40,7 @@ export class SimulationQueue {
     if (!simulation)
       throw new Error(`No simulation found with the given name "${simulationName}"`);
     this._activeSimulation = simulation;
+    this._activeSimulationChanged.next(simulation);
   }
 
   private _contains(simulation: Simulation) {

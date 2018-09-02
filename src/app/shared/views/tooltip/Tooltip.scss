@@ -12,7 +12,6 @@
     position: absolute;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3), 0 -0.5px 1px rgba(0, 0, 0, 0.2);
     border-radius: 2px;
-    padding: 10px;
     background-color: #555;
     z-index: 15;
     white-space: pre-wrap;
@@ -21,6 +20,7 @@
     opacity: 0;
     visibility: hidden;
     color: #fff;
+    border: 1px solid #8e8e8e;
 }
 
 .gridappsd-tooltip__arrow {
@@ -37,11 +37,13 @@
         height: inherit;
         display: inline-block;
         box-shadow: 0 0 1px rgba(0, 0, 0, 0.3);
+        border: 1px solid #8e8e8e;
     }
 }
 
 .gridappsd-tooltip__content {
     line-height: 1.5em;
+    padding: 10px;
 }
 
 .gridappsd-tooltip.top {
@@ -57,11 +59,11 @@
 
 .gridappsd-tooltip.right {
     .gridappsd-tooltip__arrow {
-        transform: translateY(-50%) translateX(-17px);
+        transform: translateY(-50%) translateX(-20px);
         top: 50%;
         left: 0;
         &::after {
-            transform: translateX(60%) rotate(45deg);
+            transform: translateX(65%) rotate(45deg);
         }
     }
 }

@@ -39,7 +39,10 @@ export class SimulationStatusLoggerContainer extends React.Component<Props, Stat
   }
 
   render() {
-    return <SimulationStatusLogger messages={this.state.logMessages} isFetching={this.state.isFetching} />;
+    return <SimulationStatusLogger
+      simulationRunning={this.state.isFetching}
+      messages={this.state.logMessages}
+      isFetching={this.state.isFetching} />;
   }
 
   private _subscribeToSimulationStartedEvent() {

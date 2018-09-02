@@ -8,12 +8,14 @@ import { TopologyModel } from '../models/topology/TopologyModel';
 import { RequestConfigurationType } from '../models/message-requests/RequestConfigurationType';
 import { GetTopologyModelRequestPayload } from '../models/message-requests/GetTopologyModelRequest';
 import { SimulationQueue } from '../services/SimulationQueue';
+import { Node } from './models/Node';
+import { Edge } from './models/Edge';
 
 interface Props {
 }
 
 interface State {
-  topology: { nodes: any[], links: any[] };
+  topology: { nodes: Node[], edges: Edge[] };
   isFetching: boolean;
 }
 
@@ -92,100 +94,116 @@ export class TopologyRendererContainer extends React.Component<Props, State> {
     return this._activeSimulationConfig && this._activeSimulationConfig.power_system_config.Line_name in topologyCache;
   }
 
-  private _transformModel(model: TopologyModel, ): { nodes: any[], links: any[] } {
+  private _transformModel(model: TopologyModel): { nodes: Node[], edges: Edge[] } {
     if (!model || model.feeders.length === 0)
       return null;
-    const knownNodesByName = {};
     const nodes = [];
-    const links = [];
-
-    const regulatorParentsPerSimulatioName = {
-      ieee8500: {
-        VREG3: 'l2692633',
-        VREG4: 'm1089120',
-        VREG2: 'l2841632',
-        FEEDER_REG: 'm1209814'
-      },
-      ieee123: {
-        reg2: '9r',
-        reg3: '25r',
-        reg4: '160r'
-      }
-    }
+    const edges = [];
 
     const groupNames = ['batteries', 'switches', 'solarpanels', 'swing_nodes', 'transformers', 'overhead_lines',
       'capacitors', 'regulators'
     ];
-    // Create top-level elements
     const feeder = model.feeders[0];
-    for (const groupName of groupNames) {
-      switch (groupName) {
+    const allNodes = Object.keys(feeder)
+      .filter(key => groupNames.includes(key))
+      .reduce((allNodes, group) => {
+        feeder[group].forEach(node => {
+          node.groupName = group;
+          allNodes.push(node);
+        });
+        return allNodes;
+      }, []);
+    for (const node of allNodes) {
+      switch (node.groupName) {
         case 'swing_nodes':
-        case 'transformers':
-          for (const element of feeder[groupName])
-            nodes.push({
-              name: element.name,
-              type: groupName === 'swing_nodes' ? 'swing-node' : 'transformer',
-              data: element,
-              children: []
-            });
+          nodes.push({
+            name: node.name,
+            type: 'swing_node',
+            data: node,
+            x: this._truncate(node.x1),
+            y: this._truncate(node.y1)
+          });
           break;
-        case 'capacitors':
-          for (const capacitor of feeder[groupName]) {
-            const parent = knownNodesByName[capacitor.parent];
-            if (parent)
-              parent.children.push({
-                name: capacitor.name,
-                type: 'capacitor',
-                data: capacitor,
-                children: []
-              });
-            else
-              console.log('Missing capacitor parent ' + capacitor.parent);
+        case 'batteries':
+          nodes.push({
+            name: node.name,
+            type: 'battery',
+            data: node
+          });
+          break;
+        case 'switches':
+          if ((node.x1 !== 0 && node.y1 !== 0) || (node.x2 !== 0 && node.y2 !== 0)) {
+            nodes.push({
+              name: node.name,
+              type: 'switch',
+              data: node,
+              x: this._truncate((node.x1 !== 0) ? node.x1 : node.x2),
+              y: this._truncate((node.y1 !== 0) ? node.y1 : node.y2),
+
+            });
           }
           break;
+        case 'solarpanels':
+          nodes.push({
+            name: node.name,
+            type: 'solarpanel',
+            data: node
+          });
+          break;
+        case 'transformers':
+          if ((node.x1 !== 0 && node.y1 !== 0) || (node.x2 !== 0 && node.y2 !== 0)) {
+            nodes.push({
+              name: node.name,
+              type: 'transformer',
+              data: node,
+              x: this._truncate((node.x1 !== 0) ? node.x1 : node.x2),
+              y: this._truncate((node.y1 !== 0) ? node.y1 : node.y2),
+
+            });
+          }
+          break;
+        case 'capacitors':
+          nodes.push({
+            name: node.name,
+            type: 'capacitor',
+            data: node,
+            x: this._truncate(node.x1),
+            y: this._truncate(node.y1)
+          });
+          break;
         case 'overhead_lines':
-          for (const overheadLine of feeder[groupName]) {
-            const fromNode = _getOrCreateElement(overheadLine.from, 'node', knownNodesByName);
-            const toNode = _getOrCreateElement(overheadLine.to, 'node', knownNodesByName);
+          const fromNode = allNodes.filter(e => e.name === node.from)[0] || { name: node.from, type: 'node', data: null };
+          const toNode = allNodes.filter(e => e.name === node.to)[0] || { name: node.to, type: 'node', data: null };
+          if (node.x1 !== 0.0 && node.y1 !== 0.0 && node.x2 !== 0.0 && node.y2 !== 0.0) {
+            fromNode.x = this._truncate(node.x1);
+            fromNode.y = this._truncate(node.y1);
+            toNode.x = this._truncate(node.x2);
+            toNode.y = this._truncate(node.y2);
             nodes.push(fromNode, toNode);
-            if (overheadLine.x1 !== 0.0 && overheadLine.y1 !== 0.0 && overheadLine.x2 !== 0.0 && overheadLine.y2 !== 0.0) {
-              fromNode.x = overheadLine.x1;
-              fromNode.y = overheadLine.y1;
-              toNode.x = overheadLine.x2;
-              toNode.y = overheadLine.y2;
-            }
-            links.push({
-              name: overheadLine.name,
+            edges.push({
+              name: node.name,
               from: fromNode,
               to: toNode,
-              data: overheadLine
+              data: node
             });
           }
           break;
         case 'regulators':
-          const simulationName = this._activeSimulationConfig.simulation_config.simulation_name;
-
-          for (const regulator of feeder[groupName]) {
-            const parent = knownNodesByName[regulatorParentsPerSimulatioName[simulationName][regulator.name]];
-            if (parent)
-              parent.children.push({
-                name: regulator.name,
-                type: 'regulator',
-                data: regulator,
-                children: []
-              });
-            else
-              console.log('Missing regulator parent ' + regulatorParentsPerSimulatioName[simulationName][regulator.name] + ' for ' + regulator.name);
-          }
+          nodes.push({
+            name: node.name,
+            type: 'regulator',
+            data: node,
+            x: this._truncate(node.x2),
+            y: this._truncate(node.y2)
+          });
           break;
         default:
-          console.warn(`${groupName} is in the model, but there's no switch case for it. Skipping`);
+          console.warn(`${node.groupName} is in the model, but there's no switch case for it. Skipping`);
           break;
       }
     }
 
-    return { nodes, links };
+    return { nodes, edges };
   }
 
   private _useTopologyModelFromCache() {
@@ -194,15 +212,8 @@ export class TopologyRendererContainer extends React.Component<Props, State> {
       isFetching: false
     });
   }
-}
 
-
-
-function _getOrCreateElement(name, type, map) {
-  let existingNode = map[name];
-  if (!existingNode) {
-    existingNode = { name, type, data: {}, children: [] };
-    map[name] = existingNode;
+  private _truncate(num: number) {
+    return num | 0;
   }
-  return existingNode;
 }
