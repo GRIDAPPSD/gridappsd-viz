@@ -8,9 +8,9 @@ import { Wait } from '../../../shared/views/wait/Wait';
 import { Tooltip } from '../../../shared/views/tooltip/Tooltip';
 import { Node } from '../../models/Node';
 import { Edge } from '../../models/Edge';
+import { TransformWatcherService } from '../../../services/TransformWatcherService';
 
 import './ModelRenderer.scss';
-import { TransformWatcherService } from '../../../services/TransformWatcherService';
 
 interface Props {
   topology: { nodes: Node[], edges: Edge[] };
