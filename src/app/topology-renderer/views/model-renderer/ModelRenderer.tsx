@@ -21,13 +21,6 @@ interface Props {
 interface State {
 }
 
-const imageNamesForTypes = {
-  capacitor: '../images/capacitor-condenser.png',
-  regulator: '../images/regulator.png',
-  transformer: '../images/electric-transformer_1.png',
-  switch: '../images/switch-closed.png'
-};
-
 export class ModelRenderer extends React.Component<Props, State> {
 
   private readonly _transformWatcherService = TransformWatcherService.getInstance();
@@ -35,13 +28,21 @@ export class ModelRenderer extends React.Component<Props, State> {
   private _container: Selection<SVGGElement, any, any, any> = null;
   private _svg: SVGSVGElement = null;
   private _showNodeSymbols = false;
-
-
   private readonly _zoomConfigs = {
     ieee8500: { x: 260.4093929510776, y: 73.17314737715492, k: 0.013690402749858915 },
     ieee123: { x: 198.39621983106292, y: 25.86191550179683, k: 0.1024394509185199 }
   }
   private readonly _zoomer = zoom();
+  private readonly _edgeGenerator = line<{ edge: Edge; node: Node }>()
+    .x(d => d.node.screenX)
+    .y(d => d.node.screenY);
+  private readonly _imageNamesForTypes = {
+    capacitor: '../images/capacitor.png',
+    regulator: '../images/regulator.png',
+    transformer: '../images/transformer.png',
+    switch: '../images/switch-closed.png',
+    swing_node: '../images/substation.png'
+  };
 
   constructor(props: any) {
     super(props);
@@ -82,7 +83,7 @@ export class ModelRenderer extends React.Component<Props, State> {
 
     this._canvas.on('mouseover', () => {
       const target = select(currentEvent.target);
-      if (target.classed('node')) {
+      if (target.classed('node') || target.classed('symbol')) {
         let content = '';
         const node = target.datum() as Node;
         switch (node.type) {
@@ -107,55 +108,113 @@ export class ModelRenderer extends React.Component<Props, State> {
     });
   }
 
+  private _calculateCoordinatesForEdgeEndpoints(edges: Edge[], xOffset: number, yOffset: number): { [fromNode: string]: Edge } {
+    const edgesKeyedByNodeNames: { [fromNode: string]: Edge } = {};
+    for (const edge of edges) {
+      if (edge.from.screenX === -1 || edge.from.screenY === -1) {
+        edge.from.screenX = edge.from.x + xOffset;
+        edge.from.screenY = edge.from.y + yOffset;
+      }
+      if (edge.to.screenX === -1 || edge.to.screenY === -1) {
+        edge.to.screenX = edge.to.x + xOffset;
+        edge.to.screenY = edge.to.y + yOffset;
+      }
+      edgesKeyedByNodeNames[edge.from.name] = edge;
+      edgesKeyedByNodeNames[edge.to.name] = edge;
+    }
+    return edgesKeyedByNodeNames;
+  }
+
+  private _calculateAngleBetween2Nodes(from: Node, to: Node): number {
+    const horizontal = Math.abs(from.x - to.x);
+    const vertical = Math.abs(from.y - to.y);
+    const angle = Math.abs(Math.atan(horizontal / vertical) * 180 / Math.PI);
+    // First quadrant
+    if (to.x > from.x && to.y < from.y)
+      return 90 + angle;
+    // Second quadrant
+    if (to.x < from.x && to.y < from.y)
+      return 90 - angle;
+    // Third quadrant
+    if (to.x < from.x && to.y > from.y)
+      return -(90 - angle);
+    // Fourth quadrant
+    if (to.x > from.x && to.y > from.y)
+      return -(90 + angle);
+    return -(90 - angle);
+  }
+
   private _capitalize(value: string) {
     return value[0].toUpperCase() + value.substr(1);
   }
 
-  private _createSvgImageElement(attrs: { [key: string]: any }): SVGElement {
-    const element = document.createElementNS('http://www.w3.org/2000/svg', 'image');
+  private _categorizeNodes(nodes: Node[], xOffset: number, yOffset: number) {
+    const categories: { nodesWithKnownTypes: Node[]; nodesWithUnknownType: Node[] } = {
+      nodesWithKnownTypes: [],
+      nodesWithUnknownType: []
+    };
+
+    for (const node of nodes) {
+      node.screenX = node.x + xOffset;
+      node.screenY = node.y + yOffset;
+      if (node.type === 'unknown')
+        categories.nodesWithUnknownType.push(node);
+      else
+        categories.nodesWithKnownTypes.push(node);
+    }
+    return categories;
+  }
+
+  private _createSvgElement(elementName: string, attrs: { [key: string]: any }): SVGElement {
+    const element = document.createElementNS('http://www.w3.org/2000/svg', elementName);
     for (const attrName in attrs)
       element.setAttribute(attrName, attrs[attrName]);
     return element;
   }
 
+  private _hideSymbols() {
+    this._container.select('.symbols')
+      .style('visibility', 'hidden');
+    this._container.select('.symbolized-nodes')
+      .style('visibility', 'visible');
+  }
+
   private _removePhaseNameFromNodeName(child) {
-    return '_' + child.name.replace(/(\D+)(\d)(a|b|c)$/, (_, p1, p2, __) => [p1, p2].join(''));
+    return child.name ? '_' + child.name.replace(/(\D+)(\d)(a|b|c)$/, (_, p1, p2, __) => [p1, p2].join('')) : '(I have no name)';
   }
 
   private _render(model: { nodes: any[]; edges: any[] }) {
-    const nodes = model.nodes;
     console.log(model);
 
-    const xExtent = extent(nodes, (d: Node) => d.x);
-    const yExtent = extent(nodes, (d: Node) => d.y);
+    const xExtent = extent(model.nodes, (d: Node) => d.x);
+    const yExtent = extent(model.nodes, (d: Node) => d.y);
     const xOffset = -xExtent[0];
     const yOffset = -yExtent[0];
     const zoomCenter = this._zoomConfigs[this.props.topologyName];
+    const edgesKeyedByNodeNames = this._calculateCoordinatesForEdgeEndpoints(model.edges, xOffset, yOffset);
+    const categories = this._categorizeNodes(model.nodes, xOffset, yOffset);
 
-    this._container.selectAll('g').remove();
+    this._container.selectAll('g')
+      .remove();
     this._canvas.call(this._zoomer)
       .call(this._zoomer.transform, zoomIdentity.translate(zoomCenter.x, zoomCenter.y).scale(zoomCenter.k));
 
     this._container.attr('transform', `translate(${zoomCenter.x},${zoomCenter.y}) scale(${zoomCenter.k})`);
 
-    this._renderEdges(model.edges, xOffset, yOffset);
-    this._renderNodes(model.nodes, xOffset, yOffset);
+    this._renderEdges(model.edges);
+    this._renderSymbolsForNodesWithKnownTypes(edgesKeyedByNodeNames, categories.nodesWithKnownTypes);
+    this._renderNodes(categories.nodesWithUnknownType, 'unknown-nodes');
+    this._renderNodes(categories.nodesWithKnownTypes, 'symbolized-nodes');
   }
 
-  private _renderEdges(edgeData: Edge[], xOffset, yOffset) {
-    const edges = this._container.append('g')
-      .attr('class', 'edges');
-
-    const lineGenerator: any = line<{ edge: Edge; node: Node }>()
-      .x(data => data.node.x + xOffset)
-      .y(data => data.node.y + yOffset)
+  private _renderEdges(edgeData: Edge[]) {
+    const edges = select(this._createSvgElement('g', { 'class': 'edges' }));
 
     edges.selectAll('path')
       .data(edgeData)
       .enter()
       .append('path')
       .classed('edge', true)
-      .filter(edge => [edge.from.x, edge.from.y, edge.to.x, edge.to.y].every(e => e !== undefined))
       .datum(edge => [{ edge, node: edge.from }, { edge, node: edge.to }])
       .attr('class', (d: Array<{ edge: Edge; node: Node }>) => 'edge ' + d[0].edge.name)
       .attr('stroke', (d: Array<{ edge: Edge; node: Node }>) => {
@@ -172,29 +231,25 @@ export class ModelRenderer extends React.Component<Props, State> {
             return 'darkgray';
         }
       })
-      .attr('d', lineGenerator);
+      .attr('d', this._edgeGenerator);
+
+    this._container.node()
+      .appendChild(edges.node());
   }
 
-  private _renderNodes(nodeData: Node[], xOffset, yOffset) {
-    const nodes = this._container.append('g')
-      .attr('class', 'nodes');
+  private _renderNodes(nodeData: Node[], containerClassName: string) {
+    const nodes = select(this._createSvgElement('g', { 'class': containerClassName }));
 
     nodes.selectAll('circle')
       .data(nodeData)
       .enter()
-      .filter(node => node.x !== undefined && node.y !== undefined)
-      .each(node => {
-        node.screenX = node.x + xOffset;
-        node.screenY = node.y + yOffset;
-      })
-      // .filter(node => !(['regulator', 'capacitor', 'transformer', 'switch'].includes(node.type)))
       .append('circle')
       .attr('class', node => `node ${node.type} _${node.name}_`)
       .attr('cx', node => node.screenX)
       .attr('cy', node => node.screenY)
       .attr('r', node => {
         switch (node.type) {
-          case 'node':
+          case 'unknown':
             return 50;
           case 'capacitor':
           case 'regulator':
@@ -206,61 +261,56 @@ export class ModelRenderer extends React.Component<Props, State> {
             return 50;
         }
       });
+
+    this._container.node()
+      .appendChild(nodes.node());
   }
 
-  private _replaceCirclesWithSymbols() {
-    const images = document.createDocumentFragment();
-    for (const node of this.props.topology.nodes) {
-      if (node.type in imageNamesForTypes) {
-        this._container.select(`.node.${node.type}._${node.name}_`)
-          .classed('symbolized', true)
-          .style('visibility', 'hidden');
-        const fromNode = this._container.select('._' + node.data.from + '_');
-        const toNode = this._container.select('._' + node.data.to + '_');
-        let angle = 0;
-        let distance = 0;
-        if (!fromNode.empty() && !toNode.empty()) {
-          const fromNodeData = fromNode.datum() as Node;
-          const toNodeData = toNode.datum() as Node;
-          const horizontal = Math.abs(fromNodeData.x - toNodeData.x);
-          const vertical = Math.abs(fromNodeData.y - toNodeData.y);
-          angle = 90 - Math.abs(Math.atan(horizontal / vertical) * 180 / Math.PI);
-          distance = Math.abs(Math.sqrt((fromNodeData.x - toNodeData.x) ** 2 + (fromNodeData.y - toNodeData.y) ** 2));
-        }
-        images.appendChild(this._createSvgImageElement({
-          href: imageNamesForTypes[node.type],
-          width: 500,
-          height: 500,
-          x: node.screenX,
-          y: node.screenY,
-          style: `transform-origin: calc(${node.screenX}px + 250px) calc(${node.screenY}px + 250px); transform: rotate(-${angle}deg)`
-          // style: `transform-origin: calc(${node.screenX}px + 250px) calc(${node.screenY}px + 250px); transform: rotate(-${angle}deg) translate(calc(-${distance}px / 2), calc(-${distance}px + 175px))`
-        }));
-      }
-    }
-    this._container.append<SVGElement>('g')
-      .attr('class', 'images')
-      .node()
-      .appendChild(images);
+
+  private _renderSymbolsForNodesWithKnownTypes(edgesKeyedByNodeNames: { [nodeName: string]: Edge }, nodesWithKnownTypes: Node[]) {
+    const symbols = select(this._createSvgElement('g', { 'class': 'symbols', 'style': 'visibility: hidden' }));
+    const imageSize = 400;
+    const halfImageSize = imageSize / 2;
+    symbols.selectAll('image')
+      .data(nodesWithKnownTypes)
+      .enter()
+      .append('image')
+      .attr('class', 'symbol')
+      .attr('href', node => this._imageNamesForTypes[node.type])
+      .attr('width', imageSize)
+      .attr('height', imageSize)
+      .attr('x', node => node.screenX)
+      .attr('y', node => node.screenY)
+      .style('transform-origin', node => `calc(${node.screenX}px + ${halfImageSize}px) calc(${node.screenY}px + ${halfImageSize}px)`)
+      .style('transform', node => {
+        if (!node.data || !node.data.from || !node.data.to)
+          return 'rotate(0) translate(0, 0)';
+        const edge = edgesKeyedByNodeNames[node.data.from] || edgesKeyedByNodeNames[node.data.to];
+        if (!edge)
+          return 'rotate(0) translate(0, 0)';
+        const angle = this._calculateAngleBetween2Nodes(edge.from, edge.to);
+        const transform = `translate(${-200}px, ${-200}px) rotate(${angle}deg)`;
+        return transform;
+      });
+    this._container.node()
+      .appendChild(symbols.node());
   }
 
-  private _replaceSymbolsWithCircles() {
-    this._container.select('g.images')
-      .remove();
-    this._container.select('g.nodes')
-      .selectAll('.symbolized')
-      .classed('symbolized', false)
+  private _showSymbols() {
+    this._container.select('.symbols')
       .style('visibility', 'visible');
+    this._container.select('.symbolized-nodes')
+      .style('visibility', 'hidden');
   }
 
   private _toggleNodeSymbols(currentTransformScaleDegree: number) {
     if (currentTransformScaleDegree > 0.06 && !this._showNodeSymbols) {
       this._showNodeSymbols = true;
-      this._replaceCirclesWithSymbols();
+      this._showSymbols();
     }
     else if (currentTransformScaleDegree < 0.06 && this._showNodeSymbols) {
       this._showNodeSymbols = false;
-      this._replaceSymbolsWithCircles();
+      this._hideSymbols();
     }
   }
 

@@ -1,6 +1,6 @@
 export interface Node {
   name: string;
-  type: 'battery' | 'switch' | 'solarpanel' | 'swing_node' | 'transformer' | 'capacitor' | 'regulator' | 'node';
+  type: 'battery' | 'switch' | 'solarpanel' | 'swing_node' | 'transformer' | 'capacitor' | 'regulator' | 'unknown';
   // Original data
   data: any;
   // Original x coordinate from the data

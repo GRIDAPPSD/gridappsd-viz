@@ -60,6 +60,19 @@ export class TopologyRendererContainer extends React.Component<Props, State> {
     );
   }
 
+  private _createNewNode(properties: { [key: string]: any }): Node {
+    return {
+      x: -1,
+      y: -1,
+      screenX: 0,
+      screenY: 0,
+      data: null,
+      name: '',
+      type: 'unknown',
+      ...properties
+    } as Node;
+  }
+
   private _processModelForRendering(payload: GetTopologyModelRequestPayload) {
     if (typeof payload.data === 'string')
       payload.data = JSON.parse(payload.data);
@@ -97,8 +110,8 @@ export class TopologyRendererContainer extends React.Component<Props, State> {
   private _transformModel(model: TopologyModel): { nodes: Node[], edges: Edge[] } {
     if (!model || model.feeders.length === 0)
       return null;
-    const nodes = [];
-    const edges = [];
+    const nodes: Node[] = [];
+    const edges: Edge[] = [];
 
     const groupNames = ['batteries', 'switches', 'solarpanels', 'swing_nodes', 'transformers', 'overhead_lines',
       'capacitors', 'regulators'
@@ -114,66 +127,66 @@ export class TopologyRendererContainer extends React.Component<Props, State> {
         return allNodes;
       }, []);
     for (const node of allNodes) {
-      switch (node.groupName) {
+      const groupName = node.groupName;
+      delete node.groupName;
+      switch (groupName) {
         case 'swing_nodes':
-          nodes.push({
+          nodes.push(this._createNewNode({
             name: node.name,
             type: 'swing_node',
             data: node,
             x: this._truncate(node.x1),
             y: this._truncate(node.y1)
-          });
+          }));
           break;
         case 'batteries':
-          nodes.push({
+          nodes.push(this._createNewNode({
             name: node.name,
             type: 'battery',
             data: node
-          });
+          }));
           break;
         case 'switches':
           if ((node.x1 !== 0 && node.y1 !== 0) || (node.x2 !== 0 && node.y2 !== 0)) {
-            nodes.push({
+            nodes.push(this._createNewNode({
               name: node.name,
               type: 'switch',
               data: node,
-              x: this._truncate((node.x1 !== 0) ? node.x1 : node.x2),
-              y: this._truncate((node.y1 !== 0) ? node.y1 : node.y2),
-
-            });
+              x: this._truncate(node.x1 !== 0 ? node.x1 : node.x2),
+              y: this._truncate(node.y1 !== 0 ? node.y1 : node.y2),
+            }));
           }
           break;
         case 'solarpanels':
-          nodes.push({
+          nodes.push(this._createNewNode({
             name: node.name,
             type: 'solarpanel',
             data: node
-          });
+          }));
           break;
         case 'transformers':
           if ((node.x1 !== 0 && node.y1 !== 0) || (node.x2 !== 0 && node.y2 !== 0)) {
-            nodes.push({
+            nodes.push(this._createNewNode({
               name: node.name,
               type: 'transformer',
               data: node,
               x: this._truncate((node.x1 !== 0) ? node.x1 : node.x2),
-              y: this._truncate((node.y1 !== 0) ? node.y1 : node.y2),
-
-            });
+              y: this._truncate((node.y1 !== 0) ? node.y1 : node.y2)
+            }));
           }
           break;
         case 'capacitors':
-          nodes.push({
+          nodes.push(this._createNewNode({
             name: node.name,
             type: 'capacitor',
             data: node,
             x: this._truncate(node.x1),
             y: this._truncate(node.y1)
-          });
+          }));
           break;
         case 'overhead_lines':
-          const fromNode = allNodes.filter(e => e.name === node.from)[0] || { name: node.from, type: 'node', data: null };
-          const toNode = allNodes.filter(e => e.name === node.to)[0] || { name: node.to, type: 'node', data: null };
+          const fromNode: Node = allNodes.filter(e => e.name === node.from)[0] || this._createNewNode({ name: node.from });
+          const toNode: Node = allNodes.filter(e => e.name === node.to)[0] || this._createNewNode({ name: node.to });
           if (node.x1 !== 0.0 && node.y1 !== 0.0 && node.x2 !== 0.0 && node.y2 !== 0.0) {
             fromNode.x = this._truncate(node.x1);
             fromNode.y = this._truncate(node.y1);
@@ -189,13 +202,13 @@ export class TopologyRendererContainer extends React.Component<Props, State> {
           }
           break;
         case 'regulators':
-          nodes.push({
+          nodes.push(this._createNewNode({
             name: node.name,
             type: 'regulator',
             data: node,
             x: this._truncate(node.x2),
             y: this._truncate(node.y2)
-          });
+          }));
           break;
         default:
           console.warn(`${node.groupName} is in the model, but there's no switch case for it. Skipping`);
@@ -203,7 +216,7 @@ export class TopologyRendererContainer extends React.Component<Props, State> {
       }
     }
 
-    return { nodes, edges };
+    return { nodes: nodes.filter(node => node.x !== -1 && node.y !== -1), edges: edges.filter(edge => [edge.from.x, edge.from.y, edge.to.x, edge.to.y].every(e => e !== -1)) };
   }
 
   private _useTopologyModelFromCache() {
