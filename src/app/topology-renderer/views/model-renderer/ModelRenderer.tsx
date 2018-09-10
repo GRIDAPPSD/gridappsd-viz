@@ -36,13 +36,7 @@ export class ModelRenderer extends React.Component<Props, State> {
   private readonly _edgeGenerator = line<{ edge: Edge; node: Node }>()
     .x(d => d.node.screenX)
     .y(d => d.node.screenY);
-  private readonly _symbolsForTypes = {
-    capacitor: '../images/capacitor.png',
-    regulator: '../images/regulator.png',
-    transformer: '../images/transformer.png',
-    switch: '../images/switch-closed.png',
-    swing_node: '../images/substation.png'
-  };
+
 
   constructor(props: any) {
     super(props);
@@ -125,23 +119,25 @@ export class ModelRenderer extends React.Component<Props, State> {
     return edgesKeyedByNodeNames;
   }
 
-  private _calculateAngleBetween2Nodes(from: Node, to: Node): number {
+  private _calculateAngleBetweenEdgeAndXAxis(edge: Edge): number {
+    const from = edge.from;
+    const to = edge.to;
     const horizontal = Math.abs(from.x - to.x);
     const vertical = Math.abs(from.y - to.y);
-    const angle = Math.abs(Math.atan(horizontal / vertical) * 180 / Math.PI);
-    // First quadrant
-    if (to.x > from.x && to.y < from.y)
-      return 90 + angle;
-    // Second quadrant
-    if (to.x < from.x && to.y < from.y)
-      return 90 - angle;
-    // Third quadrant
-    if (to.x < from.x && to.y > from.y)
-      return -(90 - angle);
-    // Fourth quadrant
-    if (to.x > from.x && to.y > from.y)
-      return -(90 + angle);
-    return -(90 - angle);
+    const angle = Math.atan(vertical / horizontal) * 180 / Math.PI;
+    // First quadrant or third quadrant
+    if (to.x > from.x && to.y < from.y || to.x < from.x && to.y > from.y)
+      return -angle;
+    // Second quadrant or fourth quadrant 
+    if (to.x < from.x && to.y < from.y || to.x > from.x && to.y > from.y)
+      return angle;
+    // No rotation
+    if (from.y === to.y)
+      return 0;
+    // Perpendicular to x axis
+    if (from.x === to.x)
+      return 90;
+    return angle;
   }
 
   private _capitalize(value: string) {
@@ -270,6 +266,13 @@ export class ModelRenderer extends React.Component<Props, State> {
     const symbols = select(this._createSvgElement('g', { 'class': 'symbols', 'style': 'visibility: hidden' }));
     const symbolSize = 400;
     const halfSymbolSize = symbolSize / 2;
+    const symbolsForTypes = {
+      capacitor: '../images/capacitor.png',
+      regulator: '../images/regulator.png',
+      transformer: '../images/transformer.png',
+      switch: '../images/switch-closed.png',
+      swing_node: '../images/substation.png'
+    };
     const notSwitches = symbols.append('g')
       .selectAll('image')
       .data(nodesWithKnownTypes.filter(node => node.type !== 'switch'));
@@ -280,7 +283,7 @@ export class ModelRenderer extends React.Component<Props, State> {
       selection.enter()
         .append('image')
         .attr('class', node => `symbol${node.type ? ' ' + node.type : ''}`)
-        .attr('href', node => this._symbolsForTypes[node.type])
+        .attr('href', node => symbolsForTypes[node.type])
         .attr('width', symbolSize)
         .attr('height', symbolSize)
         .attr('x', node => node.screenX)
@@ -292,7 +295,7 @@ export class ModelRenderer extends React.Component<Props, State> {
           const edge = edgesKeyedByNodeNames[node.data.from] || edgesKeyedByNodeNames[node.data.to];
           if (!edge)
             return 'rotate(0) translate(0, 0)';
-          return `translate(${-halfSymbolSize}px, ${-halfSymbolSize}px) rotate(${this._calculateAngleBetween2Nodes(edge.from, edge.to)}deg)`;
+          return `translate(${-halfSymbolSize}px, ${-halfSymbolSize}px) rotate(${this._calculateAngleBetweenEdgeAndXAxis(edge)}deg)`;
         });
     });
     this._container.node()
