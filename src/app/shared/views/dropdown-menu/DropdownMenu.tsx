@@ -32,13 +32,15 @@ export class DropdownMenu extends React.Component<Props, State> {
   render() {
     return (
       <div className='app-dropdown-menu'>
+        <div
+          style={{ display: this.state.opened ? 'block' : 'none' }}
+          className='app-dropdown-menu__click-capture'
+          onClick={this._onClose} />
         <button
           type='button'
           className='app-dropdown-menu-toggler'
           title={this.state.currentLabel}
-          onBlur={this._onClose}
-          tabIndex={0}
-          onFocus={this._onOpen}>
+          onClick={this._onOpen}>
           <span className='text'>{this.state.currentLabel}</span>
           <i className='app-icon'></i>
         </button>
@@ -86,7 +88,10 @@ export class DropdownMenu extends React.Component<Props, State> {
   private _onChange(menuItem: MenuItem) {
     if (this.state.currentLabel !== menuItem.label) {
       this.props.onChange(menuItem);
-      this.setState({ currentLabel: menuItem.label });
+      this.setState({
+        currentLabel: menuItem.label,
+        opened: false
+      });
     }
   }
 }

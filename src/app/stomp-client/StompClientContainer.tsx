@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { StompSubscription, Message } from '@stomp/stompjs';
 
-import { StompClient as Client } from '../services/StompClient';
+import { StompClientService as Client } from '../services/StompClientService';
 import { StompClient } from './StompClient';
 
 interface Props {

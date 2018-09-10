@@ -2,19 +2,19 @@ import { client, Client, StompHeaders, Message, StompSubscription } from '@stomp
 
 import { RUN_CONFIG } from '../../../runConfig';
 
-export class StompClient {
-  private static readonly _INSTANCE = new StompClient();
+export class StompClientService {
+  private static readonly _INSTANCE = new StompClientService();
   private readonly _client: Client = client(RUN_CONFIG.gossServerUrl);
 
   private constructor() {
     this._client.heartbeat.outgoing = 0; // client will send heartbeats every 20000ms
     this._client.heartbeat.incoming = 0;
 
-    this._client.connect('system', 'manager', () => {}, () => {});
+    this._client.connect('system', 'manager', () => { }, () => { });
   }
 
   static getInstance() {
-    return StompClient._INSTANCE;
+    return StompClientService._INSTANCE;
   }
 
   isActive() {

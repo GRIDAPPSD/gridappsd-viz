@@ -12,7 +12,7 @@ interface Props {
   className?: string;
 }
 
-export const FormControl = (props: Props = { type: 'text' } as Props) => (
+export const FormControl = (props: Props) => (
   <div className={'gridappsd-form-control' + (props.className ? ` ${props.className}` : '')}>
     <label className='gridappsd-form-control__label'>
       {props.label}
@@ -21,7 +21,7 @@ export const FormControl = (props: Props = { type: 'text' } as Props) => (
     </label>
     <span className='gridappsd-form-control__ripple-input-field'>
       <input
-        type={props.type}
+        type={props.type || 'text'}
         name={props.name}
         className='simulation-name gridappsd-form-control__ripple-input-field__input'
         onBlur={event => props.onUpdate((event.target as HTMLInputElement).value)}

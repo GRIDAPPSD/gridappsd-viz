@@ -89,3 +89,11 @@
 .app-dropdown-menu-item.selected {
     background-color: rgba(0, 0, 0, 0.08);
 }
+
+.app-dropdown-menu__click-capture {
+    position: fixed;
+    top: -500vw;
+    left: -500vh;
+    width: 1000vw;
+    height: 1000vh;
+}

@@ -1,6 +1,6 @@
 import { Message, StompSubscription } from '@stomp/stompjs';
 
-import { StompClient } from './StompClient';
+import { StompClientService } from './StompClientService';
 import { SimulationConfig } from '../models/SimulationConfig';
 import { SimulationOutputPayload } from '../models/message-requests/SimulationOutputPayload';
 
@@ -11,7 +11,7 @@ import { SimulationOutputPayload } from '../models/message-requests/SimulationOu
 export class SimulationControlService {
 
   private static readonly _INSTANCE_: SimulationControlService = new SimulationControlService();
-  private readonly _stompClient = StompClient.getInstance();
+  private readonly _stompClient = StompClientService.getInstance();
   private readonly _startSimulationTopic = '/queue/goss.gridappsd.process.request.simulation';
   private readonly _simulationStatusTopic = '/topic/goss.gridappsd.simulation.log';
   private readonly _simulationOutputTopic = '/topic/goss.gridappsd.simulation.output.>';

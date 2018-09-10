@@ -30,13 +30,13 @@ export class ModelRenderer extends React.Component<Props, State> {
   private _showNodeSymbols = false;
   private readonly _zoomConfigs = {
     ieee8500: { x: 260.4093929510776, y: 73.17314737715492, k: 0.013690402749858915 },
-    ieee123: { x: 198.39621983106292, y: 25.86191550179683, k: 0.1024394509185199 }
+    ieee123: { x: 340.1487935608565, y: 221.36427239273797, k: 0.05812524487428157 }
   }
   private readonly _zoomer = zoom();
   private readonly _edgeGenerator = line<{ edge: Edge; node: Node }>()
     .x(d => d.node.screenX)
     .y(d => d.node.screenY);
-  private readonly _imageNamesForTypes = {
+  private readonly _symbolsForTypes = {
     capacitor: '../images/capacitor.png',
     regulator: '../images/regulator.png',
     transformer: '../images/transformer.png',
@@ -193,7 +193,6 @@ export class ModelRenderer extends React.Component<Props, State> {
     const zoomCenter = this._zoomConfigs[this.props.topologyName];
     const edgesKeyedByNodeNames = this._calculateCoordinatesForEdgeEndpoints(model.edges, xOffset, yOffset);
     const categories = this._categorizeNodes(model.nodes, xOffset, yOffset);
-
     this._container.selectAll('g')
       .remove();
     this._canvas.call(this._zoomer)
@@ -269,29 +268,33 @@ export class ModelRenderer extends React.Component<Props, State> {
 
   private _renderSymbolsForNodesWithKnownTypes(edgesKeyedByNodeNames: { [nodeName: string]: Edge }, nodesWithKnownTypes: Node[]) {
     const symbols = select(this._createSvgElement('g', { 'class': 'symbols', 'style': 'visibility: hidden' }));
-    const imageSize = 400;
-    const halfImageSize = imageSize / 2;
-    symbols.selectAll('image')
-      .data(nodesWithKnownTypes)
-      .enter()
-      .append('image')
-      .attr('class', 'symbol')
-      .attr('href', node => this._imageNamesForTypes[node.type])
-      .attr('width', imageSize)
-      .attr('height', imageSize)
-      .attr('x', node => node.screenX)
-      .attr('y', node => node.screenY)
-      .style('transform-origin', node => `calc(${node.screenX}px + ${halfImageSize}px) calc(${node.screenY}px + ${halfImageSize}px)`)
-      .style('transform', node => {
-        if (!node.data || !node.data.from || !node.data.to)
-          return 'rotate(0) translate(0, 0)';
-        const edge = edgesKeyedByNodeNames[node.data.from] || edgesKeyedByNodeNames[node.data.to];
-        if (!edge)
-          return 'rotate(0) translate(0, 0)';
-        const angle = this._calculateAngleBetween2Nodes(edge.from, edge.to);
-        const transform = `translate(${-200}px, ${-200}px) rotate(${angle}deg)`;
-        return transform;
-      });
+    const symbolSize = 400;
+    const halfSymbolSize = symbolSize / 2;
+    const notSwitches = symbols.append('g')
+      .selectAll('image')
+      .data(nodesWithKnownTypes.filter(node => node.type !== 'switch'));
+    const switches = symbols.append('g')
+      .selectAll('image')
+      .data(nodesWithKnownTypes.filter(node => node.type === 'switch'));
+    [notSwitches, switches].forEach(selection => {
+      selection.enter()
+        .append('image')
+        .attr('class', node => `symbol${node.type ? ' ' + node.type : ''}`)
+        .attr('href', node => this._symbolsForTypes[node.type])
+        .attr('width', symbolSize)
+        .attr('height', symbolSize)
+        .attr('x', node => node.screenX)
+        .attr('y', node => node.screenY)
+        .style('transform-origin', node => `${node.screenX + halfSymbolSize}px ${node.screenY + halfSymbolSize}px`)
+        .style('transform', node => {
+          if (!node.data || !node.data.from || !node.data.to)
+            return 'rotate(0) translate(0, 0)';
+          const edge = edgesKeyedByNodeNames[node.data.from] || edgesKeyedByNodeNames[node.data.to];
+          if (!edge)
+            return 'rotate(0) translate(0, 0)';
+          return `translate(${-halfSymbolSize}px, ${-halfSymbolSize}px) rotate(${this._calculateAngleBetween2Nodes(edge.from, edge.to)}deg)`;
+        });
+    });
     this._container.node()
       .appendChild(symbols.node());
   }

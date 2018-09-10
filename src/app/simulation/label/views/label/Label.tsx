@@ -68,14 +68,16 @@ export class Label extends React.Component<Props, State> {
   private _show() {
     const anchor = document.querySelector(`.model-renderer ._${this.props.nodeNameToAttachTo}_`) as HTMLElement;
     if (anchor) {
-      this._tooltip = new Tooltip({ position: 'bottom', content: this.props.content });
+      const content = <>
+        <header className='label__heading'>{this.props.nodeNameToAttachTo}</header>
+        {this.props.content}
+      </>;
+      this._tooltip = new Tooltip({ position: 'bottom', content });
       const labelContainer = document.createElement('div');
       labelContainer.className = 'label-container';
       document.body.appendChild(labelContainer);
       this._tooltip.showAt(anchor, labelContainer);
     }
   }
-
-
 
 }

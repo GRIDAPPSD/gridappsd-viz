@@ -170,8 +170,8 @@ export class TopologyRendererContainer extends React.Component<Props, State> {
               name: node.name,
               type: 'transformer',
               data: node,
-              x: this._truncate((node.x1 !== 0) ? node.x1 : node.x2),
-              y: this._truncate((node.y1 !== 0) ? node.y1 : node.y2)
+              x: this._truncate(node.x1 !== 0 ? node.x1 : node.x2),
+              y: this._truncate(node.y1 !== 0 ? node.y1 : node.y2)
             }));
           }
           break;

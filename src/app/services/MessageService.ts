@@ -1,7 +1,6 @@
 import { Message, StompSubscription } from '@stomp/stompjs';
 
-import { StompClient } from './StompClient';
-
+import { StompClientService } from './StompClientService';
 import { GetAllFeederModelsRequest, GetAllFeederModelsRequestPayload } from '../models/message-requests/GetAllFeederModelsRequest';
 import { GetTopologyModelRequest, GetTopologyModelRequestPayload } from '../models/message-requests/GetTopologyModelRequest';
 import { GetModelDictionaryRequest } from '../models/message-requests/GetModelDictionaryRequest';
@@ -11,7 +10,7 @@ import { GetApplicationsAndServices, GetApplicationsAndServicesPayload } from '.
 
 export class MessageService {
 
-  private readonly _stompClient = StompClient.getInstance();
+  private readonly _stompClient = StompClientService.getInstance();
   private static readonly _INSTANCE_: MessageService = new MessageService();
   private readonly _getTopologyModelRequest = new GetTopologyModelRequest();
   private readonly _getAllFeederModelsRequest = new GetAllFeederModelsRequest();
