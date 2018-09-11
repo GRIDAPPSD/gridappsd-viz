@@ -37,6 +37,8 @@ export class ModelRenderer extends React.Component<Props, State> {
     .x(d => d.node.screenX)
     .y(d => d.node.screenY);
 
+  private readonly _symbolSize = 400;
+  private readonly _halfSymbolSize = this._symbolSize / 2;
 
   constructor(props: any) {
     super(props);
@@ -53,11 +55,16 @@ export class ModelRenderer extends React.Component<Props, State> {
       this._transformWatcherService.notify();
     });
     this._addTooltipTrigger();
+    this._addClickListener();
   }
 
   componentWillReceiveProps(newProps: Props) {
     if (this.props.topology !== newProps.topology)
       this._render(newProps.topology);
+  }
+
+  componentWillUnmount() {
+    this._canvas.on('mouseover mouseout click', null);
   }
 
   render() {
@@ -70,6 +77,28 @@ export class ModelRenderer extends React.Component<Props, State> {
         <Wait show={this.props.showWait} />
       </div>
     );
+  }
+
+  private _addClickListener() {
+    this._canvas.on('click', () => {
+      const target = select(currentEvent.target);
+      if (target.classed('switch')) {
+        const rotateTransform = target.style('transform').split(' ').pop();
+        if (!rotateTransform.includes('rotate'))
+          throw new Error('Transform should include rotate()');
+        if (target.attr('href').includes('open')) {
+          target.attr('href', '../images/switch-closed.png');
+          target.style('transform-origin', (node: Node) => `${node.screenX + this._halfSymbolSize}px ${node.screenY + this._halfSymbolSize}px`)
+            .style('transform', `translate(${-this._halfSymbolSize}px, ${-this._halfSymbolSize}px) ${rotateTransform}`)
+        }
+        else {
+          target.attr('href', '../images/switch-open.png');
+          target.style('transform-origin', (node: Node) => `${node.screenX + this._halfSymbolSize - 40}px ${node.screenY + this._halfSymbolSize + 13}px`)
+            .style('transform', `translate(${-this._halfSymbolSize + 40}px, ${-this._halfSymbolSize - 13}px) ${rotateTransform}`)
+
+        }
+      }
+    });
   }
 
   private _addTooltipTrigger() {
@@ -264,8 +293,6 @@ export class ModelRenderer extends React.Component<Props, State> {
 
   private _renderSymbolsForNodesWithKnownTypes(edgesKeyedByNodeNames: { [nodeName: string]: Edge }, nodesWithKnownTypes: Node[]) {
     const symbols = select(this._createSvgElement('g', { 'class': 'symbols', 'style': 'visibility: hidden' }));
-    const symbolSize = 400;
-    const halfSymbolSize = symbolSize / 2;
     const symbolsForTypes = {
       capacitor: '../images/capacitor.png',
       regulator: '../images/regulator.png',
@@ -284,18 +311,18 @@ export class ModelRenderer extends React.Component<Props, State> {
         .append('image')
         .attr('class', node => `symbol${node.type ? ' ' + node.type : ''}`)
         .attr('href', node => symbolsForTypes[node.type])
-        .attr('width', symbolSize)
-        .attr('height', symbolSize)
+        .attr('width', this._symbolSize)
+        .attr('height', this._symbolSize)
         .attr('x', node => node.screenX)
         .attr('y', node => node.screenY)
-        .style('transform-origin', node => `${node.screenX + halfSymbolSize}px ${node.screenY + halfSymbolSize}px`)
+        .style('transform-origin', node => `${node.screenX + this._halfSymbolSize}px ${node.screenY + this._halfSymbolSize}px`)
         .style('transform', node => {
           if (!node.data || !node.data.from || !node.data.to)
             return 'rotate(0) translate(0, 0)';
           const edge = edgesKeyedByNodeNames[node.data.from] || edgesKeyedByNodeNames[node.data.to];
           if (!edge)
             return 'rotate(0) translate(0, 0)';
-          return `translate(${-halfSymbolSize}px, ${-halfSymbolSize}px) rotate(${this._calculateAngleBetweenEdgeAndXAxis(edge)}deg)`;
+          return `translate(${-this._halfSymbolSize}px, ${-this._halfSymbolSize}px) rotate(${this._calculateAngleBetweenEdgeAndXAxis(edge)}deg)`;
         });
     });
     this._container.node()
