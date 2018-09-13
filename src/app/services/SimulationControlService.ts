@@ -47,7 +47,7 @@ export class SimulationControlService {
   }
 
   startSimulation(simulationConfig: SimulationConfig) {
-    const startTime = new Date(simulationConfig.simulation_config.start_time);
+    const startTime = new Date(simulationConfig.simulation_config.start_time.replace(/-/g, "/"));
     const startEpoch = startTime.getTime() / 1000.0;
     simulationConfig.simulation_config.start_time = String(startEpoch);
     this._stompClient.send(

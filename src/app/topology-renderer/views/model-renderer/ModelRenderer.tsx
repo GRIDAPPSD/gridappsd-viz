@@ -83,7 +83,8 @@ export class ModelRenderer extends React.Component<Props, State> {
     this._canvas.on('click', () => {
       const target = select(currentEvent.target);
       if (target.classed('switch')) {
-        const rotateTransform = target.style('transform').split(' ').pop();
+       // const rotateTransform = target.style('transform').split(' ').pop();
+       const rotateTransform = target.node().style.transform.split(' ').pop();
         if (!rotateTransform.includes('rotate'))
           throw new Error('Transform should include rotate()');
         if (target.attr('href').includes('open')) {
@@ -227,7 +228,7 @@ export class ModelRenderer extends React.Component<Props, State> {
 
     this._renderEdges(model.edges);
     this._renderSymbolsForNodesWithKnownTypes(edgesKeyedByNodeNames, categories.nodesWithKnownTypes);
-    this._renderNodes(categories.nodesWithUnknownType, 'unknown-nodes');
+   // this._renderNodes(categories.nodesWithUnknownType, 'unknown-nodes');
     this._renderNodes(categories.nodesWithKnownTypes, 'symbolized-nodes');
   }
 
@@ -280,7 +281,7 @@ export class ModelRenderer extends React.Component<Props, State> {
           case 'switch':
           case 'transformer':
           case 'swing_node':
-            return 150;
+            return 75;
           default:
             return 50;
         }
