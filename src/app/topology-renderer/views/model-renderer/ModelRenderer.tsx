@@ -83,20 +83,18 @@ export class ModelRenderer extends React.Component<Props, State> {
     this._canvas.on('click', () => {
       const target = select(currentEvent.target);
       if (target.classed('switch')) {
-       // const rotateTransform = target.style('transform').split(' ').pop();
-       const rotateTransform = target.node().style.transform.split(' ').pop();
+        const rotateTransform = target.node().style.transform.split(' ').pop();
         if (!rotateTransform.includes('rotate'))
           throw new Error('Transform should include rotate()');
         if (target.attr('href').includes('open')) {
           target.attr('href', '../images/switch-closed.png');
           target.style('transform-origin', (node: Node) => `${node.screenX + this._halfSymbolSize}px ${node.screenY + this._halfSymbolSize}px`)
-            .style('transform', `translate(${-this._halfSymbolSize}px, ${-this._halfSymbolSize}px) ${rotateTransform}`)
+            .style('transform', `translate(${-this._halfSymbolSize}px, ${-this._halfSymbolSize}px) ${rotateTransform}`);
         }
         else {
           target.attr('href', '../images/switch-open.png');
           target.style('transform-origin', (node: Node) => `${node.screenX + this._halfSymbolSize - 40}px ${node.screenY + this._halfSymbolSize + 13}px`)
-            .style('transform', `translate(${-this._halfSymbolSize + 40}px, ${-this._halfSymbolSize - 13}px) ${rotateTransform}`)
-
+            .style('transform', `translate(${-this._halfSymbolSize + 40}px, ${-this._halfSymbolSize - 13}px) ${rotateTransform}`);
         }
       }
     });
@@ -228,7 +226,7 @@ export class ModelRenderer extends React.Component<Props, State> {
 
     this._renderEdges(model.edges);
     this._renderSymbolsForNodesWithKnownTypes(edgesKeyedByNodeNames, categories.nodesWithKnownTypes);
-   // this._renderNodes(categories.nodesWithUnknownType, 'unknown-nodes');
+    // this._renderNodes(categories.nodesWithUnknownType, 'unknown-nodes');
     this._renderNodes(categories.nodesWithKnownTypes, 'symbolized-nodes');
   }
 

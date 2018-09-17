@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { Route, Redirect } from 'react-router-dom';
+import { StompSubscription } from '@stomp/stompjs';
 
 import { Navigation } from './navigation/Navigation';
 import { DatabaseBrowser } from './database-browser/DatabaseBrowser';
@@ -11,7 +12,6 @@ import { SimulationQueue } from './services/SimulationQueue';
 import { TopologyRendererContainer } from './topology-renderer/TopologyRendererContainer';
 import { ModelDictionaryMeasurement } from './models/model-dictionary/ModelDictionaryMeasurement';
 import { MessageService } from './services/MessageService';
-import { StompSubscription } from '@stomp/stompjs';
 import { GetAllFeederModelsRequestPayload } from './models/message-requests/GetAllFeederModelsRequest';
 import { ModelDictionary } from './models/model-dictionary/ModelDictionary';
 import { RequestConfigurationType } from './models/message-requests/RequestConfigurationType';
@@ -21,15 +21,17 @@ import { MeasurementGraphContainer } from './simulation/measurement-graph/Measur
 import { SimulationStatusLoggerContainer } from './simulation/simulation-status-logger/SimulationStatusLoggerContainer';
 import { SimulationControlContainer } from './simulation/simulation-control/SimulationControlContainer';
 import { AvailableApplicationsAndServices } from './available-applications-and-services/AvailableApplicationsAndServices';
+import { LabelContainer } from './simulation/label/LabelContainer';
+import { Application } from './models/Application';
 
 import './App.scss';
-import { LabelContainer } from './simulation/label/LabelContainer';
 
 interface Props {
 }
 
 interface State {
   feederModels: FeederModels;
+  availableApplications: Application[];
 }
 
 export class App extends React.Component<Props, State> {
@@ -51,6 +53,8 @@ export class App extends React.Component<Props, State> {
   componentDidMount() {
     this._fetchFeederModels();
     this._subscribeToModelDictionaryTopic();
+    this._subscribeToAvailableApplicationsAndServicesTopic();
+    this._messageService.fetchAvailableApplicationsAndServices(true);
   }
 
   render() {
@@ -149,6 +153,18 @@ export class App extends React.Component<Props, State> {
     return <Redirect to='/' />;
   }
 
+  private _subscribeToAvailableApplicationsAndServicesTopic() {
+    const repeater = setInterval(() => {
+      if (this._messageService.isActive()) {
+        const subscription = this._messageService.onApplicationsAndServicesReceived(payload => {
+          this.setState({ availableApplications: payload.applications });
+          subscription.unsubscribe();
+        });
+        clearInterval(repeater);
+      }
+    }, 500);
+  }
+
   private _subscribeToModelDictionaryTopic() {
     const repeater = setInterval(() => {
       if (this._messageService.isActive()) {
@@ -183,6 +199,7 @@ export class App extends React.Component<Props, State> {
           if (!this._modelDictionaryMeasurementsPerSimulationName[simulationName])
             this._messageService.fetchModelDictionary(mRID, simulationName);
         }}
+        availableApplications={this.state.availableApplications}
         initialConfig={config} />
     );
   }

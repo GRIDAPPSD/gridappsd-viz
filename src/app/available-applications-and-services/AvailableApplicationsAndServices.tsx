@@ -4,7 +4,7 @@ import { Panel, Button } from 'react-bootstrap';
 import { StompSubscription } from '@stomp/stompjs';
 
 import { MessageService } from '../services/MessageService';
-import { GetApplicationsAndServicesPayload } from '../models/message-requests/GetApplicationsAndServicesRequest';
+import { GetAvailableApplicationsAndServicesPayload } from '../models/message-requests/GetAvailableApplicationsAndServicesRequest';
 
 import './AvailableApplicationsAndServices.scss';
 
@@ -83,8 +83,8 @@ export class AvailableApplicationsAndServices extends React.Component<Applicatio
      else {*/
     const repeater = setInterval(() => {
       if (MESSAGE_SERVICE.isActive()) {
-        const sub: StompSubscription = MESSAGE_SERVICE.onApplicationsAndServicesReceived((payload: GetApplicationsAndServicesPayload) => {
-          const appData = payload.applications;
+        const sub: StompSubscription = MESSAGE_SERVICE.onApplicationsAndServicesReceived((payload: GetAvailableApplicationsAndServicesPayload) => {
+          const appData = JSON.stringify(payload.applications);
           const serviceData = payload.services;
           const appInstanceData = payload.appInstances;
           const serviceInstanceData = payload.serviceInstances;
@@ -98,7 +98,7 @@ export class AvailableApplicationsAndServices extends React.Component<Applicatio
           sessionStorage.setItem('appData', JSON.stringify(serviceInstanceData));
 
         });
-        MESSAGE_SERVICE.fetchApplicationsAndServices();
+        MESSAGE_SERVICE.fetchAvailableApplicationsAndServices();
         clearInterval(repeater);
       }
     }, 500);

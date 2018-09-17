@@ -11,10 +11,11 @@ import { CheckBox } from '../../shared/views/form/checkbox/CheckBox';
 import { MultilineFormControl } from '../../shared/views/form/multiline-form-control/MultilineFormControl';
 import { SIMULATION_CONFIG_OPTIONS } from './models/simulation-config-options';
 import { FeederModels } from '../../models/FeederModels';
-
-import './SimulationConfiguration.scss';
 import { Tooltip } from '../../shared/views/tooltip/Tooltip';
 import { IconButton } from '../../shared/views/buttons/icon-button/IconButton';
+
+import './SimulationConfiguration.scss';
+import { Application } from '../../models/Application';
 
 interface Props {
   onSubmit: (configObject: SimulationConfig) => void;
@@ -22,10 +23,12 @@ interface Props {
   onClose: (event) => void;
   initialConfig: SimulationConfig;
   feederModels: FeederModels;
+  availableApplications: Application[];
 }
 
 interface State {
   show: boolean;
+  applicationConfigStr: string;
 }
 
 export class SimulationConfiguration extends React.Component<Props, State> {
@@ -35,7 +38,8 @@ export class SimulationConfiguration extends React.Component<Props, State> {
   constructor(props: Props) {
     super(props);
     this.state = {
-      show: true
+      show: true,
+      applicationConfigStr: ''
     };
 
     this._currentConfig = JSON.parse(JSON.stringify(this.props.initialConfig));
@@ -145,23 +149,23 @@ export class SimulationConfiguration extends React.Component<Props, State> {
               <FormGroup label='Application Configuration'>
                 <SelectFormControl
                   label='Application name'
-                  // 0 is the index of this app inside SimulationConfig.application_config.applications array
-                  // new MenuItem('VVO', { index: 0, name: 'vvo' }),
-                  menuItems={[new MenuItem('Sample App', { index: 0, name: 'sample_app' })]}
+                  menuItems={this.props.availableApplications.map(app => new MenuItem(app.id, app.id))}
                   onChange={menuItem => {
-                    if (SIMULATION_CONFIG_OPTIONS.application_config.applications[menuItem.value.index].config_string !== '') {
-                      const configStr = JSON.stringify(
-                        JSON.parse(SIMULATION_CONFIG_OPTIONS.application_config.applications[menuItem.value.index].config_string),
-                        null,
-                        4
-                      );
-                      this._currentConfig.application_config.applications = [{ name: menuItem.value.name, config_string: configStr }];
-                    }
+                    const currentApp = this._currentConfig.application_config.applications.pop() || { name: menuItem.value, config_string: '' };
+                    this._currentConfig.application_config.applications.push(currentApp);
                   }}
                   defaultSelectedIndex={
-                    SIMULATION_CONFIG_OPTIONS.application_config.applications
-                      .findIndex(value => value.name === this._currentConfig.application_config.applications[0].name)
+                    this.props.availableApplications
+                      .findIndex(app => app.id === this._currentConfig.application_config.applications[0].name)
                   } />
+                <MultilineFormControl
+                  label='Application configuration'
+                  value={
+                    this._currentConfig.application_config.applications[0].config_string === ''
+                      ? ''
+                      : JSON.stringify(this._currentConfig.application_config.applications[0].config_string, null, 4)
+                  }
+                  onUpdate={value => this._currentConfig.application_config.applications[0].config_string = value} />
               </FormGroup>
             </form>
           </div>

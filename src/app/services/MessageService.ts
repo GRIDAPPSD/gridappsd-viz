@@ -6,7 +6,7 @@ import { GetTopologyModelRequest, GetTopologyModelRequestPayload } from '../mode
 import { GetModelDictionaryRequest } from '../models/message-requests/GetModelDictionaryRequest';
 import { ModelDictionary } from '../models/model-dictionary/ModelDictionary';
 import { QueryBlazeGraphRequest, QueryBlazeGraphRequestBody } from '../models/message-requests/QueryBlazeGraphRequest';
-import { GetApplicationsAndServices, GetApplicationsAndServicesPayload } from '../models/message-requests/GetApplicationsAndServicesRequest';
+import { GetAvailableApplicationsAndServices, GetAvailableApplicationsAndServicesPayload } from '../models/message-requests/GetAvailableApplicationsAndServicesRequest';
 
 export class MessageService {
 
@@ -16,7 +16,7 @@ export class MessageService {
   private readonly _getAllFeederModelsRequest = new GetAllFeederModelsRequest();
   private readonly _getModelDictionaryRequest = new GetModelDictionaryRequest();
   private readonly _queryBlazeGraphRequest = new QueryBlazeGraphRequest();
-  private readonly _getApplicationsAndServices = new GetApplicationsAndServices();
+  private readonly _getApplicationsAndServices = new GetAvailableApplicationsAndServices();
   private readonly _modelDictionaryCache = {};
   private readonly _topologyModelCache = {};
 
@@ -35,11 +35,14 @@ export class MessageService {
     return this._stompClient.isActive();
   }
 
-  fetchApplicationsAndServices() {
+  fetchAvailableApplicationsAndServices(onlyFetchApplications = false) {
+    this._getApplicationsAndServices.requestBody.services = !onlyFetchApplications;
+    this._getApplicationsAndServices.requestBody.appInstances = !onlyFetchApplications;
+    this._getApplicationsAndServices.requestBody.serviceInstances = !onlyFetchApplications;
     this._stompClient.send(
       this._getApplicationsAndServices.url,
       { 'reply-to': this._getApplicationsAndServices.url },
-      this._getApplicationsAndServices.requestBody
+      JSON.stringify(this._getApplicationsAndServices.requestBody)
     );
   }
 
@@ -107,7 +110,7 @@ export class MessageService {
     );
   }
 
-  onApplicationsAndServicesReceived(fn: (payload: GetApplicationsAndServicesPayload) => void): StompSubscription {
+  onApplicationsAndServicesReceived(fn: (payload: GetAvailableApplicationsAndServicesPayload) => void): StompSubscription {
     return this._stompClient.subscribe(this._getApplicationsAndServices.url, (message: Message) => {
       const payload = JSON.parse(message.body);
       fn(payload);

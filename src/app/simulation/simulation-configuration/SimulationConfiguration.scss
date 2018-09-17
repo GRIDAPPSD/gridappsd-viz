@@ -1,8 +1,7 @@
 .simulation-configuration {
     border-radius: 3px;
     background-color: #fff;
-    box-shadow: 2px 10px 20px rgba(0, 0, 0, 0.2);
-    max-width: 90vw;
+    box-shadow: 2px 10px 20px rgba(0, 0, 0, 0.2); // max-width: 90vw;
 }
 
 .simulation-configuration__body {
@@ -17,8 +16,7 @@
     padding: 15px;
     display: flex;
     align-items: center;
-    justify-content: flex-start;
-    // box-shadow: -2px 2px 10px rgba(0, 0, 0, 0.5);
+    justify-content: flex-start; // box-shadow: -2px 2px 10px rgba(0, 0, 0, 0.5);
     border-top: 2px solid rgba(0, 0, 0, 0.05);
 }
 
@@ -34,4 +32,17 @@
     background-color: #555;
     color: #fff;
     padding: 0;
+}
+
+.simulation-configuration__application-table {
+    border-collapse: collapse;
+    th,
+    td {
+        font-size: 13px;
+        border: 2px solid #bbb;
+        padding: 8px 10px;
+    }
+    td {
+        padding: 10px;
+    }
 }
