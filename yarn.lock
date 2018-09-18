@@ -195,14 +195,6 @@
   version "7946.0.4"
   resolved "https://registry.yarnpkg.com/@types/geojson/-/geojson-7946.0.4.tgz#4e049756383c3f055dd8f3d24e63fb543e98eb07"
 
-"@types/history@*":
-  version "4.7.0"
-  resolved "https://registry.yarnpkg.com/@types/history/-/history-4.7.0.tgz#2fac51050c68f7d6f96c5aafc631132522f4aa3f"
-
-"@types/history@^2.0.41":
-  version "2.0.49"
-  resolved "https://registry.yarnpkg.com/@types/history/-/history-2.0.49.tgz#5f626148a0de1e4eb334e66076d15c1a53aa45e2"
-
 "@types/node@*":
   version "10.7.0"
   resolved "https://registry.yarnpkg.com/@types/node/-/node-10.7.0.tgz#d384b2c8625414ab2aa18fdf989c288d6a7a8202"
@@ -218,21 +210,6 @@
   resolved "https://registry.yarnpkg.com/@types/react-dom/-/react-dom-16.0.7.tgz#54d0f867a76b90597e8432030d297982f25c20ba"
   dependencies:
     "@types/node" "*"
-    "@types/react" "*"
-
-"@types/react-router-dom@^4.3.0":
-  version "4.3.0"
-  resolved "https://registry.yarnpkg.com/@types/react-router-dom/-/react-router-dom-4.3.0.tgz#c91796d02deb3a5b24bc1c5db4a255df0d18b8b5"
-  dependencies:
-    "@types/history" "*"
-    "@types/react" "*"
-    "@types/react-router" "*"
-
-"@types/react-router@*":
-  version "4.0.30"
-  resolved "https://registry.yarnpkg.com/@types/react-router/-/react-router-4.0.30.tgz#64bcd886befd1f932779b74d17954adbefb7a3a7"
-  dependencies:
-    "@types/history" "*"
     "@types/react" "*"
 
 "@types/react@*", "@types/react@^16.4.10":
