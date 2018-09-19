@@ -13,9 +13,9 @@ import { SIMULATION_CONFIG_OPTIONS } from './models/simulation-config-options';
 import { FeederModels } from '../../models/FeederModels';
 import { Tooltip } from '../../shared/views/tooltip/Tooltip';
 import { IconButton } from '../../shared/views/buttons/icon-button/IconButton';
+import { Application } from '../../models/Application';
 
 import './SimulationConfiguration.scss';
-import { Application } from '../../models/Application';
 
 interface Props {
   onSubmit: (configObject: SimulationConfig) => void;
@@ -41,8 +41,7 @@ export class SimulationConfiguration extends React.Component<Props, State> {
       show: true,
       applicationConfigStr: ''
     };
-
-    this._currentConfig = JSON.parse(JSON.stringify(this.props.initialConfig));
+    this._currentConfig = this._cloneConfigObject(props.initialConfig);
   }
 
   render() {
@@ -146,25 +145,34 @@ export class SimulationConfiguration extends React.Component<Props, State> {
                   onUpdate={value => this._currentConfig.simulation_config.model_creation_config = JSON.parse(value)} />
               </FormGroup>
 
-              <FormGroup label='Application Configuration'>
-                <SelectFormControl
-                  label='Application name'
-                  menuItems={this.props.availableApplications.map(app => new MenuItem(app.id, app.id))}
-                  onChange={menuItem => {
-                    const currentApp = this._currentConfig.application_config.applications.pop() || { name: menuItem.value, config_string: '' };
-                    this._currentConfig.application_config.applications.push(currentApp);
-                  }}
-                  defaultSelectedIndex={
-                    this.props.availableApplications
-                      .findIndex(app => app.id === this._currentConfig.application_config.applications[0].name)
-                  } />
-                <MultilineFormControl
-                  label='Application configuration'
-                  value={
-                    ''                     
-                  }
-                  onUpdate={value => this._currentConfig.application_config.applications[0].config_string = value} />
-              </FormGroup>
+              {
+                this.props.availableApplications.length > 0 &&
+                <FormGroup label='Application Configuration'>
+                  <SelectFormControl
+                    label='Application name'
+                    menuItems={this.props.availableApplications.map(app => new MenuItem(app.id, app.id))}
+                    onChange={menuItem => {
+                      const currentApp = this._currentConfig.application_config.applications.pop() || { name: menuItem.value, config_string: '' };
+                      this._currentConfig.application_config.applications.push(currentApp);
+                    }}
+                    defaultSelectedIndex={
+                      this._currentConfig.application_config.applications.length === 0
+                        ? undefined
+                        : this.props.availableApplications
+                          .findIndex(app => app.id === this._currentConfig.application_config.applications[0].name)
+                    } />
+                  <MultilineFormControl
+                    label='Application configuration'
+                    value={
+                      this._currentConfig.application_config.applications.length === 0
+                        ? ''
+                        : this._currentConfig.application_config.applications[0].config_string === ''
+                          ? ''
+                          : JSON.stringify(this._currentConfig.application_config.applications[0].config_string, null, 4)
+                    }
+                    onUpdate={value => this._currentConfig.application_config.applications[0].config_string = value} />
+                </FormGroup>
+              }
             </form>
           </div>
           <footer className='simulation-configuration__actions'>
@@ -189,5 +197,16 @@ export class SimulationConfiguration extends React.Component<Props, State> {
         </div>
       </PopUp>
     );
+  }
+
+  private _cloneConfigObject(original: SimulationConfig): SimulationConfig {
+    const config = {} as SimulationConfig;
+    config.power_system_config = { ...original.power_system_config };
+    config.application_config = {
+      applications: original.application_config.applications.length > 0 ?
+        [{ ...original.application_config.applications[0] }] : []
+    };
+    config.simulation_config = { ...original.simulation_config };
+    return config;
   }
 }

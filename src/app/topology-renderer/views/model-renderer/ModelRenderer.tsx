@@ -208,8 +208,6 @@ export class ModelRenderer extends React.Component<Props, State> {
   }
 
   private _render(model: { nodes: any[]; edges: any[] }) {
-    console.log(model);
-
     const xExtent = extent(model.nodes, (d: Node) => d.x);
     const yExtent = extent(model.nodes, (d: Node) => d.y);
     const xOffset = -xExtent[0];
@@ -226,7 +224,6 @@ export class ModelRenderer extends React.Component<Props, State> {
 
     this._renderEdges(model.edges);
     this._renderSymbolsForNodesWithKnownTypes(edgesKeyedByNodeNames, categories.nodesWithKnownTypes);
-    // this._renderNodes(categories.nodesWithUnknownType, 'unknown-nodes');
     this._renderNodes(categories.nodesWithKnownTypes, 'symbolized-nodes');
   }
 
@@ -288,7 +285,6 @@ export class ModelRenderer extends React.Component<Props, State> {
     this._container.node()
       .appendChild(nodes.node());
   }
-
 
   private _renderSymbolsForNodesWithKnownTypes(edgesKeyedByNodeNames: { [nodeName: string]: Edge }, nodesWithKnownTypes: Node[]) {
     const symbols = select(this._createSvgElement('g', { 'class': 'symbols', 'style': 'visibility: hidden' }));
