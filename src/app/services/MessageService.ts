@@ -7,6 +7,7 @@ import { GetModelDictionaryRequest } from '../models/message-requests/GetModelDi
 import { ModelDictionary } from '../models/model-dictionary/ModelDictionary';
 import { QueryBlazeGraphRequest, QueryBlazeGraphRequestBody } from '../models/message-requests/QueryBlazeGraphRequest';
 import { GetAvailableApplicationsAndServices, GetAvailableApplicationsAndServicesPayload } from '../models/message-requests/GetAvailableApplicationsAndServicesRequest';
+import { ToggleSwitchStateRequest } from '../models/message-requests/ToggleSwitchStateRequest';
 
 export class MessageService {
 
@@ -17,6 +18,7 @@ export class MessageService {
   private readonly _getModelDictionaryRequest = new GetModelDictionaryRequest();
   private readonly _queryBlazeGraphRequest = new QueryBlazeGraphRequest();
   private readonly _getApplicationsAndServices = new GetAvailableApplicationsAndServices();
+  private readonly _toggleSwitchStateRequest = new ToggleSwitchStateRequest();
   private readonly _modelDictionaryCache = {};
   private readonly _topologyModelCache = {};
 
@@ -135,11 +137,12 @@ export class MessageService {
    * @see {@link MessageRequest.fetchModelDictionary(mrid = '')}
    * @param fn The listener to invoke when the response message arrives
    */
-  onModelDictionaryReceived(fn: (payload: ModelDictionary, simulationName) => void): StompSubscription {
+  onModelDictionaryReceived(fn: (response: { payload: ModelDictionary; requestType: string }, simulationName) => void): StompSubscription {
     return this._stompClient.subscribe(this._getModelDictionaryRequest.replyTo, (message: Message) => {
-      const payload = JSON.parse(message.body);
-      payload.requestType = this._getModelDictionaryRequest.requestBody.configurationType;
-      fn(payload, this._getModelDictionaryRequest.simulationName);
+      fn({
+        payload: JSON.parse(message.body) as ModelDictionary,
+        requestType: this._getModelDictionaryRequest.requestBody.configurationType
+      }, this._getModelDictionaryRequest.simulationName);
     });
   }
 
@@ -168,6 +171,14 @@ export class MessageService {
       payload.requestType = this._getTopologyModelRequest.requestBody.configurationType;
       fn(payload);
     });
+  }
+
+  toggleSwitchState(payload) {
+    this._stompClient.send(
+      this._toggleSwitchStateRequest.url,
+      { 'reply-to': this._toggleSwitchStateRequest.replyTo },
+      JSON.stringify(payload)
+    );
   }
 
 }

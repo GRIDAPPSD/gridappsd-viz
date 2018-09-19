@@ -10,8 +10,11 @@ import { GetTopologyModelRequestPayload } from '../models/message-requests/GetTo
 import { SimulationQueue } from '../services/SimulationQueue';
 import { Node } from './models/Node';
 import { Edge } from './models/Edge';
+import { Switch } from '../models/topology/Switch';
+import { SimulationOutputService } from '../services/SimulationOutputService';
 
 interface Props {
+  mRIDs: { [componentType: string]: string };
 }
 
 interface State {
@@ -25,6 +28,7 @@ export class TopologyRendererContainer extends React.Component<Props, State> {
 
   private readonly _messageService = MessageService.getInstance();
   private readonly _simulationQueue = SimulationQueue.getInstance();
+  private readonly _simulationOutputService = SimulationOutputService.getInstance();
   private _activeSimulationConfig = this._simulationQueue.getActiveSimulation().config;
   private _activeSimulationWatcher: Subscription;
   private _topologySubscription: StompSubscription;
@@ -35,6 +39,7 @@ export class TopologyRendererContainer extends React.Component<Props, State> {
       topology: null,
       isFetching: true
     };
+    this._onToggleSwitch = this._onToggleSwitch.bind(this);
   }
 
   componentDidMount() {
@@ -56,7 +61,8 @@ export class TopologyRendererContainer extends React.Component<Props, State> {
       <ModelRenderer
         topology={this.state.topology}
         showWait={this.state.isFetching}
-        topologyName={this._activeSimulationConfig.simulation_config.simulation_name} />
+        topologyName={this._activeSimulationConfig.simulation_config.simulation_name}
+        onToggleSwitch={this._onToggleSwitch} />
     );
   }
 
@@ -71,6 +77,29 @@ export class TopologyRendererContainer extends React.Component<Props, State> {
       type: 'unknown',
       ...properties
     } as Node;
+  }
+
+  private _onToggleSwitch(swjtch: Switch) {
+    const payload = {
+      simulation_id: this._simulationOutputService.getSimulationId(),
+      message: {
+        timestamp: new Date().toISOString(),
+        difference_mrid: this._activeSimulationConfig.power_system_config.Line_name,
+        reverse_differences: [
+          {
+            object: swjtch.mRID,
+            value: swjtch.open ? '0' : '1'
+          }
+        ],
+        forward_differences: [
+          {
+            object: swjtch.mRID,
+            value: swjtch.open ? '1' : '0'
+          }
+        ]
+      }
+    };
+    this._messageService.toggleSwitchState(payload);
   }
 
   private _processModelForRendering(payload: GetTopologyModelRequestPayload) {

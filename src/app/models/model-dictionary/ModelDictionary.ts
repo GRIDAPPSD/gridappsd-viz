@@ -27,5 +27,4 @@ export interface ModelDictionary {
       measurements: ModelDictionaryMeasurement[];
     }>;
   }
-  requestType: string;
 }

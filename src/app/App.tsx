@@ -32,6 +32,7 @@ interface Props {
 interface State {
   feederModels: FeederModels;
   availableApplications: Application[];
+  mRIDs: { [componentType: string]: string };
 }
 
 export class App extends React.Component<Props, State> {
@@ -57,6 +58,12 @@ export class App extends React.Component<Props, State> {
     this._messageService.fetchAvailableApplicationsAndServices(true);
   }
 
+  shouldComponentUpdate(_: Props, nextState: State) {
+    if (this.state && this.state.mRIDs !== nextState.mRIDs)
+      return false;
+    return true;
+  }
+
   render() {
     return (
       <Route path='/' component={(props) =>
@@ -75,7 +82,7 @@ export class App extends React.Component<Props, State> {
                     <div className='topology-renderer-simulation-status-logger-measurement-graphs'>
                       <div className='topology-renderer-simulation-status-logger'>
                         <SimulationControlContainer simulationConfig={activeSimulationConfig} />
-                        <TopologyRendererContainer />
+                        <TopologyRendererContainer mRIDs={this.state.mRIDs} />
                         <SimulationStatusLoggerContainer />
                       </div>
                       <div className='measurement-graphs'>
@@ -168,11 +175,11 @@ export class App extends React.Component<Props, State> {
   private _subscribeToModelDictionaryTopic() {
     const repeater = setInterval(() => {
       if (this._messageService.isActive()) {
-        this._messageService.onModelDictionaryReceived((payload: ModelDictionary, simulationName: string) => {
-          if (payload.requestType === RequestConfigurationType.CIM_DICTIONARY) {
-            if (typeof payload.data === 'string')
-              payload.data = JSON.parse(payload.data);
-            const modelDictionaryMeasurements = payload.data.feeders[0].measurements.reduce(
+        this._messageService.onModelDictionaryReceived((response, simulationName: string) => {
+          if (response.requestType === RequestConfigurationType.CIM_DICTIONARY) {
+            if (typeof response.payload.data === 'string')
+              response.payload.data = JSON.parse(response.payload.data);
+            const modelDictionaryMeasurements = response.payload.data.feeders[0].measurements.reduce(
               (result, measurement) => {
                 result[measurement.mRID] = measurement;
                 return result;
@@ -181,6 +188,12 @@ export class App extends React.Component<Props, State> {
             );
             this._simulationOutputService.setModelDictionaryMeasures(modelDictionaryMeasurements);
             this._modelDictionaryMeasurementsPerSimulationName[simulationName] = modelDictionaryMeasurements;
+            this.setState({
+              mRIDs: response.payload.data.feeders[0].switches.reduce((mRIDs, swjtch) => {
+                mRIDs[swjtch.name] = swjtch.mRID;
+                return mRIDs;
+              }, {})
+            });
           }
         });
         clearInterval(repeater);
