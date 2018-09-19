@@ -161,9 +161,7 @@ export class SimulationConfiguration extends React.Component<Props, State> {
                 <MultilineFormControl
                   label='Application configuration'
                   value={
-                    this._currentConfig.application_config.applications[0].config_string === ''
-                      ? ''
-                      : JSON.stringify(this._currentConfig.application_config.applications[0].config_string, null, 4)
+                    ''                     
                   }
                   onUpdate={value => this._currentConfig.application_config.applications[0].config_string = value} />
               </FormGroup>

@@ -64,7 +64,7 @@ export class DropdownMenu extends React.Component<Props, State> {
   }
 
   componentDidMount() {
-    if (this.props.defaultSelectedIndex < 0 || this.props.defaultSelectedIndex >= this.props.menuItems.length)
+    if (this.props.defaultSelectedIndex >= this.props.menuItems.length)
       throw new Error('Default item index must be between 0 and ' + (this.props.menuItems.length - 1));
     if (this.props.defaultSelectedIndex !== undefined)
       this._onChange(this.props.menuItems[this.props.defaultSelectedIndex]);
@@ -86,12 +86,14 @@ export class DropdownMenu extends React.Component<Props, State> {
   }
 
   private _onChange(menuItem: MenuItem) {
-    if (this.state.currentLabel !== menuItem.label) {
-      this.props.onChange(menuItem);
-      this.setState({
-        currentLabel: menuItem.label,
-        opened: false
-      });
+    if (menuItem != undefined) {
+      if (this.state.currentLabel !== menuItem.label) {
+        this.props.onChange(menuItem);
+        this.setState({
+          currentLabel: menuItem.label,
+          opened: false
+        });
+      }
     }
   }
 }
