@@ -9,7 +9,7 @@ import { GetAvailableApplicationsAndServicesPayload } from '../models/message-re
 import './AvailableApplicationsAndServices.scss';
 
 export interface ApplicationsProps { }
-const MESSAGE_SERVICE: MessageService = MessageService.getInstance();
+
 interface State {
   open: boolean;
   appData: string;
@@ -19,6 +19,8 @@ interface State {
 
 }
 export class AvailableApplicationsAndServices extends React.Component<ApplicationsProps, State> {
+
+  private _messageService = MessageService.getInstance();
 
   constructor(props: any) {
     super(props);
@@ -76,32 +78,20 @@ export class AvailableApplicationsAndServices extends React.Component<Applicatio
     return null;
   }
   private _fetchApplicationsAndServices() {
-    /* if (sessionStorage.getItem('appData')) {
-       const appData = JSON.parse(sessionStorage.getItem('appData'));
-       this.setState({ appData });
-     }
-     else {*/
-    const repeater = setInterval(() => {
-      if (MESSAGE_SERVICE.isActive()) {
-        const sub: StompSubscription = MESSAGE_SERVICE.onApplicationsAndServicesReceived((payload: GetAvailableApplicationsAndServicesPayload) => {
-          const appData = JSON.stringify(payload.applications);
-          const serviceData = payload.services;
-          const appInstanceData = payload.appInstances;
-          const serviceInstanceData = payload.serviceInstances;
+    this._messageService.onApplicationsAndServicesReceived((payload: GetAvailableApplicationsAndServicesPayload, sub) => {
+      const appData = JSON.stringify(payload.applications);
+      const serviceData = payload.services;
+      const appInstanceData = payload.appInstances;
+      const serviceInstanceData = payload.serviceInstances;
 
+      this.setState({ appData, serviceData, appInstanceData, serviceInstanceData });
+      sessionStorage.setItem('appData', JSON.stringify(appData));
+      sessionStorage.setItem('appData', JSON.stringify(serviceData));
+      sessionStorage.setItem('appData', JSON.stringify(appInstanceData));
+      sessionStorage.setItem('appData', JSON.stringify(serviceInstanceData));
 
-          this.setState({ appData, serviceData, appInstanceData, serviceInstanceData });
-          sub.unsubscribe();
-          sessionStorage.setItem('appData', JSON.stringify(appData));
-          sessionStorage.setItem('appData', JSON.stringify(serviceData));
-          sessionStorage.setItem('appData', JSON.stringify(appInstanceData));
-          sessionStorage.setItem('appData', JSON.stringify(serviceInstanceData));
-
-        });
-        MESSAGE_SERVICE.fetchAvailableApplicationsAndServices();
-        clearInterval(repeater);
-      }
-    }, 500);
-    //}
+      sub.unsubscribe();
+    });
+    this._messageService.fetchAvailableApplicationsAndServices();
   }
 }

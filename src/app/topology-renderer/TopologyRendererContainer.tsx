@@ -87,18 +87,19 @@ export class TopologyRendererContainer extends React.Component<Props, State> {
         difference_mrid: this._activeSimulationConfig.power_system_config.Line_name,
         reverse_differences: [
           {
-            object: swjtch.mRID,
+            object: this.props.mRIDs[swjtch.name],
             value: swjtch.open ? '0' : '1'
           }
         ],
         forward_differences: [
           {
-            object: swjtch.mRID,
+            object: this.props.mRIDs[swjtch.name],
             value: swjtch.open ? '1' : '0'
           }
         ]
       }
     };
+    console.log(payload);
     this._messageService.toggleSwitchState(payload);
   }
 
@@ -126,10 +127,11 @@ export class TopologyRendererContainer extends React.Component<Props, State> {
   }
 
   private _subscribeToTopologyModelTopic() {
-    this._topologySubscription = this._messageService.onTopologyModelReceived((payload: GetTopologyModelRequestPayload) => {
+    this._messageService.onTopologyModelReceived((payload: GetTopologyModelRequestPayload) => {
       if (payload.requestType === RequestConfigurationType.GRID_LAB_D_SYMBOLS)
         this._processModelForRendering(payload);
-    });
+    })
+      .then(sub => this._topologySubscription = sub);
   }
 
   private _topologyModelExistsInCache() {

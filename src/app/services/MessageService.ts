@@ -112,10 +112,10 @@ export class MessageService {
     );
   }
 
-  onApplicationsAndServicesReceived(fn: (payload: GetAvailableApplicationsAndServicesPayload) => void): StompSubscription {
-    return this._stompClient.subscribe(this._getApplicationsAndServices.url, (message: Message) => {
+  onApplicationsAndServicesReceived(fn: (payload: GetAvailableApplicationsAndServicesPayload, sub: StompSubscription) => void): Promise<StompSubscription> {
+    return this._stompClient.subscribe(this._getApplicationsAndServices.url, (message: Message, sub) => {
       const payload = JSON.parse(message.body);
-      fn(payload);
+      fn(payload, sub);
     });
   }
 
@@ -125,9 +125,9 @@ export class MessageService {
    * @see {@link MessageRequest.fetchDataFromBlazeGraph(requestBody: QueryBlazeGraphRequestBody)}
    * @param fn The listener to invoke when the response message arrives
    */
-  onBlazeGraphDataReceived(fn: (payload: any) => void): StompSubscription {
-    return this._stompClient.subscribe(this._queryBlazeGraphRequest.replyTo, (message: Message) => {
-      fn(JSON.parse(message.body));
+  onBlazeGraphDataReceived(fn: (payload: any, sub: StompSubscription) => void): Promise<StompSubscription> {
+    return this._stompClient.subscribe(this._queryBlazeGraphRequest.replyTo, (message: Message, sub: StompSubscription) => {
+      fn(JSON.parse(message.body), sub);
     });
   }
 
@@ -137,12 +137,12 @@ export class MessageService {
    * @see {@link MessageRequest.fetchModelDictionary(mrid = '')}
    * @param fn The listener to invoke when the response message arrives
    */
-  onModelDictionaryReceived(fn: (response: { payload: ModelDictionary; requestType: string }, simulationName) => void): StompSubscription {
-    return this._stompClient.subscribe(this._getModelDictionaryRequest.replyTo, (message: Message) => {
+  onModelDictionaryReceived(fn: (response: { payload: ModelDictionary; requestType: string }, simulationName, sub: StompSubscription) => void): Promise<StompSubscription> {
+    return this._stompClient.subscribe(this._getModelDictionaryRequest.replyTo, (message: Message, sub: StompSubscription) => {
       fn({
         payload: JSON.parse(message.body) as ModelDictionary,
         requestType: this._getModelDictionaryRequest.requestBody.configurationType
-      }, this._getModelDictionaryRequest.simulationName);
+      }, this._getModelDictionaryRequest.simulationName, sub);
     });
   }
 
@@ -152,10 +152,10 @@ export class MessageService {
    * @see {@link MessageRequest.fetchAllFeederModels()}
    * @param fn The listener to invoke when the response message arrives
    */
-  onFeederModelsReceived(fn: (payload: GetAllFeederModelsRequestPayload) => void): StompSubscription {
-    return this._stompClient.subscribe(this._getAllFeederModelsRequest.replyTo, (message: Message) => {
+  onFeederModelsReceived(fn: (payload: GetAllFeederModelsRequestPayload, sub: StompSubscription) => void): Promise<StompSubscription> {
+    return this._stompClient.subscribe(this._getAllFeederModelsRequest.replyTo, (message: Message, sub: StompSubscription) => {
       const payload = JSON.parse(message.body);
-      fn(payload);
+      fn(payload, sub);
     });
   }
 
@@ -165,11 +165,11 @@ export class MessageService {
    * @see {@link MessageRequest.fetchTopologyModel(mrid = '')}
    * @param fn The listener to invoke when the response message arrives
    */
-  onTopologyModelReceived(fn: (payload: GetTopologyModelRequestPayload) => void): StompSubscription {
-    return this._stompClient.subscribe(this._getTopologyModelRequest.replyTo, (message: Message) => {
+  onTopologyModelReceived(fn: (payload: GetTopologyModelRequestPayload, sub: StompSubscription) => void): Promise<StompSubscription> {
+    return this._stompClient.subscribe(this._getTopologyModelRequest.replyTo, (message: Message, sub: StompSubscription) => {
       const payload = JSON.parse(message.body);
       payload.requestType = this._getTopologyModelRequest.requestBody.configurationType;
-      fn(payload);
+      fn(payload, sub);
     });
   }
 

@@ -16,10 +16,10 @@ interface State {
   isFetching: boolean;
 }
 
-let blazeGraphSubscription: StompSubscription = null;
 
 export class BlazeGraphContainer extends React.Component<Props, State> {
   private readonly _messageService = MessageService.getInstance();
+  private _blazeGraphSubscription: StompSubscription = null;
 
   constructor(props: any) {
     super(props);
@@ -32,19 +32,19 @@ export class BlazeGraphContainer extends React.Component<Props, State> {
   }
 
   componentDidMount() {
-    if (blazeGraphSubscription) {
-      blazeGraphSubscription.unsubscribe();
-      blazeGraphSubscription = null;
-    }
-    const repeater = setInterval(() => {
-      if (this._messageService.isActive()) {
-        blazeGraphSubscription = this._messageService.onBlazeGraphDataReceived((payload) => {
-          this.setState({ response: payload.data }, () => this.setState({ isFetching: false }));
-        });
-        clearInterval(repeater);
-      }
-    }, 500);
+    this._messageService.onBlazeGraphDataReceived((payload, sub) => {
+      this.setState({ response: payload.data }, () => this.setState({ isFetching: false }));
+      this._blazeGraphSubscription = sub;
+    });
   }
+
+  componentWillUnmount() {
+    if (this._blazeGraphSubscription) {
+      this._blazeGraphSubscription.unsubscribe();
+      this._blazeGraphSubscription = null;
+    }
+  }
+
   render() {
     return (
       <BlazeGraph

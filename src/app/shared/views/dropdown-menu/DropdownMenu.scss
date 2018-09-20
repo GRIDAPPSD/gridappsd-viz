@@ -1,6 +1,5 @@
 .app-dropdown-menu {
-    position: relative;
-    display: inline-block;
+    position: relative; // display: inline-block;
 }
 
 .app-dropdown-menu-toggler {
@@ -92,8 +91,8 @@
 
 .app-dropdown-menu__click-capture {
     position: fixed;
-    top: -500vw;
-    left: -500vh;
+    top: -50vw;
+    left: -50vh;
     width: 1000vw;
     height: 1000vh;
 }

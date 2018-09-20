@@ -12,11 +12,10 @@ interface State {
   isFetching: boolean;
 }
 
-let subscription: StompSubscription = null;
-
 
 export class StompClientContainer extends React.Component<Props, State> {
   private readonly _stompClient = Client.getInstance();
+  private _subscription: StompSubscription = null;
 
   constructor(props: any) {
     super(props);
@@ -28,26 +27,17 @@ export class StompClientContainer extends React.Component<Props, State> {
   }
 
   componentDidMount() {
-    if (subscription) {
-      subscription.unsubscribe();
-      subscription = null;
-    }
-    const repeater = setInterval(() => {
-      if (this._stompClient.isActive()) {
-        clearInterval(repeater);
-        subscription = this._stompClient.subscribe('/stomp-client/response-queue', (message: Message) => {
-          const responseBody = JSON.parse(message.body);
-          this.setState({ responseBody: JSON.stringify(responseBody, null, 4) }, () => this.setState({ isFetching: false }));
-        });
-      }
-    }, 500);
-
+    this._stompClient.subscribe('/stomp-client/response-queue', (message: Message, sub: StompSubscription) => {
+      const responseBody = JSON.parse(message.body);
+      this.setState({ responseBody: JSON.stringify(responseBody, null, 4) }, () => this.setState({ isFetching: false }));
+      this._subscription = sub
+    });
   }
 
   componentWillUnmount() {
-    if (subscription) {
-      subscription.unsubscribe();
-      subscription = null;
+    if (this._subscription) {
+      this._subscription.unsubscribe();
+      this._subscription = null;
     }
   }
   render() {

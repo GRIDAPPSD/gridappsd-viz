@@ -30,7 +30,32 @@ export class StompClientService {
     }, 500);
   }
 
-  subscribe(destination: string, callback: (message: Message) => void): StompSubscription {
-    return this._client.subscribe(destination, callback);
+  subscribe(destination: string, callback: (message: Message, subscription: StompSubscription) => void): Promise<StompSubscription> {
+    if (this.isActive())
+      return Promise.resolve()
+        .then(() => {
+          const subscription = this._client.subscribe(destination, message => callback(message, subscription));
+          return subscription;
+        });
+    return new Promise<StompSubscription>((resolve, reject) => {
+      let attempt = 0;
+      const repeater = setInterval(() => {
+        if (this.isActive()) {
+          clearInterval(repeater);
+          resolve();
+        }
+        else {
+          attempt++;
+          if (attempt === 10) {
+            reject('Unable to establish connection to the platform');
+            clearInterval(repeater);
+          }
+        }
+      }, 500);
+    })
+      .then(() => {
+        const subscription = this._client.subscribe(destination, message => callback(message, subscription));
+        return subscription;
+      });
   }
 }

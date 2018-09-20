@@ -46,21 +46,20 @@ export class SimulationStatusLoggerContainer extends React.Component<Props, Stat
   }
 
   private _subscribeToSimulationStartedEvent() {
-    const repeater = setInterval(() => {
-      if (this._simulationControlService.isActive()) {
-        this._simulationStartSubscription = this._simulationControlService.onSimulationStarted(simulationId => {
-          console.log('simulation ID: ' + simulationId);
-          this.setState({ isFetching: true });
-          this._simulationStatusLogSub = this._simulationControlService.onSimulationStatusLogReceived(
-            simulationId,
-            logMessage => this.setState({
-              logMessages: this.state.logMessages.concat(logMessage),
-              isFetching: false
-            })
-          );
-        });
-        clearInterval(repeater);
-      }
-    }, 500);
+    this._simulationControlService.onSimulationStarted((simulationId, sub) => {
+      console.log('simulation ID: ' + simulationId);
+      this.setState({ isFetching: true });
+      this._simulationControlService.onSimulationStatusLogReceived(
+        simulationId,
+        (logMessage, innerSub) => {
+          this.setState({
+            logMessages: this.state.logMessages.concat(logMessage),
+            isFetching: false
+          });
+          this._simulationStatusLogSub = innerSub;
+        }
+      );
+      this._simulationStartSubscription = sub
+    });
   }
 }
