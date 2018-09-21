@@ -1,5 +1,5 @@
 .app-dropdown-menu {
-    position: relative; // display: inline-block;
+    position: relative;
 }
 
 .app-dropdown-menu-toggler {
@@ -95,4 +95,5 @@
     left: -50vh;
     width: 1000vw;
     height: 1000vh;
+    z-index: 100;
 }

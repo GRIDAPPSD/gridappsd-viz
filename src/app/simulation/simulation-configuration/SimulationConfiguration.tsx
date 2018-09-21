@@ -74,10 +74,6 @@ export class SimulationConfiguration extends React.Component<Props, State> {
                 <SelectFormControl
                   label='Line name'
                   menuItems={this.props.feederModels.lines.map(line => new MenuItem(line.name, line))}
-                  defaultSelectedIndex={
-                    (this.props.feederModels.lines
-                      .filter(line => line.mRID === this._currentConfig.power_system_config.Line_name)[0] || { index: 0 }).index
-                  }
                   onChange={item => {
                     this._currentConfig.power_system_config.Line_name = item.value.mRID;
                     this._currentConfig.simulation_config.simulation_name = item.value.name;

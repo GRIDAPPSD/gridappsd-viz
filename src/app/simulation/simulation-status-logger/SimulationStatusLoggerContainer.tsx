@@ -13,7 +13,6 @@ interface State {
   isFetching: boolean;
 }
 
-
 export class SimulationStatusLoggerContainer extends React.Component<Props, State> {
 
   private readonly _simulationControlService = SimulationControlService.getInstance();
@@ -33,7 +32,11 @@ export class SimulationStatusLoggerContainer extends React.Component<Props, Stat
   }
 
   componentWillUnmount() {
-    this._simulationStartSubscription.unsubscribe();
+    if (this._simulationStartSubscription) {
+      this._simulationStartSubscription.unsubscribe();
+      console.log('[SimulationStatusLoggerContainer] Unsubscribed from onSimulationStarted');
+
+    }
     if (this._simulationStatusLogSub)
       this._simulationStatusLogSub.unsubscribe();
   }
@@ -48,6 +51,7 @@ export class SimulationStatusLoggerContainer extends React.Component<Props, Stat
   private _subscribeToSimulationStartedEvent() {
     this._simulationControlService.onSimulationStarted((simulationId, sub) => {
       console.log('simulation ID: ' + simulationId);
+      console.log('[SimulationStatusLoggerContainer] Subscribed to onSimulationStarted');
       this.setState({ isFetching: true });
       this._simulationControlService.onSimulationStatusLogReceived(
         simulationId,

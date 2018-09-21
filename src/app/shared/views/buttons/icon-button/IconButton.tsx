@@ -1,7 +1,7 @@
 import * as React from 'react';
 
-import './IconButton.scss';
 import { Ripple } from '../../ripple/Ripple';
+import './IconButton.scss';
 
 interface Props {
   icon: 'plus' | 'minus' | 'question';

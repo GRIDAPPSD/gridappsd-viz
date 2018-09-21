@@ -45,7 +45,7 @@ export class Navigation extends React.Component<Props, State> {
         </AppBar>
         <Drawer ref={ref => this._drawer = ref}>
           <DrawerItem onClick={() => this.props.onShowSimulationConfigForm(DEFAULT_SIMULATION_CONFIG)}>
-            <DrawerItemIcon iconClassName='edit-simulation-config-icon' />
+            <DrawerItemIcon icon='form' />
             <DrawerItemLabel value='Simulations' />
           </DrawerItem>
           {
@@ -53,7 +53,7 @@ export class Navigation extends React.Component<Props, State> {
             <DrawerItemGroup header='Previous simulations'>
               {
                 previousSimulations.map(simulation => (
-                  <DrawerItem key={simulation.name} onClick={() => this.props.onShowSimulationConfigForm(simulation.config)}>
+                  <DrawerItem key={simulation.id} onClick={() => this.props.onShowSimulationConfigForm(simulation.config)}>
                     <strong>Name:&nbsp;</strong>
                     {simulation.name}
                     &nbsp;&mdash;&nbsp;
@@ -66,19 +66,19 @@ export class Navigation extends React.Component<Props, State> {
           }
           <DrawerItem>
             <Link to='/applications'>
-              <DrawerItemIcon iconClassName='show-application-and-services-icon' />
+              <DrawerItemIcon icon='app' />
               <DrawerItemLabel value='Applications & Services' />
             </Link>
           </DrawerItem>
           <DrawerItem>
             <Link to='/browse'>
-              <DrawerItemIcon iconClassName='browse-database-icon' />
+              <DrawerItemIcon icon='browse' />
               <DrawerItemLabel value='Browse Database' />
             </Link>
           </DrawerItem>
           <DrawerItem>
             <Link to='/stomp-client'>
-              <DrawerItemIcon iconClassName='stomp-client-icon' />
+              <DrawerItemIcon icon='terminal' />
               <DrawerItemLabel value='Stomp Client' />
             </Link>
           </DrawerItem>

@@ -30,14 +30,13 @@ export class StompClientService {
     }, 500);
   }
 
-  subscribe(destination: string, callback: (message: Message, subscription: StompSubscription) => void): Promise<StompSubscription> {
+  subscribe(destination: string, callback: (message: Message, subscription: StompSubscription) => void): Promise<void> {
     if (this.isActive())
       return Promise.resolve()
         .then(() => {
           const subscription = this._client.subscribe(destination, message => callback(message, subscription));
-          return subscription;
         });
-    return new Promise<StompSubscription>((resolve, reject) => {
+    return new Promise<void>((resolve, reject) => {
       let attempt = 0;
       const repeater = setInterval(() => {
         if (this.isActive()) {
@@ -55,7 +54,6 @@ export class StompClientService {
     })
       .then(() => {
         const subscription = this._client.subscribe(destination, message => callback(message, subscription));
-        return subscription;
       });
   }
 }

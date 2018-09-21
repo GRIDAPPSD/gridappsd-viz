@@ -1,5 +1,3 @@
-import { OutputObject} from './OutputObject';
-
 export interface SimulationConfig {
   power_system_config: {
     GeographicalRegion_name: string;
@@ -15,9 +13,6 @@ export interface SimulationConfig {
     timestep_increment: string;
     simulation_name: string;
     power_flow_solver_method: string;
-    simulation_output: {
-      output_objects: OutputObject[];
-    };
     model_creation_config: {
       load_scaling_factor: string;
       schedule_name: string;

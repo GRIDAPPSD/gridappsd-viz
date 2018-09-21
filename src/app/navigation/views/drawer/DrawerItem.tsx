@@ -14,8 +14,13 @@ export const DrawerItem = ({ className = '', onClick = (() => { }), children }) 
   </Ripple>
 );
 
-export const DrawerItemIcon = ({ iconClassName = '' }) => (
-  <i className={'app-icon drawer-item__icon' + (iconClassName ? ' ' + iconClassName : '')} />
+type IconName = 'form' | 'app' | 'browse' | 'terminal';
+
+interface DrawerItemIconProps {
+  icon: IconName
+}
+export const DrawerItemIcon = (props: DrawerItemIconProps) => (
+  <i className={'app-icon drawer-item__icon drawer-item__icon__' + props.icon} />
 );
 
 export const DrawerItemLabel = ({ className = '', value }) => (

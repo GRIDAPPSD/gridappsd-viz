@@ -93,7 +93,7 @@ export class Tooltip extends React.Component<Props, State> {
   }
 
   private _show() {
-    // Wrap in a setTimeout because React might have set this._tooltip to
+    // Wrap in a setTimeout because React might not have set this._tooltip to
     // the DOM element yet
     setTimeout(() => {
       this._tooltip.classList.add('fade-in');

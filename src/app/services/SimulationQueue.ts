@@ -5,11 +5,11 @@ import { Simulation } from '../models/Simulation';
 export class SimulationQueue {
   private static readonly _INSTANCE = new SimulationQueue();
 
+  private readonly _activeSimulationChanged = new Subject<Simulation>();
   private _simulations: Simulation[] = [];
   private _activeSimulation: Simulation;
-  private _activeSimulationChanged = new Subject<Simulation>();
-  private constructor() {
 
+  private constructor() {
   }
 
   static getInstance() {

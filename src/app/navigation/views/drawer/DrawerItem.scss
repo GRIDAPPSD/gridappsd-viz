@@ -24,6 +24,22 @@
     }
 }
 
+.drawer-item__icon__form:before {
+    content: '\f298';
+}
+
+.drawer-item__icon__app:before {
+    content: '\f0a0';
+}
+
+.drawer-item__icon__browse:before {
+    content: '\f002';
+}
+
+.drawer-item__icon__terminal:before {
+    content: '\f120';
+}
+
 .drawer-item__label {
     color: rgba(0, 0, 0, 0.7);
 }
