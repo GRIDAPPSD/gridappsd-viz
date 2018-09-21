@@ -4,7 +4,7 @@ export const DEFAULT_SIMULATION_CONFIG: SimulationConfig = {
   "power_system_config": {
     "GeographicalRegion_name": "ieee8500nodecktassets_Region",
     "SubGeographicalRegion_name": "ieee8500nodecktassets_SubRegion",
-    "Line_name": "_4F76A5F9-271D-9EB8-5E31-AA362D86F2C3" // ieee8500
+    "Line_name": ""
   },
   "simulation_config": {
     "start_time": "2009-07-21 00:00:00",
@@ -12,7 +12,7 @@ export const DEFAULT_SIMULATION_CONFIG: SimulationConfig = {
     "simulator": "GridLAB-D",
     "timestep_frequency": "1000",
     "timestep_increment": "1000",
-    "realtime": true,
+    "run_realtime": true,
     "simulation_name": "ieee8500",
     "power_flow_solver_method": "NR",
     "model_creation_config": {

@@ -8,7 +8,7 @@ export interface SimulationConfig {
     start_time: string;
     duration: string;
     simulator: string;
-    realtime: boolean;
+    run_realtime: boolean;
     timestep_frequency: string;
     timestep_increment: string;
     simulation_name: string;

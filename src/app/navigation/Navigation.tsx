@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { Link } from 'react-router-dom';
+import { Subscription } from 'rxjs';
 
 import { AppBar } from './views/app-bar/AppBar';
 import { Drawer } from './views/drawer/Drawer';
@@ -8,34 +9,43 @@ import { DrawerItem, DrawerItemIcon, DrawerItemLabel } from './views/drawer/Draw
 import { DrawerItemGroup } from './views/drawer/DrawerItemGroup';
 import { RUN_CONFIG } from '../../../runConfig';
 import { SimulationConfig } from '../models/SimulationConfig';
-
-import './Navigation.scss';
 import { DEFAULT_SIMULATION_CONFIG } from '../models/default-simulation-config';
 import { SimulationQueue } from '../services/SimulationQueue';
+import { Simulation } from '../models/Simulation';
+
+import './Navigation.scss';
 
 interface Props {
   onShowSimulationConfigForm: (config: SimulationConfig) => void;
 }
 
 interface State {
-  drawerOpened: boolean;
+  previousSimulations: Simulation[];
 }
 
 export class Navigation extends React.Component<Props, State> {
 
   private readonly _simulationQueue = SimulationQueue.getInstance();
   private _drawer: Drawer;
+  private _queueChangesStream: Subscription;
 
   constructor(props: any) {
     super(props);
     this.state = {
-      drawerOpened: false
+      previousSimulations: this._simulationQueue.getAllSimulations()
     };
+    this._queueChangesStream = this._subscribeToAllSimulationsQueueSteam();
+  }
+
+
+  componentWillUnmount() {
+    if (this._queueChangesStream) {
+      console.log('[Navigation] Unsubscribed from allSimulations', this._queueChangesStream)
+      this._queueChangesStream.unsubscribe();
+    }
   }
 
   render() {
-    const previousSimulations = this._simulationQueue.getAllSimulations();
-
     return (
       <>
         <AppBar>
@@ -49,10 +59,10 @@ export class Navigation extends React.Component<Props, State> {
             <DrawerItemLabel value='Simulations' />
           </DrawerItem>
           {
-            previousSimulations.length > 0 &&
+            this.state.previousSimulations.length > 0 &&
             <DrawerItemGroup header='Previous simulations'>
               {
-                previousSimulations.map(simulation => (
+                this.state.previousSimulations.map(simulation => (
                   <DrawerItem key={simulation.id} onClick={() => this.props.onShowSimulationConfigForm(simulation.config)}>
                     <strong>Name:&nbsp;</strong>
                     {simulation.name}
@@ -87,4 +97,8 @@ export class Navigation extends React.Component<Props, State> {
     );
   }
 
+  private _subscribeToAllSimulationsQueueSteam(): Subscription {
+    return this._simulationQueue.queueChanges()
+      .subscribe(simulations => this.setState({ previousSimulations: simulations }));
+  }
 }

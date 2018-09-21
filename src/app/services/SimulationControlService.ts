@@ -45,7 +45,7 @@ export class SimulationControlService {
     return this._stompClient.subscribe(
       this._startSimulationTopic,
       (message: Message, sub: StompSubscription) => {
-        this._simulationQueue.getActiveSimulation().id = message.body;
+        this._simulationQueue.updateIdForActiveSimulation(message.body);
         fn(message.body, sub);
       }
     );

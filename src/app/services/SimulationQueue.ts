@@ -6,6 +6,7 @@ export class SimulationQueue {
   private static readonly _INSTANCE = new SimulationQueue();
 
   private readonly _activeSimulationChanged = new Subject<Simulation>();
+  private readonly _queueChanges = new Subject<Simulation[]>();
   private _simulations: Simulation[] = [];
   private _activeSimulation: Simulation;
 
@@ -24,15 +25,25 @@ export class SimulationQueue {
     return this._activeSimulation;
   }
 
-  getAllSimulations() {
+  getAllSimulations(): Simulation[] {
     return this._simulations;
   }
 
   push(simulation: Simulation) {
-    if (!this._contains(simulation))
-      this._simulations.push(simulation);
-    this._activeSimulation = simulation;
+    this._simulations = [{ ...simulation }, ...this._simulations.filter(sim => sim.name !== simulation.name)];
+    this._activeSimulation = this._simulations[0];
     this._activeSimulationChanged.next(simulation);
+    this._queueChanges.next(this._simulations);
+  }
+
+  queueChanges(): Observable<Simulation[]> {
+    return this._queueChanges.asObservable();
+  }
+
+  updateIdForActiveSimulation(id: string) {
+    this._simulations = [{ ...this._activeSimulation, id }, ...this._simulations.filter(sim => sim !== this._activeSimulation)];
+    this._activeSimulation = this._simulations[0];
+    this._queueChanges.next(this._simulations);
   }
 
   setActiveSimulation(simulationName: string) {
@@ -43,7 +54,4 @@ export class SimulationQueue {
     this._activeSimulationChanged.next(simulation);
   }
 
-  private _contains(simulation: Simulation) {
-    return this._simulations.filter(e => e.name === simulation.name)[0] !== undefined;
-  }
 }

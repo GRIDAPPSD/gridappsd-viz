@@ -118,8 +118,8 @@ export class SimulationConfiguration extends React.Component<Props, State> {
                   <CheckBox
                     label='Real time'
                     name='realtime'
-                    checked={this._currentConfig.simulation_config.realtime}
-                    onChange={state => this._currentConfig.simulation_config.realtime = state} />
+                    checked={this._currentConfig.simulation_config.run_realtime}
+                    onChange={state => this._currentConfig.simulation_config.run_realtime = state} />
                   <Tooltip
                     position='right'
                     content={
