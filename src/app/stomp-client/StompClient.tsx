@@ -35,7 +35,7 @@ export class StompClient extends React.Component<Props, State> {
             label='Topic'
             name='topic'
             value={this.state.topic}
-            onUpdate={value => this.setState({ topic: value })} />
+            onChange={value => this.setState({ topic: value })} />
           <MultilineFormControl
             className='stomp-client-form__request-body'
             label='Request'

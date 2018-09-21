@@ -29,6 +29,7 @@ interface Props {
 interface State {
   show: boolean;
   applicationConfigStr: string;
+  simulationName: string;
 }
 
 export class SimulationConfiguration extends React.Component<Props, State> {
@@ -39,7 +40,8 @@ export class SimulationConfiguration extends React.Component<Props, State> {
     super(props);
     this.state = {
       show: true,
-      applicationConfigStr: ''
+      applicationConfigStr: '',
+      simulationName: props.initialConfig.simulation_config.simulation_name
     };
     this._currentConfig = this._cloneConfigObject(props.initialConfig);
   }
@@ -77,6 +79,7 @@ export class SimulationConfiguration extends React.Component<Props, State> {
                   onChange={item => {
                     this._currentConfig.power_system_config.Line_name = item.value.mRID;
                     this._currentConfig.simulation_config.simulation_name = item.value.name;
+                    this.setState({ simulationName: item.value.name });
                     this.props.onMRIDChanged(item.value.mRID, this._currentConfig.simulation_config.simulation_name);
                   }} />
               </FormGroup>
@@ -87,7 +90,7 @@ export class SimulationConfiguration extends React.Component<Props, State> {
                   hint='YYYY-MM-DD HH:MM:SS'
                   name='start_time'
                   value={this._currentConfig.simulation_config.start_time}
-                  onUpdate={value => this._currentConfig.simulation_config.start_time = value}
+                  onChange={value => this._currentConfig.simulation_config.start_time = value}
                 />
                 <FormControl
                   label='Duration'
@@ -95,7 +98,7 @@ export class SimulationConfiguration extends React.Component<Props, State> {
                   type='number'
                   name='duration'
                   value={this._currentConfig.simulation_config.duration}
-                  onUpdate={value => this._currentConfig.simulation_config.duration = value}
+                  onChange={value => this._currentConfig.simulation_config.duration = value}
                 />
                 <div style={{ position: 'relative' }}>
                   <SelectFormControl
@@ -132,8 +135,8 @@ export class SimulationConfiguration extends React.Component<Props, State> {
                 <FormControl
                   label='Simulation name'
                   name='simulation_name'
-                  value={this._currentConfig.simulation_config.simulation_name}
-                  onUpdate={value => this._currentConfig.simulation_config.simulation_name = value} />
+                  value={this.state.simulationName}
+                  onChange={value => this._currentConfig.simulation_config.simulation_name = value} />
 
                 <MultilineFormControl
                   label='Model creation configuration'
