@@ -2,7 +2,7 @@ import { SimulationOutputMeasurement } from './SimulationOutputMeasurement';
 
 export interface SimulationOutput {
   simulationId: string;
-  timestamp: string;
+  timestamp: number;
   measurements: SimulationOutputMeasurement[];
 
 }

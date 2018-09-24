@@ -1,7 +1,7 @@
 export interface SimulationOutputPayload {
   simulation_id: string;
   message: {
-    timestamp: string;
+    timestamp: number;
     measurements: Array<
     { magnitude: number; angle: number; measurement_mrid: string } &
     { measurement_mrid: string; value: number }

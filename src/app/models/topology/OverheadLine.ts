@@ -10,4 +10,5 @@ export interface OverheadLine {
   y1: number;
   x2: number;
   y2: 0.0;
+  mRID: string;
 }

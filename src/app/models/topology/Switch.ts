@@ -3,10 +3,11 @@ export interface Switch {
   from: string;
   to: string;
   name: string;
-  open: 'true' | 'false';
+  open: boolean;
   phases: string;
   x1: number;
   x2: number;
   y1: number;
   y2: number;
+  mRID: string;
 }

@@ -1,0 +1,45 @@
+.drawer-item {
+    display: flex;
+    align-items: center;
+    list-style-type: none;
+    padding: 10px 20px;
+    padding-right: 80px;
+    font-size: 1.3em;
+    border-bottom: 2px inset rgba(0, 0, 0, 0.2);
+    position: relative;
+    backface-visibility: hidden;
+    cursor: pointer;
+    user-select: none;
+    transition: background-color 0.2s linear;
+    &:hover {
+        background-color: rgba(0, 0, 0, 0.08);
+    }
+}
+
+.drawer-item__icon {
+    margin-right: 20px;
+    &::before {
+        font-size: 1.25em;
+        font-weight: bold;
+    }
+}
+
+.drawer-item__icon__form:before {
+    content: '\f298';
+}
+
+.drawer-item__icon__app:before {
+    content: '\f0a0';
+}
+
+.drawer-item__icon__browse:before {
+    content: '\f002';
+}
+
+.drawer-item__icon__terminal:before {
+    content: '\f120';
+}
+
+.drawer-item__label {
+    color: rgba(0, 0, 0, 0.7);
+}

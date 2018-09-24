@@ -10,6 +10,7 @@ export interface GetModelDictionaryRequestBody {
 
 export class GetModelDictionaryRequest implements MessageRequest {
   private _requestBody: GetModelDictionaryRequestBody = null;
+  private _simulationName = ''
 
   constructor() {
     this._requestBody = {
@@ -33,5 +34,13 @@ export class GetModelDictionaryRequest implements MessageRequest {
 
   set requestBody(value: GetModelDictionaryRequestBody) {
     this._requestBody = value;
+  }
+
+  get simulationName() {
+    return this._simulationName;
+  }
+
+  set simulationName(value: string) {
+    this._simulationName = value;
   }
 }

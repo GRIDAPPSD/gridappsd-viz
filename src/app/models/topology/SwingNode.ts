@@ -6,4 +6,5 @@ export interface SwingNode {
   nominal_voltage: number;
   x1: number;
   y1: number;
+  mRID: string;
 }

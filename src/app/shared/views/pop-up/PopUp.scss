@@ -1,0 +1,47 @@
+.pop-up {
+    transform-origin: 50% 50%;
+    position: absolute;
+    overflow: hidden;
+    z-index: 1000;
+    transition: opacity 300ms ease, visibility 300ms ease, transform 300ms ease;
+}
+
+.pop-up-in {
+    // animation: pop-up-in 300ms ease forwards;
+    visibility: visible;
+    opacity: 1;
+    transform: translateY(0) scale(1, 1);
+}
+
+.pop-up-out {
+    // animation: pop-up-out 300ms ease forwards;
+    visibility: hidden;
+    opacity: 0;
+    transform: translateY(25px) scale(0.9, 0.9);
+}
+
+@keyframes pop-up-in {
+    from {
+        visibility: hidden;
+        opacity: 0;
+        transform: translateY(25px) scale(0.9, 0.9);
+    }
+    to {
+        visibility: visible;
+        opacity: 1;
+        transform: translateY(0) scale(1, 1);
+    }
+}
+
+@keyframes pop-up-out {
+    from {
+        visibility: visible;
+        opacity: 1;
+        transform: translateY(0) scale(1, 1);
+    }
+    to {
+        visibility: hidden;
+        opacity: 0;
+        transform: translateY(25px) scale(0.9, 0.9);
+    }
+}
