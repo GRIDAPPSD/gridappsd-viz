@@ -75,7 +75,7 @@ export class MeasurementGraph extends React.Component<Props, State> {
   private _render(measurementGraphModel: MeasurementGraphModel) {
     this._container.selectAll('*').remove();
 
-    const axisExtents = this._calculateXYAxisExtents(this.props.measurementGraphModel.timeSeries);
+    const axisExtents = this._calculateXYAxisExtents(measurementGraphModel.timeSeries);
 
     this._timeScale.domain(axisExtents.xExtent);
     this._yScale.domain(axisExtents.yExtent);
@@ -98,7 +98,7 @@ export class MeasurementGraph extends React.Component<Props, State> {
     }
   }
 
-  private _calculateXYAxisExtents(timeSeries: TimeSeries[]): { xExtent: Array<Date>, yExtent: Array<number> } {
+  private _calculateXYAxisExtents(timeSeries: TimeSeries[]): { xExtent: [Date, Date], yExtent: [number, number] } {
     const dataPoints: Array<TimeSeriesDataPoint> = timeSeries.reduce((points, timeSeries) => points.concat(timeSeries.points), []);
     return {
       xExtent: extent<TimeSeriesDataPoint, Date>(dataPoints, point => point.primitiveX),

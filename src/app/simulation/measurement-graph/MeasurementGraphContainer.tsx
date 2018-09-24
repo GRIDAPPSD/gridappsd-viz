@@ -87,9 +87,9 @@ const GRAPH_NAMES_PER_SIMULATION_NAME = {
     voltage_A: ['53', '82', '610'],
     voltage_B: ['53', '82', '610'],
     voltage_C: ['53', '82', '610'],
-    power_in_A: ['sw1'],
-    power_in_B: ['sw1'],
-    power_in_C: ['sw1'],
+    power_in_A: ['reg1a'],
+    power_in_B: ['reg1a'],
+    power_in_C: ['reg1a'],
     tap_A: ['reg2', 'reg3', 'reg4'],
     tap_B: ['reg2', 'reg3', 'reg4'],
     tap_C: ['reg2', 'reg3', 'reg4']
@@ -110,7 +110,7 @@ export class MeasurementGraphContainer extends React.Component<Props, State> {
   }
 
   componentDidMount() {
-    this._subscribeToSimulationOutputMeasurementsStream();
+    this._simulationOutputMeasurementsStream = this._subscribeToSimulationOutputMeasurementsStream();
   }
 
   componentWillUnmount() {
@@ -124,14 +124,14 @@ export class MeasurementGraphContainer extends React.Component<Props, State> {
   }
 
   private _buildPlotModel(graphName: string, timeSeriesNames: string[], measurements: SimulationOutputMeasurement[]): MeasurementGraphModel {
-    return timeSeriesNames.map(timeSeriesName => this._buildTimeSeries(timeSeriesName, graphName, measurements))
+    return timeSeriesNames.map(timeSeriesName => this._buildTimeSeries(graphName, timeSeriesName, measurements))
       .reduce((measurementGraphModel: MeasurementGraphModel, timeSeries: TimeSeries) => {
         measurementGraphModel.timeSeries.push(timeSeries);
         return measurementGraphModel;
       }, { name: graphName, timeSeries: [] });
   }
 
-  private _buildTimeSeries(timeSeriesName: string, graphName: string, measurements: SimulationOutputMeasurement[]): TimeSeries {
+  private _buildTimeSeries(graphName: string, timeSeriesName: string, measurements: SimulationOutputMeasurement[]): TimeSeries {
     const timeSeries: TimeSeries = this._timeSeries[graphName + '_' + timeSeriesName] || { name: timeSeriesName, points: [] };
     if (timeSeries.points.length === 20)
       timeSeries.points.shift();
@@ -144,7 +144,7 @@ export class MeasurementGraphContainer extends React.Component<Props, State> {
     const dataPoint = { primitiveX: new Date(), primitiveY: 0 };
     if (graphName.includes('voltage')) {
       const measurement = measurements.filter(
-        measurement => measurement.connectivityNode === timeSeriesName && graphName.includes(measurement.phases) && measurement.magnitude !== undefined
+        measurement => measurement.connectivityNode === timeSeriesName && graphName.includes(measurement.phases) && measurement.type === 'PNV' && measurement.magnitude !== undefined
       )[0];
       if (measurement)
         dataPoint.primitiveY = measurement.magnitude;
@@ -174,8 +174,8 @@ export class MeasurementGraphContainer extends React.Component<Props, State> {
     return dataPoint;
   }
 
-  private _subscribeToSimulationOutputMeasurementsStream() {
-    this._simulationOutputMeasurementsStream = this._simulationOutputService.simulationOutputMeasurementsReceived()
+  private _subscribeToSimulationOutputMeasurementsStream(): Subscription {
+    return this._simulationOutputService.simulationOutputMeasurementsReceived()
       .subscribe(measurements => {
         const measurementGraphModels = Object.entries(GRAPH_NAMES_PER_SIMULATION_NAME[this.props.simulationName] as { [key: string]: string[] })
           .map(([graphName, timeSeriesNames]) => this._buildPlotModel(graphName, timeSeriesNames, measurements));
