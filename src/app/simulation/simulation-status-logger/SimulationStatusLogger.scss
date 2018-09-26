@@ -29,9 +29,6 @@
         counter-increment: message-number;
         content: counter(message-number) ". "
     }
-    .wait {
-        top: 30px;
-    }
 }
 
 .simulation-status-logger__drag-handle {

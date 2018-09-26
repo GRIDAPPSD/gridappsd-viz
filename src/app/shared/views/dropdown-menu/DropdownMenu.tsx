@@ -1,9 +1,9 @@
 import * as React from 'react';
 
 import { MenuItem } from './MenuItem';
+import { PopUp } from '../pop-up/PopUp';
 
 import './DropdownMenu.scss';
-import { PopUp } from '../pop-up/PopUp';
 
 interface Props {
   menuItems: MenuItem[];
@@ -93,5 +93,7 @@ export class DropdownMenu extends React.Component<Props, State> {
         opened: false
       });
     }
+    else
+      this.setState({ opened: false });
   }
 }
