@@ -22,12 +22,16 @@ export class StompClientService {
   }
 
   send(destination: string, headers: StompHeaders = {}, body: string = '') {
-    const repeater = setInterval(() => {
-      if (this.isActive()) {
-        this._client.send(destination, headers, body);
-        clearInterval(repeater);
-      }
-    }, 500);
+    if (this.isActive())
+      this._client.send(destination, headers, body);
+    else {
+      const repeater = setInterval(() => {
+        if (this.isActive()) {
+          this._client.send(destination, headers, body);
+          clearInterval(repeater);
+        }
+      }, 500);
+    }
   }
 
   subscribe(destination: string, callback: (message: Message, subscription: StompSubscription) => void): Promise<void> {

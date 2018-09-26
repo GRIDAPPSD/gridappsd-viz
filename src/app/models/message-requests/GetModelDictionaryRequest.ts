@@ -25,7 +25,7 @@ export class GetModelDictionaryRequest implements MessageRequest {
   }
 
   get replyTo() {
-    return '/model_dictionary/' + this.url;
+    return 'model_dictionary';
   }
 
   get requestBody(): GetModelDictionaryRequestBody {
