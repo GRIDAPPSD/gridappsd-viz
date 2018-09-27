@@ -104,7 +104,8 @@ export class LabelContainer extends React.Component<Props, State> {
                 {nodeName === 'FEEDER_REG' && <th>Power in</th>}
               </tr>
             );
-            for (let i = 0; i < measurementsAtPhases.length; i++) {
+            const length = Math.min(measurementsAtPhases.length, voltagesAtPhases.length, powersAtPhases.length);
+            for (let i = 0; i < length; i++) {
               content.push(
                 <tr key={i}>
                   <td>{measurementsAtPhases[i].phases}</td>

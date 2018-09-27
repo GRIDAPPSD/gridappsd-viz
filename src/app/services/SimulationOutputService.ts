@@ -33,8 +33,8 @@ export class SimulationOutputService {
   }
 
   private _subscribeToSimulationOutputTopic() {
+    console.log('[SimulationOutputService] Subscribed to onSimulationOutputReceived')
     this._simulationControlService.onSimulationOutputReceived(payload => {
-      console.log('[SimulationOutputService] Subscribed to onSimulationOutputReceived')
       if (payload) {
         this._outputTimestamp = payload.message.timestamp;
         const measurements: SimulationOutputMeasurement[] = payload.message.measurements.map(measurement => {
