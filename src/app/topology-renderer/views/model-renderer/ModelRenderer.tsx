@@ -208,6 +208,12 @@ export class ModelRenderer extends React.Component<Props, State> {
       .style('visibility', 'visible');
   }
 
+  private _getZoomConfig(nodeCounts: number) {
+    if (nodeCounts <= 1000)
+      return this._zoomConfigs.ieee123;
+    return this._zoomConfigs.ieee8500;
+  }
+
   private _removePhaseNameFromNodeName(child) {
     return child.name ? '_' + child.name.replace(/(\D+)(\d)(a|b|c)$/, (_, p1, p2, __) => [p1, p2].join('')) : '(I have no name)';
   }
@@ -217,7 +223,7 @@ export class ModelRenderer extends React.Component<Props, State> {
     const yExtent = extent(model.nodes, (d: Node) => d.y);
     const xOffset = -xExtent[0];
     const yOffset = -yExtent[0];
-    const zoomCenter = this._zoomConfigs[this.props.topologyName];
+    const zoomCenter = this._getZoomConfig(model.nodes.length);
     const edgesKeyedByNodeNames = this._calculateCoordinatesForEdgeEndpoints(model.edges, xOffset, yOffset);
     const categories = this._categorizeNodes(model.nodes, xOffset, yOffset);
     this._container.selectAll('g')
