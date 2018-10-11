@@ -5,7 +5,7 @@
     "main": "index.js",
     "scripts": {
         "start": "node server.js",
-        "lauch": "webpack-dev-server --progress --inline",
+        "launch": "webpack-dev-server --progress --inline",
         "build": "rm -rf dist && webpack"
     },
     "author": "",
@@ -38,7 +38,7 @@
         "source-map-loader": "0.1.5",
         "style-loader": "0.21.0",
         "typescript": "^3.0.1",
-        "webpack": "^3.10.0",
+        "webpack": "3.10.0",
         "webpack-dev-server": "^2.9.7"
     }
 }
