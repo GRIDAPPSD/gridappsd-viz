@@ -235,7 +235,7 @@ export class ModelRenderer extends React.Component<Props, State> {
 
     this._renderEdges(model.edges);
     this._renderSymbolsForNodesWithKnownTypes(edgesKeyedByNodeNames, categories.nodesWithKnownTypes);
-    if (this.props.topologyName === 'ieee123')
+    if (model.nodes.length <= 1000)
       this._renderNodes(categories.nodesWithUnknownType, 'unknown-nodes');
     this._renderNodes(categories.nodesWithKnownTypes, 'symbolized-nodes');
   }
