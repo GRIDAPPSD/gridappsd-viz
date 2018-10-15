@@ -9,7 +9,7 @@ export class QueryBlazeGraphRequest implements MessageRequest {
   }
 
   get replyTo() {
-    return this.url;
+    return 'query-blazegraph';
   }
 
   get requestBody() {

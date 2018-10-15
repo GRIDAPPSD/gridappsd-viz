@@ -128,7 +128,7 @@ export class App extends React.Component<Props, State> {
       this.setState({ feederModels: { regions, subregions, lines, mRIDs } });
     }
     else {
-      this._messageService.onFeederModelsReceived((payload: GetAllFeederModelsRequestPayload) => {
+      const sub = this._messageService.onFeederModelsReceived((payload: GetAllFeederModelsRequestPayload) => {
         const regions = [];
         const subregions = [];
         const lines = [];
@@ -144,8 +144,8 @@ export class App extends React.Component<Props, State> {
         sessionStorage.setItem('regions', JSON.stringify(regions));
         sessionStorage.setItem('subregions', JSON.stringify(subregions));
         sessionStorage.setItem('lines', JSON.stringify(lines));
-      })
-        .then(sub => sub.unsubscribe());
+        sub.then(sub => sub.unsubscribe());
+      });
       this._messageService.fetchAllFeederModels();
     }
   }

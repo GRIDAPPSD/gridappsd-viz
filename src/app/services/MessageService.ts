@@ -43,7 +43,7 @@ export class MessageService {
     this._getApplicationsAndServices.requestBody.serviceInstances = !onlyFetchApplications;
     this._stompClient.send(
       this._getApplicationsAndServices.url,
-      { 'reply-to': this._getApplicationsAndServices.url },
+      { 'reply-to': this._getApplicationsAndServices.replyTo },
       JSON.stringify(this._getApplicationsAndServices.requestBody)
     );
   }
@@ -113,7 +113,7 @@ export class MessageService {
   }
 
   onApplicationsAndServicesReceived(fn: (payload: GetAvailableApplicationsAndServicesPayload) => void): Promise<StompSubscription> {
-    return this._stompClient.subscribe(this._getApplicationsAndServices.url, (message: Message) => {
+    return this._stompClient.subscribe(this._getApplicationsAndServices.replyTo, (message: Message) => {
       const payload = JSON.parse(message.body);
       fn(payload);
     });
