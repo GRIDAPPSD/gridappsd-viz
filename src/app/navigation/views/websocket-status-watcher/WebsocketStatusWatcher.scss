@@ -1,0 +1,28 @@
+.websocket-status-watcher {
+    position: fixed;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    right: 0;
+    z-index: 1000;
+    background-color: rgba(0, 0, 0, 0.2);
+    color: #fff;
+}
+
+.websocket-status-watcher__container {
+    width: 100vw;
+    text-align: center;
+    top: 50%;
+    transform: translateY(-50%);
+    position: relative;
+    background-color: rgba(150, 150, 150, 0.9);
+    padding: 20px 0;
+}
+
+.icon-button.websocket-connection-inactive::before {
+    color: #f00;
+}
+
+.websocket-status-watcher__websocket-status-indicator {
+    background-color: #fff;
+}
