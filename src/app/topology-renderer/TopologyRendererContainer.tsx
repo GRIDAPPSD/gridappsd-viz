@@ -100,22 +100,25 @@ export class TopologyRendererContainer extends React.Component<Props, State> {
 
   private _onToggleSwitch(swjtch: Switch) {
     const payload = {
-      simulation_id: this._simulationQueue.getActiveSimulation().id,
-      message: {
-        timestamp: new Date().toISOString(),
-        difference_mrid: this._activeSimulationConfig.power_system_config.Line_name,
-        reverse_differences: [
-          {
-            object: this.props.mRIDs[swjtch.name],
-            value: swjtch.open ? '0' : '1'
-          }
-        ],
-        forward_differences: [
-          {
-            object: this.props.mRIDs[swjtch.name],
-            value: swjtch.open ? '1' : '0'
-          }
-        ]
+      command: 'update',
+      input: {
+        simulation_id: this._simulationQueue.getActiveSimulation().id,
+        message: {
+          timestamp: new Date().toISOString(),
+          difference_mrid: this._activeSimulationConfig.power_system_config.Line_name,
+          reverse_differences: [
+            {
+              object: this.props.mRIDs[swjtch.name],
+              value: swjtch.open ? '0' : '1'
+            }
+          ],
+          forward_differences: [
+            {
+              object: this.props.mRIDs[swjtch.name],
+              value: swjtch.open ? '1' : '0'
+            }
+          ]
+        }
       }
     };
     console.log(payload);
