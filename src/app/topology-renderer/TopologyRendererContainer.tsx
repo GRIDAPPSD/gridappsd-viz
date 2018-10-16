@@ -104,7 +104,7 @@ export class TopologyRendererContainer extends React.Component<Props, State> {
       input: {
         simulation_id: this._simulationQueue.getActiveSimulation().id,
         message: {
-          timestamp: new Date().toISOString(),
+          timestamp: Math.floor((new Date).getTime()/1000.0),
           difference_mrid: this._activeSimulationConfig.power_system_config.Line_name,
           reverse_differences: [
             {
