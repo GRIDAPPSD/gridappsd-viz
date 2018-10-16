@@ -34,27 +34,27 @@ export class SimulationControlService {
    * simulation output data
    * @param fn 
    */
-  onSimulationOutputReceived(fn: (payload: SimulationOutputPayload, sub: StompSubscription) => void): Promise<void> {
-    return this._stompClient.subscribe(this._simulationOutputTopic, (message: Message, sub: StompSubscription) => {
+  onSimulationOutputReceived(fn: (payload: SimulationOutputPayload) => void): Promise<StompSubscription> {
+    return this._stompClient.subscribe(this._simulationOutputTopic, (message: Message) => {
       const payload = JSON.parse(message.body);
-      fn(payload, sub);
+      fn(payload);
     });
   }
 
-  onSimulationStarted(fn: (simulationId: string, sub: StompSubscription) => void): Promise<void> {
+  onSimulationStarted(fn: (simulationId: string) => void): Promise<StompSubscription> {
     return this._stompClient.subscribe(
       this._startSimulationTopic,
-      (message: Message, sub: StompSubscription) => {
+      (message: Message) => {
         this._simulationQueue.updateIdForActiveSimulation(message.body);
-        fn(message.body, sub);
+        fn(message.body);
       }
     );
   }
 
-  onSimulationStatusLogReceived(simulationId: string, fn: (simulationStatusLog: string, sub: StompSubscription) => void): Promise<void> {
+  onSimulationStatusLogReceived(simulationId: string, fn: (simulationStatusLog: string) => void): Promise<StompSubscription> {
     return this._stompClient.subscribe(
       `${this._simulationStatusTopic}.${simulationId}`,
-      (message: Message, sub: StompSubscription) => fn(message.body, sub)
+      (message: Message) => fn(message.body)
     );
   }
 

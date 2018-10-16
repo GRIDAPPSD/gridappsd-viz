@@ -6,9 +6,9 @@ export class GetAllFeederModelsRequest implements MessageRequest {
   }
 
   get replyTo() {
-    return this.url;
+    return 'feeder-models';
   }
-  
+
   get requestBody(): string {
     return `{"requestType":"QUERY","resultFormat":"JSON","queryString":"SELECT ?name ?mRID ?substationName ?substationID ?subregionName ?subregionID ?regionName ?regionID WHERE {?s r:type c:Feeder.?s c:IdentifiedObject.name ?name.?s c:IdentifiedObject.mRID ?mRID.?s c:Feeder.NormalEnergizingSubstation ?subStation.?subStation c:IdentifiedObject.name ?substationName.?subStation c:IdentifiedObject.mRID ?substationID.?subStation c:Substation.Region ?subRegion.?subRegion c:IdentifiedObject.name ?subregionName.?subRegion c:IdentifiedObject.mRID ?subregionID.?subRegion c:SubGeographicalRegion.Region ?region.?region c:IdentifiedObject.name ?regionName.?region c:IdentifiedObject.mRID ?regionID.}  ORDER by ?name "}`;
   }

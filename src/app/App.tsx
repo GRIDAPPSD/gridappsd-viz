@@ -22,6 +22,8 @@ import { SimulationControlContainer } from './simulation/simulation-control/Simu
 import { AvailableApplicationsAndServices } from './available-applications-and-services/AvailableApplicationsAndServices';
 import { LabelContainer } from './simulation/label/LabelContainer';
 import { Application } from './models/Application';
+import { StompClientService } from './services/StompClientService';
+import { WebsocketStatusWatcher } from './navigation/views/websocket-status-watcher/WebsocketStatusWatcher';
 
 import './App.scss';
 
@@ -34,6 +36,7 @@ interface State {
 }
 
 export class App extends React.Component<Props, State> {
+  private readonly _stompClientService = StompClientService.getInstance();
   private readonly _simulationOutputService = SimulationOutputService.getInstance();
   private readonly _overlayService = OverlayService.getInstance();
   private readonly _simulationQueue = SimulationQueue.getInstance();
@@ -51,10 +54,23 @@ export class App extends React.Component<Props, State> {
   }
 
   componentDidMount() {
-    this._fetchFeederModels();
-    this._subscribeToModelDictionaryTopic();
-    this._subscribeToAvailableApplicationsAndServicesTopic();
-    this._messageService.fetchAvailableApplicationsAndServices(true);
+    this._stompClientService.statusChanges()
+      .subscribe(status => {
+        let sub1: Promise<StompSubscription>;
+        let sub2: Promise<StompSubscription>;
+        if (status === 'CONNECTED') {
+          sub1 = this._subscribeToModelDictionaryTopic();
+          sub2 = this._subscribeToAvailableApplicationsAndServicesTopic();
+          setTimeout(() => {
+            this._messageService.fetchAvailableApplicationsAndServices(true);
+            this._fetchFeederModels();
+          }, 0);
+        }
+        else if (status === 'CONNECTING' && sub1 && sub2) {
+          sub1.then(sub => sub.unsubscribe());
+          sub2.then(sub => sub.unsubscribe());
+        }
+      });
   }
 
   render() {
@@ -92,6 +108,7 @@ export class App extends React.Component<Props, State> {
             <Route exact path='/applications' component={AvailableApplicationsAndServices} />
             <Route exact path='/stomp-client' component={StompClientContainer} />
             <Route path='/browse' component={props => <DatabaseBrowser mRIDs={this.state.feederModels.mRIDs} match={props.match} />} />
+            <WebsocketStatusWatcher />
           </>
       } />
     );
@@ -111,7 +128,7 @@ export class App extends React.Component<Props, State> {
       this.setState({ feederModels: { regions, subregions, lines, mRIDs } });
     }
     else {
-      this._messageService.onFeederModelsReceived((payload: GetAllFeederModelsRequestPayload, sub) => {
+      const sub = this._messageService.onFeederModelsReceived((payload: GetAllFeederModelsRequestPayload) => {
         const regions = [];
         const subregions = [];
         const lines = [];
@@ -127,7 +144,7 @@ export class App extends React.Component<Props, State> {
         sessionStorage.setItem('regions', JSON.stringify(regions));
         sessionStorage.setItem('subregions', JSON.stringify(subregions));
         sessionStorage.setItem('lines', JSON.stringify(lines));
-        sub.unsubscribe();
+        sub.then(sub => sub.unsubscribe());
       });
       this._messageService.fetchAllFeederModels();
     }
@@ -149,14 +166,13 @@ export class App extends React.Component<Props, State> {
   }
 
   private _subscribeToAvailableApplicationsAndServicesTopic() {
-    this._messageService.onApplicationsAndServicesReceived((payload, sub) => {
+    return this._messageService.onApplicationsAndServicesReceived((payload) => {
       this.setState({ availableApplications: payload.applications });
-      sub.unsubscribe();
     });
   }
 
   private _subscribeToModelDictionaryTopic() {
-    this._messageService.onModelDictionaryReceived((response, simulationName: string) => {
+    return this._messageService.onModelDictionaryReceived((response, simulationName: string) => {
       if (response.requestType === RequestConfigurationType.CIM_DICTIONARY) {
         if (typeof response.payload.data === 'string')
           response.payload.data = JSON.parse(response.payload.data);

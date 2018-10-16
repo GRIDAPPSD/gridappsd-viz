@@ -19,7 +19,7 @@ interface State {
 
 export class BlazeGraphContainer extends React.Component<Props, State> {
   private readonly _messageService = MessageService.getInstance();
-  private _blazeGraphSubscription: StompSubscription = null;
+  private _blazeGraphSubscription: Promise<StompSubscription>;
 
   constructor(props: any) {
     super(props);
@@ -27,22 +27,16 @@ export class BlazeGraphContainer extends React.Component<Props, State> {
       response: null,
       isFetching: false
     };
-
     this._queryBlazeGraph = this._queryBlazeGraph.bind(this);
   }
 
   componentDidMount() {
-    this._messageService.onBlazeGraphDataReceived((payload, sub) => {
-      this.setState({ response: payload.data }, () => this.setState({ isFetching: false }));
-      this._blazeGraphSubscription = sub;
-    });
+    this._init();
   }
 
   componentWillUnmount() {
-    if (this._blazeGraphSubscription) {
-      this._blazeGraphSubscription.unsubscribe();
-      this._blazeGraphSubscription = null;
-    }
+    if (this._blazeGraphSubscription)
+      this._blazeGraphSubscription.then(sub => sub.unsubscribe());
   }
 
   render() {
@@ -53,6 +47,15 @@ export class BlazeGraphContainer extends React.Component<Props, State> {
         response={this.state.response}
         isResponseReady={!this.state.isFetching} />
     );
+  }
+
+  private _init() {
+    this._blazeGraphSubscription = this._messageService.onBlazeGraphDataReceived(payload => {
+      this.setState(
+        { response: payload.data },
+        () => this.setState({ isFetching: false })
+      );
+    });
   }
 
   private _queryBlazeGraph(requestBody: QueryBlazeGraphRequestBody) {

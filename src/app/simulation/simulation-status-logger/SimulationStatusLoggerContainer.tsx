@@ -16,8 +16,8 @@ interface State {
 export class SimulationStatusLoggerContainer extends React.Component<Props, State> {
 
   private readonly _simulationControlService = SimulationControlService.getInstance();
-  private _simulationStatusLogSub: StompSubscription = null;
-  private _simulationStartSubscription: StompSubscription = null;
+  private _simulationStatusLogSub: Promise<StompSubscription> = null;
+  private _simulationStartSubscription: Promise<StompSubscription> = null;
 
   constructor(props: any) {
     super(props);
@@ -28,17 +28,14 @@ export class SimulationStatusLoggerContainer extends React.Component<Props, Stat
   }
 
   componentDidMount() {
-    this._subscribeToSimulationStartedEvent();
+    this._simulationStartSubscription = this._subscribeToSimulationStartedEvent();
   }
 
   componentWillUnmount() {
-    if (this._simulationStartSubscription) {
-      this._simulationStartSubscription.unsubscribe();
-      console.log('[SimulationStatusLoggerContainer] Unsubscribed from onSimulationStarted');
-
-    }
+    if (this._simulationStartSubscription)
+      this._simulationStartSubscription.then(sub => sub.unsubscribe());
     if (this._simulationStatusLogSub)
-      this._simulationStatusLogSub.unsubscribe();
+      this._simulationStatusLogSub.then(sub => sub.unsubscribe());
   }
 
   render() {
@@ -49,21 +46,17 @@ export class SimulationStatusLoggerContainer extends React.Component<Props, Stat
   }
 
   private _subscribeToSimulationStartedEvent() {
-    this._simulationControlService.onSimulationStarted((simulationId, sub) => {
-      console.log('simulation ID: ' + simulationId);
-      console.log('[SimulationStatusLoggerContainer] Subscribed to onSimulationStarted');
+    return this._simulationControlService.onSimulationStarted((simulationId) => {
       this.setState({ isFetching: true });
-      this._simulationControlService.onSimulationStatusLogReceived(
+      this._simulationStatusLogSub = this._simulationControlService.onSimulationStatusLogReceived(
         simulationId,
-        (logMessage, innerSub) => {
+        logMessage => {
           this.setState({
             logMessages: this.state.logMessages.concat(logMessage),
             isFetching: false
           });
-          this._simulationStatusLogSub = innerSub;
         }
       );
-      this._simulationStartSubscription = sub
     });
   }
 }

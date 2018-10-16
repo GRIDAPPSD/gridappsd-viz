@@ -11,7 +11,7 @@ import { SimulationQueue } from '../services/SimulationQueue';
 import { Node } from './models/Node';
 import { Edge } from './models/Edge';
 import { Switch } from '../models/topology/Switch';
-import { SimulationOutputService } from '../services/SimulationOutputService';
+import { StompClientService } from '../services/StompClientService';
 
 interface Props {
   mRIDs: { [componentType: string]: string };
@@ -26,11 +26,13 @@ const topologyCache = {};
 
 export class TopologyRendererContainer extends React.Component<Props, State> {
 
+  private readonly _stompClientService = StompClientService.getInstance();
   private readonly _messageService = MessageService.getInstance();
   private readonly _simulationQueue = SimulationQueue.getInstance();
   private _activeSimulationConfig = this._simulationQueue.getActiveSimulation().config;
-  private _activeSimulationWatcher: Subscription;
-  private _topologySubscription: StompSubscription;
+  private _activeSimulationStream: Subscription;
+  private _stompClientStatusStream: Subscription;
+  private _topologySubscription: Promise<StompSubscription>;
 
   constructor(props: any) {
     super(props);
@@ -39,26 +41,27 @@ export class TopologyRendererContainer extends React.Component<Props, State> {
       isFetching: true
     };
     this._onToggleSwitch = this._onToggleSwitch.bind(this);
+
   }
 
   componentDidMount() {
-    this._subscribeToTopologyModelTopic();
-    this._subscribeToActiveSimulationStream();
-    if (this._topologyModelExistsInCache())
-      this._useTopologyModelFromCache();
-    else
-      this._messageService.fetchTopologyModel(this._activeSimulationConfig.power_system_config.Line_name);
+    this._init();
+    this._stompClientStatusStream = this._stompClientService.statusChanges()
+      .subscribe(status => {
+        if (status === 'CONNECTED')
+          this._init()
+        else
+          this.componentWillUnmount();
+      });
   }
 
   componentWillUnmount() {
-    if (this._topologySubscription) {
-      this._topologySubscription.unsubscribe();
-      console.log('[TopologyRendererContainer] Unsubscribed from onTopologyModelReceived');
-    }
-    if (this._activeSimulationConfig) {
-      this._activeSimulationWatcher.unsubscribe();
-      console.log('[TopologyRendererContainer] Unsubscribed from activeSimulationChanged');
-    }
+    if (this._topologySubscription)
+      this._topologySubscription.then(sub => sub.unsubscribe());
+    if (this._activeSimulationStream)
+      this._activeSimulationStream.unsubscribe();
+    if (this._stompClientStatusStream)
+      this._stompClientStatusStream.unsubscribe();
   }
 
   render() {
@@ -84,13 +87,22 @@ export class TopologyRendererContainer extends React.Component<Props, State> {
     } as Node;
   }
 
+  private _init() {
+    this._topologySubscription = this._subscribeToTopologyModelTopic();
+    this._activeSimulationStream = this._subscribeToActiveSimulationStream();
+    if (this._topologyModelExistsInCache())
+      this._useTopologyModelFromCache();
+    else
+      this._messageService.fetchTopologyModel(this._activeSimulationConfig.power_system_config.Line_name);
+  }
+
   private _onToggleSwitch(swjtch: Switch) {
     const payload = {
       command: 'update',
       input: {
         simulation_id: this._simulationQueue.getActiveSimulation().id,
         message: {
-          timestamp: Math.floor((new Date).getTime()/1000.0),
+          timestamp: Math.floor((new Date).getTime() / 1000.0),
           difference_mrid: this._activeSimulationConfig.power_system_config.Line_name,
           reverse_differences: [
             {
@@ -123,9 +135,8 @@ export class TopologyRendererContainer extends React.Component<Props, State> {
   }
 
   private _subscribeToActiveSimulationStream() {
-    this._activeSimulationWatcher = this._simulationQueue.activeSimulationChanged()
+    return this._activeSimulationStream = this._simulationQueue.activeSimulationChanged()
       .subscribe(simulation => {
-        console.log('[TopologyRendererContainer] Subscribed to activeSimulationChanged');
         if (this._topologyModelExistsInCache())
           this._useTopologyModelFromCache();
         else {
@@ -136,11 +147,9 @@ export class TopologyRendererContainer extends React.Component<Props, State> {
   }
 
   private _subscribeToTopologyModelTopic() {
-    this._messageService.onTopologyModelReceived((payload: GetTopologyModelRequestPayload, sub) => {
-      console.log('[TopologyRendererContainer] Subscribed to onTopologyModelReceived');
+    return this._messageService.onTopologyModelReceived((payload: GetTopologyModelRequestPayload) => {
       if (payload.requestType === RequestConfigurationType.GRID_LAB_D_SYMBOLS)
         this._processModelForRendering(payload);
-      this._topologySubscription = sub;
     });
   }
 

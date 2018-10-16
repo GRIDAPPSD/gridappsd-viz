@@ -13,3 +13,10 @@
         color: #000;
     }
 }
+
+.icon-button.websocket-connection-active {
+    margin-left: auto;
+    &::before {
+        color: #09d855;
+    }
+}
