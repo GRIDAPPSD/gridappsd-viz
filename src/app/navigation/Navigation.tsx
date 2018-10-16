@@ -12,6 +12,8 @@ import { SimulationConfig } from '../models/SimulationConfig';
 import { DEFAULT_SIMULATION_CONFIG } from '../models/default-simulation-config';
 import { SimulationQueue } from '../services/SimulationQueue';
 import { Simulation } from '../models/Simulation';
+import { StompClientService, StompClientConnectionStatus } from '../services/StompClientService';
+import { IconButton } from '../shared/views/buttons/icon-button/IconButton';
 
 import './Navigation.scss';
 
@@ -21,28 +23,34 @@ interface Props {
 
 interface State {
   previousSimulations: Simulation[];
+  websocketStatus: StompClientConnectionStatus;
 }
 
 export class Navigation extends React.Component<Props, State> {
 
   private readonly _simulationQueue = SimulationQueue.getInstance();
+  private readonly _stompClientService = StompClientService.getInstance();
   private _drawer: Drawer;
   private _queueChangesStream: Subscription;
+  private _websocketStatusStream: Subscription;
 
   constructor(props: any) {
     super(props);
     this.state = {
-      previousSimulations: this._simulationQueue.getAllSimulations()
+      previousSimulations: this._simulationQueue.getAllSimulations(),
+      websocketStatus: this._stompClientService.isActive() ? 'CONNECTED' : 'CONNECTING'
     };
     this._queueChangesStream = this._subscribeToAllSimulationsQueueSteam();
+    this._websocketStatusStream = this._stompClientService.statusChanges()
+      .subscribe(state => this.setState({ websocketStatus: state }));
   }
 
 
   componentWillUnmount() {
-    if (this._queueChangesStream) {
-      console.log('[Navigation] Unsubscribed from allSimulations', this._queueChangesStream)
+    if (this._queueChangesStream)
       this._queueChangesStream.unsubscribe();
-    }
+    if (this._websocketStatusStream)
+      this._websocketStatusStream.unsubscribe();
   }
 
   render() {
@@ -52,6 +60,14 @@ export class Navigation extends React.Component<Props, State> {
           <DrawerOpener onClick={() => this._drawer.open()} />
           <Link className='navigation__app-title' to='/'>GridAPPS-D</Link>
           <span>{RUN_CONFIG.version}</span>
+          {
+            this.state.websocketStatus === 'CONNECTED'
+            &&
+            <IconButton
+              icon='websocket-connection-active'
+              className='websocket-status-indicator'
+              label='Connection active' />
+          }
         </AppBar>
         <Drawer ref={ref => this._drawer = ref}>
           <DrawerItem onClick={() => this.props.onShowSimulationConfigForm(DEFAULT_SIMULATION_CONFIG)}>

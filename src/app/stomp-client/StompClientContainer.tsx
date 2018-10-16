@@ -15,7 +15,7 @@ interface State {
 
 export class StompClientContainer extends React.Component<Props, State> {
   private readonly _stompClient = Client.getInstance();
-  private _subscription: StompSubscription = null;
+  private _subscription: Promise<StompSubscription> = null;
 
   constructor(props: any) {
     super(props);
@@ -27,18 +27,15 @@ export class StompClientContainer extends React.Component<Props, State> {
   }
 
   componentDidMount() {
-    this._stompClient.subscribe('/stomp-client/response-queue', (message: Message, sub: StompSubscription) => {
+    this._subscription = this._stompClient.subscribe('/stomp-client/response-queue', (message: Message) => {
       const responseBody = JSON.parse(message.body);
       this.setState({ responseBody: JSON.stringify(responseBody, null, 4) }, () => this.setState({ isFetching: false }));
-      this._subscription = sub
     });
   }
 
   componentWillUnmount() {
-    if (this._subscription) {
-      this._subscription.unsubscribe();
-      this._subscription = null;
-    }
+    if (this._subscription)
+      this._subscription.then(sub => sub.unsubscribe());
   }
   render() {
     return (

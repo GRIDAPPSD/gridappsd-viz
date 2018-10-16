@@ -21,7 +21,7 @@ export class GetAvailableApplicationsAndServices implements MessageRequest {
   }
 
   get replyTo(): string {
-    return this.url;
+    return 'application-and-services';
   }
 
   get requestBody(): RequestBody {

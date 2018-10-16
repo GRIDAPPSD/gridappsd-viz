@@ -1,7 +1,6 @@
 import * as React from 'react';
 import JSONViewer from 'react-json-viewer';
 import { Panel, Button } from 'react-bootstrap';
-import { StompSubscription } from '@stomp/stompjs';
 
 import { MessageService } from '../services/MessageService';
 import { GetAvailableApplicationsAndServicesPayload } from '../models/message-requests/GetAvailableApplicationsAndServicesRequest';
@@ -34,7 +33,6 @@ export class AvailableApplicationsAndServices extends React.Component<Applicatio
   }
   componentDidMount() {
     this._fetchApplicationsAndServices();
-
   }
 
   render() {
@@ -78,7 +76,7 @@ export class AvailableApplicationsAndServices extends React.Component<Applicatio
     return null;
   }
   private _fetchApplicationsAndServices() {
-    this._messageService.onApplicationsAndServicesReceived((payload: GetAvailableApplicationsAndServicesPayload, sub) => {
+    this._messageService.onApplicationsAndServicesReceived((payload: GetAvailableApplicationsAndServicesPayload) => {
       const appData = JSON.stringify(payload.applications);
       const serviceData = payload.services;
       const appInstanceData = payload.appInstances;
@@ -89,9 +87,8 @@ export class AvailableApplicationsAndServices extends React.Component<Applicatio
       sessionStorage.setItem('appData', JSON.stringify(serviceData));
       sessionStorage.setItem('appData', JSON.stringify(appInstanceData));
       sessionStorage.setItem('appData', JSON.stringify(serviceInstanceData));
-
-      sub.unsubscribe();
-    });
+    })
+      .then(sub => sub.unsubscribe());
     this._messageService.fetchAvailableApplicationsAndServices();
   }
 }
