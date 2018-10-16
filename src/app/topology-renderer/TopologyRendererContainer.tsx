@@ -50,17 +50,15 @@ export class TopologyRendererContainer extends React.Component<Props, State> {
       .subscribe(status => {
         if (status === 'CONNECTED')
           this._init()
-        else if (status === 'CONNECTING' && this._topologySubscription && this._activeSimulationStream) {
-          this._topologySubscription.then(sub => sub.unsubscribe);
-          this._activeSimulationStream.unsubscribe();
-        }
+        else
+          this.componentWillUnmount();
       });
   }
 
   componentWillUnmount() {
     if (this._topologySubscription)
       this._topologySubscription.then(sub => sub.unsubscribe());
-    if (this._activeSimulationConfig)
+    if (this._activeSimulationStream)
       this._activeSimulationStream.unsubscribe();
     if (this._stompClientStatusStream)
       this._stompClientStatusStream.unsubscribe();
@@ -104,7 +102,7 @@ export class TopologyRendererContainer extends React.Component<Props, State> {
       input: {
         simulation_id: this._simulationQueue.getActiveSimulation().id,
         message: {
-          timestamp: Math.floor((new Date).getTime()/1000.0),
+          timestamp: Math.floor((new Date).getTime() / 1000.0),
           difference_mrid: this._activeSimulationConfig.power_system_config.Line_name,
           reverse_differences: [
             {

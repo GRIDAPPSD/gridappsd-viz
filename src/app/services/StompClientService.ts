@@ -23,7 +23,7 @@ export class StompClientService {
   }
 
   isActive() {
-    return this._client.connected;
+    return this._client ? this._client.connected : false;
   }
 
   reconnect() {
@@ -100,20 +100,21 @@ export class StompClientService {
       this._connect();
       this._attempt++;
       const reconnectionAttemptTracker = setInterval(() => {
-        if (this._attempt === 3) {
+        if (this._status === 'CONNECTING') {
+          this._connect();
+          this._attempt++;
+        }
+        else if (this._status === 'CONNECTED')
+          clearInterval(reconnectionAttemptTracker);
+        else if (this._attempt === 3) {
           this._status = 'NOT_CONNECTED';
           this._statusChanges.next(this._status);
+          this._client.disconnect();
           this._client = null;
           this._connectionInProgress = false;
           this._attempt = 0;
           clearInterval(reconnectionAttemptTracker);
         }
-        else if (this._status === 'CONNECTING') {
-          this._connect();
-          this._attempt++;
-        }
-        if (this._status === 'CONNECTED')
-          clearInterval(reconnectionAttemptTracker);
       }, 5000);
     }
   }
