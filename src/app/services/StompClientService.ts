@@ -3,18 +3,19 @@ import { client, Client, StompHeaders, Message, StompSubscription } from '@stomp
 import { RUN_CONFIG } from '../../../runConfig';
 import { Subject, Observable } from 'rxjs';
 
-export type StompClientConnectionStatus = 'NOT_CONNECTED' | 'CONNECTING' | 'CONNECTED';
+export type StompClientConnectionStatus = 'NOT_CONNECTED' | 'CONNECTING' | 'CONNECTED' | 'INIT';
 
 export class StompClientService {
   private static readonly _INSTANCE = new StompClientService();
   private _client: Client;
   private _statusChanges = new Subject<StompClientConnectionStatus>();
   private _attempt = 0;
-  private _status: StompClientConnectionStatus = 'NOT_CONNECTED';
-  private _connectionInProgress = false;
+  private _status: StompClientConnectionStatus = 'INIT';
+  private _connectionInProgress;
 
   private constructor() {
     this._reconnect = this._reconnect.bind(this);
+    this._statusChanges.next(this._status);
     this._connect();
   }
 
@@ -27,8 +28,7 @@ export class StompClientService {
   }
 
   reconnect() {
-    this._attempt = 0;
-    this._connectionInProgress = false;
+    this._reset();
     this._reconnect();
   }
 
@@ -80,42 +80,38 @@ export class StompClientService {
       this._client.heartbeat.outgoing = 0;
       this._client.heartbeat.incoming = 0;
     }
-    this._status = 'CONNECTING';
-    this._statusChanges.next(this._status);
-    this._client.connect(
-      'system',
-      'manager',
-      () => {
-        this._status = 'CONNECTED';
-        this._statusChanges.next(this._status);
-        this._connectionInProgress = false;
-      },
-      this._reconnect,
-      this._reconnect);
+    this._connectionInProgress = setTimeout(() => {
+      this._client.connect(
+        'system',
+        'manager',
+        () => {
+          this._status = 'CONNECTED';
+          this._statusChanges.next(this._status);
+          clearTimeout(this._connectionInProgress);
+        },
+        this._reconnect);
+    }, this._status === 'INIT' ? 0 : 5000);
   }
 
   private _reconnect() {
-    if (this._attempt < 3 && !this._connectionInProgress) {
-      this._connectionInProgress = true;
+    if (this._attempt < 3) {
       this._connect();
       this._attempt++;
-      const reconnectionAttemptTracker = setInterval(() => {
-        if (this._status === 'CONNECTING') {
-          this._connect();
-          this._attempt++;
-        }
-        else if (this._status === 'CONNECTED')
-          clearInterval(reconnectionAttemptTracker);
-        else if (this._attempt === 3) {
-          this._status = 'NOT_CONNECTED';
-          this._statusChanges.next(this._status);
-          this._client.disconnect();
-          this._client = null;
-          this._connectionInProgress = false;
-          this._attempt = 0;
-          clearInterval(reconnectionAttemptTracker);
-        }
-      }, 5000);
+      this._status = this._status === 'INIT' ? 'INIT' : 'CONNECTING';
+      this._statusChanges.next(this._status);
     }
+    else if (this._attempt === 3)
+      this._reset();
+  }
+
+  private _reset() {
+    this._status = 'NOT_CONNECTED';
+    this._statusChanges.next(this._status);
+    if (this._client) {
+      this._client.disconnect();
+      this._client = null;
+    }
+    clearTimeout(this._connectionInProgress);
+    this._attempt = 0;
   }
 }
