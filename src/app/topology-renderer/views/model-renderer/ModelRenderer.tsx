@@ -115,7 +115,7 @@ export class ModelRenderer extends React.Component<Props, State> {
         const node = target.datum() as Node;
         switch (node.type) {
           case 'capacitor':
-            content = 'Capacitor: ' + this._removePhaseNameFromNodeName(node.name);
+            content = 'Capacitor: ' + node.name;
             break;
           case 'regulator':
             content = 'Regulator: ' + node.name;
@@ -212,10 +212,6 @@ export class ModelRenderer extends React.Component<Props, State> {
     if (nodeCounts <= 1000)
       return this._zoomConfigs.ieee123;
     return this._zoomConfigs.ieee8500;
-  }
-
-  private _removePhaseNameFromNodeName(child) {
-    return child.name ? '_' + child.name.replace(/(\D+)(\d)(a|b|c)$/, (_, p1, p2, __) => [p1, p2].join('')) : '(I have no name)';
   }
 
   private _render(model: { nodes: any[]; edges: any[] }) {
