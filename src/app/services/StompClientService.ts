@@ -75,11 +75,11 @@ export class StompClientService {
   }
 
   private _connect() {
-    if (!this._client) {
-      this._client = client(RUN_CONFIG.gossServerUrl);
-      this._client.heartbeat.outgoing = 0;
-      this._client.heartbeat.incoming = 0;
-    }
+    if (this.isActive())
+      this._client.disconnect();
+    this._client = client(RUN_CONFIG.gossServerUrl);
+    this._client.heartbeat.outgoing = 0;
+    this._client.heartbeat.incoming = 0;
     this._connectionInProgress = setTimeout(() => {
       this._client.connect(
         'system',
@@ -88,7 +88,9 @@ export class StompClientService {
           this._status = 'CONNECTED';
           this._statusChanges.next(this._status);
           clearTimeout(this._connectionInProgress);
+          this._attempt = 0;
         },
+        this._reconnect,
         this._reconnect);
     }, this._status === 'INIT' ? 0 : 5000);
   }
