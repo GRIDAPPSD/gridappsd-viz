@@ -49,7 +49,8 @@ export class StompClientContainer extends React.Component<Props, State> {
 
   private _sendRequest(topic: string, requestBody: string) {
     this.setState({ isFetching: true, responseBody: '' });
-    this._stompClient.send(topic, { 'reply-to': '/stomp-client/response-queue' }, requestBody.replace(/\s/g, ""));
+    var req = JSON.stringify(JSON.parse(requestBody));    
+    this._stompClient.send(topic, { 'reply-to': '/stomp-client/response-queue' }, req );
   }
 
 }
