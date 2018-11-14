@@ -7,24 +7,27 @@ import './DropdownMenu.scss';
 
 interface Props {
   menuItems: MenuItem[];
-  onChange: (menuItem: MenuItem) => void;
-  onOpen?: () => void;
+  onChange: (menuItem: MenuItem, selections?: MenuItem[]) => void;
   defaultSelectedIndex?: number;
   defaultLabel?: string;
-  reset?: boolean;
+  multiple?: boolean;
 }
 
 interface State {
   currentLabel: string;
   opened: boolean;
+  selection: MenuItem[];
+  defaultLabel: string;
 }
 
 export class DropdownMenu extends React.Component<Props, State> {
-  constructor(props: any) {
+  constructor(props: Props) {
     super(props);
     this.state = {
-      currentLabel: this.props.defaultLabel || 'Select an item',
-      opened: false
+      currentLabel: props.defaultLabel || 'Select an item',
+      opened: false,
+      selection: [],
+      defaultLabel: props.defaultLabel || 'Select an item'
     };
     this._onOpen = this._onOpen.bind(this);
     this._onClose = this._onClose.bind(this);
@@ -51,7 +54,7 @@ export class DropdownMenu extends React.Component<Props, State> {
               this.props.menuItems.map((menuItem, i) =>
                 <li
                   key={i}
-                  className={'app-dropdown-menu-item' + (this.state.currentLabel === menuItem.label ? ' selected' : '')}
+                  className={'app-dropdown-menu-item' + (this.state.selection.includes(menuItem) ? ' selected' : '')}
                   onClick={() => this._onChange(menuItem)}>
                   <span className="text">{menuItem.label}</span>
                 </li>
@@ -64,33 +67,49 @@ export class DropdownMenu extends React.Component<Props, State> {
   }
 
   componentDidMount() {
-    if (this.props.defaultSelectedIndex < 0 || this.props.defaultSelectedIndex >= this.props.menuItems.length)
-      throw new Error('Default item index must be between 0 and ' + (this.props.menuItems.length - 1));
-    if (this.props.defaultSelectedIndex !== undefined)
-      this._onChange(this.props.menuItems[this.props.defaultSelectedIndex]);
+    if (this.props.menuItems.length !== 0 && !this.props.multiple) {
+      if (this.props.defaultSelectedIndex < 0 || this.props.defaultSelectedIndex >= this.props.menuItems.length)
+        throw new Error('Default item index must be between 0 and ' + (this.props.menuItems.length - 1));
+      if (this.props.defaultSelectedIndex !== undefined)
+        this._onChange(this.props.menuItems[this.props.defaultSelectedIndex]);
+    }
   }
 
-  componentWillReceiveProps(newProps: Props) {
-    if (newProps.reset)
-      this.setState({ currentLabel: this.props.defaultLabel || 'Select an item' });
-  }
   private _onOpen() {
-    if (this.props.onOpen)
-      this.props.onOpen();
     this.setState({ opened: true });
   }
 
   private _onClose() {
     // Wait for the clicked item to fire before collapse or else it won't fire
-    setTimeout(() => this.setState({ opened: false }), 100);
+    setTimeout(() => {
+      if (this.props.multiple) {
+        this.setState(prevState => ({
+          currentLabel: prevState.selection.length === 0 ? prevState.defaultLabel : prevState.selection.map(item => item.label).join(', '),
+        }));
+        this.props.onChange(null, this.state.selection);
+      }
+      this.setState({ opened: false });
+    }, 100);
   }
 
   private _onChange(menuItem: MenuItem) {
-    if (this.state.currentLabel !== menuItem.label) {
+    if (this.props.multiple) {
+      this.setState(prevState => {
+        if (prevState.selection.includes(menuItem))
+          return {
+            selection: prevState.selection.filter(e => e !== menuItem)
+          };
+        return {
+          selection: [...prevState.selection, menuItem]
+        };
+      })
+    }
+    else if (this.state.currentLabel !== menuItem.label) {
       this.props.onChange(menuItem);
       this.setState({
         currentLabel: menuItem.label,
-        opened: false
+        opened: false,
+        selection: [menuItem]
       });
     }
     else

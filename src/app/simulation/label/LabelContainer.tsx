@@ -1,6 +1,7 @@
 import * as React from 'react';
-import { SimulationOutputService } from '../../services/SimulationOutputService';
 import { Subscription } from 'rxjs';
+
+import { SimulationOutputService } from '../../services/SimulationOutputService';
 import { Label } from './views/label/Label';
 
 interface Props {
@@ -14,9 +15,21 @@ interface State {
 const NODES_PER_TOPOLOGY = {
   ieee8500: {
     capbank0: ['A', 'B', 'C'],
+    capbank0a: ['A', 'B', 'C'],
+    capbank0b: ['A', 'B', 'C'],
+    capbank0c: ['A', 'B', 'C'],
     capbank1: ['A', 'B', 'C'],
+    capbank1a: ['A', 'B', 'C'],
+    capbank1b: ['A', 'B', 'C'],
+    capbank1c: ['A', 'B', 'C'],
     capbank2: ['A', 'B', 'C'],
+    capbank2a: ['A', 'B', 'C'],
+    capbank2b: ['A', 'B', 'C'],
+    capbank2c: ['A', 'B', 'C'],
     capbank3: ['A', 'B', 'C'],
+    capbank3a: ['A', 'B', 'C'],
+    capbank3b: ['A', 'B', 'C'],
+    capbank3c: ['A', 'B', 'C'],
     VREG2: ['A', 'B', 'C'],
     VREG3: ['A', 'B', 'C'],
     VREG4: ['A', 'B', 'C'],

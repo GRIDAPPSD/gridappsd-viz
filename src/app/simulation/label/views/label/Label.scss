@@ -10,6 +10,10 @@
     top: 0;
     .gridappsd-tooltip.bottom {
         transform: translateY(-8px);
+        font-size: 0.5em;
+    }
+    .gridappsd-tooltip.bottom .gridappsd-tooltip__content {
+        padding: 2px;
     }
     .gridappsd-tooltip.top {
         transform: translateY(8px);
@@ -22,6 +26,4 @@
 .label__heading {
     font-weight: bold;
     text-align: center;
-    font-weight: 13px;
-    padding-bottom: 5px;
 }

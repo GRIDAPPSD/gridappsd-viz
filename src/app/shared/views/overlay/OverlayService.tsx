@@ -25,7 +25,7 @@ export class OverlayService {
   }
 
   hide() {
-    this._currentOverlay.classList.add('fade-out');
+    setTimeout(() => this._currentOverlay.classList.add('fade-out'), 400);
   }
 
   private _remove() {
