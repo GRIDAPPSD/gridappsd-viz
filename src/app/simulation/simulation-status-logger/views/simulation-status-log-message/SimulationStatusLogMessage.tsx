@@ -30,22 +30,22 @@ export class SimulationStatusLogMessage extends React.Component<Props, State> {
           this.state.showMessageAsJson
             ?
             <>
-              <IconButton
-                icon='minus'
-                onClick={this._showAsString} />
-              <span>
-                {JSON.stringify(JSON.parse(this.props.message), null, 4)}
-              </span>
+            <IconButton
+              icon='minus'
+              onClick={this._showAsString} />
+            <span>
+              {JSON.stringify(JSON.parse(this.props.message), null, 4)}
+            </span>
             </>
             :
             <>
-              <IconButton
-                icon='plus'
-                onClick={this._showAsJson} />
-              <span className='simulation-status-log-message__content'>
-                {this.props.message}
-              </span>
-            </>
+          <IconButton
+            icon='plus'
+            onClick={this._showAsJson} />
+          <span className='simulation-status-log-message__content'>
+            {JSON.parse(this.props.message).logMessage}
+          </span>
+        </>
         }
       </div>
     );
