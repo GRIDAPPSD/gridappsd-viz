@@ -30,6 +30,7 @@ interface State {
   show: boolean;
   applicationConfigStr: string;
   simulationName: string;
+  noLineNameMessage: boolean;
 }
 
 export class SimulationConfiguration extends React.Component<Props, State> {
@@ -41,12 +42,13 @@ export class SimulationConfiguration extends React.Component<Props, State> {
     this.state = {
       show: true,
       applicationConfigStr: '',
-      simulationName: props.initialConfig.simulation_config.simulation_name
+      simulationName: props.initialConfig.simulation_config.simulation_name,
+      noLineNameMessage: false
     };
     this._currentConfig = this._cloneConfigObject(props.initialConfig);
   }
 
-  render() {
+  render() {    
     return (
       <PopUp in={this.state.show}>
         <div className='simulation-configuration'>
@@ -79,7 +81,7 @@ export class SimulationConfiguration extends React.Component<Props, State> {
                   onChange={item => {
                     this._currentConfig.power_system_config.Line_name = item.value.mRID;
                     this._currentConfig.simulation_config.simulation_name = item.value.name;
-                    this.setState({ simulationName: item.value.name });
+                    this.setState({ simulationName: item.value.name, noLineNameMessage: false });
                     this.props.onMRIDChanged(item.value.mRID, this._currentConfig.simulation_config.simulation_name);
                   }} />
               </FormGroup>
@@ -187,11 +189,20 @@ export class SimulationConfiguration extends React.Component<Props, State> {
             <BasicButton
               label='Submit'
               type='positive'
-              onClick={event => {
-                event.stopPropagation();
-                this.setState({ show: false });
-                this.props.onSubmit(this._currentConfig);
+              onClick={event => {                
+                if(this._currentConfig.power_system_config.Line_name == "")
+                {
+                  console.log("No model selected");
+                  this.setState({ noLineNameMessage: true });
+                }
+                else {
+                  event.stopPropagation();
+                  this.setState({ show: false });
+                  this.props.onSubmit(this._currentConfig);
+                }
               }} />
+              {this.state.noLineNameMessage &&
+                  <span style={{color: 'red'}} >&nbsp; Please select a Line Name </span>}
           </footer>
         </div>
       </PopUp>
