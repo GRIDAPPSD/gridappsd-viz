@@ -15,21 +15,9 @@ interface State {
 const NODES_PER_TOPOLOGY = {
   ieee8500: {
     capbank0: ['A', 'B', 'C'],
-    capbank0a: ['A', 'B', 'C'],
-    capbank0b: ['A', 'B', 'C'],
-    capbank0c: ['A', 'B', 'C'],
     capbank1: ['A', 'B', 'C'],
-    capbank1a: ['A', 'B', 'C'],
-    capbank1b: ['A', 'B', 'C'],
-    capbank1c: ['A', 'B', 'C'],
     capbank2: ['A', 'B', 'C'],
-    capbank2a: ['A', 'B', 'C'],
-    capbank2b: ['A', 'B', 'C'],
-    capbank2c: ['A', 'B', 'C'],
     capbank3: ['A', 'B', 'C'],
-    capbank3a: ['A', 'B', 'C'],
-    capbank3b: ['A', 'B', 'C'],
-    capbank3c: ['A', 'B', 'C'],
     VREG2: ['A', 'B', 'C'],
     VREG3: ['A', 'B', 'C'],
     VREG4: ['A', 'B', 'C'],
@@ -85,12 +73,12 @@ export class LabelContainer extends React.Component<Props, State> {
               measurementsAtPhases.push(m);
           });
           if (nodeName.includes('capbank') || nodeName.includes('c83')) {
-            measurementsAtPhases.map(node => (
+            content = measurementsAtPhases.map(node => (
               <tr key={node.phases}>
                 <td>Switch {node.phases}</td>
                 <td>{node.value === 0 ? 'CLOSED' : 'OPEN'}</td>
               </tr>
-            )).forEach(e => content.push(e));
+            ));
           }
           else {
             // get measurements for voltages
