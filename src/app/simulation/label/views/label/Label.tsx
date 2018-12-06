@@ -66,7 +66,8 @@ export class Label extends React.Component<Props, State> {
   }
 
   private _show() {
-    const anchor = document.querySelector(`.model-renderer ._${this.props.nodeNameToAttachTo}_`) as HTMLElement;
+    const anchor = ['', 'a', 'b', 'c'].map(phase => document.querySelector(`.model-renderer ._${this.props.nodeNameToAttachTo}${phase}_`) as HTMLElement)
+      .filter(element => element)[0];
     if (anchor) {
       const content = <>
         <header className='label__heading'>{this.props.nodeNameToAttachTo}</header>

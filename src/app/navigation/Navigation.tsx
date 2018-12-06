@@ -19,6 +19,7 @@ import './Navigation.scss';
 
 interface Props {
   onShowSimulationConfigForm: (config: SimulationConfig) => void;
+  onShowQueryLogsForm: () => void;
 }
 
 interface State {
@@ -108,6 +109,10 @@ export class Navigation extends React.Component<Props, State> {
               <DrawerItemLabel value='Stomp Client' />
             </Link>
           </DrawerItem>
+          {/* <DrawerItem onClick={this.props.onShowQueryLogsForm}>
+            <DrawerItemIcon icon='cubes' />
+            <DrawerItemLabel value='Query Logs' />
+          </DrawerItem> */}
         </Drawer>
       </>
     );
