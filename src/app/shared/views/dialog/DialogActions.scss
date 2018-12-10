@@ -1,0 +1,11 @@
+.dialog-actions {
+    width: 100%;
+    padding: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    border-top: 2px solid rgba(0, 0, 0, 0.05);
+    &>* {
+        margin-right: 5px;
+    }
+}

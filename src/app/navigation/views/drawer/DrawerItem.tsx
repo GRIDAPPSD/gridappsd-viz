@@ -14,7 +14,7 @@ export const DrawerItem = ({ className = '', onClick = (() => { }), children }) 
   </Ripple>
 );
 
-type IconName = 'form' | 'app' | 'browse' | 'terminal';
+type IconName = 'form' | 'app' | 'browse' | 'terminal' | 'cubes';
 
 interface DrawerItemIconProps {
   icon: IconName
