@@ -23,7 +23,7 @@ export class WebsocketStatusWatcher extends React.Component<Props, State> {
   constructor(props: any) {
     super(props);
     this.state = {
-      websocketStatus: this._stompClientService.isActive() ? 'CONNECTED' : 'CONNECTING',
+      websocketStatus: this._stompClientService.isActive() ? 'CONNECTED' : 'INIT',
       dots: 1
     };
   }
@@ -50,28 +50,40 @@ export class WebsocketStatusWatcher extends React.Component<Props, State> {
     return (
       <div className='websocket-status-watcher'>
         <div className='websocket-status-watcher__container'>
-          {
-            this.state.websocketStatus === 'CONNECTING'
-              ?
-              <span style={{ fontSize: '45px' }}>
-                <span>Connection lost, trying to reconnect</span>
-                <span style={{ display: 'inline-block', width: '30px', textAlign: 'left' }}>{'.'.repeat(this.state.dots)}</span>
-              </span>
-              :
-              <>
-                <span style={{ fontSize: '45px' }}>Connection failed to establish</span>
-                <br />
-                <br />
-                <span style={{ fontSize: '30px' }}>Check server or</span>
-                <IconButton
-                  icon='websocket-connection-inactive'
-                  className='websocket-status-watcher__websocket-status-indicator'
-                  onClick={() => this._stompClientService.reconnect()}
-                  label='Click to reconnect' />
-              </>
-          }
+          {this._showComponentForCurrentStatus()}
         </div>
       </div>
     );
+  }
+
+  private _showComponentForCurrentStatus() {
+    if (this.state.websocketStatus === 'CONNECTING')
+      return (
+        <span style={{ fontSize: '45px' }}>
+          <span>Connection lost, trying to reconnect</span>
+          <span style={{ display: 'inline-block', width: '30px', textAlign: 'left' }}>{'.'.repeat(this.state.dots)}</span>
+        </span>
+      );
+    if (this.state.websocketStatus === 'INIT')
+      return (
+        <span style={{ fontSize: '45px' }}>
+          <span>Trying to connect</span>
+          <span style={{ display: 'inline-block', width: '30px', textAlign: 'left' }}>{'.'.repeat(this.state.dots)}</span>
+        </span>
+      );
+    else
+      return (
+        <>
+          <span style={{ fontSize: '45px' }}>Connection failed to establish</span>
+          <br />
+          <br />
+          <span style={{ fontSize: '30px' }}>Check server or</span>
+          <IconButton
+            icon='websocket-connection-inactive'
+            className='websocket-status-watcher__websocket-status-indicator'
+            onClick={() => this._stompClientService.reconnect()}
+            label='Click to reconnect' />
+        </>
+      );
   }
 }

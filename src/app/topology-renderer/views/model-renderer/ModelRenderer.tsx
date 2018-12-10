@@ -38,9 +38,21 @@ export class ModelRenderer extends React.Component<Props, State> {
   private readonly _edgeGenerator = line<{ edge: Edge; node: Node }>()
     .x(d => d.node.screenX)
     .y(d => d.node.screenY);
-
   private readonly _symbolSize = 400;
-  private readonly _halfSymbolSize = this._symbolSize / 2;
+  private readonly _symbolsForTypes = {
+    capacitor: '../images/capacitor.svg',
+    regulator: '../images/regulator.svg',
+    transformer: '../images/transformer.svg',
+    switch: '../images/switch-closed.svg',
+    swing_node: '../images/substation.svg'
+  };
+  private readonly _symbolDimensions = {
+    capacitor: { width: 52 * 4, height: 32 * 4 },
+    regulator: { width: 48 * 4, height: 103 * 4 },
+    transformer: { width: 31 * 4, height: 149 * 4 },
+    switch: { width: 123 * 4, height: 16 * 4 },
+    swing_node: { width: this._symbolSize, height: this._symbolSize }
+  };
 
   constructor(props: any) {
     super(props);
@@ -90,14 +102,16 @@ export class ModelRenderer extends React.Component<Props, State> {
         if (!rotateTransform.includes('rotate'))
           throw new Error('Transform should include rotate()');
         if (swjtch.open) {
-          target.attr('href', '../images/switch-closed.png');
-          target.style('transform-origin', (node: Node) => `${node.screenX + this._halfSymbolSize}px ${node.screenY + this._halfSymbolSize}px`)
-            .style('transform', `translate(${-this._halfSymbolSize}px, ${-this._halfSymbolSize}px) ${rotateTransform}`);
+          target.attr('href', '../images/switch-closed.svg')
+            .attr('height', (node: Node) => this._symbolDimensions[node.type].height)
+            .style('transform-origin', (node: Node) => `${node.screenX + this._symbolDimensions[node.type].width / 2}px ${node.screenY + this._symbolDimensions[node.type].height / 2}px`)
+            .style('transform', (node: Node) => `translate(${-this._symbolDimensions[node.type].width / 2}px, ${-this._symbolDimensions[node.type].height / 2}px) ${rotateTransform}`);
         }
         else {
-          target.attr('href', '../images/switch-open.png');
-          target.style('transform-origin', (node: Node) => `${node.screenX + this._halfSymbolSize - 40}px ${node.screenY + this._halfSymbolSize + 13}px`)
-            .style('transform', `translate(${-this._halfSymbolSize + 40}px, ${-this._halfSymbolSize - 13}px) ${rotateTransform}`);
+          target.attr('href', '../images/switch-open.svg')
+            .attr('height', 22 * 4)
+            .style('transform-origin', (node: Node) => `${node.screenX + this._symbolDimensions[node.type].width / 2}px ${node.screenY + 22}px`)
+            .style('transform', (node: Node) => `translate(${-this._symbolDimensions[node.type].width / 2}px, -55px) ${rotateTransform}`);
         }
         swjtch.open = !swjtch.open;
         this.props.onToggleSwitch(swjtch);
@@ -115,7 +129,7 @@ export class ModelRenderer extends React.Component<Props, State> {
         const node = target.datum() as Node;
         switch (node.type) {
           case 'capacitor':
-            content = 'Capacitor: ' + this._removePhaseNameFromNodeName(node.name);
+            content = 'Capacitor: ' + node.name;
             break;
           case 'regulator':
             content = 'Regulator: ' + node.name;
@@ -214,11 +228,7 @@ export class ModelRenderer extends React.Component<Props, State> {
     return this._zoomConfigs.ieee8500;
   }
 
-  private _removePhaseNameFromNodeName(child) {
-    return child.name ? '_' + child.name.replace(/(\D+)(\d)(a|b|c)$/, (_, p1, p2, __) => [p1, p2].join('')) : '(I have no name)';
-  }
-
-  private _render(model: { nodes: any[]; edges: any[] }) {
+  private _render(model: { nodes: Node[]; edges: Edge[] }) {
     const xExtent = extent(model.nodes, (d: Node) => d.x);
     const yExtent = extent(model.nodes, (d: Node) => d.y);
     const xOffset = -xExtent[0];
@@ -234,10 +244,10 @@ export class ModelRenderer extends React.Component<Props, State> {
     this._container.attr('transform', `translate(${zoomCenter.x},${zoomCenter.y}) scale(${zoomCenter.k})`);
 
     this._renderEdges(model.edges);
-    this._renderSymbolsForNodesWithKnownTypes(edgesKeyedByNodeNames, categories.nodesWithKnownTypes);
     if (model.nodes.length <= 1000)
       this._renderNodes(categories.nodesWithUnknownType, 'unknown-nodes');
     this._renderNodes(categories.nodesWithKnownTypes, 'symbolized-nodes');
+    this._renderSymbolsForNodesWithKnownTypes(edgesKeyedByNodeNames, categories.nodesWithKnownTypes);
   }
 
   private _renderEdges(edgeData: Edge[]) {
@@ -301,13 +311,7 @@ export class ModelRenderer extends React.Component<Props, State> {
 
   private _renderSymbolsForNodesWithKnownTypes(edgesKeyedByNodeNames: { [nodeName: string]: Edge }, nodesWithKnownTypes: Node[]) {
     const symbols = select(this._createSvgElement('g', { 'class': 'symbols', 'style': 'visibility: hidden' }));
-    const symbolsForTypes = {
-      capacitor: '../images/capacitor.png',
-      regulator: '../images/regulator.png',
-      transformer: '../images/transformer.png',
-      switch: '../images/switch-closed.png',
-      swing_node: '../images/substation.png'
-    };
+
     const notSwitches = symbols.append('g')
       .selectAll('image')
       .data(nodesWithKnownTypes.filter(node => node.type !== 'switch'));
@@ -318,19 +322,19 @@ export class ModelRenderer extends React.Component<Props, State> {
       selection.enter()
         .append('image')
         .attr('class', node => `symbol${node.type ? ' ' + node.type : ''}`)
-        .attr('href', node => symbolsForTypes[node.type])
-        .attr('width', this._symbolSize)
-        .attr('height', this._symbolSize)
+        .attr('href', node => this._symbolsForTypes[node.type])
+        .attr('width', node => this._symbolDimensions[node.type] ? this._symbolDimensions[node.type].width : this._symbolSize)
+        .attr('height', node => this._symbolDimensions[node.type] ? this._symbolDimensions[node.type].height : this._symbolSize)
         .attr('x', node => node.screenX)
         .attr('y', node => node.screenY)
-        .style('transform-origin', node => `${node.screenX + this._halfSymbolSize}px ${node.screenY + this._halfSymbolSize}px`)
+        .style('transform-origin', node => `${node.screenX + (this._symbolDimensions[node.type] ? this._symbolDimensions[node.type].width : this._symbolSize) / 2}px ${node.screenY + (this._symbolDimensions[node.type] ? this._symbolDimensions[node.type].height : this._symbolSize) / 2}px`)
         .style('transform', node => {
           if (!node.data || !node.data.from || !node.data.to)
             return 'rotate(0) translate(0, 0)';
           const edge = edgesKeyedByNodeNames[node.data.from] || edgesKeyedByNodeNames[node.data.to];
           if (!edge)
             return 'rotate(0) translate(0, 0)';
-          return `translate(${-this._halfSymbolSize}px, ${-this._halfSymbolSize}px) rotate(${this._calculateAngleBetweenEdgeAndXAxis(edge)}deg)`;
+          return `translate(${-(this._symbolDimensions[node.type] ? this._symbolDimensions[node.type].width : this._symbolSize) / 2}px, ${-(this._symbolDimensions[node.type] ? this._symbolDimensions[node.type].height : this._symbolSize) / 2}px) rotate(${this._calculateAngleBetweenEdgeAndXAxis(edge)}deg)`;
         });
     });
     this._container.node()

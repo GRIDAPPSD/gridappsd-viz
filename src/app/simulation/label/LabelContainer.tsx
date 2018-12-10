@@ -1,6 +1,7 @@
 import * as React from 'react';
-import { SimulationOutputService } from '../../services/SimulationOutputService';
 import { Subscription } from 'rxjs';
+
+import { SimulationOutputService } from '../../services/SimulationOutputService';
 import { Label } from './views/label/Label';
 
 interface Props {
@@ -72,12 +73,12 @@ export class LabelContainer extends React.Component<Props, State> {
               measurementsAtPhases.push(m);
           });
           if (nodeName.includes('capbank') || nodeName.includes('c83')) {
-            measurementsAtPhases.map(node => (
+            content = measurementsAtPhases.map(node => (
               <tr key={node.phases}>
                 <td>Switch {node.phases}</td>
                 <td>{node.value === 0 ? 'CLOSED' : 'OPEN'}</td>
               </tr>
-            )).forEach(e => content.push(e));
+            ));
           }
           else {
             // get measurements for voltages
