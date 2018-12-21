@@ -52,15 +52,15 @@ export class StompClientService {
   }
 
   subscribe(destination: string, callback: (message: Message) => void): Promise<StompSubscription> {
-    if (this.isActive())
-      return Promise.resolve()
-        .then(() => this._client.subscribe(destination, message => callback(message)));
-    return new Promise<void>((resolve, reject) => {
+    return new Promise<StompSubscription>((resolve, reject) => {
       let attempt = 0;
       const repeater = setInterval(() => {
         if (this.isActive()) {
           clearInterval(repeater);
-          resolve();
+          const subscription = this._client.subscribe(destination, message => {
+            callback(message);
+            resolve(subscription);
+          });
         }
         else {
           attempt++;
@@ -70,8 +70,7 @@ export class StompClientService {
           }
         }
       }, 500);
-    })
-      .then(() => this._client.subscribe(destination, message => callback(message)));
+    });
   }
 
   private _connect() {
