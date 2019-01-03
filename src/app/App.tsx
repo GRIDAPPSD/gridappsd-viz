@@ -68,15 +68,15 @@ export class App extends React.Component<Props, State> {
         let sub2: Promise<StompSubscription>;
         if (status === 'CONNECTED') {
           sub1 = this._subscribeToModelDictionaryTopic();
-          sub2 = this._subscribeToAvailableApplicationsAndServicesTopic();
+          this._subscribeToAvailableApplicationsAndServicesTopic();
           setTimeout(() => {
             this._messageService.fetchAvailableApplicationsAndServices(true);
             this._fetchFeederModels();
           }, 0);
         }
-        else if (status === 'CONNECTING' && sub1 && sub2) {
+        else if (status === 'CONNECTING' && sub1) {
           sub1.then(sub => sub.unsubscribe());
-          sub2.then(sub => sub.unsubscribe());
+          // sub2.then(sub => sub.unsubscribe());
         }
       });
   }
@@ -183,7 +183,8 @@ export class App extends React.Component<Props, State> {
   private _subscribeToAvailableApplicationsAndServicesTopic() {
     return this._messageService.onApplicationsAndServicesReceived((payload) => {
       this.setState({ availableApplications: payload.applications });
-    });
+    })
+      .then(sub => sub.unsubscribe());
   }
 
   private _subscribeToModelDictionaryTopic() {

@@ -137,7 +137,7 @@ export class MessageService {
    * @see {@link MessageRequest.fetchModelDictionary(mrid = '')}
    * @param fn The listener to invoke when the response message arrives
    */
-  onModelDictionaryReceived(fn: (response: { payload: ModelDictionary; requestType: string }, simulationName) => void): Promise<StompSubscription> {
+  onModelDictionaryReceived(fn: (response: { payload: ModelDictionary; requestType: string }, simulationName: string) => void): Promise<StompSubscription> {
     return this._stompClient.subscribe(this._getModelDictionaryRequest.replyTo, (message: Message) => {
       fn({
         payload: JSON.parse(message.body) as ModelDictionary,
