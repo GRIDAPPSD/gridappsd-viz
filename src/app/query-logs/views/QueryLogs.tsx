@@ -97,7 +97,7 @@ export class QueryLogs extends React.Component<Props, State> {
             </form>
             <ReactTable
               filterable={true}
-              defaultFilterMethod={(filter, row, column) => {
+              defaultFilterMethod={(filter, row) => {
                 return row[filter.id] !== undefined ? String(row[filter.id]).includes(filter.value.toLowerCase()) : true
               }}
               defaultPageSize={5}

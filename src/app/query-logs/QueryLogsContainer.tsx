@@ -35,22 +35,20 @@ export class QueryLogsContainer extends React.Component<Props, State> {
 
   componentDidMount() {
     this._getAllSimulationIds();
-    this._stompClient.subscribe('query-logs.result', message => {
+    this._queryResult = this._stompClient.subscribe('query-logs.result', message => {
       this.setState({ result: JSON.parse(message.body).data })
     });
   }
 
   render() {
     return (
-      <>
-        <QueryLogs
-          result={this.state.result}
-          simulationIds={this.state.simulationIds}
-          sources={this.state.sources}
-          onSimulationIdSelected={this._getSource}
-          onClose={this._onClose}
-          onSubmit={this._getLogs} />
-      </>
+      <QueryLogs
+        result={this.state.result}
+        simulationIds={this.state.simulationIds}
+        sources={this.state.sources}
+        onSimulationIdSelected={this._getSource}
+        onClose={this._onClose}
+        onSubmit={this._getLogs} />
     );
   }
 
