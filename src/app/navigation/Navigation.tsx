@@ -109,10 +109,10 @@ export class Navigation extends React.Component<Props, State> {
               <DrawerItemLabel value='Stomp Client' />
             </Link>
           </DrawerItem>
-          {/* <DrawerItem onClick={this.props.onShowQueryLogsForm}>
+          <DrawerItem onClick={this.props.onShowQueryLogsForm}>
             <DrawerItemIcon icon='cubes' />
             <DrawerItemLabel value='Query Logs' />
-          </DrawerItem> */}
+          </DrawerItem>
         </Drawer>
       </>
     );

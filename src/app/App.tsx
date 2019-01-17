@@ -65,7 +65,6 @@ export class App extends React.Component<Props, State> {
     this._stompClientService.statusChanges()
       .subscribe(status => {
         let sub1: Promise<StompSubscription>;
-        let sub2: Promise<StompSubscription>;
         if (status === 'CONNECTED') {
           sub1 = this._subscribeToModelDictionaryTopic();
           this._subscribeToAvailableApplicationsAndServicesTopic();
@@ -74,10 +73,8 @@ export class App extends React.Component<Props, State> {
             this._fetchFeederModels();
           }, 0);
         }
-        else if (status === 'CONNECTING' && sub1) {
+        else if (status === 'CONNECTING' && sub1)
           sub1.then(sub => sub.unsubscribe());
-          // sub2.then(sub => sub.unsubscribe());
-        }
       });
   }
 

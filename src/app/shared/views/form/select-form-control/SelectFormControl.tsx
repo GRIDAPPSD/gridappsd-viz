@@ -7,7 +7,7 @@ import './SelectFormControl.scss';
 interface Props {
   label: string;
   menuItems: MenuItem[];
-  onChange: (item: MenuItem) => void;
+  onChange: (item: MenuItem, selections: MenuItem[]) => void;
   defaultSelectedIndex?: number;
   multiple?: boolean;
 }
