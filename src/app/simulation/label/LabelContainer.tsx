@@ -28,6 +28,12 @@ const NODES_PER_TOPOLOGY = {
     reg2: ['A', 'B', 'C'],
     reg3: ['A', 'B', 'C'],
     reg4: ['A', 'B', 'C']
+  },
+  ieee123pv: {
+    c83: ['A', 'B', 'C'],
+    reg2: ['A', 'B', 'C'],
+    reg3: ['A', 'B', 'C'],
+    reg4: ['A', 'B', 'C']
   }
 }
 
