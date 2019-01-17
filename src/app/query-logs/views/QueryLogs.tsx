@@ -10,6 +10,7 @@ import { MenuItem } from '../../shared/views/dropdown-menu/MenuItem';
 import { SelectFormControl } from '../../shared/views/form/select-form-control/SelectFormControl';
 import { SimulationId } from '../models/SimulationId';
 import { QueryLogsRequestBody } from '../models/QueryLogsRequestBody';
+import { Tooltip } from '../../shared/views/tooltip/Tooltip';
 
 import './QueryLogs.scss';
 import 'react-table/react-table.css';
@@ -107,9 +108,15 @@ export class QueryLogs extends React.Component<Props, State> {
                     accessor: columnName,
                     Header: columnName,
                     Cell: row => (
-                      <span title={row.original[row.column.Header]}>
-                        {row.original[row.column.Header]}
-                      </span>
+                      <Tooltip position='bottom'
+                        content={row.value}>
+                        <span style={{
+                          display: 'inline-block',
+                          width: `${row.width}px`
+                        }}>
+                          {row.value}
+                        </span>
+                      </Tooltip>
                     ),
                     style: {
                       textAlign: 'center'
