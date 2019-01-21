@@ -26,7 +26,7 @@ export class QueryLogsContainer extends React.Component<Props, State> {
     this.state = {
       result: [],
       simulationIds: [],
-      sources: []
+      sources: ['ALL']
     };
     this._onClose = this._onClose.bind(this);
     this._getSource = this._getSource.bind(this);
@@ -75,14 +75,14 @@ export class QueryLogsContainer extends React.Component<Props, State> {
     this._stompClient.send(
       'goss.gridappsd.process.request.data.log',
       { 'reply-to': 'query-logs.process-id' },
-      '{"query": "select distinct(process_id), timestamp from log where process_id is not null order by timestamp desc limit 10"}'
+      '{"query": "select distinct(process_id), min(timestamp) as timestamp from log where process_id is not null group by process_id order by timestamp desc limit 10"}'
     );
   }
 
   private _getSource(simulationId: SimulationId) {
     this._stompClient.subscribe('query-logs.source', message => {
       const sources: string[] = JSON.parse(message.body).data.map((e: { source: string }) => e.source);
-      this.setState({ sources });
+      this.setState({ sources: ['ALL', ...sources] });
     })
       .then(sub => sub.unsubscribe());
     this._stompClient.send(

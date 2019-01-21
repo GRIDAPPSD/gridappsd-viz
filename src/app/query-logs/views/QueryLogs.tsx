@@ -35,9 +35,9 @@ export class QueryLogs extends React.Component<Props, State> {
     startTime: '',
     processId: '',
     username: 'system',
-    source: '',
+    source: 'ALL',
     processStatus: 'ALL',
-    logLevel: 'DEBUG'
+    logLevel: 'ALL'
   };
 
   constructor(props: any) {
@@ -82,9 +82,9 @@ export class QueryLogs extends React.Component<Props, State> {
                 <SelectFormControl
                   label='Log level'
                   menuItems={
-                    ['TRACE', 'DEBUG', 'INFO', 'WARN', 'ERROR', 'FATAL'].map(e => new MenuItem(e, e))
+                    ['ALL', 'TRACE', 'DEBUG', 'INFO', 'WARN', 'ERROR', 'FATAL'].map(e => new MenuItem(e, e))
                   }
-                  defaultSelectedIndex={1}
+                  defaultSelectedIndex={0}
                   onChange={menuItem => this._formData.logLevel = menuItem.value} />
                 <SelectFormControl
                   label='Process status'
