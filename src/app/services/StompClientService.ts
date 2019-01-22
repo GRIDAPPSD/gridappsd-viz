@@ -1,14 +1,14 @@
 import { client, Client, StompHeaders, Message, StompSubscription } from '@stomp/stompjs';
+import { BehaviorSubject, Observable } from 'rxjs';
 
 import { RUN_CONFIG } from '../../../runConfig';
-import { Subject, Observable } from 'rxjs';
 
 export type StompClientConnectionStatus = 'NOT_CONNECTED' | 'CONNECTING' | 'CONNECTED' | 'INIT';
 
 export class StompClientService {
   private static readonly _INSTANCE = new StompClientService();
   private _client: Client;
-  private _statusChanges = new Subject<StompClientConnectionStatus>();
+  private _statusChanges = new BehaviorSubject<StompClientConnectionStatus>('INIT');
   private _attempt = 0;
   private _status: StompClientConnectionStatus = 'INIT';
   private _connectionInProgress;

@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { StompSubscription } from '@stomp/stompjs';
 import { Subscription } from 'rxjs';
+import { filter } from 'rxjs/operators';
 
 import { ModelRenderer } from './views/model-renderer/ModelRenderer';
 import { MessageService } from '../services/MessageService';
@@ -45,14 +46,9 @@ export class TopologyRendererContainer extends React.Component<Props, State> {
   }
 
   componentDidMount() {
-    this._init();
     this._stompClientStatusStream = this._stompClientService.statusChanges()
-      .subscribe(status => {
-        if (status === 'CONNECTED')
-          this._init()
-        else
-          this.componentWillUnmount();
-      });
+      .pipe(filter(status => status === 'CONNECTED'))
+      .subscribe(() => this._init());
   }
 
   componentWillUnmount() {

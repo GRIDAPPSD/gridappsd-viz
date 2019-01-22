@@ -1,5 +1,7 @@
 import * as React from 'react';
 import { StompSubscription } from '@stomp/stompjs';
+import { Subscription } from 'rxjs';
+import { filter, map } from 'rxjs/operators';
 
 import { QueryLogs } from './views/QueryLogs';
 import { StompClientService } from '../services/StompClientService';
@@ -20,7 +22,7 @@ interface State {
 export class QueryLogsContainer extends React.Component<Props, State> {
   private readonly _stompClient = StompClientService.getInstance();
   private _queryResult: Promise<StompSubscription>;
-
+  private _websocketStatus: Subscription;
   constructor(props: any) {
     super(props);
     this.state = {
@@ -34,10 +36,15 @@ export class QueryLogsContainer extends React.Component<Props, State> {
   }
 
   componentDidMount() {
+    this._websocketStatus = this._stompClient.statusChanges()
+      .pipe(filter(status => status === 'CONNECTED'), map(() => this._observeQueryLogsResult()))
+      .subscribe(sub => this._queryResult = sub);
+
     this._getAllSimulationIds();
-    this._queryResult = this._stompClient.subscribe('query-logs.result', message => {
-      this.setState({ result: JSON.parse(message.body).data })
-    });
+  }
+
+  private _observeQueryLogsResult() {
+    return this._stompClient.subscribe('query-logs.result', message => this.setState({ result: JSON.parse(message.body).data }));
   }
 
   render() {
@@ -56,9 +63,12 @@ export class QueryLogsContainer extends React.Component<Props, State> {
     this.props.onClose();
     if (this._queryResult)
       this._queryResult.then(sub => sub.unsubscribe());
+    this._websocketStatus.unsubscribe();
   }
 
   private _getLogs(requestBody: QueryLogsRequestBody) {
+    if (requestBody.source === 'ALL')
+      delete requestBody.source;
     this._stompClient.send(
       'goss.gridappsd.process.request.data.log',
       { 'reply-to': 'query-logs.result' },
