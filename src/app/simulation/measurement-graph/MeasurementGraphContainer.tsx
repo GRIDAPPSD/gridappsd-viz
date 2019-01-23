@@ -93,7 +93,19 @@ const GRAPH_NAMES_PER_SIMULATION_NAME = {
     tap_A: ['reg2', 'reg3', 'reg4'],
     tap_B: ['reg2', 'reg3', 'reg4'],
     tap_C: ['reg2', 'reg3', 'reg4']
+  },
+  ieee123pv: {
+    voltage_A: ['53', '82', '62'],
+    voltage_B: ['53', '82', '62'],
+    voltage_C: ['53', '82', '62'],
+    power_in_A: ['reg1a'],
+    power_in_B: ['reg1a'],
+    power_in_C: ['reg1a'],
+    tap_A: ['reg2', 'reg3', 'reg4'],
+    tap_B: ['reg2', 'reg3', 'reg4'],
+    tap_C: ['reg2', 'reg3', 'reg4']
   }
+
 };
 
 export class MeasurementGraphContainer extends React.Component<Props, State> {
