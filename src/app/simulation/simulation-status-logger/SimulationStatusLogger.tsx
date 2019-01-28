@@ -1,7 +1,7 @@
 import * as React from 'react';
 
-import { SimulationStatusLogMessage } from './views/simulation-status-log-message/SimulationStatusLogMessage';
-import { Wait } from '../../shared/views/wait/Wait';
+import { SimulationStatusLogMessage } from './SimulationStatusLogMessage';
+import { Wait } from '@shared/wait';
 
 import './SimulationStatusLogger.scss';
 

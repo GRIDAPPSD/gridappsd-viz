@@ -1,0 +1,23 @@
+.query-logs {
+    box-shadow: 0 0 2px #888;
+    height: 100%;
+    position: relative;
+    button.positive {
+        transform: translate(10px, 3px);
+    }
+}
+
+.query-logs__request-configuration {
+    display: flex;
+    border-bottom: 1px solid #ccc;
+}
+
+.query-logs__request-configuration__left {
+    border-right: 2px solid #ddd;
+    width: 50%;
+}
+
+.query-logs__result {
+    height: 100%;
+    max-height: 100%;
+}

@@ -3,7 +3,7 @@ import { StompSubscription } from '@stomp/stompjs';
 import { Subscription } from 'rxjs';
 import { filter } from 'rxjs/operators';
 
-import { ModelRenderer } from './views/model-renderer/ModelRenderer';
+import { TopologyRenderer } from './TopologyRenderer';
 import { MessageService } from '../services/MessageService';
 import { TopologyModel } from '../models/topology/TopologyModel';
 import { RequestConfigurationType } from '../models/message-requests/RequestConfigurationType';
@@ -62,7 +62,7 @@ export class TopologyRendererContainer extends React.Component<Props, State> {
 
   render() {
     return (
-      <ModelRenderer
+      <TopologyRenderer
         topology={this.state.topology}
         showWait={this.state.isFetching}
         topologyName={this._activeSimulationConfig.simulation_config.simulation_name}

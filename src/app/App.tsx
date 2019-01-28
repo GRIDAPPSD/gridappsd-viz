@@ -3,10 +3,9 @@ import { Route, Redirect } from 'react-router-dom';
 import { StompSubscription } from '@stomp/stompjs';
 
 import { Navigation } from './navigation/Navigation';
-import { DatabaseBrowser } from './database-browser/DatabaseBrowser';
+import { DataBrowser } from './data-browser/DataBrowser';
 import { StompClientContainer } from './stomp-client/StompClientContainer';
 import { SimulationConfiguration } from './simulation/simulation-configuration/SimulationConfiguration';
-import { OverlayService } from './shared/views/overlay/OverlayService';
 import { FeederModels } from './models/FeederModels';
 import { SimulationQueue } from './services/SimulationQueue';
 import { TopologyRendererContainer } from './topology-renderer/TopologyRendererContainer';
@@ -23,8 +22,8 @@ import { AvailableApplicationsAndServices } from './available-applications-and-s
 import { LabelContainer } from './simulation/label/LabelContainer';
 import { Application } from './models/Application';
 import { StompClientService } from './services/StompClientService';
-import { WebsocketStatusWatcher } from './navigation/views/websocket-status-watcher/WebsocketStatusWatcher';
-import { QueryLogsContainer } from './query-logs/QueryLogsContainer';
+import { WebsocketStatusWatcher } from './websocket-status-watcher/WebsocketStatusWatcher';
+import { OverlayService } from '@shared/overlay';
 
 import './App.scss';
 
@@ -54,7 +53,6 @@ export class App extends React.Component<Props, State> {
       availableApplications: null
     };
 
-    this._showQueryLogsForm = this._showQueryLogsForm.bind(this);
   }
 
   componentDidCatch() {
@@ -84,8 +82,7 @@ export class App extends React.Component<Props, State> {
         this._shouldRedirect ? this._redirect() :
           <>
             <Navigation
-              onShowSimulationConfigForm={(config: SimulationConfig) => this._showSimulationConfigForm(config, props.history)}
-              onShowQueryLogsForm={this._showQueryLogsForm} />
+              onShowSimulationConfigForm={(config: SimulationConfig) => this._showSimulationConfigForm(config, props.history)} />
             <Route
               exact
               path='/topology'
@@ -113,7 +110,7 @@ export class App extends React.Component<Props, State> {
               }} />
             <Route exact path='/applications' component={AvailableApplicationsAndServices} />
             <Route exact path='/stomp-client' component={StompClientContainer} />
-            <Route path='/browse' component={props => <DatabaseBrowser mRIDs={this.state.feederModels.mRIDs} match={props.match} />} />
+            <Route path='/browse' component={props => <DataBrowser mRIDs={this.state.feederModels.mRIDs} match={props.match} />} />
             <WebsocketStatusWatcher />
           </>
       } />
@@ -169,12 +166,6 @@ export class App extends React.Component<Props, State> {
   private _redirect() {
     this._shouldRedirect = false;
     return <Redirect to='/' />;
-  }
-
-  private _showQueryLogsForm() {
-    this._overlayService.show(
-      <QueryLogsContainer onClose={() => this._overlayService.hide()} />
-    );
   }
 
   private _subscribeToAvailableApplicationsAndServicesTopic() {

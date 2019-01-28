@@ -5,7 +5,7 @@ import { GetAllFeederModelsRequest, GetAllFeederModelsRequestPayload } from '../
 import { GetTopologyModelRequest, GetTopologyModelRequestPayload } from '../models/message-requests/GetTopologyModelRequest';
 import { GetModelDictionaryRequest } from '../models/message-requests/GetModelDictionaryRequest';
 import { ModelDictionary } from '../models/model-dictionary/ModelDictionary';
-import { QueryBlazeGraphRequest, QueryBlazeGraphRequestBody } from '../models/message-requests/QueryBlazeGraphRequest';
+import { QueryPowerGridModelsRequest, QueryPowerGridModelsRequestBody } from '../models/message-requests/QueryPowerGridModelsRequest';
 import { GetAvailableApplicationsAndServices, GetAvailableApplicationsAndServicesPayload } from '../models/message-requests/GetAvailableApplicationsAndServicesRequest';
 import { ToggleSwitchStateRequest } from '../models/message-requests/ToggleSwitchStateRequest';
 
@@ -16,7 +16,7 @@ export class MessageService {
   private readonly _getTopologyModelRequest = new GetTopologyModelRequest();
   private readonly _getAllFeederModelsRequest = new GetAllFeederModelsRequest();
   private readonly _getModelDictionaryRequest = new GetModelDictionaryRequest();
-  private readonly _queryBlazeGraphRequest = new QueryBlazeGraphRequest();
+  private readonly _queryPowergridModelsRequest = new QueryPowerGridModelsRequest();
   private readonly _getApplicationsAndServices = new GetAvailableApplicationsAndServices();
   private readonly _toggleSwitchStateRequest = new ToggleSwitchStateRequest();
   private readonly _modelDictionaryCache = {};
@@ -86,12 +86,12 @@ export class MessageService {
    * @param requestBody 
    * @see {@link MessageRequest.onBlazeGraphDataReceived(fn: (payload: any) => void)}
    */
-  fetchDataFromBlazeGraph(requestBody: QueryBlazeGraphRequestBody) {
-    this._queryBlazeGraphRequest.requestBody = requestBody;
+  fetchDataForPowergridModels(requestBody: QueryPowerGridModelsRequestBody) {
+    this._queryPowergridModelsRequest.requestBody = requestBody;
     this._stompClient.send(
-      this._queryBlazeGraphRequest.url,
-      { 'reply-to': this._queryBlazeGraphRequest.replyTo },
-      JSON.stringify(this._queryBlazeGraphRequest.requestBody).replace(/\\"/g, '"')
+      this._queryPowergridModelsRequest.url,
+      { 'reply-to': this._queryPowergridModelsRequest.replyTo },
+      JSON.stringify(this._queryPowergridModelsRequest.requestBody).replace(/\\"/g, '"')
     );
   }
 
@@ -122,11 +122,11 @@ export class MessageService {
   /**
    * Set up the listener that will be invoked when the platform sends back the data in response to
    * a send request to {@link QueryBlazeGraphRequest.replyTo}
-   * @see {@link MessageRequest.fetchDataFromBlazeGraph(requestBody: QueryBlazeGraphRequestBody)}
+   * @see {@link MessageRequest.fetchDataFromBlazeGraph(requestBody: QueryPowerGridModelsRequestBody)}
    * @param fn The listener to invoke when the response message arrives
    */
   onBlazeGraphDataReceived(fn: (payload: any) => void): Promise<StompSubscription> {
-    return this._stompClient.subscribe(this._queryBlazeGraphRequest.replyTo, (message: Message) => {
+    return this._stompClient.subscribe(this._queryPowergridModelsRequest.replyTo, (message: Message) => {
       fn(JSON.parse(message.body));
     });
   }

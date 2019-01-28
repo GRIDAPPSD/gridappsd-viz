@@ -1,21 +1,14 @@
 import * as React from 'react';
 
-import { FormGroup } from '../../shared/views/form/form-group/FormGroup';
-import { FormControl } from '../../shared/views/form/form-control/FormControl';
-import { SimulationConfig } from '../../models/SimulationConfig';
-import { BasicButton } from '../../shared/views/buttons/basic-button/BasicButton';
-import { MenuItem } from '../../shared/views/dropdown-menu/MenuItem';
-import { SelectFormControl } from '../../shared/views/form/select-form-control/SelectFormControl';
-import { CheckBox } from '../../shared/views/form/checkbox/CheckBox';
-import { MultilineFormControl } from '../../shared/views/form/multiline-form-control/MultilineFormControl';
-import { SIMULATION_CONFIG_OPTIONS } from './models/simulation-config-options';
+import { SimulationConfig } from 'app/models/SimulationConfig';
 import { FeederModels } from '../../models/FeederModels';
-import { Tooltip } from '../../shared/views/tooltip/Tooltip';
-import { IconButton } from '../../shared/views/buttons/icon-button/IconButton';
 import { Application } from '../../models/Application';
-import { Dialog } from '../../shared/views/dialog/Dialog';
-import { DialogContent } from '../../shared/views/dialog/DialogContent';
-import { DialogActions } from '../../shared/views/dialog/DialogActions';
+import { Dialog, DialogContent, DialogActions } from '@shared/dialog';
+import { FormGroup, SelectFormControl, FormControl, CheckBox, MultilineFormControl } from '@shared/form';
+import { MenuItem } from '@shared/dropdown-menu';
+import { SIMULATION_CONFIG_OPTIONS } from './models/simulation-config-options';
+import { Tooltip } from '@shared/tooltip';
+import { IconButton, BasicButton } from '@shared/buttons';
 
 import './SimulationConfiguration.scss';
 
@@ -127,82 +120,82 @@ export class SimulationConfiguration extends React.Component<Props, State> {
                   position='right'
                   content={
                     <>
-                    <div>Checked: Run in real time. Slower than simulation time</div>
-                    <div>Unchecked: Run in simulation time. Faster than real time</div>
+                      <div>Checked: Run in real time. Slower than simulation time</div>
+                      <div>Unchecked: Run in simulation time. Faster than real time</div>
                     </>
                   }>
                   <IconButton icon='question' />
                 </Tooltip>
               </div>
 
-            <FormControl
-              label='Simulation name'
-              name='simulation_name'
-              value={this.state.simulationName}
-              onChange={value => this._currentConfig.simulation_config.simulation_name = value} />
+              <FormControl
+                label='Simulation name'
+                name='simulation_name'
+                value={this.state.simulationName}
+                onChange={value => this._currentConfig.simulation_config.simulation_name = value} />
 
-            <MultilineFormControl
-              label='Model creation configuration'
-              value={JSON.stringify(this._currentConfig.simulation_config.model_creation_config, null, 4)}
-              onUpdate={value => this._currentConfig.simulation_config.model_creation_config = JSON.parse(value)} />
-            </FormGroup>
-
-          {
-            this.props.availableApplications.length > 0 &&
-            <FormGroup label='Application Configuration'>
-              <SelectFormControl
-                label='Application name'
-                menuItems={this.props.availableApplications.map(app => new MenuItem(app.id, app.id))}
-                onChange={menuItem => {
-                  const currentApp = this._currentConfig.application_config.applications.pop() || { name: menuItem.value, config_string: '' };
-                  this._currentConfig.application_config.applications.push(currentApp);
-                }}
-                defaultSelectedIndex={
-                  this._currentConfig.application_config.applications.length === 0
-                    ? undefined
-                    : this.props.availableApplications
-                      .findIndex(app => app.id === this._currentConfig.application_config.applications[0].name)
-                } />
               <MultilineFormControl
-                label='Application configuration'
-                value={
-                  this._currentConfig.application_config.applications.length === 0
-                    ? ''
-                    : this._currentConfig.application_config.applications[0].config_string === ''
-                      ? ''
-                      : JSON.stringify(this._currentConfig.application_config.applications[0].config_string, null, 4)
-                }
-                onUpdate={value => this._currentConfig.application_config.applications[0].config_string = value} />
+                label='Model creation configuration'
+                value={JSON.stringify(this._currentConfig.simulation_config.model_creation_config, null, 4)}
+                onUpdate={value => this._currentConfig.simulation_config.model_creation_config = JSON.parse(value)} />
             </FormGroup>
-          }
+
+            {
+              this.props.availableApplications.length > 0 &&
+              <FormGroup label='Application Configuration'>
+                <SelectFormControl
+                  label='Application name'
+                  menuItems={this.props.availableApplications.map(app => new MenuItem(app.id, app.id))}
+                  onChange={menuItem => {
+                    const currentApp = this._currentConfig.application_config.applications.pop() || { name: menuItem.value, config_string: '' };
+                    this._currentConfig.application_config.applications.push(currentApp);
+                  }}
+                  defaultSelectedIndex={
+                    this._currentConfig.application_config.applications.length === 0
+                      ? undefined
+                      : this.props.availableApplications
+                        .findIndex(app => app.id === this._currentConfig.application_config.applications[0].name)
+                  } />
+                <MultilineFormControl
+                  label='Application configuration'
+                  value={
+                    this._currentConfig.application_config.applications.length === 0
+                      ? ''
+                      : this._currentConfig.application_config.applications[0].config_string === ''
+                        ? ''
+                        : JSON.stringify(this._currentConfig.application_config.applications[0].config_string, null, 4)
+                  }
+                  onUpdate={value => this._currentConfig.application_config.applications[0].config_string = value} />
+              </FormGroup>
+            }
           </form>
         </DialogContent>
-      <DialogActions>
-        <BasicButton
-          label='Cancel'
-          type='negative'
-          onClick={event => {
-            event.stopPropagation();
-            this.props.onClose(event);
-            this.setState({ show: false });
-          }} />
-        <BasicButton
-          label='Submit'
-          type='positive'
-          onClick={event => {
-            if (this._currentConfig.power_system_config.Line_name == "") {
-              console.log("No model selected");
-              this.setState({ noLineNameMessage: true });
-            }
-            else {
+        <DialogActions>
+          <BasicButton
+            label='Cancel'
+            type='negative'
+            onClick={event => {
               event.stopPropagation();
+              this.props.onClose(event);
               this.setState({ show: false });
-              this.props.onSubmit(this._currentConfig);
-            }
-          }} />
-        {this.state.noLineNameMessage &&
-          <span style={{ color: 'red' }} >&nbsp; Please select a Line Name </span>}
-      </DialogActions>
+            }} />
+          <BasicButton
+            label='Submit'
+            type='positive'
+            onClick={event => {
+              if (this._currentConfig.power_system_config.Line_name == "") {
+                console.log("No model selected");
+                this.setState({ noLineNameMessage: true });
+              }
+              else {
+                event.stopPropagation();
+                this.setState({ show: false });
+                this.props.onSubmit(this._currentConfig);
+              }
+            }} />
+          {this.state.noLineNameMessage &&
+            <span style={{ color: 'red' }} >&nbsp; Please select a Line Name </span>}
+        </DialogActions>
       </Dialog >
     );
   }
