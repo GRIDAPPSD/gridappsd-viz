@@ -30,10 +30,6 @@ export class PowergridModelsContainer extends React.Component<Props, State> {
     this._queryBlazeGraph = this._queryBlazeGraph.bind(this);
   }
 
-  componentDidMount() {
-    this._init();
-  }
-
   componentWillUnmount() {
     if (this._blazeGraphSubscription)
       this._blazeGraphSubscription.then(sub => sub.unsubscribe());
@@ -49,7 +45,7 @@ export class PowergridModelsContainer extends React.Component<Props, State> {
     );
   }
 
-  private _init() {
+  private _subscribe() {
     this._blazeGraphSubscription = this._messageService.onBlazeGraphDataReceived(payload => {
       this.setState(
         { response: payload.data },
@@ -59,6 +55,8 @@ export class PowergridModelsContainer extends React.Component<Props, State> {
   }
 
   private _queryBlazeGraph(requestBody: QueryPowerGridModelsRequestBody) {
+    if (!this._blazeGraphSubscription)
+      this._subscribe();
     this.setState({ isFetching: true });
     const cleanedUpRequestBody = {
       requestType: requestBody.requestType,

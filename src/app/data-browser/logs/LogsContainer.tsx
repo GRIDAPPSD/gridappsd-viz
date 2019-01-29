@@ -34,21 +34,14 @@ export class LogsContainer extends React.Component<Props, State> {
   }
 
   componentDidMount() {
-    this._websocketStatus = this._stompClient.statusChanges()
-      .pipe(filter(status => status === 'CONNECTED'), map(() => this._observeQueryLogsResult()))
-      .subscribe(sub => this._queryResult = sub);
-
     this._getAllSimulationIds();
   }
 
   componentWillUnmount() {
-    if (this._queryResult)
+    if (this._websocketStatus) {
       this._queryResult.then(sub => sub.unsubscribe());
-    this._websocketStatus.unsubscribe();
-  }
-
-  private _observeQueryLogsResult() {
-    return this._stompClient.subscribe('query-logs.result', message => this.setState({ result: JSON.parse(message.body).data }));
+      this._websocketStatus.unsubscribe();
+    }
   }
 
   render() {
@@ -63,6 +56,10 @@ export class LogsContainer extends React.Component<Props, State> {
   }
 
   private _getLogs(requestBody: QueryLogsRequestBody) {
+    if (!this._websocketStatus)
+      this._websocketStatus = this._stompClient.statusChanges()
+        .pipe(filter(status => status === 'CONNECTED'), map(() => this._observeQueryLogsResult()))
+        .subscribe(sub => this._queryResult = sub);
     if (requestBody.source === 'ALL')
       delete requestBody.source;
     this._stompClient.send(
@@ -72,12 +69,18 @@ export class LogsContainer extends React.Component<Props, State> {
     );
   }
 
+  private _observeQueryLogsResult() {
+    return this._stompClient.subscribe(
+      'query-logs.result',
+      message => this.setState({ result: JSON.parse(message.body).data })
+    );
+  }
+
   private _getAllSimulationIds() {
     this._stompClient.subscribe('query-logs.process-id', message => {
       const simulationIds: Array<SimulationId> = JSON.parse(message.body).data;
       this.setState({ simulationIds });
-    })
-      .then(sub => sub.unsubscribe());
+    }).then(sub => sub.unsubscribe());
     this._stompClient.send(
       'goss.gridappsd.process.request.data.log',
       { 'reply-to': 'query-logs.process-id' },
