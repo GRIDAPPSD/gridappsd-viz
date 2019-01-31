@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { BasicButton } from '../../shared/views/buttons/basic-button/BasicButton';
+import { BasicButton } from '@shared/buttons';
 
 import './SimulationControl.scss';
 

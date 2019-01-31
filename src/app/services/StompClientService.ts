@@ -1,17 +1,18 @@
 import { client, Client, StompHeaders, Message, StompSubscription } from '@stomp/stompjs';
+import { BehaviorSubject, Observable } from 'rxjs';
 
 import { RUN_CONFIG } from '../../../runConfig';
-import { Subject, Observable } from 'rxjs';
 
 export type StompClientConnectionStatus = 'NOT_CONNECTED' | 'CONNECTING' | 'CONNECTED' | 'INIT';
 
 export class StompClientService {
   private static readonly _INSTANCE = new StompClientService();
   private _client: Client;
-  private _statusChanges = new Subject<StompClientConnectionStatus>();
+  private _statusChanges = new BehaviorSubject<StompClientConnectionStatus>('INIT');
   private _attempt = 0;
   private _status: StompClientConnectionStatus = 'INIT';
   private _connectionInProgress;
+  private _subscriptions: StompSubscription[] = [];
 
   private constructor() {
     this._reconnect = this._reconnect.bind(this);
@@ -61,6 +62,7 @@ export class StompClientService {
             callback(message);
             resolve(subscription);
           });
+          this._subscriptions.push(subscription);
         }
         else {
           attempt++;
@@ -101,8 +103,12 @@ export class StompClientService {
       this._status = this._status === 'INIT' ? 'INIT' : 'CONNECTING';
       this._statusChanges.next(this._status);
     }
-    else if (this._attempt === 3)
+    else if (this._attempt === 3) {
       this._reset();
+      for (const sub of this._subscriptions)
+        sub.unsubscribe();
+      this._subscriptions = [];
+    }
   }
 
   private _reset() {

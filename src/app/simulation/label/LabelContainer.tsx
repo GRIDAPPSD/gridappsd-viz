@@ -2,7 +2,7 @@ import * as React from 'react';
 import { Subscription } from 'rxjs';
 
 import { SimulationOutputService } from '../../services/SimulationOutputService';
-import { Label } from './views/label/Label';
+import { Label } from './Label';
 
 interface Props {
   topologyName: string;

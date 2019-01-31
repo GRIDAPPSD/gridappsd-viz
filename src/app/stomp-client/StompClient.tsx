@@ -1,11 +1,10 @@
 import * as React from 'react';
 
-import { Wait } from '../shared/views/wait/Wait';
-import { BasicButton } from '../shared/views/buttons/basic-button/BasicButton';
+import { FormControl, MultilineFormControl } from '@shared/form';
+import { BasicButton } from '@shared/buttons';
+import { Wait } from '@shared/wait';
 
 import './StompClient.styles.scss';
-import { FormControl } from '../shared/views/form/form-control/FormControl';
-import { MultilineFormControl } from '../shared/views/form/multiline-form-control/MultilineFormControl';
 
 interface Props {
   response: any;

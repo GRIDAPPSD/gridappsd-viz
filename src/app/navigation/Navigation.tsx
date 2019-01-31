@@ -2,24 +2,24 @@ import * as React from 'react';
 import { Link } from 'react-router-dom';
 import { Subscription } from 'rxjs';
 
-import { AppBar } from './views/app-bar/AppBar';
-import { Drawer } from './views/drawer/Drawer';
-import { DrawerOpener } from './views/drawer/DrawerOpener';
-import { DrawerItem, DrawerItemIcon, DrawerItemLabel } from './views/drawer/DrawerItem';
-import { DrawerItemGroup } from './views/drawer/DrawerItemGroup';
+import { AppBar } from './app-bar/AppBar';
+import { Drawer } from './drawer/Drawer';
+import { DrawerOpener } from './drawer/DrawerOpener';
+import { DrawerItem, DrawerItemIcon, DrawerItemLabel } from './drawer/DrawerItem';
+import { DrawerItemGroup } from './drawer/DrawerItemGroup';
 import { RUN_CONFIG } from '../../../runConfig';
 import { SimulationConfig } from '../models/SimulationConfig';
 import { DEFAULT_SIMULATION_CONFIG } from '../models/default-simulation-config';
 import { SimulationQueue } from '../services/SimulationQueue';
 import { Simulation } from '../models/Simulation';
 import { StompClientService, StompClientConnectionStatus } from '../services/StompClientService';
-import { IconButton } from '../shared/views/buttons/icon-button/IconButton';
+import { IconButton } from '@shared/buttons';
+
 
 import './Navigation.scss';
 
 interface Props {
   onShowSimulationConfigForm: (config: SimulationConfig) => void;
-  onShowQueryLogsForm: () => void;
 }
 
 interface State {
@@ -100,7 +100,7 @@ export class Navigation extends React.Component<Props, State> {
           <DrawerItem>
             <Link to='/browse'>
               <DrawerItemIcon icon='browse' />
-              <DrawerItemLabel value='Browse Database' />
+              <DrawerItemLabel value='Browse Data' />
             </Link>
           </DrawerItem>
           <DrawerItem>
@@ -109,10 +109,6 @@ export class Navigation extends React.Component<Props, State> {
               <DrawerItemLabel value='Stomp Client' />
             </Link>
           </DrawerItem>
-          {/* <DrawerItem onClick={this.props.onShowQueryLogsForm}>
-            <DrawerItemIcon icon='cubes' />
-            <DrawerItemLabel value='Query Logs' />
-          </DrawerItem> */}
         </Drawer>
       </>
     );
