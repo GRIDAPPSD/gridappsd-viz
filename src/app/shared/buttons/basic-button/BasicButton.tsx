@@ -12,7 +12,7 @@ interface Props {
   disabled?: boolean;
 }
 
-export const BasicButton = (props: Props = { disabled: false } as Props) => (
+export const BasicButton = (props: Props) => (
   <Ripple>
     <button
       type='button'

@@ -99,3 +99,12 @@
     height: 1000vh;
     z-index: 100;
 }
+
+.app-dropdown-menu-item-list-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    z-index: 10000;
+}

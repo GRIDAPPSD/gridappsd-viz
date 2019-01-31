@@ -18,7 +18,7 @@ export class DrawerItemGroup extends React.Component<Props, State> {
   constructor(props: any) {
     super(props);
     this.state = {
-      isExpanded: true
+      isExpanded: false
     }
     this._collapse = this._collapse.bind(this);
     this._toogle = this._toogle.bind(this);
@@ -48,10 +48,6 @@ export class DrawerItemGroup extends React.Component<Props, State> {
         </PopUp>
       </li>
     );
-  }
-
-  componentDidMount() {
-    this.setState({ isExpanded: false });
   }
 
   private _collapse(event) {

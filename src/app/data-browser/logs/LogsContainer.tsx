@@ -3,10 +3,11 @@ import { StompSubscription } from '@stomp/stompjs';
 import { Subscription } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
 
-import { Logs } from './Logs';
 import { StompClientService } from '../../services/StompClientService';
 import { QueryLogsRequestBody } from './models/QueryLogsRequestBody';
 import { SimulationId } from './models/SimulationId';
+import { QueryLogsForm } from './QueryLogsForm';
+import { QueryLogsResultTable } from './QueryLogsResultTable';
 
 
 interface Props {
@@ -46,12 +47,14 @@ export class LogsContainer extends React.Component<Props, State> {
 
   render() {
     return (
-      <Logs
-        result={this.state.result}
-        simulationIds={this.state.simulationIds}
-        sources={this.state.sources}
-        onSimulationIdSelected={this._getSource}
-        onSubmit={this._getLogs} />
+      <div style={{ boxShadow: '0 0 2px #888', height: '100%', position: 'relative' }}>
+        <QueryLogsForm
+          simulationIds={this.state.simulationIds}
+          sources={this.state.sources}
+          onSimulationIdSelected={this._getSource}
+          onSubmit={this._getLogs} />
+        <QueryLogsResultTable rows={this.state.result} />
+      </div>
     );
   }
 
@@ -72,7 +75,7 @@ export class LogsContainer extends React.Component<Props, State> {
   private _observeQueryLogsResult() {
     return this._stompClient.subscribe(
       'query-logs.result',
-      message => this.setState({ result: JSON.parse(message.body).data })
+      message => this.setState({ result: JSON.parse(message.body).data || [] })
     );
   }
 
