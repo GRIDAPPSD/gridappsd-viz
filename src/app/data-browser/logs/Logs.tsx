@@ -99,49 +99,52 @@ export class Logs extends React.Component<Props, State> {
             event.stopPropagation();
             this.props.onSubmit(this._formData);
           }} />
-        <Response styles={{ boxShadow: 'initial', borderRadius: '0', height: '60vh', maxHeight: '60vh', overflow: 'initial' }}>
-          <ReactTable
-            filterable={true}
-            defaultFilterMethod={(filter, row) => {
-              return row[filter.id] !== undefined ? String(row[filter.id]).includes(filter.value.toLowerCase()) : true
-            }}
-            defaultPageSize={5}
-            data={this.props.result}
-            columns={
-              Object.keys(this.props.result[0] || {})
-                .map(columnName => ({
-                  accessor: columnName,
-                  Header: columnName,
-                  Cell: row => (
-                    row.value.length > 15 ?
-                      <Tooltip position='bottom'
-                        content={row.value}>
+        {
+          this.props.result.length > 0 &&
+          <Response styles={{ boxShadow: 'initial', borderRadius: '0', height: '60vh', maxHeight: '60vh', overflow: 'initial' }}>
+            <ReactTable
+              filterable={true}
+              defaultFilterMethod={(filter, row) => {
+                return row[filter.id] !== undefined ? String(row[filter.id]).includes(filter.value.toLowerCase()) : true
+              }}
+              defaultPageSize={5}
+              data={this.props.result}
+              columns={
+                Object.keys(this.props.result[0] || {})
+                  .map(columnName => ({
+                    accessor: columnName,
+                    Header: columnName,
+                    Cell: row => (
+                      row.value.length > 15 ?
+                        <Tooltip position='bottom'
+                          content={row.value}>
+                          <span style={{
+                            display: 'inline-block',
+                            width: '100%',
+                            position: 'relative',
+                            top: '50%',
+                            transform: 'translateY(-50%)'
+                          }}>
+                            {row.value}
+                          </span>
+                        </Tooltip>
+                        :
                         <span style={{
                           display: 'inline-block',
                           width: '100%',
                           position: 'relative',
                           top: '50%',
-                          transform: 'translateY(-50%)'
+                          transform: 'translateY(-50%)',
+                          textAlign: 'center'
                         }}>
                           {row.value}
                         </span>
-                      </Tooltip>
-                      :
-                      <span style={{
-                        display: 'inline-block',
-                        width: '100%',
-                        position: 'relative',
-                        top: '50%',
-                        transform: 'translateY(-50%)',
-                        textAlign: 'center'
-                      }}>
-                        {row.value}
-                      </span>
-                  )
-                }))
-            }
-            className='query-logs__result' />
-        </Response>
+                    )
+                  }))
+              }
+              className='query-logs__result' />
+          </Response>
+        }
       </div>
     );
   }
