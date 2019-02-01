@@ -8,7 +8,7 @@ import { QueryLogsRequestBody } from './models/QueryLogsRequestBody';
 import { SimulationId } from './models/SimulationId';
 import { QueryLogsForm } from './QueryLogsForm';
 import { QueryLogsResultTable } from './QueryLogsResultTable';
-
+import { Response } from '../Response';
 
 interface Props {
 }
@@ -53,7 +53,17 @@ export class LogsContainer extends React.Component<Props, State> {
           sources={this.state.sources}
           onSimulationIdSelected={this._getSource}
           onSubmit={this._getLogs} />
-        <QueryLogsResultTable rows={this.state.result} />
+        <Response styles={{ boxShadow: 'initial', borderRadius: '0', height: '60vh', maxHeight: '60vh', overflow: 'initial' }}>
+          {
+            this.state.result.length > 0
+              ?
+              <QueryLogsResultTable rows={this.state.result} />
+              :
+              <div style={{ textAlign: 'center', transform: 'translateY(200px)', fontSize: '2em' }}>
+                No result
+              </div>
+          }
+        </Response>
       </div>
     );
   }
