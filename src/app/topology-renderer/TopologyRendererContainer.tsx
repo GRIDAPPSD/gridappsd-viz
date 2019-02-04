@@ -194,6 +194,7 @@ export class TopologyRendererContainer extends React.Component<Props, State> {
           break;
         case 'switches':
           if ((node.x1 !== 0 && node.y1 !== 0) || (node.x2 !== 0 && node.y2 !== 0)) {
+            node.open = node.open === 'open';
             nodes.push(this._createNewNode({
               name: node.name,
               type: 'switch',

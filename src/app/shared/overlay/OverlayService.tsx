@@ -1,6 +1,6 @@
 import * as React from 'react';
-
 import * as ReactDOM from 'react-dom';
+
 import { Overlay } from './Overlay';
 
 export class OverlayService {
@@ -10,31 +10,30 @@ export class OverlayService {
 
 
   private constructor() {
-    this._remove = this._remove.bind(this);
   }
 
   static getInstance() {
     return OverlayService._INSTANCE;
   }
 
-  show(element: React.ReactElement<any>) {
+  show(element: React.ReactElement<any>, showBackdrop = true) {
     this._currentOverlay = document.createElement('div');
-    this._currentOverlay.addEventListener('animationend', this._remove, false);
     document.body.appendChild(this._currentOverlay);
-    ReactDOM.render(<Overlay element={element} />, this._currentOverlay);
+    ReactDOM.render(<Overlay element={element} showBackdrop={showBackdrop} />, this._currentOverlay);
   }
 
-  hide() {
-    setTimeout(() => this._currentOverlay.classList.add('fade-out'), 400);
-  }
-
-  private _remove() {
-    if (this._currentOverlay.classList.contains('fade-out')) {
+  hide(animate = true) {
+    if (animate) {
+      this._currentOverlay.classList.add('fade-out');
+      setTimeout(() => {
+        ReactDOM.unmountComponentAtNode(this._currentOverlay);
+        this._currentOverlay.parentElement.removeChild(this._currentOverlay);
+      }, 1000);
+    }
+    else {
       ReactDOM.unmountComponentAtNode(this._currentOverlay);
-      this._currentOverlay.removeEventListener('animationend', this._remove, false);
       this._currentOverlay.parentElement.removeChild(this._currentOverlay);
     }
-
   }
 
 }
