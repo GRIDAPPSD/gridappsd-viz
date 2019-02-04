@@ -2,6 +2,7 @@ const path = require('path');
 const ExtractTextPlugin = require('extract-text-webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const webpack = require('webpack');
+const TsConfigPathsPlugin = require('awesome-typescript-loader').TsConfigPathsPlugin;
 
 module.exports = {
   entry: {
@@ -18,24 +19,28 @@ module.exports = {
 
   resolve: {
     // Add '.ts' and '.tsx' as resolvable extensions.
+    alias: {
+      '@shared': path.resolve('./src/app/shared')
+    },
     extensions: ['.ts', '.js', '.tsx', '.jsx', '.scss', '.css', '.html', ".web.js"]
   },
 
   module: {
     rules: [{
-        test: /(\.tsx?)$/,
-        use: 'awesome-typescript-loader'
-      },
-      {
-        test: /(\.s?css)$/,
-        use: ExtractTextPlugin.extract({
-          use: ['css-loader', 'sass-loader']
-        })
-      },
-      { test: /\.(svg|png|woff|woff2|ttf|eot)$/, use: "file-loader" },
+      test: /(\.tsx?)$/,
+      use: 'awesome-typescript-loader'
+    },
+    {
+      test: /(\.s?css)$/,
+      use: ExtractTextPlugin.extract({
+        use: ['css-loader', 'sass-loader']
+      })
+    },
+    { test: /\.(svg|png|woff|woff2|ttf|eot)$/, use: "file-loader" },
     ]
   },
   plugins: [
+    new TsConfigPathsPlugin(),
     new webpack.optimize.CommonsChunkPlugin({
       names: ['app', 'vendors', 'webpack-runtime']
     }),

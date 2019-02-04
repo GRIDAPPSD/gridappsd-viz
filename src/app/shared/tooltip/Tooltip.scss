@@ -1,0 +1,91 @@
+.tooltip-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    z-index: 1000;
+    pointer-events: none;
+}
+
+.gridappsd-tooltip {
+    position: absolute;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3), 0 -0.5px 1px rgba(0, 0, 0, 0.2);
+    border-radius: 2px;
+    background-color: #555;
+    z-index: 15;
+    white-space: pre-wrap;
+    font-family: 'Roboto', sans-serif;
+    font-size: 11px;
+    opacity: 0;
+    visibility: hidden;
+    color: #fff;
+    border: 1px solid #8e8e8e;
+}
+
+.gridappsd-tooltip__arrow {
+    overflow: hidden;
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    &::after {
+        content: '';
+        background-color: #555;
+        position: relative;
+        border: 1px solid rgba(0, 0, 0, 0.1);
+        width: inherit;
+        height: inherit;
+        display: inline-block;
+        box-shadow: 0 0 1px rgba(0, 0, 0, 0.3);
+        border: 1px solid #8e8e8e;
+    }
+}
+
+.gridappsd-tooltip__content {
+    line-height: 1.5em;
+    padding: 10px;
+}
+
+.gridappsd-tooltip.top {
+    .gridappsd-tooltip__arrow {
+        transform: translateX(-50%);
+        top: 100%;
+        left: 50%;
+        &::after {
+            transform: translateY(-18px) rotate(45deg);
+        }
+    }
+}
+
+.gridappsd-tooltip.right {
+    .gridappsd-tooltip__arrow {
+        transform: translateY(-50%) translateX(-20px);
+        top: 50%;
+        left: 0;
+        &::after {
+            transform: translateX(65%) rotate(45deg);
+        }
+    }
+}
+
+.gridappsd-tooltip.bottom {
+    .gridappsd-tooltip__arrow {
+        transform: translateX(-50%);
+        top: -20px;
+        left: 50%;
+        &::after {
+            transform: translateY(16px) rotate(45deg);
+        }
+    }
+}
+
+.gridappsd-tooltip.left {
+    .gridappsd-tooltip__arrow {
+        transform: translateY(-51%);
+        top: 50%;
+        left: 100%;
+        &::after {
+            transform: translateX(-85%) rotate(45deg);
+        }
+    }
+}

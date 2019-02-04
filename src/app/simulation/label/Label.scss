@@ -1,0 +1,29 @@
+.label-container {
+    position: fixed;
+    pointer-events: none;
+    height: 100vh;
+    width: 100vw;
+    max-width: 100vw;
+    z-index: 0;
+    overflow: hidden;
+    left: 0;
+    top: 0;
+    .gridappsd-tooltip.bottom {
+        transform: translateY(-8px);
+        font-size: 0.5em;
+    }
+    .gridappsd-tooltip.bottom .gridappsd-tooltip__content {
+        padding: 2px;
+    }
+    .gridappsd-tooltip.top {
+        transform: translateY(8px);
+    }
+    td {
+        padding: 0 5px;
+    }
+}
+
+.label__heading {
+    font-weight: bold;
+    text-align: center;
+}

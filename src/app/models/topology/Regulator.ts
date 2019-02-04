@@ -8,4 +8,5 @@ export interface Regulator {
   y1: number;
   x2: number;
   y2: number;
+  mRID: string;
 }

@@ -4,7 +4,7 @@ import { TopologyModel } from '../topology/TopologyModel';
 
 export class GetTopologyModelRequest implements MessageRequest {
   private _requestBody: GetTopologyModelRequestBody = null;
-  
+
   constructor() {
     this._requestBody = {
       configurationType: RequestConfigurationType.GRID_LAB_D_SYMBOLS,
@@ -13,15 +13,15 @@ export class GetTopologyModelRequest implements MessageRequest {
       }
     };
   }
-  
+
   get url(): string {
     return 'goss.gridappsd.process.request.config';
   }
 
   get replyTo(): string {
-    return this.url;
+    return `topology-model`;
   }
-  
+
   get requestBody(): GetTopologyModelRequestBody {
     return this._requestBody;
   }

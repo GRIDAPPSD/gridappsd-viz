@@ -1,0 +1,22 @@
+.navigation__app-title {
+    padding: 15px 15px;
+    font-size: 18px;
+}
+
+.drawer-item a {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    color: #000;
+    &:hover {
+        text-decoration: none;
+        color: #000;
+    }
+}
+
+.icon-button.websocket-connection-active {
+    margin-left: auto;
+    &::before {
+        color: #09d855;
+    }
+}

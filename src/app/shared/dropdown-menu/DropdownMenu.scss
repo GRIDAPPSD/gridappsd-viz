@@ -1,0 +1,101 @@
+.app-dropdown-menu {
+    position: relative;
+}
+
+.app-dropdown-menu-toggler {
+    box-shadow: 1px 1px 10px -1px rgba(0, 0, 0, 0.2), 1px 2px 3px rgba(0, 0, 0, 0.1);
+    display: flex;
+    padding: 8px 5px 8px 10px;
+    min-width: 150px;
+    max-width: 150px;
+    align-items: center;
+    border-radius: 2px;
+    cursor: pointer;
+    color: #555;
+    text-decoration: none;
+    position: relative;
+    outline: none;
+    text-align: left;
+    .text {
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        overflow: hidden;
+        width: 90%;
+        max-width: 90%;
+        position: relative;
+    }
+    i {
+        width: 13%;
+        position: relative;
+        z-index: 1;
+    }
+    i:before {
+        transition: transform 0.2s linear;
+        transform-origin: 50% 50%;
+        transform: rotate(0deg);
+        content: '\f078';
+    }
+    &:hover,
+    &:focus,
+    &:link {
+        text-decoration: none;
+        color: #555;
+        outline: none;
+    }
+    &:focus {
+        box-shadow: 0px 0px 1px 2px #999 inset;
+        i:before {
+            transform: rotate(180deg);
+        }
+    }
+}
+
+.app-dropdown-menu-item-list {
+    margin: 0;
+    padding: 5px 0;
+    position: absolute;
+    left: 0;
+    top: -10px;
+    box-shadow: 2px 5px 10px -10px rgba(0, 0, 0, 0.2), 2px 5px 20px rgba(0, 0, 0, 0.25);
+    border-radius: 3px;
+    background-color: #fff;
+    z-index: 300;
+    overflow-x: hidden;
+    overflow-y: auto;
+    min-width: 200px;
+    max-height: 500px;
+    &:empty {
+        box-shadow: none;
+    }
+}
+
+.app-dropdown-menu-item {
+    backface-visibility: hidden;
+    color: #000;
+    list-style-type: none;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-weight: normal;
+    overflow: hidden;
+    padding: 12px 10px;
+    cursor: pointer;
+    &:hover {
+        background-color: #84811114;
+    }
+    .text {
+        font-weight: normal;
+    }
+}
+
+.app-dropdown-menu-item.selected {
+    background-color: rgba(0, 0, 0, 0.08);
+}
+
+.app-dropdown-menu__click-capture {
+    position: fixed;
+    top: -50vw;
+    left: -50vh;
+    width: 1000vw;
+    height: 1000vh;
+    z-index: 100;
+}
