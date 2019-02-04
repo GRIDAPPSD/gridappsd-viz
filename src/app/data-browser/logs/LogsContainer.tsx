@@ -3,11 +3,12 @@ import { StompSubscription } from '@stomp/stompjs';
 import { Subscription } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
 
-import { Logs } from './Logs';
 import { StompClientService } from '../../services/StompClientService';
 import { QueryLogsRequestBody } from './models/QueryLogsRequestBody';
 import { SimulationId } from './models/SimulationId';
-
+import { QueryLogsForm } from './QueryLogsForm';
+import { QueryLogsResultTable } from './QueryLogsResultTable';
+import { Response } from '../Response';
 
 interface Props {
 }
@@ -46,12 +47,24 @@ export class LogsContainer extends React.Component<Props, State> {
 
   render() {
     return (
-      <Logs
-        result={this.state.result}
-        simulationIds={this.state.simulationIds}
-        sources={this.state.sources}
-        onSimulationIdSelected={this._getSource}
-        onSubmit={this._getLogs} />
+      <div style={{ boxShadow: '0 0 2px #888', height: '100%', position: 'relative' }}>
+        <QueryLogsForm
+          simulationIds={this.state.simulationIds}
+          sources={this.state.sources}
+          onSimulationIdSelected={this._getSource}
+          onSubmit={this._getLogs} />
+        <Response styles={{ boxShadow: 'initial', borderRadius: '0', height: '60vh', maxHeight: '60vh', overflow: 'initial' }}>
+          {
+            this.state.result.length > 0
+              ?
+              <QueryLogsResultTable rows={this.state.result} />
+              :
+              <div style={{ textAlign: 'center', transform: 'translateY(200px)', fontSize: '2em' }}>
+                No result
+              </div>
+          }
+        </Response>
+      </div>
     );
   }
 
@@ -72,7 +85,7 @@ export class LogsContainer extends React.Component<Props, State> {
   private _observeQueryLogsResult() {
     return this._stompClient.subscribe(
       'query-logs.result',
-      message => this.setState({ result: JSON.parse(message.body).data })
+      message => this.setState({ result: JSON.parse(message.body).data || [] })
     );
   }
 

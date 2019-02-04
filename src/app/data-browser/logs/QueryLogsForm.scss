@@ -1,0 +1,13 @@
+.query-logs-form {
+    display: flex;
+    border-bottom: 1px solid #ccc;
+}
+
+.query-logs-form__left {
+    border-right: 2px solid #ddd;
+    width: 50%;
+}
+
+.query-logs-form__submit {
+    transform: translate(10px, 3px);
+}

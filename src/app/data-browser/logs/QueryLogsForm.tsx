@@ -1,32 +1,26 @@
 import * as React from 'react';
-import ReactTable from 'react-table';
 
-import { QueryLogsRequestBody } from './models/QueryLogsRequestBody';
-import { SimulationId } from './models/SimulationId';
+import { RequestEditor } from '../RequestEditor';
 import { FormControl, SelectFormControl } from '@shared/form';
 import { MenuItem } from '@shared/dropdown-menu';
-import { Tooltip } from '@shared/tooltip';
 import { BasicButton } from '@shared/buttons';
-import { RequestEditor } from '../RequestEditor';
-import { Response } from '../Response';
+import { QueryLogsRequestBody } from './models/QueryLogsRequestBody';
+import { SimulationId } from './models/SimulationId';
 
-import './Logs.scss';
-import 'react-table/react-table.css';
+import './QueryLogsForm.scss';
 
 interface Props {
   onSubmit: (body: QueryLogsRequestBody) => void;
   onSimulationIdSelected: (simulationId: SimulationId) => void;
   simulationIds: SimulationId[];
   sources: string[];
-  result: any[];
 }
 
 interface State {
-  show: boolean;
   selectedSimulationId: SimulationId;
 }
 
-export class Logs extends React.Component<Props, State> {
+export class QueryLogsForm extends React.Component<Props, State> {
 
   private _formData: QueryLogsRequestBody = {
     startTime: '',
@@ -40,7 +34,6 @@ export class Logs extends React.Component<Props, State> {
   constructor(props: any) {
     super(props);
     this.state = {
-      show: true,
       selectedSimulationId: null
     };
 
@@ -49,10 +42,10 @@ export class Logs extends React.Component<Props, State> {
 
   render() {
     return (
-      <div className='query-logs'>
+      <>
         <RequestEditor styles={{ overflow: 'initial', borderRadius: 'initial', boxShadow: 'initial', height: 'initial' }}>
-          <form className='query-logs__request-configuration'>
-            <div className='query-logs__request-configuration__left'>
+          <form className='query-logs-form'>
+            <div className='query-logs-form__left'>
               <FormControl
                 label='Start time'
                 name='startTime'
@@ -69,7 +62,7 @@ export class Logs extends React.Component<Props, State> {
                 value='system'
                 onChange={value => this._formData.username = value} />
             </div>
-            <div className='query-logs__request-configuration__right'>
+            <div className='query-logs-form__right'>
               <SelectFormControl
                 label='Source'
                 menuItems={this.props.sources.map(source => new MenuItem(source, source))}
@@ -93,56 +86,15 @@ export class Logs extends React.Component<Props, State> {
           </form>
         </RequestEditor>
         <BasicButton
+          className='query-logs-form__submit'
           label='Submit'
           type='positive'
           onClick={event => {
             event.stopPropagation();
             this.props.onSubmit(this._formData);
           }} />
-        <Response styles={{ boxShadow: 'initial', borderRadius: '0', height: '60vh', maxHeight: '60vh', overflow: 'initial' }}>
-          <ReactTable
-            filterable={true}
-            defaultFilterMethod={(filter, row) => {
-              return row[filter.id] !== undefined ? String(row[filter.id]).includes(filter.value.toLowerCase()) : true
-            }}
-            defaultPageSize={5}
-            data={this.props.result}
-            columns={
-              Object.keys(this.props.result[0] || {})
-                .map(columnName => ({
-                  accessor: columnName,
-                  Header: columnName,
-                  Cell: row => (
-                    row.value.length > 15 ?
-                      <Tooltip position='bottom'
-                        content={row.value}>
-                        <span style={{
-                          display: 'inline-block',
-                          width: '100%',
-                          position: 'relative',
-                          top: '50%',
-                          transform: 'translateY(-50%)'
-                        }}>
-                          {row.value}
-                        </span>
-                      </Tooltip>
-                      :
-                      <span style={{
-                        display: 'inline-block',
-                        width: '100%',
-                        position: 'relative',
-                        top: '50%',
-                        transform: 'translateY(-50%)',
-                        textAlign: 'center'
-                      }}>
-                        {row.value}
-                      </span>
-                  )
-                }))
-            }
-            className='query-logs__result' />
-        </Response>
-      </div>
+
+      </>
     );
   }
 
@@ -153,4 +105,5 @@ export class Logs extends React.Component<Props, State> {
     this._formData.processId = simulationId.process_id;
     this._formData.startTime = simulationId.timestamp;
   }
+
 }
