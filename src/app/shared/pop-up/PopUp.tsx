@@ -5,6 +5,7 @@ import './PopUp.scss';
 
 interface Props {
   in: boolean;
+  afterClosed?: (data: any) => void;
 }
 
 interface State {
@@ -21,8 +22,13 @@ export class PopUp extends React.Component<Props, State> {
 
   componentDidMount() {
     this._element = ReactDOM.findDOMNode(this) as HTMLElement;
+    this._element.addEventListener('transitionend', this.props.afterClosed, false);
     this._element.classList.add('pop-up', 'pop-up-out');
     this.componentWillReceiveProps(this.props);
+  }
+
+  componentWillUnmount() {
+    this._element.removeEventListener('transitionend', this.props.afterClosed, false);
   }
 
   componentWillReceiveProps(newProps: Props) {

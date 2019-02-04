@@ -10,6 +10,8 @@ import { TransformWatcherService } from '../services/TransformWatcherService';
 import { Switch } from '../models/topology/Switch';
 import { Tooltip } from '@shared/tooltip';
 import { Wait } from '@shared/wait';
+import { OverlayService } from '@shared/overlay';
+import { SwitchMenu } from './menus/switch-menu/SwitchMenu';
 
 import './TopologyRenderer.scss';
 
@@ -26,6 +28,8 @@ interface State {
 export class TopologyRenderer extends React.Component<Props, State> {
 
   private readonly _transformWatcherService = TransformWatcherService.getInstance();
+  private readonly _overlay = OverlayService.getInstance();
+
   private _canvas: Selection<SVGSVGElement, any, any, any> = null;
   private _container: Selection<SVGGElement, any, any, any> = null;
   private _svg: SVGSVGElement = null;
@@ -99,27 +103,48 @@ export class TopologyRenderer extends React.Component<Props, State> {
 
   showMenuOnComponentClicked(event) {
     const target = select(event.target);
-    if (target.classed('switch')) {
-      const rotateTransform = target.node().style.transform.split(' ').pop();
-      const swjtch = target.datum() as Switch;
+    if (target.classed('switch'))
+      this._onSwitchClicked(target);
+  }
+
+  private _onSwitchClicked(clickedElement: Selection<SVGElement, any, SVGElement, any>) {
+    const clickedElementRect = clickedElement.node().getBoundingClientRect();
+    const swjtch = clickedElement.datum().data as Switch;
+    this._overlay.show(
+      <SwitchMenu
+        left={clickedElementRect.left}
+        top={clickedElementRect.top}
+        open={swjtch.open}
+        onCancel={() => this._overlay.hide(false)}
+        onConfirm={open => {
+          this._overlay.hide(false);
+          this._toggleSwitch(open, swjtch, clickedElement);
+        }}
+      />,
+      false
+    );
+  }
+
+  private _toggleSwitch(open: boolean, swjtch: Switch, clickedElement: Selection<SVGElement, Node, SVGElement, any>) {
+    if (swjtch.open !== open) {
+      const rotateTransform = clickedElement.node().style.transform.split(' ').pop();
       if (!rotateTransform.includes('rotate'))
         throw new Error('Transform should include rotate()');
-      if (swjtch.open) {
-        target.attr('href', '../images/switch-closed.svg')
-          .attr('height', (node: Node) => this._symbolDimensions[node.type].height)
-          .style('transform-origin', (node: Node) => `${node.screenX + this._symbolDimensions[node.type].width / 2}px ${node.screenY + this._symbolDimensions[node.type].height / 2}px`)
-          .style('transform', (node: Node) => `translate(${-this._symbolDimensions[node.type].width / 2}px, ${-this._symbolDimensions[node.type].height / 2}px) ${rotateTransform}`);
+      if (open) {
+        clickedElement.attr('href', '../images/switch-open.svg')
+          .attr('height', 22 * 4)
+          .style('transform-origin', node => `${node.screenX + this._symbolDimensions[node.type].width / 2}px ${node.screenY + 22}px`)
+          .style('transform', node => `translate(${-this._symbolDimensions[node.type].width / 2}px, -55px) ${rotateTransform}`);
       }
       else {
-        target.attr('href', '../images/switch-open.svg')
-          .attr('height', 22 * 4)
-          .style('transform-origin', (node: Node) => `${node.screenX + this._symbolDimensions[node.type].width / 2}px ${node.screenY + 22}px`)
-          .style('transform', (node: Node) => `translate(${-this._symbolDimensions[node.type].width / 2}px, -55px) ${rotateTransform}`);
+        clickedElement.attr('href', '../images/switch-closed.svg')
+          .attr('height', node => this._symbolDimensions[node.type].height)
+          .style('transform-origin', node => `${node.screenX + this._symbolDimensions[node.type].width / 2}px ${node.screenY + this._symbolDimensions[node.type].height / 2}px`)
+          .style('transform', node => `translate(${-this._symbolDimensions[node.type].width / 2}px, ${-this._symbolDimensions[node.type].height / 2}px) ${rotateTransform}`);
       }
-      swjtch.open = !swjtch.open;
+      swjtch.open = open;
       this.props.onToggleSwitch(swjtch);
     }
-
   }
 
   showTooltip(event) {
@@ -148,7 +173,6 @@ export class TopologyRenderer extends React.Component<Props, State> {
       this._tooltip.hide();
       this._tooltip = null;
     }
-
   }
 
   private _calculateCoordinatesForEdgeEndpoints(edges: Edge[], xOffset: number, yOffset: number): { [fromNode: string]: Edge } {
