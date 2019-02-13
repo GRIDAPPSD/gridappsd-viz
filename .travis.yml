@@ -12,8 +12,4 @@ before_install:
   - './.travis/main.sh'
   
 script:
-  - './.travis/build-docker.sh -b'
-
-# # Final script that starts the testing.
-# script: npm test
-
+  - './.travis/build-docker.sh'
