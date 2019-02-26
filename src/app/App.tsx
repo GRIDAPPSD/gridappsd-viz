@@ -189,7 +189,7 @@ export class App extends React.Component<Props, State> {
         );
         this._simulationOutputService.setModelDictionaryMeasures(modelDictionaryMeasurements);
         this._modelDictionaryMeasurementsPerSimulationName[simulationName] = modelDictionaryMeasurements;
-        for (const swjtch of response.payload.data.feeders[0].capacitors)
+        for (const swjtch of response.payload.data.feeders[0].switches)
           this._mRIDs[swjtch.name] = swjtch.mRID;
         for (const capacitor of response.payload.data.feeders[0].capacitors)
           this._mRIDs[capacitor.name] = capacitor.mRID;
