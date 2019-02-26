@@ -123,24 +123,27 @@ export class TopologyRendererContainer extends React.Component<Props, State> {
 
   onToggleCapacitor(capacitor: Capacitor) {
     const payload = {
-      simulation_id: this._simulationQueue.getActiveSimulation().id,
-      message: {
-        timestamp: Math.floor((new Date).getTime() / 1000.0),
-        difference_mrid: this._activeSimulationConfig.power_system_config.Line_name,
-        reverse_differences: [
-          {
-            object: this.props.mRIDs[capacitor.name],
-            attribute: 'ShuntCompensator.sections',
-            value: capacitor.open ? '1' : '0'
-          }
-        ],
-        forward_differences: [
-          {
-            object: this.props.mRIDs[capacitor.name],
-            attribute: 'ShuntCompensator.sections',
-            value: capacitor.open ? '0' : '1'
-          }
-        ]
+      command: 'update',
+      input: {
+        simulation_id: this._simulationQueue.getActiveSimulation().id,
+        message: {
+          timestamp: Math.floor((new Date).getTime() / 1000.0),
+          difference_mrid: this._activeSimulationConfig.power_system_config.Line_name,
+          reverse_differences: [
+            {
+              object: this.props.mRIDs[capacitor.name],
+              attribute: 'ShuntCompensator.sections',
+              value: capacitor.open ? '1' : '0'
+            }
+          ],
+          forward_differences: [
+            {
+              object: this.props.mRIDs[capacitor.name],
+              attribute: 'ShuntCompensator.sections',
+              value: capacitor.open ? '0' : '1'
+            }
+          ]
+        }
       }
     };
     this._stompClientService.send(
