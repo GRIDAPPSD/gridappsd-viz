@@ -1,6 +1,6 @@
 import { MessageRequest } from './MessageRequest';
 import { RequestConfigurationType } from './RequestConfigurationType';
-import { TopologyModel } from '../topology/TopologyModel';
+import { TopologyModel } from '@shared/topology';
 
 export class GetTopologyModelRequest implements MessageRequest {
   private _requestBody: GetTopologyModelRequestBody = null;

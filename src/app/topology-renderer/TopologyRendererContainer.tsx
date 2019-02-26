@@ -5,14 +5,13 @@ import { filter } from 'rxjs/operators';
 
 import { TopologyRenderer } from './TopologyRenderer';
 import { MessageService } from '../services/MessageService';
-import { TopologyModel } from '../models/topology/TopologyModel';
 import { RequestConfigurationType } from '../models/message-requests/RequestConfigurationType';
 import { GetTopologyModelRequestPayload } from '../models/message-requests/GetTopologyModelRequest';
 import { SimulationQueue } from '../services/SimulationQueue';
-import { Node } from './models/Node';
-import { Edge } from './models/Edge';
-import { Switch } from '../models/topology/Switch';
+import { Node, Edge } from '@shared/topology';
 import { StompClientService } from '../services/StompClientService';
+import { Switch, TopologyModel, Capacitor } from '@shared/topology';
+import { ToggleCapacitorRequest } from './models/ToggleCapacitorRequest';
 
 interface Props {
   mRIDs: { [componentType: string]: string };
@@ -30,6 +29,7 @@ export class TopologyRendererContainer extends React.Component<Props, State> {
   private readonly _stompClientService = StompClientService.getInstance();
   private readonly _messageService = MessageService.getInstance();
   private readonly _simulationQueue = SimulationQueue.getInstance();
+  private readonly _toggleCapacitorRequest = new ToggleCapacitorRequest(null);
   private _activeSimulationConfig = this._simulationQueue.getActiveSimulation().config;
   private _activeSimulationStream: Subscription;
   private _stompClientStatusStream: Subscription;
@@ -42,7 +42,7 @@ export class TopologyRendererContainer extends React.Component<Props, State> {
       isFetching: true
     };
     this._onToggleSwitch = this._onToggleSwitch.bind(this);
-
+    this.onToggleCapacitor = this.onToggleCapacitor.bind(this);
   }
 
   componentDidMount() {
@@ -66,7 +66,8 @@ export class TopologyRendererContainer extends React.Component<Props, State> {
         topology={this.state.topology}
         showWait={this.state.isFetching}
         topologyName={this._activeSimulationConfig.simulation_config.simulation_name}
-        onToggleSwitch={this._onToggleSwitch} />
+        onToggleSwitch={this._onToggleSwitch}
+        onToggleCapacitor={this.onToggleCapacitor} />
     );
   }
 
@@ -103,20 +104,50 @@ export class TopologyRendererContainer extends React.Component<Props, State> {
           reverse_differences: [
             {
               object: this.props.mRIDs[swjtch.name],
-              value: swjtch.open ? '0' : '1'
+              value: swjtch.open ? '0' : '1',
+              attribute: 'Switch.open'
             }
           ],
           forward_differences: [
             {
               object: this.props.mRIDs[swjtch.name],
-              value: swjtch.open ? '1' : '0'
+              value: swjtch.open ? '1' : '0',
+              attribute: 'Switch.open'
             }
           ]
         }
       }
     };
-    console.log(payload);
     this._messageService.toggleSwitchState(payload);
+  }
+
+  onToggleCapacitor(capacitor: Capacitor) {
+    const payload = {
+      simulation_id: this._simulationQueue.getActiveSimulation().id,
+      message: {
+        timestamp: Math.floor((new Date).getTime() / 1000.0),
+        difference_mrid: this._activeSimulationConfig.power_system_config.Line_name,
+        reverse_differences: [
+          {
+            object: this.props.mRIDs[capacitor.name],
+            attribute: 'ShuntCompensator.sections',
+            value: capacitor.open ? '1' : '0'
+          }
+        ],
+        forward_differences: [
+          {
+            object: this.props.mRIDs[capacitor.name],
+            attribute: 'ShuntCompensator.sections',
+            value: capacitor.open ? '0' : '1'
+          }
+        ]
+      }
+    };
+    this._stompClientService.send(
+      this._toggleCapacitorRequest.url,
+      { 'reply-to': this._toggleCapacitorRequest.replyTo },
+      JSON.stringify(payload)
+    );
   }
 
   private _processModelForRendering(payload: GetTopologyModelRequestPayload) {
@@ -178,27 +209,27 @@ export class TopologyRendererContainer extends React.Component<Props, State> {
       switch (groupName) {
         case 'swing_nodes':
           nodes.push(this._createNewNode({
+            ...node,
             name: node.name,
             type: 'swing_node',
-            data: node,
             x: this._truncate(node.x1),
             y: this._truncate(node.y1)
           }));
           break;
         case 'batteries':
           nodes.push(this._createNewNode({
+            ...node,
             name: node.name,
-            type: 'battery',
-            data: node
+            type: 'battery'
           }));
           break;
         case 'switches':
           if ((node.x1 !== 0 && node.y1 !== 0) || (node.x2 !== 0 && node.y2 !== 0)) {
-            node.open = node.open === 'open';
             nodes.push(this._createNewNode({
+              ...node,
               name: node.name,
               type: 'switch',
-              data: node,
+              open: node.open === 'open',
               x: this._truncate(node.x1 !== 0 ? node.x1 : node.x2),
               y: this._truncate(node.y1 !== 0 ? node.y1 : node.y2),
             }));
@@ -206,17 +237,17 @@ export class TopologyRendererContainer extends React.Component<Props, State> {
           break;
         case 'solarpanels':
           nodes.push(this._createNewNode({
+            ...node,
             name: node.name,
-            type: 'solarpanel',
-            data: node
+            type: 'solarpanel'
           }));
           break;
         case 'transformers':
           if ((node.x1 !== 0 && node.y1 !== 0) || (node.x2 !== 0 && node.y2 !== 0)) {
             nodes.push(this._createNewNode({
+              ...node,
               name: node.name,
               type: 'transformer',
-              data: node,
               x: this._truncate(node.x1 !== 0 ? node.x1 : node.x2),
               y: this._truncate(node.y1 !== 0 ? node.y1 : node.y2)
             }));
@@ -224,9 +255,10 @@ export class TopologyRendererContainer extends React.Component<Props, State> {
           break;
         case 'capacitors':
           nodes.push(this._createNewNode({
+            ...node,
             name: node.name,
             type: 'capacitor',
-            data: node,
+            open: node.open === 'open',
             x: this._truncate(node.x1),
             y: this._truncate(node.y1)
           }));
@@ -241,18 +273,18 @@ export class TopologyRendererContainer extends React.Component<Props, State> {
             toNode.y = this._truncate(node.y2);
             nodes.push(fromNode, toNode);
             edges.push({
+              ...node,
               name: node.name,
               from: fromNode,
               to: toNode,
-              data: node
             });
           }
           break;
         case 'regulators':
           nodes.push(this._createNewNode({
+            ...node,
             name: node.name,
             type: 'regulator',
-            data: node,
             x: this._truncate(node.x2),
             y: this._truncate(node.y2)
           }));

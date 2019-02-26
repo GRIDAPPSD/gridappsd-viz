@@ -183,7 +183,7 @@ export class SimulationConfiguration extends React.Component<Props, State> {
             label='Submit'
             type='positive'
             onClick={event => {
-              if (this._currentConfig.power_system_config.Line_name == "") {
+              if (this._currentConfig.power_system_config.Line_name === '') {
                 console.log("No model selected");
                 this.setState({ noLineNameMessage: true });
               }

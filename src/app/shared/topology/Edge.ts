@@ -1,8 +1,8 @@
-import { Node } from './Node';
+import { Node } from '@shared/topology';
 
 export interface Edge {
   name: string;
   from: Node;
   to: Node;
-  data: any;
+  type: string;
 }

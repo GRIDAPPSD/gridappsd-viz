@@ -1,10 +1,5 @@
-import { Regulator } from '../topology/Regulator';
-import { Switch } from '../topology/Switch';
-import { SolarPanel } from '../topology/SolarPanel';
-import { Battery } from '../topology/Battery';
-import { Fuse } from '../topology/Fuse';
-import { Disconnector } from '../topology/Disconnector';
 import { ModelDictionaryMeasurement } from './ModelDictionaryMeasurement';
+import { Regulator, SolarPanel, Battery, Switch, Fuse, Disconnector, Capacitor } from '@shared/topology';
 
 export interface ModelDictionary {
   data: {
@@ -17,7 +12,7 @@ export interface ModelDictionary {
       subregionID: string;
       region: string;
       regionID: string;
-      capacitors: string;
+      capacitors: Capacitor[];
       regulators: Regulator[];
       solarpanels: SolarPanel[];
       batteries: Battery[];

@@ -4,14 +4,13 @@ import { line } from 'd3-shape';
 import { zoom, zoomIdentity } from 'd3-zoom';
 import { select, event as currentEvent, Selection } from 'd3-selection';
 
-import { Node } from './models/Node';
-import { Edge } from './models/Edge';
 import { TransformWatcherService } from '../services/TransformWatcherService';
-import { Switch } from '../models/topology/Switch';
+import { Switch, Capacitor, OverheadLine, Node, Edge } from '@shared/topology';
 import { Tooltip } from '@shared/tooltip';
 import { Wait } from '@shared/wait';
 import { OverlayService } from '@shared/overlay';
 import { SwitchMenu } from './menus/switch-menu/SwitchMenu';
+import { CapacitorMenu } from './menus/capacitor-menu/CapacitorMenu';
 
 import './TopologyRenderer.scss';
 
@@ -20,6 +19,7 @@ interface Props {
   showWait: boolean;
   topologyName: string;
   onToggleSwitch: (swjtch: Switch) => void;
+  onToggleCapacitor: (capacitor: Capacitor) => void;
 }
 
 interface State {
@@ -105,11 +105,13 @@ export class TopologyRenderer extends React.Component<Props, State> {
     const target = select(event.target);
     if (target.classed('switch'))
       this._onSwitchClicked(target);
+    else if (target.classed('capacitor'))
+      this._onCapacitorClicked(target);
   }
 
   private _onSwitchClicked(clickedElement: Selection<SVGElement, any, SVGElement, any>) {
     const clickedElementRect = clickedElement.node().getBoundingClientRect();
-    const swjtch = clickedElement.datum().data as Switch;
+    const swjtch = clickedElement.datum() as Switch;
     this._overlay.show(
       <SwitchMenu
         left={clickedElementRect.left}
@@ -144,6 +146,31 @@ export class TopologyRenderer extends React.Component<Props, State> {
       }
       swjtch.open = open;
       this.props.onToggleSwitch(swjtch);
+    }
+  }
+
+  private _onCapacitorClicked(clickedElement: Selection<SVGElement, any, SVGElement, any>) {
+    const clickedElementRect = clickedElement.node().getBoundingClientRect();
+    const capacitor = clickedElement.datum() as Capacitor;
+    this._overlay.show(
+      <CapacitorMenu
+        left={clickedElementRect.left}
+        top={clickedElementRect.top}
+        open={capacitor.open}
+        onCancel={() => this._overlay.hide(false)}
+        onConfirm={open => {
+          this._overlay.hide(false);
+          this._toggleCapacitor(open, capacitor);
+        }}
+      />,
+      false
+    );
+  }
+
+  private _toggleCapacitor(open: boolean, capacitor: Capacitor) {
+    if (capacitor.open !== open) {
+      capacitor.open = open;
+      this.props.onToggleCapacitor(capacitor);
     }
   }
 
@@ -287,7 +314,7 @@ export class TopologyRenderer extends React.Component<Props, State> {
       .datum(edge => [{ edge, node: edge.from }, { edge, node: edge.to }])
       .attr('class', (d: Array<{ edge: Edge; node: Node }>) => 'edge ' + d[0].edge.name)
       .attr('stroke', (d: Array<{ edge: Edge; node: Node }>) => {
-        switch (d[0].edge.data.phases) {
+        switch ((d[0].edge as OverheadLine).phases) {
           case 'A':
             return 'blue';
           case 'B':
@@ -354,10 +381,10 @@ export class TopologyRenderer extends React.Component<Props, State> {
         .attr('x', node => node.screenX)
         .attr('y', node => node.screenY)
         .style('transform-origin', node => `${node.screenX + (this._symbolDimensions[node.type] ? this._symbolDimensions[node.type].width : this._symbolSize) / 2}px ${node.screenY + (this._symbolDimensions[node.type] ? this._symbolDimensions[node.type].height : this._symbolSize) / 2}px`)
-        .style('transform', node => {
-          if (!node.data || !node.data.from || !node.data.to)
+        .style('transform', (node: any) => {
+          if (!node.from || !node.to)
             return 'rotate(0) translate(0, 0)';
-          const edge = edgesKeyedByNodeNames[node.data.from] || edgesKeyedByNodeNames[node.data.to];
+          const edge = edgesKeyedByNodeNames[node.from] || edgesKeyedByNodeNames[node.to];
           if (!edge)
             return 'rotate(0) translate(0, 0)';
           return `translate(${-(this._symbolDimensions[node.type] ? this._symbolDimensions[node.type].width : this._symbolSize) / 2}px, ${-(this._symbolDimensions[node.type] ? this._symbolDimensions[node.type].height : this._symbolSize) / 2}px) rotate(${this._calculateAngleBetweenEdgeAndXAxis(edge)}deg)`;

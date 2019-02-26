@@ -1,8 +1,6 @@
-export interface OverheadLine {
-  name: string;
-  from: string;
-  to: string;
-  type: string;
+import { Edge } from './Edge';
+
+export interface OverheadLine extends Edge {
   phases: string;
   configuration: string;
   length: number;

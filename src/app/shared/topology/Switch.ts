@@ -1,8 +1,8 @@
-export interface Switch {
-  type: string;
+import { Node } from './Node';
+
+export interface Switch extends Node {
   from: string;
   to: string;
-  name: string;
   open: boolean;
   phases: string;
   x1: number;
