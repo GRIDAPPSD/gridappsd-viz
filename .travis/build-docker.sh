@@ -1,6 +1,6 @@
 #!/bin/bash
 
-TAG="${TRAVIS_BRANCH}"
+TAG="${TRAVIS_BRANCH//\//_}"
 
 ORG=`echo $DOCKER_PROJECT | tr '[:upper:]' '[:lower:]'`
 ORG="${ORG:+${ORG}/}"
@@ -20,11 +20,11 @@ if [ $status -ne 0 ]; then
 fi
 
 # To have `DOCKER_USERNAME` and `DOCKER_PASSWORD`
-# filled you need to either use `travis`' cli 
+# filled you need to either use `travis`' cli
 # (https://github.com/travis-ci/travis.rb)
 # and then `travis set ..` or go to the travis
-# page of your repository and then change the 
-# environment in the settings pannel.  
+# page of your repository and then change the
+# environment in the settings pannel.
 
 if [ -n "$DOCKER_USERNAME" -a -n "$DOCKER_PASSWORD" ]; then
 
@@ -37,9 +37,9 @@ if [ -n "$DOCKER_USERNAME" -a -n "$DOCKER_PASSWORD" ]; then
     echo "Error: status $status"
     exit 1
   fi
-  
+
   if [ -n "$TAG" -a -n "$ORG" ]; then
-    # Get the built container name, for builds that cross the hour boundary
+    # Get the built container name
     CONTAINER=`docker images --format "{{.Repository}}:{{.Tag}}" ${IMAGE}`
 
     echo "docker push ${CONTAINER}"
