@@ -1,11 +1,10 @@
 import { MessageRequest } from '@shared/MessageRequest';
 
-export class ToggleCapacitorRequest implements MessageRequest {
+export class ToggleSwitchStateRequest implements MessageRequest {
   readonly url = '/topic/goss.gridappsd.fncs.input';
-  readonly replyTo = '/topic/goss.gridappsd.fncs.input.capacitor';
+  readonly replyTo = '/topic/goss.gridappsd.fncs.input.switch';
 
   constructor(readonly requestBody: any) {
 
   }
-
 }

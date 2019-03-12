@@ -4,7 +4,7 @@ import { line } from 'd3-shape';
 import { zoom, zoomIdentity } from 'd3-zoom';
 import { select, event as currentEvent, Selection } from 'd3-selection';
 
-import { TransformWatcherService } from '../services/TransformWatcherService';
+import { MapTransformWatcherService } from '@shared/MapTransformWatcherService';
 import { Switch, Capacitor, OverheadLine, Node, Edge } from '@shared/topology';
 import { Tooltip } from '@shared/tooltip';
 import { Wait } from '@shared/wait';
@@ -27,7 +27,7 @@ interface State {
 
 export class TopologyRenderer extends React.Component<Props, State> {
 
-  private readonly _transformWatcherService = TransformWatcherService.getInstance();
+  private readonly _transformWatcherService = MapTransformWatcherService.getInstance();
   private readonly _overlay = OverlayService.getInstance();
 
   private _canvas: Selection<SVGSVGElement, any, any, any> = null;

@@ -1,5 +1,4 @@
-import { MessageRequest } from './MessageRequest';
-import { RequestConfigurationType } from './RequestConfigurationType';
+import { MessageRequest, RequestConfigurationType } from '@shared/MessageRequest';
 
 export interface GetModelDictionaryRequestBody {
   configurationType: string;
@@ -9,8 +8,10 @@ export interface GetModelDictionaryRequestBody {
 }
 
 export class GetModelDictionaryRequest implements MessageRequest {
+  readonly url = 'goss.gridappsd.process.request.config';
+  readonly replyTo = 'model_dictionary';
+
   private _requestBody: GetModelDictionaryRequestBody = null;
-  private _simulationName = ''
 
   constructor() {
     this._requestBody = {
@@ -19,13 +20,6 @@ export class GetModelDictionaryRequest implements MessageRequest {
         model_id: '_4F76A5F9-271D-9EB8-5E31-AA362D86F2C3'
       }
     };
-  }
-  get url(): string {
-    return 'goss.gridappsd.process.request.config';
-  }
-
-  get replyTo() {
-    return 'model_dictionary';
   }
 
   get requestBody(): GetModelDictionaryRequestBody {
@@ -36,11 +30,4 @@ export class GetModelDictionaryRequest implements MessageRequest {
     this._requestBody = value;
   }
 
-  get simulationName() {
-    return this._simulationName;
-  }
-
-  set simulationName(value: string) {
-    this._simulationName = value;
-  }
 }

@@ -2,10 +2,10 @@ import * as React from 'react';
 import JSONViewer from 'react-json-viewer';
 import { Panel, Button } from 'react-bootstrap';
 
-import { MessageService } from '../services/MessageService';
-import { GetAvailableApplicationsAndServicesPayload } from '../models/message-requests/GetAvailableApplicationsAndServicesRequest';
+import { GetAvailableApplicationsAndServices } from './models/GetAvailableApplicationsAndServicesRequest';
 
 import './AvailableApplicationsAndServices.scss';
+import { StompClientService } from '@shared/StompClientService';
 
 export interface ApplicationsProps { }
 
@@ -19,7 +19,7 @@ interface State {
 }
 export class AvailableApplicationsAndServices extends React.Component<ApplicationsProps, State> {
 
-  private _messageService = MessageService.getInstance();
+  private _stompClientService = StompClientService.getInstance();
 
   constructor(props: any) {
     super(props);
@@ -76,19 +76,30 @@ export class AvailableApplicationsAndServices extends React.Component<Applicatio
     return null;
   }
   private _fetchApplicationsAndServices() {
-    this._messageService.onApplicationsAndServicesReceived((payload: GetAvailableApplicationsAndServicesPayload) => {
-      const appData = JSON.stringify(payload.applications);
-      const serviceData = payload.services;
-      const appInstanceData = payload.appInstances;
-      const serviceInstanceData = payload.serviceInstances;
-
-      this.setState({ appData, serviceData, appInstanceData, serviceInstanceData });
-      sessionStorage.setItem('appData', JSON.stringify(appData));
-      sessionStorage.setItem('appData', JSON.stringify(serviceData));
-      sessionStorage.setItem('appData', JSON.stringify(appInstanceData));
-      sessionStorage.setItem('appData', JSON.stringify(serviceInstanceData));
-    })
-      .then(sub => sub.unsubscribe());
-    this._messageService.fetchAvailableApplicationsAndServices();
+    const getApplicationsAndServices = new GetAvailableApplicationsAndServices();
+    this._subscribeForApplicationAndServicesResponse(getApplicationsAndServices.replyTo);
+    this._stompClientService.send(
+      getApplicationsAndServices.url,
+      { 'reply-to': getApplicationsAndServices.replyTo },
+      JSON.stringify(getApplicationsAndServices.requestBody)
+    );
   }
+
+  private _subscribeForApplicationAndServicesResponse(destination: string) {
+    this._stompClientService.readOnceFrom(destination)
+      .subscribe(data => {
+        const payload = JSON.parse(data);
+        const appData = JSON.stringify(payload.applications);
+        const serviceData = payload.services;
+        const appInstanceData = payload.appInstances;
+        const serviceInstanceData = payload.serviceInstances;
+
+        this.setState({ appData, serviceData, appInstanceData, serviceInstanceData });
+        sessionStorage.setItem('appData', JSON.stringify(appData));
+        sessionStorage.setItem('serviceData', JSON.stringify(serviceData));
+        sessionStorage.setItem('appInstanceData', JSON.stringify(appInstanceData));
+        sessionStorage.setItem('serviceInstanceData', JSON.stringify(serviceInstanceData));
+      });
+  }
+
 }

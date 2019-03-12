@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { Subscription } from 'rxjs';
 
-import { SimulationOutputService } from '../../services/SimulationOutputService';
+import { SimulationOutputService } from '@shared/simulation';
 import { Label } from './Label';
 
 interface Props {
@@ -139,4 +139,5 @@ export class LabelContainer extends React.Component<Props, State> {
         this.setState({ labels });
       });
   }
+
 }

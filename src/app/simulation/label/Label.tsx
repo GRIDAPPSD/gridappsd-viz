@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { Subscription } from 'rxjs';
 
-import { TransformWatcherService } from '../../services/TransformWatcherService';
+import { MapTransformWatcherService } from '@shared/MapTransformWatcherService';
 import { Tooltip } from '@shared/tooltip';
 
 import './Label.scss';
@@ -15,7 +15,7 @@ interface State {
 }
 
 export class Label extends React.Component<Props, State> {
-  private readonly _transformWatcherService = TransformWatcherService.getInstance();
+  private readonly _transformWatcherService = MapTransformWatcherService.getInstance();
   private _tooltip: Tooltip;
   private _anchorNodeTransformWatcher: Subscription;
 
@@ -52,7 +52,7 @@ export class Label extends React.Component<Props, State> {
   }
 
   private _repositionLabel() {
-    this._anchorNodeTransformWatcher = this._transformWatcherService.changed()
+    this._anchorNodeTransformWatcher = this._transformWatcherService.observe()
       .subscribe(() => {
         this._hide();
         this._show();
