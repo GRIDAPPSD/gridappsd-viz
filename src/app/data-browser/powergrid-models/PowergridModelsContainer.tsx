@@ -1,5 +1,6 @@
 import * as React from 'react';
-import { StompSubscription } from '@stomp/stompjs';
+import { Subscription } from 'rxjs';
+import { map } from 'rxjs/operators';
 
 import { PowerGridModels } from './PowergridModels';
 import { MRID } from '@shared/MRID';
@@ -7,8 +8,6 @@ import {
   QueryPowerGridModelsRequestBody, QueryPowerGridModelsRequestType, QueryPowerGridModelsRequest
 } from './models/QueryPowerGridModelsRequest';
 import { StompClientService } from '@shared/StompClientService';
-import { Subscription } from 'rxjs';
-import { finalize } from 'rxjs/operators';
 
 
 interface Props {
@@ -43,14 +42,12 @@ export class PowergridModelsContainer extends React.Component<Props, State> {
 
   private _subscribeToPowerGridModelsTopic() {
     return this._stompClientService.readFrom(this._queryPowerGridModelsRequest.replyTo)
+      .pipe(
+        map(body => JSON.parse(body)),
+        map(payload => JSON.stringify(payload.data, null, 4) || payload.error.message)
+      )
       .subscribe({
-        next: data => {
-          const payload = JSON.parse(data);
-          this.setState(
-            { response: JSON.stringify(payload.data, null, 4) || payload.error.message },
-            () => this.setState({ isFetching: false })
-          );
-        }
+        next: response => this.setState({ response }, () => this.setState({ isFetching: false }))
       });
   }
 

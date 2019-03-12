@@ -4,7 +4,7 @@ import { StompSubscription, Message } from '@stomp/stompjs';
 import { StompClientService } from '@shared/StompClientService';
 import { StompClient } from './StompClient';
 import { Subscription } from 'rxjs';
-import { finalize } from 'rxjs/operators';
+import { finalize, map } from 'rxjs/operators';
 
 interface Props {
 }
@@ -36,11 +36,12 @@ export class StompClientContainer extends React.Component<Props, State> {
 
   private _subscribeForResponse() {
     return this._stompClient.readFrom('/stomp-client/response-queue')
+      .pipe(
+        map(body => JSON.parse(body)),
+        map(payload => JSON.stringify(payload, null, 4))
+      )
       .subscribe({
-        next: data => {
-          const responseBody = JSON.parse(data);
-          this.setState({ responseBody: JSON.stringify(responseBody, null, 4) }, () => this.setState({ isFetching: false }));
-        }
+        next: result => this.setState({ responseBody: result }, () => this.setState({ isFetching: false }))
       });
   }
 

@@ -42,11 +42,9 @@ export class LogsContainer extends React.Component<Props, State> {
 
   private _fetchLatestTenSimulationIds() {
     this._stompClientService.readOnceFrom('query-logs.process-id')
+      .pipe(map(body => JSON.parse(body).data as Array<SimulationId>))
       .subscribe({
-        next: data => {
-          const simulationIds: Array<SimulationId> = JSON.parse(data).data;
-          this.setState({ simulationIds });
-        }
+        next: simulationIds => this.setState({ simulationIds })
       });
     this._stompClientService.send(
       'goss.gridappsd.process.request.data.log',
@@ -57,9 +55,12 @@ export class LogsContainer extends React.Component<Props, State> {
 
   private _observeQueryLogsResult() {
     this._stompClientService.readFrom('query-logs.result')
-      .pipe(takeUntil(this._unsubscribeNotifier))
+      .pipe(
+        takeUntil(this._unsubscribeNotifier),
+        map(body => JSON.parse(body).data || [])
+      )
       .subscribe({
-        next: data => this.setState({ result: JSON.parse(data).data || [] })
+        next: queryResults => this.setState({ result: queryResults })
       });
   }
 
