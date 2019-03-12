@@ -43,6 +43,17 @@ export class SimulationConfigurationEditor extends React.Component<Props, State>
     this._currentConfig = this._cloneConfigObject(props.initialConfig);
   }
 
+  private _cloneConfigObject(original: SimulationConfiguration): SimulationConfiguration {
+    const config = {} as SimulationConfiguration;
+    config.power_system_config = { ...original.power_system_config };
+    config.application_config = {
+      applications: original.application_config.applications.length > 0 ?
+        [{ ...original.application_config.applications[0] }] : []
+    };
+    config.simulation_config = { ...original.simulation_config };
+    return config;
+  }
+
   render() {
     return (
       <Dialog show={this.state.show}>
@@ -200,14 +211,4 @@ export class SimulationConfigurationEditor extends React.Component<Props, State>
     );
   }
 
-  private _cloneConfigObject(original: SimulationConfiguration): SimulationConfiguration {
-    const config = {} as SimulationConfiguration;
-    config.power_system_config = { ...original.power_system_config };
-    config.application_config = {
-      applications: original.application_config.applications.length > 0 ?
-        [{ ...original.application_config.applications[0] }] : []
-    };
-    config.simulation_config = { ...original.simulation_config };
-    return config;
-  }
 }
