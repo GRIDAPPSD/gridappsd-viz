@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { Route, Redirect } from 'react-router-dom';
+import { map, take, filter } from 'rxjs/operators';
 
 import { Application } from '@shared/Application';
 import { AvailableApplicationsAndServices } from './available-applications-and-services';
@@ -60,8 +61,12 @@ export class App extends React.Component<Props, State> {
 
   componentDidMount() {
     this._stompClientService.statusChanges()
-      .subscribe(status => {
-        if (status === 'CONNECTED') {
+      .pipe(
+        filter(status => status === 'CONNECTED'),
+        take(1)
+      )
+      .subscribe({
+        next: () => {
           this._fetchAvailableApplications();
           this._fetchFeederModels();
         }
@@ -80,11 +85,9 @@ export class App extends React.Component<Props, State> {
 
   private _subscribeToAvailableApplicationsTopic(destination: string) {
     this._stompClientService.readOnceFrom(destination)
+      .pipe(map(body => JSON.parse(body) as GetAvailableApplicationsRequestPayload))
       .subscribe({
-        next: data => {
-          const payload = JSON.parse(data) as GetAvailableApplicationsRequestPayload;
-          this.setState({ availableApplications: payload.applications });
-        }
+        next: payload => this.setState({ availableApplications: payload.applications })
       });
   }
 
@@ -109,12 +112,12 @@ export class App extends React.Component<Props, State> {
 
   private _subscribeToFeederModelsTopic(destination: string) {
     this._stompClientService.readOnceFrom(destination)
+      .pipe(map(body => JSON.parse(body)))
       .subscribe({
-        next: data => {
+        next: payload => {
           const regions = [];
           const subregions = [];
           const lines = [];
-          const payload = JSON.parse(data);
           if (typeof payload.data === 'string')
             payload.data = JSON.parse(payload.data);
           payload.data.results.bindings.forEach((binding, index) => {
@@ -232,9 +235,9 @@ export class App extends React.Component<Props, State> {
 
   private _subscribeToModelDictionaryTopic(getModelDictionaryRequest: GetModelDictionaryRequest, simulationName: string) {
     this._stompClientService.readOnceFrom(getModelDictionaryRequest.replyTo)
+      .pipe(map(body => JSON.parse(body)))
       .subscribe({
-        next: data => {
-          const payload = JSON.parse(data);
+        next: payload => {
           if (typeof payload.data === 'string')
             payload.data = JSON.parse(payload.data);
           const feeders = payload.data.feeders[0];
