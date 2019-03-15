@@ -1,6 +1,6 @@
 import * as React from 'react';
-import { Subject } from 'rxjs';
-import { takeUntil, filter, switchMap, tap } from 'rxjs/operators';
+import { Subscription } from 'rxjs';
+import { filter, switchMap, tap, takeWhile } from 'rxjs/operators';
 
 import { SimulationStatusLog } from './SimulationStatusLog';
 import {
@@ -23,7 +23,7 @@ export class SimulationStatusLogContainer extends React.Component<Props, State> 
   private readonly _stompClientService = StompClientService.getInstance();
   private readonly _simulationControlService = SimulationControlService.getInstance();
   private readonly _simulationQueue = SimulationQueue.getInstance();
-  private readonly _componentWillUnmountNotifier = new Subject<void>();
+  private _logMessagesSubscription: Subscription;
 
   constructor(props: Props) {
     super(props);
@@ -38,13 +38,8 @@ export class SimulationStatusLogContainer extends React.Component<Props, State> 
   }
 
   private _respondToSimulationStatusChanges() {
-    this._simulationControlService.statusChanged()
+    this._logMessagesSubscription = this._simulationControlService.statusChanged()
       .pipe(
-        takeUntil(this._componentWillUnmountNotifier),
-        tap(status => {
-          if (status === SimulationStatus.STOPPED)
-            this._closeAllSubscriptions();
-        }),
         filter(status => status === SimulationStatus.STARTED),
         switchMap(() => this._newObservableToReadSimulationId()),
         tap(simulationId => {
@@ -52,18 +47,11 @@ export class SimulationStatusLogContainer extends React.Component<Props, State> 
           this._simulationQueue.updateIdOfActiveSimulation(simulationId);
         }),
         switchMap(simulationId => this._newObservableForLogMessages(simulationId)),
-        takeUntil(this._componentWillUnmountNotifier)
+        takeWhile(() => this._logMessagesSubscription === null)
       )
       .subscribe({
         next: logMessage => this._onSimulationStatusLogMessageReceived(logMessage)
       });
-  }
-
-  private _closeAllSubscriptions() {
-    if (!this._componentWillUnmountNotifier.closed) {
-      this._componentWillUnmountNotifier.next();
-      this._componentWillUnmountNotifier.complete();
-    }
   }
 
   private _newObservableToReadSimulationId() {
@@ -82,7 +70,7 @@ export class SimulationStatusLogContainer extends React.Component<Props, State> 
   }
 
   componentWillUnmount() {
-    this._closeAllSubscriptions();
+    this._logMessagesSubscription.unsubscribe();
   }
 
   render() {

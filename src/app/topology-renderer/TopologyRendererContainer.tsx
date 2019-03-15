@@ -1,7 +1,6 @@
 import * as React from 'react';
-import { StompSubscription } from '@stomp/stompjs';
 import { Subscription } from 'rxjs';
-import { filter, take } from 'rxjs/operators';
+import { map, takeWhile } from 'rxjs/operators';
 
 import { TopologyRenderer } from './TopologyRenderer';
 import { SimulationQueue } from '@shared/simulation';
@@ -11,7 +10,6 @@ import { Switch, TopologyModel, Capacitor } from '@shared/topology';
 import { ToggleCapacitorRequest } from './models/ToggleCapacitorRequest';
 import { ToggleSwitchStateRequest } from './models/ToggleSwitchStateRequest';
 import { GetTopologyModelRequest, GetTopologyModelRequestPayload } from './models/GetTopologyModelRequest';
-import { RequestConfigurationType } from '@shared/MessageRequest';
 
 interface Props {
   mRIDs: { [componentType: string]: string };
@@ -22,15 +20,12 @@ interface State {
   isFetching: boolean;
 }
 
-
 export class TopologyRendererContainer extends React.Component<Props, State> {
 
   private readonly _stompClientService = StompClientService.getInstance();
   private readonly _simulationQueue = SimulationQueue.getInstance();
   private _activeSimulationConfig = this._simulationQueue.getActiveSimulation().config;
-  private _activeSimulationStream: Subscription;
-  private _stompClientStatusStream: Subscription;
-  private _topologySubscription: Promise<StompSubscription>;
+  private _activeSimulationStream: Subscription = null;
   private static readonly _CACHE = {};
 
   constructor(props: any) {
@@ -44,30 +39,22 @@ export class TopologyRendererContainer extends React.Component<Props, State> {
   }
 
   componentDidMount() {
-    this._stompClientStatusStream = this._stompClientService.statusChanges()
-      .pipe(filter(status => status === 'CONNECTED'))
-      .subscribe(() => this._init());
+    this._activeSimulationStream = this._observeActiveSimulationChangeEvent();
   }
 
-  private _init() {
-    this._activeSimulationStream = this._subscribeToActiveSimulationStream();
-    if (this._topologyModelExistsInCache())
-      this._useTopologyModelFromCache();
-    else
-      this._fetchTopologyModel();
-  }
-
-  private _subscribeToActiveSimulationStream() {
-    return this._activeSimulationStream = this._simulationQueue.activeSimulationChanged()
-      .subscribe(simulation => {
-        this._activeSimulationConfig = simulation.config;
-        if (this._topologyModelExistsInCache())
-          this._useTopologyModelFromCache();
-        else
-          this._fetchTopologyModel();
+  private _observeActiveSimulationChangeEvent() {
+    return this._simulationQueue.activeSimulationChanged()
+      .pipe(takeWhile(() => this._activeSimulationStream === null))
+      .subscribe({
+        next: simulation => {
+          this._activeSimulationConfig = simulation.config;
+          if (this._topologyModelExistsInCache())
+            this._useTopologyModelFromCache();
+          else
+            this._fetchTopologyModel();
+        }
       });
   }
-
   private _topologyModelExistsInCache() {
     return this._activeSimulationConfig && this._activeSimulationConfig.power_system_config.Line_name in TopologyRendererContainer._CACHE;
   }
@@ -92,11 +79,9 @@ export class TopologyRendererContainer extends React.Component<Props, State> {
 
   private _subscribeToTopologyModelTopic(destination: string) {
     this._stompClientService.readOnceFrom(destination)
+      .pipe(map(body => JSON.parse(body) as GetTopologyModelRequestPayload))
       .subscribe({
-        next: data => {
-          const payload = JSON.parse(data) as GetTopologyModelRequestPayload;
-          this._processModelForRendering(payload);
-        }
+        next: payload => this._processModelForRendering(payload)
       });
   }
 
@@ -241,12 +226,7 @@ export class TopologyRendererContainer extends React.Component<Props, State> {
   }
 
   componentWillUnmount() {
-    if (this._topologySubscription)
-      this._topologySubscription.then(sub => sub.unsubscribe());
-    if (this._activeSimulationStream)
-      this._activeSimulationStream.unsubscribe();
-    if (this._stompClientStatusStream)
-      this._stompClientStatusStream.unsubscribe();
+    this._activeSimulationStream.unsubscribe();
   }
 
   render() {

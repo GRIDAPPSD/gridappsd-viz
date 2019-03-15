@@ -1,11 +1,12 @@
-import { Subject, Observable } from 'rxjs';
+import { Subject, Observable, BehaviorSubject } from 'rxjs';
+import { filter } from 'rxjs/operators';
 
 import { Simulation } from '@shared/simulation';
 
 export class SimulationQueue {
   private static readonly _INSTANCE = new SimulationQueue();
 
-  private readonly _activeSimulationChanged = new Subject<Simulation>();
+  private readonly _activeSimulationChanged = new BehaviorSubject<Simulation>(null);
   private readonly _queueChanges = new Subject<Simulation[]>();
   private _simulations: Simulation[] = [];
   private _activeSimulation: Simulation;
@@ -18,7 +19,8 @@ export class SimulationQueue {
   }
 
   activeSimulationChanged(): Observable<Simulation> {
-    return this._activeSimulationChanged.asObservable();
+    return this._activeSimulationChanged.asObservable()
+      .pipe(filter(simulation => simulation !== null));
   }
 
   getActiveSimulation(): Simulation {
