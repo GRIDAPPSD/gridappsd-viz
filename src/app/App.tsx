@@ -257,7 +257,7 @@ export class App extends React.Component<Props, State> {
       this._mRIDs[swjtch.name] = swjtch.mRID;
     for (const capacitor of feeders.capacitors)
       this._mRIDs[capacitor.name] = capacitor.mRID;
-    for (const regulator of feeders.regulator)
+    for (const regulator of feeders.regulators)
       this._mRIDs[regulator.name] = regulator.mRID;
   }
 
