@@ -46,8 +46,7 @@ export class SimulationStatusLogContainer extends React.Component<Props, State> 
           this.setState({ isFetching: true });
           this._simulationQueue.updateIdOfActiveSimulation(simulationId);
         }),
-        switchMap(simulationId => this._newObservableForLogMessages(simulationId)),
-        takeWhile(() => this._logMessagesSubscription === null)
+        switchMap(simulationId => this._newObservableForLogMessages(simulationId))
       )
       .subscribe({
         next: logMessage => this._onSimulationStatusLogMessageReceived(logMessage)
