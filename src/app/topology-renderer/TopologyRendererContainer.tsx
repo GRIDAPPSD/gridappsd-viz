@@ -4,13 +4,14 @@ import { map, takeWhile } from 'rxjs/operators';
 
 import { TopologyRenderer } from './TopologyRenderer';
 import { SimulationQueue } from '@shared/simulation';
-import { Node, Edge } from '@shared/topology';
+import { Node, Edge, Regulator } from '@shared/topology';
 import { StompClientService } from '@shared/StompClientService';
 import { Switch, TopologyModel, Capacitor } from '@shared/topology';
 import { OpenOrCloseCapacitorRequest } from './models/OpenOrCloseCapacitorRequest';
 import { ToggleSwitchStateRequest } from './models/ToggleSwitchStateRequest';
 import { GetTopologyModelRequest, GetTopologyModelRequestPayload } from './models/GetTopologyModelRequest';
-import { ToggleCapacitorManualModeRequest } from './models/ToggleCapacitorControlModeRequest';
+import { ToggleCapacitorManualModeRequest } from './models/ToggleCapacitorManualModeRequest';
+import { ToggleRegulatorManualModeRequest } from './models/ToggleRegulatorManualModeRequest';
 
 interface Props {
   mRIDs: { [componentType: string]: string };
@@ -37,7 +38,8 @@ export class TopologyRendererContainer extends React.Component<Props, State> {
     };
     this.onToggleSwitchState = this.onToggleSwitchState.bind(this);
     this.onOpenOrCloseCapacitor = this.onOpenOrCloseCapacitor.bind(this);
-    this.onToggleCapacitorControlMode = this.onToggleCapacitorControlMode.bind(this);
+    this.onToggleCapacitorManualMode = this.onToggleCapacitorManualMode.bind(this);
+    this.onToggleRegulatorManualMode = this.onToggleRegulatorManualMode.bind(this);
   }
 
   componentDidMount() {
@@ -201,7 +203,8 @@ export class TopologyRendererContainer extends React.Component<Props, State> {
             name: node.name,
             type: 'regulator',
             x: Math.trunc(node.x2),
-            y: Math.trunc(node.y2)
+            y: Math.trunc(node.y2),
+            manual: node.manual === 'manual'
           }));
           break;
         default:
@@ -240,7 +243,8 @@ export class TopologyRendererContainer extends React.Component<Props, State> {
         topologyName={this._activeSimulationConfig.simulation_config.simulation_name}
         onToggleSwitch={this.onToggleSwitchState}
         onOpenOrCloseCapacitor={this.onOpenOrCloseCapacitor}
-        onToggleCapacitorManualMode={this.onToggleCapacitorControlMode} />
+        onToggleCapacitorManualMode={this.onToggleCapacitorManualMode}
+        onToggleRegulatorManualMode={this.onToggleRegulatorManualMode} />
     );
   }
 
@@ -272,17 +276,31 @@ export class TopologyRendererContainer extends React.Component<Props, State> {
     );
   }
 
-  onToggleCapacitorControlMode(capacitor: Capacitor) {
-    const toggleCapacitorControlModeRequest = new ToggleCapacitorManualModeRequest({
+  onToggleCapacitorManualMode(capacitor: Capacitor) {
+    const toggleCapacitorManualModeRequest = new ToggleCapacitorManualModeRequest({
       componentMRID: this.props.mRIDs[capacitor.name],
       simulationId: this._simulationQueue.getActiveSimulation().id,
       manual: capacitor.manual,
       differenceMRID: this._activeSimulationConfig.power_system_config.Line_name
     });
     this._stompClientService.send(
-      toggleCapacitorControlModeRequest.url,
-      { 'reply-to': toggleCapacitorControlModeRequest.replyTo },
-      JSON.stringify(toggleCapacitorControlModeRequest.requestBody)
+      toggleCapacitorManualModeRequest.url,
+      { 'reply-to': toggleCapacitorManualModeRequest.replyTo },
+      JSON.stringify(toggleCapacitorManualModeRequest.requestBody)
+    );
+  }
+
+  onToggleRegulatorManualMode(regulator: Regulator) {
+    const toggleRegulatorManualModeRequest = new ToggleRegulatorManualModeRequest({
+      componentMRID: this.props.mRIDs[regulator.name],
+      simulationId: this._simulationQueue.getActiveSimulation().id,
+      manual: regulator.manual,
+      differenceMRID: this._activeSimulationConfig.power_system_config.Line_name
+    });
+    this._stompClientService.send(
+      toggleRegulatorManualModeRequest.url,
+      { 'reply-to': toggleRegulatorManualModeRequest.replyTo },
+      JSON.stringify(toggleRegulatorManualModeRequest.requestBody)
     );
   }
 

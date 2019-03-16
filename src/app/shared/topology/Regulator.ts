@@ -9,4 +9,5 @@ export interface Regulator extends Node {
   x2: number;
   y2: number;
   mRID: string;
+  manual: boolean;
 }

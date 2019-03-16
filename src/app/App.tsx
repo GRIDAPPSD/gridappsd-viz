@@ -247,12 +247,18 @@ export class App extends React.Component<Props, State> {
           }, {});
           this._simulationOutputService.setModelDictionaryMeasures(modelDictionaryMeasurements);
           this._modelDictionaryMeasurementsPerSimulationName[simulationName] = modelDictionaryMeasurements;
-          for (const swjtch of feeders.switches)
-            this._mRIDs[swjtch.name] = swjtch.mRID;
-          for (const capacitor of feeders.capacitors)
-            this._mRIDs[capacitor.name] = capacitor.mRID;
+          this._collectMRIDsForComponents(feeders);
         }
       });
+  }
+
+  private _collectMRIDsForComponents(feeders: any) {
+    for (const swjtch of feeders.switches)
+      this._mRIDs[swjtch.name] = swjtch.mRID;
+    for (const capacitor of feeders.capacitors)
+      this._mRIDs[capacitor.name] = capacitor.mRID;
+    for (const regulator of feeders.regulator)
+      this._mRIDs[regulator.name] = regulator.mRID;
   }
 
 }

@@ -5,12 +5,13 @@ import { zoom, zoomIdentity } from 'd3-zoom';
 import { select, event as currentEvent, Selection } from 'd3-selection';
 
 import { MapTransformWatcherService } from '@shared/MapTransformWatcherService';
-import { Switch, Capacitor, OverheadLine, Node, Edge } from '@shared/topology';
+import { Switch, Capacitor, OverheadLine, Node, Edge, Regulator } from '@shared/topology';
 import { Tooltip } from '@shared/tooltip';
 import { Wait } from '@shared/wait';
 import { OverlayService } from '@shared/overlay';
 import { SwitchMenu } from './menus/switch-menu/SwitchMenu';
 import { CapacitorMenu } from './menus/capacitor-menu/CapacitorMenu';
+import { RegulatorMenu } from './menus/regulator-menu/RegulatorMenu';
 
 import './TopologyRenderer.scss';
 
@@ -21,6 +22,7 @@ interface Props {
   onToggleSwitch: (swjtch: Switch) => void;
   onOpenOrCloseCapacitor: (capacitor: Capacitor) => void;
   onToggleCapacitorManualMode: (capacitor: Capacitor) => void;
+  onToggleRegulatorManualMode: (regulator: Regulator) => void;
 }
 
 interface State {
@@ -108,6 +110,8 @@ export class TopologyRenderer extends React.Component<Props, State> {
       this._onSwitchClicked(target);
     else if (target.classed('capacitor'))
       this._onCapacitorClicked(target);
+    else if (target.classed('regulator'))
+      this._onRegulatorClicked(target);
   }
 
   private _onSwitchClicked(clickedElement: Selection<SVGElement, any, SVGElement, any>) {
@@ -122,8 +126,7 @@ export class TopologyRenderer extends React.Component<Props, State> {
         onConfirm={open => {
           this._overlay.hide(false);
           this._toggleSwitch(open, swjtch, clickedElement);
-        }}
-      />,
+        }} />,
       false
     );
   }
@@ -161,12 +164,10 @@ export class TopologyRenderer extends React.Component<Props, State> {
         manual={capacitor.manual}
         onCancel={() => this._overlay.hide(false)}
         onConfirm={formValue => {
-          console.log(formValue);
           this._overlay.hide(false);
           this._openOrCloseCapacitor(formValue.open, capacitor);
           this._toggleCapacitorManualMode(formValue.manual, capacitor);
-        }}
-      />,
+        }} />,
       false
     );
   }
@@ -182,6 +183,30 @@ export class TopologyRenderer extends React.Component<Props, State> {
     if (capacitor.manual !== isManual) {
       capacitor.manual = isManual;
       this.props.onToggleCapacitorManualMode(capacitor);
+    }
+  }
+
+  private _onRegulatorClicked(clickedElement: Selection<SVGElement, any, SVGElement, any>) {
+    const clickedElementRect = clickedElement.node().getBoundingClientRect();
+    const regulator = clickedElement.datum() as Regulator;
+    this._overlay.show(
+      <RegulatorMenu
+        left={clickedElementRect.left}
+        top={clickedElementRect.top}
+        manual={regulator.manual}
+        onCancel={() => this._overlay.hide(false)}
+        onConfirm={isManual => {
+          this._overlay.hide(false);
+          this._toggleRegulatorManualMode(isManual, regulator);
+        }} />,
+      false
+    );
+  }
+
+  private _toggleRegulatorManualMode(isManual: boolean, regulator: Regulator) {
+    if (regulator.manual !== isManual) {
+      regulator.manual = isManual;
+      this.props.onToggleRegulatorManualMode(regulator);
     }
   }
 
