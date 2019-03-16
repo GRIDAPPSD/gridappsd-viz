@@ -67,8 +67,10 @@ export class Label extends React.Component<Props, State> {
   }
 
   private _show() {
-    const anchor = ['', 'a', 'b', 'c'].map(phase => document.querySelector(`.model-renderer ._${this.props.nodeNameToAttachTo}${phase}_`) as HTMLElement)
-      .filter(element => element)[0];
+    const anchor = ['', 'a', 'b', 'c'].map(
+      phase => document.querySelector(`.model-renderer ._${this.props.nodeNameToAttachTo}${phase}_`)
+    )
+      .find(element => element !== null);
     if (anchor) {
       const content = <>
         <header className='label__heading'>{this.props.nodeNameToAttachTo}</header>
@@ -78,7 +80,7 @@ export class Label extends React.Component<Props, State> {
       const labelContainer = document.createElement('div');
       labelContainer.className = 'label-container';
       document.body.appendChild(labelContainer);
-      this._tooltip.showAt(anchor, labelContainer);
+      this._tooltip.showAt(anchor as HTMLElement, labelContainer);
     }
   }
 
