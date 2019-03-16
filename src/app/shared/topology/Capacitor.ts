@@ -9,4 +9,5 @@ export interface Capacitor extends Node {
   y1: number;
   open: boolean;
   mRID: string;
+  manual: boolean;
 }

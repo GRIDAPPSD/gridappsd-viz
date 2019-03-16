@@ -7,9 +7,10 @@ import { SimulationQueue } from '@shared/simulation';
 import { Node, Edge } from '@shared/topology';
 import { StompClientService } from '@shared/StompClientService';
 import { Switch, TopologyModel, Capacitor } from '@shared/topology';
-import { ToggleCapacitorRequest } from './models/ToggleCapacitorRequest';
+import { OpenOrCloseCapacitorRequest } from './models/OpenOrCloseCapacitorRequest';
 import { ToggleSwitchStateRequest } from './models/ToggleSwitchStateRequest';
 import { GetTopologyModelRequest, GetTopologyModelRequestPayload } from './models/GetTopologyModelRequest';
+import { ToggleCapacitorManualModeRequest } from './models/ToggleCapacitorControlModeRequest';
 
 interface Props {
   mRIDs: { [componentType: string]: string };
@@ -34,8 +35,9 @@ export class TopologyRendererContainer extends React.Component<Props, State> {
       topology: null,
       isFetching: true
     };
-    this.onToggleSwitch = this.onToggleSwitch.bind(this);
-    this.onToggleCapacitor = this.onToggleCapacitor.bind(this);
+    this.onToggleSwitchState = this.onToggleSwitchState.bind(this);
+    this.onOpenOrCloseCapacitor = this.onOpenOrCloseCapacitor.bind(this);
+    this.onToggleCapacitorControlMode = this.onToggleCapacitorControlMode.bind(this);
   }
 
   componentDidMount() {
@@ -172,7 +174,8 @@ export class TopologyRendererContainer extends React.Component<Props, State> {
             type: 'capacitor',
             open: node.open === 'open',
             x: Math.trunc(node.x1),
-            y: Math.trunc(node.y1)
+            y: Math.trunc(node.y1),
+            manual: node.manual === 'manual'
           }));
           break;
         case 'overhead_lines':
@@ -235,35 +238,18 @@ export class TopologyRendererContainer extends React.Component<Props, State> {
         topology={this.state.topology}
         showWait={this.state.isFetching}
         topologyName={this._activeSimulationConfig.simulation_config.simulation_name}
-        onToggleSwitch={this.onToggleSwitch}
-        onToggleCapacitor={this.onToggleCapacitor} />
+        onToggleSwitch={this.onToggleSwitchState}
+        onOpenOrCloseCapacitor={this.onOpenOrCloseCapacitor}
+        onToggleCapacitorManualMode={this.onToggleCapacitorControlMode} />
     );
   }
 
-  onToggleSwitch(swjtch: Switch) {
+  onToggleSwitchState(swjtch: Switch) {
     const toggleSwitchStateRequest = new ToggleSwitchStateRequest({
-      command: 'update',
-      input: {
-        simulation_id: this._simulationQueue.getActiveSimulation().id,
-        message: {
-          timestamp: Math.floor((new Date).getTime() / 1000.0),
-          difference_mrid: this._activeSimulationConfig.power_system_config.Line_name,
-          reverse_differences: [
-            {
-              object: this.props.mRIDs[swjtch.name],
-              value: swjtch.open ? '0' : '1',
-              attribute: 'Switch.open'
-            }
-          ],
-          forward_differences: [
-            {
-              object: this.props.mRIDs[swjtch.name],
-              value: swjtch.open ? '1' : '0',
-              attribute: 'Switch.open'
-            }
-          ]
-        }
-      }
+      componentMRID: this.props.mRIDs[swjtch.name],
+      simulationId: this._simulationQueue.getActiveSimulation().id,
+      open: swjtch.open,
+      differenceMRID: this._activeSimulationConfig.power_system_config.Line_name
     });
     this._stompClientService.send(
       toggleSwitchStateRequest.url,
@@ -272,32 +258,31 @@ export class TopologyRendererContainer extends React.Component<Props, State> {
     );
   }
 
-  onToggleCapacitor(capacitor: Capacitor) {
-    const toggleCapacitorRequest = new ToggleCapacitorRequest({
-      simulation_id: this._simulationQueue.getActiveSimulation().id,
-      message: {
-        timestamp: Math.floor((new Date).getTime() / 1000.0),
-        difference_mrid: this._activeSimulationConfig.power_system_config.Line_name,
-        reverse_differences: [
-          {
-            object: this.props.mRIDs[capacitor.name],
-            attribute: 'ShuntCompensator.sections',
-            value: capacitor.open ? '1' : '0'
-          }
-        ],
-        forward_differences: [
-          {
-            object: this.props.mRIDs[capacitor.name],
-            attribute: 'ShuntCompensator.sections',
-            value: capacitor.open ? '0' : '1'
-          }
-        ]
-      }
+  onOpenOrCloseCapacitor(capacitor: Capacitor) {
+    const openOrCloseCapacitorRequest = new OpenOrCloseCapacitorRequest({
+      componentMRID: this.props.mRIDs[capacitor.name],
+      simulationId: this._simulationQueue.getActiveSimulation().id,
+      open: capacitor.open,
+      differenceMRID: this._activeSimulationConfig.power_system_config.Line_name
     });
     this._stompClientService.send(
-      toggleCapacitorRequest.url,
-      { 'reply-to': toggleCapacitorRequest.replyTo },
-      JSON.stringify(toggleCapacitorRequest.requestBody)
+      openOrCloseCapacitorRequest.url,
+      { 'reply-to': openOrCloseCapacitorRequest.replyTo },
+      JSON.stringify(openOrCloseCapacitorRequest.requestBody)
+    );
+  }
+
+  onToggleCapacitorControlMode(capacitor: Capacitor) {
+    const toggleCapacitorControlModeRequest = new ToggleCapacitorManualModeRequest({
+      componentMRID: this.props.mRIDs[capacitor.name],
+      simulationId: this._simulationQueue.getActiveSimulation().id,
+      manual: capacitor.manual,
+      differenceMRID: this._activeSimulationConfig.power_system_config.Line_name
+    });
+    this._stompClientService.send(
+      toggleCapacitorControlModeRequest.url,
+      { 'reply-to': toggleCapacitorControlModeRequest.replyTo },
+      JSON.stringify(toggleCapacitorControlModeRequest.requestBody)
     );
   }
 

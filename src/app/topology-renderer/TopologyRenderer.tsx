@@ -19,7 +19,8 @@ interface Props {
   showWait: boolean;
   topologyName: string;
   onToggleSwitch: (swjtch: Switch) => void;
-  onToggleCapacitor: (capacitor: Capacitor) => void;
+  onOpenOrCloseCapacitor: (capacitor: Capacitor) => void;
+  onToggleCapacitorManualMode: (capacitor: Capacitor) => void;
 }
 
 interface State {
@@ -157,20 +158,30 @@ export class TopologyRenderer extends React.Component<Props, State> {
         left={clickedElementRect.left}
         top={clickedElementRect.top}
         open={capacitor.open}
+        manual={capacitor.manual}
         onCancel={() => this._overlay.hide(false)}
-        onConfirm={open => {
+        onConfirm={formValue => {
+          console.log(formValue);
           this._overlay.hide(false);
-          this._toggleCapacitor(open, capacitor);
+          this._openOrCloseCapacitor(formValue.open, capacitor);
+          this._toggleCapacitorManualMode(formValue.manual, capacitor);
         }}
       />,
       false
     );
   }
 
-  private _toggleCapacitor(open: boolean, capacitor: Capacitor) {
+  private _openOrCloseCapacitor(open: boolean, capacitor: Capacitor) {
     if (capacitor.open !== open) {
       capacitor.open = open;
-      this.props.onToggleCapacitor(capacitor);
+      this.props.onOpenOrCloseCapacitor(capacitor);
+    }
+  }
+
+  private _toggleCapacitorManualMode(isManual: boolean, capacitor: Capacitor) {
+    if (capacitor.manual !== isManual) {
+      capacitor.manual = isManual;
+      this.props.onToggleCapacitorManualMode(capacitor);
     }
   }
 

@@ -1,29 +1,36 @@
 import * as React from 'react';
 
 import { Dialog, DialogContent, DialogActions } from '@shared/dialog';
-import { SelectFormControl } from '@shared/form';
+import { SelectFormControl, CheckBox } from '@shared/form';
 import { MenuItem } from '@shared/dropdown-menu';
 import { BasicButton } from '@shared/buttons';
+import { CapacityMenuFormValue } from '../../models/CapacityMenuFormValue';
 
 import './CapacitorMenu.scss';
 
 interface Props {
-  onConfirm: (open: boolean) => void;
+  onConfirm: (formValue: CapacityMenuFormValue) => void;
   onCancel: () => void;
   left: number;
   top: number;
   open: boolean;
+  manual: boolean;
 }
 
 interface State {
-  capacitorOpen: boolean
 }
 
 export class CapacitorMenu extends React.Component<Props, State> {
+  private readonly _formValue: CapacityMenuFormValue;
+
   constructor(props: Props) {
     super(props);
     this.state = {
-      capacitorOpen: props.open
+    };
+
+    this._formValue = {
+      open: props.open,
+      manual: props.manual
     };
   }
 
@@ -42,7 +49,13 @@ export class CapacitorMenu extends React.Component<Props, State> {
                 new MenuItem('Close', false),
               ]}
               defaultSelectedIndex={this.props.open ? 0 : 1}
-              onChange={menuItem => this.setState({ capacitorOpen: menuItem.value })} />
+              onChange={menuItem => this._formValue.open = menuItem.value} />
+            <CheckBox
+              label='Control mode'
+              name='control-mode'
+              hint='Manual'
+              checked={this.props.manual}
+              onChange={state => this._formValue.manual = state} />
           </form>
         </DialogContent>
         <DialogActions>
@@ -53,8 +66,7 @@ export class CapacitorMenu extends React.Component<Props, State> {
           <BasicButton
             type='positive'
             label='Apply'
-            disabled={this.state.capacitorOpen === this.props.open}
-            onClick={() => this.props.onConfirm(this.state.capacitorOpen)} />
+            onClick={() => this.props.onConfirm(this._formValue)} />
         </DialogActions>
       </Dialog>
     );
