@@ -3,10 +3,9 @@ import { Subscription } from 'rxjs';
 
 import { MeasurementGraph } from './MeasurementGraph';
 import { MeasurementGraphModel } from './models/MeasurementGraphModel';
+import { SimulationOutputMeasurement, SimulationOutputService } from '@shared/simulation';
 import { TimeSeries } from './models/TimeSeries';
 import { TimeSeriesDataPoint } from './models/TimeSeriesDataPoint';
-import { SimulationOutputMeasurement } from '../../models/simulation-output/SimulationOutputMeasurement';
-import { SimulationOutputService } from '../../services/SimulationOutputService';
 
 
 interface Props {
@@ -125,14 +124,13 @@ export class MeasurementGraphContainer extends React.Component<Props, State> {
     this._simulationOutputMeasurementsStream = this._subscribeToSimulationOutputMeasurementsStream();
   }
 
-  componentWillUnmount() {
-    this._simulationOutputMeasurementsStream.unsubscribe();
-  }
-
-  render() {
-    return (
-      this.state.measurementGraphModels.map(measurementGraphModel => <MeasurementGraph key={measurementGraphModel.name} measurementGraphModel={measurementGraphModel} />)
-    );
+  private _subscribeToSimulationOutputMeasurementsStream(): Subscription {
+    return this._simulationOutputService.simulationOutputMeasurementsReceived()
+      .subscribe(measurements => {
+        const measurementGraphModels = Object.entries(GRAPH_NAMES_PER_SIMULATION_NAME[this.props.simulationName] as { [key: string]: string[] })
+          .map(([graphName, timeSeriesNames]) => this._buildPlotModel(graphName, timeSeriesNames, measurements));
+        this.setState({ measurementGraphModels });
+      });
   }
 
   private _buildPlotModel(graphName: string, timeSeriesNames: string[], measurements: SimulationOutputMeasurement[]): MeasurementGraphModel {
@@ -186,12 +184,14 @@ export class MeasurementGraphContainer extends React.Component<Props, State> {
     return dataPoint;
   }
 
-  private _subscribeToSimulationOutputMeasurementsStream(): Subscription {
-    return this._simulationOutputService.simulationOutputMeasurementsReceived()
-      .subscribe(measurements => {
-        const measurementGraphModels = Object.entries(GRAPH_NAMES_PER_SIMULATION_NAME[this.props.simulationName] as { [key: string]: string[] })
-          .map(([graphName, timeSeriesNames]) => this._buildPlotModel(graphName, timeSeriesNames, measurements));
-        this.setState({ measurementGraphModels });
-      });
+  componentWillUnmount() {
+    this._simulationOutputMeasurementsStream.unsubscribe();
   }
+
+  render() {
+    return (
+      this.state.measurementGraphModels.map(measurementGraphModel => <MeasurementGraph key={measurementGraphModel.name} measurementGraphModel={measurementGraphModel} />)
+    );
+  }
+
 }

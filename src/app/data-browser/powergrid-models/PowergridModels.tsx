@@ -2,19 +2,21 @@ import * as React from 'react';
 
 import { RequestEditor } from '../RequestEditor';
 import { Response } from '../Response';
-import { QueryPowerGridModelsRequestType, QueryPowerGridModelsRequestBody, QueryPowerGridModelsResultFormat } from '../../models/message-requests/QueryPowerGridModelsRequest';
-import { MRID } from '../../models/MRID';
-
-import './PowergridModels.scss';
+import {
+  QueryPowerGridModelsRequestType, QueryPowerGridModelsRequestBody, QueryPowerGridModelsResultFormat
+} from './models/QueryPowerGridModelsRequest';
+import { MRID } from '@shared/MRID';
 import { MenuItem } from '@shared/dropdown-menu';
 import { MultilineFormControl, SelectFormControl } from '@shared/form';
 import { BasicButton } from '@shared/buttons';
 import { Wait } from '@shared/wait';
 
+import './PowergridModels.scss';
+
 interface Props {
   mRIDs: MRID[];
   onSubmit: (requestBody: QueryPowerGridModelsRequestBody) => void;
-  response: any;
+  response: string;
   isResponseReady: boolean;
 }
 
@@ -51,14 +53,14 @@ export class PowerGridModels extends React.Component<Props, State> {
           label='Object ID'
           menuItems={this.state.menuItemsForMRIDs}
           onChange={menuItem => this._updateRequestBody('objectId', menuItem.value)}
-          defaultSelectedIndex={this.props.mRIDs.filter((mRID, index) => mRID.displayName === 'ieee8500')[0].index} />
+          defaultSelectedIndex={this.props.mRIDs.findIndex(mRID => mRID.displayName === 'ieee8500')} />
       ),
       [QueryPowerGridModelsRequestType.QUERY_OBJECT_TYPES]: (
         <SelectFormControl
           label='Model ID'
           menuItems={this.state.menuItemsForMRIDs}
           onChange={menuItem => this._updateRequestBody('modelId', menuItem.value)}
-          defaultSelectedIndex={this.props.mRIDs.filter((mRID, index) => mRID.displayName === 'ieee8500')[0].index} />
+          defaultSelectedIndex={this.props.mRIDs.findIndex(mRID => mRID.displayName === 'ieee8500')} />
       ),
       [QueryPowerGridModelsRequestType.QUERY_MODEL]: (
         <>
@@ -66,7 +68,7 @@ export class PowerGridModels extends React.Component<Props, State> {
             label='Model ID'
             menuItems={this.state.menuItemsForMRIDs}
             onChange={menuItem => this._updateRequestBody('modelId', menuItem.value)}
-            defaultSelectedIndex={this.props.mRIDs.filter((mRID, index) => mRID.displayName === 'ieee8500')[0].index} />
+            defaultSelectedIndex={this.props.mRIDs.findIndex(mRID => mRID.displayName === 'ieee8500')} />
           <MultilineFormControl
             label='Filter'
             value={`?s cim:IdentifiedObject.name \u0027q14733\u0027","objectType":"http://iec.ch/TC57/2012/CIM-schema-cim17#ConnectivityNode`}
@@ -124,7 +126,7 @@ export class PowerGridModels extends React.Component<Props, State> {
           {
             this.state.response &&
             <Response>
-              {JSON.stringify(this.state.response, null, 4)}
+              {this.state.response}
             </Response>
           }
           <Wait show={!this.props.isResponseReady} />

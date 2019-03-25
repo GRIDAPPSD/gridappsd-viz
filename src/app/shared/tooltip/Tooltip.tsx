@@ -55,6 +55,12 @@ export class Tooltip extends React.Component<Props, State> {
     }
   }
 
+  private _cleanup() {
+    this._tooltip.removeEventListener('animationend', this._cleanup, false);
+    this._tooltipContainer.parentElement.removeChild(this._tooltipContainer);
+    ReactDOM.unmountComponentAtNode(this._tooltipContainer);
+  }
+
   show() {
     this._addTooltip(this._createDefaultTooltipContainer());
     this._show();
@@ -64,6 +70,13 @@ export class Tooltip extends React.Component<Props, State> {
     this._addTooltip(container);
     this._anchor = anchor;
     this._show();
+  }
+
+  private _createDefaultTooltipContainer(): HTMLElement {
+    this._tooltipContainer = document.createElement('div');
+    this._tooltipContainer.classList.add('tooltip-container');
+    document.body.appendChild(this._tooltipContainer);
+    return this._tooltipContainer;
   }
 
   private _addTooltip(container: HTMLElement) {
@@ -77,19 +90,6 @@ export class Tooltip extends React.Component<Props, State> {
       </div>,
       container
     );
-  }
-
-  private _cleanup() {
-    this._tooltip.removeEventListener('animationend', this._cleanup, false);
-    this._tooltipContainer.parentElement.removeChild(this._tooltipContainer);
-    ReactDOM.unmountComponentAtNode(this._tooltipContainer);
-  }
-
-  private _createDefaultTooltipContainer(): HTMLElement {
-    this._tooltipContainer = document.createElement('div');
-    this._tooltipContainer.classList.add('tooltip-container');
-    document.body.appendChild(this._tooltipContainer);
-    return this._tooltipContainer;
   }
 
   private _show() {

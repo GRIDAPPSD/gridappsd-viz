@@ -1,9 +1,9 @@
 .gridappsd-checkbox {
-    display: inline-flex;
+    display: flex;
     position: relative;
     line-height: initial;
     margin: 0 20px;
-    flex-flow: row-reverse;
+    flex-flow: row;
     align-items: center;
 }
 
@@ -26,7 +26,7 @@
         vertical-align: middle;
         left: 3px;
         transform-origin: 50% 0;
-        width: 30px;
+        width: 100%;
         position: absolute;
         top: 36%;
         transform: scale(0) translateY(-50%);
@@ -62,4 +62,11 @@
         color: #ccc;
     }
     cursor: not-allowed;
+}
+
+.gridappsd-checkbox__hint {
+    display: inline-block;
+    font-size: 0.8em;
+    color: #666;
+    margin: 0 2.5px;
 }

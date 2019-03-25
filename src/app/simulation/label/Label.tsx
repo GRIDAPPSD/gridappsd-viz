@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { Subscription } from 'rxjs';
 
-import { TransformWatcherService } from '../../services/TransformWatcherService';
+import { MapTransformWatcherService } from '@shared/MapTransformWatcherService';
 import { Tooltip } from '@shared/tooltip';
 
 import './Label.scss';
@@ -15,7 +15,7 @@ interface State {
 }
 
 export class Label extends React.Component<Props, State> {
-  private readonly _transformWatcherService = TransformWatcherService.getInstance();
+  private readonly _transformWatcherService = MapTransformWatcherService.getInstance();
   private _tooltip: Tooltip;
   private _anchorNodeTransformWatcher: Subscription;
 
@@ -52,7 +52,7 @@ export class Label extends React.Component<Props, State> {
   }
 
   private _repositionLabel() {
-    this._anchorNodeTransformWatcher = this._transformWatcherService.changed()
+    this._anchorNodeTransformWatcher = this._transformWatcherService.observe()
       .subscribe(() => {
         this._hide();
         this._show();
@@ -67,8 +67,10 @@ export class Label extends React.Component<Props, State> {
   }
 
   private _show() {
-    const anchor = ['', 'a', 'b', 'c'].map(phase => document.querySelector(`.model-renderer ._${this.props.nodeNameToAttachTo}${phase}_`) as HTMLElement)
-      .filter(element => element)[0];
+    const anchor = ['', 'a', 'b', 'c'].map(
+      phase => document.querySelector(`.model-renderer ._${this.props.nodeNameToAttachTo}${phase}_`)
+    )
+      .find(element => element !== null);
     if (anchor) {
       const content = <>
         <header className='label__heading'>{this.props.nodeNameToAttachTo}</header>
@@ -78,7 +80,7 @@ export class Label extends React.Component<Props, State> {
       const labelContainer = document.createElement('div');
       labelContainer.className = 'label-container';
       document.body.appendChild(labelContainer);
-      this._tooltip.showAt(anchor, labelContainer);
+      this._tooltip.showAt(anchor as HTMLElement, labelContainer);
     }
   }
 
