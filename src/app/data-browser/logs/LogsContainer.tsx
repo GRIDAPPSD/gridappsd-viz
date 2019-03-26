@@ -1,6 +1,6 @@
 import * as React from 'react';
-import { Subject } from 'rxjs';
-import { takeUntil, map } from 'rxjs/operators';
+import { Subscription } from 'rxjs';
+import { map } from 'rxjs/operators';
 
 import { StompClientService } from '@shared/StompClientService';
 import { QueryLogsRequestBody } from './models/QueryLogsRequestBody';
@@ -21,7 +21,9 @@ interface State {
 export class LogsContainer extends React.Component<Props, State> {
 
   private readonly _stompClientService = StompClientService.getInstance();
-  private _unsubscribeNotifier = new Subject<void>();
+  private _queryLogsResultSubscription: Subscription;
+  private _sourcesSubscription: Subscription;
+  private _stompClientStatusSubscription: Subscription;
 
   constructor(props: any) {
     super(props);
@@ -36,8 +38,7 @@ export class LogsContainer extends React.Component<Props, State> {
 
   componentDidMount() {
     this._fetchLatestTenSimulationIds();
-    this._observeQueryLogsResult();
-    this._observeSources();
+    this._stompClientStatusSubscription = this._watchStompClientStatusChanges();
   }
 
   private _fetchLatestTenSimulationIds() {
@@ -53,21 +54,37 @@ export class LogsContainer extends React.Component<Props, State> {
     );
   }
 
+  private _watchStompClientStatusChanges() {
+    return this._stompClientService.statusChanges()
+      .subscribe({
+        next: status => {
+          switch (status) {
+            case 'CONNECTING':
+              if (this._queryLogsResultSubscription)
+                this._queryLogsResultSubscription.unsubscribe();
+              if (this._sourcesSubscription)
+                this._sourcesSubscription.unsubscribe();
+              break;
+            case 'CONNECTED':
+              this._queryLogsResultSubscription = this._observeQueryLogsResult();
+              this._sourcesSubscription = this._observeSources();
+              break;
+          }
+        }
+      });
+  }
+
   private _observeQueryLogsResult() {
-    this._stompClientService.readFrom('query-logs.result')
-      .pipe(
-        takeUntil(this._unsubscribeNotifier),
-        map(body => JSON.parse(body).data || [])
-      )
+    return this._stompClientService.readFrom('query-logs.result')
+      .pipe(map(body => JSON.parse(body).data || []))
       .subscribe({
         next: queryResults => this.setState({ result: queryResults })
       });
   }
 
   private _observeSources() {
-    this._stompClientService.readFrom('query-logs.source')
+    return this._stompClientService.readFrom('query-logs.source')
       .pipe(
-        takeUntil(this._unsubscribeNotifier),
         map(body => JSON.parse(body).data as Array<{ source: string }>),
         map(sources => sources.map(source => source.source))
       )
@@ -77,8 +94,9 @@ export class LogsContainer extends React.Component<Props, State> {
   }
 
   componentWillUnmount() {
-    this._unsubscribeNotifier.next();
-    this._unsubscribeNotifier.complete();
+    this._queryLogsResultSubscription.unsubscribe();
+    this._sourcesSubscription.unsubscribe();
+    this._stompClientStatusSubscription.unsubscribe();
   }
 
   render() {

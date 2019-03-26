@@ -24,6 +24,7 @@ export class SimulationStatusLogContainer extends React.Component<Props, State> 
   private readonly _simulationControlService = SimulationControlService.getInstance();
   private readonly _simulationQueue = SimulationQueue.getInstance();
   private _logMessagesSubscription: Subscription;
+  private _stompClientStatusSubscription: Subscription;
 
   constructor(props: Props) {
     super(props);
@@ -34,11 +35,29 @@ export class SimulationStatusLogContainer extends React.Component<Props, State> 
   }
 
   componentDidMount() {
-    this._respondToSimulationStatusChanges();
+    this._stompClientStatusSubscription = this._watchStompClientStatusChanges();
   }
 
+  private _watchStompClientStatusChanges() {
+    return this._stompClientService.statusChanges()
+      .subscribe({
+        next: status => {
+          switch (status) {
+            case 'CONNECTING':
+              if (this._logMessagesSubscription)
+                this._logMessagesSubscription.unsubscribe();
+              break;
+            case 'CONNECTED':
+              this._logMessagesSubscription = this._respondToSimulationStatusChanges();
+              break;
+          }
+        }
+      });
+  }
+
+
   private _respondToSimulationStatusChanges() {
-    this._logMessagesSubscription = this._simulationControlService.statusChanged()
+    return this._simulationControlService.statusChanged()
       .pipe(
         filter(status => status === SimulationStatus.STARTED),
         switchMap(() => this._newObservableToReadSimulationId()),
@@ -70,6 +89,7 @@ export class SimulationStatusLogContainer extends React.Component<Props, State> 
 
   componentWillUnmount() {
     this._logMessagesSubscription.unsubscribe();
+    this._stompClientStatusSubscription.unsubscribe();
   }
 
   render() {

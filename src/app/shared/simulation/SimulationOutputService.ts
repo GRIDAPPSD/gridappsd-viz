@@ -1,10 +1,10 @@
-import { Subject, Observable } from 'rxjs';
+import { Subject, Observable, Subscription } from 'rxjs';
 
 import { ModelDictionaryMeasurement } from '../../models/model-dictionary/ModelDictionaryMeasurement';
 import { SimulationOutputMeasurement } from './SimulationOutputMeasurement';
-import { SimulationControlService } from './SimulationControlService';
 import { StompClientService } from '@shared/StompClientService';
 import { SIMULATION_OUTPUT_TOPIC } from './topics';
+import { map, filter } from 'rxjs/operators';
 
 export class SimulationOutputService {
 
@@ -14,14 +14,33 @@ export class SimulationOutputService {
   private _modelDictionaryMeasurements: { [mRID: string]: ModelDictionaryMeasurement };
   private _outputTimestamp: number;
   private _simulationOutputMeasurementsStream = new Subject<SimulationOutputMeasurement[]>();
+  private _simulationOutputSubscription: Subscription;
 
   private constructor() {
-    this._subscribeToSimulationOutputTopic();
+    this._watchStompClientStatusChanges();
+  }
+
+  private _watchStompClientStatusChanges() {
+    return this._stompClientService.statusChanges()
+      .subscribe({
+        next: status => {
+          switch (status) {
+            case 'CONNECTING':
+              if (this._simulationOutputSubscription)
+                this._simulationOutputSubscription.unsubscribe();
+              break;
+            case 'CONNECTED':
+              this._simulationOutputSubscription = this._subscribeToSimulationOutputTopic();
+              break;
+          }
+        }
+      });
   }
 
   static getInstance() {
     return SimulationOutputService._INSTANCE;
   }
+
 
   getOutputTimestamp() {
     return this._outputTimestamp;
@@ -36,30 +55,31 @@ export class SimulationOutputService {
   }
 
   private _subscribeToSimulationOutputTopic() {
-    this._stompClientService.readFrom(SIMULATION_OUTPUT_TOPIC)
+    return this._stompClientService.readFrom(SIMULATION_OUTPUT_TOPIC)
+      .pipe(
+        map(body => JSON.parse(body)),
+        filter(payload => Boolean(payload))
+      )
       .subscribe({
-        next: data => {
-          const payload = JSON.parse(data);
-          if (payload) {
-            this._outputTimestamp = payload.message.timestamp;
-            const measurements: SimulationOutputMeasurement[] = payload.message.measurements.map(measurement => {
-              const measurementInModelDictionary = this._modelDictionaryMeasurements[measurement.measurement_mrid];
-              if (measurementInModelDictionary)
-                return {
-                  name: measurementInModelDictionary.name,
-                  type: measurementInModelDictionary.measurementType,
-                  magnitude: measurement.magnitude,
-                  angle: measurement.angle,
-                  value: measurement.value,
-                  mRID: measurement.measurement_mrid,
-                  phases: measurementInModelDictionary.phases,
-                  conductingEquipmentName: measurementInModelDictionary.ConductingEquipment_name,
-                  connectivityNode: measurementInModelDictionary.ConnectivityNode
-                };
-              return null;
-            }).filter(e => e !== null);
-            this._simulationOutputMeasurementsStream.next(measurements);
-          }
+        next: payload => {
+          this._outputTimestamp = payload.message.timestamp;
+          const measurements: SimulationOutputMeasurement[] = payload.message.measurements.map(measurement => {
+            const measurementInModelDictionary = this._modelDictionaryMeasurements[measurement.measurement_mrid];
+            if (measurementInModelDictionary)
+              return {
+                name: measurementInModelDictionary.name,
+                type: measurementInModelDictionary.measurementType,
+                magnitude: measurement.magnitude,
+                angle: measurement.angle,
+                value: measurement.value,
+                mRID: measurement.measurement_mrid,
+                phases: measurementInModelDictionary.phases,
+                conductingEquipmentName: measurementInModelDictionary.ConductingEquipment_name,
+                connectivityNode: measurementInModelDictionary.ConnectivityNode
+              };
+            return null;
+          }).filter(e => e !== null);
+          this._simulationOutputMeasurementsStream.next(measurements);
         }
       });
   }
