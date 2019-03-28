@@ -1,18 +1,17 @@
 import * as React from 'react';
-import { StompSubscription } from '@stomp/stompjs';
 import { Subscription } from 'rxjs';
-import { filter } from 'rxjs/operators';
+import { map, takeWhile } from 'rxjs/operators';
 
 import { TopologyRenderer } from './TopologyRenderer';
-import { MessageService } from '../services/MessageService';
-import { TopologyModel } from '../models/topology/TopologyModel';
-import { RequestConfigurationType } from '../models/message-requests/RequestConfigurationType';
-import { GetTopologyModelRequestPayload } from '../models/message-requests/GetTopologyModelRequest';
-import { SimulationQueue } from '../services/SimulationQueue';
-import { Node } from './models/Node';
-import { Edge } from './models/Edge';
-import { Switch } from '../models/topology/Switch';
-import { StompClientService } from '../services/StompClientService';
+import { SimulationQueue } from '@shared/simulation';
+import { Node, Edge, Regulator } from '@shared/topology';
+import { StompClientService } from '@shared/StompClientService';
+import { Switch, TopologyModel, Capacitor } from '@shared/topology';
+import { OpenOrCloseCapacitorRequest } from './models/OpenOrCloseCapacitorRequest';
+import { ToggleSwitchStateRequest } from './models/ToggleSwitchStateRequest';
+import { GetTopologyModelRequest, GetTopologyModelRequestPayload } from './models/GetTopologyModelRequest';
+import { ToggleCapacitorManualModeRequest } from './models/ToggleCapacitorManualModeRequest';
+import { ToggleRegulatorManualModeRequest } from './models/ToggleRegulatorManualModeRequest';
 
 interface Props {
   mRIDs: { [componentType: string]: string };
@@ -23,17 +22,13 @@ interface State {
   isFetching: boolean;
 }
 
-const topologyCache = {};
-
 export class TopologyRendererContainer extends React.Component<Props, State> {
 
   private readonly _stompClientService = StompClientService.getInstance();
-  private readonly _messageService = MessageService.getInstance();
   private readonly _simulationQueue = SimulationQueue.getInstance();
   private _activeSimulationConfig = this._simulationQueue.getActiveSimulation().config;
-  private _activeSimulationStream: Subscription;
-  private _stompClientStatusStream: Subscription;
-  private _topologySubscription: Promise<StompSubscription>;
+  private _activeSimulationStream: Subscription = null;
+  private static readonly _CACHE = {};
 
   constructor(props: any) {
     super(props);
@@ -41,82 +36,57 @@ export class TopologyRendererContainer extends React.Component<Props, State> {
       topology: null,
       isFetching: true
     };
-    this._onToggleSwitch = this._onToggleSwitch.bind(this);
-
+    this.onToggleSwitchState = this.onToggleSwitchState.bind(this);
+    this.onOpenOrCloseCapacitor = this.onOpenOrCloseCapacitor.bind(this);
+    this.onToggleCapacitorManualMode = this.onToggleCapacitorManualMode.bind(this);
+    this.onToggleRegulatorManualMode = this.onToggleRegulatorManualMode.bind(this);
   }
 
   componentDidMount() {
-    this._stompClientStatusStream = this._stompClientService.statusChanges()
-      .pipe(filter(status => status === 'CONNECTED'))
-      .subscribe(() => this._init());
+    this._activeSimulationStream = this._observeActiveSimulationChangeEvent();
   }
 
-  componentWillUnmount() {
-    if (this._topologySubscription)
-      this._topologySubscription.then(sub => sub.unsubscribe());
-    if (this._activeSimulationStream)
-      this._activeSimulationStream.unsubscribe();
-    if (this._stompClientStatusStream)
-      this._stompClientStatusStream.unsubscribe();
+  private _observeActiveSimulationChangeEvent() {
+    return this._simulationQueue.activeSimulationChanged()
+      .pipe(takeWhile(() => this._activeSimulationStream === null))
+      .subscribe({
+        next: simulation => {
+          this._activeSimulationConfig = simulation.config;
+          if (this._topologyModelExistsInCache())
+            this._useTopologyModelFromCache();
+          else
+            this._fetchTopologyModel();
+        }
+      });
+  }
+  private _topologyModelExistsInCache() {
+    return this._activeSimulationConfig && this._activeSimulationConfig.power_system_config.Line_name in TopologyRendererContainer._CACHE;
   }
 
-  render() {
-    return (
-      <TopologyRenderer
-        topology={this.state.topology}
-        showWait={this.state.isFetching}
-        topologyName={this._activeSimulationConfig.simulation_config.simulation_name}
-        onToggleSwitch={this._onToggleSwitch} />
+  private _useTopologyModelFromCache() {
+    this.setState({
+      topology: TopologyRendererContainer._CACHE[this._activeSimulationConfig.power_system_config.Line_name],
+      isFetching: false
+    });
+  }
+
+  private _fetchTopologyModel() {
+    const lineName = this._activeSimulationConfig.power_system_config.Line_name;
+    const getTopologyModelRequest = new GetTopologyModelRequest(lineName);
+    this._subscribeToTopologyModelTopic(getTopologyModelRequest.replyTo);
+    this._stompClientService.send(
+      getTopologyModelRequest.url,
+      { 'reply-to': getTopologyModelRequest.replyTo },
+      JSON.stringify(getTopologyModelRequest.requestBody)
     );
   }
 
-  private _createNewNode(properties: { [key: string]: any }): Node {
-    return {
-      x: -1,
-      y: -1,
-      screenX: 0,
-      screenY: 0,
-      data: null,
-      name: '',
-      type: 'unknown',
-      ...properties
-    } as Node;
-  }
-
-  private _init() {
-    this._topologySubscription = this._subscribeToTopologyModelTopic();
-    this._activeSimulationStream = this._subscribeToActiveSimulationStream();
-    if (this._topologyModelExistsInCache())
-      this._useTopologyModelFromCache();
-    else
-      this._messageService.fetchTopologyModel(this._activeSimulationConfig.power_system_config.Line_name);
-  }
-
-  private _onToggleSwitch(swjtch: Switch) {
-    const payload = {
-      command: 'update',
-      input: {
-        simulation_id: this._simulationQueue.getActiveSimulation().id,
-        message: {
-          timestamp: Math.floor((new Date).getTime() / 1000.0),
-          difference_mrid: this._activeSimulationConfig.power_system_config.Line_name,
-          reverse_differences: [
-            {
-              object: this.props.mRIDs[swjtch.name],
-              value: swjtch.open ? '0' : '1'
-            }
-          ],
-          forward_differences: [
-            {
-              object: this.props.mRIDs[swjtch.name],
-              value: swjtch.open ? '1' : '0'
-            }
-          ]
-        }
-      }
-    };
-    console.log(payload);
-    this._messageService.toggleSwitchState(payload);
+  private _subscribeToTopologyModelTopic(destination: string) {
+    this._stompClientService.readOnceFrom(destination)
+      .pipe(map(body => JSON.parse(body) as GetTopologyModelRequestPayload))
+      .subscribe({
+        next: payload => this._processModelForRendering(payload)
+      });
   }
 
   private _processModelForRendering(payload: GetTopologyModelRequestPayload) {
@@ -127,30 +97,7 @@ export class TopologyRendererContainer extends React.Component<Props, State> {
       topology,
       isFetching: false
     });
-    topologyCache[this._activeSimulationConfig.power_system_config.Line_name] = topology;
-  }
-
-  private _subscribeToActiveSimulationStream() {
-    return this._activeSimulationStream = this._simulationQueue.activeSimulationChanged()
-      .subscribe(simulation => {
-        if (this._topologyModelExistsInCache())
-          this._useTopologyModelFromCache();
-        else {
-          this._activeSimulationConfig = simulation.config;
-          this._messageService.fetchTopologyModel(simulation.config.power_system_config.Line_name);
-        }
-      });
-  }
-
-  private _subscribeToTopologyModelTopic() {
-    return this._messageService.onTopologyModelReceived((payload: GetTopologyModelRequestPayload) => {
-      if (payload.requestType === RequestConfigurationType.GRID_LAB_D_SYMBOLS)
-        this._processModelForRendering(payload);
-    });
-  }
-
-  private _topologyModelExistsInCache() {
-    return this._activeSimulationConfig && this._activeSimulationConfig.power_system_config.Line_name in topologyCache;
+    TopologyRendererContainer._CACHE[this._activeSimulationConfig.power_system_config.Line_name] = topology;
   }
 
   private _transformModel(model: TopologyModel): { nodes: Node[], edges: Edge[] } {
@@ -178,83 +125,86 @@ export class TopologyRendererContainer extends React.Component<Props, State> {
       switch (groupName) {
         case 'swing_nodes':
           nodes.push(this._createNewNode({
+            ...node,
             name: node.name,
             type: 'swing_node',
-            data: node,
-            x: this._truncate(node.x1),
-            y: this._truncate(node.y1)
+            x: Math.trunc(node.x1),
+            y: Math.trunc(node.y1)
           }));
           break;
         case 'batteries':
           nodes.push(this._createNewNode({
+            ...node,
             name: node.name,
-            type: 'battery',
-            data: node
+            type: 'battery'
           }));
           break;
         case 'switches':
           if ((node.x1 !== 0 && node.y1 !== 0) || (node.x2 !== 0 && node.y2 !== 0)) {
-            node.open = node.open === 'open';
             nodes.push(this._createNewNode({
+              ...node,
               name: node.name,
               type: 'switch',
-              data: node,
-              x: this._truncate(node.x1 !== 0 ? node.x1 : node.x2),
-              y: this._truncate(node.y1 !== 0 ? node.y1 : node.y2),
+              open: node.open === 'open',
+              x: Math.trunc(node.x1 !== 0 ? node.x1 : node.x2),
+              y: Math.trunc(node.y1 !== 0 ? node.y1 : node.y2),
             }));
           }
           break;
         case 'solarpanels':
           nodes.push(this._createNewNode({
+            ...node,
             name: node.name,
-            type: 'solarpanel',
-            data: node
+            type: 'solarpanel'
           }));
           break;
         case 'transformers':
           if ((node.x1 !== 0 && node.y1 !== 0) || (node.x2 !== 0 && node.y2 !== 0)) {
             nodes.push(this._createNewNode({
+              ...node,
               name: node.name,
               type: 'transformer',
-              data: node,
-              x: this._truncate(node.x1 !== 0 ? node.x1 : node.x2),
-              y: this._truncate(node.y1 !== 0 ? node.y1 : node.y2)
+              x: Math.trunc(node.x1 !== 0 ? node.x1 : node.x2),
+              y: Math.trunc(node.y1 !== 0 ? node.y1 : node.y2)
             }));
           }
           break;
         case 'capacitors':
           nodes.push(this._createNewNode({
+            ...node,
             name: node.name,
             type: 'capacitor',
-            data: node,
-            x: this._truncate(node.x1),
-            y: this._truncate(node.y1)
+            open: node.open === 'open',
+            x: Math.trunc(node.x1),
+            y: Math.trunc(node.y1),
+            manual: node.manual === 'manual'
           }));
           break;
         case 'overhead_lines':
           const fromNode: Node = allNodes.filter(e => e.name === node.from)[0] || this._createNewNode({ name: node.from });
           const toNode: Node = allNodes.filter(e => e.name === node.to)[0] || this._createNewNode({ name: node.to });
           if (node.x1 !== 0.0 && node.y1 !== 0.0 && node.x2 !== 0.0 && node.y2 !== 0.0) {
-            fromNode.x = this._truncate(node.x1);
-            fromNode.y = this._truncate(node.y1);
-            toNode.x = this._truncate(node.x2);
-            toNode.y = this._truncate(node.y2);
+            fromNode.x = Math.trunc(node.x1);
+            fromNode.y = Math.trunc(node.y1);
+            toNode.x = Math.trunc(node.x2);
+            toNode.y = Math.trunc(node.y2);
             nodes.push(fromNode, toNode);
             edges.push({
+              ...node,
               name: node.name,
               from: fromNode,
               to: toNode,
-              data: node
             });
           }
           break;
         case 'regulators':
           nodes.push(this._createNewNode({
+            ...node,
             name: node.name,
             type: 'regulator',
-            data: node,
-            x: this._truncate(node.x2),
-            y: this._truncate(node.y2)
+            x: Math.trunc(node.x2),
+            y: Math.trunc(node.y2),
+            manual: node.manual === 'manual'
           }));
           break;
         default:
@@ -263,17 +213,95 @@ export class TopologyRendererContainer extends React.Component<Props, State> {
       }
     }
 
-    return { nodes: nodes.filter(node => node.x !== -1 && node.y !== -1), edges: edges.filter(edge => [edge.from.x, edge.from.y, edge.to.x, edge.to.y].every(e => e !== -1)) };
+    return {
+      nodes: nodes.filter(node => node.x !== -1 && node.y !== -1),
+      edges: edges.filter(edge => [edge.from.x, edge.from.y, edge.to.x, edge.to.y].every(e => e !== -1))
+    };
   }
 
-  private _useTopologyModelFromCache() {
-    this.setState({
-      topology: topologyCache[this._activeSimulationConfig.power_system_config.Line_name],
-      isFetching: false
+  private _createNewNode(properties: { [key: string]: any }): Node {
+    return {
+      x: -1,
+      y: -1,
+      screenX: 0,
+      screenY: 0,
+      name: '',
+      type: 'unknown',
+      ...properties
+    } as Node;
+  }
+
+  componentWillUnmount() {
+    this._activeSimulationStream.unsubscribe();
+  }
+
+  render() {
+    return (
+      <TopologyRenderer
+        topology={this.state.topology}
+        showWait={this.state.isFetching}
+        topologyName={this._activeSimulationConfig.simulation_config.simulation_name}
+        onToggleSwitch={this.onToggleSwitchState}
+        onOpenOrCloseCapacitor={this.onOpenOrCloseCapacitor}
+        onToggleCapacitorManualMode={this.onToggleCapacitorManualMode}
+        onToggleRegulatorManualMode={this.onToggleRegulatorManualMode} />
+    );
+  }
+
+  onToggleSwitchState(swjtch: Switch) {
+    const toggleSwitchStateRequest = new ToggleSwitchStateRequest({
+      componentMRID: this.props.mRIDs[swjtch.name],
+      simulationId: this._simulationQueue.getActiveSimulation().id,
+      open: swjtch.open,
+      differenceMRID: this._activeSimulationConfig.power_system_config.Line_name
     });
+    this._stompClientService.send(
+      toggleSwitchStateRequest.url,
+      { 'reply-to': toggleSwitchStateRequest.replyTo },
+      JSON.stringify(toggleSwitchStateRequest.requestBody)
+    );
   }
 
-  private _truncate(num: number) {
-    return num | 0;
+  onOpenOrCloseCapacitor(capacitor: Capacitor) {
+    const openOrCloseCapacitorRequest = new OpenOrCloseCapacitorRequest({
+      componentMRID: this.props.mRIDs[capacitor.name],
+      simulationId: this._simulationQueue.getActiveSimulation().id,
+      open: capacitor.open,
+      differenceMRID: this._activeSimulationConfig.power_system_config.Line_name
+    });
+    this._stompClientService.send(
+      openOrCloseCapacitorRequest.url,
+      { 'reply-to': openOrCloseCapacitorRequest.replyTo },
+      JSON.stringify(openOrCloseCapacitorRequest.requestBody)
+    );
   }
+
+  onToggleCapacitorManualMode(capacitor: Capacitor) {
+    const toggleCapacitorManualModeRequest = new ToggleCapacitorManualModeRequest({
+      componentMRID: this.props.mRIDs[capacitor.name],
+      simulationId: this._simulationQueue.getActiveSimulation().id,
+      manual: capacitor.manual,
+      differenceMRID: this._activeSimulationConfig.power_system_config.Line_name
+    });
+    this._stompClientService.send(
+      toggleCapacitorManualModeRequest.url,
+      { 'reply-to': toggleCapacitorManualModeRequest.replyTo },
+      JSON.stringify(toggleCapacitorManualModeRequest.requestBody)
+    );
+  }
+
+  onToggleRegulatorManualMode(regulator: Regulator) {
+    const toggleRegulatorManualModeRequest = new ToggleRegulatorManualModeRequest({
+      componentMRID: this.props.mRIDs[regulator.name],
+      simulationId: this._simulationQueue.getActiveSimulation().id,
+      manual: regulator.manual,
+      differenceMRID: this._activeSimulationConfig.power_system_config.Line_name
+    });
+    this._stompClientService.send(
+      toggleRegulatorManualModeRequest.url,
+      { 'reply-to': toggleRegulatorManualModeRequest.replyTo },
+      JSON.stringify(toggleRegulatorManualModeRequest.requestBody)
+    );
+  }
+
 }

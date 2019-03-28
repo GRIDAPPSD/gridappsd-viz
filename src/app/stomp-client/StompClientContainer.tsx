@@ -1,8 +1,10 @@
 import * as React from 'react';
 import { StompSubscription, Message } from '@stomp/stompjs';
 
-import { StompClientService as Client } from '../services/StompClientService';
+import { StompClientService } from '@shared/StompClientService';
 import { StompClient } from './StompClient';
+import { Subscription } from 'rxjs';
+import { finalize, map } from 'rxjs/operators';
 
 interface Props {
 }
@@ -14,8 +16,10 @@ interface State {
 
 
 export class StompClientContainer extends React.Component<Props, State> {
-  private readonly _stompClient = Client.getInstance();
-  private _subscription: Promise<StompSubscription> = null;
+
+  private readonly _stompClient = StompClientService.getInstance();
+  private _setupSubscription: Subscription = null;
+  private _topicResponseSubscription: StompSubscription = null;
 
   constructor(props: any) {
     super(props);
@@ -23,36 +27,44 @@ export class StompClientContainer extends React.Component<Props, State> {
       responseBody: '',
       isFetching: false
     };
-    this._sendRequest = this._sendRequest.bind(this);
+    this.sendRequest = this.sendRequest.bind(this);
   }
 
   componentDidMount() {
-    this._subscription = this._stompClient.subscribe('/stomp-client/response-queue', (message: Message) => {
-      const responseBody = JSON.parse(message.body);
-      this.setState({ responseBody: JSON.stringify(responseBody, null, 4) }, () => this.setState({ isFetching: false }));
-    });
+    this._setupSubscription = this._subscribeForResponse();
+  }
+
+  private _subscribeForResponse() {
+    return this._stompClient.readFrom('/stomp-client/response-queue')
+      .pipe(
+        map(body => JSON.parse(body)),
+        map(payload => JSON.stringify(payload, null, 4))
+      )
+      .subscribe({
+        next: result => this.setState({ responseBody: result }, () => this.setState({ isFetching: false }))
+      });
   }
 
   componentWillUnmount() {
-    if (this._subscription)
-      this._subscription.then(sub => sub.unsubscribe());
+    this._setupSubscription.unsubscribe();
   }
+
   render() {
     return (
       <StompClient
-        onRequestSubmitted={this._sendRequest}
+        onRequestSubmitted={this.sendRequest}
         response={this.state.responseBody}
         isDone={!this.state.isFetching}
       />
     );
   }
 
-  private _sendRequest(topic: string, requestBody: string) {
+  sendRequest(topic: string, requestBody: string) {
     this.setState({ isFetching: true, responseBody: '' });
-    if(requestBody != "") {
-      requestBody = JSON.stringify(JSON.parse(requestBody));  
-    }  
-    this._stompClient.send(topic, { 'reply-to': '/stomp-client/response-queue' }, requestBody );
+    if (requestBody !== '') {
+      requestBody = JSON.stringify(JSON.parse(requestBody));
+    }
+    this._stompClient.send(topic, { 'reply-to': '/stomp-client/response-queue' }, requestBody);
   }
 
 }

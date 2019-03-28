@@ -6,7 +6,7 @@ const TsConfigPathsPlugin = require('awesome-typescript-loader').TsConfigPathsPl
 
 module.exports = {
   entry: {
-    app: './src/app/index.tsx',
+    app: './src/main.tsx',
     vendors: './src/vendors.ts'
   },
   output: {

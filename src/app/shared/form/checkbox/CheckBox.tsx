@@ -7,12 +7,14 @@ interface Props {
   name: string;
   onChange?: (state: boolean) => void;
   disabled?: boolean;
-  checked: boolean;
+  hint?: string;
+  checked?: boolean;
 }
 
-export const CheckBox = (props: Props = { disabled: false } as Props) => {
+export const CheckBox = (props: Props) => {
   return (
     <div className={'gridappsd-checkbox' + (props.disabled ? ' disabled-checkbox' : '')}>
+      <label className='gridappsd-checkbox__label'>{props.label}</label>
       <input
         className={'gridappsd-checkbox__input'}
         ref={checkbox => {
@@ -24,7 +26,9 @@ export const CheckBox = (props: Props = { disabled: false } as Props) => {
         disabled={props.disabled}
         onChange={event => props.onChange(event.currentTarget.checked)} />
       <i className='app-icon gridappsd-checkbox__icon'></i>
-      <label className='gridappsd-checkbox__label'>{props.label}</label>
+      {
+        props.hint && <span className='gridappsd-checkbox__hint'>{props.hint}</span>
+      }
     </div>
   );
 }

@@ -43,7 +43,9 @@ export class QueryLogsResultTable extends React.Component<Props, State> {
                       width: '100%',
                       position: 'relative',
                       top: '50%',
-                      transform: 'translateY(-50%)'
+                      transform: 'translateY(-50%)',
+                      textOverflow: 'ellipsis',
+                      overflow: 'hidden'
                     }}>
                       {row.value}
                     </span>

@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { Subscription } from 'rxjs';
 
-import { SimulationOutputService } from '../../services/SimulationOutputService';
+import { SimulationOutputService } from '@shared/simulation';
 import { Label } from './Label';
 
 interface Props {
@@ -68,16 +68,22 @@ export class LabelContainer extends React.Component<Props, State> {
       .subscribe(measurements => {
         const nodeNames: { [key: string]: string[] } = NODES_PER_TOPOLOGY[this.props.topologyName];
         const labels = [];
-        for (const nodeName in nodeNames) {
+        for (const [nodeName, phases] of Object.entries(nodeNames)) {
           let content = [];
           // getting values for taps
-          const filteredMeasurements = measurements.filter(m => m.conductingEquipmentName.includes(nodeName) && m.type === 'Pos');
-          const measurementsAtPhases = [];
+          const filteredMeasurements = measurements.filter(
+            m => m.conductingEquipmentName.includes(nodeName) && m.type === 'Pos'
+          );
           // Only get the measurements for phases A, B, C and discard measurements with duplicate phases
-          filteredMeasurements.forEach(m => {
-            if (nodeNames[nodeName].includes(m.phases) && measurementsAtPhases.findIndex(e => e.phases === m.phases) === -1)
-              measurementsAtPhases.push(m);
-          });
+          const measurementsAtPhases = filteredMeasurements.reduce(
+            (measurementsAtPhases, m) => {
+              if (phases.includes(m.phases) && measurementsAtPhases.findIndex(e => e.phases === m.phases) === -1)
+                measurementsAtPhases.push(m);
+              return measurementsAtPhases;
+            },
+            []
+          ).sort((a, b) => a.phases.localeCompare(b.phases));
+
           if (nodeName.includes('capbank') || nodeName.includes('c83')) {
             content = measurementsAtPhases.map(node => (
               <tr key={node.phases}>
@@ -88,20 +94,29 @@ export class LabelContainer extends React.Component<Props, State> {
           }
           else {
             // get measurements for voltages
-            const voltages = measurements.filter(m => measurementsAtPhases[0].connectivityNode === m.connectivityNode && m.type === 'PNV');
-            const voltagesAtPhases = [];
-            // discard measures with phases that were already added
-            voltages.forEach(m => {
-              if (nodeNames[nodeName].includes(m.phases) && voltagesAtPhases.findIndex(e => e.phases === m.phases) === -1)
-                voltagesAtPhases.push(m);
-            });
+            const voltages = measurements.filter(
+              m => measurementsAtPhases[0].connectivityNode === m.connectivityNode && m.type === 'PNV'
+            );
+            const voltagesAtPhases = voltages.reduce(
+              (voltagesAtPhases, m) => {
+                // discard measures with phases that were already added
+                if (phases.includes(m.phases) && voltagesAtPhases.findIndex(e => e.phases === m.phases) === -1)
+                  voltagesAtPhases.push(m);
+                return voltagesAtPhases;
+              },
+              []
+            ).sort((a, b) => a.phases.localeCompare(b.phases));
+
             const powers = measurements.filter(m => m.conductingEquipmentName === 'hvmv_sub' && m.type === 'VA');
-            const powersAtPhases = [];
-            // Only get the measurements for phases A, B, C and discard measurements with duplicate phases
-            powers.forEach(m => {
-              if (nodeNames[nodeName].includes(m.phases) && powersAtPhases.findIndex(e => e.phases === m.phases) === -1)
-                powersAtPhases.push(m);
-            });
+            const powersAtPhases = powers.reduce(
+              (powersAtPhases, m) => {
+                // Only get the measurements for phases A, B, C and discard measurements with duplicate phases
+                if (phases.includes(m.phases) && powersAtPhases.findIndex(e => e.phases === m.phases) === -1)
+                  powersAtPhases.push(m);
+                return powersAtPhases;
+              },
+              []
+            ).sort((a, b) => a.phases.localeCompare(b.phases));
 
             content.push(
               <tr key='header'>
@@ -111,23 +126,36 @@ export class LabelContainer extends React.Component<Props, State> {
                 {nodeName === 'FEEDER_REG' && <th>Power in</th>}
               </tr>
             );
-            const length = Math.min(measurementsAtPhases.length, voltagesAtPhases.length, powersAtPhases.length);
+            const length = Math.max(measurementsAtPhases.length, voltagesAtPhases.length, powersAtPhases.length);
             for (let i = 0; i < length; i++) {
               content.push(
                 <tr key={i}>
-                  <td>{measurementsAtPhases[i].phases}</td>
+                  <td>{measurementsAtPhases[i] && measurementsAtPhases[i].phases}</td>
                   <td>
-                    {voltagesAtPhases[i].magnitude}
-                    <span>&ang;</span>
-                    {(voltagesAtPhases[i].angle > 0 ? '+' + voltagesAtPhases[i].angle : voltagesAtPhases[i].angle) + '  V'}
+                    {voltagesAtPhases[i] &&
+                      <>
+                        {voltagesAtPhases[i].magnitude}
+                        <span>&ang;</span>
+                        {(voltagesAtPhases[i].angle > 0 ? '+' + voltagesAtPhases[i].angle : voltagesAtPhases[i].angle) + '  V'}
+                      </>
+                    }
                   </td>
-                  <td>{measurementsAtPhases[i].value}</td>
+                  <td>{measurementsAtPhases[i] && measurementsAtPhases[i].value}</td>
                   {
                     nodeName === 'FEEDER_REG' &&
                     <td>
-                      {powersAtPhases[i].magnitude}
-                      <span>&ang;</span>
-                      {(voltagesAtPhases[i].angle > 0 ? '+' + voltagesAtPhases[i].angle : voltagesAtPhases[i].angle) + '  VA'}
+                      {powersAtPhases[i] &&
+                        <>
+                          {powersAtPhases[i].magnitude}
+                          <span>&ang;</span>
+                        </>
+                      }
+                      {voltagesAtPhases[i] &&
+                        (voltagesAtPhases[i].angle > 0
+                          ? '+' + voltagesAtPhases[i].angle
+                          : voltagesAtPhases[i].angle)
+                        + '  VA'
+                      }
                     </td>
                   }
                 </tr>
@@ -139,4 +167,5 @@ export class LabelContainer extends React.Component<Props, State> {
         this.setState({ labels });
       });
   }
+
 }

@@ -1,11 +1,10 @@
 import * as React from 'react';
 
-import { SimulationControlService } from '../../services/SimulationControlService';
+import { SimulationConfiguration, SimulationControlService } from '@shared/simulation';
 import { SimulationControl } from './SimulationControl';
-import { SimulationConfig } from '../../models/SimulationConfig';
 
 interface Props {
-  simulationConfig: SimulationConfig;
+  simulationConfig: SimulationConfiguration;
 }
 
 interface State {

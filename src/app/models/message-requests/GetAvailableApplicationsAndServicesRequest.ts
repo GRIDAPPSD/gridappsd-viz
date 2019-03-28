@@ -1,37 +1,26 @@
-import { MessageRequest } from './MessageRequest';
-import { Application } from '../Application';
+import { MessageRequest } from '@shared/MessageRequest';
+import { Application } from '@shared/Application';
 
-type RequestBody = {
+interface RequestBody {
   applications: boolean;
   services: boolean;
   appInstances: boolean;
   serviceInstances: boolean;
 }
 
-export class GetAvailableApplicationsAndServices implements MessageRequest {
-  private _requestBody: RequestBody = {
+export class GetAvailableApplicationsRequest implements MessageRequest {
+
+  readonly url = 'goss.gridappsd.process.request.status.platform';
+  readonly replyTo = 'available-applications';
+  readonly requestBody = {
     applications: true,
-    services: true,
-    appInstances: true,
-    serviceInstances: true
-  };
+    services: false,
+    appInstances: false,
+    serviceInstances: false
+  } as RequestBody;
 
-  get url(): string {
-    return 'goss.gridappsd.process.request.status.platform';
-  }
-
-  get replyTo(): string {
-    return 'application-and-services';
-  }
-
-  get requestBody(): RequestBody {
-    return this._requestBody;
-  }
 }
 
-export interface GetAvailableApplicationsAndServicesPayload {
+export interface GetAvailableApplicationsRequestPayload {
   applications: Application[];
-  services: string;
-  appInstances: string;
-  serviceInstances: string;
 }
