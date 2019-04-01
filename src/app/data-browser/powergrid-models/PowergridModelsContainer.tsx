@@ -26,6 +26,7 @@ export class PowergridModelsContainer extends React.Component<Props, State> {
   private readonly _queryPowerGridModelsRequest = new QueryPowerGridModelsRequest();
 
   private _setupSubscription: Subscription;
+  private _stompClientStatusSubscription: Subscription;
 
   constructor(props: any) {
     super(props);
@@ -37,7 +38,24 @@ export class PowergridModelsContainer extends React.Component<Props, State> {
   }
 
   componentDidMount() {
-    this._setupSubscription = this._subscribeToPowerGridModelsTopic();
+    this._stompClientStatusSubscription = this._watchStompClientStatusChanges();
+  }
+
+  private _watchStompClientStatusChanges() {
+    return this._stompClientService.statusChanges()
+      .subscribe({
+        next: status => {
+          switch (status) {
+            case 'CONNECTING':
+              if (this._setupSubscription)
+                this._setupSubscription.unsubscribe();
+              break;
+            case 'CONNECTED':
+              this._setupSubscription = this._subscribeToPowerGridModelsTopic();
+              break;
+          }
+        }
+      });
   }
 
   private _subscribeToPowerGridModelsTopic() {
@@ -53,6 +71,7 @@ export class PowergridModelsContainer extends React.Component<Props, State> {
 
   componentWillUnmount() {
     this._setupSubscription.unsubscribe();
+    this._stompClientStatusSubscription.unsubscribe();
   }
 
   render() {

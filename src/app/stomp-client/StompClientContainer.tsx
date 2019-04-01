@@ -17,9 +17,9 @@ interface State {
 
 export class StompClientContainer extends React.Component<Props, State> {
 
-  private readonly _stompClient = StompClientService.getInstance();
-  private _setupSubscription: Subscription = null;
-  private _topicResponseSubscription: StompSubscription = null;
+  private readonly _stompClientService = StompClientService.getInstance();
+  private _responseSubscription: Subscription = null;
+  private _stompClientStatusSubscription: Subscription;
 
   constructor(props: any) {
     super(props);
@@ -31,11 +31,28 @@ export class StompClientContainer extends React.Component<Props, State> {
   }
 
   componentDidMount() {
-    this._setupSubscription = this._subscribeForResponse();
+    this._stompClientStatusSubscription = this._watchStompClientStatusChanges();
+  }
+
+  private _watchStompClientStatusChanges() {
+    return this._stompClientService.statusChanges()
+      .subscribe({
+        next: status => {
+          switch (status) {
+            case 'CONNECTING':
+              if (this._responseSubscription)
+                this._responseSubscription.unsubscribe();
+              break;
+            case 'CONNECTED':
+              this._responseSubscription = this._subscribeForResponse();
+              break;
+          }
+        }
+      });
   }
 
   private _subscribeForResponse() {
-    return this._stompClient.readFrom('/stomp-client/response-queue')
+    return this._stompClientService.readFrom('/stomp-client/response-queue')
       .pipe(
         map(body => JSON.parse(body)),
         map(payload => JSON.stringify(payload, null, 4))
@@ -46,7 +63,8 @@ export class StompClientContainer extends React.Component<Props, State> {
   }
 
   componentWillUnmount() {
-    this._setupSubscription.unsubscribe();
+    this._responseSubscription.unsubscribe();
+    this._stompClientStatusSubscription.unsubscribe();
   }
 
   render() {
@@ -64,7 +82,7 @@ export class StompClientContainer extends React.Component<Props, State> {
     if (requestBody !== '') {
       requestBody = JSON.stringify(JSON.parse(requestBody));
     }
-    this._stompClient.send(topic, { 'reply-to': '/stomp-client/response-queue' }, requestBody);
+    this._stompClientService.send(topic, { 'reply-to': '/stomp-client/response-queue' }, requestBody);
   }
 
 }
