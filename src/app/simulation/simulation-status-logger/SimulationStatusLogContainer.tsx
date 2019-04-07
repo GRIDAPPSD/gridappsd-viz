@@ -82,7 +82,7 @@ export class SimulationStatusLogContainer extends React.Component<Props, State> 
 
   private _onSimulationStatusLogMessageReceived(logMessage: string) {
     this.setState({
-      logMessages: this.state.logMessages.concat(logMessage),
+      logMessages: [logMessage].concat(this.state.logMessages),
       isFetching: false
     });
   }

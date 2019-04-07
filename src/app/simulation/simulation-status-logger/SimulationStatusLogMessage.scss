@@ -2,7 +2,18 @@
     display: flex;
     align-items: center;
     padding: 5px;
-    border-bottom: 2px solid #add8e6;
+    border-bottom: 2px solid #29B6F6;
+}
+
+$logLevels: FATAL ERROR WARN INFO DEBUG TRACE;
+$logLevelColors: #B71C1C #D32F2F #FFFF00 #F0F4C3 #E1F5FE #C0CA33;
+$textColors: #fff #fff #000 #000 #000 #000;
+
+@for $index from 1 through length($logLevels) {
+    .simulation-status-log-message.#{nth($logLevels, $index)} {
+        background-color: #{nth($logLevelColors, $index)};
+        color: #{nth($textColors, $index)} !important;
+    }
 }
 
 .simulation-status-log-message.highlight {
