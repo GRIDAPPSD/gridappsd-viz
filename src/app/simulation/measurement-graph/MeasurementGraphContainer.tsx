@@ -3,13 +3,12 @@ import { Subscription } from 'rxjs';
 
 import { MeasurementGraph } from './MeasurementGraph';
 import { MeasurementGraphModel } from './models/MeasurementGraphModel';
-import { SimulationOutputMeasurement, SimulationOutputService } from '@shared/simulation';
+import { SimulationOutputMeasurement, SimulationOutputService, SimulationQueue } from '@shared/simulation';
 import { TimeSeries } from './models/TimeSeries';
 import { TimeSeriesDataPoint } from './models/TimeSeriesDataPoint';
 
 
 interface Props {
-  simulationName: string;
 }
 
 interface State {
@@ -110,6 +109,7 @@ const GRAPH_NAMES_PER_SIMULATION_NAME = {
 export class MeasurementGraphContainer extends React.Component<Props, State> {
 
   private readonly _simulationOutputService = SimulationOutputService.getInstance();
+  private readonly _simulationQueue = SimulationQueue.getInstance();
   private _timeSeries: { [seriesName: string]: TimeSeries } = {};
   private _simulationOutputMeasurementsStream: Subscription;
 
@@ -125,9 +125,10 @@ export class MeasurementGraphContainer extends React.Component<Props, State> {
   }
 
   private _subscribeToSimulationOutputMeasurementsStream(): Subscription {
+    const simulationName = this._simulationQueue.getActiveSimulation().name;
     return this._simulationOutputService.simulationOutputMeasurementsReceived()
       .subscribe(measurements => {
-        const measurementGraphModels = Object.entries(GRAPH_NAMES_PER_SIMULATION_NAME[this.props.simulationName] as { [key: string]: string[] })
+        const measurementGraphModels = Object.entries(GRAPH_NAMES_PER_SIMULATION_NAME[simulationName] as { [key: string]: string[] })
           .map(([graphName, timeSeriesNames]) => this._buildPlotModel(graphName, timeSeriesNames, measurements));
         this.setState({ measurementGraphModels });
       });

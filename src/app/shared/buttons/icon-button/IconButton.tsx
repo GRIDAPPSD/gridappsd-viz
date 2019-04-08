@@ -3,8 +3,11 @@ import * as React from 'react';
 import { Ripple } from '../../ripple/Ripple';
 import './IconButton.scss';
 
+type Icon = 'plus' | 'minus' | 'question' | 'websocket-connection-active' | 'websocket-connection-inactive' |
+  'start' | 'stop' | 'pause' | 'resume';
+
 interface Props {
-  icon: 'plus' | 'minus' | 'question' | 'websocket-connection-active' | 'websocket-connection-inactive';
+  icon: Icon;
   onClick?: (event) => void;
   children?: any;
   className?: string;

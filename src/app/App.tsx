@@ -162,21 +162,19 @@ export class App extends React.Component<Props, State> {
               exact
               path='/topology'
               component={() => {
-                const activeSimulationConfig = this._simulationQueue.getActiveSimulation().config;
-                const line = this.state.feederModels.lines.filter(line => line.mRID === activeSimulationConfig.power_system_config.Line_name)[0];
                 return (
                   <>
                     <div className='topology-renderer-simulation-status-logger-measurement-graphs'>
                       <div className='topology-renderer-simulation-status-logger'>
-                        <SimulationControlContainer simulationConfig={activeSimulationConfig} />
+                        <SimulationControlContainer />
                         <TopologyRendererContainer mRIDs={this._mRIDs} />
                         <SimulationStatusLogContainer />
                       </div>
                       <div className='measurement-graphs'>
-                        <MeasurementGraphContainer simulationName={activeSimulationConfig.simulation_config.simulation_name} />
+                        <MeasurementGraphContainer />
                       </div>
                     </div>
-                    {line && <LabelContainer topologyName={line.name} />}
+                    <LabelContainer />
                   </>
                 );
               }} />
