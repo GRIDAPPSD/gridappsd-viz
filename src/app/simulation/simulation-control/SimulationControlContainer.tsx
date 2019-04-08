@@ -1,30 +1,75 @@
 import * as React from 'react';
+import { Subscription } from 'rxjs';
 
-import { SimulationConfiguration, SimulationControlService } from '@shared/simulation';
+import { SimulationConfiguration, SimulationControlService, SimulationStatus, SimulationQueue } from '@shared/simulation';
 import { SimulationControl } from './SimulationControl';
 
 interface Props {
-  simulationConfig: SimulationConfiguration;
 }
 
 interface State {
+  simulationStatus: SimulationStatus
 }
 
 export class SimulationControlContainer extends React.Component<Props, State> {
-  private _simulationControlService = SimulationControlService.getInstance();
+  private readonly _simulationControlService = SimulationControlService.getInstance();
+  private readonly _simulationQueue = SimulationQueue.getInstance();
+  private _simulationStatusChangeSubscription: Subscription;
 
   constructor(props: any) {
     super(props);
 
-    this._startSimulation = this._startSimulation.bind(this);
+    this.state = {
+      simulationStatus: SimulationStatus.NEW
+    };
+
+    this.startSimulation = this.startSimulation.bind(this);
+    this.stopSimulation = this.stopSimulation.bind(this);
+    this.pauseSimulation = this.pauseSimulation.bind(this);
+    this.resumeSimulation = this.resumeSimulation.bind(this);
+  }
+
+  componentDidMount() {
+    this._simulationStatusChangeSubscription = this._subscribeToSimulationStatusChanges();
+  }
+
+  private _subscribeToSimulationStatusChanges() {
+    return this._simulationControlService.statusChanged()
+      .subscribe({
+        next: status => this.setState({ simulationStatus: status })
+      });
+  }
+
+  componentWillUnmount() {
+    this._simulationStatusChangeSubscription.unsubscribe();
   }
 
   render() {
-    return <SimulationControl timestamp='' onStartSimulation={this._startSimulation} />;
+    return (
+      <SimulationControl
+        timestamp=''
+        simulationStatus={this.state.simulationStatus}
+        onStartSimulation={this.startSimulation}
+        onStopSimulation={this.stopSimulation}
+        onPauseSimulation={this.pauseSimulation}
+        onResumeSimulation={this.resumeSimulation} />
+    );
   }
 
-  private _startSimulation() {
-    this._simulationControlService.startSimulation(this.props.simulationConfig);
+  startSimulation() {
+    this._simulationControlService.startSimulation(this._simulationQueue.getActiveSimulation().config);
+  }
+
+  stopSimulation() {
+    this._simulationControlService.stopSimulation();
+  }
+
+  pauseSimulation() {
+    this._simulationControlService.pauseSimulation();
+  }
+
+  resumeSimulation() {
+    this._simulationControlService.resumeSimulation();
   }
 
 }

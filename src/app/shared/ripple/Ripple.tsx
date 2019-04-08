@@ -35,6 +35,7 @@ export class Ripple extends React.Component<Props, {}> {
     const rect = this._rippleTrigger.getBoundingClientRect();
     const rippleContainer = document.createElement('div');
     rippleContainer.className = 'ripple';
+    rippleContainer.style.borderRadius = getComputedStyle(this._rippleTrigger, null).borderRadius;
     const rippler = document.createElement('span');
     const largerDimension = Math.max(rect.width, rect.height);
     if (this.props.fixed) {

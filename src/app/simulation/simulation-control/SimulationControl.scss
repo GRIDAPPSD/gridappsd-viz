@@ -6,7 +6,16 @@
     border-bottom: 2px solid rgba(0, 0, 0, 0.2);
     background-color: #fff;
     z-index: 1;
-    * {
-        margin: 0 5px;
-    }
+}
+
+.simulation-control__action {
+    border-radius: 100%;
+    transform-origin: 50% 50%;
+    transform: scale(1.1, 1.1);
+}
+
+.simulation-control__action.start:before,
+.simulation-control__action.resume:before {
+    position: relative;
+    transform: translateX(1px);
 }

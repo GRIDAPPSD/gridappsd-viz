@@ -11,9 +11,11 @@
     box-shadow: 1px 3px 8px -2px rgba(0, 0, 0, 0.2), 0px 2px 5px rgba(0, 0, 0, 0.2);
     transition: box-shadow 0.2s ease;
     cursor: pointer;
+
     &:hover {
         box-shadow: 0px 3px 10px rgba(0, 0, 0, 0.2), 0px 2px 7px rgba(0, 0, 0, 0.2);
     }
+
     &>span {
         font-family: Roboto;
     }
@@ -23,6 +25,7 @@
     width: auto;
     height: auto;
     padding: 5px 10px;
+
     &::before {
         margin-right: 10px;
         font-size: 25px;
@@ -47,4 +50,20 @@
 
 .icon-button.websocket-connection-inactive:before {
     content: '\f057';
+}
+
+.icon-button.start:before {
+    content: '\f04b';
+}
+
+.icon-button.stop:before {
+    content: '\f04d';
+}
+
+.icon-button.pause:before {
+    content: '\f04c';
+}
+
+.icon-button.resume:before {
+    content: '\f04b';
 }

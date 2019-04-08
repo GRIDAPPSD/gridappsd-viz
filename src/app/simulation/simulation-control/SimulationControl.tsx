@@ -1,20 +1,63 @@
 import * as React from 'react';
 
-import { BasicButton } from '@shared/buttons';
+import { IconButton } from '@shared/buttons';
 
 import './SimulationControl.scss';
+import { SimulationStatus } from '@shared/simulation';
+import { Tooltip } from '@shared/tooltip';
 
 interface Props {
   timestamp: string;
+  simulationStatus: SimulationStatus;
   onStartSimulation: () => void;
+  onStopSimulation: () => void;
+  onPauseSimulation: () => void;
+  onResumeSimulation: () => void;
 }
 
 export const SimulationControl = (props: Props) => (
   <div className='simulation-control'>
     <span className='simulation-control__timestamp'>{props.timestamp}</span>
-    <BasicButton
-      label='Start simulation'
-      type='positive'
-      onClick={props.onStartSimulation} />
+    {
+      props.simulationStatus === SimulationStatus.STARTED || props.simulationStatus === SimulationStatus.RESUMED
+        ?
+        <>
+          <Tooltip position='bottom' content='Pause simulation'>
+            <IconButton
+              icon='pause'
+              className='simulation-control__action'
+              onClick={props.onPauseSimulation} />
+          </Tooltip>
+          <Tooltip position='bottom' content='Stop simulation'>
+            <IconButton
+              icon='stop'
+              className='simulation-control__action'
+              onClick={props.onStopSimulation} />
+          </Tooltip>
+        </>
+        : props.simulationStatus === SimulationStatus.PAUSED
+          ?
+          <>
+            <Tooltip position='bottom' content='Resume simulation'>
+              <IconButton
+                icon='resume'
+                className='simulation-control__action resume'
+                onClick={props.onResumeSimulation} />
+            </Tooltip>
+            <Tooltip position='bottom' content='Stop simulation'>
+              <IconButton
+                icon='stop'
+                className='simulation-control__action'
+                onClick={props.onStopSimulation} />
+            </Tooltip>
+          </>
+          :
+          <Tooltip position='bottom' content='Start simulation'>
+            <IconButton
+              icon='start'
+              className='simulation-control__action start'
+              onClick={props.onStartSimulation} />
+          </Tooltip>
+    }
   </div>
 );
