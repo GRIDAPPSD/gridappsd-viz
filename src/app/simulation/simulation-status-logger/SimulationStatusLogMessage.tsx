@@ -10,22 +10,26 @@ interface Props {
 
 interface State {
   showMessageAsJson: boolean;
+  messageAsJson: any;
 }
 
 export class SimulationStatusLogMessage extends React.Component<Props, State> {
   private _messageElement: HTMLElement = null;
 
-  constructor(props: any) {
+  constructor(props: Props) {
     super(props);
     this.state = {
-      showMessageAsJson: false
+      showMessageAsJson: false,
+      messageAsJson: JSON.parse(this.props.message)
     };
     this._showAsJson = this._showAsJson.bind(this);
     this._showAsString = this._showAsString.bind(this);
   }
   render() {
     return (
-      <div className='simulation-status-log-message' ref={elem => this._messageElement = elem}>
+      <div
+        className={'simulation-status-log-message ' + this.state.messageAsJson.logLevel}
+        ref={elem => this._messageElement = elem}>
         {
           this.state.showMessageAsJson
             ?
@@ -34,7 +38,7 @@ export class SimulationStatusLogMessage extends React.Component<Props, State> {
                 icon='minus'
                 onClick={this._showAsString} />
               <span>
-                {JSON.stringify(JSON.parse(this.props.message), null, 4)}
+                {JSON.stringify(this.state.messageAsJson, null, 4)}
               </span>
             </>
             :
@@ -43,7 +47,7 @@ export class SimulationStatusLogMessage extends React.Component<Props, State> {
                 icon='plus'
                 onClick={this._showAsJson} />
               <span className='simulation-status-log-message__content'>
-                {JSON.parse(this.props.message).logMessage}
+                {this.state.messageAsJson.logMessage}
               </span>
             </>
         }

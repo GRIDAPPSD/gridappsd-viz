@@ -20,6 +20,14 @@ export class SimulationStatusLog extends React.Component<Props, State> {
   private _messagesContainer: HTMLElement = null;
   private readonly _dragHandleMinPosition = 85;
   private readonly _dragHandleMaxPosition = document.body.clientHeight - 71;
+  private readonly _logLevelAndColorTupleList = [
+    ['FATAL', '#B71C1C'],
+    ['ERROR', '#D32F2F'],
+    ['WARN', '#FFFF00'],
+    ['INFO', '#F0F4C3'],
+    ['DEBUG', '#E1F5FE'],
+    ['TRACE', '#C0CA33']
+  ];
 
   constructor(props: any) {
     super(props);
@@ -37,21 +45,38 @@ export class SimulationStatusLog extends React.Component<Props, State> {
   }
 
   render() {
+
     return (
       <div
         className='simulation-status-logger'
         style={{
           top: `${this.state.dragHandlePosition}px`
         }}>
-        <header>
-          <span>Simulation Status</span>
+        <header className='simulation-status-logger__header'>
+          <span className='simulation-status-logger__header__label'>Simulation Status</span>
+          {
+            this.props.messages.length > 0
+            &&
+            <div className='simulation-status-logger__header__legends'>
+              {
+                this._logLevelAndColorTupleList.map((tuple, i) => (
+                  <div key={i} className='simulation-status-logger__header__legends__level'>
+                    <span
+                      className='simulation-status-logger__header__legends__level__color'
+                      style={{ backgroundColor: tuple[1] }} />
+                    <span className='simulation-status-logger__header__legends__level__label'>{tuple[0]}</span>
+                  </div>
+                ))
+              }
+            </div>
+          }
         </header>
         <div className='simulation-status-logger__drag-handle' onMouseDown={this._mouseDown} />
         <section className='simulation-status-logger__content' ref={elem => this._messagesContainer = elem}>
           {
-            this.props.messages.map((message, i) => {
-              return <SimulationStatusLogMessage key={i} message={message} />;
-            })
+            this.props.messages.map((message, i, messages) => (
+              <SimulationStatusLogMessage key={messages.length - i} message={message} />
+            ))
           }
         </section>
         <Wait show={this.props.isFetching} />

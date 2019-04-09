@@ -5,30 +5,59 @@
     bottom: 0;
     width: 100%;
     z-index: 1;
-    header {
-        height: 30px;
-        display: inline-flex;
-        align-items: center;
-        position: absolute;
-        top: -30px;
-        span {
-            pointer-events: none;
-            user-select: none;
-            display: inline-block;
-            border-top-left-radius: 3px;
-            border-top-right-radius: 3px;
-            margin-left: 2px;
-            background-color: #3f51b5;
-            padding: 7px 15px;
-            font-size: 13px;
-            color: #fff;
-            box-shadow: -1px -0.25px 1px #888, 1px 0 1px #888;
-        }
-    }
+
     .simulation-status-logger-message:before {
         counter-increment: message-number;
         content: counter(message-number) ". "
     }
+}
+
+.simulation-status-logger__header {
+    display: inline-flex;
+    align-items: center;
+    position: absolute;
+    top: -29px;
+    box-shadow: 0px -0.5px 2px #555;
+}
+
+.simulation-status-logger__header__label {
+    pointer-events: none;
+    user-select: none;
+    display: inline-block;
+    background-color: #3f51b5;
+    padding: 7px 15px;
+    font-size: 13px;
+    color: #fff;
+}
+
+.simulation-status-logger__header__legends {
+    display: flex;
+    box-sizing: border-box;
+    background-color: #a29494;
+    padding: 5px;
+}
+
+.simulation-status-logger__header__legends__level {
+    display: flex;
+    align-items: center;
+    padding: 0 10px;
+}
+
+.simulation-status-logger__header__legends__level:not(:last-of-type) {
+    border-right: 1px solid #fff;
+}
+
+.simulation-status-logger__header__legends__level__color {
+    width: 15px;
+    height: 15px;
+    display: inline-block;
+    border-radius: 100%;
+    margin-right: 10px;
+}
+
+.simulation-status-logger__header__legends__level__label {
+    display: inline-block;
+    color: #fff;
 }
 
 .simulation-status-logger__drag-handle {
