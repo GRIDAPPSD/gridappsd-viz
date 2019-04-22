@@ -1,8 +1,8 @@
 import * as React from 'react';
 import { Subscription } from 'rxjs';
 
-import { MeasurementGraph } from './MeasurementGraph';
-import { MeasurementGraphModel } from './models/MeasurementGraphModel';
+import { MeasurementChart } from './MeasurementChart';
+import { MeasurementChartModel } from './models/MeasurementChartModel';
 import { SimulationOutputMeasurement, SimulationOutputService, SimulationQueue } from '@shared/simulation';
 import { TimeSeries } from './models/TimeSeries';
 import { TimeSeriesDataPoint } from './models/TimeSeriesDataPoint';
@@ -12,7 +12,7 @@ interface Props {
 }
 
 interface State {
-  measurementGraphModels: MeasurementGraphModel[];
+  measurementChartModels: MeasurementChartModel[];
 }
 
 const GRAPH_NAMES_PER_SIMULATION_NAME = {
@@ -106,7 +106,7 @@ const GRAPH_NAMES_PER_SIMULATION_NAME = {
 
 };
 
-export class MeasurementGraphContainer extends React.Component<Props, State> {
+export class MeasurementChartContainer extends React.Component<Props, State> {
 
   private readonly _simulationOutputService = SimulationOutputService.getInstance();
   private readonly _simulationQueue = SimulationQueue.getInstance();
@@ -116,7 +116,7 @@ export class MeasurementGraphContainer extends React.Component<Props, State> {
   constructor(props: any) {
     super(props);
     this.state = {
-      measurementGraphModels: []
+      measurementChartModels: []
     };
   }
 
@@ -128,17 +128,17 @@ export class MeasurementGraphContainer extends React.Component<Props, State> {
     const simulationName = this._simulationQueue.getActiveSimulation().name;
     return this._simulationOutputService.simulationOutputMeasurementsReceived()
       .subscribe(measurements => {
-        const measurementGraphModels = Object.entries(GRAPH_NAMES_PER_SIMULATION_NAME[simulationName] as { [key: string]: string[] })
+        const measurementChartModels = Object.entries(GRAPH_NAMES_PER_SIMULATION_NAME[simulationName] as { [key: string]: string[] })
           .map(([graphName, timeSeriesNames]) => this._buildPlotModel(graphName, timeSeriesNames, measurements));
-        this.setState({ measurementGraphModels });
+        this.setState({ measurementChartModels });
       });
   }
 
-  private _buildPlotModel(graphName: string, timeSeriesNames: string[], measurements: SimulationOutputMeasurement[]): MeasurementGraphModel {
+  private _buildPlotModel(graphName: string, timeSeriesNames: string[], measurements: SimulationOutputMeasurement[]): MeasurementChartModel {
     return timeSeriesNames.map(timeSeriesName => this._buildTimeSeries(graphName, timeSeriesName, measurements))
-      .reduce((measurementGraphModel: MeasurementGraphModel, timeSeries: TimeSeries) => {
-        measurementGraphModel.timeSeries.push(timeSeries);
-        return measurementGraphModel;
+      .reduce((measurementChartModel: MeasurementChartModel, timeSeries: TimeSeries) => {
+        measurementChartModel.timeSeries.push(timeSeries);
+        return measurementChartModel;
       }, { name: graphName, timeSeries: [] });
   }
 
@@ -191,7 +191,7 @@ export class MeasurementGraphContainer extends React.Component<Props, State> {
 
   render() {
     return (
-      this.state.measurementGraphModels.map(measurementGraphModel => <MeasurementGraph key={measurementGraphModel.name} measurementGraphModel={measurementGraphModel} />)
+      this.state.measurementChartModels.map(measurementChartModel => <MeasurementChart key={measurementChartModel.name} measurementChartModel={measurementChartModel} />)
     );
   }
 

@@ -4,31 +4,31 @@ import { scaleLinear, scaleTime, ScaleTime, ScaleLinear } from 'd3-scale';
 import { axisBottom, axisLeft } from 'd3-axis';
 import { line, Line } from 'd3-shape';
 import { extent } from 'd3-array';
-import { timeSecond } from 'd3-time';
+import { timeFormat } from 'd3-time-format';
 
-import { MeasurementGraphModel } from './models/MeasurementGraphModel';
+import { MeasurementChartModel } from './models/MeasurementChartModel';
 import { TimeSeriesDataPoint } from './models/TimeSeriesDataPoint';
 import { TimeSeries } from './models/TimeSeries';
 
-import './MeasurementGraph.scss';
+import './MeasurementChart.scss';
 
 interface Props {
-  measurementGraphModel: MeasurementGraphModel;
+  measurementChartModel: MeasurementChartModel;
 }
 
 interface State {
 }
 
-export class MeasurementGraph extends React.Component<Props, State> {
+export class MeasurementChart extends React.Component<Props, State> {
 
   private _canvas: SVGSVGElement = null;
   private _container: Selection<SVGGElement, any, any, any> = null;
   private _timeScale: ScaleTime<number, number> = null;
   private _yScale: ScaleLinear<number, number> = null;
   private _lineGenerator: Line<TimeSeriesDataPoint> = null;
-  private readonly _margin = { top: 10, bottom: 20, left: 70, right: 10 };
+  private readonly _margin = { top: 5, bottom: 35, left: 70, right: 10 };
   private _width = 370;
-  private readonly _height = 200;
+  private readonly _height = 250;
 
   constructor(props: any) {
     super(props);
@@ -36,18 +36,18 @@ export class MeasurementGraph extends React.Component<Props, State> {
 
   componentDidMount() {
     this._init();
-    this._render(this.props.measurementGraphModel);
+    this._render(this.props.measurementChartModel);
   }
 
   componentWillReceiveProps(newProps: Props) {
-    if (newProps.measurementGraphModel !== this.props.measurementGraphModel)
-      this._render(newProps.measurementGraphModel);
+    if (newProps.measurementChartModel !== this.props.measurementChartModel)
+      this._render(newProps.measurementChartModel);
   }
 
   render() {
     return (
-      <div className='measurement-graph'>
-        <header>{this.props.measurementGraphModel.name.replace(/_/g, ' ')}</header>
+      <div className='measurement-chart'>
+        <header>{this.props.measurementChartModel.name.replace(/_/g, ' ')}</header>
         <svg
           className='canvas'
           ref={elem => this._canvas = elem}
@@ -65,7 +65,6 @@ export class MeasurementGraph extends React.Component<Props, State> {
     this._container = select(this._canvas).select('g');
     this._timeScale = scaleTime()
       .range([this._margin.left, this._width - this._margin.right]);
-    this._timeScale.tickFormat(5, ':%S');
     this._yScale = scaleLinear()
       .range([this._height - this._margin.bottom, this._margin.top]);
     this._lineGenerator = line<TimeSeriesDataPoint>()
@@ -73,15 +72,15 @@ export class MeasurementGraph extends React.Component<Props, State> {
       .y(dataPoint => this._yScale(dataPoint.primitiveY));
   }
 
-  private _render(measurementGraphModel: MeasurementGraphModel) {
+  private _render(measurementChartModel: MeasurementChartModel) {
     this._container.selectAll('*').remove();
 
-    const axisExtents = this._calculateXYAxisExtents(measurementGraphModel.timeSeries);
+    const axisExtents = this._calculateXYAxisExtents(measurementChartModel.timeSeries);
 
     this._timeScale.domain(axisExtents.xExtent);
     this._yScale.domain(axisExtents.yExtent);
 
-    this._renderXAxis(axisExtents.xExtent[0]);
+    this._renderXAxis();
     this._renderYAxis();
     this._renderTimeSeriesLineCharts();
   }
@@ -94,15 +93,16 @@ export class MeasurementGraph extends React.Component<Props, State> {
     };
   }
 
-  private _renderXAxis(startTime: Date) {
+  private _renderXAxis() {
     this._container.append('g')
       .attr('class', 'axis x')
       .attr('transform', `translate(0,${this._height - this._margin.bottom})`)
-      .call(axisBottom(this._timeScale).tickFormat(this._createTickFormatForXAxis(startTime)));
-  }
-
-  private _createTickFormatForXAxis(startTime: Date) {
-    return date => String(timeSecond.count(startTime, date));
+      .call(axisBottom(this._timeScale).tickFormat(timeFormat('%H:%M:%S')))
+      .selectAll('text')
+      .style('text-anchor', 'end')
+      .attr('dx', '-.4em')
+      .attr('dy', '.45em')
+      .attr('transform', 'rotate(-35)');
   }
 
   private _renderYAxis() {
@@ -113,7 +113,7 @@ export class MeasurementGraph extends React.Component<Props, State> {
   }
 
   private _renderTimeSeriesLineCharts() {
-    for (const timeSeries of this.props.measurementGraphModel.timeSeries) {
+    for (const timeSeries of this.props.measurementChartModel.timeSeries) {
       this._container.append('path')
         .attr('class', 'time-series-line' + ' _' + timeSeries.name)
         .datum(timeSeries.points)
