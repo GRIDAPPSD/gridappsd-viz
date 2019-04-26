@@ -8,7 +8,7 @@ import { DataBrowser } from './data-browser';
 import { FeederModel } from '@shared/FeederModel';
 import { GetAllFeederModelsRequest } from './models/message-requests/GetAllFeederModelsRequest';
 import { LabelContainer } from './simulation/label';
-import { MeasurementGraphContainer } from './simulation/measurement-graph';
+import { MeasurementChartContainer } from './simulation/measurement-chart';
 import { ModelDictionaryMeasurement } from './models/model-dictionary';
 import { Navigation } from './navigation';
 import { OverlayService } from '@shared/overlay';
@@ -170,8 +170,8 @@ export class App extends React.Component<Props, State> {
                         <TopologyRendererContainer mRIDs={this._mRIDs} />
                         <SimulationStatusLogContainer />
                       </div>
-                      <div className='measurement-graphs'>
-                        <MeasurementGraphContainer />
+                      <div className='measurement-charts'>
+                        <MeasurementChartContainer />
                       </div>
                     </div>
                     <LabelContainer />
