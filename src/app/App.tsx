@@ -211,7 +211,7 @@ export class App extends React.Component<Props, State> {
     this._simulationQueue.push({
       name: config.simulation_config.simulation_name,
       config,
-      id: config.simulation_config.simulation_name
+      id: ''
     });
     this._overlayService.hide();
     setTimeout(() => history.push('/topology'), 500);

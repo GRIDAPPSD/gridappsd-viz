@@ -8,6 +8,32 @@
     z-index: 1;
 }
 
+.simulation-control__simulation-id {
+    display: inline-flex;
+    width: 100%;
+    justify-content: flex-start;
+    box-sizing: border-box;
+    padding-left: 10px;
+    align-items: center;
+    font-size: 0.7em;
+}
+
+.simulation-control__simulation-id__label {
+    display: inline-block;
+    padding: 8px 10px;
+    color: #fff;
+    background-color: #3660c5;
+    box-shadow: 0 0 1px #555;
+}
+
+.simulation-control__simulation-id__value {
+    display: inline-block;
+    padding: 6px 5px;
+    border: 2px solid #3660c5;
+    border-left: none;
+    box-shadow: 0 0 1px #555;
+}
+
 .simulation-control__action {
     border-radius: 100%;
     transform-origin: 50% 50%;
