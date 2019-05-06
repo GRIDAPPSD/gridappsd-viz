@@ -27,13 +27,13 @@ export class DrawerItemGroup extends React.Component<Props, State> {
     return (
       <li className={'drawer-item drawer-item-group' + (this.state.isExpanded ? ' expanded' : ' collapsed') + (this.props.className ? ' ' + this.props.className : '')}>
         <button
-          className='trigger'
+          className='drawer-item-group__toggle'
           type='button'
           tabIndex={0}
           onClick={this._toogle}
           onBlur={this._collapse}>
           <span>{this.props.header}</span>
-          <i className={'app-icon angle'} />
+          <i className={'app-icon drawer-item-group__toggle__angle'} />
         </button>
         <PopUp in={this.state.isExpanded}>
           <div

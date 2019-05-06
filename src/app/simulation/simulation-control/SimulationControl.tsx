@@ -9,6 +9,7 @@ import { Tooltip } from '@shared/tooltip';
 interface Props {
   timestamp: string;
   simulationStatus: SimulationStatus;
+  simulationId: string;
   onStartSimulation: () => void;
   onStopSimulation: () => void;
   onPauseSimulation: () => void;
@@ -17,6 +18,13 @@ interface Props {
 
 export const SimulationControl = (props: Props) => (
   <div className='simulation-control'>
+    {
+      props.simulationId &&
+      <div className='simulation-control__simulation-id'>
+        <span className='simulation-control__simulation-id__label'>Simulation ID</span>
+        <span className='simulation-control__simulation-id__value'>{props.simulationId}</span>
+      </div>
+    }
     <span className='simulation-control__timestamp'>{props.timestamp}</span>
     {
       props.simulationStatus === SimulationStatus.STARTED || props.simulationStatus === SimulationStatus.RESUMED

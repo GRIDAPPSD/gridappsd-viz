@@ -8,19 +8,25 @@ interface Props {
 }
 
 interface State {
-  simulationStatus: SimulationStatus
+  simulationStatus: SimulationStatus;
+  activeSimulationId: string;
 }
 
 export class SimulationControlContainer extends React.Component<Props, State> {
+
+  activeSimulationId: string;
+
   private readonly _simulationControlService = SimulationControlService.getInstance();
   private readonly _simulationQueue = SimulationQueue.getInstance();
   private _simulationStatusChangeSubscription: Subscription;
+  private _activeSimulationIdChangeSubscription: Subscription;
 
   constructor(props: any) {
     super(props);
 
     this.state = {
-      simulationStatus: SimulationStatus.NEW
+      simulationStatus: SimulationStatus.NEW,
+      activeSimulationId: ''
     };
 
     this.startSimulation = this.startSimulation.bind(this);
@@ -31,6 +37,7 @@ export class SimulationControlContainer extends React.Component<Props, State> {
 
   componentDidMount() {
     this._simulationStatusChangeSubscription = this._subscribeToSimulationStatusChanges();
+    this._activeSimulationIdChangeSubscription = this._subscribeToActiveSimulationIdChanges();
   }
 
   private _subscribeToSimulationStatusChanges() {
@@ -40,14 +47,23 @@ export class SimulationControlContainer extends React.Component<Props, State> {
       });
   }
 
+  private _subscribeToActiveSimulationIdChanges() {
+    return this._simulationQueue.activeSimulationIdChanged()
+      .subscribe({
+        next: id => this.setState({ activeSimulationId: id })
+      });
+  }
+
   componentWillUnmount() {
     this._simulationStatusChangeSubscription.unsubscribe();
+    this._activeSimulationIdChangeSubscription.unsubscribe();
   }
 
   render() {
     return (
       <SimulationControl
         timestamp=''
+        simulationId={this.state.activeSimulationId}
         simulationStatus={this.state.simulationStatus}
         onStartSimulation={this.startSimulation}
         onStopSimulation={this.stopSimulation}
