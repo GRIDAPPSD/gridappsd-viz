@@ -6,7 +6,9 @@
 }
 
 .gridappsd-form-control__label {
-    width: 250px;
+    width: 15em;
+    display: flex;
+    flex-flow: column;
 }
 
 .gridappsd-form-control__label__hint {

@@ -12,6 +12,9 @@ import { ToggleSwitchStateRequest } from './models/ToggleSwitchStateRequest';
 import { GetTopologyModelRequest, GetTopologyModelRequestPayload } from './models/GetTopologyModelRequest';
 import { ToggleCapacitorManualModeRequest } from './models/ToggleCapacitorManualModeRequest';
 import { ToggleRegulatorManualModeRequest } from './models/ToggleRegulatorManualModeRequest';
+import { CapacitorControlMode } from './models/CapacitorControlMode';
+import { CapacitorVarUpdateRequest } from './models/CapacitorVarUpdateRequest';
+import { CapacitorVoltUpdateRequest } from './models/CapacitorVoltUpdateRequest';
 
 interface Props {
   mRIDs: { [componentType: string]: string };
@@ -37,8 +40,7 @@ export class TopologyRendererContainer extends React.Component<Props, State> {
       isFetching: true
     };
     this.onToggleSwitchState = this.onToggleSwitchState.bind(this);
-    this.onOpenOrCloseCapacitor = this.onOpenOrCloseCapacitor.bind(this);
-    this.onToggleCapacitorManualMode = this.onToggleCapacitorManualMode.bind(this);
+    this.onCapacitorMenuFormSubmitted = this.onCapacitorMenuFormSubmitted.bind(this);
     this.onToggleRegulatorManualMode = this.onToggleRegulatorManualMode.bind(this);
   }
 
@@ -177,7 +179,10 @@ export class TopologyRendererContainer extends React.Component<Props, State> {
             open: node.open === 'open',
             x: Math.trunc(node.x1),
             y: Math.trunc(node.y1),
-            manual: node.manual === 'manual'
+            manual: node.manual === 'manual',
+            controlMode: CapacitorControlMode.UNSPECIFIED,
+            volt: null,
+            var: null
           }));
           break;
         case 'overhead_lines':
@@ -242,8 +247,7 @@ export class TopologyRendererContainer extends React.Component<Props, State> {
         showWait={this.state.isFetching}
         topologyName={this._activeSimulationConfig.simulation_config.simulation_name}
         onToggleSwitch={this.onToggleSwitchState}
-        onOpenOrCloseCapacitor={this.onOpenOrCloseCapacitor}
-        onToggleCapacitorManualMode={this.onToggleCapacitorManualMode}
+        onCapacitorMenuFormSubmitted={this.onCapacitorMenuFormSubmitted}
         onToggleRegulatorManualMode={this.onToggleRegulatorManualMode} />
     );
   }
@@ -262,7 +266,56 @@ export class TopologyRendererContainer extends React.Component<Props, State> {
     );
   }
 
-  onOpenOrCloseCapacitor(capacitor: Capacitor) {
+  onCapacitorMenuFormSubmitted(currentCapacitor: Capacitor, newCapacitor: Capacitor) {
+    switch (newCapacitor.controlMode) {
+      case CapacitorControlMode.MANUAL:
+        if (currentCapacitor.controlMode !== newCapacitor.controlMode) {
+          currentCapacitor.manual = newCapacitor.manual;
+          this._onToggleCapacitorManualMode(newCapacitor);
+        }
+        if (currentCapacitor.open !== newCapacitor.open) {
+          currentCapacitor.open = newCapacitor.open;
+          this._openOrCloseCapacitor(newCapacitor);
+        }
+        break;
+      case CapacitorControlMode.VAR:
+        // Send request only if we switched from manual mode
+        if (currentCapacitor.controlMode === CapacitorControlMode.MANUAL) {
+          currentCapacitor.manual = false;
+          this._onToggleCapacitorManualMode(currentCapacitor);
+        }
+        currentCapacitor.controlMode = CapacitorControlMode.VAR;
+        currentCapacitor.var = newCapacitor.var;
+        this._sendCapacitorVarUpdateRequest(currentCapacitor);
+        break;
+      case CapacitorControlMode.VOLT:
+        // Send request only if we switched from manual mode
+        if (currentCapacitor.controlMode === CapacitorControlMode.MANUAL) {
+          currentCapacitor.manual = false;
+          this._onToggleCapacitorManualMode(currentCapacitor);
+        }
+        currentCapacitor.controlMode = CapacitorControlMode.VOLT;
+        currentCapacitor.volt = newCapacitor.volt;
+        this._sendCapacitorVoltUpdateRequest(currentCapacitor);
+        break;
+    }
+  }
+
+  private _onToggleCapacitorManualMode(capacitor: Capacitor) {
+    const toggleCapacitorManualModeRequest = new ToggleCapacitorManualModeRequest({
+      componentMRID: this.props.mRIDs[capacitor.name],
+      simulationId: this._simulationQueue.getActiveSimulation().id,
+      manual: capacitor.manual,
+      differenceMRID: this._activeSimulationConfig.power_system_config.Line_name
+    });
+    this._stompClientService.send(
+      toggleCapacitorManualModeRequest.url,
+      { 'reply-to': toggleCapacitorManualModeRequest.replyTo },
+      JSON.stringify(toggleCapacitorManualModeRequest.requestBody)
+    );
+  }
+
+  private _openOrCloseCapacitor(capacitor: Capacitor) {
     const openOrCloseCapacitorRequest = new OpenOrCloseCapacitorRequest({
       componentMRID: this.props.mRIDs[capacitor.name],
       simulationId: this._simulationQueue.getActiveSimulation().id,
@@ -276,17 +329,33 @@ export class TopologyRendererContainer extends React.Component<Props, State> {
     );
   }
 
-  onToggleCapacitorManualMode(capacitor: Capacitor) {
-    const toggleCapacitorManualModeRequest = new ToggleCapacitorManualModeRequest({
+  private _sendCapacitorVarUpdateRequest(capacitor: Capacitor) {
+    const capacitorVarUpdateRequest = new CapacitorVarUpdateRequest({
       componentMRID: this.props.mRIDs[capacitor.name],
       simulationId: this._simulationQueue.getActiveSimulation().id,
-      manual: capacitor.manual,
+      target: capacitor.var.target,
+      deadband: capacitor.var.deadband,
       differenceMRID: this._activeSimulationConfig.power_system_config.Line_name
     });
     this._stompClientService.send(
-      toggleCapacitorManualModeRequest.url,
-      { 'reply-to': toggleCapacitorManualModeRequest.replyTo },
-      JSON.stringify(toggleCapacitorManualModeRequest.requestBody)
+      capacitorVarUpdateRequest.url,
+      { 'reply-to': capacitorVarUpdateRequest.replyTo },
+      JSON.stringify(capacitorVarUpdateRequest.requestBody)
+    );
+  }
+
+  private _sendCapacitorVoltUpdateRequest(capacitor: Capacitor) {
+    const capacitorVoltUpdateRequest = new CapacitorVoltUpdateRequest({
+      componentMRID: this.props.mRIDs[capacitor.name],
+      simulationId: this._simulationQueue.getActiveSimulation().id,
+      target: capacitor.var.target,
+      deadband: capacitor.var.deadband,
+      differenceMRID: this._activeSimulationConfig.power_system_config.Line_name
+    });
+    this._stompClientService.send(
+      capacitorVoltUpdateRequest.url,
+      { 'reply-to': capacitorVoltUpdateRequest.replyTo },
+      JSON.stringify(capacitorVoltUpdateRequest.requestBody)
     );
   }
 
