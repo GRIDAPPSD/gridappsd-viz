@@ -25,6 +25,17 @@ export class PopUp extends React.Component<Props, State> {
     this._element.addEventListener('transitionend', this.props.afterClosed, false);
     this._element.classList.add('pop-up', 'pop-up-out');
     this.componentWillReceiveProps(this.props);
+    this._shiftIntoViewIfOverflowScreen();
+  }
+
+  componentDidUpdate() {
+    this._shiftIntoViewIfOverflowScreen();
+  }
+
+  private _shiftIntoViewIfOverflowScreen() {
+    const popupRect = this._element.getBoundingClientRect();
+    if (popupRect.bottom > document.body.clientHeight)
+      this._element.style.transform = `translateY(${document.body.clientHeight - popupRect.bottom - 20}px)`;
   }
 
   componentWillUnmount() {

@@ -1,5 +1,6 @@
 import { Node } from './Node';
-import { CapacitorControlMode } from 'app/topology-renderer/models/CapacitorControlMode';
+import { CapacitorControlMode } from '../CapacitorControlMode';
+
 export interface Capacitor extends Node {
   parent: string;
   phases: string;

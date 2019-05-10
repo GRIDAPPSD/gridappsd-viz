@@ -20,8 +20,8 @@ interface Props {
   showWait: boolean;
   topologyName: string;
   onToggleSwitch: (swjtch: Switch) => void;
-  onCapacitorMenuFormSubmitted: (oldCapacitor: Capacitor, updatedCapacitor: Capacitor) => void;
-  onToggleRegulatorManualMode: (regulator: Regulator) => void;
+  onCapacitorMenuFormSubmitted: (currentCapacitor: Capacitor, newCapacitor: Capacitor) => void;
+  onRegulatorMenuFormSubmitted: (currentRegulator: Regulator, newRegulator: Regulator) => void;
 }
 
 interface State {
@@ -176,21 +176,14 @@ export class TopologyRenderer extends React.Component<Props, State> {
       <RegulatorMenu
         left={clickedElementRect.left}
         top={clickedElementRect.top}
-        manual={regulator.manual}
+        regulator={regulator}
         onCancel={() => this._overlay.hide(false)}
-        onConfirm={isManual => {
+        onConfirm={newRegulator => {
           this._overlay.hide(false);
-          this._toggleRegulatorManualMode(isManual, regulator);
+          this.props.onRegulatorMenuFormSubmitted(regulator, newRegulator);
         }} />,
       false
     );
-  }
-
-  private _toggleRegulatorManualMode(isManual: boolean, regulator: Regulator) {
-    if (regulator.manual !== isManual) {
-      regulator.manual = isManual;
-      this.props.onToggleRegulatorManualMode(regulator);
-    }
   }
 
   showTooltip(event) {
@@ -260,7 +253,7 @@ export class TopologyRenderer extends React.Component<Props, State> {
   }
 
   private _capitalize(value: string) {
-    return value[0].toUpperCase() + value.substr(1);
+    return value ? value[0].toUpperCase() + value.substr(1) : '';
   }
 
   private _categorizeNodes(nodes: Node[], xOffset: number, yOffset: number) {

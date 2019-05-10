@@ -4,7 +4,7 @@ import { Dialog, DialogContent, DialogActions } from '@shared/dialog';
 import { SelectFormControl, CheckBox, FormControl } from '@shared/form';
 import { MenuItem } from '@shared/dropdown-menu';
 import { BasicButton } from '@shared/buttons';
-import { CapacitorControlMode } from '../../models/CapacitorControlMode';
+import { CapacitorControlMode } from '@shared/CapacitorControlMode';
 import { Capacitor } from '@shared/topology';
 
 import './CapacitorMenu.scss';

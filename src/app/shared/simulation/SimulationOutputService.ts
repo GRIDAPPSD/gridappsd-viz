@@ -46,7 +46,7 @@ export class SimulationOutputService {
     return this._outputTimestamp;
   }
 
-  setModelDictionaryMeasures(value: { [mRID: string]: ModelDictionaryMeasurement }) {
+  setModelDictionaryMeasurements(value: { [mRID: string]: ModelDictionaryMeasurement }) {
     this._modelDictionaryMeasurements = value;
   }
 
