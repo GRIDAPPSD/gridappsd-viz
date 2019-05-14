@@ -1,29 +1,44 @@
 import * as React from 'react';
 
 import { Dialog, DialogContent, DialogActions } from '@shared/dialog';
-import { CheckBox } from '@shared/form';
+import { SelectFormControl, FormControl } from '@shared/form';
 import { BasicButton } from '@shared/buttons';
+import { RegulatorControlMode } from '@shared/RegulatorControlMode';
+import { Regulator } from '@shared/topology';
+import { MenuItem } from '@shared/dropdown-menu';
 
 import './RegulatorMenu.scss';
 
 interface Props {
-  onConfirm: (open: boolean) => void;
+  onConfirm: (newRegulator: Regulator) => void;
   onCancel: () => void;
   left: number;
   top: number;
-  manual: boolean;
+  regulator: Regulator;
 }
 
 interface State {
-  manual: boolean
+  controlMode: RegulatorControlMode;
 }
 
 export class RegulatorMenu extends React.Component<Props, State> {
+
+  readonly regulator: Regulator;
+
   constructor(props: Props) {
     super(props);
     this.state = {
-      manual: props.manual
+      controlMode: props.regulator.controlMode
     };
+
+    this.regulator = { ...props.regulator };
+    for (const phase of this.regulator.phases)
+      if (!this.regulator.phaseValues[phase])
+        this.regulator.phaseValues[phase] = {
+          lineDropR: '',
+          lineDropX: '',
+          tap: ''
+        };
   }
 
   render() {
@@ -32,14 +47,24 @@ export class RegulatorMenu extends React.Component<Props, State> {
         className='regulator-menu'
         show={true}
         styles={{ left: this.props.left + 'px', top: this.props.top + 'px' }}>
-        <DialogContent styles={{ overflow: 'hidden', width: '300px' }}>
+        <DialogContent styles={{ overflow: 'hidden' }}>
           <form className='regulator-menu__form'>
-            <CheckBox
+            <SelectFormControl
               label='Control mode'
-              name='control-mode'
-              hint='Manual'
-              checked={this.props.manual}
-              onChange={state => this.setState({ manual: state })} />
+              menuItems={[
+                new MenuItem('Manual', RegulatorControlMode.MANUAL),
+                new MenuItem('Line drop compensation', RegulatorControlMode.LINE_DROP_COMPENSATION)
+              ]}
+              defaultSelectedIndex={
+                this.state.controlMode === RegulatorControlMode.MANUAL ? 0 :
+                  this.state.controlMode === RegulatorControlMode.LINE_DROP_COMPENSATION ? 1 :
+                    undefined
+              }
+              onChange={menuItem => {
+                this.regulator.controlMode = menuItem.value;
+                this.setState({ controlMode: menuItem.value });
+              }} />
+            {this.showFormFieldsBasedOnControlMode()}
           </form>
         </DialogContent>
         <DialogActions>
@@ -50,10 +75,62 @@ export class RegulatorMenu extends React.Component<Props, State> {
           <BasicButton
             type='positive'
             label='Apply'
-            disabled={this.state.manual === this.props.manual}
-            onClick={() => this.props.onConfirm(this.state.manual)} />
+            onClick={() => this.props.onConfirm(this.regulator)} />
         </DialogActions>
       </Dialog>
     );
+  }
+
+  showFormFieldsBasedOnControlMode() {
+    // The sort method below will modify the phases array
+    // and if the phases are not sorted by default
+    // then mRID array elements will not map to their respective phase
+    const phases = [...this.regulator.phases];
+    switch (this.regulator.controlMode) {
+      case RegulatorControlMode.LINE_DROP_COMPENSATION:
+        return (
+          <ul>
+            {
+              phases.sort((a, b) => a.localeCompare(b))
+                .map(phase => (
+                  <li key={phase}>
+                    <span>{`Phase ${phase}`}</span>
+                    <ul>
+                      <li>
+                        <FormControl
+                          label='LineDropR'
+                          name='LineDropR'
+                          hint='Unit in Ohms'
+                          value={this.regulator.phaseValues[phase].lineDropR}
+                          onChange={newValue => this.regulator.phaseValues[phase].lineDropR = newValue} />
+                      </li>
+                      <li>
+                        <FormControl
+                          label='LineDropX'
+                          name='LineDropX'
+                          hint='Unit in Ohms'
+                          value={this.regulator.phaseValues[phase].lineDropX}
+                          onChange={newValue => this.regulator.phaseValues[phase].lineDropX = newValue} />
+                      </li>
+                    </ul>
+                  </li>
+                ))
+            }
+          </ul>
+        );
+      case RegulatorControlMode.MANUAL:
+        return (
+          phases.sort((a, b) => a.localeCompare(b))
+            .map(phase => (
+              <FormControl
+                key={phase}
+                label={`Tap ${phase}`}
+                name={`Tap${phase}`}
+                value={this.regulator.phaseValues[phase].tap}
+                onChange={newValue => this.regulator.phaseValues[phase].tap = newValue} />
+            ))
+        );
+    }
+    return null;
   }
 }

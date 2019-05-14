@@ -37,13 +37,15 @@ interface State {
 }
 
 export class App extends React.Component<Props, State> {
+  shouldRedirect = false;
+  readonly componentMrids = new Map<string, string & string[]>();
+  readonly componentPhases = new Map<string, string[]>();
+
   private readonly _stompClientService = StompClientService.getInstance();
   private readonly _simulationOutputService = SimulationOutputService.getInstance();
   private readonly _overlayService = OverlayService.getInstance();
   private readonly _simulationQueue = SimulationQueue.getInstance();
   private readonly _modelDictionaryMeasurementsPerSimulationName: { [name: string]: { [mRID: string]: ModelDictionaryMeasurement } } = {};
-  private _shouldRedirect = false;
-  private readonly _mRIDs: { [componentType: string]: string } = {};
   private readonly _availableModelDictionaries = {};
 
   constructor(props: any) {
@@ -56,7 +58,7 @@ export class App extends React.Component<Props, State> {
   }
 
   componentDidCatch() {
-    this._shouldRedirect = true;
+    this.shouldRedirect = true;
   }
 
   componentDidMount() {
@@ -154,7 +156,7 @@ export class App extends React.Component<Props, State> {
   render() {
     return (
       <Route path='/' component={(props) =>
-        this._shouldRedirect ? this.redirect() :
+        this.shouldRedirect ? this.redirect() :
           <>
             <Navigation
               onShowSimulationConfigForm={(config: SimulationConfiguration) => this.showSimulationConfigForm(config, props.history)} />
@@ -167,7 +169,9 @@ export class App extends React.Component<Props, State> {
                     <div className='topology-renderer-simulation-status-logger-measurement-graphs'>
                       <div className='topology-renderer-simulation-status-logger'>
                         <SimulationControlContainer />
-                        <TopologyRendererContainer mRIDs={this._mRIDs} />
+                        <TopologyRendererContainer
+                          mRIDs={this.componentMrids}
+                          phases={this.componentPhases} />
                         <SimulationStatusLogContainer />
                       </div>
                       <div className='measurement-charts'>
@@ -188,7 +192,7 @@ export class App extends React.Component<Props, State> {
   }
 
   redirect() {
-    this._shouldRedirect = false;
+    this.shouldRedirect = false;
     return <Redirect to='/' />;
   }
 
@@ -243,20 +247,23 @@ export class App extends React.Component<Props, State> {
             accummulator[measurement.mRID] = measurement;
             return accummulator;
           }, {});
-          this._simulationOutputService.setModelDictionaryMeasures(modelDictionaryMeasurements);
+          this._simulationOutputService.setModelDictionaryMeasurements(modelDictionaryMeasurements);
           this._modelDictionaryMeasurementsPerSimulationName[simulationName] = modelDictionaryMeasurements;
-          this._collectMRIDsForComponents(feeders);
+          this._collectMRIDsAndPhasesForComponents(feeders);
         }
       });
   }
 
-  private _collectMRIDsForComponents(feeders: any) {
+  private _collectMRIDsAndPhasesForComponents(feeders: any) {
     for (const swjtch of feeders.switches)
-      this._mRIDs[swjtch.name] = swjtch.mRID;
+      this.componentMrids.set(swjtch.name, swjtch.mRID);
     for (const capacitor of feeders.capacitors)
-      this._mRIDs[capacitor.name] = capacitor.mRID;
-    for (const regulator of feeders.regulators)
-      this._mRIDs[regulator.name] = regulator.mRID;
+      this.componentMrids.set(capacitor.name, capacitor.mRID);
+    for (const regulator of feeders.regulators) {
+      this.componentMrids.set(regulator.bankName, regulator.mRID);
+      // Only interested in regulators' phases for now, need phases for regulator menus
+      this.componentPhases.set(regulator.bankName, (regulator.bankPhases || '').split(''));
+    }
   }
 
 }
