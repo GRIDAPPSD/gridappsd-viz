@@ -11,7 +11,7 @@ COPY . /gridappsd/viz/
 WORKDIR /gridappsd/viz
 
 RUN npm install  \
-    && webpack
+    && npm run build
 
 RUN echo $TIMESTAMP > /gridappsd/viz/dockerbuildversion.txt
 
