@@ -136,8 +136,6 @@ export class DropdownMenu extends React.Component<Props, State> {
         throw new Error('Default item index must be between 0 and ' + (this.props.menuItems.length - 1));
       if (this.props.defaultSelectedIndex !== undefined)
         this.onChange(this.props.menuItems[this.props.defaultSelectedIndex]);
-      else if (this.props.menuItems.length === 1)
-        this.onChange(this.props.menuItems[0]);
     }
   }
 

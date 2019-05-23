@@ -17,8 +17,8 @@ export class SimulationControlService {
   private static readonly _INSTANCE_: SimulationControlService = new SimulationControlService();
   private readonly _simulationQueue = SimulationQueue.getInstance();
   private readonly _stompClientService = StompClientService.getInstance();
-  private readonly _simulationStatusNotifer = new Subject<SimulationStatus>();
-  private _simulationStatus = SimulationStatus.NEW;
+  private readonly _currentSimulationStatusNotifer = new Subject<SimulationStatus>();
+  private _currentSimulationStatus = SimulationStatus.NEW;
 
   private constructor() {
   }
@@ -28,19 +28,22 @@ export class SimulationControlService {
   }
 
   statusChanged(): Observable<SimulationStatus> {
-    return this._simulationStatusNotifer.asObservable();
+    return this._currentSimulationStatusNotifer.asObservable();
   }
 
   startSimulation(simulationConfig: SimulationConfiguration) {
-    if (this._simulationStatus !== SimulationStatus.STARTED) {
-      const config = { ...simulationConfig };
+    if (this._currentSimulationStatus !== SimulationStatus.STARTED) {
       const startTime = new Date(simulationConfig.simulation_config.start_time.replace(/-/g, '/'));
       const startEpoch = startTime.getTime() / 1000.0;
-      this._simulationStatus = SimulationStatus.STARTED;
-      this._simulationStatusNotifer.next(SimulationStatus.STARTED);
-      config.simulation_config = { ...simulationConfig.simulation_config };
-      config.simulation_config.start_time = String(startEpoch);
-
+      const config: SimulationConfiguration = {
+        ...simulationConfig,
+        simulation_config: {
+          ...simulationConfig.simulation_config,
+          start_time: String(startEpoch)
+        }
+      };
+      this._currentSimulationStatus = SimulationStatus.STARTED;
+      this._currentSimulationStatusNotifer.next(SimulationStatus.STARTED);
       // Let's wait for all the subscriptions in other components to this topic to complete
       // before sending the message
       setTimeout(() => {
@@ -54,17 +57,20 @@ export class SimulationControlService {
   }
 
   stopSimulation() {
-    this._simulationStatusNotifer.next(SimulationStatus.STOPPED);
+    this._currentSimulationStatus = SimulationStatus.STOPPED;
+    this._currentSimulationStatusNotifer.next(SimulationStatus.STOPPED);
     this._sendSimulationControlCommand('stop');
   }
 
   pauseSimulation() {
-    this._simulationStatusNotifer.next(SimulationStatus.PAUSED);
+    this._currentSimulationStatus = SimulationStatus.PAUSED;
+    this._currentSimulationStatusNotifer.next(SimulationStatus.PAUSED);
     this._sendSimulationControlCommand('pause');
   }
 
   resumeSimulation() {
-    this._simulationStatusNotifer.next(SimulationStatus.RESUMED);
+    this._currentSimulationStatus = SimulationStatus.RESUMED;
+    this._currentSimulationStatusNotifer.next(SimulationStatus.RESUMED);
     this._sendSimulationControlCommand('resume');
   }
 

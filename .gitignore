@@ -2,6 +2,8 @@ dist
 
 node_modules
 
+ignores
+
 fncs-output.ts
 node_modules/*
 !node_modules/react-json-viewer/

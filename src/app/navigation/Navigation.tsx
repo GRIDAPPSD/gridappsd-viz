@@ -115,7 +115,7 @@ export class Navigation extends React.Component<Props, State> {
             <DrawerItemGroup header='Previous simulations'>
               {
                 this.state.previousSimulations.map(simulation => (
-                  <DrawerItem key={simulation.id} onClick={() => this.props.onShowSimulationConfigForm(simulation.config)}>
+                  <DrawerItem key={simulation.name} onClick={() => this.props.onShowSimulationConfigForm(simulation.config)}>
                     <strong>Name:&nbsp;</strong>
                     {simulation.name}
                     &nbsp;&mdash;&nbsp;

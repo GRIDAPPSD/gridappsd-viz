@@ -33,7 +33,7 @@ export class SwitchMenu extends React.Component<Props, State> {
         className='switch-menu'
         show={true}
         styles={{ left: this.props.left + 'px', top: this.props.top + 'px' }}>
-        <DialogContent styles={{ overflow: 'hidden', width: '300px' }}>
+        <DialogContent styles={{ overflow: 'hidden' }}>
           <form className='switch-menu__form'>
             <SelectFormControl
               label='Action'

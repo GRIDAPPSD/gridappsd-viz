@@ -8,6 +8,7 @@ export class SimulationQueue {
 
   private readonly _activeSimulationChanged = new BehaviorSubject<Simulation>(null);
   private readonly _queueChanges = new Subject<Simulation[]>();
+  private readonly _activeSimulationIdChanges = new Subject<string>();
   private _simulations: Simulation[] = [];
   private _activeSimulation: Simulation;
 
@@ -21,6 +22,10 @@ export class SimulationQueue {
   activeSimulationChanged(): Observable<Simulation> {
     return this._activeSimulationChanged.asObservable()
       .pipe(filter(simulation => simulation !== null));
+  }
+
+  activeSimulationIdChanged(): Observable<string> {
+    return this._activeSimulationIdChanges.asObservable();
   }
 
   getActiveSimulation(): Simulation {
@@ -43,9 +48,13 @@ export class SimulationQueue {
   }
 
   updateIdOfActiveSimulation(id: string) {
-    this._simulations = [{ ...this._activeSimulation, id }, ...this._simulations.filter(sim => sim !== this._activeSimulation)];
+    this._simulations = [
+      { ...this._activeSimulation, id },
+      ...this._simulations.filter(sim => sim !== this._activeSimulation)
+    ];
     this._activeSimulation = this._simulations[0];
     this._queueChanges.next(this._simulations);
+    this._activeSimulationIdChanges.next(id);
   }
 
   setActiveSimulation(simulationName: string) {
