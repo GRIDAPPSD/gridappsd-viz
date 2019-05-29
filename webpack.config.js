@@ -74,18 +74,16 @@ function updateVersion() {
   /*
     process.argv returns an array of this form
     [
-      '/path/to/node',
-      '/path/to/webpack',
+      '/Users/vann363/.nvm/versions/node/v8.12.0/bin/node',
+      '/Users/vann363/projects/test/viz/node_modules/.bin/webpack',
       '--env=production',
-      'BUILD_VERSION=some-version',
+      '--env.BUILD_VERSION',
+      'some-version',
     ]
   */
-  if (process.argv.length > 3) {
-    const buildVersionArgument = process.argv.slice(-1)[0];
-    const [argumentName, argumentValue] = buildVersionArgument.split('=');
-    if (argumentName !== 'BUILD_VERSION' && argumentName !== '--env')
-      throw new Error(`BUILD_VERSION argument expected, but found [${argumentName}] instead`);
-    writeVersionNumber(argumentValue);
+  if (process.argv.length === 5) {
+    const buildVersionValue = process.argv.slice(-1)[0];
+    writeVersionNumber(buildVersionValue);
   }
   else {
     childProcess.exec('git rev-parse --abbrev-ref HEAD', {}, (error, stdout) => {
