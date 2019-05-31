@@ -8,8 +8,10 @@ interface Props {
 }
 
 export class Ripple extends React.Component<Props, {}> {
+
+  private static readonly __RIPPLE_DURATION__ = 2000;
+
   private _rippleTrigger: HTMLElement = null;
-  private static readonly __RIPPLE_DURATION__ = 1500;
 
   constructor(props: any) {
     super(props);
@@ -38,18 +40,13 @@ export class Ripple extends React.Component<Props, {}> {
     rippleContainer.style.borderRadius = getComputedStyle(this._rippleTrigger, null).borderRadius;
     const rippler = document.createElement('span');
     const largerDimension = Math.max(rect.width, rect.height);
-    if (this.props.fixed) {
-      rippler.style.left = '0';
-      rippler.style.top = '0';
-    }
+    if (this.props.fixed)
+      rippleContainer.setAttribute('style', 'display:inline-flex;justify-content:center;align-items:center;');
     else {
       const x = event.clientX - rect.left - largerDimension / 2;
       const y = event.clientY - rect.top - largerDimension / 2;
-      rippler.style.left = x + 'px';
-      rippler.style.top = y + 'px';
+      rippler.setAttribute('style', `left:${x}px;top:${y}px;`);
     }
-    rippleContainer.style.width = rect.width + 'px';
-    rippleContainer.style.height = rect.height + 'px';
     rippler.style.width = largerDimension + 'px';
     rippler.style.height = largerDimension + 'px';
     rippler.style.animationDuration = `${Ripple.__RIPPLE_DURATION__}ms`;

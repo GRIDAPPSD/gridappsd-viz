@@ -11,39 +11,18 @@
     cursor: pointer;
     user-select: none;
     transition: background-color 0.2s linear;
+
     &:hover {
         background-color: rgba(0, 0, 0, 0.08);
     }
 }
 
-.drawer-item__icon {
+.drawer-item-icon {
     margin-right: 20px;
-    &::before {
-        font-size: 1.25em;
-        font-weight: bold;
-    }
+    font-size: 1.25em;
+    font-weight: bold;
 }
 
-.drawer-item__icon__form:before {
-    content: '\f298';
-}
-
-.drawer-item__icon__app:before {
-    content: '\f0a0';
-}
-
-.drawer-item__icon__browse:before {
-    content: '\f002';
-}
-
-.drawer-item__icon__terminal:before {
-    content: '\f120';
-}
-
-.drawer-item__icon__cubes:before {
-    content: '\f1b3';
-}
-
-.drawer-item__label {
+.drawer-item-label {
     color: rgba(0, 0, 0, 0.7);
 }

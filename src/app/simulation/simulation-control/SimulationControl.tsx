@@ -32,12 +32,14 @@ export const SimulationControl = (props: Props) => (
         <>
           <Tooltip position='bottom' content='Pause simulation'>
             <IconButton
+              rounded
               icon='pause'
               className='simulation-control__action'
               onClick={props.onPauseSimulation} />
           </Tooltip>
           <Tooltip position='bottom' content='Stop simulation'>
             <IconButton
+              rounded
               icon='stop'
               className='simulation-control__action'
               onClick={props.onStopSimulation} />
@@ -48,12 +50,14 @@ export const SimulationControl = (props: Props) => (
           <>
             <Tooltip position='bottom' content='Resume simulation'>
               <IconButton
-                icon='resume'
+                rounded
+                icon='play_arrow'
                 className='simulation-control__action resume'
                 onClick={props.onResumeSimulation} />
             </Tooltip>
             <Tooltip position='bottom' content='Stop simulation'>
               <IconButton
+                rounded
                 icon='stop'
                 className='simulation-control__action'
                 onClick={props.onStopSimulation} />
@@ -62,7 +66,8 @@ export const SimulationControl = (props: Props) => (
           :
           <Tooltip position='bottom' content='Start simulation'>
             <IconButton
-              icon='start'
+              rounded
+              icon='play_arrow'
               className='simulation-control__action start'
               onClick={props.onStartSimulation} />
           </Tooltip>

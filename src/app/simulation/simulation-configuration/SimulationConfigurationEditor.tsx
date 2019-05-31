@@ -1,14 +1,21 @@
 import * as React from 'react';
+import { Subscription } from 'rxjs';
 
-import { SimulationConfiguration } from '@shared/simulation';
-import { FeederModel } from '@shared/FeederModel';
+import { SimulationConfiguration, SimulationControlService, SimulationStatus } from '@shared/simulation';
+import { FeederModel, ModelDictionary } from '@shared/topology';
 import { Application } from '@shared/Application';
 import { Dialog, DialogContent, DialogActions } from '@shared/dialog';
-import { FormGroup, SelectFormControl, FormControl, CheckBox, MultilineFormControl } from '@shared/form';
-import { MenuItem } from '@shared/dropdown-menu';
-import { SIMULATION_CONFIG_OPTIONS } from './models/simulation-config-options';
-import { Tooltip } from '@shared/tooltip';
-import { IconButton, BasicButton } from '@shared/buttons';
+import { TabGroup, Tab } from '@shared/tabs';
+import { BasicButton } from '@shared/buttons';
+import { PowerSystemConfigurationFormGroup } from './views/PowerSystemConfigurationFormGroup';
+import { SimulationConfigurationFormGroup } from './views/SimulationConfigurationFormGroup';
+import { ApplicationConfigurationFormGroup } from './views/ApplicationConfigurationFormGroup';
+import { TestConfigurationFormGroup } from './views/TestConfigurationFormGroup';
+import { ModelDictionaryTracker } from './services/ModelDictionaryTracker';
+import { Wait } from '@shared/wait';
+import { DateTimeService } from './services/DateTimeService';
+import { OutageEvent } from './models/OutageEvent';
+import { FaultEvent } from './models/FaultEvent';
 
 import './SimulationConfigurationEditor.scss';
 
@@ -26,11 +33,24 @@ interface State {
   applicationConfigStr: string;
   simulationName: string;
   noLineNameMessage: boolean;
+  modelDictionary: ModelDictionary;
+  disableSubmitButton: boolean;
 }
 
 export class SimulationConfigurationEditor extends React.Component<Props, State> {
 
-  private _currentConfig: SimulationConfiguration;
+  readonly currentConfig: SimulationConfiguration;
+  readonly simulationStartDate = new Date();
+  readonly dateTimeService = DateTimeService.getInstance();
+
+  outageEvents: OutageEvent[];
+  faultEvents: FaultEvent[];
+
+  private readonly _modelDictionaryTracker = ModelDictionaryTracker.getInstance();
+  private readonly _simulationControlService = SimulationControlService.getInstance();
+
+  private _subscription: Subscription;
+  private _simulationStatusSubscription: Subscription;
 
   constructor(props: Props) {
     super(props);
@@ -38,9 +58,11 @@ export class SimulationConfigurationEditor extends React.Component<Props, State>
       show: true,
       applicationConfigStr: '',
       simulationName: props.initialConfig.simulation_config.simulation_name,
-      noLineNameMessage: false
+      noLineNameMessage: false,
+      modelDictionary: null,
+      disableSubmitButton: true
     };
-    this._currentConfig = this._cloneConfigObject(props.initialConfig);
+    this.currentConfig = this._cloneConfigObject(props.initialConfig);
   }
 
   private _cloneConfigObject(original: SimulationConfiguration): SimulationConfiguration {
@@ -48,142 +70,107 @@ export class SimulationConfigurationEditor extends React.Component<Props, State>
     config.power_system_config = { ...original.power_system_config };
     config.application_config = {
       applications: original.application_config.applications.length > 0 ?
-        [{ ...original.application_config.applications[0] }] : []
+        [{ ...original.application_config.applications[0] }] : [{ name: '', config_string: '' }]
     };
-    config.simulation_config = { ...original.simulation_config };
+    config.simulation_config = {
+      ...original.simulation_config,
+      start_time: this.dateTimeService.format(this.simulationStartDate)
+    };
+    config.test_config = {
+      events: original.test_config.events.map(event => Object.assign({}, event)),
+      appId: original.test_config.appId
+    };
     return config;
+  }
+
+  componentDidMount() {
+    this._subscription = this._modelDictionaryTracker.changes()
+      .subscribe({
+        next: modelDictionary => this.setState({ modelDictionary: modelDictionary })
+      });
+    this._simulationStatusSubscription = this._simulationControlService.statusChanges()
+      .subscribe({
+        next: status => this.setState({
+          disableSubmitButton: status !== SimulationStatus.NEW && status !== SimulationStatus.STOPPED
+        })
+      });
+  }
+
+  componentWillUnmount() {
+    this._subscription.unsubscribe();
+    this._simulationStatusSubscription.unsubscribe();
   }
 
   render() {
     return (
       <Dialog show={this.state.show}>
         <DialogContent>
-          <form>
-            <FormGroup label='Power System Configuration'>
-              <SelectFormControl
-                label='Geographical region name'
-                menuItems={this.props.feederModels.regions.map(region => new MenuItem(region.regionName, region.regionID))}
-                defaultSelectedIndex={
-                  (this.props.feederModels.regions
-                    .filter(region => region.regionID === this._currentConfig.power_system_config.GeographicalRegion_name)[0] || { index: 0 }).index
-                }
-                onChange={item => this._currentConfig.power_system_config.GeographicalRegion_name = item.value} />
-
-              <SelectFormControl
-                label='Sub-geographical region name'
-                menuItems={
-                  this.props.feederModels.subregions.map(subregion => new MenuItem(subregion.subregionName, subregion.subregionID))
-                }
-                defaultSelectedIndex={
-                  (this.props.feederModels.subregions
-                    .filter(subregion => subregion.subregionID === this._currentConfig.power_system_config.SubGeographicalRegion_name)[0] || { index: 0 }).index
-                }
-                onChange={item => this._currentConfig.power_system_config.SubGeographicalRegion_name = item.value} />
-
-              <SelectFormControl
-                label='Line name'
-                menuItems={this.props.feederModels.lines.map(line => new MenuItem(line.name, line))}
-                onChange={item => {
-                  this._currentConfig.power_system_config.Line_name = item.value.mRID;
-                  this._currentConfig.simulation_config.simulation_name = item.value.name;
-                  this.setState({ simulationName: item.value.name, noLineNameMessage: false });
-                  this.props.onMRIDChanged(item.value.mRID, this._currentConfig.simulation_config.simulation_name);
-                }} />
-            </FormGroup>
-
-            <FormGroup label='Simulation Configuration'>
-              <FormControl
-                label='Start time'
-                hint='YYYY-MM-DD HH:MM:SS'
-                name='start_time'
-                value={this._currentConfig.simulation_config.start_time}
-                onChange={value => this._currentConfig.simulation_config.start_time = value}
-              />
-              <FormControl
-                label='Duration'
-                hint='Seconds'
-                type='number'
-                name='duration'
-                value={this._currentConfig.simulation_config.duration}
-                onChange={value => this._currentConfig.simulation_config.duration = value}
-              />
-              <div style={{ position: 'relative' }}>
-                <SelectFormControl
-                  label='Simulator'
-                  menuItems={SIMULATION_CONFIG_OPTIONS.simulation_config.simulators.map(e => new MenuItem(e, e))}
-                  onChange={item => this._currentConfig.simulation_config.simulator = item.value}
-                  defaultSelectedIndex={
-                    SIMULATION_CONFIG_OPTIONS.simulation_config.simulators
-                      .indexOf(this._currentConfig.simulation_config.simulator)
-                  } />
-                <div style={{ position: 'absolute', top: 0, left: '48%', fontSize: '13px' }}>
-                  <div style={{ fontWeight: 'bold' }}>Power flow solver method</div>
-                  <div>NR</div>
-                </div>
-              </div>
-              <div className='realtime-checkbox-container'>
-                <CheckBox
-                  label='Real time'
-                  name='realtime'
-                  checked={this._currentConfig.simulation_config.run_realtime}
-                  onChange={state => this._currentConfig.simulation_config.run_realtime = state} />
-                <Tooltip
-                  position='right'
-                  content={
-                    <>
-                      <div>Checked: Run in real time. Slower than simulation time</div>
-                      <div>Unchecked: Run in simulation time. Faster than real time</div>
-                    </>
-                  }>
-                  <IconButton icon='question' />
-                </Tooltip>
-              </div>
-
-              <FormControl
-                label='Simulation name'
-                name='simulation_name'
-                value={this.state.simulationName}
-                onChange={value => this._currentConfig.simulation_config.simulation_name = value} />
-
-              <MultilineFormControl
-                label='Model creation configuration'
-                value={JSON.stringify(this._currentConfig.simulation_config.model_creation_config, null, 4)}
-                onUpdate={value => this._currentConfig.simulation_config.model_creation_config = JSON.parse(value)} />
-            </FormGroup>
-
-            {
-              this.props.availableApplications.length > 0 &&
-              <FormGroup label='Application Configuration'>
-                <SelectFormControl
-                  label='Application name'
-                  menuItems={this.props.availableApplications.map(app => new MenuItem(app.id, app.id))}
-                  onChange={menuItem => {
-                    const currentApp = this._currentConfig.application_config.applications.pop() || { name: menuItem.value, config_string: '' };
-                    this._currentConfig.application_config.applications.push(currentApp);
-                  }}
-                  defaultSelectedIndex={
-                    this._currentConfig.application_config.applications.length === 0
-                      ? undefined
-                      : this.props.availableApplications
-                        .findIndex(app => app.id === this._currentConfig.application_config.applications[0].name)
-                  } />
-                <MultilineFormControl
-                  label='Application configuration'
-                  value={
-                    this._currentConfig.application_config.applications.length === 0
-                      ? ''
-                      : this._currentConfig.application_config.applications[0].config_string === ''
-                        ? ''
-                        : JSON.stringify(this._currentConfig.application_config.applications[0].config_string, null, 4)
+          <form className='simulation-configuration-form'>
+            <TabGroup>
+              <Tab label='Power System Configuration'>
+                <PowerSystemConfigurationFormGroup
+                  feederModels={
+                    this.props.feederModels
                   }
-                  onUpdate={value => this._currentConfig.application_config.applications[0].config_string = value} />
-              </FormGroup>
-            }
+                  onChange={formValue => {
+                    const currentPowerSystemConfig = this.currentConfig.power_system_config;
+                    currentPowerSystemConfig.GeographicalRegion_name = formValue.geographicalRegionId;
+                    currentPowerSystemConfig.SubGeographicalRegion_name = formValue.subGeographicalRegionId;
+                    if (currentPowerSystemConfig.Line_name !== formValue.lineName) {
+                      currentPowerSystemConfig.Line_name = formValue.lineName;
+                      this.currentConfig.simulation_config.simulation_name = formValue.simulationName;
+                      this.props.onMRIDChanged(formValue.lineName, formValue.simulationName);
+                    }
+                    if (formValue.lineName)
+                      this.setState({
+                        disableSubmitButton: false
+                      });
+                  }} />
+              </Tab>
+              <Tab label='Simulation Configuration'>
+                <SimulationConfigurationFormGroup
+                  currentConfig={this.currentConfig}
+                  onChange={formValue => {
+                    this.currentConfig.simulation_config.start_time = formValue.startTime;
+                    this.currentConfig.simulation_config.duration = formValue.duration;
+                    this.currentConfig.simulation_config.simulator = formValue.simulator;
+                    this.currentConfig.simulation_config.run_realtime = formValue.runInRealtime;
+                    this.currentConfig.simulation_config.simulation_name = formValue.simulationName;
+                    this.currentConfig.simulation_config.model_creation_config = formValue.modelCreationConfig;
+                  }} />
+              </Tab>
+              <Tab label='Application Configuration'>
+                <ApplicationConfigurationFormGroup
+                  currentConfig={this.currentConfig}
+                  availableApplications={this.props.availableApplications}
+                  onChange={formValue => {
+                    const selectedApplication = this.currentConfig.application_config.applications.pop();
+                    selectedApplication.name = formValue.applicationId;
+                    selectedApplication.config_string = formValue.configString;
+                    this.currentConfig.application_config.applications.push(selectedApplication);
+                  }} />
+              </Tab>
+              <Tab label='Test Configuration'>
+                {
+                  this.state.modelDictionary
+                    ? <TestConfigurationFormGroup
+                      modelDictionary={this.state.modelDictionary}
+                      simulationStartDate={this.dateTimeService.format(this.simulationStartDate)}
+                      simulationStopDate={this.dateTimeService.format(this.calculateSimulationStopTime())}
+                      onEventsAdded={events => {
+                        this.outageEvents = events.outage;
+                        this.faultEvents = events.fault;
+                        console.log(this.outageEvents, this.faultEvents);
+                      }} />
+                    : <Wait show={true} />
+                }
+              </Tab>
+            </TabGroup>
           </form>
         </DialogContent>
         <DialogActions>
           <BasicButton
-            label='Cancel'
+            label='Close'
             type='negative'
             onClick={event => {
               event.stopPropagation();
@@ -193,22 +180,28 @@ export class SimulationConfigurationEditor extends React.Component<Props, State>
           <BasicButton
             label='Submit'
             type='positive'
+            disabled={this.state.disableSubmitButton}
             onClick={event => {
-              if (this._currentConfig.power_system_config.Line_name === '') {
-                console.log("No model selected");
+              if (this.currentConfig.power_system_config.Line_name === '') {
+                console.log('No model selected');
                 this.setState({ noLineNameMessage: true });
               }
               else {
                 event.stopPropagation();
                 this.setState({ show: false });
-                this.props.onSubmit(this._currentConfig);
+                this.currentConfig.test_config.appId = this.currentConfig.application_config.applications[0].name;
+                this.props.onSubmit(this.currentConfig);
               }
             }} />
           {this.state.noLineNameMessage &&
             <span style={{ color: 'red' }} >&nbsp; Please select a Line Name </span>}
         </DialogActions>
-      </Dialog >
+      </Dialog>
     );
+  }
+
+  calculateSimulationStopTime() {
+    return +this.currentConfig.simulation_config.duration * 1000 + this.simulationStartDate.getTime();
   }
 
 }

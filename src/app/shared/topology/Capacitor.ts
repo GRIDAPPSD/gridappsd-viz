@@ -1,5 +1,5 @@
 import { Node } from './Node';
-import { CapacitorControlMode } from '../CapacitorControlMode';
+import { CapacitorControlMode } from './CapacitorControlMode';
 
 export interface Capacitor extends Node {
   parent: string;

@@ -34,12 +34,6 @@
     box-shadow: 0 0 1px #555;
 }
 
-.simulation-control__action {
-    border-radius: 100%;
-    transform-origin: 50% 50%;
-    transform: scale(1.1, 1.1);
-}
-
 .simulation-control__action.start:before,
 .simulation-control__action.resume:before {
     position: relative;

@@ -78,7 +78,7 @@ export class WebsocketStatusWatcher extends React.Component<Props, State> {
             Check server or
           </span>
           <IconButton
-            icon='websocket-connection-inactive'
+            icon='send'
             className='websocket-status-watcher__websocket-status-indicator'
             onClick={() => this._stompClientService.connect()}
             label='Click to reconnect' />

@@ -1,0 +1,20 @@
+.tabgroup__active-tab-indicator {
+    position: absolute;
+    border: 2px solid rgba(64, 81, 181, 0.502);
+    border-top-right-radius: 5px;
+    border-top-left-radius: 5px;
+    border-bottom: 0;
+    height: 100%;
+    transition: transform 0.5s cubic-bezier(0.35, 0, 0.25, 1), width 0.5s cubic-bezier(0.35, 0, 0.25, 1);
+    left: 0;
+
+    &::after {
+        content: '';
+        display: inline-block;
+        position: absolute;
+        width: 100%;
+        height: 5px;
+        background-color: #fff;
+        top: 95%;
+    }
+}

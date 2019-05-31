@@ -4,7 +4,7 @@ import * as ReactDOM from 'react-dom';
 import './Tooltip.scss';
 
 interface Props {
-  position: 'top' | 'left' | 'right' | 'bottom';
+  position?: 'top' | 'left' | 'right' | 'bottom';
   content: string | React.ReactElement<any>;
   anchor?: HTMLElement;
 }
@@ -13,6 +13,10 @@ interface State {
 }
 
 export class Tooltip extends React.Component<Props, State> {
+
+  static defaultProps = {
+    position: 'bottom'
+  };
 
   private _tooltip: HTMLElement;
   private _tooltipContainer: HTMLElement;

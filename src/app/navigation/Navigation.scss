@@ -15,10 +15,10 @@
     }
 }
 
-.icon-button.websocket-connection-active {
+.icon-button.websocket-status-indicator {
     margin-left: auto;
 
-    &::before {
+    i {
         color: #09d855;
     }
 }

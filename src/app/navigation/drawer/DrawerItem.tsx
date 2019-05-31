@@ -14,17 +14,18 @@ export const DrawerItem = ({ className = '', onClick = (() => { }), children }) 
   </Ripple>
 );
 
-type IconName = 'form' | 'app' | 'browse' | 'terminal' | 'cubes';
+type IconName = 'assignment' | 'storage' | 'search' | 'laptop';
 
 interface DrawerItemIconProps {
   icon: IconName
 }
+
 export const DrawerItemIcon = (props: DrawerItemIconProps) => (
-  <i className={'app-icon drawer-item__icon drawer-item__icon__' + props.icon} />
+  <i className={'material-icons drawer-item-icon drawer-item-icon__' + props.icon}>{props.icon}</i>
 );
 
 export const DrawerItemLabel = ({ className = '', value }) => (
-  <span className={'drawer-item__label' + (className ? ' ' + className : '')}>
+  <span className={'drawer-item-label' + (className ? ' ' + className : '')}>
     {value}
   </span>
 );

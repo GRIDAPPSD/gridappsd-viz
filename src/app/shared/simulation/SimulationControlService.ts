@@ -27,7 +27,7 @@ export class SimulationControlService {
     return SimulationControlService._INSTANCE_;
   }
 
-  statusChanged(): Observable<SimulationStatus> {
+  statusChanges(): Observable<SimulationStatus> {
     return this._currentSimulationStatusNotifer.asObservable();
   }
 

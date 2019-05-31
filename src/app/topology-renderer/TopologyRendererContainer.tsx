@@ -4,7 +4,7 @@ import { map, takeWhile } from 'rxjs/operators';
 
 import { TopologyRenderer } from './TopologyRenderer';
 import { SimulationQueue } from '@shared/simulation';
-import { Node, Edge, Regulator } from '@shared/topology';
+import { Node, Edge, Regulator, RegulatorControlMode } from '@shared/topology';
 import { StompClientService } from '@shared/StompClientService';
 import { Switch, TopologyModel, Capacitor } from '@shared/topology';
 import { OpenOrCloseCapacitorRequest } from './models/OpenOrCloseCapacitorRequest';
@@ -12,10 +12,9 @@ import { ToggleSwitchStateRequest } from './models/ToggleSwitchStateRequest';
 import { GetTopologyModelRequest, GetTopologyModelRequestPayload } from './models/GetTopologyModelRequest';
 import { ToggleCapacitorManualModeRequest } from './models/ToggleCapacitorManualModeRequest';
 import { ToggleRegulatorManualModeRequest } from './models/ToggleRegulatorManualModeRequest';
-import { CapacitorControlMode } from '../shared/CapacitorControlMode';
+import { CapacitorControlMode } from '@shared/topology';
 import { CapacitorVarUpdateRequest } from './models/CapacitorVarUpdateRequest';
 import { CapacitorVoltUpdateRequest } from './models/CapacitorVoltUpdateRequest';
-import { RegulatorControlMode } from '@shared/RegulatorControlMode';
 import { RegulatorLineDropUpdateRequest } from './models/RegulatorLineDropUpdateRequest';
 import { RegulatorTapChangerRequest } from './models/RegulatorTapChangerRequest';
 

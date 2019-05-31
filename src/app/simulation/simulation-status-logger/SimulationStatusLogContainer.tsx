@@ -57,7 +57,7 @@ export class SimulationStatusLogContainer extends React.Component<Props, State> 
 
 
   private _respondToSimulationStatusChanges() {
-    return this._simulationControlService.statusChanged()
+    return this._simulationControlService.statusChanges()
       .pipe(
         filter(status => status === SimulationStatus.STARTED),
         switchMap(() => this._newObservableToReadSimulationId()),

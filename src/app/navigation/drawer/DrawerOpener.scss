@@ -10,13 +10,13 @@
     border-radius: 3px;
     outline: none;
     transition: box-shadow 0.2s ease;
+
     &:hover {
         box-shadow: 0 5px 10px rgba(0, 0, 0, 0.5), 2px 1px 5px rgba(0, 0, 0, 0.2);
     }
-    &:before {
-        transform: translateY(1.5px);
-        color: #000;
-        font-size: 27px;
-        content: '\f0c9';
+
+    i {
+        font-size: 1em;
     }
+
 }

@@ -3,26 +3,35 @@
     background-color: #fff;
     width: 100vw;
     position: relative;
+
     label {
         width: 100px;
     }
 }
 
-.stomp-client-form__topic input,
-.stomp-client-form__request-body .gridappsd-form-control__multiline-input {
-    width: 80vw;
+.stomp-client-form__topic .input-field-wrapper {
+    width: 100%;
+
+    input {
+        width: 100%;
+    }
+}
+
+.stomp-client-form__request-body .textarea__input-box {
+    width: 100%;
 }
 
 .stomp-client__send-request {
-    margin-left: 120px;
+    margin-left: 110px;
     display: block;
 }
 
-.gridappsd-form-control__multiline-input.response {
+.stomp-client-form__response .textarea__input-box {
     height: 52.5vh;
     white-space: pre;
     max-height: 52.5vh;
     padding: 5px;
     overflow: auto;
-    width: 80vw;
+    pointer-events: none;
+    width: 100%;
 }

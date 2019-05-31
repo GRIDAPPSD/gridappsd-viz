@@ -6,8 +6,7 @@ import {
   QueryPowerGridModelsRequestType, QueryPowerGridModelsRequestBody, QueryPowerGridModelsResultFormat
 } from './models/QueryPowerGridModelsRequest';
 import { MRID } from '@shared/MRID';
-import { MenuItem } from '@shared/dropdown-menu';
-import { MultilineFormControl, SelectFormControl } from '@shared/form';
+import { TextArea, Select, Option } from '@shared/form';
 import { BasicButton } from '@shared/buttons';
 import { Wait } from '@shared/wait';
 
@@ -23,7 +22,7 @@ interface Props {
 interface State {
   response: any;
   requestBody: QueryPowerGridModelsRequestBody;
-  menuItemsForMRIDs: MenuItem[];
+  optionsForMRIDs: Option[];
 }
 
 export class PowerGridModels extends React.Component<Props, State> {
@@ -38,41 +37,65 @@ export class PowerGridModels extends React.Component<Props, State> {
         queryString: `SELECT ?feeder ?fid  WHERE {?s r:type c:Feeder.?s c:IdentifiedObject.name ?feeder.?s c:IdentifiedObject.mRID ?fid.?s c:Feeder.NormalEnergizingSubstation ?sub.?sub c:IdentifiedObject.name ?station.?sub c:IdentifiedObject.mRID ?sid.?sub c:Substation.Region ?sgr.?sgr c:IdentifiedObject.name ?subregion.?sgr c:IdentifiedObject.mRID ?sgrid.?sgr c:SubGeographicalRegion.Region ?rgn.?rgn c:IdentifiedObject.name ?region.?rgn c:IdentifiedObject.mRID ?rgnid.}  ORDER by ?station ?feeder`,
         filter: `?s cim:IdentifiedObject.name \u0027q14733\u0027","objectType":"http://iec.ch/TC57/2012/CIM-schema-cim17#ConnectivityNode`
       } as QueryPowerGridModelsRequestBody,
-      menuItemsForMRIDs: props.mRIDs.map(mRID => new MenuItem(mRID.displayName, mRID.value))
+      optionsForMRIDs: props.mRIDs.map(mRID => new Option(mRID.displayName, mRID.value))
     };
 
     this._COMPONENT_TO_SHOW_FOR_QUERY_TYPE = {
       [QueryPowerGridModelsRequestType.QUERY]: (
-        <MultilineFormControl
+        <TextArea
           label='Query string'
           value='SELECT ?feeder ?fid  WHERE {?s r:type c:Feeder.?s c:IdentifiedObject.name ?feeder.?s c:IdentifiedObject.mRID ?fid.?s c:Feeder.NormalEnergizingSubstation ?sub.?sub c:IdentifiedObject.name ?station.?sub c:IdentifiedObject.mRID ?sid.?sub c:Substation.Region ?sgr.?sgr c:IdentifiedObject.name ?subregion.?sgr c:IdentifiedObject.mRID ?sgrid.?sgr c:SubGeographicalRegion.Region ?rgn.?rgn c:IdentifiedObject.name ?region.?rgn c:IdentifiedObject.mRID ?rgnid.}  ORDER by ?station ?feeder'
-          onUpdate={value => this._updateRequestBody('queryString', value)} />
+          onUpdate={
+            value => this._updateRequestBody('queryString', value)
+          } />
       ),
       [QueryPowerGridModelsRequestType.QUERY_OBJECT]: (
-        <SelectFormControl
+        <Select
           label='Object ID'
-          menuItems={this.state.menuItemsForMRIDs}
-          onChange={menuItem => this._updateRequestBody('objectId', menuItem.value)}
-          defaultSelectedIndex={this.props.mRIDs.findIndex(mRID => mRID.displayName === 'ieee8500')} />
+          options={
+            this.state.optionsForMRIDs
+          }
+          onChange={
+            options => this._updateRequestBody('objectId', options[0].value)
+          }
+          selectedOptions={
+            option => option.label === 'ieee8500'
+          } />
       ),
       [QueryPowerGridModelsRequestType.QUERY_OBJECT_TYPES]: (
-        <SelectFormControl
+        <Select
           label='Model ID'
-          menuItems={this.state.menuItemsForMRIDs}
-          onChange={menuItem => this._updateRequestBody('modelId', menuItem.value)}
-          defaultSelectedIndex={this.props.mRIDs.findIndex(mRID => mRID.displayName === 'ieee8500')} />
+          options={
+            this.state.optionsForMRIDs
+          }
+          onChange={
+            options => this._updateRequestBody('modelId', options[0].value)
+          }
+          selectedOptions={
+            option => option.label === 'ieee8500'
+          } />
       ),
       [QueryPowerGridModelsRequestType.QUERY_MODEL]: (
         <>
-          <SelectFormControl
+          <Select
             label='Model ID'
-            menuItems={this.state.menuItemsForMRIDs}
-            onChange={menuItem => this._updateRequestBody('modelId', menuItem.value)}
-            defaultSelectedIndex={this.props.mRIDs.findIndex(mRID => mRID.displayName === 'ieee8500')} />
-          <MultilineFormControl
+            options={
+              this.state.optionsForMRIDs
+            }
+            onChange={
+              options => this._updateRequestBody('modelId', options[0].value)
+            }
+            selectedOptions={
+              option => option.label === 'ieee8500'
+            } />
+          <TextArea
             label='Filter'
-            value={`?s cim:IdentifiedObject.name \u0027q14733\u0027","objectType":"http://iec.ch/TC57/2012/CIM-schema-cim17#ConnectivityNode`}
-            onUpdate={value => this._updateRequestBody('filter', value)} />
+            value={
+              `?s cim:IdentifiedObject.name \u0027q14733\u0027","objectType":"http://iec.ch/TC57/2012/CIM-schema-cim17#ConnectivityNode`
+            }
+            onUpdate={
+              value => this._updateRequestBody('filter', value)
+            } />
         </>
       )
     }
@@ -84,6 +107,7 @@ export class PowerGridModels extends React.Component<Props, State> {
     if (newProps !== this.props)
       this.setState({ response: newProps.response });
   }
+
   render() {
     if (this.props.mRIDs.length > 0) {
       const requestContainerStyles = !this.state.response ? { height: '100%', maxHeight: '100%' } : {};
@@ -91,36 +115,44 @@ export class PowerGridModels extends React.Component<Props, State> {
         <>
           <RequestEditor styles={requestContainerStyles}>
             <form className='query-powergrid-models-form'>
-              <SelectFormControl
+              <Select
                 label='Request type'
-                menuItems={[
-                  new MenuItem(QueryPowerGridModelsRequestType.QUERY, QueryPowerGridModelsRequestType.QUERY),
-                  new MenuItem(QueryPowerGridModelsRequestType.QUERY_MODEL, QueryPowerGridModelsRequestType.QUERY_MODEL),
-                  new MenuItem(QueryPowerGridModelsRequestType.QUERY_MODEL_NAMES, QueryPowerGridModelsRequestType.QUERY_MODEL_NAMES),
-                  new MenuItem(QueryPowerGridModelsRequestType.QUERY_OBJECT, QueryPowerGridModelsRequestType.QUERY_OBJECT),
-                  new MenuItem(QueryPowerGridModelsRequestType.QUERY_OBJECT_TYPES, QueryPowerGridModelsRequestType.QUERY_OBJECT_TYPES),
+                options={[
+                  new Option(QueryPowerGridModelsRequestType.QUERY, QueryPowerGridModelsRequestType.QUERY),
+                  new Option(QueryPowerGridModelsRequestType.QUERY_MODEL, QueryPowerGridModelsRequestType.QUERY_MODEL),
+                  new Option(QueryPowerGridModelsRequestType.QUERY_MODEL_NAMES, QueryPowerGridModelsRequestType.QUERY_MODEL_NAMES),
+                  new Option(QueryPowerGridModelsRequestType.QUERY_OBJECT, QueryPowerGridModelsRequestType.QUERY_OBJECT),
+                  new Option(QueryPowerGridModelsRequestType.QUERY_OBJECT_TYPES, QueryPowerGridModelsRequestType.QUERY_OBJECT_TYPES),
                 ]}
-                onChange={menuItem => {
+                onChange={options => {
                   this.setState({ response: null });
-                  this._updateRequestBody('requestType', menuItem.value);
+                  this._updateRequestBody('requestType', options[0].value);
                 }} />
 
-              <SelectFormControl
+              <Select
                 label='Result format'
-                onChange={menuItem => this._updateRequestBody('resultFormat', menuItem.value)}
-                menuItems={[
-                  new MenuItem(QueryPowerGridModelsResultFormat.JSON, QueryPowerGridModelsResultFormat.JSON),
-                  new MenuItem(QueryPowerGridModelsResultFormat.CSV, QueryPowerGridModelsResultFormat.CSV),
+                onChange={
+                  options => this._updateRequestBody('resultFormat', options[0].value)
+                }
+                options={[
+                  new Option(QueryPowerGridModelsResultFormat.JSON, QueryPowerGridModelsResultFormat.JSON),
+                  new Option(QueryPowerGridModelsResultFormat.CSV, QueryPowerGridModelsResultFormat.CSV),
                 ]}
-                defaultSelectedIndex={0} />
+                selectedOptions={
+                  (_, index) => index === 0
+                } />
               {
                 this._COMPONENT_TO_SHOW_FOR_QUERY_TYPE[this.state.requestBody.requestType]
               }
               <BasicButton
                 label='Submit'
                 type='positive'
-                disabled={!this.state.requestBody.requestType}
-                onClick={() => this.props.onSubmit(this.state.requestBody)} />
+                disabled={
+                  !this.state.requestBody.requestType
+                }
+                onClick={
+                  () => this.props.onSubmit(this.state.requestBody)
+                } />
             </form>
           </RequestEditor>
           {

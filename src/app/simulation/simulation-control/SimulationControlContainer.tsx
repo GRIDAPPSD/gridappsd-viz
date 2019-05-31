@@ -41,7 +41,7 @@ export class SimulationControlContainer extends React.Component<Props, State> {
   }
 
   private _subscribeToSimulationStatusChanges() {
-    return this._simulationControlService.statusChanged()
+    return this._simulationControlService.statusChanges()
       .subscribe({
         next: status => this.setState({ simulationStatus: status })
       });

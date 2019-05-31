@@ -1,4 +1,5 @@
 $app-bar-height: 60px;
+
 .data-browser {
     position: fixed;
     overflow: hidden;
@@ -6,9 +7,11 @@ $app-bar-height: 60px;
     width: 100vw;
     display: flex;
     padding: 10px;
+
     li {
         list-style-type: none;
     }
+
     .wait .dots {
         transform: translateX(-70px);
     }
@@ -32,18 +35,20 @@ $app-bar-height: 60px;
     font-size: 20px;
     transition: transform 0.4s cubic-bezier(0.85, 1.72, 0, 1.32);
     position: relative;
-    color: #000;
+    color: #3f51b5;
     display: block;
     user-select: none;
     position: relative;
+
     &:link,
     &:hover,
     &:active {
         text-decoration: none;
-        color: #000;
     }
+
     &:hover {
         transform: translateX(20px);
+
         &:after {
             width: 10px;
         }
@@ -52,6 +57,7 @@ $app-bar-height: 60px;
 
 .data-browser__selection__item.selected {
     pointer-events: none;
+
     &:before {
         content: '';
         width: 30px;
@@ -61,6 +67,7 @@ $app-bar-height: 60px;
         left: 100%;
         top: 20px;
     }
+
     &:after {
         content: '';
         width: 30px;

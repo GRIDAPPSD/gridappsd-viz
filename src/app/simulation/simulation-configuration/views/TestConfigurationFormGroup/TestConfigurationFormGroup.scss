@@ -1,0 +1,29 @@
+.test-configuration {
+    position: relative;
+    display: flex;
+    height: 100%;
+    overflow: hidden;
+
+    .test-configuration__form {
+        overflow: auto auto;
+        width: 40%;
+    }
+}
+
+.test-configuration__form__upload-file {
+    margin-left: 20px;
+}
+
+.test-configuration__event-summary {
+    width: 60%;
+    margin-top: 10px;
+    display: flex;
+    flex-flow: column nowrap;
+}
+
+.test-configuration__save-events {
+    position: absolute;
+    left: 96%;
+    top: 90%;
+    z-index: 10;
+}
