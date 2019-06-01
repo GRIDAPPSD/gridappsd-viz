@@ -26,6 +26,9 @@ interface State<T> {
 }
 
 export class Select<T> extends React.Component<Props<T>, State<T>> {
+
+  optionListOpener: HTMLButtonElement;
+
   private readonly _optionListContainer = document.createElement('div');
 
   constructor(props: Props<T>) {
@@ -124,8 +127,9 @@ export class Select<T> extends React.Component<Props<T>, State<T>> {
         className={`select${this.props.options.length === 0 ? ' disabled' : ''}`}
         label={this.props.label}>
         <button
+          ref={ref => this.optionListOpener = ref}
           type='button'
-          className='select__option-list__toggler'
+          className='select__option-list__opener'
           title={this.state.currentLabel}
           onClick={this.onOpen}>
           <span className='text'>{this.state.currentLabel}</span>
@@ -133,7 +137,9 @@ export class Select<T> extends React.Component<Props<T>, State<T>> {
         </button>
         {
           createPortal(
-            <PopUp in={this.state.opened} afterClosed={this.removePortal}>
+            <PopUp
+              in={this.state.opened}
+              afterClosed={this.removePortal}>
               <div
                 className='select__option-list-wrapper'
                 style={{
@@ -163,16 +169,12 @@ export class Select<T> extends React.Component<Props<T>, State<T>> {
 
   onOpen() {
     document.body.appendChild(this._optionListContainer);
-    setTimeout(() => {
-      const rect = (findDOMNode(this) as HTMLDivElement)
-        .querySelector('.select__option-list__toggler')
-        .getBoundingClientRect();
-      this.setState({
-        opened: true,
-        left: rect.left,
-        top: rect.top
-      });
-    }, 0);
+    const rect = this.optionListOpener.getBoundingClientRect();
+    this.setState({
+      opened: true,
+      left: rect.left,
+      top: rect.top
+    });
   }
 
   componentDidMount() {

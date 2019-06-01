@@ -6,26 +6,25 @@
     transition: opacity 300ms ease, visibility 300ms ease, transform 300ms ease;
 }
 
-.pop-up-in {
-    // animation-name: pop-up-in;
+.pop-up--enter {
     visibility: visible;
     opacity: 1;
     transform: translateY(0) scale(1, 1);
 }
 
-.pop-up-out {
-    // animation-name: pop-up-out;
+.pop-up--leave {
     visibility: hidden;
     opacity: 0;
     transform: translateY(25px) scale(0.9, 0.9);
 }
 
-@keyframes pop-up-in {
+@keyframes pop-up--enter {
     from {
         visibility: hidden;
         opacity: 0;
         transform: translateY(25px) scale(0.9, 0.9);
     }
+
     to {
         visibility: visible;
         opacity: 1;
@@ -33,12 +32,13 @@
     }
 }
 
-@keyframes pop-up-out {
+@keyframes pop-up--leave {
     from {
         visibility: visible;
         opacity: 1;
         transform: translateY(0) scale(1, 1);
     }
+
     to {
         visibility: hidden;
         opacity: 0;

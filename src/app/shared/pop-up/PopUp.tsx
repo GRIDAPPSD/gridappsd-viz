@@ -16,6 +16,7 @@ export class PopUp extends React.Component<Props, State> {
 
   constructor(props: any) {
     super(props);
+
     this.state = {
     };
   }
@@ -23,7 +24,7 @@ export class PopUp extends React.Component<Props, State> {
   componentDidMount() {
     this._element = ReactDOM.findDOMNode(this) as HTMLElement;
     this._element.addEventListener('transitionend', this.props.afterClosed, false);
-    this._element.classList.add('pop-up', 'pop-up-out');
+    this._element.classList.add('pop-up', 'pop-up--leave');
     this.componentWillReceiveProps(this.props);
     this._shiftIntoViewIfOverflowScreen();
   }
@@ -34,8 +35,12 @@ export class PopUp extends React.Component<Props, State> {
 
   private _shiftIntoViewIfOverflowScreen() {
     const popupRect = this._element.getBoundingClientRect();
-    if (popupRect.bottom > document.body.clientHeight)
-      this._element.style.transform = `translateY(${document.body.clientHeight - popupRect.bottom - 20}px)`;
+
+    if (popupRect.bottom > document.body.clientHeight) {
+      // 77 is the magic number figured out by using the Inspector
+      const topPositionToShiftTo = popupRect.top - (popupRect.bottom - document.body.clientHeight) - 77;
+      this._element.style.top = `${topPositionToShiftTo > 5 ? topPositionToShiftTo : 0}px`;
+    }
   }
 
   componentWillUnmount() {
@@ -44,18 +49,16 @@ export class PopUp extends React.Component<Props, State> {
 
   componentWillReceiveProps(newProps: Props) {
     if (newProps.in) {
-      this._element.classList.remove('pop-up-out');
-      this._element.classList.add('pop-up-in');
+      this._element.classList.remove('pop-up--leave');
+      this._element.classList.add('pop-up--enter');
     }
     else {
-      this._element.classList.remove('pop-up-in');
-      this._element.classList.add('pop-up-out');
+      this._element.classList.remove('pop-up--enter');
+      this._element.classList.add('pop-up--leave');
     }
   }
 
   render() {
-    return (
-      this.props.children
-    );
+    return (this.props.children);
   }
 }
