@@ -153,7 +153,6 @@ export class OutageEventForm extends React.Component<Props, State> {
               });
               this.currentInputListItem.name = selectedOption.label;
               this.currentInputListItem.mRID = selectedOption.value.mRID;
-              console.log(selectedOption);
               this.enableOrDisableAddInputItemButton();
             }} />
           <Select

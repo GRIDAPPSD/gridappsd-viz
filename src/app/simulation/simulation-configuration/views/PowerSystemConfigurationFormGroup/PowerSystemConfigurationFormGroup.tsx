@@ -12,6 +12,9 @@ interface Props {
 }
 
 interface State {
+  regionNameOptions: Option<string>[];
+  subregionNameOptions: Option<string>[];
+  lineNameOptions: Option<{ name: string; mRID: string; index: number }>[];
 }
 
 export class PowerSystemConfigurationFormGroup extends React.Component<Props, State> {
@@ -26,6 +29,9 @@ export class PowerSystemConfigurationFormGroup extends React.Component<Props, St
   constructor(props: any) {
     super(props);
     this.state = {
+      regionNameOptions: this.props.feederModels.regions.map(region => new Option(region.regionName, region.regionID)),
+      subregionNameOptions: this.props.feederModels.subregions.map(e => new Option(e.subregionName, e.subregionID)),
+      lineNameOptions: this.props.feederModels.lines.map(line => new Option(line.name, line))
     };
   }
 
@@ -34,8 +40,8 @@ export class PowerSystemConfigurationFormGroup extends React.Component<Props, St
       <FormGroup label=''>
         <Select
           label='Geographical region name'
-          options={this.props.feederModels.regions.map(region => new Option(region.regionName, region.regionID))}
-          selectedOptions={option => option.value === this.formValue.geographicalRegionId}
+          options={this.state.regionNameOptions}
+          isOptionSelected={option => option.value === this.formValue.geographicalRegionId}
           onChange={options => {
             this.formValue.geographicalRegionId = options[0].value;
             this.props.onChange(this.formValue);
@@ -43,8 +49,8 @@ export class PowerSystemConfigurationFormGroup extends React.Component<Props, St
 
         <Select
           label='Sub-geographical region name'
-          options={this.props.feederModels.subregions.map(e => new Option(e.subregionName, e.subregionID))}
-          selectedOptions={option => option.value === this.formValue.subGeographicalRegionId}
+          options={this.state.subregionNameOptions}
+          isOptionSelected={option => option.value === this.formValue.subGeographicalRegionId}
           onChange={options => {
             this.formValue.subGeographicalRegionId = options[0].value;
             this.props.onChange(this.formValue);
@@ -52,7 +58,7 @@ export class PowerSystemConfigurationFormGroup extends React.Component<Props, St
 
         <Select
           label='Line name'
-          options={this.props.feederModels.lines.map(line => new Option(line.name, line))}
+          options={this.state.lineNameOptions}
           onChange={options => {
             this.formValue.lineName = options[0].value.mRID;
             this.formValue.simulationName = options[0].value.name;

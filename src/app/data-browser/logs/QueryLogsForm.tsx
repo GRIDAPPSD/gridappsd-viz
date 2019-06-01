@@ -52,12 +52,8 @@ export class QueryLogsForm extends React.Component<Props, State> {
                 onChange={value => this.formValue.startTime = value} />
               <Select
                 label='Simulation ID'
-                options={
-                  this.props.simulationIds.map(id => new Option(`${id.process_id}`, id))
-                }
-                onChange={
-                  this.onSimulationIdSelected
-                } />
+                options={this.props.simulationIds.map(id => new Option(`${id.process_id}`, id))}
+                onChange={this.onSimulationIdSelected} />
               <Input
                 label='Username'
                 name='username'
@@ -67,32 +63,22 @@ export class QueryLogsForm extends React.Component<Props, State> {
             <div className='query-logs-form__right'>
               <Select
                 label='Source'
-                options={
-                  this.props.sources.map(source => new Option(source, source))
-                }
-                selectedOptions={
-                  (_, index) => index === 0
-                }
-                onChange={
-                  options => this.formValue.source = options[0].value
-                } />
+                options={this.props.sources.map(source => new Option(source, source))}
+                isOptionSelected={(_, index) => index === 0}
+                onChange={options => this.formValue.source = options[0].value} />
               <Select
                 label='Log level'
                 options={
                   ['ALL', 'TRACE', 'DEBUG', 'INFO', 'WARN', 'ERROR', 'FATAL'].map(e => new Option(e, e))
                 }
-                selectedOptions={
-                  (_, index) => index === 0
-                }
-                onChange={
-                  options => this.formValue.logLevel = options[0].value
-                } />
+                isOptionSelected={(_, index) => index === 0}
+                onChange={options => this.formValue.logLevel = options[0].value} />
               <Select
                 label='Process status'
                 options={
                   ['ALL', 'STARTING', 'STARTED', 'RUNNING', 'ERROR', 'CLOSED', 'COMPLETE'].map(e => new Option(e, e))
                 }
-                selectedOptions={(_, index) => index === 0}
+                isOptionSelected={(_, index) => index === 0}
                 onChange={options => this.formValue.processStatus = options[0].value} />
             </div>
           </form>

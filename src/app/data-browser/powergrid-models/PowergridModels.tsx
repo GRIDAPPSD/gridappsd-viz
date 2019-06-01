@@ -45,57 +45,33 @@ export class PowerGridModels extends React.Component<Props, State> {
         <TextArea
           label='Query string'
           value='SELECT ?feeder ?fid  WHERE {?s r:type c:Feeder.?s c:IdentifiedObject.name ?feeder.?s c:IdentifiedObject.mRID ?fid.?s c:Feeder.NormalEnergizingSubstation ?sub.?sub c:IdentifiedObject.name ?station.?sub c:IdentifiedObject.mRID ?sid.?sub c:Substation.Region ?sgr.?sgr c:IdentifiedObject.name ?subregion.?sgr c:IdentifiedObject.mRID ?sgrid.?sgr c:SubGeographicalRegion.Region ?rgn.?rgn c:IdentifiedObject.name ?region.?rgn c:IdentifiedObject.mRID ?rgnid.}  ORDER by ?station ?feeder'
-          onUpdate={
-            value => this._updateRequestBody('queryString', value)
-          } />
+          onUpdate={value => this._updateRequestBody('queryString', value)} />
       ),
       [QueryPowerGridModelsRequestType.QUERY_OBJECT]: (
         <Select
           label='Object ID'
-          options={
-            this.state.optionsForMRIDs
-          }
-          onChange={
-            options => this._updateRequestBody('objectId', options[0].value)
-          }
-          selectedOptions={
-            option => option.label === 'ieee8500'
-          } />
+          options={this.state.optionsForMRIDs}
+          onChange={options => this._updateRequestBody('objectId', options[0].value)}
+          isOptionSelected={option => option.label === 'ieee8500'} />
       ),
       [QueryPowerGridModelsRequestType.QUERY_OBJECT_TYPES]: (
         <Select
           label='Model ID'
-          options={
-            this.state.optionsForMRIDs
-          }
-          onChange={
-            options => this._updateRequestBody('modelId', options[0].value)
-          }
-          selectedOptions={
-            option => option.label === 'ieee8500'
-          } />
+          options={this.state.optionsForMRIDs}
+          onChange={options => this._updateRequestBody('modelId', options[0].value)}
+          isOptionSelected={option => option.label === 'ieee8500'} />
       ),
       [QueryPowerGridModelsRequestType.QUERY_MODEL]: (
         <>
           <Select
             label='Model ID'
-            options={
-              this.state.optionsForMRIDs
-            }
-            onChange={
-              options => this._updateRequestBody('modelId', options[0].value)
-            }
-            selectedOptions={
-              option => option.label === 'ieee8500'
-            } />
+            options={this.state.optionsForMRIDs}
+            onChange={options => this._updateRequestBody('modelId', options[0].value)}
+            isOptionSelected={option => option.label === 'ieee8500'} />
           <TextArea
             label='Filter'
-            value={
-              `?s cim:IdentifiedObject.name \u0027q14733\u0027","objectType":"http://iec.ch/TC57/2012/CIM-schema-cim17#ConnectivityNode`
-            }
-            onUpdate={
-              value => this._updateRequestBody('filter', value)
-            } />
+            value={`?s cim:IdentifiedObject.name \u0027q14733\u0027","objectType":"http://iec.ch/TC57/2012/CIM-schema-cim17#ConnectivityNode`}
+            onUpdate={value => this._updateRequestBody('filter', value)} />
         </>
       )
     }
@@ -131,28 +107,20 @@ export class PowerGridModels extends React.Component<Props, State> {
 
               <Select
                 label='Result format'
-                onChange={
-                  options => this._updateRequestBody('resultFormat', options[0].value)
-                }
+                onChange={options => this._updateRequestBody('resultFormat', options[0].value)}
                 options={[
                   new Option(QueryPowerGridModelsResultFormat.JSON, QueryPowerGridModelsResultFormat.JSON),
                   new Option(QueryPowerGridModelsResultFormat.CSV, QueryPowerGridModelsResultFormat.CSV),
                 ]}
-                selectedOptions={
-                  (_, index) => index === 0
-                } />
+                isOptionSelected={(_, index) => index === 0} />
               {
                 this._COMPONENT_TO_SHOW_FOR_QUERY_TYPE[this.state.requestBody.requestType]
               }
               <BasicButton
                 label='Submit'
                 type='positive'
-                disabled={
-                  !this.state.requestBody.requestType
-                }
-                onClick={
-                  () => this.props.onSubmit(this.state.requestBody)
-                } />
+                disabled={!this.state.requestBody.requestType}
+                onClick={() => this.props.onSubmit(this.state.requestBody)} />
             </form>
           </RequestEditor>
           {

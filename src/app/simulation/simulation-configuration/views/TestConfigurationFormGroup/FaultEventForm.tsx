@@ -25,8 +25,6 @@ interface State {
 export class FaultEventForm extends React.Component<Props, State> {
   formValue: FaultEvent;
   equipmentTypeSelect: Select<string>;
-  nameSelect: Select<string>;
-  phaseSelect: Select<string>;
 
   constructor(props: Props) {
     super(props);
@@ -70,7 +68,6 @@ export class FaultEventForm extends React.Component<Props, State> {
       const formValue = { ...this.props.initialFormValue };
       this.setState({ formValue });
       this.formValue = formValue;
-
     }
   }
 
@@ -88,10 +85,8 @@ export class FaultEventForm extends React.Component<Props, State> {
               phaseOptions: []
             });
             this.formValue.equipmentType = options[0].label;
-            this.nameSelect.reset();
           }} />
         <Select
-          ref={ref => this.nameSelect = ref}
           label='Name'
           options={this.state.componentOptions}
           onChange={options => {
@@ -100,17 +95,15 @@ export class FaultEventForm extends React.Component<Props, State> {
                 .sort((a, b) => a.label.localeCompare(b.label))
             });
             this.formValue.equipmentName = options[0].label;
-            this.phaseSelect.reset();
           }} />
         <Select
-          ref={ref => this.phaseSelect = ref}
           label='Phase'
           options={this.state.phaseOptions}
           onChange={options => this.formValue.phase = options[0].value} />
         <Select
           label='Phase Connected Fault Kind'
           options={this.state.faultKindOptions}
-          selectedOptions={option => option.value === this.formValue.faultKind}
+          isOptionSelected={option => option.value === this.formValue.faultKind}
           onChange={options => {
             this.formValue.faultKind = options[0].value;
             this.setState({

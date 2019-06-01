@@ -4,6 +4,7 @@ import { findDOMNode, createPortal } from 'react-dom'
 import { Option } from './Option';
 import { PopUp } from '@shared/pop-up';
 import { FormControl } from '../form-control/FormControl';
+import { IconButton } from '@shared/buttons';
 
 import './Select.scss';
 
@@ -11,7 +12,7 @@ interface Props<T> {
   label: string;
   options: Option<T>[];
   onChange: (selections: Option<T>[]) => void;
-  selectedOptions?: (option: Option<T>, index: number) => boolean;
+  isOptionSelected?: (option: Option<T>, index: number) => boolean;
   defaultLabel?: string;
   multiple?: boolean;
 }
@@ -19,30 +20,38 @@ interface Props<T> {
 interface State<T> {
   currentLabel: string;
   opened: boolean;
-  selectedIndices: number[];
+  selectedOptions: Option<T>[];
   defaultLabel: string;
   left: number;
   top: number;
+  filter: string;
+  filteredOptions: Option<T>[];
 }
 
 export class Select<T> extends React.Component<Props<T>, State<T>> {
 
   optionListOpener: HTMLButtonElement;
+  filterInput: HTMLInputElement;
 
   private readonly _optionListContainer = document.createElement('div');
+  private _filterTimeout: any;
 
   constructor(props: Props<T>) {
     super(props);
     this.state = {
       currentLabel: props.defaultLabel || props.multiple ? 'Select one or more' : 'Select one option',
       opened: false,
-      selectedIndices: [],
+      selectedOptions: [],
       defaultLabel: props.defaultLabel || props.multiple ? 'Select one or more' : 'Select an option',
       left: 0,
-      top: 0
+      top: 0,
+      filter: '',
+      filteredOptions: props.options
     };
     this.onOpen = this.onOpen.bind(this);
     this._onClose = this._onClose.bind(this);
+    this.filterOptionList = this.filterOptionList.bind(this);
+    this.clearFilter = this.clearFilter.bind(this);
     this.removePortal = this.removePortal.bind(this);
     this._optionListContainer.className = 'select-option-list-container';
     this._optionListContainer.onclick = this._onClose;
@@ -55,43 +64,49 @@ export class Select<T> extends React.Component<Props<T>, State<T>> {
       setTimeout(() => this.setState({ opened: false }), 100);
       // if multiple is true, then only fire onChange when the option list is closed
       if (this.props.multiple) {
-        const selectedOptions = this.state.selectedIndices.map(i => this.props.options[i]);
         this.setState({
-          currentLabel: selectedOptions.length === 0
+          currentLabel: this.state.selectedOptions.length === 0
             ? this.state.defaultLabel
-            : selectedOptions.map(option => option.label).join(', '),
+            : this.state.selectedOptions.map(option => option.label).join(', '),
         });
-        this.props.onChange(selectedOptions);
+        this.props.onChange(this.state.selectedOptions);
       }
     }
   }
 
-  onChange(index: number) {
-    if (this.props.multiple && this.props.options.length !== 1) {
-      this.setState(prevState => {
-        if (prevState.selectedIndices.includes(index))
-          return {
-            selectedIndices: prevState.selectedIndices.filter(e => e !== index)
-          };
-        return {
-          selectedIndices: [...prevState.selectedIndices, index]
-        };
-      })
+  onChange(clickedOption: Option<T>) {
+    if (this.props.multiple && this.props.options.length > 1) {
+      if (clickedOption.isSelected)
+        this.setState({
+          selectedOptions: this.state.selectedOptions.filter(option => option.label !== clickedOption.label)
+        });
+      else
+        this.setState({
+          selectedOptions: [...this.state.selectedOptions, clickedOption]
+        });
+      clickedOption.isSelected = !clickedOption.isSelected;
     }
-    else if (this.state.selectedIndices[0] !== index) {
+    else if (!clickedOption.isSelected) {
+      this._toggleAllSelectedOptions(false);
+      const selectedOptions = [clickedOption];
       this.setState({
-        currentLabel: this.props.options[index].label,
+        currentLabel: clickedOption.label,
         opened: false,
-        selectedIndices: [index]
+        selectedOptions
       });
-      this.props.onChange([this.props.options[index]]);
+      clickedOption.isSelected = true;
+      this.props.onChange(selectedOptions);
     }
     else {
       this.setState({
         opened: false
       });
-      this.props.onChange([this.props.options[index]]);
     }
+  }
+
+  private _toggleAllSelectedOptions(isSelected: boolean) {
+    for (const selectedOption of this.state.selectedOptions)
+      selectedOption.isSelected = isSelected;
   }
 
   componentWillUnmount() {
@@ -106,18 +121,17 @@ export class Select<T> extends React.Component<Props<T>, State<T>> {
 
   componentDidUpdate(prevProps: Props<T>) {
     if (this.props.options !== prevProps.options) {
-      if (this.props.options.length !== prevProps.options.length || this.props.options.length === 0)
-        this.setState({
-          selectedIndices: [],
-          currentLabel: this.state.defaultLabel
-        });
+      // if (this.props.options.length !== prevProps.options.length || this.props.options.length === 0)
+      this.reset();
     }
   }
 
   reset() {
+    this._toggleAllSelectedOptions(false);
     this.setState({
-      selectedIndices: [],
-      currentLabel: this.state.defaultLabel
+      selectedOptions: [],
+      currentLabel: this.state.defaultLabel,
+      filter: ''
     });
   }
 
@@ -146,13 +160,30 @@ export class Select<T> extends React.Component<Props<T>, State<T>> {
                   left: this.state.left + 'px',
                   top: this.state.top + 'px'
                 }}>
+                <form className='select__option-list__filter'>
+                  <input
+                    ref={ref => this.filterInput = ref}
+                    type='text'
+                    className='select__option-list__filter__input'
+                    autoFocus={true}
+                    value={this.state.filter}
+                    onChange={this.filterOptionList} />
+                  <IconButton
+                    className='select__option-list__filter__clear'
+                    disabled={this.state.filter === ''}
+                    rounded
+                    icon='close'
+                    size='small'
+                    style='accent'
+                    onClick={this.clearFilter} />
+                </form>
                 <ul className='select__option-list'>
                   {
-                    this.props.options.map((option, index) =>
+                    this.state.filteredOptions.map((option, index) =>
                       <li
                         key={index}
-                        className={`select__option-list__option${this.state.selectedIndices.includes(index) ? ' selected' : ''}`}
-                        onClick={() => this.onChange(index)}>
+                        className={`select__option-list__option${option.isSelected ? ' selected' : ''}`}
+                        onClick={() => this.onChange(option)}>
                         <span className='text'>{option.label}</span>
                       </li>
                     )
@@ -173,21 +204,58 @@ export class Select<T> extends React.Component<Props<T>, State<T>> {
     this.setState({
       opened: true,
       left: rect.left,
-      top: rect.top
+      top: rect.top,
+      filter: '',
+      filteredOptions: this.props.options
+    });
+    // Need to wait a little after component is rendered to focus the filter
+    setTimeout(() => {
+      this.filterInput.focus();
+      if (!this.props.multiple && this.state.selectedOptions.length === 1)
+        document.querySelector('.select__option-list__option.selected')
+          .scrollIntoView();
+    }, 500);
+  }
+
+  filterOptionList(event: any) {
+    clearTimeout(this._filterTimeout);
+    const filterValue = event.target.value.toLowerCase();
+    this.setState({
+      filter: filterValue,
+    });
+    this._filterTimeout = setTimeout(() => {
+      this.setState((state, props) => {
+        // If the user keeps typing
+        // then it's more performant to use the filtered list to narrow down the result
+        // otherwise, if the user is deleting, then use the props option list
+        if (filterValue.length > state.filter && state.filteredOptions.length > 0)
+          return {
+            filteredOptions: state.filteredOptions.filter(option => option.label.toLowerCase().startsWith(filterValue))
+          };
+        return {
+          filteredOptions: props.options.filter(option => option.label.toLowerCase().startsWith(filterValue))
+        };
+      });
+    }, 250);
+  }
+
+  clearFilter() {
+    this.setState({
+      filter: '',
+      filteredOptions: this.props.options
     });
   }
 
   componentDidMount() {
-    if (this.props.options.length !== 0 && this.props.selectedOptions) {
-      const selectedIndices = this.props.options.map((option, i) => this.props.selectedOptions(option, i) ? i : -1)
-        .filter(i => i !== -1);
-      if (selectedIndices.length > 0) {
-        const selectedOptions = selectedIndices.map(i => this.props.options[i]);
+    if (this.props.options.length !== 0 && this.props.isOptionSelected) {
+      const selectedOptions = this.props.options.filter((option, i) => this.props.isOptionSelected(option, i));
+      if (selectedOptions.length > 0) {
         this.setState({
           currentLabel: selectedOptions.map(option => option.label).join(', '),
-          selectedIndices
-        });
+          selectedOptions
+        }, () => this._toggleAllSelectedOptions(true));
         this.props.onChange(selectedOptions);
+
       }
     }
   }

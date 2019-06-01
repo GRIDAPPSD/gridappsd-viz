@@ -48,9 +48,7 @@ export class CapacitorMenu extends React.Component<Props, State> {
                 new Option('Var', CapacitorControlMode.VAR),
                 new Option('Volt', CapacitorControlMode.VOLT)
               ]}
-              selectedOptions={
-                option => option.value === this.state.controlMode
-              }
+              isOptionSelected={option => option.value === this.state.controlMode}
               onChange={options => {
                 this.capacitor.controlMode = options[0].value;
                 this.setState({ controlMode: this.capacitor.controlMode });
@@ -82,7 +80,7 @@ export class CapacitorMenu extends React.Component<Props, State> {
               new Option('Open', true),
               new Option('Close', false),
             ]}
-            selectedOptions={option => option.value === this.capacitor.open}
+            isOptionSelected={option => option.value === this.capacitor.open}
             onChange={options => this.capacitor.open = options[0].value} />
         );
       case CapacitorControlMode.VAR:

@@ -54,9 +54,7 @@ export class RegulatorMenu extends React.Component<Props, State> {
                 new Option('Manual', RegulatorControlMode.MANUAL),
                 new Option('Line drop compensation', RegulatorControlMode.LINE_DROP_COMPENSATION)
               ]}
-              selectedOptions={
-                option => option.value === this.state.controlMode
-              }
+              isOptionSelected={option => option.value === this.state.controlMode}
               onChange={options => {
                 this.regulator.controlMode = options[0].value;
                 this.setState({ controlMode: this.regulator.controlMode });

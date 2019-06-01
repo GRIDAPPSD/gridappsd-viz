@@ -61,12 +61,10 @@ export class SimulationConfigurationFormGroup extends React.Component<Props, Sta
         <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
           <Select
             label='Simulator'
-            options={
-              ['GridLAB-D'].map(e => new Option(e, e))
-            }
-            selectedOptions={
-              option => option.value === 'GridLAB-D'
-            }
+            options={[
+              new Option('GridLAB-D', 'GridLAB-D')
+            ]}
+            isOptionSelected={option => option.value === 'GridLAB-D'}
             onChange={options => {
               this.formValue.simulator = options[0].value;
               this.props.onChange(this.formValue);
