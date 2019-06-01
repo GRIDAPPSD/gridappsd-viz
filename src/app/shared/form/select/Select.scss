@@ -1,3 +1,6 @@
+$filter-height: 40px;
+$paginator-height: 45px;
+
 .select-option-list-container {
     position: fixed;
     top: 0;
@@ -66,7 +69,7 @@
 .select__option-list-wrapper {
     left: 0;
     top: 0;
-    box-shadow: 2px 5px 10px -10px rgba(0, 0, 0, 0.2), 2px 5px 20px rgba(0, 0, 0, 0.25);
+    box-shadow: 2px 5px 20px -10px rgba(0, 0, 0, 0.2), 2px 5px 40px rgba(0, 0, 0, 0.25);
     border-radius: 5px;
     background-color: #fff;
     z-index: 300;
@@ -76,7 +79,7 @@
 .select__option-list {
     overflow: hidden auto;
     min-width: 200px;
-    max-height: calc(100vh - 65px);
+    max-height: calc(100vh - #{$filter-height} - #{$paginator-height} - 25px); // Magic 25
     padding: 5px 0;
     margin: 0;
 
@@ -96,7 +99,7 @@
     min-width: 200px;
     display: flex;
     box-sizing: border-box;
-    height: 40px;
+    height: $filter-height;
 }
 
 .select__option-list__filter__input {
@@ -132,4 +135,18 @@
     color: rgba(0, 0, 0, 0.3);
     box-shadow: none;
     pointer-events: none;
+}
+
+.select__option-list__paginator {
+    display: flex;
+    justify-content: space-evenly;
+    align-items: center;
+    border-top: 2px solid rgba(0, 0, 0, 0.05);
+    height: $paginator-height;
+    box-sizing: border-box;
+}
+
+.select__option-list__paginator__page-indicator {
+    width: 100px;
+    text-align: center;
 }

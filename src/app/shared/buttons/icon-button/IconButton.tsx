@@ -5,7 +5,7 @@ import { Ripple } from '../../ripple/Ripple';
 import './IconButton.scss';
 
 type Icon = 'check_circle' | 'menu' | 'assignment' | 'storage' | 'search' | 'laptop' | 'help' | 'delete' | 'cloud_upload'
-  | 'pause' | 'stop' | 'play_arrow' | 'add' | 'remove' | 'send' | 'save' | 'close';
+  | 'pause' | 'stop' | 'play_arrow' | 'add' | 'remove' | 'send' | 'save' | 'close' | 'navigate_next' | 'navigate_before';
 
 
 interface Props {
