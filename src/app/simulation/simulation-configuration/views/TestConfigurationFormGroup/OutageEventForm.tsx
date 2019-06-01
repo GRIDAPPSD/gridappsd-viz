@@ -44,10 +44,10 @@ export class OutageEventForm extends React.Component<Props, State> {
     super(props);
 
     if (!outputEquipmentTypeOptions && !outputMeasurementTypeOptions) {
-      outputEquipmentTypeOptions = this.generateUniqueOptions(
+      outputEquipmentTypeOptions = this._generateUniqueOptions(
         props.modelDictionary.measurements.map(e => e.ConductingEquipment_type)
       );
-      outputMeasurementTypeOptions = this.generateUniqueOptions(
+      outputMeasurementTypeOptions = this._generateUniqueOptions(
         props.modelDictionary.measurements.map(e => e.measurementType)
       );
     }
@@ -79,11 +79,35 @@ export class OutageEventForm extends React.Component<Props, State> {
     };
 
     this.formValue = { ...props.initialFormValue };
-    this.currentInputListItem = this.newInputListItem();
-    this.currentOutputListItem = this.newOutputListItem();
+    this.currentInputListItem = this._newInputListItem();
+    this.currentOutputListItem = this._newOutputListItem();
+
+    this.onAllInputOutageCheckboxToggled = this.onAllInputOutageCheckboxToggled.bind(this);
+    this.onInputEquipmentTypeChanged = this.onInputEquipmentTypeChanged.bind(this);
+    this.onInputComponentChanged = this.onInputComponentChanged.bind(this);
+    this.onInputPhasesChanged = this.onInputPhasesChanged.bind(this);
+    this.onInputAttributeChanged = this.onInputAttributeChanged.bind(this);
+    this.addNewInputItem = this.addNewInputItem.bind(this);
+    this.onAllOutputOutageCheckBoxToggled = this.onAllOutputOutageCheckBoxToggled.bind(this);
+    this.onOuputEquipmentTypeChanged = this.onOuputEquipmentTypeChanged.bind(this);
+    this.onOutputComponentChanged = this.onOutputComponentChanged.bind(this);
+    this.onOutputPhasesChanged = this.onOutputPhasesChanged.bind(this);
+    this.onOutputMeasurementTypesChanged = this.onOutputMeasurementTypesChanged.bind(this);
+    this.onStartDateTimeChanged = this.onStartDateTimeChanged.bind(this);
+    this.onStopDateTimeChanged = this.onStopDateTimeChanged.bind(this);
+    this.addNewOutputItem = this.addNewOutputItem.bind(this);
+    this.createNewEvent = this.createNewEvent.bind(this);
   }
 
-  newInputListItem(): OutageEventInputListItem {
+  private _generateUniqueOptions(iterable: string[] | string): Option[] {
+    const result = [];
+    for (const element of iterable)
+      if (!result.includes(element))
+        result.push(element);
+    return result.map(e => new Option(e));
+  }
+
+  private _newInputListItem(): OutageEventInputListItem {
     return {
       name: '',
       type: '',
@@ -93,7 +117,7 @@ export class OutageEventForm extends React.Component<Props, State> {
     };
   }
 
-  newOutputListItem(): OutageEventOutputListItem {
+  private _newOutputListItem(): OutageEventOutputListItem {
     return {
       name: '',
       type: '',
@@ -101,14 +125,6 @@ export class OutageEventForm extends React.Component<Props, State> {
       phases: [],
       measurementTypes: []
     };
-  }
-
-  generateUniqueOptions(iterable: string[] | string): Option[] {
-    const result = [];
-    for (const element of iterable)
-      if (!result.includes(element))
-        result.push(element);
-    return result.map(e => new Option(e));
   }
 
   componentDidUpdate(previousProps: Props) {
@@ -124,52 +140,25 @@ export class OutageEventForm extends React.Component<Props, State> {
             label='All Input Outage'
             name='allInputOutage'
             checked={this.formValue.allInputOutage}
-            onChange={state => this.formValue.allInputOutage = state} />
+            onChange={this.onAllInputOutageCheckboxToggled} />
           <Select
             ref={comp => this.inputComponentTypeSelect = comp}
             label='Equipment Type'
             options={this.state.inputEquipmentTypeOptions}
-            onChange={options => {
-              const type = options[0].value;
-              this.setState({
-                inputComponentOptions: (this.props.modelDictionary[type] || []).map(e => new Option(e.name || e.bankName, e)),
-                inputAttributeOptions: (COMPONENT_ATTRIBUTES[type] || []).map(e => new Option(e)),
-                inputPhaseOptions: []
-              });
-              this.currentInputListItem = this.newInputListItem();
-              this.currentInputListItem.type = options[0].label;
-              this.enableOrDisableAddInputItemButton();
-            }} />
+            onChange={this.onInputEquipmentTypeChanged} />
           <Select
             label='Name'
             options={this.state.inputComponentOptions}
-            onChange={options => {
-              const selectedOption = options[0];
-              this.setState({
-                inputPhaseOptions: this.generateUniqueOptions(
-                  this.normalizePhases(selectedOption.value.phases || selectedOption.value.bankPhases)
-                )
-                  .sort((a, b) => a.label.localeCompare(b.label))
-              });
-              this.currentInputListItem.name = selectedOption.label;
-              this.currentInputListItem.mRID = selectedOption.value.mRID;
-              this.enableOrDisableAddInputItemButton();
-            }} />
+            onChange={this.onInputComponentChanged} />
           <Select
             label='Phase'
             multiple
             options={this.state.inputPhaseOptions}
-            onChange={options => {
-              this.currentInputListItem.phases = options.map(option => option.value).sort();
-              this.enableOrDisableAddInputItemButton();
-            }} />
+            onChange={this.onInputPhasesChanged} />
           <Select
             label='Attribute'
             options={this.state.inputAttributeOptions}
-            onChange={options => {
-              this.currentInputListItem.attribute = options[0].value;
-              this.enableOrDisableAddInputItemButton();
-            }} />
+            onChange={this.onInputAttributeChanged} />
           <Tooltip
             content='Add input item'
             position='right'>
@@ -178,19 +167,7 @@ export class OutageEventForm extends React.Component<Props, State> {
               className='outage-event-form__add-input'
               rounded
               icon='add'
-              onClick={() => {
-                this.setState({
-                  inputList: [...this.state.inputList, this.currentInputListItem],
-                  inputComponentOptions: [],
-                  inputPhaseOptions: [],
-                  inputAttributeOptions: [],
-                  addInputItemButtonDisabled: true
-                });
-                const type = this.currentInputListItem.type;
-                this.currentInputListItem = this.newInputListItem();
-                this.currentInputListItem.type = type;
-                this.inputComponentTypeSelect.reset();
-              }} />
+              onClick={this.addNewInputItem} />
           </Tooltip>
           {
             this.state.inputList.length > 0 &&
@@ -236,65 +213,36 @@ export class OutageEventForm extends React.Component<Props, State> {
             label='All Ouput Outage'
             name='allOutputOutage'
             checked={this.formValue.allOutputOutage}
-            onChange={state => this.formValue.allOutputOutage = state} />
+            onChange={this.onAllOutputOutageCheckBoxToggled} />
           <Select
             ref={comp => this.outputComponentTypeSelect = comp}
             label='Equipment Type'
             options={this.state.outputEquipmentTypeOptions}
-            onChange={options => {
-              const selectedType = options[0].value;
-              this.currentOutputListItem = this.newOutputListItem();
-              this.currentOutputListItem.type = selectedType;
-              this.setState({
-                outputComponentOptions: this.props.modelDictionary.measurements.filter(
-                  e => e.ConductingEquipment_type === selectedType
-                )
-                  .map(e => new Option(e.ConductingEquipment_name, e)),
-                outputPhaseOptions: [],
-                outputMeasurementTypeOptions: []
-              });
-              this.enableOrDisableAddOutputItemButton();
-            }} />
+            onChange={this.onOuputEquipmentTypeChanged} />
           <Select
             label='Equipment Name'
             options={this.state.outputComponentOptions}
-            onChange={options => {
-              const selectedOption = options[0];
-              this.currentOutputListItem.name = selectedOption.label;
-              this.setState({
-                outputPhaseOptions: this.generateUniqueOptions(this.normalizePhases(selectedOption.value.phases))
-                  .sort((a, b) => a.label.localeCompare(b.label)),
-                outputMeasurementTypeOptions: this.generateUniqueOptions(selectedOption.value.measurementType.split(''))
-              });
-              this.currentOutputListItem.mRID = selectedOption.value.ConductingEquipment_mRID;
-              this.enableOrDisableAddOutputItemButton();
-            }} />
+            onChange={this.onOutputComponentChanged} />
           <Select
             label='Phase'
             multiple
             options={this.state.outputPhaseOptions}
-            onChange={options => {
-              this.currentOutputListItem.phases = options.map(option => option.value);
-              this.enableOrDisableAddOutputItemButton();
-            }} />
+            onChange={this.onOutputPhasesChanged} />
           <Select
             label='Measurement Type'
             multiple
             options={this.state.outputMeasurementTypeOptions}
-            onChange={options => {
-              this.currentOutputListItem.measurementTypes = options.map(option => option.value);
-              this.enableOrDisableAddOutputItemButton();
-            }} />
+            onChange={this.onOutputMeasurementTypesChanged} />
           <Input
             label='Start Date Time'
             name='startDateTime'
             value={this.formValue.startDateTime}
-            onChange={value => this.formValue.startDateTime = value} />
+            onChange={this.onStartDateTimeChanged} />
           <Input
             label='Stop Date Time'
             name='stopDateTime'
             value={this.formValue.stopDateTime}
-            onChange={value => this.formValue.stopDateTime = value} />
+            onChange={this.onStopDateTimeChanged} />
           <Tooltip
             content='Add output item'
             position='right'>
@@ -303,19 +251,7 @@ export class OutageEventForm extends React.Component<Props, State> {
               rounded
               className='outage-event-form__add-output'
               icon='add'
-              onClick={() => {
-                this.setState({
-                  outputList: [...this.state.outputList, this.currentOutputListItem],
-                  outputComponentOptions: [],
-                  outputPhaseOptions: [],
-                  outputMeasurementTypeOptions: [],
-                  addOutputItemButtonDisabled: true
-                });
-                const type = this.currentOutputListItem.type;
-                this.currentOutputListItem = this.newOutputListItem();
-                this.currentOutputListItem.type = type;
-                this.outputComponentTypeSelect.reset();
-              }} />
+              onClick={this.addNewOutputItem} />
           </Tooltip>
           {
             this.state.outputList.length > 0 &&
@@ -359,35 +295,28 @@ export class OutageEventForm extends React.Component<Props, State> {
           className='outage-event-form__add-event'
           type='positive'
           label='Add event'
-          onClick={() => {
-            this.formValue.inputList = this.state.inputList;
-            this.formValue.outputList = this.state.outputList;
-            this.props.onEventAdded(this.formValue);
-            this.setState({
-              inputList: [],
-              outputList: [],
-              addInputItemButtonDisabled: true,
-              addOutputItemButtonDisabled: true
-            });
-          }} />
+          onClick={this.createNewEvent} />
       </div>
     );
   }
 
-  normalizePhases(phases: string) {
-    // If phases is a string containing either A or B or C,
-    // then this string needs to be split up
-    return /^[abc]+$/i.test(phases) ? phases : [phases];
+  onAllInputOutageCheckboxToggled(state: boolean) {
+    this.formValue.allInputOutage = state;
   }
 
-  flatten(array: any[][]) {
-    const result = [];
-    for (const subArray of array)
-      result.push(...subArray);
-    return result;
+  onInputEquipmentTypeChanged(selectedOptions: Option<string>[]) {
+    const selectedType = selectedOptions[0].value;
+    this.setState({
+      inputComponentOptions: (this.props.modelDictionary[selectedType] || []).map(e => new Option(e.name || e.bankName, e)),
+      inputAttributeOptions: (COMPONENT_ATTRIBUTES[selectedType] || []).map(e => new Option(e)),
+      inputPhaseOptions: []
+    });
+    this.currentInputListItem = this._newInputListItem();
+    this.currentInputListItem.type = selectedOptions[0].label;
+    this._enableOrDisableAddInputItemButton();
   }
 
-  enableOrDisableAddInputItemButton() {
+  private _enableOrDisableAddInputItemButton() {
     if (
       this.currentInputListItem.name !== '' &&
       this.currentInputListItem.type !== '' &&
@@ -403,7 +332,105 @@ export class OutageEventForm extends React.Component<Props, State> {
       });
   }
 
-  enableOrDisableAddOutputItemButton() {
+  onInputComponentChanged(selectedOptions: Option<any>[]) {
+    const selectedOption = selectedOptions[0];
+    this.setState({
+      inputPhaseOptions: this._generateUniqueOptions(
+        this._normalizePhases(selectedOption.value.phases || selectedOption.value.bankPhases)
+      )
+        .sort((a, b) => a.label.localeCompare(b.label))
+    });
+    this.currentInputListItem.name = selectedOption.label;
+    this.currentInputListItem.mRID = selectedOption.value.mRID;
+    this._enableOrDisableAddInputItemButton();
+  }
+
+  private _normalizePhases(phases: string) {
+    // If phases is a string containing either A or B or C,
+    // then this string needs to be split up
+    return /^[abc]+$/i.test(phases) ? phases : [phases];
+  }
+
+  onInputPhasesChanged(selectedOptions: Option<string>[]) {
+    this.currentInputListItem.phases = selectedOptions.map(option => option.value).sort();
+    this._enableOrDisableAddInputItemButton();
+  }
+
+  onInputAttributeChanged(selectedOptions: Option<string>[]) {
+    this.currentInputListItem.attribute = selectedOptions[0].value;
+    this._enableOrDisableAddInputItemButton();
+  }
+
+  addNewInputItem() {
+    this.setState({
+      inputList: [...this.state.inputList, this.currentInputListItem],
+      inputComponentOptions: [],
+      inputPhaseOptions: [],
+      inputAttributeOptions: [],
+      addInputItemButtonDisabled: true
+    });
+    const type = this.currentInputListItem.type;
+    this.currentInputListItem = this._newInputListItem();
+    this.currentInputListItem.type = type;
+    this.inputComponentTypeSelect.reset();
+  }
+
+  onAllOutputOutageCheckBoxToggled(state: boolean) {
+    this.formValue.allOutputOutage = state;
+  }
+
+  onOuputEquipmentTypeChanged(selectedOptions: Option<string>[]) {
+    const selectedType = selectedOptions[0].value;
+    this.currentOutputListItem = this._newOutputListItem();
+    this.currentOutputListItem.type = selectedType;
+    this.setState({
+      outputComponentOptions: this.props.modelDictionary.measurements.filter(
+        e => e.ConductingEquipment_type === selectedType
+      )
+        .map(e => new Option(e.ConductingEquipment_name, e)),
+      outputPhaseOptions: [],
+      outputMeasurementTypeOptions: []
+    });
+    this._enableOrDisableAddOutputItemButton();
+  }
+
+  onOutputComponentChanged(selectedOptions: Option<ModelDictionaryMeasurement>[]) {
+    const selectedOption = selectedOptions[0];
+    this.currentOutputListItem.name = selectedOption.label;
+    this.setState({
+      outputPhaseOptions: this._generateUniqueOptions(this._normalizePhases(selectedOption.value.phases))
+        .sort((a, b) => a.label.localeCompare(b.label)),
+      outputMeasurementTypeOptions: this._generateUniqueOptions(selectedOption.value.measurementType.split(''))
+    });
+    this.currentOutputListItem.mRID = selectedOption.value.ConductingEquipment_mRID;
+    this._enableOrDisableAddOutputItemButton();
+  }
+
+  onOutputPhasesChanged(selectedOptions: Option<string>[]) {
+    this.currentOutputListItem.phases = selectedOptions.map(option => option.value);
+    this._enableOrDisableAddOutputItemButton();
+  }
+
+  onOutputMeasurementTypesChanged(selectedOptions: Option<string>[]) {
+    this.currentOutputListItem.measurementTypes = selectedOptions.map(option => option.value);
+    this._enableOrDisableAddOutputItemButton();
+  }
+
+  addNewOutputItem() {
+    this.setState({
+      outputList: [...this.state.outputList, this.currentOutputListItem],
+      outputComponentOptions: [],
+      outputPhaseOptions: [],
+      outputMeasurementTypeOptions: [],
+      addOutputItemButtonDisabled: true
+    });
+    const type = this.currentOutputListItem.type;
+    this.currentOutputListItem = this._newOutputListItem();
+    this.currentOutputListItem.type = type;
+    this.outputComponentTypeSelect.reset();
+  }
+
+  private _enableOrDisableAddOutputItemButton() {
     if (
       this.currentOutputListItem.name !== '' &&
       this.currentOutputListItem.type !== '' &&
@@ -417,6 +444,26 @@ export class OutageEventForm extends React.Component<Props, State> {
       this.setState({
         addOutputItemButtonDisabled: true
       });
+  }
+
+  onStartDateTimeChanged(value: string) {
+    this.formValue.startDateTime = value;
+  }
+
+  onStopDateTimeChanged(value: string) {
+    this.formValue.stopDateTime = value;
+  }
+
+  createNewEvent() {
+    this.formValue.inputList = this.state.inputList;
+    this.formValue.outputList = this.state.outputList;
+    this.props.onEventAdded(this.formValue);
+    this.setState({
+      inputList: [],
+      outputList: [],
+      addInputItemButtonDisabled: true,
+      addOutputItemButtonDisabled: true
+    });
   }
 
 }
