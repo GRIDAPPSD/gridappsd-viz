@@ -1,0 +1,37 @@
+.option-list {
+    overflow: hidden auto;
+    min-width: 200px;
+    // 40px: option list filter's height
+    // 45px: option list paginator's height
+    // 25px: magic number figured by using the inspector
+    max-height: calc(100vh - 40px - 45px - 25px);
+    padding: 5px 0;
+    margin: 0;
+
+    &:empty {
+        box-shadow: none;
+    }
+}
+
+.option-list__option {
+    backface-visibility: hidden;
+    color: #000;
+    list-style-type: none;
+    white-space: nowrap;
+    font-weight: normal;
+    padding: 15px 10px;
+    padding-right: 25px;
+    cursor: pointer;
+
+    &:hover {
+        background-color: #84811114;
+    }
+}
+
+.option-list__option__label {
+    font-weight: normal;
+}
+
+.option-list__option.selected {
+    background-color: rgba(0, 0, 0, 0.08);
+}

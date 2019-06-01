@@ -28,10 +28,10 @@ export function IconButton(props: Props) {
         className={
           'icon-button' +
           (props.className ? ' ' + props.className : '') +
-          (props.label ? ' has-label' : '') +
+          (props.label ? ' icon-button--has-label' : '') +
           (props.rounded ? ' rounded-icon-button' : '') +
-          (' style-' + (props.style ? props.style : 'primary')) +
-          (' size-' + (props.size ? props.size : 'normal'))
+          (' icon-button--' + (props.style ? props.style : 'primary')) +
+          (' rounded-icon-button--' + (props.size ? props.size : 'normal'))
         }
         onClick={props.onClick}>
         <i className='material-icons icon-button__icon'>{props.icon}</i>

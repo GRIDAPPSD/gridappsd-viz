@@ -4,7 +4,10 @@ import { findDOMNode, createPortal } from 'react-dom'
 import { Option } from './Option';
 import { PopUp } from '@shared/pop-up';
 import { FormControl } from '../form-control/FormControl';
-import { IconButton } from '@shared/buttons';
+import { OptionList } from './OptionList';
+import { OptionListFilter } from './OptionListFilter';
+import { SelectedOptionList } from './SelectedOptionList';
+import { OptionListPaginator } from './OptionListPaginator';
 
 import './Select.scss';
 
@@ -24,22 +27,15 @@ interface State<T> {
   defaultLabel: string;
   left: number;
   top: number;
-  filter: string;
-  currentPageNumber: number;
   currentPage: Option<T>[];
-  totalPages: number;
+  filteredOptions: Option<T>[];
 }
-
-const pageSize = 50;
 
 export class Select<T> extends React.Component<Props<T>, State<T>> {
 
   optionListOpener: HTMLButtonElement;
-  filterInput: HTMLInputElement;
 
   private readonly _optionListContainer = document.createElement('div');
-  private _filterTimeout: any;
-  private _filteredOptions: Option<T>[] = this.props.options;
 
   constructor(props: Props<T>) {
     super(props);
@@ -50,25 +46,18 @@ export class Select<T> extends React.Component<Props<T>, State<T>> {
       defaultLabel: props.defaultLabel || props.multiple ? 'Select one or more' : 'Select an option',
       left: 0,
       top: 0,
-      filter: '',
-      currentPageNumber: 0,
-      totalPages: this._calculateTotalPages(),
-      currentPage: props.options
+      currentPage: [],
+      filteredOptions: props.options
     };
-    this._filteredOptions = props.options;
-    this.onOpen = this.onOpen.bind(this);
-    this._onClose = this._onClose.bind(this);
-    this.filterOptionList = this.filterOptionList.bind(this);
-    this.clearFilter = this.clearFilter.bind(this);
-    this.removePortal = this.removePortal.bind(this);
-    this.navigateToNextPage = this.navigateToNextPage.bind(this);
-    this.navigateToPreviousPage = this.navigateToPreviousPage.bind(this);
     this._optionListContainer.className = 'select-option-list-container';
+    this._onClose = this._onClose.bind(this);
     this._optionListContainer.onclick = this._onClose;
-  }
 
-  private _calculateTotalPages() {
-    return Math.ceil(this._filteredOptions.length / pageSize);
+    this.onChange = this.onChange.bind(this);
+    this.removePortal = this.removePortal.bind(this);
+    this.onOpen = this.onOpen.bind(this);
+    this.filterOptionList = this.filterOptionList.bind(this);
+    this.onPageChanged = this.onPageChanged.bind(this);
   }
 
   private _onClose(event: MouseEvent) {
@@ -123,6 +112,19 @@ export class Select<T> extends React.Component<Props<T>, State<T>> {
       selectedOption.isSelected = isSelected;
   }
 
+  componentDidMount() {
+    if (this.props.options.length !== 0 && this.props.isOptionSelected) {
+      const selectedOptions = this.props.options.filter((option, i) => this.props.isOptionSelected(option, i));
+      if (selectedOptions.length > 0) {
+        this.setState({
+          currentLabel: selectedOptions.map(option => option.label).join(', '),
+          selectedOptions
+        }, () => this._toggleAllSelectedOptions(true));
+        this.props.onChange(selectedOptions);
+      }
+    }
+  }
+
   componentWillUnmount() {
     this.removePortal();
     this._optionListContainer.onclick = null;
@@ -134,14 +136,8 @@ export class Select<T> extends React.Component<Props<T>, State<T>> {
   }
 
   componentDidUpdate(prevProps: Props<T>) {
-    if (this.props.options !== prevProps.options) {
-      // if (this.props.options.length !== prevProps.options.length || this.props.options.length === 0)
-      this._filteredOptions = this.props.options;
+    if (this.props.options !== prevProps.options)
       this.reset();
-      this.setState({
-        totalPages: this._calculateTotalPages(),
-      });
-    }
   }
 
   reset() {
@@ -149,9 +145,8 @@ export class Select<T> extends React.Component<Props<T>, State<T>> {
     this.setState({
       selectedOptions: [],
       currentLabel: this.state.defaultLabel,
-      filter: '',
-      currentPageNumber: 0,
-      currentPage: this._filteredOptions.slice(0, pageSize)
+      filteredOptions: this.props.options,
+      currentPage: []
     });
   }
 
@@ -176,40 +171,14 @@ export class Select<T> extends React.Component<Props<T>, State<T>> {
               afterClosed={this.removePortal}>
               <div
                 className='select__option-list-wrapper'
-                style={{
-                  left: this.state.left + 'px',
-                  top: this.state.top + 'px'
-                }}>
-                <form className='select__option-list__filter'>
-                  <input
-                    ref={ref => this.filterInput = ref}
-                    type='text'
-                    className='select__option-list__filter__input'
-                    autoFocus={true}
-                    value={this.state.filter}
-                    onChange={this.filterOptionList} />
-                  <IconButton
-                    className='select__option-list__filter__clear'
-                    disabled={this.state.filter === ''}
-                    rounded
-                    icon='close'
-                    size='small'
-                    style='accent'
-                    onClick={this.clearFilter} />
-                </form>
-                <ul className='select__option-list'>
-                  {
-                    this.state.currentPage.map((option, index) =>
-                      <li
-                        key={index}
-                        className={`select__option-list__option${option.isSelected ? ' selected' : ''}`}
-                        onClick={() => this.onChange(option)}>
-                        <span className='text'>{option.label}</span>
-                      </li>
-                    )
-                  }
-                </ul>
-                {this.showOptionListPaginator()}
+                style={{ left: this.state.left + 'px', top: this.state.top + 'px' }}>
+                <OptionListFilter onChange={this.filterOptionList} />
+                <OptionList
+                  options={this.state.currentPage}
+                  onSelectOption={this.onChange} />
+                <OptionListPaginator
+                  options={this.state.filteredOptions}
+                  onPageChanged={this.onPageChanged} />
               </div>
             </PopUp>,
             this._optionListContainer
@@ -227,99 +196,32 @@ export class Select<T> extends React.Component<Props<T>, State<T>> {
       left: rect.left,
       top: rect.top
     });
-    // Need to wait a little after component is rendered to focus the filter
-    setTimeout(() => this.filterInput.focus(), 500);
   }
 
-  filterOptionList(event: any) {
-    clearTimeout(this._filterTimeout);
-    const filterValue = event.target.value.toLowerCase();
-    this.setState({
-      filter: filterValue,
-    });
-    this._filterTimeout = setTimeout(() => {
+  filterOptionList(newFilterValue: string, oldFilterValue: string) {
+    if (newFilterValue === '')
+      this.setState({
+        currentPage: [],
+        filteredOptions: this.props.options
+      });
+    else
       this.setState((state, props) => {
         // If the user keeps typing
         // then it's more performant to use the filtered list to narrow down the result
         // otherwise, if the user is deleting, then use the props option list
-        if (filterValue.length > state.filter.length && this._filteredOptions.length > 0)
-          this._filteredOptions = this._filteredOptions.filter(option => option.label.toLowerCase().startsWith(filterValue))
-        else
-          this._filteredOptions = props.options.filter(option => option.label.toLowerCase().startsWith(filterValue));
+        if (newFilterValue.length > oldFilterValue.length)
+          return {
+            filteredOptions: state.filteredOptions.filter(option => option.label.toLowerCase().startsWith(newFilterValue))
+          };
         return {
-          currentPage: this._filteredOptions.slice(0, pageSize),
-          currentPageNumber: 0,
-          totalPages: this._calculateTotalPages()
+          filteredOptions: props.options.filter(option => option.label.toLowerCase().startsWith(newFilterValue))
         };
       });
-    }, 250);
   }
 
-  clearFilter() {
-    this._filteredOptions = this.props.options;
+  onPageChanged(newPage: Option<T>[]) {
     this.setState({
-      filter: '',
-      currentPageNumber: 0,
-      currentPage: this._filteredOptions.slice(0, pageSize),
-      totalPages: this._calculateTotalPages()
-    });
-  }
-
-  componentDidMount() {
-    if (this.props.options.length !== 0 && this.props.isOptionSelected) {
-      const selectedOptions = this.props.options.filter((option, i) => this.props.isOptionSelected(option, i));
-      if (selectedOptions.length > 0) {
-        this.setState({
-          currentLabel: selectedOptions.map(option => option.label).join(', '),
-          selectedOptions
-        }, () => this._toggleAllSelectedOptions(true));
-        this.props.onChange(selectedOptions);
-
-      }
-    }
-  }
-
-  showOptionListPaginator() {
-    if (this._filteredOptions.length > pageSize)
-      return (
-        <footer className='select__option-list__paginator'>
-          <IconButton
-            rounded
-            disabled={this.state.currentPageNumber === 0}
-            icon='navigate_before'
-            style='accent'
-            onClick={this.navigateToPreviousPage} />
-          <div className='select__option-list__paginator__page-indicator'>
-            {`${this.state.currentPageNumber + 1} / ${this.state.totalPages}`}
-          </div>
-          <IconButton
-            rounded
-            disabled={this.state.currentPageNumber === this.state.totalPages - 1}
-            icon='navigate_next'
-            style='accent'
-            onClick={this.navigateToNextPage} />
-        </footer>
-      )
-    return null;
-  }
-
-  navigateToPreviousPage() {
-    this.setState(state => {
-      const startSlice = (state.currentPageNumber - 1) * pageSize;
-      return {
-        currentPageNumber: state.currentPageNumber - 1,
-        currentPage: this._filteredOptions.slice(startSlice, startSlice + pageSize)
-      };
-    });
-  }
-
-  navigateToNextPage() {
-    this.setState(state => {
-      const startSlice = (state.currentPageNumber + 1) * pageSize;
-      return {
-        currentPageNumber: state.currentPageNumber + 1,
-        currentPage: this._filteredOptions.slice(startSlice, startSlice + pageSize)
-      };
+      currentPage: newPage
     });
   }
 
