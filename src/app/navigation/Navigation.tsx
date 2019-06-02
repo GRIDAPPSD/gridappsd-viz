@@ -61,12 +61,10 @@ export class Navigation extends React.Component<Props, State> {
           {
             this.state.websocketStatus === 'CONNECTED'
             &&
-            <IconButton
-              style='default'
-              rounded={false}
-              icon='check_circle'
-              className='websocket-status-indicator'
-              label='Connection active' />
+            <div className='websocket-status-indicator'>
+              <i className='material-icons websocket-status-indicator__icon'>import_export</i>
+              <div className='websocket-status-indicator__status-text'>Connected</div>
+            </div>
           }
         </ToolBar>
         <Drawer ref={ref => this._drawer = ref}>
