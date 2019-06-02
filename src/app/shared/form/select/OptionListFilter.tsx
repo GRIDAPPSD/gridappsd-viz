@@ -58,7 +58,6 @@ export class OptionListFilter extends React.Component<Props, State> {
         <IconButton
           className='option-list-filter__clear'
           disabled={this.state.filterValue === ''}
-          rounded
           icon='close'
           size='small'
           style='accent'

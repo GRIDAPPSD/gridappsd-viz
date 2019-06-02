@@ -148,7 +148,6 @@ export class TestConfigurationFormGroup extends React.Component<Props, State> {
             <IconButton
               icon='cloud_upload'
               style='accent'
-              rounded
               className='test-configuration__form__upload-file'
               onClick={this.showEventFilePicker} />
           </Tooltip>
@@ -256,7 +255,6 @@ export class TestConfigurationFormGroup extends React.Component<Props, State> {
           content='Save created events'
           position='top'>
           <IconButton
-            rounded
             size='large'
             icon='save'
             className='test-configuration__save-events'

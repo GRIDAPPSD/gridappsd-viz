@@ -63,6 +63,7 @@ export class Navigation extends React.Component<Props, State> {
             &&
             <IconButton
               style='default'
+              rounded={false}
               icon='check_circle'
               className='websocket-status-indicator'
               label='Connection active' />

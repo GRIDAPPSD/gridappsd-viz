@@ -52,7 +52,6 @@ export class OptionListPaginator<T> extends React.Component<Props<T>, State> {
       return (
         <footer className='option-list-paginator'>
           <IconButton
-            rounded
             disabled={this.state.currentPageNumber === 0}
             icon='navigate_before'
             style='accent'
@@ -61,7 +60,6 @@ export class OptionListPaginator<T> extends React.Component<Props<T>, State> {
             {`${this.state.currentPageNumber + 1} / ${this.state.totalPages}`}
           </div>
           <IconButton
-            rounded
             disabled={this.state.currentPageNumber === this.state.totalPages - 1}
             icon='navigate_next'
             style='accent'

@@ -165,7 +165,6 @@ export class OutageEventForm extends React.Component<Props, State> {
             <IconButton
               disabled={this.state.addInputItemButtonDisabled}
               className='outage-event-form__add-input'
-              rounded
               icon='add'
               onClick={this.addNewInputItem} />
           </Tooltip>
@@ -188,7 +187,6 @@ export class OutageEventForm extends React.Component<Props, State> {
                       <td>
                         <Tooltip content='Delete'>
                           <IconButton
-                            rounded
                             style='accent'
                             size='small'
                             icon='delete'
@@ -248,7 +246,6 @@ export class OutageEventForm extends React.Component<Props, State> {
             position='right'>
             <IconButton
               disabled={this.state.addOutputItemButtonDisabled}
-              rounded
               className='outage-event-form__add-output'
               icon='add'
               onClick={this.addNewOutputItem} />
@@ -272,7 +269,6 @@ export class OutageEventForm extends React.Component<Props, State> {
                       <td>
                         <Tooltip content='Delete'>
                           <IconButton
-                            rounded
                             style='accent'
                             size='small'
                             icon='delete'

@@ -5,7 +5,7 @@ import { Ripple } from '../../ripple/Ripple';
 import './IconButton.scss';
 
 type Icon = 'check_circle' | 'menu' | 'assignment' | 'storage' | 'search' | 'laptop' | 'help' | 'delete' | 'cloud_upload'
-  | 'pause' | 'stop' | 'play_arrow' | 'add' | 'remove' | 'send' | 'save' | 'close' | 'navigate_next' | 'navigate_before'
+  | 'pause' | 'stop' | 'play_arrow' | 'add' | 'remove' | 'cached' | 'save' | 'close' | 'navigate_next' | 'navigate_before'
   | 'keyboard_arrow_down';
 
 
@@ -30,7 +30,7 @@ export function IconButton(props: Props) {
           'icon-button' +
           (props.className ? ' ' + props.className : '') +
           (props.label ? ' icon-button--has-label' : '') +
-          (props.rounded ? ' rounded-icon-button' : '') +
+          (props.rounded === undefined || props.rounded ? ' rounded-icon-button' : '') +
           (' icon-button--' + (props.style ? props.style : 'primary')) +
           (' rounded-icon-button--' + (props.size ? props.size : 'normal'))
         }

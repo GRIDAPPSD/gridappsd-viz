@@ -38,7 +38,6 @@ export function FaultEventSummaryTable(props: Props) {
                   <div className='fault-event-summary-table__row-action'>
                     <Tooltip content='Delete'>
                       <IconButton
-                        rounded
                         icon='delete'
                         onClick={() => props.onDeleteEvent(event)} />
                     </Tooltip>

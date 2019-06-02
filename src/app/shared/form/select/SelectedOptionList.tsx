@@ -33,7 +33,6 @@ export class SelectedOptionList<T> extends React.Component<Props<T>, State> {
         {
           this.props.options.length > 0 &&
           <IconButton
-            rounded
             className='show-selected-option-list'
             icon='keyboard_arrow_down'
             style='accent'
@@ -51,7 +50,6 @@ export class SelectedOptionList<T> extends React.Component<Props<T>, State> {
                 <IconButton
                   className='selected-option-list__option__deselect'
                   icon='close'
-                  rounded
                   style='accent'
                   size='small'
                   onClick={() => {

@@ -78,8 +78,8 @@ export class WebsocketStatusWatcher extends React.Component<Props, State> {
             Check server or
           </span>
           <IconButton
-            icon='send'
-            className='websocket-status-watcher__websocket-status-indicator'
+            icon='cached'
+            rounded={false}
             onClick={() => this._stompClientService.connect()}
             label='Click to reconnect' />
         </>
