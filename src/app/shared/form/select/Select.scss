@@ -4,7 +4,7 @@
     left: 0;
     bottom: 0;
     right: 0;
-    z-index: 10000;
+    z-index: 24;
 }
 
 .select__option-list__opener {
@@ -71,6 +71,8 @@
     background-color: #fff;
     z-index: 300;
     max-height: 100vh;
+    display: flex;
+    flex-flow: column;
 }
 
 

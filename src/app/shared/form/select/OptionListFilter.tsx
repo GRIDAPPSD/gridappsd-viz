@@ -19,7 +19,6 @@ export class OptionListFilter extends React.Component<Props, State> {
   filterInput: HTMLInputElement;
 
   private readonly _valueChanger = new Subject<[string, string]>();
-  private readonly _notifier: Observable<[string, string]>;
 
   constructor(props: Props) {
     super(props);
@@ -27,19 +26,16 @@ export class OptionListFilter extends React.Component<Props, State> {
     this.state = {
       filterValue: ''
     };
-    this._notifier = this._valueChanger.pipe(
-      distinctUntilChanged(),
-      debounceTime(250)
-    );
 
     this.onChange = this.onChange.bind(this);
     this.clearFilter = this.clearFilter.bind(this);
   }
 
   componentDidMount() {
-    this._notifier.subscribe({
-      next: (values: [string, string]) => this.props.onChange(values[0], values[1])
-    });
+    this._valueChanger.pipe(distinctUntilChanged(), debounceTime(250))
+      .subscribe({
+        next: (values: [string, string]) => this.props.onChange(values[0], values[1])
+      });
   }
   componentDidUpdate() {
     setTimeout(() => this.filterInput.focus(), 250);

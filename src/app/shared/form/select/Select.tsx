@@ -57,6 +57,7 @@ export class Select<T> extends React.Component<Props<T>, State<T>> {
     this.removePortal = this.removePortal.bind(this);
     this.onOpen = this.onOpen.bind(this);
     this.filterOptionList = this.filterOptionList.bind(this);
+    this.deselectOption = this.deselectOption.bind(this);
     this.onPageChanged = this.onPageChanged.bind(this);
   }
 
@@ -173,6 +174,9 @@ export class Select<T> extends React.Component<Props<T>, State<T>> {
                 className='select__option-list-wrapper'
                 style={{ left: this.state.left + 'px', top: this.state.top + 'px' }}>
                 <OptionListFilter onChange={this.filterOptionList} />
+                <SelectedOptionList
+                  options={this.state.selectedOptions}
+                  onDeselectOption={this.deselectOption} />
                 <OptionList
                   options={this.state.currentPage}
                   onSelectOption={this.onChange} />
@@ -217,6 +221,13 @@ export class Select<T> extends React.Component<Props<T>, State<T>> {
           filteredOptions: props.options.filter(option => option.label.toLowerCase().startsWith(newFilterValue))
         };
       });
+  }
+
+  deselectOption(option: Option<T>) {
+    this.setState(state => ({
+      selectedOptions: state.selectedOptions.filter(e => e !== option)
+    }));
+    option.isSelected = false;
   }
 
   onPageChanged(newPage: Option<T>[]) {
