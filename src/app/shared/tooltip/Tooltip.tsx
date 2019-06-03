@@ -122,7 +122,7 @@ export class Tooltip extends React.Component<Props, State> {
   private _showTop(originRect: ClientRect) {
     setTimeout(() => {
       const left = originRect.left + (originRect.width - this._tooltipRect.width) / 2;
-      let top = originRect.top - originRect.height - 25;
+      let top = originRect.top - originRect.height;
       if (top < 0) {
         this._tooltip.classList.remove('top');
         this._tooltip.classList.add('bottom');
