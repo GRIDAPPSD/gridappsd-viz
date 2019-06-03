@@ -18,6 +18,7 @@ interface Props {
 
 interface State {
   controlMode: CapacitorControlMode;
+  options: Option<CapacitorControlMode>[];
 }
 
 export class CapacitorMenu extends React.Component<Props, State> {
@@ -27,7 +28,12 @@ export class CapacitorMenu extends React.Component<Props, State> {
   constructor(props: Props) {
     super(props);
     this.state = {
-      controlMode: props.capacitor.controlMode
+      controlMode: props.capacitor.controlMode,
+      options: [
+        new Option('Manual', CapacitorControlMode.MANUAL),
+        new Option('Var', CapacitorControlMode.VAR),
+        new Option('Volt', CapacitorControlMode.VOLT)
+      ]
     };
 
     this.capacitor = { ...props.capacitor };
@@ -43,11 +49,7 @@ export class CapacitorMenu extends React.Component<Props, State> {
           <form className='capacitor-menu__form'>
             <Select
               label='Control mode'
-              options={[
-                new Option('Manual', CapacitorControlMode.MANUAL),
-                new Option('Var', CapacitorControlMode.VAR),
-                new Option('Volt', CapacitorControlMode.VOLT)
-              ]}
+              options={this.state.options}
               isOptionSelected={option => option.value === this.state.controlMode}
               onChange={options => {
                 this.capacitor.controlMode = options[0].value;

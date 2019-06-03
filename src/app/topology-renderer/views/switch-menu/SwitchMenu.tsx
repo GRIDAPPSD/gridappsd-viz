@@ -15,14 +15,19 @@ interface Props {
 }
 
 interface State {
-  switchOpen: boolean
+  switchOpen: boolean;
+  options: Option<boolean>[];
 }
 
 export class SwitchMenu extends React.Component<Props, State> {
   constructor(props: Props) {
     super(props);
     this.state = {
-      switchOpen: props.open
+      switchOpen: props.open,
+      options: [
+        new Option('Open', true),
+        new Option('Close', false),
+      ]
     };
   }
 
@@ -36,10 +41,7 @@ export class SwitchMenu extends React.Component<Props, State> {
           <form className='switch-menu__form'>
             <Select
               label='Action'
-              options={[
-                new Option('Open', true),
-                new Option('Close', false),
-              ]}
+              options={this.state.options}
               isOptionSelected={option => option.value === this.props.open}
               onChange={options => this.setState({ switchOpen: options[0].value })} />
           </form>

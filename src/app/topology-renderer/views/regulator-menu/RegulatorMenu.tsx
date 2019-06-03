@@ -18,6 +18,7 @@ interface Props {
 
 interface State {
   controlMode: RegulatorControlMode;
+  options: Option<RegulatorControlMode>[];
 }
 
 export class RegulatorMenu extends React.Component<Props, State> {
@@ -27,7 +28,11 @@ export class RegulatorMenu extends React.Component<Props, State> {
   constructor(props: Props) {
     super(props);
     this.state = {
-      controlMode: props.regulator.controlMode
+      controlMode: props.regulator.controlMode,
+      options: [
+        new Option('Manual', RegulatorControlMode.MANUAL),
+        new Option('Line drop compensation', RegulatorControlMode.LINE_DROP_COMPENSATION)
+      ]
     };
 
     this.regulator = { ...props.regulator };
@@ -50,10 +55,7 @@ export class RegulatorMenu extends React.Component<Props, State> {
           <form className='regulator-menu__form'>
             <Select
               label='Control mode'
-              options={[
-                new Option('Manual', RegulatorControlMode.MANUAL),
-                new Option('Line drop compensation', RegulatorControlMode.LINE_DROP_COMPENSATION)
-              ]}
+              options={this.state.options}
               isOptionSelected={option => option.value === this.state.controlMode}
               onChange={options => {
                 this.regulator.controlMode = options[0].value;
