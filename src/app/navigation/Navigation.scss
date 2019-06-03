@@ -1,6 +1,11 @@
 .navigation__app-title {
     padding: 15px 15px;
     font-size: 18px;
+    color: #fff;
+}
+
+.navigation__app-version {
+    color: #ddd;
 }
 
 .drawer-item a {
@@ -24,7 +29,7 @@
     height: 100%;
     padding: 0 10px;
     box-shadow: 0 0 1px #bbb;
-    color: orange;
+    color: #FFEB3B;
 }
 
 .websocket-status-indicator__icon {

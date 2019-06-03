@@ -1,12 +1,13 @@
 import * as React from 'react';
 
 import { PopUp } from '@shared/pop-up';
+import { DrawerItemIcon, DrawerItem, DrawerItemLabel } from './DrawerItem';
 
 import './DrawerItemGroup.scss';
 
 interface Props {
   header: string;
-  className?: string;
+  icon: 'memory';
 }
 
 interface State {
@@ -25,19 +26,14 @@ export class DrawerItemGroup extends React.Component<Props, State> {
   }
   render() {
     return (
-      <li className={'drawer-item drawer-item-group' + (this.state.isExpanded ? ' expanded' : ' collapsed') + (this.props.className ? ' ' + this.props.className : '')}>
-        <button
-          className='drawer-item-group__toggle'
-          type='button'
-          tabIndex={0}
-          onClick={this._toogle}
-          onBlur={this._collapse}>
-          <span>{this.props.header}</span>
-          <i className={'app-icon drawer-item-group__toggle__angle'} />
-        </button>
+      <DrawerItem className={'drawer-item-group' + (this.state.isExpanded ? ' expanded' : ' collapsed')}>
+        <DrawerItemIcon icon={this.props.icon} />
+        <DrawerItemLabel value={this.props.header} />
+        <i className={'material-icons drawer-item-group__angle'}>
+          keyboard_arrow_right
+        </i>
         <PopUp in={this.state.isExpanded}>
-          <div
-            className='nested-drawer-items'>
+          <div className='nested-drawer-items'>
             <div className='nested-drawer-items__arrow' />
             <ul
               className='nested-drawer-items__list'
@@ -46,7 +42,7 @@ export class DrawerItemGroup extends React.Component<Props, State> {
             </ul>
           </div>
         </PopUp>
-      </li>
+      </DrawerItem>
     );
   }
 

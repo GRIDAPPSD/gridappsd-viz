@@ -2,7 +2,7 @@ import * as React from 'react';
 import { Link } from 'react-router-dom';
 import { Subscription } from 'rxjs';
 
-import { ToolBar } from './app-bar/AppBar';
+import { ToolBar } from './tool-bar/ToolBar';
 import { Drawer } from './drawer/Drawer';
 import { DrawerOpener } from './drawer/DrawerOpener';
 import { DrawerItem, DrawerItemIcon, DrawerItemLabel } from './drawer/DrawerItem';
@@ -57,7 +57,7 @@ export class Navigation extends React.Component<Props, State> {
         <ToolBar>
           <DrawerOpener onClick={() => this._drawer.open()} />
           <Link className='navigation__app-title' to='/'>GridAPPS-D</Link>
-          <span>{RUN_CONFIG.version}</span>
+          <span className='navigation__app-version'>{RUN_CONFIG.version}</span>
           {
             this.state.websocketStatus === 'CONNECTED'
             &&
@@ -73,8 +73,10 @@ export class Navigation extends React.Component<Props, State> {
             <DrawerItemLabel value='Simulations' />
           </DrawerItem>
           {
-            this.state.previousSimulations.length > 0 &&
-            <DrawerItemGroup header='Previous simulations'>
+            // this.state.previousSimulations.length > 0 &&
+            <DrawerItemGroup
+              header='Previous simulations'
+              icon='memory'>
               {
                 this.state.previousSimulations.map(simulation => (
                   <DrawerItem key={simulation.name} onClick={() => this.props.onShowSimulationConfigForm(simulation.config)}>

@@ -15,6 +15,7 @@ interface Props {
 
 interface State {
   simulationName: string;
+  simulatorOptions: Option<string>[];
 }
 
 export class SimulationConfigurationFormGroup extends React.Component<Props, State> {
@@ -23,7 +24,10 @@ export class SimulationConfigurationFormGroup extends React.Component<Props, Sta
   constructor(props: Props) {
     super(props);
     this.state = {
-      simulationName: props.currentConfig.simulation_config.simulation_name
+      simulationName: props.currentConfig.simulation_config.simulation_name,
+      simulatorOptions: [
+        new Option('GridLAB-D', 'GridLAB-D')
+      ]
     };
 
     this.formValue = {
@@ -61,9 +65,7 @@ export class SimulationConfigurationFormGroup extends React.Component<Props, Sta
         <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
           <Select
             label='Simulator'
-            options={[
-              new Option('GridLAB-D', 'GridLAB-D')
-            ]}
+            options={this.state.simulatorOptions}
             isOptionSelected={option => option.value === 'GridLAB-D'}
             onChange={options => {
               this.formValue.simulator = options[0].value;
@@ -91,7 +93,9 @@ export class SimulationConfigurationFormGroup extends React.Component<Props, Sta
                 <div>Unchecked: Run in simulation time. Faster than real time</div>
               </>
             }>
-            <IconButton icon='help' />
+            <IconButton
+              icon='help'
+              size='small' />
           </Tooltip>
         </div>
 

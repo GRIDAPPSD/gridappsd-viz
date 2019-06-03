@@ -33,7 +33,8 @@ export class Drawer extends React.Component<Props, State> {
   open() {
     this.setState({ isOpened: true });
   }
-  close(event?) {
+
+  close() {
     this.setState({ isOpened: false });
   }
 

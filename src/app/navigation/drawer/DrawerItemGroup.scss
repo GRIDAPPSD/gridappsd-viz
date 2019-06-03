@@ -1,6 +1,4 @@
 .drawer-item-group {
-    padding-left: 0;
-
     .nested-drawer-items {
         position: absolute;
         left: 103%;
@@ -25,7 +23,7 @@
 
         .drawer-item {
             backface-visibility: hidden;
-            color: #000;
+            color: #fff;
             list-style-type: none;
             text-overflow: ellipsis;
             white-space: nowrap;
@@ -52,17 +50,6 @@
         transform: translateY(-50%) translateX(-20px);
         top: 25px;
         left: 0;
-
-        &::after {
-            transform: translateX(70%) rotate(45deg);
-            content: '';
-            background-color: #fff;
-            position: relative;
-            width: inherit;
-            height: inherit;
-            display: inline-block;
-            box-shadow: 0 0 1px rgba(0, 0, 0, 0.3);
-        }
     }
 }
 
@@ -75,20 +62,15 @@
     color: rgba(0, 0, 0, 0.7);
     font-size: inherit;
     background-color: transparent;
+}
 
-    .drawer-item-group__toggle__angle {
-        left: 100%;
-        transition: transform 0.25s ease;
-        transform-origin: 50% 50%;
-        transform: scale(1.5);
-        backface-visibility: hidden;
-        position: absolute;
-
-        &:after {
-            content: '\f105';
-        }
-    }
-
+.drawer-item-group__angle {
+    left: 92%;
+    transition: transform 0.25s ease;
+    transform-origin: 50% 50%;
+    transform: scale(1.5);
+    backface-visibility: hidden;
+    position: absolute;
 }
 
 .drawer-item-group.expanded {

@@ -9,15 +9,17 @@ export const DrawerItem = ({ className = '', onClick = (() => { }), children }) 
     <li
       className={'drawer-item' + (className ? ' ' + className : '')}
       onClick={onClick}>
-      {children}
+      <div>
+        {children}
+      </div>
     </li>
   </Ripple>
 );
 
-type IconName = 'assignment' | 'storage' | 'search' | 'laptop';
+type IconName = 'assignment' | 'storage' | 'search' | 'laptop' | 'memory';
 
 interface DrawerItemIconProps {
-  icon: IconName
+  icon: IconName;
 }
 
 export const DrawerItemIcon = (props: DrawerItemIconProps) => (

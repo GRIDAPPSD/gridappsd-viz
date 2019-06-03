@@ -4,18 +4,16 @@
     flex-flow: column;
     align-items: center;
     margin-top: 18px;
-    margin-bottom: 10px;
 
     .show-selected-option-list {
         position: absolute;
         top: -14px;
         transition: transform 0.25s ease;
-        transform-origin: 50% 50%;
     }
 }
 
 .selected-option-list-container.open .show-selected-option-list {
-    transform: rotate(180deg);
+    transform: rotate(180deg) scale(1.1, 1.1);
 }
 
 .selected-option-list {
@@ -28,7 +26,7 @@
     background-color: #fcfcfc;
 
     .selected-option-list__option__deselect {
-        transform: scale(0.65, 0.65);
+        transform: scale(0.7, 0.7);
     }
 }
 

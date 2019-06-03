@@ -6,7 +6,7 @@ import './IconButton.scss';
 
 type Icon = 'check_circle' | 'menu' | 'assignment' | 'storage' | 'search' | 'laptop' | 'help' | 'delete' | 'cloud_upload'
   | 'pause' | 'stop' | 'play_arrow' | 'add' | 'remove' | 'cached' | 'save' | 'close' | 'navigate_next' | 'navigate_before'
-  | 'keyboard_arrow_down';
+  | 'keyboard_arrow_down' | 'memory';
 
 
 interface Props {
@@ -22,17 +22,15 @@ interface Props {
 
 export function IconButton(props: Props) {
   return (
-    <Ripple fixed={props.rounded}>
+    <Ripple fixed={props.rounded || props.rounded === undefined}>
       <button
         type='button'
         disabled={props.disabled}
         className={
           'icon-button' +
           (props.className ? ' ' + props.className : '') +
-          (props.label ? ' icon-button--has-label' : '') +
-          (props.rounded === undefined || props.rounded ? ' rounded-icon-button' : '') +
           (' icon-button--' + (props.style ? props.style : 'primary')) +
-          (' rounded-icon-button--' + (props.size ? props.size : 'normal'))
+          deriveClassName(props)
         }
         onClick={props.onClick}>
         <i className='material-icons icon-button__icon'>{props.icon}</i>
@@ -40,4 +38,11 @@ export function IconButton(props: Props) {
       </button>
     </Ripple>
   );
+}
+
+function deriveClassName(props: Props) {
+  if (props.rounded || (props.rounded === undefined && !props.label))
+    return ` rounded-icon-button rounded-icon-button--${props.size ? props.size : 'normal'}`;
+  return props.label ? ' icon-button--has-label' : '';
+
 }

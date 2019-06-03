@@ -1,28 +1,31 @@
 .drawer-item {
-    display: flex;
-    align-items: center;
     list-style-type: none;
-    padding: 10px 20px;
-    padding-right: 80px;
     font-size: 1.3em;
-    border-bottom: 2px inset rgba(0, 0, 0, 0.2);
+    border-bottom: 2px solid #BDBDBD;
     position: relative;
     backface-visibility: hidden;
     cursor: pointer;
     user-select: none;
     transition: background-color 0.2s linear;
 
+    div {
+        display: flex;
+        align-items: center;
+        padding: 10px 70px 10px 20px;
+    }
+
     &:hover {
-        background-color: rgba(0, 0, 0, 0.08);
+        background-color: rgba(0, 0, 0, 0.1);
     }
 }
 
 .drawer-item-icon {
     margin-right: 20px;
-    font-size: 1.25em;
+    font-size: 1.5em;
     font-weight: bold;
+    color: #757575;
 }
 
 .drawer-item-label {
-    color: rgba(0, 0, 0, 0.7);
+    color: #666;
 }
