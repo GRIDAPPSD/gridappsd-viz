@@ -129,6 +129,7 @@ export class Select<T> extends React.Component<Props<T>, State<T>> {
   componentWillUnmount() {
     this.removePortal();
     this._optionListContainer.onclick = null;
+    this._toggleAllSelectedOptions(false);
   }
 
   removePortal() {
