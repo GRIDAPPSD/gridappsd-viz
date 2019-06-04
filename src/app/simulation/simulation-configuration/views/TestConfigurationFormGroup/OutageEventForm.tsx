@@ -10,7 +10,6 @@ import { Tooltip } from '@shared/tooltip';
 import './OutageEventForm.scss';
 
 let outputEquipmentTypeOptions: Option<string>[];
-let outputMeasurementTypeOptions: Option<any>[];
 
 interface Props {
   onEventAdded: (event: OutageEvent) => void;
@@ -43,14 +42,11 @@ export class OutageEventForm extends React.Component<Props, State> {
   constructor(props: Props) {
     super(props);
 
-    if (!outputEquipmentTypeOptions && !outputMeasurementTypeOptions) {
+    if (!outputEquipmentTypeOptions)
       outputEquipmentTypeOptions = this._generateUniqueOptions(
         props.modelDictionary.measurements.map(e => e.ConductingEquipment_type)
       );
-      outputMeasurementTypeOptions = this._generateUniqueOptions(
-        props.modelDictionary.measurements.map(e => e.measurementType)
-      );
-    }
+
     this.state = {
       inputEquipmentTypeOptions: [
         new Option('Battery', 'batteries'),
@@ -71,7 +67,7 @@ export class OutageEventForm extends React.Component<Props, State> {
       outputEquipmentTypeOptions,
       outputComponentOptions: [],
       outputPhaseOptions: [],
-      outputMeasurementTypeOptions,
+      outputMeasurementTypeOptions: [],
       inputList: [],
       outputList: [],
       addInputItemButtonDisabled: true,
@@ -228,7 +224,6 @@ export class OutageEventForm extends React.Component<Props, State> {
             onChange={this.onOutputPhasesChanged} />
           <Select
             label='Measurement Type'
-            multiple
             options={this.state.outputMeasurementTypeOptions}
             onChange={this.onOutputMeasurementTypesChanged} />
           <Input
@@ -396,7 +391,7 @@ export class OutageEventForm extends React.Component<Props, State> {
     this.setState({
       outputPhaseOptions: this._generateUniqueOptions(this._normalizePhases(selectedOption.value.phases))
         .sort((a, b) => a.label.localeCompare(b.label)),
-      outputMeasurementTypeOptions: this._generateUniqueOptions(selectedOption.value.measurementType.split(''))
+      outputMeasurementTypeOptions: [new Option(selectedOption.value.measurementType)]
     });
     this.currentOutputListItem.mRID = selectedOption.value.ConductingEquipment_mRID;
     this._enableOrDisableAddOutputItemButton();
