@@ -14,6 +14,7 @@ interface Props {
 }
 
 interface State {
+  availableApplicationOptions: Option<string>[];
 }
 
 export class ApplicationConfigurationFormGroup extends React.Component<Props, State> {
@@ -21,6 +22,10 @@ export class ApplicationConfigurationFormGroup extends React.Component<Props, St
 
   constructor(props: Props) {
     super(props);
+
+    this.state = {
+      availableApplicationOptions: (props.availableApplications || []).map(app => new Option(app.id))
+    };
 
     const previousSelectedApplication = this.props.currentConfig.application_config.applications[0];
     if (previousSelectedApplication)
@@ -40,7 +45,7 @@ export class ApplicationConfigurationFormGroup extends React.Component<Props, St
       <FormGroup label=''>
         <Select
           label='Application name'
-          options={(this.props.availableApplications || []).map(app => new Option(app.id, app.id))}
+          options={this.state.availableApplicationOptions}
           onChange={options => {
             this.formValue.applicationId = options[0].value;
             this.props.onChange(this.formValue);
