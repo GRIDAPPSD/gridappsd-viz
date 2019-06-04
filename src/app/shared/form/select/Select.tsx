@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { findDOMNode, createPortal } from 'react-dom'
+import { createPortal } from 'react-dom'
 
 import { Option } from './Option';
 import { PopUp } from '@shared/pop-up';
@@ -36,6 +36,7 @@ export class Select<T> extends React.Component<Props<T>, State<T>> {
   optionListOpener: HTMLButtonElement;
 
   private readonly _optionListContainer = document.createElement('div');
+  private _defaultFirstPage: Option<T>[];
 
   constructor(props: Props<T>) {
     super(props);
@@ -154,7 +155,7 @@ export class Select<T> extends React.Component<Props<T>, State<T>> {
       selectedOptions: [],
       currentLabel: this.state.defaultLabel,
       filteredOptions: this.props.options,
-      currentPage: []
+      currentPage: this._defaultFirstPage
     });
   }
 
@@ -238,6 +239,8 @@ export class Select<T> extends React.Component<Props<T>, State<T>> {
   }
 
   onPageChanged(newPage: Option<T>[]) {
+    if (!this._defaultFirstPage)
+      this._defaultFirstPage = newPage;
     this.setState({
       currentPage: newPage
     });
