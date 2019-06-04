@@ -111,7 +111,16 @@ export class TestConfigurationFormGroup extends React.Component<Props, State> {
               label='Fault'
               onSelect={() => this.setState({ selectedEventType: 'fault', selectedEventTypeToView: 'fault' })} />
           </RadioButtonGroup>
-          {this.showUploadEventFileButton()}
+          <Tooltip
+            content='Upload event file'
+            position='right'>
+            <IconButton
+              icon='cloud_upload'
+              style='accent'
+              className='test-configuration__form__upload-file'
+              onClick={this.showEventFilePicker} />
+          </Tooltip>
+          <FilePicker />
           {this.showFormForSelectedEventType()}
         </FormGroup>
         {
@@ -136,25 +145,6 @@ export class TestConfigurationFormGroup extends React.Component<Props, State> {
         {this.showSaveEventsButton()}
       </div>
     );
-  }
-
-  showUploadEventFileButton() {
-    if (this.state.selectedEventType !== null)
-      return (
-        <>
-          <Tooltip
-            content='Upload event file'
-            position='right'>
-            <IconButton
-              icon='cloud_upload'
-              style='accent'
-              className='test-configuration__form__upload-file'
-              onClick={this.showEventFilePicker} />
-          </Tooltip>
-          <FilePicker />
-        </>
-      );
-    return null;
   }
 
   showEventFilePicker() {
