@@ -150,6 +150,7 @@ export class OutageEventForm extends React.Component<Props, State> {
             label='Phase'
             multiple
             options={this.state.inputPhaseOptions}
+            isOptionSelected={() => this.state.inputPhaseOptions.length === 1}
             onChange={this.onInputPhasesChanged} />
           <Select
             label='Attribute'
@@ -221,10 +222,12 @@ export class OutageEventForm extends React.Component<Props, State> {
             label='Phase'
             multiple
             options={this.state.outputPhaseOptions}
+            isOptionSelected={() => this.state.outputPhaseOptions.length === 1}
             onChange={this.onOutputPhasesChanged} />
           <Select
             label='Measurement Type'
             options={this.state.outputMeasurementTypeOptions}
+            isOptionSelected={() => this.state.outputMeasurementTypeOptions.length === 1}
             onChange={this.onOutputMeasurementTypesChanged} />
           <Input
             label='Start Date Time'

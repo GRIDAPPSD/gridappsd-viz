@@ -114,6 +114,10 @@ export class Select<T> extends React.Component<Props<T>, State<T>> {
   }
 
   componentDidMount() {
+    this._selectDefaultSelectedOptions();
+  }
+
+  private _selectDefaultSelectedOptions() {
     if (this.props.options.length !== 0 && this.props.isOptionSelected) {
       const selectedOptions = this.props.options.filter((option, i) => this.props.isOptionSelected(option, i));
       if (selectedOptions.length > 0) {
@@ -138,8 +142,10 @@ export class Select<T> extends React.Component<Props<T>, State<T>> {
   }
 
   componentDidUpdate(prevProps: Props<T>) {
-    if (this.props.options !== prevProps.options)
+    if (this.props.options !== prevProps.options) {
       this.reset();
+      this._selectDefaultSelectedOptions();
+    }
   }
 
   reset() {
