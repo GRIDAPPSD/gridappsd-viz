@@ -37,6 +37,7 @@ $app-bar-height: 60px;
     position: relative;
     color: #3f51b5;
     display: block;
+    -moz-user-select: none;
     user-select: none;
     position: relative;
 

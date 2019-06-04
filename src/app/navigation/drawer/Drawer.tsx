@@ -17,6 +17,7 @@ export class Drawer extends React.Component<Props, State> {
     this.state = {
       isOpened: false
     };
+
     this.close = this.close.bind(this);
   }
   render() {

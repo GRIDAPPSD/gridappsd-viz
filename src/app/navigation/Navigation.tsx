@@ -10,7 +10,6 @@ import { DrawerItemGroup } from './drawer/DrawerItemGroup';
 import { RUN_CONFIG } from '../../../runConfig';
 import { SimulationConfiguration, Simulation, SimulationQueue } from '@shared/simulation';
 import { StompClientService, StompClientConnectionStatus } from '@shared/StompClientService';
-import { IconButton } from '@shared/buttons';
 
 
 import './Navigation.scss';
@@ -26,13 +25,14 @@ interface State {
 
 export class Navigation extends React.Component<Props, State> {
 
+  drawer: Drawer;
+
   private readonly _simulationQueue = SimulationQueue.getInstance();
   private readonly _stompClientService = StompClientService.getInstance();
-  private _drawer: Drawer;
   private _queueChangesStream: Subscription;
   private _websocketStatusStream: Subscription;
 
-  constructor(props: any) {
+  constructor(props: Props) {
     super(props);
     this.state = {
       previousSimulations: this._simulationQueue.getAllSimulations(),
@@ -55,7 +55,7 @@ export class Navigation extends React.Component<Props, State> {
     return (
       <>
         <ToolBar>
-          <DrawerOpener onClick={() => this._drawer.open()} />
+          <DrawerOpener onClick={() => this.drawer.open()} />
           <Link className='navigation__app-title' to='/'>GridAPPS-D</Link>
           <span className='navigation__app-version'>{RUN_CONFIG.version}</span>
           {
@@ -67,19 +67,21 @@ export class Navigation extends React.Component<Props, State> {
             </div>
           }
         </ToolBar>
-        <Drawer ref={ref => this._drawer = ref}>
+        <Drawer ref={ref => this.drawer = ref}>
           <DrawerItem onClick={() => this.props.onShowSimulationConfigForm(null)}>
             <DrawerItemIcon icon='assignment' />
             <DrawerItemLabel value='Simulations' />
           </DrawerItem>
           {
-            // this.state.previousSimulations.length > 0 &&
+            this.state.previousSimulations.length > 0 &&
             <DrawerItemGroup
               header='Previous simulations'
               icon='memory'>
               {
                 this.state.previousSimulations.map(simulation => (
-                  <DrawerItem key={simulation.name} onClick={() => this.props.onShowSimulationConfigForm(simulation.config)}>
+                  <DrawerItem
+                    key={simulation.name}
+                    onClick={() => this.props.onShowSimulationConfigForm(simulation.config)}>
                     <strong>Name:&nbsp;</strong>
                     {simulation.name}
                     &nbsp;&mdash;&nbsp;

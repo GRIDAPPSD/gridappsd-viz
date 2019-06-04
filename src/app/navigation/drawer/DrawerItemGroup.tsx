@@ -1,7 +1,6 @@
 import * as React from 'react';
 
-import { PopUp } from '@shared/pop-up';
-import { DrawerItemIcon, DrawerItem, DrawerItemLabel } from './DrawerItem';
+import { DrawerItemIcon, DrawerItemLabel } from './DrawerItem';
 
 import './DrawerItemGroup.scss';
 
@@ -12,6 +11,7 @@ interface Props {
 
 interface State {
   isExpanded: boolean;
+  maxHeight: number;
 }
 
 export class DrawerItemGroup extends React.Component<Props, State> {
@@ -19,40 +19,51 @@ export class DrawerItemGroup extends React.Component<Props, State> {
   constructor(props: any) {
     super(props);
     this.state = {
-      isExpanded: false
+      isExpanded: false,
+      maxHeight: 55
     }
-    this._collapse = this._collapse.bind(this);
-    this._toogle = this._toogle.bind(this);
+
+    this.toggle = this.toggle.bind(this);
   }
+
   render() {
     return (
-      <DrawerItem className={'drawer-item-group' + (this.state.isExpanded ? ' expanded' : ' collapsed')}>
-        <DrawerItemIcon icon={this.props.icon} />
-        <DrawerItemLabel value={this.props.header} />
-        <i className={'material-icons drawer-item-group__angle'}>
-          keyboard_arrow_right
-        </i>
-        <PopUp in={this.state.isExpanded}>
-          <div className='nested-drawer-items'>
-            <div className='nested-drawer-items__arrow' />
-            <ul
-              className='nested-drawer-items__list'
-              onClick={this._collapse}>
-              {this.props.children}
-            </ul>
-          </div>
-        </PopUp>
-      </DrawerItem>
+      <li
+        style={{
+          maxHeight: this.getMaxHeight()
+        }}
+        className={`drawer-item drawer-item-group${this.state.isExpanded ? ' expanded' : ' collapsed'}`}
+        onClick={this.toggle}>
+        <div className='drawer-item-wrapper'>
+          <DrawerItemIcon icon={this.props.icon} />
+          <DrawerItemLabel value={this.props.header} />
+          <i className={'material-icons drawer-item-group__angle'}>
+            keyboard_arrow_down
+          </i>
+        </div>
+        <ul className='drawer-item-group__nested-drawer-items'>
+          {this.props.children}
+        </ul>
+      </li>
     );
   }
 
-  private _collapse(event) {
-    event.stopPropagation();
-    this.setState({ isExpanded: false });
+  getMaxHeight() {
+    return Array.isArray(this.props.children) && this.state.isExpanded ? this.props.children.length * 50 + 55 : 50;
   }
 
-  private _toogle(event: any) {
-    event.stopPropagation();
-    this.setState((prevState) => ({ isExpanded: !prevState.isExpanded }));
+  toggle(event: React.SyntheticEvent) {
+    if ((event.target as HTMLElement).classList.contains('drawer-item-group')) {
+      event.stopPropagation();
+      this.setState(state => ({
+        isExpanded: !state.isExpanded
+      }));
+    }
+    // if child DrawerItems are clicked, then let the event propagate
+    // then collapse the nested item group list
+    else
+      this.setState({
+        isExpanded: false
+      });
   }
 }

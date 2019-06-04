@@ -1,82 +1,41 @@
 .drawer-item-group {
-    .nested-drawer-items {
-        position: absolute;
-        left: 103%;
-        top: -3px;
-        z-index: 300;
-        box-shadow: 2px 5px 10px -10px rgba(0, 0, 0, 0.2), 2px 5px 20px rgba(0, 0, 0, 0.25);
-        border-radius: 3px;
-        background-color: #fff;
-        min-width: 200px;
-        overflow: initial;
-    }
-
-    .nested-drawer-items__list {
-        margin: 0;
-        padding: 5px 0;
-        overflow-x: hidden;
-        overflow-y: auto;
-
-        &:empty {
-            box-shadow: none;
-        }
-
-        .drawer-item {
-            backface-visibility: hidden;
-            color: #fff;
-            list-style-type: none;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-            font-weight: normal;
-            overflow: hidden;
-            padding: 12px 10px;
-            cursor: pointer;
-
-            &:hover {
-                background-color: #84811114;
-            }
-
-            font-weight: normal;
-            border: none;
-            font-size: 14px;
-        }
-    }
-
-    .nested-drawer-items__arrow {
-        overflow: hidden;
-        position: absolute;
-        width: 20px;
-        height: 20px;
-        transform: translateY(-50%) translateX(-20px);
-        top: 25px;
-        left: 0;
-    }
+    max-height: 50px;
 }
 
-.drawer-item-group__toggle {
+.drawer-item-group__nested-drawer-items:not(:empty) {
     position: relative;
-    display: flex;
-    align-items: center;
-    transform: translateX(57px);
+    margin: 0;
+    padding: 0;
     width: 100%;
-    color: rgba(0, 0, 0, 0.7);
-    font-size: inherit;
-    background-color: transparent;
+    border: none;
+    background-color: #dedede;
+    box-shadow: 0 3px 5px #888 inset;
+
+    .drawer-item {
+        font-size: 0.8em;
+        padding: 0 20px 0 60px;
+    }
+
+    .drawer-item:last-of-type {
+        border-bottom: none;
+    }
 }
 
 .drawer-item-group__angle {
-    left: 92%;
-    transition: transform 0.25s ease;
+    position: relative;
+    margin-left: auto;
+    transition: transform 0.25s cubic-bezier(0.35, 0, 0.25, 1);
     transform-origin: 50% 50%;
-    transform: scale(1.5);
+    font-size: 2em;
     backface-visibility: hidden;
-    position: absolute;
 }
 
 .drawer-item-group.expanded {
-    background-color: rgba(0, 0, 0, 0.08);
+    max-height: 100%;
+    background-color: rgba($color: #000, $alpha: 0.15);
 
-    .angle {
-        transform: rotate(180deg) scale(1.5);
+    .drawer-item-group__angle {
+        transform: rotate(-90deg);
     }
+
 }

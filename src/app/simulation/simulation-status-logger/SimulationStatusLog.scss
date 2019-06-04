@@ -22,6 +22,7 @@
 
 .simulation-status-logger__header__label {
     pointer-events: none;
+    -moz-user-select: none;
     user-select: none;
     display: inline-block;
     background-color: #3f51b5;
