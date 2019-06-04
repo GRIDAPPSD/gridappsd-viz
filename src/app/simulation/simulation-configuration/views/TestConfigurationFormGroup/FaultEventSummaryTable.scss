@@ -8,6 +8,7 @@
 
 .fault-event-summary-table {
     border-collapse: collapse;
+    width: 100%;
 
     th,
     td,
@@ -17,36 +18,27 @@
     }
 
     thead {
-        background-color: #ff4081;
+        background-color: #3f51b5;
         color: #fff;
-        border: 2px solid #db356e;
+        border: 2px solid #CECECE;
     }
 
     th {
         font-weight: 500;
         padding: 5px 10px;
-        border: 2px solid #db356e;
+        border: 2px solid #CECECE;
     }
 
     td {
-        border: 2px solid #db356e;
+        border: 2px solid #CECECE;
         padding: 0;
 
         &>div {
             padding: 5px 10px;
 
             &:not(:last-of-type) {
-                border-bottom: 2px solid #db356e;
+                border-bottom: 2px solid #CECECE;
             }
-        }
-    }
-
-    .icon-button {
-        background-color: #db356e;
-        transform: scale(0.9, 0.9);
-
-        i {
-            font-size: 1.5em;
         }
     }
 }
