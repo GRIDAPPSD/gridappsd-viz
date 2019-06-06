@@ -4,6 +4,7 @@ import { BasicButton } from '@shared/buttons';
 import { ModelDictionary } from '@shared/topology/model-dictionary';
 import { FormGroup, Select, Option, Input } from '@shared/form';
 import { FaultEvent, FaultKind, FaultImpedence } from '../../models/FaultEvent';
+import { Phase } from '../../models/Phase';
 
 import './FaultEventForm.scss';
 
@@ -16,10 +17,11 @@ interface Props {
 interface State {
   equipmentTypeOptions: Option<string>[];
   componentOptions: Option<any>[];
-  phaseOptions: Option<string>[];
+  phaseOptions: Option<Phase>[];
   faultKindOptions: Option<FaultKind>[];
   selectedFaultKind: FaultKind;
   formValue: FaultEvent;
+  addEventButtonDisabled: boolean;
 }
 
 export class FaultEventForm extends React.Component<Props, State> {
@@ -50,7 +52,8 @@ export class FaultEventForm extends React.Component<Props, State> {
         new Option(FaultKind.LINE_TO_LINE_TO_GROUND)
       ],
       selectedFaultKind: FaultKind.LINE_TO_GROUND,
-      formValue: { ...props.initialFormValue }
+      formValue: { ...props.initialFormValue },
+      addEventButtonDisabled: true
     };
     this.formValue = this.state.formValue;
 
@@ -60,7 +63,6 @@ export class FaultEventForm extends React.Component<Props, State> {
     this.onFaultKindChanged = this.onFaultKindChanged.bind(this);
     this.onStartDateTimeChanged = this.onStartDateTimeChanged.bind(this);
     this.onStopDateTimeChanged = this.onStopDateTimeChanged.bind(this);
-    this.onValueForSelectedFaultKindChanged = this.onValueForSelectedFaultKindChanged.bind(this);
     this.createNewEvent = this.createNewEvent.bind(this);
   }
 
@@ -86,6 +88,8 @@ export class FaultEventForm extends React.Component<Props, State> {
           onChange={this.onComponentChanged} />
         <Select
           label='Phase'
+          multiple
+          isOptionSelected={() => this.state.phaseOptions.length === 1}
           options={this.state.phaseOptions}
           onChange={this.onPhaseChanged} />
         <Select
@@ -93,14 +97,6 @@ export class FaultEventForm extends React.Component<Props, State> {
           options={this.state.faultKindOptions}
           isOptionSelected={option => option.value === this.formValue.faultKind}
           onChange={this.onFaultKindChanged} />
-        {
-          this.state.selectedFaultKind &&
-          <Input
-            label={this.state.selectedFaultKind}
-            name={this.state.selectedFaultKind}
-            value={this.formValue[this.state.selectedFaultKind]}
-            onChange={this.onValueForSelectedFaultKindChanged} />
-        }
         <FormGroup label='Impedance'>
           {
             FaultImpedence[this.state.selectedFaultKind].map(kind => (
@@ -109,7 +105,10 @@ export class FaultEventForm extends React.Component<Props, State> {
                 label={kind}
                 name={kind}
                 value={this.state.formValue.impedance[kind]}
-                onChange={value => this.formValue.impedance[kind] = value} />
+                onChange={value => {
+                  this.formValue.impedance[kind] = value;
+                  this._enableAddEventButtonIfFormIsValid();
+                }} />
             ))
           }
           <Input
@@ -125,6 +124,7 @@ export class FaultEventForm extends React.Component<Props, State> {
         </FormGroup>
         <BasicButton
           className='fault-event-form__add-event'
+          disabled={this.state.addEventButtonDisabled}
           type='positive'
           label='Add event'
           onClick={this.createNewEvent} />
@@ -139,16 +139,50 @@ export class FaultEventForm extends React.Component<Props, State> {
       phaseOptions: []
     });
     this.formValue.equipmentType = selectedOptions[0].label;
+    this._enableAddEventButtonIfFormIsValid();
+  }
+
+  private _enableAddEventButtonIfFormIsValid() {
+    if (this._isFormValueValid())
+      this.setState({
+        addEventButtonDisabled: false
+      });
+    else
+      this.setState({
+        addEventButtonDisabled: true
+      });
+  }
+
+  private _isFormValueValid(): boolean {
+    return this.formValue.equipmentName !== ''
+      && this.formValue.equipmentType !== ''
+      && this.formValue.id !== ''
+      && this.formValue.mRID.length !== 0
+      && this.formValue.phases.length !== 0
+      && this.formValue.startDateTime !== ''
+      && this.formValue.stopDateTime !== ''
+      && (
+        this.formValue.faultKind === FaultKind.LINE_TO_GROUND
+          ? this.formValue.impedance.rGround !== '' && this.formValue.impedance.xGround !== ''
+          : this.formValue.faultKind === FaultKind.LINE_TO_LINE
+            ? this.formValue.impedance.rLinetoLine !== '' && this.formValue.impedance.xLineToLine !== ''
+            : this.formValue.impedance.rGround !== '' && this.formValue.impedance.xGround !== ''
+            && this.formValue.impedance.rLinetoLine !== '' && this.formValue.impedance.xLineToLine !== ''
+      );
   }
 
   onComponentChanged(selectedOptions: Option<any>[]) {
+    const selectedOption = selectedOptions[0];
     this.setState({
       phaseOptions: this._generateUniqueOptions(
-        this._normalizePhases(selectedOptions[0].value.phases || selectedOptions[0].value.bankPhases)
+        this._normalizePhases(selectedOption.value.phases || selectedOption.value.bankPhases)
       )
+        .map((option, i) => new Option(option.label, { phaseLabel: option.label, phaseIndex: i }))
         .sort((a, b) => a.label.localeCompare(b.label))
     });
-    this.formValue.equipmentName = selectedOptions[0].label;
+    this.formValue.equipmentName = selectedOption.label;
+    this.formValue.mRID = selectedOption.value.mRID;
+    this._enableAddEventButtonIfFormIsValid();
   }
 
   private _generateUniqueOptions(iterable: string[] | string): Option[] {
@@ -165,8 +199,9 @@ export class FaultEventForm extends React.Component<Props, State> {
     return /^[abc]+$/i.test(phases) ? phases : [phases];
   }
 
-  onPhaseChanged(selectedOptions: Option<string>[]) {
-    this.formValue.phase = selectedOptions[0].value;
+  onPhaseChanged(selectedOptions: Option<Phase>[]) {
+    this.formValue.phases = selectedOptions.map(option => option.value);
+    this._enableAddEventButtonIfFormIsValid();
   }
 
   onFaultKindChanged(selectedOptions: Option<FaultKind>[]) {
@@ -176,16 +211,14 @@ export class FaultEventForm extends React.Component<Props, State> {
     });
   }
 
-  onValueForSelectedFaultKindChanged(value: string) {
-    this.formValue[this.state.selectedFaultKind] = value;
-  }
-
   onStartDateTimeChanged(value: string) {
     this.formValue.startDateTime = value;
+    this._enableAddEventButtonIfFormIsValid();
   }
 
   onStopDateTimeChanged(value: string) {
     this.formValue.stopDateTime = value;
+    this._enableAddEventButtonIfFormIsValid();
   }
 
   createNewEvent() {
@@ -194,7 +227,8 @@ export class FaultEventForm extends React.Component<Props, State> {
     this.setState({
       componentOptions: [],
       phaseOptions: [],
-      selectedFaultKind: FaultKind.LINE_TO_GROUND
+      selectedFaultKind: FaultKind.LINE_TO_GROUND,
+      addEventButtonDisabled: true
     });
   }
 

@@ -24,10 +24,10 @@ export interface SimulationConfiguration {
     };
   };
   application_config: {
-    applications: Array<{ name: string, config_string: string }>
+    applications: Array<{ name: string; config_string: string }>
   };
   test_config: {
-    events: any[];
+    events: Array<any>;
     appId: string;
   };
 }

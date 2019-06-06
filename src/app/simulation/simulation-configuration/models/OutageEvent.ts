@@ -1,3 +1,5 @@
+import { Phase } from './Phase';
+
 export interface OutageEvent {
   type: 'CommOutage';
   id: string;
@@ -13,8 +15,8 @@ export interface OutageEvent {
 export interface OutageEventInputListItem {
   type: string;
   name: string;
-  mRID: string;
-  phases: string[];
+  mRID: any;
+  phases: Phase[];
   attribute: string;
 }
 

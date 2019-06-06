@@ -58,11 +58,9 @@ export class TestConfigurationFormGroup extends React.Component<Props, State> {
       id: this._generateEventId(),
       equipmentType: '',
       equipmentName: '',
-      phase: '',
+      phases: [],
+      mRID: '',
       faultKind: FaultKind.LINE_TO_GROUND,
-      lineToGround: '',
-      lineToLine: '',
-      lineToLineToGround: '',
       impedance: {
         rGround: '',
         xGround: '',
@@ -71,7 +69,7 @@ export class TestConfigurationFormGroup extends React.Component<Props, State> {
       },
       startDateTime: this.props.simulationStartDate,
       stopDateTime: this.props.simulationStopDate
-    }
+    };
   }
 
   defaultOutageEventFormValue(): OutageEvent {
@@ -84,7 +82,7 @@ export class TestConfigurationFormGroup extends React.Component<Props, State> {
       outputList: [],
       startDateTime: this.props.simulationStartDate,
       stopDateTime: this.props.simulationStopDate
-    }
+    };
   }
 
   private _generateEventId() {

@@ -9,6 +9,7 @@
 .outage-event-summary-table {
     border-collapse: collapse;
     width: 100%;
+
     th,
     td,
     div {
@@ -33,7 +34,7 @@
         padding: 0;
 
         &>div {
-            padding: 5px 10px;
+            padding: 5px;
 
             &:not(:last-of-type) {
                 border-bottom: 2px solid #CECECE;

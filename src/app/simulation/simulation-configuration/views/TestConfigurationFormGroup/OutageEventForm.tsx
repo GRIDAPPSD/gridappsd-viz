@@ -6,6 +6,7 @@ import { FormGroup, CheckBox, Select, Option, Input } from '@shared/form';
 import { COMPONENT_ATTRIBUTES } from '../../models/component-attributes';
 import { OutageEvent, OutageEventInputListItem, OutageEventOutputListItem } from '../../models/OutageEvent';
 import { Tooltip } from '@shared/tooltip';
+import { Phase } from '../../models/Phase';
 
 import './OutageEventForm.scss';
 
@@ -20,7 +21,7 @@ interface Props {
 interface State {
   inputEquipmentTypeOptions: Option<string>[];
   inputComponentOptions: Option<any>[];
-  inputPhaseOptions: Option<string>[];
+  inputPhaseOptions: Option<Phase>[];
   inputAttributeOptions: Option<string>[];
   outputEquipmentTypeOptions: Option<string>[];
   outputComponentOptions: Option<ModelDictionaryMeasurement>[];
@@ -192,7 +193,7 @@ export class OutageEventForm extends React.Component<Props, State> {
                       </td>
                       <td>{e.type}</td>
                       <td>{e.name}</td>
-                      <td>{e.phases.map((e, i) => <div key={i}>{e}</div>)}</td>
+                      <td>{e.phases.map((e, i) => <div key={i}>{e.phaseLabel}</div>)}</td>
                       <td>
                         <div>{e.attribute}</div>
                       </td>
@@ -332,6 +333,7 @@ export class OutageEventForm extends React.Component<Props, State> {
       inputPhaseOptions: this._generateUniqueOptions(
         this._normalizePhases(selectedOption.value.phases || selectedOption.value.bankPhases)
       )
+        .map((option, i) => new Option(option.label, { phaseLabel: option.label, phaseIndex: i }))
         .sort((a, b) => a.label.localeCompare(b.label))
     });
     this.currentInputListItem.name = selectedOption.label;
@@ -345,8 +347,9 @@ export class OutageEventForm extends React.Component<Props, State> {
     return /^[abc]+$/i.test(phases) ? phases : [phases];
   }
 
-  onInputPhasesChanged(selectedOptions: Option<string>[]) {
-    this.currentInputListItem.phases = selectedOptions.map(option => option.value).sort();
+  onInputPhasesChanged(selectedOptions: Option<{ phaseLabel: string; phaseIndex: number }>[]) {
+    this.currentInputListItem.phases = selectedOptions.sort((a, b) => a.label.localeCompare(b.label))
+      .map(option => option.value);
     this._enableOrDisableAddInputItemButton();
   }
 

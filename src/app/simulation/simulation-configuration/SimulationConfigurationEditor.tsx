@@ -15,7 +15,10 @@ import { ModelDictionaryTracker } from './services/ModelDictionaryTracker';
 import { Wait } from '@shared/wait';
 import { DateTimeService } from './services/DateTimeService';
 import { OutageEvent } from './models/OutageEvent';
-import { FaultEvent } from './models/FaultEvent';
+import { FaultEvent, FaultKind } from './models/FaultEvent';
+import { PowerSystemConfigurationFormGroupValue } from './models/PowerSystemConfigurationFormGroupValue';
+import { SimulationConfigurationFormGroupValue } from './models/SimulationConfigurationFormGroupValue';
+import { ApplicationConfigurationFormGroupValue } from './models/ApplicationConfigurationFormGroupValue';
 
 import './SimulationConfigurationEditor.scss';
 
@@ -35,6 +38,7 @@ interface State {
   noLineNameMessage: boolean;
   modelDictionary: ModelDictionary;
   disableSubmitButton: boolean;
+  lineName: string;
 }
 
 export class SimulationConfigurationEditor extends React.Component<Props, State> {
@@ -60,9 +64,18 @@ export class SimulationConfigurationEditor extends React.Component<Props, State>
       simulationName: props.initialConfig.simulation_config.simulation_name,
       noLineNameMessage: false,
       modelDictionary: null,
-      disableSubmitButton: true
+      disableSubmitButton: true,
+      lineName: props.initialConfig.power_system_config.Line_name
     };
+
     this.currentConfig = this._cloneConfigObject(props.initialConfig);
+
+    this.onPowerSystemConfigurationFormGroupValueChanged = this.onPowerSystemConfigurationFormGroupValueChanged.bind(this);
+    this.onSimulationConfigurationFormGroupValueChanged = this.onSimulationConfigurationFormGroupValueChanged.bind(this);
+    this.onApplicationConfigurationFormGroup = this.onApplicationConfigurationFormGroup.bind(this);
+    this.onFaultEventsAdded = this.onFaultEventsAdded.bind(this);
+    this.closeForm = this.closeForm.bind(this);
+    this.submitForm = this.submitForm.bind(this);
   }
 
   private _cloneConfigObject(original: SimulationConfiguration): SimulationConfiguration {
@@ -109,59 +122,28 @@ export class SimulationConfigurationEditor extends React.Component<Props, State>
             <TabGroup>
               <Tab label='Power System Configuration'>
                 <PowerSystemConfigurationFormGroup
-                  feederModels={
-                    this.props.feederModels
-                  }
-                  onChange={formValue => {
-                    const currentPowerSystemConfig = this.currentConfig.power_system_config;
-                    currentPowerSystemConfig.GeographicalRegion_name = formValue.geographicalRegionId;
-                    currentPowerSystemConfig.SubGeographicalRegion_name = formValue.subGeographicalRegionId;
-                    if (currentPowerSystemConfig.Line_name !== formValue.lineName) {
-                      currentPowerSystemConfig.Line_name = formValue.lineName;
-                      this.currentConfig.simulation_config.simulation_name = formValue.simulationName;
-                      this.props.onMRIDChanged(formValue.lineName, formValue.simulationName);
-                    }
-                    if (formValue.lineName)
-                      this.setState({
-                        disableSubmitButton: false
-                      });
-                  }} />
+                  feederModels={this.props.feederModels}
+                  onChange={this.onPowerSystemConfigurationFormGroupValueChanged} />
               </Tab>
               <Tab label='Simulation Configuration'>
                 <SimulationConfigurationFormGroup
                   currentConfig={this.currentConfig}
-                  onChange={formValue => {
-                    this.currentConfig.simulation_config.start_time = formValue.startTime;
-                    this.currentConfig.simulation_config.duration = formValue.duration;
-                    this.currentConfig.simulation_config.simulator = formValue.simulator;
-                    this.currentConfig.simulation_config.run_realtime = formValue.runInRealtime;
-                    this.currentConfig.simulation_config.simulation_name = formValue.simulationName;
-                    this.currentConfig.simulation_config.model_creation_config = formValue.modelCreationConfig;
-                  }} />
+                  onChange={this.onSimulationConfigurationFormGroupValueChanged} />
               </Tab>
               <Tab label='Application Configuration'>
                 <ApplicationConfigurationFormGroup
                   currentConfig={this.currentConfig}
                   availableApplications={this.props.availableApplications}
-                  onChange={formValue => {
-                    const selectedApplication = this.currentConfig.application_config.applications.pop();
-                    selectedApplication.name = formValue.applicationId;
-                    selectedApplication.config_string = formValue.configString;
-                    this.currentConfig.application_config.applications.push(selectedApplication);
-                  }} />
+                  onChange={this.onApplicationConfigurationFormGroup} />
               </Tab>
               <Tab label='Test Configuration'>
                 {
-                  this.state.modelDictionary
+                  (this.state.modelDictionary && this.state.lineName)
                     ? <TestConfigurationFormGroup
                       modelDictionary={this.state.modelDictionary}
                       simulationStartDate={this.dateTimeService.format(this.simulationStartDate)}
                       simulationStopDate={this.dateTimeService.format(this.calculateSimulationStopTime())}
-                      onEventsAdded={events => {
-                        this.outageEvents = events.outage;
-                        this.faultEvents = events.fault;
-                        console.log(this.outageEvents, this.faultEvents);
-                      }} />
+                      onEventsAdded={this.onFaultEventsAdded} />
                     : <Wait show={true} />
                 }
               </Tab>
@@ -172,27 +154,12 @@ export class SimulationConfigurationEditor extends React.Component<Props, State>
           <BasicButton
             label='Close'
             type='negative'
-            onClick={event => {
-              event.stopPropagation();
-              this.props.onClose(event);
-              this.setState({ show: false });
-            }} />
+            onClick={this.closeForm} />
           <BasicButton
             label='Submit'
             type='positive'
             disabled={this.state.disableSubmitButton}
-            onClick={event => {
-              if (this.currentConfig.power_system_config.Line_name === '') {
-                console.log('No model selected');
-                this.setState({ noLineNameMessage: true });
-              }
-              else {
-                event.stopPropagation();
-                this.setState({ show: false });
-                this.currentConfig.test_config.appId = this.currentConfig.application_config.applications[0].name;
-                this.props.onSubmit(this.currentConfig);
-              }
-            }} />
+            onClick={this.submitForm} />
           {this.state.noLineNameMessage &&
             <span style={{ color: 'red' }} >&nbsp; Please select a Line Name </span>}
         </DialogActions>
@@ -200,8 +167,130 @@ export class SimulationConfigurationEditor extends React.Component<Props, State>
     );
   }
 
+  onPowerSystemConfigurationFormGroupValueChanged(formValue: PowerSystemConfigurationFormGroupValue) {
+    const currentPowerSystemConfig = this.currentConfig.power_system_config;
+    currentPowerSystemConfig.GeographicalRegion_name = formValue.geographicalRegionId;
+    currentPowerSystemConfig.SubGeographicalRegion_name = formValue.subGeographicalRegionId;
+    if (currentPowerSystemConfig.Line_name !== formValue.lineName) {
+      currentPowerSystemConfig.Line_name = formValue.lineName;
+      this.currentConfig.simulation_config.simulation_name = formValue.simulationName;
+      this.props.onMRIDChanged(formValue.lineName, formValue.simulationName);
+      this.setState({
+        lineName: formValue.lineName
+      });
+    }
+    if (formValue.lineName)
+      this.setState({
+        disableSubmitButton: false
+      });
+  }
+
+  onSimulationConfigurationFormGroupValueChanged(formValue: SimulationConfigurationFormGroupValue) {
+    for (const key in formValue)
+      this.currentConfig.simulation_config[key] = formValue[key];
+  }
+
+  onApplicationConfigurationFormGroup(formValue: ApplicationConfigurationFormGroupValue) {
+    const selectedApplication = this.currentConfig.application_config.applications.pop();
+    selectedApplication.name = formValue.applicationId;
+    selectedApplication.config_string = formValue.configString;
+    this.currentConfig.application_config.applications.push(selectedApplication);
+  }
+
+  onFaultEventsAdded(events: { outage: OutageEvent[]; fault: FaultEvent[] }) {
+    this.outageEvents = events.outage;
+    this.faultEvents = events.fault;
+  }
+
   calculateSimulationStopTime() {
     return +this.currentConfig.simulation_config.duration * 1000 + this.simulationStartDate.getTime();
+  }
+
+  closeForm(event: React.SyntheticEvent) {
+    event.stopPropagation();
+    this.props.onClose(event);
+    this.setState({ show: false });
+  }
+
+  submitForm(event: React.SyntheticEvent) {
+    if (this.currentConfig.power_system_config.Line_name === '')
+      this.setState({ noLineNameMessage: true });
+    else {
+      event.stopPropagation();
+      this.setState({ show: false });
+      this.currentConfig.test_config.appId = this.currentConfig.application_config.applications[0].name;
+      for (const outageEvent of this.outageEvents)
+        this.currentConfig.test_config.events.push(this._transformOutageEventForForSubmission(outageEvent));
+      for (const faultEvent of this.faultEvents)
+        this.currentConfig.test_config.events.push(this._transformFaultEventForForSubmission(faultEvent));
+      this.props.onSubmit(this.currentConfig);
+    }
+  }
+
+  private _transformOutageEventForForSubmission(outageEvent: OutageEvent) {
+    return {
+      allInputOutage: outageEvent.allInputOutage,
+      allOutputOutage: outageEvent.allOutputOutage,
+      inputOutageList: this._flattenArray(outageEvent.inputList.map(inputItem => {
+        if (inputItem.phases.length === 1)
+          return {
+            objectMrid: inputItem.mRID,
+            attribute: inputItem.attribute
+          };
+        return inputItem.phases.map(phase => ({
+          objectMrid: inputItem.mRID[phase.phaseIndex],
+          attribute: inputItem.attribute
+        }));
+      })),
+      outputOutageList: outageEvent.outputList.map(outputItem => outputItem.mRID),
+      event_type: outageEvent.type,
+      occuredDateTime: this.dateTimeService.parse(outageEvent.startDateTime).getTime(),
+      stopDateTime: this.dateTimeService.parse(outageEvent.stopDateTime).getTime()
+    };
+  }
+
+  private _transformFaultEventForForSubmission(faultEvent: FaultEvent) {
+    return {
+      PhaseConnectedFaultKind: faultEvent.faultKind,
+      impedance: this._getImpedance(faultEvent),
+      equipmentMrid: faultEvent.phases.length === 1
+        ? faultEvent.mRID
+        : faultEvent.phases.map(phase => faultEvent.mRID[phase.phaseIndex]),
+      phases: faultEvent.phases.map(phase => phase.phaseLabel).join(''),
+      event_type: faultEvent.type,
+      occuredDateTime: this.dateTimeService.parse(faultEvent.startDateTime).getTime(),
+      stopDateTime: this.dateTimeService.parse(faultEvent.stopDateTime).getTime()
+    };
+  }
+
+  private _getImpedance(faultEvent: FaultEvent) {
+    if (faultEvent.faultKind === FaultKind.LINE_TO_GROUND)
+      return {
+        xGround: faultEvent.impedance.xGround,
+        rGround: faultEvent.impedance.rGround
+      };
+    if (faultEvent.faultKind === FaultKind.LINE_TO_LINE)
+      return {
+        xLineToLine: faultEvent.impedance.xLineToLine,
+        rLineToLine: faultEvent.impedance.rLinetoLine
+      };
+    return {
+      xGround: faultEvent.impedance.xGround,
+      rGround: faultEvent.impedance.rGround,
+      xLineToLine: faultEvent.impedance.xLineToLine,
+      rLineToLine: faultEvent.impedance.rLinetoLine
+    };
+  }
+
+  private _flattenArray(array: any[]) {
+    const result = [];
+    for (const element of array) {
+      if (Array.isArray(element))
+        result.push(...element);
+      else
+        result.push(element);
+    }
+    return result;
   }
 
 }

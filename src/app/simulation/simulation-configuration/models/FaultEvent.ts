@@ -1,13 +1,13 @@
+import { Phase } from './Phase';
+
 export interface FaultEvent {
   type: 'Fault';
   id: string;
   equipmentType: string;
   equipmentName: string;
-  phase: string;
+  phases: Phase[];
   faultKind: FaultKind;
-  lineToGround: string;
-  lineToLine: string;
-  lineToLineToGround: string;
+  mRID: any;
   impedance: {
     rGround: string;
     xGround: string;

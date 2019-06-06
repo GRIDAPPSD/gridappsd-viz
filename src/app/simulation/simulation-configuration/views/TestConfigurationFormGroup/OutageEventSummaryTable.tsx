@@ -64,7 +64,7 @@ export function OutageEventSummaryTable(props: Props) {
                   {event.inputList.map((e, i) => <div key={i}>{e.name}</div>)}
                 </td>
                 <td>
-                  {event.inputList.map((e, i) => <div key={i}>{e.phases.join(', ')}</div>)}
+                  {event.inputList.map((e, i) => <div key={i}>{e.phases.map(e => e.phaseLabel).join(', ')}</div>)}
                 </td>
                 <td>
                   {event.inputList.map((e, i) => <div key={i}>{e.attribute}</div>)}
