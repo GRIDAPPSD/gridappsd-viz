@@ -11,6 +11,19 @@ import { Phase } from '../../models/Phase';
 import './OutageEventForm.scss';
 
 let outputEquipmentTypeOptions: Option<string>[];
+const inputEquipmentTypeOptions = [
+  new Option('Battery', 'batteries'),
+  new Option('Breaker', 'breakers'),
+  new Option('Capacitor', 'capacitors'),
+  new Option('Disconnector', 'disconnectors'),
+  new Option('Fuse', 'fuses'),
+  new Option('Recloser', 'reclosers'),
+  new Option('Regulator', 'regulators'),
+  new Option('Sectionaliser', 'sectionalisers'),
+  new Option('Solar Panel', 'solarpanels'),
+  new Option('Switch', 'switches'),
+  new Option('Synchronous Machine', 'synchronousmachines')
+];
 
 interface Props {
   onEventAdded: (event: OutageEvent) => void;
@@ -31,6 +44,8 @@ interface State {
   outputList: OutageEventOutputListItem[];
   addInputItemButtonDisabled: boolean;
   addOutputItemButtonDisabled: boolean;
+  allInputOutageChecked: boolean;
+  allOutputOutageChecked: boolean;
 }
 
 export class OutageEventForm extends React.Component<Props, State> {
@@ -49,19 +64,7 @@ export class OutageEventForm extends React.Component<Props, State> {
       );
 
     this.state = {
-      inputEquipmentTypeOptions: [
-        new Option('Battery', 'batteries'),
-        new Option('Breaker', 'breakers'),
-        new Option('Capacitor', 'capacitors'),
-        new Option('Disconnector', 'disconnectors'),
-        new Option('Fuse', 'fuses'),
-        new Option('Recloser', 'reclosers'),
-        new Option('Regulator', 'regulators'),
-        new Option('Sectionaliser', 'sectionalisers'),
-        new Option('Solar Panel', 'solarpanels'),
-        new Option('Switch', 'switches'),
-        new Option('Synchronous Machine', 'synchronousmachines')
-      ],
+      inputEquipmentTypeOptions,
       inputComponentOptions: [],
       inputPhaseOptions: [],
       inputAttributeOptions: [],
@@ -72,7 +75,9 @@ export class OutageEventForm extends React.Component<Props, State> {
       inputList: [],
       outputList: [],
       addInputItemButtonDisabled: true,
-      addOutputItemButtonDisabled: true
+      addOutputItemButtonDisabled: true,
+      allInputOutageChecked: props.initialFormValue.allInputOutage,
+      allOutputOutageChecked: props.initialFormValue.allOutputOutage
     };
 
     this.formValue = { ...props.initialFormValue };
@@ -136,7 +141,7 @@ export class OutageEventForm extends React.Component<Props, State> {
           <CheckBox
             label='All Input Outage'
             name='allInputOutage'
-            checked={this.formValue.allInputOutage}
+            checked={this.state.allInputOutageChecked}
             onChange={this.onAllInputOutageCheckboxToggled} />
           <Select
             ref={comp => this.inputComponentTypeSelect = comp}
@@ -208,7 +213,7 @@ export class OutageEventForm extends React.Component<Props, State> {
           <CheckBox
             label='All Ouput Outage'
             name='allOutputOutage'
-            checked={this.formValue.allOutputOutage}
+            checked={this.state.allOutputOutageChecked}
             onChange={this.onAllOutputOutageCheckBoxToggled} />
           <Select
             ref={comp => this.outputComponentTypeSelect = comp}
@@ -286,7 +291,7 @@ export class OutageEventForm extends React.Component<Props, State> {
           }
         </FormGroup>
         <BasicButton
-          disabled={this.state.inputList.length === 0 || this.state.outputList.length === 0}
+          disabled={this.disableAddEventButton()}
           className='outage-event-form__add-event'
           type='positive'
           label='Add event'
@@ -297,6 +302,17 @@ export class OutageEventForm extends React.Component<Props, State> {
 
   onAllInputOutageCheckboxToggled(state: boolean) {
     this.formValue.allInputOutage = state;
+    if (state)
+      this.setState({
+        inputEquipmentTypeOptions: [],
+        inputList: [],
+        allInputOutageChecked: true
+      });
+    else
+      this.setState({
+        inputEquipmentTypeOptions,
+        allInputOutageChecked: false
+      });
   }
 
   onInputEquipmentTypeChanged(selectedOptions: Option<string>[]) {
@@ -374,6 +390,18 @@ export class OutageEventForm extends React.Component<Props, State> {
 
   onAllOutputOutageCheckBoxToggled(state: boolean) {
     this.formValue.allOutputOutage = state;
+    if (state) {
+      this.setState({
+        outputEquipmentTypeOptions: [],
+        outputList: [],
+        allOutputOutageChecked: true
+      });
+    }
+    else
+      this.setState({
+        outputEquipmentTypeOptions,
+        allOutputOutageChecked: false
+      });
   }
 
   onOuputEquipmentTypeChanged(selectedOptions: Option<string>[]) {
@@ -451,6 +479,15 @@ export class OutageEventForm extends React.Component<Props, State> {
     this.formValue.stopDateTime = value;
   }
 
+  disableAddEventButton(): boolean {
+    if (!this.state.allInputOutageChecked && this.state.inputList.length === 0)
+      return true;
+    if (!this.state.allOutputOutageChecked && this.state.outputList.length === 0)
+      return true;
+
+    return false;
+  }
+
   createNewEvent() {
     this.formValue.inputList = this.state.inputList;
     this.formValue.outputList = this.state.outputList;
@@ -458,8 +495,12 @@ export class OutageEventForm extends React.Component<Props, State> {
     this.setState({
       inputList: [],
       outputList: [],
+      inputEquipmentTypeOptions,
+      outputEquipmentTypeOptions,
       addInputItemButtonDisabled: true,
-      addOutputItemButtonDisabled: true
+      addOutputItemButtonDisabled: true,
+      allInputOutageChecked: false,
+      allOutputOutageChecked: false
     });
   }
 

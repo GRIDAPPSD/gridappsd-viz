@@ -21,8 +21,8 @@ export const CheckBox = (props: Props) => {
         <input
           className={'checkbox__input'}
           ref={checkbox => {
-            if (checkbox && props.checked)
-              checkbox.checked = true;
+            if (checkbox)
+              checkbox.checked = props.checked;
           }}
           type='checkbox'
           name={props.name}
