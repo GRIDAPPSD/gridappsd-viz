@@ -33,6 +33,10 @@ export class PowerSystemConfigurationFormGroup extends React.Component<Props, St
       subregionNameOptions: this.props.feederModels.subregions.map(e => new Option(e.subregionName, e.subregionID)),
       lineNameOptions: this.props.feederModels.lines.map(line => new Option(line.name, line))
     };
+
+    this.onRegionChanged = this.onRegionChanged.bind(this);
+    this.onSubRegionChanged = this.onSubRegionChanged.bind(this);
+    this.onLineNameChanged = this.onLineNameChanged.bind(this);
   }
 
   render() {
@@ -42,29 +46,35 @@ export class PowerSystemConfigurationFormGroup extends React.Component<Props, St
           label='Geographical region name'
           options={this.state.regionNameOptions}
           isOptionSelected={option => option.value === this.formValue.geographicalRegionId}
-          onChange={options => {
-            this.formValue.geographicalRegionId = options[0].value;
-            this.props.onChange(this.formValue);
-          }} />
+          onChange={this.onRegionChanged} />
 
         <Select
           label='Sub-geographical region name'
           options={this.state.subregionNameOptions}
           isOptionSelected={option => option.value === this.formValue.subGeographicalRegionId}
-          onChange={options => {
-            this.formValue.subGeographicalRegionId = options[0].value;
-            this.props.onChange(this.formValue);
-          }} />
+          onChange={this.onSubRegionChanged} />
 
         <Select
           label='Line name'
           options={this.state.lineNameOptions}
-          onChange={options => {
-            this.formValue.lineName = options[0].value.mRID;
-            this.formValue.simulationName = options[0].value.name;
-            this.props.onChange(this.formValue);
-          }} />
+          onChange={this.onLineNameChanged} />
       </FormGroup>
     );
+  }
+
+  onRegionChanged(options: Option[]) {
+    this.formValue.geographicalRegionId = options[0].value;
+    this.props.onChange(this.formValue);
+  }
+
+  onSubRegionChanged(options: Option[]) {
+    this.formValue.subGeographicalRegionId = options[0].value;
+    this.props.onChange(this.formValue);
+  }
+
+  onLineNameChanged(options: Option<{ mRID: string; name: string; }>[]) {
+    this.formValue.lineName = options[0].value.mRID;
+    this.formValue.simulationName = options[0].value.name;
+    this.props.onChange(this.formValue);
   }
 }
