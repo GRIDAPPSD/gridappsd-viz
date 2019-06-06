@@ -27,6 +27,8 @@ export class Tooltip extends React.Component<Props, State> {
     super(props);
     this.state = {
     };
+    this._anchor = props.anchor;
+
     this.show = this.show.bind(this);
     this.hide = this.hide.bind(this);
     this._cleanup = this._cleanup.bind(this);
@@ -70,8 +72,8 @@ export class Tooltip extends React.Component<Props, State> {
     this._show();
   }
 
-  showAt(anchor: HTMLElement, container: HTMLElement = this._createDefaultTooltipContainer()) {
-    this._addTooltip(container);
+  showAt(anchor: HTMLElement, container?: HTMLElement) {
+    this._addTooltip(container || this._createDefaultTooltipContainer());
     this._anchor = anchor;
     this._show();
   }

@@ -35,6 +35,7 @@ interface State {
 export class TestConfigurationFormGroup extends React.Component<Props, State> {
 
   private readonly _filePicker = FilePickerService.getInstance();
+  private _idForCurrentEvent = '';
 
   constructor(props: Props) {
     super(props);
@@ -46,6 +47,7 @@ export class TestConfigurationFormGroup extends React.Component<Props, State> {
       currentFaultEvent: this.defaultFaultEventFormValue(),
       currentOutageEvent: this.defaultOutageEventFormValue()
     }
+    this.uniqueEventIdValidator = this.uniqueEventIdValidator.bind(this);
     this.showEventFilePicker = this.showEventFilePicker.bind(this);
     this.saveEventsIntoFile = this.saveEventsIntoFile.bind(this);
   }
@@ -86,7 +88,8 @@ export class TestConfigurationFormGroup extends React.Component<Props, State> {
   }
 
   private _generateEventId() {
-    return btoa(String(Math.random())).toLowerCase().substr(0, 8);
+    this._idForCurrentEvent = btoa(String(Math.random())).toLowerCase().substr(0, 8);
+    return this._idForCurrentEvent;
   }
 
   render() {
@@ -96,13 +99,11 @@ export class TestConfigurationFormGroup extends React.Component<Props, State> {
           <Input
             label='Event ID'
             name='eventId'
-            value={this.state.selectedEventType === 'outage' ? this.state.currentOutageEvent.id : this.state.currentFaultEvent.id}
-            onChange={value => {
-              if (this.state.selectedEventType === 'fault')
-                this.state.currentFaultEvent.id = value;
-              else
-                this.state.currentOutageEvent.id = value;
-            }} />
+            value={
+              this.state.selectedEventType === 'outage' ? this.state.currentOutageEvent.id : this.state.currentFaultEvent.id
+            }
+            onChange={value => this._idForCurrentEvent = value}
+            validators={[this.uniqueEventIdValidator]} />
           <RadioButtonGroup id='event-type' label='Event Type'>
             <RadioButton
               label='CommOutage'
@@ -147,6 +148,25 @@ export class TestConfigurationFormGroup extends React.Component<Props, State> {
     );
   }
 
+  uniqueEventIdValidator(value: string) {
+    for (const event of this.state.outageEvents)
+      if (event.id === value)
+        return {
+          isValid: false,
+          errorMessage: 'Event ID entered already exists'
+        };
+    for (const event of this.state.faultEvents)
+      if (event.id === value)
+        return {
+          isValid: false,
+          errorMessage: 'Event ID entered already exists'
+        };
+    return {
+      isValid: true,
+      errorMessage: ''
+    };
+  }
+
   showEventFilePicker() {
     this._filePicker.open()
       .readFileAsJson<{ outageEvents: OutageEvent[]; faultEvents: FaultEvent[] }>()
@@ -176,6 +196,7 @@ export class TestConfigurationFormGroup extends React.Component<Props, State> {
             modelDictionary={this.props.modelDictionary}
             initialFormValue={this.state.currentOutageEvent}
             onEventAdded={event => {
+              event.id = this._idForCurrentEvent;
               const events = [...this.state.outageEvents, event];
               this.setState({
                 outageEvents: events,
@@ -194,6 +215,7 @@ export class TestConfigurationFormGroup extends React.Component<Props, State> {
             modelDictionary={this.props.modelDictionary}
             initialFormValue={this.state.currentFaultEvent}
             onEventAdded={event => {
+              event.id = this._idForCurrentEvent;
               const events = [...this.state.faultEvents, event];
               this.setState({
                 faultEvents: events,

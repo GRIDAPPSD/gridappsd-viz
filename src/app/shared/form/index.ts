@@ -7,3 +7,4 @@ export * from './radio';
 export * from './select/Select'
 export * from './select/Option';
 export * from './textarea/TextArea';
+export * from './ValidationResult';

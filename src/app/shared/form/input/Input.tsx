@@ -1,6 +1,9 @@
 import * as React from 'react';
 
 import { FormControl } from '../form-control/FormControl';
+import { ValidationResult } from '../ValidationResult';
+
+import { ValidationErrorMessages } from '../validation-error-messages/ValidationErrorMessages';
 
 import './Input.scss';
 
@@ -12,19 +15,24 @@ interface Props {
   onChange: (value: string) => void;
   hint?: string;
   className?: string;
+  validators?: Array<(value: string) => ValidationResult>;
+  onValidate?: (isValid: boolean) => void;
 }
 
 interface State {
   value: string;
+  errorMessages: string[];
 }
 
 export class Input extends React.Component<Props, State> {
+
   constructor(props: Props) {
     super(props);
     this.state = {
-      value: this.props.value
+      value: this.props.value,
+      errorMessages: []
     };
-    this._handleChange = this._handleChange.bind(this);
+    this.handleChange = this.handleChange.bind(this);
   }
 
   componentDidUpdate(prevProps: Props) {
@@ -40,22 +48,37 @@ export class Input extends React.Component<Props, State> {
         className={`input-field${this.props.className ? ' ' + this.props.className : ''}`}
         label={this.props.label}
         hint={this.props.hint}>
-        <span className='input-field-wrapper'>
-          <input
-            type={this.props.type || 'text'}
-            name={this.props.name}
-            className='input-field__input'
-            onChange={this._handleChange}
-            value={this.state.value} />
-          <span className='input-field__ripple-bar' />
-        </span>
+        <div>
+          <div className='input-field-wrapper'>
+            <input
+              type={this.props.type || 'text'}
+              name={this.props.name}
+              className='input-field__input'
+              onChange={this.handleChange}
+              value={this.state.value} />
+            <span className='input-field__ripple-bar' />
+          </div>
+          <ValidationErrorMessages messages={this.state.errorMessages} />
+        </div>
       </FormControl>
     );
   }
 
-  private _handleChange(event: React.FocusEvent<HTMLInputElement>) {
+  handleChange(event: React.FocusEvent<HTMLInputElement>) {
     const value = (event.target as HTMLInputElement).value;
     this.setState({ value });
-    this.props.onChange(value);
+    if (this.props.validators) {
+      const errorMessages = this.props.validators.map(validator => validator(value))
+        .filter(result => !result.isValid)
+        .map(result => result.errorMessage);
+      this.setState({
+        errorMessages: errorMessages
+      })
+      if (errorMessages.length === 0)
+        this.props.onChange(value);
+    }
+    else
+      this.props.onChange(value);
   }
+
 }
