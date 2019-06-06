@@ -35,7 +35,6 @@ interface State {
   show: boolean;
   applicationConfigStr: string;
   simulationName: string;
-  noLineNameMessage: boolean;
   modelDictionary: ModelDictionary;
   disableSubmitButton: boolean;
   lineName: string;
@@ -62,7 +61,6 @@ export class SimulationConfigurationEditor extends React.Component<Props, State>
       show: true,
       applicationConfigStr: '',
       simulationName: props.initialConfig.simulation_config.simulation_name,
-      noLineNameMessage: false,
       modelDictionary: null,
       disableSubmitButton: true,
       lineName: props.initialConfig.power_system_config.Line_name
@@ -160,8 +158,6 @@ export class SimulationConfigurationEditor extends React.Component<Props, State>
             type='positive'
             disabled={this.state.disableSubmitButton}
             onClick={this.submitForm} />
-          {this.state.noLineNameMessage &&
-            <span style={{ color: 'red' }} >&nbsp; Please select a Line Name </span>}
         </DialogActions>
       </Dialog>
     );
@@ -213,18 +209,14 @@ export class SimulationConfigurationEditor extends React.Component<Props, State>
   }
 
   submitForm(event: React.SyntheticEvent) {
-    if (this.currentConfig.power_system_config.Line_name === '')
-      this.setState({ noLineNameMessage: true });
-    else {
-      event.stopPropagation();
-      this.setState({ show: false });
-      this.currentConfig.test_config.appId = this.currentConfig.application_config.applications[0].name;
-      for (const outageEvent of this.outageEvents)
-        this.currentConfig.test_config.events.push(this._transformOutageEventForForSubmission(outageEvent));
-      for (const faultEvent of this.faultEvents)
-        this.currentConfig.test_config.events.push(this._transformFaultEventForForSubmission(faultEvent));
-      this.props.onSubmit(this.currentConfig);
-    }
+    event.stopPropagation();
+    this.setState({ show: false });
+    this.currentConfig.test_config.appId = this.state.lineName;
+    for (const outageEvent of this.outageEvents)
+      this.currentConfig.test_config.events.push(this._transformOutageEventForForSubmission(outageEvent));
+    for (const faultEvent of this.faultEvents)
+      this.currentConfig.test_config.events.push(this._transformFaultEventForForSubmission(faultEvent));
+    this.props.onSubmit(this.currentConfig);
   }
 
   private _transformOutageEventForForSubmission(outageEvent: OutageEvent) {
