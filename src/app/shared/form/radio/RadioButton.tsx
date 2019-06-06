@@ -15,11 +15,12 @@ interface State {
 
 export class RadioButton extends React.Component<Props, State> {
 
-  isChecked = false;
   constructor(props: Props) {
     super(props);
+
     this.state = {
     };
+
   }
 
   render() {
