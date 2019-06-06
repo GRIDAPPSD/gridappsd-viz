@@ -15,6 +15,7 @@ interface Props<T> {
   label: string;
   options: Option<T>[];
   onChange: (selections: Option<T>[]) => void;
+  onClear?: () => void;
   isOptionSelected?: (option: Option<T>, index: number) => boolean;
   defaultLabel?: string;
   multiple?: boolean;
@@ -72,11 +73,15 @@ export class Select<T> extends React.Component<Props<T>, State<T>> {
         this.setState({
           currentLabel: this.state.selectedOptions.length === 0
             ? this.state.defaultLabel
-            : this.state.selectedOptions.map(option => option.label).join(', '),
+            : this._produceCurrentLabelForMultiSelect(),
         });
         this.props.onChange(this.state.selectedOptions);
       }
     }
+  }
+
+  private _produceCurrentLabelForMultiSelect() {
+    return this.state.selectedOptions.map(option => option.label).join(', ') || this.state.defaultLabel;
   }
 
   onChange(clickedOption: Option<T>) {
@@ -232,9 +237,15 @@ export class Select<T> extends React.Component<Props<T>, State<T>> {
   }
 
   deselectOption(option: Option<T>) {
-    this.setState(state => ({
-      selectedOptions: state.selectedOptions.filter(e => e !== option)
-    }));
+    this.setState(state => {
+      const selectedOptions = state.selectedOptions.filter(e => e !== option);
+      if (selectedOptions.length === 0)
+        this.props.onClear();
+      return {
+        selectedOptions,
+        currentLabel: !this.props.multiple ? this.state.defaultLabel : this._produceCurrentLabelForMultiSelect()
+      }
+    });
     option.isSelected = false;
   }
 
