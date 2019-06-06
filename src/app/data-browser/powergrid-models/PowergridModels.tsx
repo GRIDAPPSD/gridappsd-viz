@@ -23,6 +23,8 @@ interface State {
   response: any;
   requestBody: QueryPowerGridModelsRequestBody;
   optionsForMRIDs: Option[];
+  requestTypeOptions: Option<QueryPowerGridModelsRequestType>[];
+  resultFormatOptions: Option<QueryPowerGridModelsResultFormat>[];
 }
 
 export class PowerGridModels extends React.Component<Props, State> {
@@ -37,7 +39,18 @@ export class PowerGridModels extends React.Component<Props, State> {
         queryString: `SELECT ?feeder ?fid  WHERE {?s r:type c:Feeder.?s c:IdentifiedObject.name ?feeder.?s c:IdentifiedObject.mRID ?fid.?s c:Feeder.NormalEnergizingSubstation ?sub.?sub c:IdentifiedObject.name ?station.?sub c:IdentifiedObject.mRID ?sid.?sub c:Substation.Region ?sgr.?sgr c:IdentifiedObject.name ?subregion.?sgr c:IdentifiedObject.mRID ?sgrid.?sgr c:SubGeographicalRegion.Region ?rgn.?rgn c:IdentifiedObject.name ?region.?rgn c:IdentifiedObject.mRID ?rgnid.}  ORDER by ?station ?feeder`,
         filter: `?s cim:IdentifiedObject.name \u0027q14733\u0027","objectType":"http://iec.ch/TC57/2012/CIM-schema-cim17#ConnectivityNode`
       } as QueryPowerGridModelsRequestBody,
-      optionsForMRIDs: props.mRIDs.map(mRID => new Option(mRID.displayName, mRID.value))
+      optionsForMRIDs: props.mRIDs.map(mRID => new Option(mRID.displayName, mRID.value)),
+      requestTypeOptions: [
+        new Option(QueryPowerGridModelsRequestType.QUERY, QueryPowerGridModelsRequestType.QUERY),
+        new Option(QueryPowerGridModelsRequestType.QUERY_MODEL, QueryPowerGridModelsRequestType.QUERY_MODEL),
+        new Option(QueryPowerGridModelsRequestType.QUERY_MODEL_NAMES, QueryPowerGridModelsRequestType.QUERY_MODEL_NAMES),
+        new Option(QueryPowerGridModelsRequestType.QUERY_OBJECT, QueryPowerGridModelsRequestType.QUERY_OBJECT),
+        new Option(QueryPowerGridModelsRequestType.QUERY_OBJECT_TYPES, QueryPowerGridModelsRequestType.QUERY_OBJECT_TYPES),
+      ],
+      resultFormatOptions: [
+        new Option(QueryPowerGridModelsResultFormat.JSON, QueryPowerGridModelsResultFormat.JSON),
+        new Option(QueryPowerGridModelsResultFormat.CSV, QueryPowerGridModelsResultFormat.CSV),
+      ]
     };
 
     this._COMPONENT_TO_SHOW_FOR_QUERY_TYPE = {
@@ -93,13 +106,7 @@ export class PowerGridModels extends React.Component<Props, State> {
             <form className='query-powergrid-models-form'>
               <Select
                 label='Request type'
-                options={[
-                  new Option(QueryPowerGridModelsRequestType.QUERY, QueryPowerGridModelsRequestType.QUERY),
-                  new Option(QueryPowerGridModelsRequestType.QUERY_MODEL, QueryPowerGridModelsRequestType.QUERY_MODEL),
-                  new Option(QueryPowerGridModelsRequestType.QUERY_MODEL_NAMES, QueryPowerGridModelsRequestType.QUERY_MODEL_NAMES),
-                  new Option(QueryPowerGridModelsRequestType.QUERY_OBJECT, QueryPowerGridModelsRequestType.QUERY_OBJECT),
-                  new Option(QueryPowerGridModelsRequestType.QUERY_OBJECT_TYPES, QueryPowerGridModelsRequestType.QUERY_OBJECT_TYPES),
-                ]}
+                options={this.state.requestTypeOptions}
                 onChange={options => {
                   this.setState({ response: null });
                   this._updateRequestBody('requestType', options[0].value);
@@ -108,10 +115,7 @@ export class PowerGridModels extends React.Component<Props, State> {
               <Select
                 label='Result format'
                 onChange={options => this._updateRequestBody('resultFormat', options[0].value)}
-                options={[
-                  new Option(QueryPowerGridModelsResultFormat.JSON, QueryPowerGridModelsResultFormat.JSON),
-                  new Option(QueryPowerGridModelsResultFormat.CSV, QueryPowerGridModelsResultFormat.CSV),
-                ]}
+                options={this.state.resultFormatOptions}
                 isOptionSelected={(_, index) => index === 0} />
               {
                 this._COMPONENT_TO_SHOW_FOR_QUERY_TYPE[this.state.requestBody.requestType]
