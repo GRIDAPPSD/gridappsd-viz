@@ -37,6 +37,7 @@ export class PowerSystemConfigurationFormGroup extends React.Component<Props, St
     this.onRegionChanged = this.onRegionChanged.bind(this);
     this.onSubRegionChanged = this.onSubRegionChanged.bind(this);
     this.onLineNameChanged = this.onLineNameChanged.bind(this);
+    this.onLineNameCleared = this.onLineNameCleared.bind(this);
   }
 
   render() {
@@ -57,6 +58,7 @@ export class PowerSystemConfigurationFormGroup extends React.Component<Props, St
         <Select
           label='Line name'
           options={this.state.lineNameOptions}
+          onClear={this.onLineNameCleared}
           onChange={this.onLineNameChanged} />
       </FormGroup>
     );
@@ -77,4 +79,10 @@ export class PowerSystemConfigurationFormGroup extends React.Component<Props, St
     this.formValue.simulationName = options[0].value.name;
     this.props.onChange(this.formValue);
   }
+
+  onLineNameCleared() {
+    this.formValue.lineName = '';
+    this.props.onChange(this.formValue);
+  }
+
 }

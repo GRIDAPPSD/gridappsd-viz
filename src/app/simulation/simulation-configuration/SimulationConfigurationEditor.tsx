@@ -167,18 +167,22 @@ export class SimulationConfigurationEditor extends React.Component<Props, State>
     const currentPowerSystemConfig = this.currentConfig.power_system_config;
     currentPowerSystemConfig.GeographicalRegion_name = formValue.geographicalRegionId;
     currentPowerSystemConfig.SubGeographicalRegion_name = formValue.subGeographicalRegionId;
-    if (currentPowerSystemConfig.Line_name !== formValue.lineName) {
+    if (formValue.lineName === '') {
+      currentPowerSystemConfig.Line_name = '';
+      this.setState({
+        disableSubmitButton: true,
+        lineName: ''
+      });
+    }
+    else if (currentPowerSystemConfig.Line_name !== formValue.lineName) {
       currentPowerSystemConfig.Line_name = formValue.lineName;
       this.currentConfig.simulation_config.simulation_name = formValue.simulationName;
       this.props.onMRIDChanged(formValue.lineName, formValue.simulationName);
       this.setState({
-        lineName: formValue.lineName
-      });
-    }
-    if (formValue.lineName)
-      this.setState({
+        lineName: formValue.lineName,
         disableSubmitButton: false
       });
+    }
   }
 
   onSimulationConfigurationFormGroupValueChanged(formValue: SimulationConfigurationFormGroupValue) {
