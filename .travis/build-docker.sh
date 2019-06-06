@@ -12,7 +12,7 @@ BUILD_VERSION="${TIMESTAMP}_${GITHASH}${TRAVIS_BRANCH:+:$TRAVIS_BRANCH}"
 echo "BUILD_VERSION $BUILD_VERSION"
 
 # Pass gridappsd tag to docker-compose
-docker build --build-arg TIMESTAMP="${BUILD_VERSION}" -t ${IMAGE}:${TIMESTAMP}_${GITHASH} .
+docker build --build-arg VERSION="${TRAVIS_BRANCH}" --build-arg TIMESTAMP="${BUILD_VERSION}" -t ${IMAGE}:${TIMESTAMP}_${GITHASH} .
 status=$?
 if [ $status -ne 0 ]; then
   echo "Error: status $status"
