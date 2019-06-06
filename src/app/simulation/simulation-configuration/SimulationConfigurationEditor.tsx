@@ -47,8 +47,8 @@ export class SimulationConfigurationEditor extends React.Component<Props, State>
   readonly simulationStartDate = new Date();
   readonly dateTimeService = DateTimeService.getInstance();
 
-  outageEvents: OutageEvent[];
-  faultEvents: FaultEvent[];
+  outageEvents: OutageEvent[] = [];
+  faultEvents: FaultEvent[] = [];
 
   private readonly _modelDictionaryTracker = ModelDictionaryTracker.getInstance();
   private readonly _simulationControlService = SimulationControlService.getInstance();
