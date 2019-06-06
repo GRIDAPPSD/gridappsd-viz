@@ -48,6 +48,10 @@ export class TestConfigurationFormGroup extends React.Component<Props, State> {
       currentOutageEvent: this.defaultOutageEventFormValue()
     }
     this.uniqueEventIdValidator = this.uniqueEventIdValidator.bind(this);
+    this.addOutageEvent = this.addOutageEvent.bind(this);
+    this.addFaultEvent = this.addFaultEvent.bind(this);
+    this.deleteOutageEvent = this.deleteOutageEvent.bind(this);
+    this.deleteFaultEvent = this.deleteFaultEvent.bind(this);
     this.showEventFilePicker = this.showEventFilePicker.bind(this);
     this.saveEventsIntoFile = this.saveEventsIntoFile.bind(this);
   }
@@ -177,9 +181,15 @@ export class TestConfigurationFormGroup extends React.Component<Props, State> {
       .pipe(filter(content => Boolean(content)))
       .subscribe({
         next: content => {
+          const faultEvents = content.faultEvents || [];
+          const outageEvents = content.outageEvents || [];
           this.setState({
-            faultEvents: content.faultEvents || [],
-            outageEvents: content.outageEvents || []
+            faultEvents,
+            outageEvents
+          });
+          this.props.onEventsAdded({
+            fault: faultEvents,
+            outage: outageEvents
           });
         }
       });
@@ -193,42 +203,46 @@ export class TestConfigurationFormGroup extends React.Component<Props, State> {
           <OutageEventForm
             modelDictionary={this.props.modelDictionary}
             initialFormValue={this.state.currentOutageEvent}
-            onEventAdded={event => {
-              event.id = this._idForCurrentEvent;
-              const events = [...this.state.outageEvents, event];
-              this.setState({
-                outageEvents: events,
-                selectedEventTypeToView: 'outage',
-                currentOutageEvent: this.defaultOutageEventFormValue()
-              });
-              this.props.onEventsAdded({
-                outage: events,
-                fault: this.state.faultEvents
-              });
-            }} />
+            onEventAdded={this.addOutageEvent} />
         );
       case 'fault':
         return (
           <FaultEventForm
             modelDictionary={this.props.modelDictionary}
             initialFormValue={this.state.currentFaultEvent}
-            onEventAdded={event => {
-              event.id = this._idForCurrentEvent;
-              const events = [...this.state.faultEvents, event];
-              this.setState({
-                faultEvents: events,
-                selectedEventTypeToView: 'fault',
-                currentFaultEvent: this.defaultFaultEventFormValue()
-              });
-              this.props.onEventsAdded({
-                fault: events,
-                outage: this.state.outageEvents
-              });
-            }} />
+            onEventAdded={this.addFaultEvent} />
         );
       default:
         return null;
     }
+  }
+
+  addOutageEvent(event: OutageEvent) {
+    event.id = this._idForCurrentEvent;
+    const events = [...this.state.outageEvents, event];
+    this.setState({
+      outageEvents: events,
+      selectedEventTypeToView: 'outage',
+      currentOutageEvent: this.defaultOutageEventFormValue()
+    });
+    this.props.onEventsAdded({
+      outage: events,
+      fault: this.state.faultEvents
+    });
+  }
+
+  addFaultEvent(event: FaultEvent) {
+    event.id = this._idForCurrentEvent;
+    const events = [...this.state.faultEvents, event];
+    this.setState({
+      faultEvents: events,
+      selectedEventTypeToView: 'fault',
+      currentFaultEvent: this.defaultFaultEventFormValue()
+    });
+    this.props.onEventsAdded({
+      fault: events,
+      outage: this.state.outageEvents
+    });
   }
 
   showEventSummaryTable() {
@@ -237,25 +251,29 @@ export class TestConfigurationFormGroup extends React.Component<Props, State> {
         return (
           <OutageEventSummaryTable
             events={this.state.outageEvents}
-            onDeleteEvent={event => {
-              this.setState({
-                outageEvents: this.state.outageEvents.filter(e => e !== event)
-              })
-            }} />
+            onDeleteEvent={this.deleteOutageEvent} />
         );
       case 'fault':
         return (
           <FaultEventSummaryTable
             events={this.state.faultEvents}
-            onDeleteEvent={event => {
-              this.setState({
-                faultEvents: this.state.faultEvents.filter(e => e !== event)
-              })
-            }} />
+            onDeleteEvent={this.deleteFaultEvent} />
         );
       default:
         return null;
     }
+  }
+
+  deleteOutageEvent(event: OutageEvent) {
+    this.setState({
+      outageEvents: this.state.outageEvents.filter(e => e !== event)
+    });
+  }
+
+  deleteFaultEvent(event: FaultEvent) {
+    this.setState({
+      faultEvents: this.state.faultEvents.filter(e => e !== event)
+    });
   }
 
   showSaveEventsButton() {
