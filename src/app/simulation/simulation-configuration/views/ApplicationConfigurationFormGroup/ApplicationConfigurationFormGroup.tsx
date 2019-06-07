@@ -46,6 +46,10 @@ export class ApplicationConfigurationFormGroup extends React.Component<Props, St
         <Select
           label='Application name'
           options={this.state.availableApplicationOptions}
+          onClear={() => {
+            this.formValue.applicationId = '';
+            this.props.onChange(this.formValue);
+          }}
           onChange={options => {
             this.formValue.applicationId = options[0].value;
             this.props.onChange(this.formValue);

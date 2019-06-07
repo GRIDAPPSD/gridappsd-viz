@@ -19,10 +19,10 @@ import { FaultEvent, FaultKind } from './models/FaultEvent';
 import { PowerSystemConfigurationFormGroupValue } from './models/PowerSystemConfigurationFormGroupValue';
 import { SimulationConfigurationFormGroupValue } from './models/SimulationConfigurationFormGroupValue';
 import { ApplicationConfigurationFormGroupValue } from './models/ApplicationConfigurationFormGroupValue';
-
-import './SimulationConfigurationEditor.scss';
 import { Store } from '@shared/Store';
 import { ApplicationState } from '@shared/ApplicationState';
+
+import './SimulationConfigurationEditor.scss';
 
 interface Props {
   onSubmit: (configObject: SimulationConfiguration) => void;
@@ -194,10 +194,14 @@ export class SimulationConfigurationEditor extends React.Component<Props, State>
   }
 
   onApplicationConfigurationFormGroup(formValue: ApplicationConfigurationFormGroupValue) {
-    const selectedApplication = this.currentConfig.application_config.applications.pop();
-    selectedApplication.name = formValue.applicationId;
-    selectedApplication.config_string = formValue.configString;
-    this.currentConfig.application_config.applications.push(selectedApplication);
+    if (formValue.applicationId !== '') {
+      const selectedApplication = this.currentConfig.application_config.applications.pop();
+      selectedApplication.name = formValue.applicationId;
+      selectedApplication.config_string = formValue.configString;
+      this.currentConfig.application_config.applications.push(selectedApplication);
+    }
+    else
+      this.currentConfig.application_config.applications.pop();
   }
 
   onFaultEventsAdded(events: { outage: OutageEvent[]; fault: FaultEvent[] }) {
