@@ -45,7 +45,7 @@ module.exports = {
       names: ['app', 'vendors', 'webpack-runtime']
     }),
     new HtmlWebpackPlugin({
-      template: './index.html'
+      template: './index.template.html'
     }),
     new ExtractTextPlugin('[hash:10].css')
   ],
