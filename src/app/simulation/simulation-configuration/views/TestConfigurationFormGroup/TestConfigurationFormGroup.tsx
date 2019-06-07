@@ -12,9 +12,9 @@ import { OutageEventSummaryTable } from './OutageEventSummaryTable';
 import { IconButton } from '@shared/buttons';
 import { FilePicker, FilePickerService } from '@shared/file-picker';
 import { Tooltip } from '@shared/tooltip';
+import { FaultEventSummaryTable } from './FaultEventSummaryTable';
 
 import './TestConfigurationFormGroup.scss';
-import { FaultEventSummaryTable } from './FaultEventSummaryTable';
 
 interface Props {
   modelDictionary: ModelDictionary;
@@ -35,7 +35,7 @@ interface State {
 export class TestConfigurationFormGroup extends React.Component<Props, State> {
 
   private readonly _filePicker = FilePickerService.getInstance();
-  private _idForCurrentEvent = '';
+  private _tagForCurrentEvent = '';
 
   constructor(props: Props) {
     super(props);
@@ -59,7 +59,7 @@ export class TestConfigurationFormGroup extends React.Component<Props, State> {
   defaultFaultEventFormValue(): FaultEvent {
     return {
       type: 'Fault',
-      id: this._generateEventId(),
+      tag: this._generateEventTag(),
       equipmentType: '',
       equipmentName: '',
       phases: [],
@@ -79,7 +79,7 @@ export class TestConfigurationFormGroup extends React.Component<Props, State> {
   defaultOutageEventFormValue(): OutageEvent {
     return {
       type: 'CommOutage',
-      id: this._generateEventId(),
+      tag: this._generateEventTag(),
       allInputOutage: false,
       inputList: [],
       allOutputOutage: false,
@@ -89,9 +89,9 @@ export class TestConfigurationFormGroup extends React.Component<Props, State> {
     };
   }
 
-  private _generateEventId() {
-    this._idForCurrentEvent = btoa(String(Math.random())).toLowerCase().substr(0, 8);
-    return this._idForCurrentEvent;
+  private _generateEventTag() {
+    this._tagForCurrentEvent = btoa(String(Math.random())).toLowerCase().substr(0, 8);
+    return this._tagForCurrentEvent;
   }
 
   render() {
@@ -99,12 +99,12 @@ export class TestConfigurationFormGroup extends React.Component<Props, State> {
       <div className='test-configuration'>
         <FormGroup className='test-configuration__form'>
           <Input
-            label='Event ID'
-            name='eventId'
+            label='Event Tag'
+            name='eventTag'
             value={
-              this.state.selectedEventType === 'outage' ? this.state.currentOutageEvent.id : this.state.currentFaultEvent.id
+              this.state.selectedEventType === 'outage' ? this.state.currentOutageEvent.tag : this.state.currentFaultEvent.tag
             }
-            onChange={value => this._idForCurrentEvent = value}
+            onChange={value => this._tagForCurrentEvent = value}
             validators={[this.uniqueEventIdValidator]} />
           <RadioButtonGroup id='event-type' label='Event Type'>
             <RadioButton
@@ -152,13 +152,13 @@ export class TestConfigurationFormGroup extends React.Component<Props, State> {
 
   uniqueEventIdValidator(value: string) {
     for (const event of this.state.outageEvents)
-      if (event.id === value)
+      if (event.tag === value)
         return {
           isValid: false,
           errorMessage: 'Event ID entered already exists'
         };
     for (const event of this.state.faultEvents)
-      if (event.id === value)
+      if (event.tag === value)
         return {
           isValid: false,
           errorMessage: 'Event ID entered already exists'
@@ -218,7 +218,7 @@ export class TestConfigurationFormGroup extends React.Component<Props, State> {
   }
 
   addOutageEvent(event: OutageEvent) {
-    event.id = this._idForCurrentEvent;
+    event.tag = this._tagForCurrentEvent;
     const events = [...this.state.outageEvents, event];
     this.setState({
       outageEvents: events,
@@ -232,7 +232,7 @@ export class TestConfigurationFormGroup extends React.Component<Props, State> {
   }
 
   addFaultEvent(event: FaultEvent) {
-    event.id = this._idForCurrentEvent;
+    event.tag = this._tagForCurrentEvent;
     const events = [...this.state.faultEvents, event];
     this.setState({
       faultEvents: events,

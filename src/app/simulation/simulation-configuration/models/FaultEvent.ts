@@ -2,7 +2,7 @@ import { Phase } from './Phase';
 
 export interface FaultEvent {
   type: 'Fault';
-  id: string;
+  tag: string;
   equipmentType: string;
   equipmentName: string;
   phases: Phase[];

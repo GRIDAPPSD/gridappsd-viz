@@ -2,7 +2,7 @@ import { Phase } from './Phase';
 
 export interface OutageEvent {
   type: 'CommOutage';
-  id: string;
+  tag: string;
   allInputOutage: boolean;
   inputList: OutageEventInputListItem[];
   allOutputOutage: boolean;

@@ -18,7 +18,7 @@ export function OutageEventSummaryTable(props: Props) {
         <thead>
           <tr>
             <th rowSpan={2}>Action</th>
-            <th rowSpan={2}>Event ID</th>
+            <th rowSpan={2}>Event Tag</th>
             <th colSpan={4}>Input List</th>
             <th colSpan={6}>Output List</th>
           </tr>
@@ -54,7 +54,7 @@ export function OutageEventSummaryTable(props: Props) {
                   </div>
                 </td>
                 <td>
-                  <div>{event.id}</div>
+                  <div>{event.tag}</div>
                 </td>
                 {/* Input List */}
                 <td>

@@ -55,7 +55,7 @@ export class FaultEventSummary extends React.Component<Props, State> {
               <tr>
                 <th rowSpan={2}>Action</th>
                 <th rowSpan={2}>Fault MRID</th>
-                <th rowSpan={2}>Event ID</th>
+                <th rowSpan={2}>Event Tag</th>
                 <th colSpan={4}>Input List</th>
                 <th colSpan={6}>Output List</th>
               </tr>
@@ -99,7 +99,7 @@ export class FaultEventSummary extends React.Component<Props, State> {
                       <div>{this.state.faultMRIDs[i]}</div>
                     </td>
                     <td>
-                      <div>{event.id}</div>
+                      <div>{event.tag}</div>
                     </td>
                     {/* Input List */}
                     <td>
@@ -147,7 +147,7 @@ export class FaultEventSummary extends React.Component<Props, State> {
               <tr>
                 <th>Action</th>
                 <th>Fault MRID</th>
-                <th>Event ID</th>
+                <th>Event Tag</th>
                 <th>Equipment Type</th>
                 <th>Equipment Name</th>
                 <th>Phase</th>
@@ -179,7 +179,7 @@ export class FaultEventSummary extends React.Component<Props, State> {
                       </div>
                     </td>
                     <td><div>{this.state.faultMRIDs[this.state.outageEvents.length + i]}</div></td>
-                    <td><div>{event.id}</div></td>
+                    <td><div>{event.tag}</div></td>
                     <td><div>{event.equipmentType}</div></td>
                     <td><div>{event.equipmentName}</div></td>
                     <td><div>{event.phases.map(phase => phase.phaseLabel).join(', ')}</div></td>

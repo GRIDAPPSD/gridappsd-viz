@@ -18,7 +18,7 @@ export function FaultEventSummaryTable(props: Props) {
         <thead>
           <tr>
             <th>Action</th>
-            <th>Event ID</th>
+            <th>Event Tag</th>
             <th>Equipment Type</th>
             <th>Equipment Name</th>
             <th>Phase</th>
@@ -43,7 +43,7 @@ export function FaultEventSummaryTable(props: Props) {
                     </Tooltip>
                   </div>
                 </td>
-                <td><div>{event.id}</div></td>
+                <td><div>{event.tag}</div></td>
                 <td><div>{event.equipmentType}</div></td>
                 <td><div>{event.equipmentName}</div></td>
                 <td><div>{event.phases.map(phase => phase.phaseLabel).join(', ')}</div></td>

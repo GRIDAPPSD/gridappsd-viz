@@ -156,7 +156,7 @@ export class FaultEventForm extends React.Component<Props, State> {
   private _isFormValueValid(): boolean {
     return this.formValue.equipmentName !== ''
       && this.formValue.equipmentType !== ''
-      && this.formValue.id !== ''
+      && this.formValue.tag !== ''
       && this.formValue.mRID.length !== 0
       && this.formValue.phases.length !== 0
       && this.formValue.startDateTime !== ''
