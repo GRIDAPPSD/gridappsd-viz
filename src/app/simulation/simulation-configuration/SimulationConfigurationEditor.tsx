@@ -235,15 +235,15 @@ export class SimulationConfigurationEditor extends React.Component<Props, State>
       allInputOutage: outageEvent.allInputOutage,
       allOutputOutage: outageEvent.allOutputOutage,
       inputOutageList: this._flattenArray(outageEvent.inputList.map(inputItem => {
-        if (inputItem.phases.length === 1)
-          return {
-            objectMrid: inputItem.mRID,
+        if (Array.isArray(inputItem.mRID))
+          return inputItem.phases.map(phase => ({
+            objectMrid: inputItem.mRID[phase.phaseIndex],
             attribute: inputItem.attribute
-          };
-        return inputItem.phases.map(phase => ({
-          objectMrid: inputItem.mRID[phase.phaseIndex],
+          }));
+        return {
+          objectMrid: inputItem.mRID,
           attribute: inputItem.attribute
-        }));
+        };
       })),
       outputOutageList: outageEvent.outputList.map(outputItem => outputItem.mRID),
       event_type: outageEvent.type,
@@ -256,9 +256,9 @@ export class SimulationConfigurationEditor extends React.Component<Props, State>
     return {
       PhaseConnectedFaultKind: faultEvent.faultKind,
       impedance: this._getImpedance(faultEvent),
-      equipmentMrid: faultEvent.phases.length === 1
-        ? faultEvent.mRID
-        : faultEvent.phases.map(phase => faultEvent.mRID[phase.phaseIndex]),
+      equipmentMrid: Array.isArray(faultEvent.mRID)
+        ? faultEvent.phases.map(phase => faultEvent.mRID[phase.phaseIndex])
+        : faultEvent.mRID,
       phases: faultEvent.phases.map(phase => phase.phaseLabel).join(''),
       event_type: faultEvent.type,
       occuredDateTime: this.dateTimeService.parse(faultEvent.startDateTime).getTime(),
