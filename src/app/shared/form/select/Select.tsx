@@ -239,7 +239,7 @@ export class Select<T> extends React.Component<Props<T>, State<T>> {
   deselectOption(option: Option<T>) {
     this.setState(state => {
       const selectedOptions = state.selectedOptions.filter(e => e !== option);
-      if (selectedOptions.length === 0)
+      if (selectedOptions.length === 0 && this.props.onClear)
         this.props.onClear();
       return {
         selectedOptions,
