@@ -9,6 +9,9 @@ export class Store<T> {
 
   private _state: T;
 
+  private constructor() {
+  }
+
   static getInstance<T>(): Store<T> {
     return Store._INSTANCE as Store<T>;
   }
@@ -26,7 +29,7 @@ export class Store<T> {
     this._stateChange.next(this._state);
   }
 
-  select<K extends keyof T>(selector: (state: T) => T[K]) {
+  select<K extends keyof T>(selector: (state: T) => Readonly<T[K]>) {
     return this._stateChange.pipe(map(selector));
   }
 
