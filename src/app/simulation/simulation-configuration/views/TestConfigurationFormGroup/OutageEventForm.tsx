@@ -238,11 +238,13 @@ export class OutageEventForm extends React.Component<Props, State> {
           <Input
             label='Start Date Time'
             name='startDateTime'
+            hint='YYYY-MM-DD HH:MM:SS'
             value={this.formValue.startDateTime}
             onChange={this.onStartDateTimeChanged} />
           <Input
             label='Stop Date Time'
             name='stopDateTime'
+            hint='YYYY-MM-DD HH:MM:SS'
             value={this.formValue.stopDateTime}
             onChange={this.onStopDateTimeChanged} />
           <Tooltip

@@ -114,10 +114,12 @@ export class FaultEventForm extends React.Component<Props, State> {
           <Input
             label='Start Date Time'
             name='startDateTime'
+            hint='YYYY-MM-DD HH:MM:SS'
             value={this.state.formValue.startDateTime}
             onChange={this.onStartDateTimeChanged} />
           <Input
             label='Stop Date Time'
+            hint='YYYY-MM-DD HH:MM:SS'
             name='stopDateTime'
             value={this.state.formValue.stopDateTime}
             onChange={this.onStopDateTimeChanged} />
