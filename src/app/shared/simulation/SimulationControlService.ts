@@ -1,9 +1,12 @@
 import { Subject, Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 
 import { SimulationConfiguration } from './SimulationConfiguration';
 import { StompClientService } from '@shared/StompClientService';
 import { START_SIMULATION_TOPIC, CONTROL_SIMULATION_TOPIC } from './topics';
 import { SimulationQueue } from './SimulationQueue';
+import { Store } from '@shared/Store';
+import { ApplicationState } from '@shared/ApplicationState';
 
 export const enum SimulationStatus {
   STARTED, PAUSED, STOPPED, NEW, RESUMED
@@ -15,9 +18,11 @@ export const enum SimulationStatus {
 export class SimulationControlService {
 
   private static readonly _INSTANCE_: SimulationControlService = new SimulationControlService();
+
   private readonly _simulationQueue = SimulationQueue.getInstance();
   private readonly _stompClientService = StompClientService.getInstance();
   private readonly _currentSimulationStatusNotifer = new Subject<SimulationStatus>();
+  private readonly _store = Store.getInstance<ApplicationState>();
   private _currentSimulationStatus = SimulationStatus.NEW;
 
   private constructor() {
@@ -44,6 +49,9 @@ export class SimulationControlService {
       };
       this._currentSimulationStatus = SimulationStatus.STARTED;
       this._currentSimulationStatusNotifer.next(SimulationStatus.STARTED);
+
+      this._subscribeToStartSimulationTopic();
+
       // Let's wait for all the subscriptions in other components to this topic to complete
       // before sending the message
       setTimeout(() => {
@@ -54,6 +62,14 @@ export class SimulationControlService {
         );
       }, 1000);
     }
+  }
+
+  private _subscribeToStartSimulationTopic() {
+    this._stompClientService.readOnceFrom(START_SIMULATION_TOPIC)
+      .pipe(map(body => JSON.parse(body)))
+      .subscribe({
+        next: payload => this._store.mergeState({ simulationStartResponse: payload })
+      });
   }
 
   stopSimulation() {

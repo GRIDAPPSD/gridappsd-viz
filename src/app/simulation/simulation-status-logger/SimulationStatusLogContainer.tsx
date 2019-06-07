@@ -1,12 +1,14 @@
 import * as React from 'react';
 import { Subscription } from 'rxjs';
-import { filter, switchMap, tap, takeWhile } from 'rxjs/operators';
+import { filter, switchMap, tap, map, takeWhile } from 'rxjs/operators';
 
 import { SimulationStatusLog } from './SimulationStatusLog';
 import {
   SimulationQueue, START_SIMULATION_TOPIC, SIMULATION_STATUS_LOG_TOPIC, SimulationControlService, SimulationStatus
 } from '@shared/simulation';
 import { StompClientService } from '@shared/StompClientService';
+import { Store } from '@shared/Store';
+import { ApplicationState } from '@shared/ApplicationState';
 
 interface Props {
 
@@ -21,9 +23,9 @@ interface State {
 export class SimulationStatusLogContainer extends React.Component<Props, State> {
 
   private readonly _stompClientService = StompClientService.getInstance();
-  private readonly _simulationControlService = SimulationControlService.getInstance();
   private readonly _simulationQueue = SimulationQueue.getInstance();
-  private _logMessagesSubscription: Subscription;
+  private readonly _store = Store.getInstance<ApplicationState>();
+  private _stateStoreChangeSubscription: Subscription;
   private _stompClientStatusSubscription: Subscription;
 
   constructor(props: Props) {
@@ -32,6 +34,10 @@ export class SimulationStatusLogContainer extends React.Component<Props, State> 
       logMessages: [],
       isFetching: false
     };
+
+    this._newObservableToReadSimulationId = this._newObservableToReadSimulationId.bind(this);
+    this._newObservableForLogMessages = this._newObservableForLogMessages.bind(this);
+    this._onSimulationStatusLogMessageReceived = this._onSimulationStatusLogMessageReceived.bind(this);
   }
 
   componentDidMount() {
@@ -44,31 +50,31 @@ export class SimulationStatusLogContainer extends React.Component<Props, State> 
         next: status => {
           switch (status) {
             case 'CONNECTING':
-              if (this._logMessagesSubscription)
-                this._logMessagesSubscription.unsubscribe();
+              if (this._stateStoreChangeSubscription)
+                this._stateStoreChangeSubscription.unsubscribe();
               break;
             case 'CONNECTED':
-              this._logMessagesSubscription = this._respondToSimulationStatusChanges();
+              this._stateStoreChangeSubscription = this._subscribeToStateStoreChanges();
               break;
           }
         }
       });
   }
 
-
-  private _respondToSimulationStatusChanges() {
-    return this._simulationControlService.statusChanges()
+  private _subscribeToStateStoreChanges() {
+    return this._store.select(state => state.simulationStartResponse)
       .pipe(
-        filter(status => status === SimulationStatus.STARTED),
-        switchMap(() => this._newObservableToReadSimulationId()),
+        takeWhile(() => !this._stompClientStatusSubscription.closed),
+        filter(simulationStartResponse => Boolean(simulationStartResponse)),
+        map(simulationStartResponse => simulationStartResponse.simulationId),
         tap(simulationId => {
           this.setState({ isFetching: true });
           this._simulationQueue.updateIdOfActiveSimulation(simulationId);
         }),
-        switchMap(simulationId => this._newObservableForLogMessages(simulationId))
+        switchMap(this._newObservableForLogMessages)
       )
       .subscribe({
-        next: logMessage => this._onSimulationStatusLogMessageReceived(logMessage)
+        next: this._onSimulationStatusLogMessageReceived
       });
   }
 
@@ -88,7 +94,6 @@ export class SimulationStatusLogContainer extends React.Component<Props, State> 
   }
 
   componentWillUnmount() {
-    this._logMessagesSubscription.unsubscribe();
     this._stompClientStatusSubscription.unsubscribe();
   }
 

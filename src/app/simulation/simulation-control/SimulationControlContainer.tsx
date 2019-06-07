@@ -1,8 +1,11 @@
 import * as React from 'react';
 import { Subscription } from 'rxjs';
+import { map, filter, takeWhile } from 'rxjs/operators';
 
-import { SimulationConfiguration, SimulationControlService, SimulationStatus, SimulationQueue } from '@shared/simulation';
+import { SimulationControlService, SimulationStatus, SimulationQueue, START_SIMULATION_TOPIC } from '@shared/simulation';
 import { SimulationControl } from './SimulationControl';
+import { Store } from '@shared/Store';
+import { ApplicationState } from '@shared/ApplicationState';
 
 interface Props {
 }
@@ -18,8 +21,9 @@ export class SimulationControlContainer extends React.Component<Props, State> {
 
   private readonly _simulationControlService = SimulationControlService.getInstance();
   private readonly _simulationQueue = SimulationQueue.getInstance();
+  private readonly _store = Store.getInstance<ApplicationState>();
+
   private _simulationStatusChangeSubscription: Subscription;
-  private _activeSimulationIdChangeSubscription: Subscription;
 
   constructor(props: any) {
     super(props);
@@ -37,26 +41,35 @@ export class SimulationControlContainer extends React.Component<Props, State> {
 
   componentDidMount() {
     this._simulationStatusChangeSubscription = this._subscribeToSimulationStatusChanges();
-    this._activeSimulationIdChangeSubscription = this._subscribeToActiveSimulationIdChanges();
   }
 
   private _subscribeToSimulationStatusChanges() {
     return this._simulationControlService.statusChanges()
       .subscribe({
-        next: status => this.setState({ simulationStatus: status })
+        next: status => {
+          this.setState({
+            simulationStatus: status
+          });
+          if (status === SimulationStatus.STARTED)
+            this._readSimulationIdFromStore();
+        }
       });
   }
 
-  private _subscribeToActiveSimulationIdChanges() {
-    return this._simulationQueue.activeSimulationIdChanged()
+  private _readSimulationIdFromStore() {
+    this._store.select(state => state.simulationStartResponse)
+      .pipe(
+        takeWhile(() => !this._simulationStatusChangeSubscription.closed),
+        filter(simulationStartResponse => Boolean(simulationStartResponse)),
+        map(simulationStartResponse => simulationStartResponse.simulationId)
+      )
       .subscribe({
-        next: id => this.setState({ activeSimulationId: id })
+        next: simulationId => this.setState({ activeSimulationId: simulationId })
       });
   }
 
   componentWillUnmount() {
     this._simulationStatusChangeSubscription.unsubscribe();
-    this._activeSimulationIdChangeSubscription.unsubscribe();
   }
 
   render() {

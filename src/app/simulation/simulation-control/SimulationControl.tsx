@@ -1,10 +1,10 @@
 import * as React from 'react';
 
 import { IconButton } from '@shared/buttons';
-
-import './SimulationControl.scss';
 import { SimulationStatus } from '@shared/simulation';
 import { Tooltip } from '@shared/tooltip';
+
+import './SimulationControl.scss';
 
 interface Props {
   timestamp: string;
