@@ -12,21 +12,26 @@ interface Props {
 interface State {
   activeTabIndex: number;
   previousTabIndex: number;
+  activeTab: HTMLElement;
 }
 
 export class TabGroup extends React.Component<Props, State> {
+
+  nativeElement: HTMLElement;
 
   static defaultProps = {
     selectedTabIndex: 0
   };
 
   tabs: Tab[] = [];
+  tabLabels: NodeListOf<HTMLElement>;
 
   constructor(props: any) {
     super(props);
     this.state = {
       activeTabIndex: props.selectedTabIndex,
-      previousTabIndex: props.selectedTabIndex
+      previousTabIndex: props.selectedTabIndex,
+      activeTab: null
     };
   }
 
@@ -38,15 +43,24 @@ export class TabGroup extends React.Component<Props, State> {
       }));
   }
 
+  componentDidMount() {
+    this.tabLabels = this.nativeElement.querySelectorAll('.tabgroup__header__label');
+    this.setState({
+      activeTab: this.tabLabels[this.state.activeTabIndex]
+    })
+  }
+
   render() {
     // If there is only one <Tab></Tab> as children
     // then this.props.children will be an object instead of an array
     // so, convert it to an array no matter what
     const tabs = (Array.isArray(this.props.children) ? this.props.children : [this.props.children]) as Tab[];
-    const { activeTabIndex, previousTabIndex } = this.state;
+    const { activeTabIndex, previousTabIndex, activeTab } = this.state;
     return (
-      <div className='tabgroup'>
-        <header className='tabgroup__header'>
+      <div ref={ref => this.nativeElement = ref}
+        className='tabgroup'>
+        <header
+          className='tabgroup__header'>
           {
             tabs.map((tab, index) => (
               <div key={index}
@@ -56,7 +70,17 @@ export class TabGroup extends React.Component<Props, State> {
               </div>
             ))
           }
-          <ActiveTabIndicator activeTabIndex={this.state.activeTabIndex} />
+          {
+            this.state.activeTab &&
+            <div className='tabgroup__active-tab-indicator'
+              style={{
+                // minus 4 because it has 2 px border
+                transform: `translateX(${activeTab.offsetLeft - 2}px)`,
+                width: activeTab.clientWidth + 'px'
+              }}>
+              <div className='tabgroup__active-tab-indicator__rubber-band' />
+            </div>
+          }
         </header>
         <div className='tabgroup__body'>
           <div className='tabgroup__body__wrapper'>
@@ -85,7 +109,8 @@ export class TabGroup extends React.Component<Props, State> {
       if (prevState.activeTabIndex !== index)
         return {
           activeTabIndex: index,
-          previousTabIndex: prevState.activeTabIndex
+          previousTabIndex: prevState.activeTabIndex,
+          activeTab: this.tabLabels[index]
         };
       return null;
     });

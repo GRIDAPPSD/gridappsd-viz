@@ -1,4 +1,4 @@
-import { Subject } from 'rxjs';
+import { Subject, Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
 export class Store<T> {
@@ -23,13 +23,13 @@ export class Store<T> {
     this._stateChange.next(this._state);
   }
 
-  mergeState(newState: { [K in keyof T]: T[K] }) {
+  mergeState<K extends keyof T>(newState: Pick<T, K>) {
     for (const key in newState)
       this._state[key] = newState[key];
     this._stateChange.next(this._state);
   }
 
-  select<K extends keyof T>(selector: (state: T) => Readonly<T[K]>) {
+  select<K>(selector: (state: T) => Readonly<K>) {
     return this._stateChange.pipe(map(selector));
   }
 

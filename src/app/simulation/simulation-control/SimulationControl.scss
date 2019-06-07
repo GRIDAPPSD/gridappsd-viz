@@ -3,9 +3,10 @@
     display: flex;
     justify-content: flex-end;
     align-items: center;
-    border-bottom: 2px solid rgba(0, 0, 0, 0.2);
-    background-color: #fff;
-    z-index: 1;
+    position: absolute;
+    top: -2px;
+    right: 20px;
+    width: 100%;
 }
 
 .simulation-control__simulation-id {
@@ -16,6 +17,7 @@
     padding-left: 10px;
     align-items: center;
     font-size: 0.7em;
+    margin: 0 12px;
 }
 
 .simulation-control__simulation-id__label {
@@ -34,8 +36,6 @@
     box-shadow: 0 0 1px #555;
 }
 
-.simulation-control__action.start:before,
-.simulation-control__action.resume:before {
-    position: relative;
-    transform: translateX(1px);
+.simulation-control__action {
+    z-index: 1;
 }

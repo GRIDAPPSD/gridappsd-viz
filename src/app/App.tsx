@@ -30,6 +30,8 @@ import { ModelDictionaryTracker } from './simulation/simulation-configuration/se
 import { Store } from '@shared/Store';
 import { ApplicationState } from '@shared/ApplicationState';
 import { DEFAULT_APPLICATION_STATE } from './models/default-application-state';
+import { TabGroup, Tab } from '@shared/tabs';
+import { FaultEventSummary } from './fault-event-summary/FaultEventSummary';
 
 import './App.scss';
 
@@ -179,12 +181,19 @@ export class App extends React.Component<Props, State> {
                 return (
                   <>
                     <div className='topology-renderer-simulation-status-logger-measurement-graphs'>
-                      <div className='topology-renderer-simulation-status-logger'>
+                      <div>
                         <SimulationControlContainer />
-                        <TopologyRendererContainer
-                          mRIDs={this.componentMrids}
-                          phases={this.componentPhases} />
-                        <SimulationStatusLogContainer />
+                        <TabGroup>
+                          <Tab label='Simulation'>
+                            <TopologyRendererContainer
+                              mRIDs={this.componentMrids}
+                              phases={this.componentPhases} />
+                            <SimulationStatusLogContainer />
+                          </Tab>
+                          <Tab label='Events'>
+                            <FaultEventSummary />
+                          </Tab>
+                        </TabGroup>
                       </div>
                       <div className='measurement-charts'>
                         <MeasurementChartContainer />

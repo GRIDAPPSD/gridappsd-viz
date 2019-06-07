@@ -13,5 +13,7 @@ export interface ApplicationState {
       PhaseConnectedFaultKind: string;
       phases: string;
     }>;
-  }
+  };
+  outageEvents: any[];
+  faultEvents: any[];
 }

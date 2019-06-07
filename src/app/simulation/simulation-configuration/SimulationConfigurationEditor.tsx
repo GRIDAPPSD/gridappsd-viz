@@ -21,6 +21,8 @@ import { SimulationConfigurationFormGroupValue } from './models/SimulationConfig
 import { ApplicationConfigurationFormGroupValue } from './models/ApplicationConfigurationFormGroupValue';
 
 import './SimulationConfigurationEditor.scss';
+import { Store } from '@shared/Store';
+import { ApplicationState } from '@shared/ApplicationState';
 
 interface Props {
   onSubmit: (configObject: SimulationConfiguration) => void;
@@ -51,6 +53,7 @@ export class SimulationConfigurationEditor extends React.Component<Props, State>
 
   private readonly _modelDictionaryTracker = ModelDictionaryTracker.getInstance();
   private readonly _simulationControlService = SimulationControlService.getInstance();
+  private readonly _store = Store.getInstance<ApplicationState>();
 
   private _subscription: Subscription;
   private _simulationStatusSubscription: Subscription;
@@ -220,6 +223,10 @@ export class SimulationConfigurationEditor extends React.Component<Props, State>
       this.currentConfig.test_config.events.push(this._transformOutageEventForForSubmission(outageEvent));
     for (const faultEvent of this.faultEvents)
       this.currentConfig.test_config.events.push(this._transformFaultEventForForSubmission(faultEvent));
+    this._store.mergeState({
+      faultEvents: this.faultEvents,
+      outageEvents: this.outageEvents
+    });
     this.props.onSubmit(this.currentConfig);
   }
 

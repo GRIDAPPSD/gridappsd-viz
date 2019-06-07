@@ -4,6 +4,7 @@ import './ActiveTabIndicator.scss';
 
 interface Props {
   activeTabIndex: number;
+  tabGroup: HTMLElement;
 }
 
 interface State {
@@ -11,8 +12,6 @@ interface State {
 }
 
 export class ActiveTabIndicator extends React.Component<Props, State> {
-
-  currentWidth = 500;
 
   constructor(props: any) {
     super(props);
@@ -23,14 +22,15 @@ export class ActiveTabIndicator extends React.Component<Props, State> {
 
   componentDidMount() {
     this.setState({
-      tabLabels: document.querySelectorAll('.tabgroup__header__label')
+      tabLabels: this.queryTabLabels()
     });
   }
 
   render() {
-    if (!this.state.tabLabels)
+    const tabLabels = this.queryTabLabels();
+    if (!tabLabels)
       return null;
-    const activeTab = this.state.tabLabels[this.props.activeTabIndex];
+    const activeTab = tabLabels[this.props.activeTabIndex];
     return (
       <div className='tabgroup__active-tab-indicator'
         style={{
@@ -41,5 +41,9 @@ export class ActiveTabIndicator extends React.Component<Props, State> {
         <div className='tabgroup__active-tab-indicator__rubber-band' />
       </div>
     );
+  }
+
+  queryTabLabels(): NodeListOf<HTMLElement> {
+    return this.props.tabGroup ? this.props.tabGroup.querySelectorAll('.tabgroup__header__label') as any : this.state.tabLabels;
   }
 }
