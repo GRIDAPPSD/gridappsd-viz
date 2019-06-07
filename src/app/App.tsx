@@ -27,6 +27,9 @@ import {
 } from './models/message-requests/GetAvailableApplicationsAndServicesRequest';
 import { DEFAULT_SIMULATION_CONFIGURATION } from './models/default-simulation-configuration';
 import { ModelDictionaryTracker } from './simulation/simulation-configuration/services/ModelDictionaryTracker';
+import { Store } from '@shared/Store';
+import { ApplicationState } from '@shared/ApplicationState';
+import { DEFAULT_APPLICATION_STATE } from './models/default-application-state';
 
 import './App.scss';
 
@@ -43,6 +46,8 @@ export class App extends React.Component<Props, State> {
   readonly componentMrids = new Map<string, string & string[]>();
   readonly componentPhases = new Map<string, string[]>();
 
+  private _store = Store.getInstance<ApplicationState>();
+
   private readonly _stompClientService = StompClientService.getInstance();
   private readonly _simulationOutputService = SimulationOutputService.getInstance();
   private readonly _overlayService = OverlayService.getInstance();
@@ -58,6 +63,8 @@ export class App extends React.Component<Props, State> {
       feederModels: null,
       availableApplications: null
     };
+
+    this._store.initialize(DEFAULT_APPLICATION_STATE);
   }
 
   componentDidCatch() {
