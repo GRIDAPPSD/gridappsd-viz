@@ -65,11 +65,14 @@ export class Tooltip extends React.Component<Props, State> {
     this._tooltip.removeEventListener('animationend', this._cleanup, false);
     this._tooltipContainer.parentElement.removeChild(this._tooltipContainer);
     ReactDOM.unmountComponentAtNode(this._tooltipContainer);
+    this._tooltipContainer = null;
   }
 
   show() {
-    this._addTooltip(this._createDefaultTooltipContainer());
-    this._show();
+    if (!this._tooltipContainer) {
+      this._addTooltip(this._createDefaultTooltipContainer());
+      this._show();
+    }
   }
 
   showAt(anchor: HTMLElement, container?: HTMLElement) {
