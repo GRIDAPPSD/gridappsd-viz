@@ -64,7 +64,7 @@ export class SimulationOutputService {
         next: payload => {
           this._outputTimestamp = payload.message.timestamp;
           const measurements: SimulationOutputMeasurement[] = payload.message.measurements.map(measurement => {
-            const measurementInModelDictionary = this._modelDictionaryMeasurements[measurement.measurement_mrid];
+            const measurementInModelDictionary = this._modelDictionaryMeasurements.get(measurement.measurement_mrid);
             if (measurementInModelDictionary)
               return {
                 name: measurementInModelDictionary.name,
