@@ -62,24 +62,27 @@ export class PowerGridModels extends React.Component<Props, State> {
       ),
       [QueryPowerGridModelsRequestType.QUERY_OBJECT]: (
         <Select
+          multiple={false}
           label='Object ID'
           options={this.state.optionsForMRIDs}
-          onChange={options => this._updateRequestBody('objectId', options[0].value)}
+          onChange={selectedOption => this._updateRequestBody('objectId', selectedOption.value)}
           isOptionSelected={option => option.label === 'ieee8500'} />
       ),
       [QueryPowerGridModelsRequestType.QUERY_OBJECT_TYPES]: (
         <Select
+          multiple={false}
           label='Model ID'
           options={this.state.optionsForMRIDs}
-          onChange={options => this._updateRequestBody('modelId', options[0].value)}
+          onChange={selectedOption => this._updateRequestBody('modelId', selectedOption.value)}
           isOptionSelected={option => option.label === 'ieee8500'} />
       ),
       [QueryPowerGridModelsRequestType.QUERY_MODEL]: (
         <>
           <Select
+            multiple={false}
             label='Model ID'
             options={this.state.optionsForMRIDs}
-            onChange={options => this._updateRequestBody('modelId', options[0].value)}
+            onChange={selectedOption => this._updateRequestBody('modelId', selectedOption.value)}
             isOptionSelected={option => option.label === 'ieee8500'} />
           <TextArea
             label='Filter'
@@ -105,16 +108,17 @@ export class PowerGridModels extends React.Component<Props, State> {
           <RequestEditor styles={requestContainerStyles}>
             <form className='query-powergrid-models-form'>
               <Select
+                multiple={false}
                 label='Request type'
                 options={this.state.requestTypeOptions}
-                onChange={options => {
+                onChange={selectedOption => {
                   this.setState({ response: null });
-                  this._updateRequestBody('requestType', options[0].value);
+                  this._updateRequestBody('requestType', selectedOption.value);
                 }} />
-
               <Select
+                multiple={false}
                 label='Result format'
-                onChange={options => this._updateRequestBody('resultFormat', options[0].value)}
+                onChange={selectedOption => this._updateRequestBody('resultFormat', selectedOption.value)}
                 options={this.state.resultFormatOptions}
                 isOptionSelected={(_, index) => index === 0} />
               {

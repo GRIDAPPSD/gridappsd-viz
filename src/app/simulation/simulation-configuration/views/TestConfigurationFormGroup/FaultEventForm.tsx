@@ -26,7 +26,7 @@ interface State {
 
 export class FaultEventForm extends React.Component<Props, State> {
   formValue: FaultEvent;
-  equipmentTypeSelect: Select<string>;
+  equipmentTypeSelect: Select<string, boolean>;
 
   constructor(props: Props) {
     super(props);
@@ -78,11 +78,13 @@ export class FaultEventForm extends React.Component<Props, State> {
     return (
       <div className='fault-event'>
         <Select
+          multiple={false}
           ref={comp => this.equipmentTypeSelect = comp}
           label='Equipment Type'
           options={this.state.equipmentTypeOptions}
           onChange={this.onEquipmentTypeChanged} />
         <Select
+          multiple={false}
           label='Name'
           options={this.state.componentOptions}
           onChange={this.onComponentChanged} />
@@ -93,6 +95,7 @@ export class FaultEventForm extends React.Component<Props, State> {
           options={this.state.phaseOptions}
           onChange={this.onPhaseChanged} />
         <Select
+          multiple={false}
           label='Phase Connected Fault Kind'
           options={this.state.faultKindOptions}
           isOptionSelected={option => option.value === this.formValue.faultKind}
@@ -134,13 +137,13 @@ export class FaultEventForm extends React.Component<Props, State> {
     );
   }
 
-  onEquipmentTypeChanged(selectedOptions: Option<string>[]) {
-    const components = this.props.modelDictionary[selectedOptions[0].value] || [];
+  onEquipmentTypeChanged(selectedOption: Option<string>) {
+    const components = this.props.modelDictionary[selectedOption.value] || [];
     this.setState({
       componentOptions: components.map(e => new Option(e.name || e.bankName, e)),
       phaseOptions: []
     });
-    this.formValue.equipmentType = selectedOptions[0].label;
+    this.formValue.equipmentType = selectedOption.label;
     this._enableAddEventButtonIfFormIsValid();
   }
 
@@ -173,8 +176,7 @@ export class FaultEventForm extends React.Component<Props, State> {
       );
   }
 
-  onComponentChanged(selectedOptions: Option<any>[]) {
-    const selectedOption = selectedOptions[0];
+  onComponentChanged(selectedOption: Option<any>) {
     this.setState({
       phaseOptions: this._generateUniqueOptions(
         this._normalizePhases(selectedOption.value.phases || selectedOption.value.bankPhases)
@@ -206,8 +208,8 @@ export class FaultEventForm extends React.Component<Props, State> {
     this._enableAddEventButtonIfFormIsValid();
   }
 
-  onFaultKindChanged(selectedOptions: Option<FaultKind>[]) {
-    this.formValue.faultKind = selectedOptions[0].value;
+  onFaultKindChanged(selectedOption: Option<FaultKind>) {
+    this.formValue.faultKind = selectedOption.value;
     this.setState({
       selectedFaultKind: this.formValue.faultKind
     });

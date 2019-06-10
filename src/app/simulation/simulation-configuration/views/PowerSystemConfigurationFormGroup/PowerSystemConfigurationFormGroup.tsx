@@ -45,17 +45,20 @@ export class PowerSystemConfigurationFormGroup extends React.Component<Props, St
       <FormGroup label=''>
         <Select
           label='Geographical region name'
+          multiple={false}
           options={this.state.regionNameOptions}
           isOptionSelected={option => option.value === this.formValue.geographicalRegionId}
           onChange={this.onRegionChanged} />
 
         <Select
+          multiple={false}
           label='Sub-geographical region name'
           options={this.state.subregionNameOptions}
           isOptionSelected={option => option.value === this.formValue.subGeographicalRegionId}
           onChange={this.onSubRegionChanged} />
 
         <Select
+          multiple={false}
           label='Line name'
           options={this.state.lineNameOptions}
           onClear={this.onLineNameCleared}
@@ -64,19 +67,19 @@ export class PowerSystemConfigurationFormGroup extends React.Component<Props, St
     );
   }
 
-  onRegionChanged(options: Option[]) {
-    this.formValue.geographicalRegionId = options[0].value;
+  onRegionChanged(selectedOption: Option) {
+    this.formValue.geographicalRegionId = selectedOption.value;
     this.props.onChange(this.formValue);
   }
 
-  onSubRegionChanged(options: Option[]) {
-    this.formValue.subGeographicalRegionId = options[0].value;
+  onSubRegionChanged(selectedOption: Option) {
+    this.formValue.subGeographicalRegionId = selectedOption.value;
     this.props.onChange(this.formValue);
   }
 
-  onLineNameChanged(options: Option<{ mRID: string; name: string; }>[]) {
-    this.formValue.lineName = options[0].value.mRID;
-    this.formValue.simulationName = options[0].value.name;
+  onLineNameChanged(selectedOption: Option<{ mRID: string; name: string; }>) {
+    this.formValue.lineName = selectedOption.value.mRID;
+    this.formValue.simulationName = selectedOption.value.name;
     this.props.onChange(this.formValue);
   }
 

@@ -51,6 +51,7 @@ export class QueryLogsForm extends React.Component<Props, State> {
                 value={this.state.selectedSimulationId ? this.state.selectedSimulationId.timestamp : ''}
                 onChange={value => this.formValue.startTime = value} />
               <Select
+                multiple={false}
                 label='Simulation ID'
                 options={this.props.simulationIds.map(id => new Option(`${id.process_id}`, id))}
                 onChange={this.onSimulationIdSelected} />
@@ -62,24 +63,27 @@ export class QueryLogsForm extends React.Component<Props, State> {
             </div>
             <div className='query-logs-form__right'>
               <Select
+                multiple={false}
                 label='Source'
                 options={this.props.sources.map(source => new Option(source, source))}
                 isOptionSelected={(_, index) => index === 0}
                 onChange={options => this.formValue.source = options[0].value} />
               <Select
+                multiple={false}
                 label='Log level'
                 options={
                   ['ALL', 'TRACE', 'DEBUG', 'INFO', 'WARN', 'ERROR', 'FATAL'].map(e => new Option(e, e))
                 }
                 isOptionSelected={(_, index) => index === 0}
-                onChange={options => this.formValue.logLevel = options[0].value} />
+                onChange={selectedOption => this.formValue.logLevel = selectedOption.value} />
               <Select
+                multiple={false}
                 label='Process status'
                 options={
                   ['ALL', 'STARTING', 'STARTED', 'RUNNING', 'ERROR', 'CLOSED', 'COMPLETE'].map(e => new Option(e, e))
                 }
                 isOptionSelected={(_, index) => index === 0}
-                onChange={options => this.formValue.processStatus = options[0].value} />
+                onChange={selectedOption => this.formValue.processStatus = selectedOption.value} />
             </div>
           </form>
         </RequestEditor>
@@ -96,8 +100,8 @@ export class QueryLogsForm extends React.Component<Props, State> {
     );
   }
 
-  onSimulationIdSelected(options: Option<SimulationId>[]) {
-    const simulationId = options[0].value;
+  onSimulationIdSelected(selectedOption: Option<SimulationId>) {
+    const simulationId = selectedOption.value;
     this.setState({ selectedSimulationId: simulationId });
     this.props.onSimulationIdSelected(simulationId);
     this.formValue.processId = simulationId.process_id;
