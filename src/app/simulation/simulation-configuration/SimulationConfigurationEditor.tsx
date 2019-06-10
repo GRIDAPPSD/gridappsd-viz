@@ -73,7 +73,7 @@ export class SimulationConfigurationEditor extends React.Component<Props, State>
 
     this.onPowerSystemConfigurationFormGroupValueChanged = this.onPowerSystemConfigurationFormGroupValueChanged.bind(this);
     this.onSimulationConfigurationFormGroupValueChanged = this.onSimulationConfigurationFormGroupValueChanged.bind(this);
-    this.onApplicationConfigurationFormGroup = this.onApplicationConfigurationFormGroup.bind(this);
+    this.onApplicationConfigurationFormGroupValueChanged = this.onApplicationConfigurationFormGroupValueChanged.bind(this);
     this.onFaultEventsAdded = this.onFaultEventsAdded.bind(this);
     this.closeForm = this.closeForm.bind(this);
     this.submitForm = this.submitForm.bind(this);
@@ -135,7 +135,7 @@ export class SimulationConfigurationEditor extends React.Component<Props, State>
                 <ApplicationConfigurationFormGroup
                   currentConfig={this.currentConfig}
                   availableApplications={this.props.availableApplications}
-                  onChange={this.onApplicationConfigurationFormGroup} />
+                  onChange={this.onApplicationConfigurationFormGroupValueChanged} />
               </Tab>
               <Tab label='Test Configuration'>
                 {
@@ -193,7 +193,7 @@ export class SimulationConfigurationEditor extends React.Component<Props, State>
       this.currentConfig.simulation_config[key] = formValue[key];
   }
 
-  onApplicationConfigurationFormGroup(formValue: ApplicationConfigurationFormGroupValue) {
+  onApplicationConfigurationFormGroupValueChanged(formValue: ApplicationConfigurationFormGroupValue) {
     if (formValue.applicationId !== '') {
       const selectedApplication = this.currentConfig.application_config.applications.pop();
       selectedApplication.name = formValue.applicationId;

@@ -54,11 +54,12 @@ export class RegulatorMenu extends React.Component<Props, State> {
         <DialogContent styles={{ overflow: 'hidden' }}>
           <form className='regulator-menu__form'>
             <Select
+              multiple={false}
               label='Control mode'
               options={this.state.options}
               isOptionSelected={option => option.value === this.state.controlMode}
-              onChange={options => {
-                this.regulator.controlMode = options[0].value;
+              onChange={selectedOption => {
+                this.regulator.controlMode = selectedOption.value;
                 this.setState({ controlMode: this.regulator.controlMode });
               }} />
             {this.showFormFieldsBasedOnControlMode()}

@@ -64,11 +64,12 @@ export class SimulationConfigurationFormGroup extends React.Component<Props, Sta
           }} />
         <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
           <Select
+            multiple={false}
             label='Simulator'
             options={this.state.simulatorOptions}
             isOptionSelected={option => option.value === 'GridLAB-D'}
-            onChange={options => {
-              this.formValue.simulator = options[0].value;
+            onChange={selectedOption => {
+              this.formValue.simulator = selectedOption.value;
               this.props.onChange(this.formValue);
             }} />
           <div style={{ fontSize: '13px' }}>
