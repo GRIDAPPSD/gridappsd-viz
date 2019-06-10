@@ -1,6 +1,11 @@
 .navigation__app-title {
     padding: 15px 15px;
     font-size: 18px;
+    color: #fff;
+}
+
+.navigation__app-version {
+    color: #ddd;
 }
 
 .drawer-item a {
@@ -15,10 +20,23 @@
     }
 }
 
-.icon-button.websocket-connection-active {
+.websocket-status-indicator {
     margin-left: auto;
+    display: flex;
+    flex-flow: column nowrap;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    padding: 0 10px;
+    box-shadow: 0 0 1px #bbb;
+    color: #FFEB3B;
+}
 
-    &::before {
-        color: #09d855;
-    }
+.websocket-status-indicator__icon {
+    font-size: 2em;
+    font-weight: bold;
+}
+
+.websocket-status-indicator__status-text {
+    font-size: 0.8em;
 }

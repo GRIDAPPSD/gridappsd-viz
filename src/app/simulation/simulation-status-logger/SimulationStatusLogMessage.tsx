@@ -35,7 +35,9 @@ export class SimulationStatusLogMessage extends React.Component<Props, State> {
             ?
             <>
               <IconButton
-                icon='minus'
+                size='small'
+                style='accent'
+                icon='remove'
                 onClick={this._showAsString} />
               <span>
                 {JSON.stringify(this.state.messageAsJson, null, 4)}
@@ -44,7 +46,9 @@ export class SimulationStatusLogMessage extends React.Component<Props, State> {
             :
             <>
               <IconButton
-                icon='plus'
+                size='small'
+                style='accent'
+                icon='add'
                 onClick={this._showAsJson} />
               <span className='simulation-status-log-message__content'>
                 {this.state.messageAsJson.logMessage}

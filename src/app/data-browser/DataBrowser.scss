@@ -1,14 +1,16 @@
 $app-bar-height: 60px;
+
 .data-browser {
     position: fixed;
     overflow: hidden;
     height: calc(100vh - #{$app-bar-height});
     width: 100vw;
     display: flex;
-    padding: 10px;
+
     li {
         list-style-type: none;
     }
+
     .wait .dots {
         transform: translateX(-70px);
     }
@@ -17,7 +19,7 @@ $app-bar-height: 60px;
 .data-browser__selection {
     margin: 0;
     padding: 0;
-    width: 20%;
+    width: 350px;
     z-index: 1;
     border-radius: 3px; // box-shadow: 0 0 2px #888;
 }
@@ -32,18 +34,21 @@ $app-bar-height: 60px;
     font-size: 20px;
     transition: transform 0.4s cubic-bezier(0.85, 1.72, 0, 1.32);
     position: relative;
-    color: #000;
+    color: #3f51b5;
     display: block;
+    -moz-user-select: none;
     user-select: none;
     position: relative;
+
     &:link,
     &:hover,
     &:active {
         text-decoration: none;
-        color: #000;
     }
+
     &:hover {
         transform: translateX(20px);
+
         &:after {
             width: 10px;
         }
@@ -52,6 +57,7 @@ $app-bar-height: 60px;
 
 .data-browser__selection__item.selected {
     pointer-events: none;
+
     &:before {
         content: '';
         width: 30px;
@@ -61,6 +67,7 @@ $app-bar-height: 60px;
         left: 100%;
         top: 20px;
     }
+
     &:after {
         content: '';
         width: 30px;
@@ -76,8 +83,7 @@ $app-bar-height: 60px;
 }
 
 .request-response {
-    width: 77.5%;
-    height: 97%;
+    width: 100%;
     position: relative;
     overflow-y: auto;
     display: flex;
@@ -95,6 +101,7 @@ $app-bar-height: 60px;
     border-radius: 3px;
     padding: 5px;
     white-space: pre;
+    box-sizing: border-box;
 }
 
 .response {

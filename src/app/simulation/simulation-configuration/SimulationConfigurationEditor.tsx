@@ -1,14 +1,26 @@
 import * as React from 'react';
+import { Subscription } from 'rxjs';
 
-import { SimulationConfiguration } from '@shared/simulation';
-import { FeederModel } from '@shared/FeederModel';
+import { SimulationConfiguration, SimulationControlService, SimulationStatus } from '@shared/simulation';
+import { FeederModel, ModelDictionary } from '@shared/topology';
 import { Application } from '@shared/Application';
 import { Dialog, DialogContent, DialogActions } from '@shared/dialog';
-import { FormGroup, SelectFormControl, FormControl, CheckBox, MultilineFormControl } from '@shared/form';
-import { MenuItem } from '@shared/dropdown-menu';
-import { SIMULATION_CONFIG_OPTIONS } from './models/simulation-config-options';
-import { Tooltip } from '@shared/tooltip';
-import { IconButton, BasicButton } from '@shared/buttons';
+import { TabGroup, Tab } from '@shared/tabs';
+import { BasicButton } from '@shared/buttons';
+import { PowerSystemConfigurationFormGroup } from './views/PowerSystemConfigurationFormGroup';
+import { SimulationConfigurationFormGroup } from './views/SimulationConfigurationFormGroup';
+import { ApplicationConfigurationFormGroup } from './views/ApplicationConfigurationFormGroup';
+import { TestConfigurationFormGroup } from './views/TestConfigurationFormGroup';
+import { ModelDictionaryTracker } from './services/ModelDictionaryTracker';
+import { Wait } from '@shared/wait';
+import { DateTimeService } from './services/DateTimeService';
+import { OutageEvent } from './models/OutageEvent';
+import { FaultEvent, FaultKind } from './models/FaultEvent';
+import { PowerSystemConfigurationFormGroupValue } from './models/PowerSystemConfigurationFormGroupValue';
+import { SimulationConfigurationFormGroupValue } from './models/SimulationConfigurationFormGroupValue';
+import { ApplicationConfigurationFormGroupValue } from './models/ApplicationConfigurationFormGroupValue';
+import { Store } from '@shared/Store';
+import { ApplicationState } from '@shared/ApplicationState';
 
 import './SimulationConfigurationEditor.scss';
 
@@ -25,12 +37,26 @@ interface State {
   show: boolean;
   applicationConfigStr: string;
   simulationName: string;
-  noLineNameMessage: boolean;
+  modelDictionary: ModelDictionary;
+  disableSubmitButton: boolean;
+  lineName: string;
 }
 
 export class SimulationConfigurationEditor extends React.Component<Props, State> {
 
-  private _currentConfig: SimulationConfiguration;
+  readonly currentConfig: SimulationConfiguration;
+  readonly simulationStartDate = new Date();
+  readonly dateTimeService = DateTimeService.getInstance();
+
+  outageEvents: OutageEvent[] = [];
+  faultEvents: FaultEvent[] = [];
+
+  private readonly _modelDictionaryTracker = ModelDictionaryTracker.getInstance();
+  private readonly _simulationControlService = SimulationControlService.getInstance();
+  private readonly _store = Store.getInstance<ApplicationState>();
+
+  private _subscription: Subscription;
+  private _simulationStatusSubscription: Subscription;
 
   constructor(props: Props) {
     super(props);
@@ -38,9 +64,19 @@ export class SimulationConfigurationEditor extends React.Component<Props, State>
       show: true,
       applicationConfigStr: '',
       simulationName: props.initialConfig.simulation_config.simulation_name,
-      noLineNameMessage: false
+      modelDictionary: null,
+      disableSubmitButton: true,
+      lineName: props.initialConfig.power_system_config.Line_name
     };
-    this._currentConfig = this._cloneConfigObject(props.initialConfig);
+
+    this.currentConfig = this._cloneConfigObject(props.initialConfig);
+
+    this.onPowerSystemConfigurationFormGroupValueChanged = this.onPowerSystemConfigurationFormGroupValueChanged.bind(this);
+    this.onSimulationConfigurationFormGroupValueChanged = this.onSimulationConfigurationFormGroupValueChanged.bind(this);
+    this.onApplicationConfigurationFormGroup = this.onApplicationConfigurationFormGroup.bind(this);
+    this.onFaultEventsAdded = this.onFaultEventsAdded.bind(this);
+    this.closeForm = this.closeForm.bind(this);
+    this.submitForm = this.submitForm.bind(this);
   }
 
   private _cloneConfigObject(original: SimulationConfiguration): SimulationConfiguration {
@@ -48,167 +84,220 @@ export class SimulationConfigurationEditor extends React.Component<Props, State>
     config.power_system_config = { ...original.power_system_config };
     config.application_config = {
       applications: original.application_config.applications.length > 0 ?
-        [{ ...original.application_config.applications[0] }] : []
+        [{ ...original.application_config.applications[0] }] : [{ name: '', config_string: '' }]
     };
-    config.simulation_config = { ...original.simulation_config };
+    config.simulation_config = {
+      ...original.simulation_config,
+      start_time: this.dateTimeService.format(this.simulationStartDate)
+    };
+    config.test_config = {
+      events: original.test_config.events.map(event => Object.assign({}, event)),
+      appId: original.test_config.appId
+    };
     return config;
+  }
+
+  componentDidMount() {
+    this._subscription = this._modelDictionaryTracker.changes()
+      .subscribe({
+        next: modelDictionary => this.setState({ modelDictionary: modelDictionary })
+      });
+    this._simulationStatusSubscription = this._simulationControlService.statusChanges()
+      .subscribe({
+        next: status => this.setState({
+          disableSubmitButton: status !== SimulationStatus.NEW && status !== SimulationStatus.STOPPED
+        })
+      });
+  }
+
+  componentWillUnmount() {
+    this._subscription.unsubscribe();
+    this._simulationStatusSubscription.unsubscribe();
   }
 
   render() {
     return (
       <Dialog show={this.state.show}>
         <DialogContent>
-          <form>
-            <FormGroup label='Power System Configuration'>
-              <SelectFormControl
-                label='Geographical region name'
-                menuItems={this.props.feederModels.regions.map(region => new MenuItem(region.regionName, region.regionID))}
-                defaultSelectedIndex={
-                  (this.props.feederModels.regions
-                    .filter(region => region.regionID === this._currentConfig.power_system_config.GeographicalRegion_name)[0] || { index: 0 }).index
+          <form className='simulation-configuration-form'>
+            <TabGroup>
+              <Tab label='Power System Configuration'>
+                <PowerSystemConfigurationFormGroup
+                  feederModels={this.props.feederModels}
+                  onChange={this.onPowerSystemConfigurationFormGroupValueChanged} />
+              </Tab>
+              <Tab label='Simulation Configuration'>
+                <SimulationConfigurationFormGroup
+                  currentConfig={this.currentConfig}
+                  onChange={this.onSimulationConfigurationFormGroupValueChanged} />
+              </Tab>
+              <Tab label='Application Configuration'>
+                <ApplicationConfigurationFormGroup
+                  currentConfig={this.currentConfig}
+                  availableApplications={this.props.availableApplications}
+                  onChange={this.onApplicationConfigurationFormGroup} />
+              </Tab>
+              <Tab label='Test Configuration'>
+                {
+                  (this.state.modelDictionary && this.state.lineName)
+                    ? <TestConfigurationFormGroup
+                      modelDictionary={this.state.modelDictionary}
+                      simulationStartDate={this.dateTimeService.format(this.simulationStartDate)}
+                      simulationStopDate={this.dateTimeService.format(this.calculateSimulationStopTime())}
+                      onEventsAdded={this.onFaultEventsAdded} />
+                    : <Wait show={true} />
                 }
-                onChange={item => this._currentConfig.power_system_config.GeographicalRegion_name = item.value} />
-
-              <SelectFormControl
-                label='Sub-geographical region name'
-                menuItems={
-                  this.props.feederModels.subregions.map(subregion => new MenuItem(subregion.subregionName, subregion.subregionID))
-                }
-                defaultSelectedIndex={
-                  (this.props.feederModels.subregions
-                    .filter(subregion => subregion.subregionID === this._currentConfig.power_system_config.SubGeographicalRegion_name)[0] || { index: 0 }).index
-                }
-                onChange={item => this._currentConfig.power_system_config.SubGeographicalRegion_name = item.value} />
-
-              <SelectFormControl
-                label='Line name'
-                menuItems={this.props.feederModels.lines.map(line => new MenuItem(line.name, line))}
-                onChange={item => {
-                  this._currentConfig.power_system_config.Line_name = item.value.mRID;
-                  this._currentConfig.simulation_config.simulation_name = item.value.name;
-                  this.setState({ simulationName: item.value.name, noLineNameMessage: false });
-                  this.props.onMRIDChanged(item.value.mRID, this._currentConfig.simulation_config.simulation_name);
-                }} />
-            </FormGroup>
-
-            <FormGroup label='Simulation Configuration'>
-              <FormControl
-                label='Start time'
-                hint='YYYY-MM-DD HH:MM:SS'
-                name='start_time'
-                value={this._currentConfig.simulation_config.start_time}
-                onChange={value => this._currentConfig.simulation_config.start_time = value}
-              />
-              <FormControl
-                label='Duration'
-                hint='Seconds'
-                type='number'
-                name='duration'
-                value={this._currentConfig.simulation_config.duration}
-                onChange={value => this._currentConfig.simulation_config.duration = value}
-              />
-              <div style={{ position: 'relative' }}>
-                <SelectFormControl
-                  label='Simulator'
-                  menuItems={SIMULATION_CONFIG_OPTIONS.simulation_config.simulators.map(e => new MenuItem(e, e))}
-                  onChange={item => this._currentConfig.simulation_config.simulator = item.value}
-                  defaultSelectedIndex={
-                    SIMULATION_CONFIG_OPTIONS.simulation_config.simulators
-                      .indexOf(this._currentConfig.simulation_config.simulator)
-                  } />
-                <div style={{ position: 'absolute', top: 0, left: '48%', fontSize: '13px' }}>
-                  <div style={{ fontWeight: 'bold' }}>Power flow solver method</div>
-                  <div>NR</div>
-                </div>
-              </div>
-              <div className='realtime-checkbox-container'>
-                <CheckBox
-                  label='Real time'
-                  name='realtime'
-                  checked={this._currentConfig.simulation_config.run_realtime}
-                  onChange={state => this._currentConfig.simulation_config.run_realtime = state} />
-                <Tooltip
-                  position='right'
-                  content={
-                    <>
-                      <div>Checked: Run in real time. Slower than simulation time</div>
-                      <div>Unchecked: Run in simulation time. Faster than real time</div>
-                    </>
-                  }>
-                  <IconButton icon='question' />
-                </Tooltip>
-              </div>
-
-              <FormControl
-                label='Simulation name'
-                name='simulation_name'
-                value={this.state.simulationName}
-                onChange={value => this._currentConfig.simulation_config.simulation_name = value} />
-
-              <MultilineFormControl
-                label='Model creation configuration'
-                value={JSON.stringify(this._currentConfig.simulation_config.model_creation_config, null, 4)}
-                onUpdate={value => this._currentConfig.simulation_config.model_creation_config = JSON.parse(value)} />
-            </FormGroup>
-
-            {
-              this.props.availableApplications.length > 0 &&
-              <FormGroup label='Application Configuration'>
-                <SelectFormControl
-                  label='Application name'
-                  menuItems={this.props.availableApplications.map(app => new MenuItem(app.id, app.id))}
-                  onChange={menuItem => {
-                    const currentApp = this._currentConfig.application_config.applications.pop() || { name: menuItem.value, config_string: '' };
-                    this._currentConfig.application_config.applications.push(currentApp);
-                  }}
-                  defaultSelectedIndex={
-                    this._currentConfig.application_config.applications.length === 0
-                      ? undefined
-                      : this.props.availableApplications
-                        .findIndex(app => app.id === this._currentConfig.application_config.applications[0].name)
-                  } />
-                <MultilineFormControl
-                  label='Application configuration'
-                  value={
-                    this._currentConfig.application_config.applications.length === 0
-                      ? ''
-                      : this._currentConfig.application_config.applications[0].config_string === ''
-                        ? ''
-                        : JSON.stringify(this._currentConfig.application_config.applications[0].config_string, null, 4)
-                  }
-                  onUpdate={value => this._currentConfig.application_config.applications[0].config_string = value} />
-              </FormGroup>
-            }
+              </Tab>
+            </TabGroup>
           </form>
         </DialogContent>
         <DialogActions>
           <BasicButton
-            label='Cancel'
+            label='Close'
             type='negative'
-            onClick={event => {
-              event.stopPropagation();
-              this.props.onClose(event);
-              this.setState({ show: false });
-            }} />
+            onClick={this.closeForm} />
           <BasicButton
             label='Submit'
             type='positive'
-            onClick={event => {
-              if (this._currentConfig.power_system_config.Line_name === '') {
-                console.log("No model selected");
-                this.setState({ noLineNameMessage: true });
-              }
-              else {
-                event.stopPropagation();
-                this.setState({ show: false });
-                this.props.onSubmit(this._currentConfig);
-              }
-            }} />
-          {this.state.noLineNameMessage &&
-            <span style={{ color: 'red' }} >&nbsp; Please select a Line Name </span>}
+            disabled={this.state.disableSubmitButton}
+            onClick={this.submitForm} />
         </DialogActions>
-      </Dialog >
+      </Dialog>
     );
+  }
+
+  onPowerSystemConfigurationFormGroupValueChanged(formValue: PowerSystemConfigurationFormGroupValue) {
+    const currentPowerSystemConfig = this.currentConfig.power_system_config;
+    currentPowerSystemConfig.GeographicalRegion_name = formValue.geographicalRegionId;
+    currentPowerSystemConfig.SubGeographicalRegion_name = formValue.subGeographicalRegionId;
+    if (formValue.lineName === '') {
+      currentPowerSystemConfig.Line_name = '';
+      this.setState({
+        disableSubmitButton: true,
+        lineName: ''
+      });
+    }
+    else if (currentPowerSystemConfig.Line_name !== formValue.lineName) {
+      currentPowerSystemConfig.Line_name = formValue.lineName;
+      this.currentConfig.simulation_config.simulation_name = formValue.simulationName;
+      this.props.onMRIDChanged(formValue.lineName, formValue.simulationName);
+      this.setState({
+        lineName: formValue.lineName,
+        disableSubmitButton: false
+      });
+    }
+  }
+
+  onSimulationConfigurationFormGroupValueChanged(formValue: SimulationConfigurationFormGroupValue) {
+    for (const key in formValue)
+      this.currentConfig.simulation_config[key] = formValue[key];
+  }
+
+  onApplicationConfigurationFormGroup(formValue: ApplicationConfigurationFormGroupValue) {
+    if (formValue.applicationId !== '') {
+      const selectedApplication = this.currentConfig.application_config.applications.pop();
+      selectedApplication.name = formValue.applicationId;
+      selectedApplication.config_string = formValue.configString;
+      this.currentConfig.application_config.applications.push(selectedApplication);
+    }
+    else
+      this.currentConfig.application_config.applications.pop();
+  }
+
+  onFaultEventsAdded(events: { outage: OutageEvent[]; fault: FaultEvent[] }) {
+    this.outageEvents = events.outage;
+    this.faultEvents = events.fault;
+  }
+
+  calculateSimulationStopTime() {
+    return +this.currentConfig.simulation_config.duration * 1000 + this.simulationStartDate.getTime();
+  }
+
+  closeForm(event: React.SyntheticEvent) {
+    event.stopPropagation();
+    this.props.onClose(event);
+    this.setState({ show: false });
+  }
+
+  submitForm(event: React.SyntheticEvent) {
+    event.stopPropagation();
+    this.setState({ show: false });
+    this.currentConfig.test_config.appId = this.state.lineName;
+    for (const outageEvent of this.outageEvents)
+      this.currentConfig.test_config.events.push(this._transformOutageEventForForSubmission(outageEvent));
+    for (const faultEvent of this.faultEvents)
+      this.currentConfig.test_config.events.push(this._transformFaultEventForForSubmission(faultEvent));
+    this._store.mergeState({
+      faultEvents: this.faultEvents,
+      outageEvents: this.outageEvents
+    });
+    this.props.onSubmit(this.currentConfig);
+  }
+
+  private _transformOutageEventForForSubmission(outageEvent: OutageEvent) {
+    return {
+      allInputOutage: outageEvent.allInputOutage,
+      allOutputOutage: outageEvent.allOutputOutage,
+      inputOutageList: this._flattenArray(outageEvent.inputList.map(inputItem => {
+        if (Array.isArray(inputItem.mRID))
+          return inputItem.phases.map(phase => ({
+            objectMrid: inputItem.mRID[phase.phaseIndex],
+            attribute: inputItem.attribute
+          }));
+        return {
+          objectMrid: inputItem.mRID,
+          attribute: inputItem.attribute
+        };
+      })),
+      outputOutageList: outageEvent.outputList.map(outputItem => outputItem.mRID),
+      event_type: outageEvent.type,
+      occuredDateTime: this.dateTimeService.parse(outageEvent.startDateTime).getTime(),
+      stopDateTime: this.dateTimeService.parse(outageEvent.stopDateTime).getTime()
+    };
+  }
+
+  private _transformFaultEventForForSubmission(faultEvent: FaultEvent) {
+    return {
+      PhaseConnectedFaultKind: faultEvent.faultKind,
+      impedance: this._getImpedance(faultEvent),
+      equipmentMrid: Array.isArray(faultEvent.mRID)
+        ? faultEvent.phases.map(phase => faultEvent.mRID[phase.phaseIndex])
+        : faultEvent.mRID,
+      phases: faultEvent.phases.map(phase => phase.phaseLabel).join(''),
+      event_type: faultEvent.type,
+      occuredDateTime: this.dateTimeService.parse(faultEvent.startDateTime).getTime(),
+      stopDateTime: this.dateTimeService.parse(faultEvent.stopDateTime).getTime()
+    };
+  }
+
+  private _getImpedance(faultEvent: FaultEvent) {
+    if (faultEvent.faultKind === FaultKind.LINE_TO_GROUND)
+      return {
+        xGround: faultEvent.impedance.xGround,
+        rGround: faultEvent.impedance.rGround
+      };
+    if (faultEvent.faultKind === FaultKind.LINE_TO_LINE)
+      return {
+        xLineToLine: faultEvent.impedance.xLineToLine,
+        rLineToLine: faultEvent.impedance.rLinetoLine
+      };
+    return {
+      xGround: faultEvent.impedance.xGround,
+      rGround: faultEvent.impedance.rGround,
+      xLineToLine: faultEvent.impedance.xLineToLine,
+      rLineToLine: faultEvent.impedance.rLinetoLine
+    };
+  }
+
+  private _flattenArray(array: any[]) {
+    const result = [];
+    for (const element of array) {
+      if (Array.isArray(element))
+        result.push(...element);
+      else
+        result.push(element);
+    }
+    return result;
   }
 
 }

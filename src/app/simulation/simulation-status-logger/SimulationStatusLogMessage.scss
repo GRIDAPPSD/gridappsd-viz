@@ -3,6 +3,8 @@
     align-items: center;
     padding: 5px;
     border-bottom: 2px solid #29B6F6;
+    max-width: 100%;
+    overflow: auto hidden;
 }
 
 $logLevels: FATAL ERROR WARN INFO DEBUG TRACE;

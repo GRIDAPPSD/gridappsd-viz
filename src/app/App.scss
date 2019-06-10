@@ -2,10 +2,14 @@
     display: flex;
     overflow: hidden;
     z-index: 1;
+
+    &>div:first-of-type {
+        width: 70vw;
+        position: relative;
+    }
 }
 
 .topology-renderer-simulation-status-logger {
-    width: 70vw;
     display: flex;
     position: relative;
     flex-flow: column nowrap;

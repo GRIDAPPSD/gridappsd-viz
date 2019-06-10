@@ -9,9 +9,9 @@ import { Switch, Capacitor, OverheadLine, Node, Edge, Regulator } from '@shared/
 import { Tooltip } from '@shared/tooltip';
 import { Wait } from '@shared/wait';
 import { OverlayService } from '@shared/overlay';
-import { SwitchMenu } from './menus/switch-menu/SwitchMenu';
-import { CapacitorMenu } from './menus/capacitor-menu/CapacitorMenu';
-import { RegulatorMenu } from './menus/regulator-menu/RegulatorMenu';
+import { SwitchMenu } from './views/switch-menu/SwitchMenu';
+import { CapacitorMenu } from './views/capacitor-menu/CapacitorMenu';
+import { RegulatorMenu } from './views/regulator-menu/RegulatorMenu';
 
 import './TopologyRenderer.scss';
 

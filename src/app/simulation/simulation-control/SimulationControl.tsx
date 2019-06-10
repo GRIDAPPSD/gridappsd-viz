@@ -1,10 +1,10 @@
 import * as React from 'react';
 
 import { IconButton } from '@shared/buttons';
-
-import './SimulationControl.scss';
 import { SimulationStatus } from '@shared/simulation';
 import { Tooltip } from '@shared/tooltip';
+
+import './SimulationControl.scss';
 
 interface Props {
   timestamp: string;
@@ -48,7 +48,7 @@ export const SimulationControl = (props: Props) => (
           <>
             <Tooltip position='bottom' content='Resume simulation'>
               <IconButton
-                icon='resume'
+                icon='play_arrow'
                 className='simulation-control__action resume'
                 onClick={props.onResumeSimulation} />
             </Tooltip>
@@ -62,7 +62,7 @@ export const SimulationControl = (props: Props) => (
           :
           <Tooltip position='bottom' content='Start simulation'>
             <IconButton
-              icon='start'
+              icon='play_arrow'
               className='simulation-control__action start'
               onClick={props.onStartSimulation} />
           </Tooltip>

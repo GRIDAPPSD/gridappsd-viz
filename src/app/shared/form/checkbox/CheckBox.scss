@@ -1,4 +1,4 @@
-.gridappsd-checkbox {
+.checkbox {
     display: flex;
     position: relative;
     line-height: initial;
@@ -7,34 +7,26 @@
     align-items: center;
 }
 
-.gridappsd-checkbox__icon {
-    width: 30px;
+.checkbox-wrapper {
     position: relative;
-    text-align: center;
-    left: 0;
-    &:before {
-        content: '\f096';
-        font-size: 1.5em;
-        color: #000;
-        vertical-align: middle;
-    }
-    &:after {
-        backface-visibility: hidden;
-        content: '\f00c';
-        font-size: 1.5em;
-        color: #000;
-        vertical-align: middle;
-        left: 3px;
-        transform-origin: 50% 0;
-        width: 100%;
-        position: absolute;
-        top: 36%;
-        transform: scale(0) translateY(-50%);
-        transition: transform 0.2s ease;
-    }
 }
 
-.gridappsd-checkbox__input {
+.checkbox__icon {
+    width: 30px;
+    position: relative;
+    left: 0;
+    font-size: 1.5em;
+    color: #3f51b5;
+    pointer-events: none;
+}
+
+.checkbox__icon__checked {
+    position: absolute;
+    transition: opacity 0.2s ease;
+    opacity: 0;
+}
+
+.checkbox__input {
     cursor: pointer;
     opacity: 0;
     position: absolute;
@@ -43,28 +35,23 @@
     left: 0;
     z-index: 2;
     display: block;
-    &:checked~.gridappsd-checkbox__icon:after {
-        transform: scale(1) translateY(-50%);
-    }
 }
 
-.gridappsd-checkbox__input.checked~.gridappsd-checkbox__icon:after {
-    transform: scale(1) translateY(-50%);
-}
-
-.gridappsd-checkbox__label {
-    width: 250px;
+.checkbox__input:checked~.checkbox__icon__checked {
+    opacity: 1;
 }
 
 .disabled-checkbox {
-    .gridappsd-checkbox__label,
-    .gridappsd-checkbox__icon:before {
+
+    .checkbox__label,
+    .checkbox__icon {
         color: #ccc;
     }
+
     cursor: not-allowed;
 }
 
-.gridappsd-checkbox__hint {
+.checkbox__hint {
     display: inline-block;
     font-size: 0.8em;
     color: #666;

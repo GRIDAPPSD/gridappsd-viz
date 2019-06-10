@@ -1,0 +1,13 @@
+.realtime-checkbox-container {
+    position: relative;
+    display: flex;
+    align-items: center;
+
+    .icon-button {
+        border-radius: 50%;
+        width: 20px;
+        height: 20px;
+        transform: translate(-20px, -2px);
+        padding: 0;
+    }
+}

@@ -1,5 +1,5 @@
 import { Node } from './Node';
-import { RegulatorControlMode } from '../RegulatorControlMode';
+import { RegulatorControlMode } from './RegulatorControlMode';
 
 export interface Regulator extends Node {
   from: string;

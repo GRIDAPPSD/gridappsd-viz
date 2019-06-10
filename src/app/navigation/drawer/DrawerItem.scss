@@ -1,49 +1,36 @@
 .drawer-item {
-    display: flex;
-    align-items: center;
     list-style-type: none;
-    padding: 10px 20px;
-    padding-right: 80px;
-    font-size: 1.3em;
-    border-bottom: 2px inset rgba(0, 0, 0, 0.2);
+    font-size: 1.2em;
+    border-bottom: 2px solid #BDBDBD;
     position: relative;
     backface-visibility: hidden;
     cursor: pointer;
+    -moz-user-select: none;
     user-select: none;
-    transition: background-color 0.2s linear;
+    transition: background-color 0.2s linear, max-height 0.25s cubic-bezier(0.35, 0, 0.25, 1);
+    overflow: hidden;
+    box-sizing: border-box;
+
     &:hover {
-        background-color: rgba(0, 0, 0, 0.08);
+        background-color: rgba(0, 0, 0, 0.05);
     }
 }
 
-.drawer-item__icon {
+.drawer-item-wrapper {
+    display: flex;
+    align-items: center;
+    height: 50px;
+    box-sizing: border-box;
+}
+
+.drawer-item-icon {
     margin-right: 20px;
-    &::before {
-        font-size: 1.25em;
-        font-weight: bold;
-    }
+    margin-left: 15px;
+    font-size: 1.5em;
+    font-weight: bold;
+    color: #757575;
 }
 
-.drawer-item__icon__form:before {
-    content: '\f298';
-}
-
-.drawer-item__icon__app:before {
-    content: '\f0a0';
-}
-
-.drawer-item__icon__browse:before {
-    content: '\f002';
-}
-
-.drawer-item__icon__terminal:before {
-    content: '\f120';
-}
-
-.drawer-item__icon__cubes:before {
-    content: '\f1b3';
-}
-
-.drawer-item__label {
-    color: rgba(0, 0, 0, 0.7);
+.drawer-item-label {
+    color: #666;
 }
