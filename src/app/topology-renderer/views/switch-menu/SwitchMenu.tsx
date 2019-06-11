@@ -40,10 +40,11 @@ export class SwitchMenu extends React.Component<Props, State> {
         <DialogContent styles={{ overflow: 'hidden' }}>
           <form className='switch-menu__form'>
             <Select
+              multiple={false}
               label='Action'
               options={this.state.options}
               isOptionSelected={option => option.value === this.props.open}
-              onChange={options => this.setState({ switchOpen: options[0].value })} />
+              onChange={selectedOption => this.setState({ switchOpen: selectedOption.value })} />
           </form>
         </DialogContent>
         <DialogActions>

@@ -38,22 +38,20 @@ export class ApplicationConfigurationFormGroup extends React.Component<Props, St
         applicationId: '',
         configString: ''
       };
+
+    this.onApplicationDeselected = this.onApplicationDeselected.bind(this);
+    this.onSelectedApplicationChanged = this.onSelectedApplicationChanged.bind(this);
   }
 
   render() {
     return (
       <FormGroup label=''>
         <Select
+          multiple={false}
           label='Application name'
           options={this.state.availableApplicationOptions}
-          onClear={() => {
-            this.formValue.applicationId = '';
-            this.props.onChange(this.formValue);
-          }}
-          onChange={options => {
-            this.formValue.applicationId = options[0].value;
-            this.props.onChange(this.formValue);
-          }} />
+          onClear={this.onApplicationDeselected}
+          onChange={this.onSelectedApplicationChanged} />
         <TextArea
           label='Application configuration'
           value={this.formValue.configString}
@@ -63,5 +61,15 @@ export class ApplicationConfigurationFormGroup extends React.Component<Props, St
           }} />
       </FormGroup>
     );
+  }
+
+  onApplicationDeselected() {
+    this.formValue.applicationId = '';
+    this.props.onChange(this.formValue);
+  }
+
+  onSelectedApplicationChanged(selectedOption: Option<string>) {
+    this.formValue.applicationId = selectedOption.value;
+    this.props.onChange(this.formValue);
   }
 }

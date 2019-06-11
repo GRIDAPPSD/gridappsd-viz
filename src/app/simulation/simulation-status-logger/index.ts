@@ -1,1 +1,1 @@
-export * from './SimulationStatusLogContainer';
+export * from './SimulationStatusLoggerContainer';

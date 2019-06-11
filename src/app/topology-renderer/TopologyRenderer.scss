@@ -1,15 +1,19 @@
 .model-renderer {
-    height: calc(100vh - 60px);
+    height: 100%;
     width: 100%;
-    position: absolute;
+    position: relative;
+    overflow: hidden;
+
     svg {
         width: 100%;
         height: 100%;
     }
+
     .wait {
         height: calc(100% + 30px);
         z-index: 0;
     }
+
     path.edge {
         stroke-width: 10px;
     }

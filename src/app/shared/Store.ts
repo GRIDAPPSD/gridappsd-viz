@@ -1,4 +1,4 @@
-import { Subject, Observable } from 'rxjs';
+import { Subject } from 'rxjs';
 import { map } from 'rxjs/operators';
 
 export class Store<T> {

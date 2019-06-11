@@ -11,14 +11,14 @@ import { OptionListPaginator } from './OptionListPaginator';
 
 import './Select.scss';
 
-interface Props<T> {
+interface Props<T, E extends boolean> {
   label: string;
   options: Option<T>[];
-  onChange: (selections: Option<T>[]) => void;
+  onChange: E extends true ? (selections: Option<T>[]) => void : (selection: Option<T>) => void;
   onClear?: () => void;
   isOptionSelected?: (option: Option<T>, index: number) => boolean;
   defaultLabel?: string;
-  multiple?: boolean;
+  multiple: E;
 }
 
 interface State<T> {
@@ -32,14 +32,14 @@ interface State<T> {
   filteredOptions: Option<T>[];
 }
 
-export class Select<T> extends React.Component<Props<T>, State<T>> {
+export class Select<T, E extends boolean> extends React.Component<Props<T, E>, State<T>> {
 
   optionListOpener: HTMLButtonElement;
 
   private readonly _optionListContainer = document.createElement('div');
   private _defaultFirstPage: Option<T>[];
 
-  constructor(props: Props<T>) {
+  constructor(props: Props<T, E>) {
     super(props);
     this.state = {
       currentLabel: props.defaultLabel || props.multiple ? 'Select one or more' : 'Select one option',
@@ -75,7 +75,7 @@ export class Select<T> extends React.Component<Props<T>, State<T>> {
             ? this.state.defaultLabel
             : this._produceCurrentLabelForMultiSelect(),
         });
-        this.props.onChange(this.state.selectedOptions);
+        (this.props.onChange as any)(this.state.selectedOptions);
       }
     }
   }
@@ -85,7 +85,7 @@ export class Select<T> extends React.Component<Props<T>, State<T>> {
   }
 
   onChange(clickedOption: Option<T>) {
-    if (this.props.multiple && this.props.options.length > 1) {
+    if (this.props.multiple) {
       if (clickedOption.isSelected)
         this.setState({
           selectedOptions: this.state.selectedOptions.filter(option => option.label !== clickedOption.label)
@@ -105,7 +105,7 @@ export class Select<T> extends React.Component<Props<T>, State<T>> {
         selectedOptions
       });
       clickedOption.isSelected = true;
-      this.props.onChange(selectedOptions);
+      (this.props.onChange as any)(clickedOption);
     }
     else {
       this.setState({
@@ -131,7 +131,10 @@ export class Select<T> extends React.Component<Props<T>, State<T>> {
           currentLabel: selectedOptions.map(option => option.label).join(', '),
           selectedOptions
         }, () => this._toggleAllSelectedOptions(true));
-        this.props.onChange(selectedOptions);
+        if (this.props.multiple)
+          (this.props.onChange as any)(selectedOptions);
+        else
+          (this.props.onChange as any)(selectedOptions[0]);
       }
     }
   }
@@ -147,7 +150,7 @@ export class Select<T> extends React.Component<Props<T>, State<T>> {
       document.body.removeChild(this._optionListContainer);
   }
 
-  componentDidUpdate(prevProps: Props<T>) {
+  componentDidUpdate(prevProps: Props<T, E>) {
     if (this.props.options !== prevProps.options) {
       this.reset();
       this._selectDefaultSelectedOptions();

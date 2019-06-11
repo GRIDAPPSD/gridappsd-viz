@@ -48,11 +48,12 @@ export class CapacitorMenu extends React.Component<Props, State> {
         <DialogContent styles={{ overflow: 'hidden' }}>
           <form className='capacitor-menu__form'>
             <Select
+              multiple={false}
               label='Control mode'
               options={this.state.options}
               isOptionSelected={option => option.value === this.state.controlMode}
-              onChange={options => {
-                this.capacitor.controlMode = options[0].value;
+              onChange={selectedOption => {
+                this.capacitor.controlMode = selectedOption.value;
                 this.setState({ controlMode: this.capacitor.controlMode });
               }} />
             {this.showFormFieldsBasedOnControlMode()}
@@ -77,13 +78,14 @@ export class CapacitorMenu extends React.Component<Props, State> {
       case CapacitorControlMode.MANUAL:
         return (
           <Select
+            multiple={false}
             label='Action'
             options={[
               new Option('Open', true),
               new Option('Close', false),
             ]}
             isOptionSelected={option => option.value === this.capacitor.open}
-            onChange={options => this.capacitor.open = options[0].value} />
+            onChange={selectedOption => this.capacitor.open = selectedOption.value} />
         );
       case CapacitorControlMode.VAR:
         if (this.props.capacitor.var)

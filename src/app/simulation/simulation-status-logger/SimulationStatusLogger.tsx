@@ -1,9 +1,9 @@
 import * as React from 'react';
 
-import { SimulationStatusLogMessage } from './SimulationStatusLogMessage';
+import { SimulationStatusLoggerMessage } from './SimulationStatusLoggerMessage';
 import { Wait } from '@shared/wait';
 
-import './SimulationStatusLog.scss';
+import './SimulationStatusLogger.scss';
 
 interface Props {
   messages: string[];
@@ -15,11 +15,12 @@ interface State {
   dragHandlePosition: number;
 }
 
-export class SimulationStatusLog extends React.Component<Props, State> {
+export class SimulationStatusLogger extends React.Component<Props, State> {
 
-  private _messagesContainer: HTMLElement = null;
-  private readonly _dragHandleMinPosition = 85;
-  private readonly _dragHandleMaxPosition = document.body.clientHeight - 71;
+  simulationStatusLoggerBody: HTMLElement = null;
+
+  private readonly _dragHandleMinPosition = 30;
+  private readonly _dragHandleMaxPosition = document.body.clientHeight - 110;
   private readonly _logLevelAndColorTupleList = [
     ['FATAL', '#B71C1C'],
     ['ERROR', '#D32F2F'],
@@ -34,7 +35,7 @@ export class SimulationStatusLog extends React.Component<Props, State> {
     this.state = {
       dragHandlePosition: this._dragHandleMaxPosition
     };
-    this._mouseDown = this._mouseDown.bind(this);
+    this.mouseDown = this.mouseDown.bind(this);
     this._mouseUp = this._mouseUp.bind(this);
     this._resize = this._resize.bind(this);
   }
@@ -52,7 +53,9 @@ export class SimulationStatusLog extends React.Component<Props, State> {
         style={{
           top: `${this.state.dragHandlePosition}px`
         }}>
-        <header className='simulation-status-logger__header'>
+        <header
+          className='simulation-status-logger__header'
+          onMouseDown={this.mouseDown} >
           <span className='simulation-status-logger__header__label'>Simulation Status</span>
           {
             this.props.messages.length > 0
@@ -71,11 +74,12 @@ export class SimulationStatusLog extends React.Component<Props, State> {
             </div>
           }
         </header>
-        <div className='simulation-status-logger__drag-handle' onMouseDown={this._mouseDown} />
-        <section className='simulation-status-logger__content' ref={elem => this._messagesContainer = elem}>
+        <section
+          className='simulation-status-logger__body'
+          ref={elem => this.simulationStatusLoggerBody = elem}>
           {
             this.props.messages.map((message, i, messages) => (
-              <SimulationStatusLogMessage key={messages.length - i} message={message} />
+              <SimulationStatusLoggerMessage key={messages.length - i} message={message} />
             ))
           }
         </section>
@@ -84,21 +88,21 @@ export class SimulationStatusLog extends React.Component<Props, State> {
     );
   }
 
-  private _mouseDown() {
-    this._messagesContainer.style.userSelect = 'none';
+  mouseDown() {
+    this.simulationStatusLoggerBody.style.userSelect = 'none';
     document.documentElement.addEventListener('mousemove', this._resize, false);
     document.documentElement.addEventListener('mouseup', this._mouseUp, false);
   }
 
   private _mouseUp() {
-    this._messagesContainer.style.userSelect = 'initial';
+    this.simulationStatusLoggerBody.style.userSelect = 'initial';
     window.getSelection().empty();
     document.documentElement.removeEventListener('mousemove', this._resize, false);
     document.documentElement.removeEventListener('mouseup', this._mouseUp, false);
   }
 
   private _resize(event) {
-    const newPosition = Math.min(this._dragHandleMaxPosition, Math.max(event.clientY - 71, this._dragHandleMinPosition));
+    const newPosition = Math.min(this._dragHandleMaxPosition, Math.max(event.clientY - 90, this._dragHandleMinPosition));
     this.setState({
       dragHandlePosition: newPosition
     });

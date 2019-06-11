@@ -2,7 +2,8 @@
     display: flex;
     overflow: hidden;
     z-index: 1;
-
+    height: calc(100vh - 60px);
+    box-sizing: border-box;
     &>div:first-of-type {
         width: 70vw;
         position: relative;

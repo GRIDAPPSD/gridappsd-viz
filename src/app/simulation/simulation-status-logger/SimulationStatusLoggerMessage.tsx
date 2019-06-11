@@ -2,7 +2,7 @@ import * as React from 'react';
 
 import { IconButton } from '@shared/buttons';
 
-import './SimulationStatusLogMessage.scss';
+import './SimulationStatusLoggerMessage.scss';
 
 interface Props {
   message: string;
@@ -13,8 +13,8 @@ interface State {
   messageAsJson: any;
 }
 
-export class SimulationStatusLogMessage extends React.Component<Props, State> {
-  private _messageElement: HTMLElement = null;
+export class SimulationStatusLoggerMessage extends React.Component<Props, State> {
+  messageElement: HTMLElement = null;
 
   constructor(props: Props) {
     super(props);
@@ -28,8 +28,8 @@ export class SimulationStatusLogMessage extends React.Component<Props, State> {
   render() {
     return (
       <div
-        className={'simulation-status-log-message ' + this.state.messageAsJson.logLevel}
-        ref={elem => this._messageElement = elem}>
+        className={'simulation-status-logger-message ' + this.state.messageAsJson.logLevel}
+        ref={elem => this.messageElement = elem}>
         {
           this.state.showMessageAsJson
             ?
@@ -50,7 +50,7 @@ export class SimulationStatusLogMessage extends React.Component<Props, State> {
                 style='accent'
                 icon='add'
                 onClick={this._showAsJson} />
-              <span className='simulation-status-log-message__content'>
+              <span className='simulation-status-logger-message__body'>
                 {this.state.messageAsJson.logMessage}
               </span>
             </>
@@ -60,12 +60,12 @@ export class SimulationStatusLogMessage extends React.Component<Props, State> {
   }
   private _showAsJson() {
     this.setState({ showMessageAsJson: true });
-    this._messageElement.classList.add('highlight');
+    this.messageElement.classList.add('highlight');
     // setTimeout(() => this._messageElement.scrollIntoView(), 0);
   }
 
   private _showAsString() {
-    this._messageElement.classList.remove('highlight');
+    this.messageElement.classList.remove('highlight');
     this.setState({ showMessageAsJson: false });
   }
 }

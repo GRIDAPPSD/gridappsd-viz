@@ -52,8 +52,8 @@ export class OutageEventForm extends React.Component<Props, State> {
   formValue: OutageEvent;
   currentInputListItem: OutageEventInputListItem;
   currentOutputListItem: OutageEventOutputListItem;
-  inputComponentTypeSelect: Select<string>;
-  outputComponentTypeSelect: Select<string>;
+  inputComponentTypeSelect: Select<string, boolean>;
+  outputComponentTypeSelect: Select<string, boolean>;
 
   constructor(props: Props) {
     super(props);
@@ -144,11 +144,13 @@ export class OutageEventForm extends React.Component<Props, State> {
             checked={this.state.allInputOutageChecked}
             onChange={this.onAllInputOutageCheckboxToggled} />
           <Select
+            multiple={false}
             ref={comp => this.inputComponentTypeSelect = comp}
             label='Equipment Type'
             options={this.state.inputEquipmentTypeOptions}
             onChange={this.onInputEquipmentTypeChanged} />
           <Select
+            multiple={false}
             label='Name'
             options={this.state.inputComponentOptions}
             onChange={this.onInputComponentChanged} />
@@ -159,6 +161,7 @@ export class OutageEventForm extends React.Component<Props, State> {
             isOptionSelected={() => this.state.inputPhaseOptions.length === 1}
             onChange={this.onInputPhasesChanged} />
           <Select
+            multiple={false}
             label='Attribute'
             options={this.state.inputAttributeOptions}
             onChange={this.onInputAttributeChanged} />
@@ -216,11 +219,13 @@ export class OutageEventForm extends React.Component<Props, State> {
             checked={this.state.allOutputOutageChecked}
             onChange={this.onAllOutputOutageCheckBoxToggled} />
           <Select
+            multiple={false}
             ref={comp => this.outputComponentTypeSelect = comp}
             label='Equipment Type'
             options={this.state.outputEquipmentTypeOptions}
             onChange={this.onOuputEquipmentTypeChanged} />
           <Select
+            multiple={false}
             label='Equipment Name'
             options={this.state.outputComponentOptions}
             onChange={this.onOutputComponentChanged} />
@@ -231,6 +236,7 @@ export class OutageEventForm extends React.Component<Props, State> {
             isOptionSelected={() => this.state.outputPhaseOptions.length === 1}
             onChange={this.onOutputPhasesChanged} />
           <Select
+            multiple
             label='Measurement Type'
             options={this.state.outputMeasurementTypeOptions}
             isOptionSelected={() => this.state.outputMeasurementTypeOptions.length === 1}
@@ -317,15 +323,15 @@ export class OutageEventForm extends React.Component<Props, State> {
       });
   }
 
-  onInputEquipmentTypeChanged(selectedOptions: Option<string>[]) {
-    const selectedType = selectedOptions[0].value;
+  onInputEquipmentTypeChanged(selectedOption: Option<string>) {
+    const selectedType = selectedOption.value;
     this.setState({
       inputComponentOptions: (this.props.modelDictionary[selectedType] || []).map(e => new Option(e.name || e.bankName, e)),
       inputAttributeOptions: (COMPONENT_ATTRIBUTES[selectedType] || []).map(e => new Option(e)),
       inputPhaseOptions: []
     });
     this.currentInputListItem = this._newInputListItem();
-    this.currentInputListItem.type = selectedOptions[0].label;
+    this.currentInputListItem.type = selectedOption.label;
     this._enableOrDisableAddInputItemButton();
   }
 
@@ -345,8 +351,7 @@ export class OutageEventForm extends React.Component<Props, State> {
       });
   }
 
-  onInputComponentChanged(selectedOptions: Option<any>[]) {
-    const selectedOption = selectedOptions[0];
+  onInputComponentChanged(selectedOption: Option<any>) {
     this.setState({
       inputPhaseOptions: this._generateUniqueOptions(
         this._normalizePhases(selectedOption.value.phases || selectedOption.value.bankPhases)
@@ -371,8 +376,8 @@ export class OutageEventForm extends React.Component<Props, State> {
     this._enableOrDisableAddInputItemButton();
   }
 
-  onInputAttributeChanged(selectedOptions: Option<string>[]) {
-    this.currentInputListItem.attribute = selectedOptions[0].value;
+  onInputAttributeChanged(selectedOption: Option<string>) {
+    this.currentInputListItem.attribute = selectedOption.value;
     this._enableOrDisableAddInputItemButton();
   }
 
@@ -406,8 +411,8 @@ export class OutageEventForm extends React.Component<Props, State> {
       });
   }
 
-  onOuputEquipmentTypeChanged(selectedOptions: Option<string>[]) {
-    const selectedType = selectedOptions[0].value;
+  onOuputEquipmentTypeChanged(selectedOption: Option<string>) {
+    const selectedType = selectedOption.value;
     this.currentOutputListItem = this._newOutputListItem();
     this.currentOutputListItem.type = selectedType;
     this.setState({
@@ -421,8 +426,7 @@ export class OutageEventForm extends React.Component<Props, State> {
     this._enableOrDisableAddOutputItemButton();
   }
 
-  onOutputComponentChanged(selectedOptions: Option<ModelDictionaryMeasurement>[]) {
-    const selectedOption = selectedOptions[0];
+  onOutputComponentChanged(selectedOption: Option<ModelDictionaryMeasurement>) {
     this.currentOutputListItem.name = selectedOption.label;
     this.setState({
       outputPhaseOptions: this._generateUniqueOptions(this._normalizePhases(selectedOption.value.phases))
