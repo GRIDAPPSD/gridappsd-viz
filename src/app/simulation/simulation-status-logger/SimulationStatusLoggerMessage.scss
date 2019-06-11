@@ -1,4 +1,4 @@
-.simulation-status-log-message {
+.simulation-status-logger-message {
     display: flex;
     align-items: center;
     padding: 5px;
@@ -12,17 +12,17 @@ $logLevelColors: #B71C1C #D32F2F #FFFF00 #F0F4C3 #E1F5FE #C0CA33;
 $textColors: #fff #fff #000 #000 #000 #000;
 
 @for $index from 1 through length($logLevels) {
-    .simulation-status-log-message.#{nth($logLevels, $index)} {
+    .simulation-status-logger-message.#{nth($logLevels, $index)} {
         background-color: #{nth($logLevelColors, $index)};
         color: #{nth($textColors, $index)} !important;
     }
 }
 
-.simulation-status-log-message.highlight {
+.simulation-status-logger-message.highlight {
     animation: highlight 2s ease;
 }
 
-.simulation-status-log-message__content {
+.simulation-status-logger-message__body {
     display: inline-block;
 }
 

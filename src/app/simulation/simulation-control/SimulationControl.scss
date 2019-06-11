@@ -26,6 +26,7 @@
     color: #fff;
     background-color: #3660c5;
     box-shadow: 0 0 1px #555;
+    border-top-left-radius: 7px;
 }
 
 .simulation-control__simulation-id__value {
@@ -34,6 +35,7 @@
     border: 2px solid #3660c5;
     border-left: none;
     box-shadow: 0 0 1px #555;
+    border-bottom-right-radius: 7px;
 }
 
 .simulation-control__action {

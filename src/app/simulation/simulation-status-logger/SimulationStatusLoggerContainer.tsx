@@ -2,7 +2,7 @@ import * as React from 'react';
 import { Subscription } from 'rxjs';
 import { filter, switchMap, tap, map, takeWhile } from 'rxjs/operators';
 
-import { SimulationStatusLog } from './SimulationStatusLog';
+import { SimulationStatusLogger } from './SimulationStatusLogger';
 import {
   SimulationQueue, START_SIMULATION_TOPIC, SIMULATION_STATUS_LOG_TOPIC, SimulationControlService, SimulationStatus
 } from '@shared/simulation';
@@ -98,7 +98,7 @@ export class SimulationStatusLogContainer extends React.Component<Props, State> 
   }
 
   render() {
-    return <SimulationStatusLog
+    return <SimulationStatusLogger
       simulationRunning={this.state.isFetching}
       messages={this.state.logMessages}
       isFetching={this.state.isFetching} />;
