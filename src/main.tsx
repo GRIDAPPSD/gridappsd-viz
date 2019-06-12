@@ -4,7 +4,7 @@ import { BrowserRouter } from 'react-router-dom';
 
 import { App } from './app/App';
 
-import './global.styles.scss';
+import './styles.scss';
 
 
 ReactDOM.render(

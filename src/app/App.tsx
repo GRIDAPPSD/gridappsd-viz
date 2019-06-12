@@ -5,11 +5,11 @@ import { map, take, filter } from 'rxjs/operators';
 import { Application } from '@shared/Application';
 import { AvailableApplicationsAndServices } from './available-applications-and-services';
 import { DataBrowser } from './data-browser';
-import { FeederModel } from '@shared/FeederModel';
+import { FeederModel } from '@shared/topology';
 import { GetAllFeederModelsRequest } from './models/message-requests/GetAllFeederModelsRequest';
 import { LabelContainer } from './simulation/label';
-import { MeasurementGraphContainer } from './simulation/measurement-graph';
-import { ModelDictionaryMeasurement } from './models/model-dictionary';
+import { MeasurementChartContainer } from './simulation/measurement-chart';
+import { ModelDictionaryMeasurement, ModelDictionary } from '@shared/topology/model-dictionary';
 import { Navigation } from './navigation';
 import { OverlayService } from '@shared/overlay';
 import { SimulationConfiguration } from '@shared/simulation';
@@ -25,6 +25,13 @@ import { GetModelDictionaryRequest } from './models/message-requests/GetModelDic
 import {
   GetAvailableApplicationsRequest, GetAvailableApplicationsRequestPayload
 } from './models/message-requests/GetAvailableApplicationsAndServicesRequest';
+import { DEFAULT_SIMULATION_CONFIGURATION } from './models/default-simulation-configuration';
+import { ModelDictionaryTracker } from './simulation/simulation-configuration/services/ModelDictionaryTracker';
+import { Store } from '@shared/Store';
+import { ApplicationState } from '@shared/ApplicationState';
+import { DEFAULT_APPLICATION_STATE } from './models/default-application-state';
+import { TabGroup, Tab } from '@shared/tabs';
+import { FaultEventSummary } from './fault-event-summary/FaultEventSummary';
 
 import './App.scss';
 
@@ -37,14 +44,19 @@ interface State {
 }
 
 export class App extends React.Component<Props, State> {
+  shouldRedirect = false;
+  readonly componentMrids = new Map<string, string & string[]>();
+  readonly componentPhases = new Map<string, string[]>();
+
+  private _store = Store.getInstance<ApplicationState>();
+
   private readonly _stompClientService = StompClientService.getInstance();
   private readonly _simulationOutputService = SimulationOutputService.getInstance();
   private readonly _overlayService = OverlayService.getInstance();
   private readonly _simulationQueue = SimulationQueue.getInstance();
-  private readonly _modelDictionaryMeasurementsPerSimulationName: { [name: string]: { [mRID: string]: ModelDictionaryMeasurement } } = {};
-  private _shouldRedirect = false;
-  private readonly _mRIDs: { [componentType: string]: string } = {};
-  private readonly _availableModelDictionaries = {};
+  private readonly _modelDictionaryTracker = ModelDictionaryTracker.getInstance();
+  private readonly _modelDictionaryMeasurementsPerSimulationName = new Map<string, Map<string, ModelDictionaryMeasurement>>();
+  private readonly _availableModelDictionaries = new Map<string, ModelDictionary>();
 
   constructor(props: any) {
     super(props);
@@ -53,10 +65,12 @@ export class App extends React.Component<Props, State> {
       feederModels: null,
       availableApplications: null
     };
+
+    this._store.initialize(DEFAULT_APPLICATION_STATE);
   }
 
   componentDidCatch() {
-    this._shouldRedirect = true;
+    this.shouldRedirect = true;
   }
 
   componentDidMount() {
@@ -154,29 +168,38 @@ export class App extends React.Component<Props, State> {
   render() {
     return (
       <Route path='/' component={(props) =>
-        this._shouldRedirect ? this.redirect() :
+        this.shouldRedirect ? this.redirect() :
           <>
             <Navigation
-              onShowSimulationConfigForm={(config: SimulationConfiguration) => this.showSimulationConfigForm(config, props.history)} />
+              onShowSimulationConfigForm={
+                (config: SimulationConfiguration) => this.showSimulationConfigForm(config, props.history)
+              } />
             <Route
               exact
               path='/topology'
               component={() => {
-                const activeSimulationConfig = this._simulationQueue.getActiveSimulation().config;
-                const line = this.state.feederModels.lines.filter(line => line.mRID === activeSimulationConfig.power_system_config.Line_name)[0];
                 return (
                   <>
                     <div className='topology-renderer-simulation-status-logger-measurement-graphs'>
-                      <div className='topology-renderer-simulation-status-logger'>
-                        <SimulationControlContainer simulationConfig={activeSimulationConfig} />
-                        <TopologyRendererContainer mRIDs={this._mRIDs} />
-                        <SimulationStatusLogContainer />
+                      <div>
+                        <SimulationControlContainer />
+                        <TabGroup>
+                          <Tab label='Simulation'>
+                            <TopologyRendererContainer
+                              mRIDs={this.componentMrids}
+                              phases={this.componentPhases} />
+                            <SimulationStatusLogContainer />
+                          </Tab>
+                          <Tab label='Events'>
+                            <FaultEventSummary />
+                          </Tab>
+                        </TabGroup>
                       </div>
-                      <div className='measurement-graphs'>
-                        <MeasurementGraphContainer simulationName={activeSimulationConfig.simulation_config.simulation_name} />
+                      <div className='measurement-charts'>
+                        <MeasurementChartContainer />
                       </div>
                     </div>
-                    {line && <LabelContainer topologyName={line.name} />}
+                    <LabelContainer />
                   </>
                 );
               }} />
@@ -190,18 +213,20 @@ export class App extends React.Component<Props, State> {
   }
 
   redirect() {
-    this._shouldRedirect = false;
+    this.shouldRedirect = false;
     return <Redirect to='/' />;
   }
 
   showSimulationConfigForm(config: SimulationConfiguration, browserHistory) {
+    if (config === null)
+      config = DEFAULT_SIMULATION_CONFIGURATION;
     this._overlayService.show(
       <SimulationConfigurationEditor
         feederModels={this.state.feederModels}
-        onSubmit={config => this._onSimulationConfigFormSubmitted(config, browserHistory)}
+        onSubmit={updatedConfig => this._onSimulationConfigFormSubmitted(updatedConfig, browserHistory)}
         onClose={() => this._overlayService.hide()}
         onMRIDChanged={(mRID, simulationName) => {
-          if (!this._modelDictionaryMeasurementsPerSimulationName[simulationName])
+          if (!this._modelDictionaryMeasurementsPerSimulationName.has(simulationName))
             this._fetchModelDictionary(mRID, simulationName);
         }}
         availableApplications={this.state.availableApplications}
@@ -213,24 +238,25 @@ export class App extends React.Component<Props, State> {
     this._simulationQueue.push({
       name: config.simulation_config.simulation_name,
       config,
-      id: config.simulation_config.simulation_name
+      id: ''
     });
     this._overlayService.hide();
     setTimeout(() => history.push('/topology'), 500);
   }
 
   private _fetchModelDictionary(mrid: string, simulationName: string) {
-    if (mrid in this._availableModelDictionaries)
-      return;
-    const getModelDictionaryRequest = new GetModelDictionaryRequest();
-    this._availableModelDictionaries[mrid] = true;
-    getModelDictionaryRequest.requestBody.parameters.model_id = mrid;
-    this._subscribeToModelDictionaryTopic(getModelDictionaryRequest, simulationName);
-    this._stompClientService.send(
-      getModelDictionaryRequest.url,
-      { 'reply-to': getModelDictionaryRequest.replyTo },
-      JSON.stringify(getModelDictionaryRequest.requestBody)
-    );
+    if (!this._availableModelDictionaries.has(simulationName)) {
+      const getModelDictionaryRequest = new GetModelDictionaryRequest();
+      getModelDictionaryRequest.requestBody.parameters.model_id = mrid;
+      this._subscribeToModelDictionaryTopic(getModelDictionaryRequest, simulationName);
+      this._stompClientService.send(
+        getModelDictionaryRequest.url,
+        { 'reply-to': getModelDictionaryRequest.replyTo },
+        JSON.stringify(getModelDictionaryRequest.requestBody)
+      );
+    }
+    else
+      this._modelDictionaryTracker.selectCurrentModelDictionary(this._availableModelDictionaries.get(simulationName));
   }
 
   private _subscribeToModelDictionaryTopic(getModelDictionaryRequest: GetModelDictionaryRequest, simulationName: string) {
@@ -240,25 +266,29 @@ export class App extends React.Component<Props, State> {
         next: payload => {
           if (typeof payload.data === 'string')
             payload.data = JSON.parse(payload.data);
-          const feeders = payload.data.feeders[0];
-          const modelDictionaryMeasurements = feeders.measurements.reduce((accummulator, measurement) => {
-            accummulator[measurement.mRID] = measurement;
-            return accummulator;
-          }, {});
-          this._simulationOutputService.setModelDictionaryMeasures(modelDictionaryMeasurements);
-          this._modelDictionaryMeasurementsPerSimulationName[simulationName] = modelDictionaryMeasurements;
-          this._collectMRIDsForComponents(feeders);
+          const modelDictionary = payload.data.feeders[0];
+          const modelDictionaryMeasurements = new Map<string, ModelDictionaryMeasurement>();
+          for (const measurement of modelDictionary.measurements)
+            modelDictionaryMeasurements.set(measurement.mRID, measurement);
+          this._collectMRIDsAndPhasesForComponents(modelDictionary);
+          this._simulationOutputService.setModelDictionaryMeasurements(modelDictionaryMeasurements);
+          this._modelDictionaryMeasurementsPerSimulationName.set(simulationName, modelDictionaryMeasurements);
+          this._availableModelDictionaries.set(simulationName, modelDictionary);
+          this._modelDictionaryTracker.selectCurrentModelDictionary(this._availableModelDictionaries.get(simulationName));
         }
       });
   }
 
-  private _collectMRIDsForComponents(feeders: any) {
-    for (const swjtch of feeders.switches)
-      this._mRIDs[swjtch.name] = swjtch.mRID;
-    for (const capacitor of feeders.capacitors)
-      this._mRIDs[capacitor.name] = capacitor.mRID;
-    for (const regulator of feeders.regulators)
-      this._mRIDs[regulator.name] = regulator.mRID;
+  private _collectMRIDsAndPhasesForComponents(modelDictionary: any) {
+    for (const swjtch of modelDictionary.switches)
+      this.componentMrids.set(swjtch.name, swjtch.mRID);
+    for (const capacitor of modelDictionary.capacitors)
+      this.componentMrids.set(capacitor.name, capacitor.mRID);
+    for (const regulator of modelDictionary.regulators) {
+      this.componentMrids.set(regulator.bankName, regulator.mRID);
+      // Only interested in regulators' phases for now, need phases for regulator menus
+      this.componentPhases.set(regulator.bankName, (regulator.bankPhases || '').split(''));
+    }
   }
 
 }

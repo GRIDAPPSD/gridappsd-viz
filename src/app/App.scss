@@ -2,17 +2,22 @@
     display: flex;
     overflow: hidden;
     z-index: 1;
+    height: calc(100vh - 60px);
+    box-sizing: border-box;
+    &>div:first-of-type {
+        width: 70vw;
+        position: relative;
+    }
 }
 
 .topology-renderer-simulation-status-logger {
-    width: 70vw;
     display: flex;
     position: relative;
     flex-flow: column nowrap;
     border-right: 2px solid rgba(0, 0, 0, 0.08);
 }
 
-.measurement-graphs {
+.measurement-charts {
     width: 30vw;
     overflow-y: auto;
     display: flex;

@@ -3,10 +3,41 @@
     display: flex;
     justify-content: flex-end;
     align-items: center;
-    border-bottom: 2px solid rgba(0, 0, 0, 0.2);
-    background-color: #fff;
+    position: absolute;
+    top: -2px;
+    right: 20px;
+    width: 100%;
+}
+
+.simulation-control__simulation-id {
+    display: inline-flex;
+    width: 100%;
+    justify-content: flex-start;
+    box-sizing: border-box;
+    padding-left: 10px;
+    align-items: center;
+    font-size: 0.7em;
+    margin: 0 12px;
+}
+
+.simulation-control__simulation-id__label {
+    display: inline-block;
+    padding: 8px 10px;
+    color: #fff;
+    background-color: #3660c5;
+    box-shadow: 0 0 1px #555;
+    border-top-left-radius: 7px;
+}
+
+.simulation-control__simulation-id__value {
+    display: inline-block;
+    padding: 6px 5px;
+    border: 2px solid #3660c5;
+    border-left: none;
+    box-shadow: 0 0 1px #555;
+    border-bottom-right-radius: 7px;
+}
+
+.simulation-control__action {
     z-index: 1;
-    * {
-        margin: 0 5px;
-    }
 }

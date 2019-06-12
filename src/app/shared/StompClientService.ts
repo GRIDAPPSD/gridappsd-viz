@@ -106,7 +106,7 @@ export class StompClientService {
           const id = `${destination}[${Math.random() * 1_000_000 | 0}]`;
           return using(
             () => this._client.subscribe(destination, (message: Message) => source.next(message.body), { id }),
-            () => source.asObservable().pipe(filter(data => Boolean(data)))
+            () => source.asObservable().pipe(filter(responseBody => Boolean(responseBody)))
           );
         })
       );

@@ -4,7 +4,7 @@ import * as ReactDOM from 'react-dom';
 import './Tooltip.scss';
 
 interface Props {
-  position: 'top' | 'left' | 'right' | 'bottom';
+  position?: 'top' | 'left' | 'right' | 'bottom';
   content: string | React.ReactElement<any>;
   anchor?: HTMLElement;
 }
@@ -13,6 +13,10 @@ interface State {
 }
 
 export class Tooltip extends React.Component<Props, State> {
+
+  static defaultProps = {
+    position: 'bottom'
+  };
 
   private _tooltip: HTMLElement;
   private _tooltipContainer: HTMLElement;
@@ -23,6 +27,8 @@ export class Tooltip extends React.Component<Props, State> {
     super(props);
     this.state = {
     };
+    this._anchor = props.anchor;
+
     this.show = this.show.bind(this);
     this.hide = this.hide.bind(this);
     this._cleanup = this._cleanup.bind(this);
@@ -59,15 +65,18 @@ export class Tooltip extends React.Component<Props, State> {
     this._tooltip.removeEventListener('animationend', this._cleanup, false);
     this._tooltipContainer.parentElement.removeChild(this._tooltipContainer);
     ReactDOM.unmountComponentAtNode(this._tooltipContainer);
+    this._tooltipContainer = null;
   }
 
   show() {
-    this._addTooltip(this._createDefaultTooltipContainer());
-    this._show();
+    if (!this._tooltipContainer) {
+      this._addTooltip(this._createDefaultTooltipContainer());
+      this._show();
+    }
   }
 
-  showAt(anchor: HTMLElement, container: HTMLElement = this._createDefaultTooltipContainer()) {
-    this._addTooltip(container);
+  showAt(anchor: HTMLElement, container?: HTMLElement) {
+    this._addTooltip(container || this._createDefaultTooltipContainer());
     this._anchor = anchor;
     this._show();
   }
@@ -118,7 +127,7 @@ export class Tooltip extends React.Component<Props, State> {
   private _showTop(originRect: ClientRect) {
     setTimeout(() => {
       const left = originRect.left + (originRect.width - this._tooltipRect.width) / 2;
-      let top = originRect.top - originRect.height - 25;
+      let top = originRect.top - originRect.height;
       if (top < 0) {
         this._tooltip.classList.remove('top');
         this._tooltip.classList.add('bottom');

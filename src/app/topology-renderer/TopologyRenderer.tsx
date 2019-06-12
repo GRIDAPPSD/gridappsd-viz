@@ -9,9 +9,9 @@ import { Switch, Capacitor, OverheadLine, Node, Edge, Regulator } from '@shared/
 import { Tooltip } from '@shared/tooltip';
 import { Wait } from '@shared/wait';
 import { OverlayService } from '@shared/overlay';
-import { SwitchMenu } from './menus/switch-menu/SwitchMenu';
-import { CapacitorMenu } from './menus/capacitor-menu/CapacitorMenu';
-import { RegulatorMenu } from './menus/regulator-menu/RegulatorMenu';
+import { SwitchMenu } from './views/switch-menu/SwitchMenu';
+import { CapacitorMenu } from './views/capacitor-menu/CapacitorMenu';
+import { RegulatorMenu } from './views/regulator-menu/RegulatorMenu';
 
 import './TopologyRenderer.scss';
 
@@ -20,9 +20,8 @@ interface Props {
   showWait: boolean;
   topologyName: string;
   onToggleSwitch: (swjtch: Switch) => void;
-  onOpenOrCloseCapacitor: (capacitor: Capacitor) => void;
-  onToggleCapacitorManualMode: (capacitor: Capacitor) => void;
-  onToggleRegulatorManualMode: (regulator: Regulator) => void;
+  onCapacitorMenuFormSubmitted: (currentCapacitor: Capacitor, newCapacitor: Capacitor) => void;
+  onRegulatorMenuFormSubmitted: (currentRegulator: Regulator, newRegulator: Regulator) => void;
 }
 
 interface State {
@@ -160,30 +159,14 @@ export class TopologyRenderer extends React.Component<Props, State> {
       <CapacitorMenu
         left={clickedElementRect.left}
         top={clickedElementRect.top}
-        open={capacitor.open}
-        manual={capacitor.manual}
+        capacitor={capacitor}
         onCancel={() => this._overlay.hide(false)}
-        onConfirm={formValue => {
+        onConfirm={newCapacitor => {
           this._overlay.hide(false);
-          this._openOrCloseCapacitor(formValue.open, capacitor);
-          this._toggleCapacitorManualMode(formValue.manual, capacitor);
+          this.props.onCapacitorMenuFormSubmitted(capacitor, newCapacitor);
         }} />,
       false
     );
-  }
-
-  private _openOrCloseCapacitor(open: boolean, capacitor: Capacitor) {
-    if (capacitor.open !== open) {
-      capacitor.open = open;
-      this.props.onOpenOrCloseCapacitor(capacitor);
-    }
-  }
-
-  private _toggleCapacitorManualMode(isManual: boolean, capacitor: Capacitor) {
-    if (capacitor.manual !== isManual) {
-      capacitor.manual = isManual;
-      this.props.onToggleCapacitorManualMode(capacitor);
-    }
   }
 
   private _onRegulatorClicked(clickedElement: Selection<SVGElement, any, SVGElement, any>) {
@@ -193,21 +176,14 @@ export class TopologyRenderer extends React.Component<Props, State> {
       <RegulatorMenu
         left={clickedElementRect.left}
         top={clickedElementRect.top}
-        manual={regulator.manual}
+        regulator={regulator}
         onCancel={() => this._overlay.hide(false)}
-        onConfirm={isManual => {
+        onConfirm={newRegulator => {
           this._overlay.hide(false);
-          this._toggleRegulatorManualMode(isManual, regulator);
+          this.props.onRegulatorMenuFormSubmitted(regulator, newRegulator);
         }} />,
       false
     );
-  }
-
-  private _toggleRegulatorManualMode(isManual: boolean, regulator: Regulator) {
-    if (regulator.manual !== isManual) {
-      regulator.manual = isManual;
-      this.props.onToggleRegulatorManualMode(regulator);
-    }
   }
 
   showTooltip(event) {
@@ -277,7 +253,7 @@ export class TopologyRenderer extends React.Component<Props, State> {
   }
 
   private _capitalize(value: string) {
-    return value[0].toUpperCase() + value.substr(1);
+    return value ? value[0].toUpperCase() + value.substr(1) : '';
   }
 
   private _categorizeNodes(nodes: Node[], xOffset: number, yOffset: number) {

@@ -11,3 +11,7 @@ export * from './TopologyModel';
 export * from './Transformer';
 export * from './Node';
 export * from './Edge';
+export * from './FeederModel';
+export * from './RegulatorControlMode';
+export * from './CapacitorControlMode';
+export * from './model-dictionary';

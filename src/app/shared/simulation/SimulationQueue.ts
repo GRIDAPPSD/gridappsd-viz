@@ -43,7 +43,10 @@ export class SimulationQueue {
   }
 
   updateIdOfActiveSimulation(id: string) {
-    this._simulations = [{ ...this._activeSimulation, id }, ...this._simulations.filter(sim => sim !== this._activeSimulation)];
+    this._simulations = [
+      { ...this._activeSimulation, id },
+      ...this._simulations.filter(sim => sim !== this._activeSimulation)
+    ];
     this._activeSimulation = this._simulations[0];
     this._queueChanges.next(this._simulations);
   }

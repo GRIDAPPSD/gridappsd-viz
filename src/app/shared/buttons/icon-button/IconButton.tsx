@@ -1,23 +1,48 @@
 import * as React from 'react';
 
 import { Ripple } from '../../ripple/Ripple';
+
 import './IconButton.scss';
 
+type Icon = 'check_circle' | 'menu' | 'assignment' | 'storage' | 'search' | 'laptop' | 'help' | 'delete' | 'cloud_upload'
+  | 'pause' | 'stop' | 'play_arrow' | 'add' | 'remove' | 'cached' | 'save' | 'close' | 'navigate_next' | 'navigate_before'
+  | 'keyboard_arrow_down' | 'memory' | 'send';
+
+
 interface Props {
-  icon: 'plus' | 'minus' | 'question' | 'websocket-connection-active' | 'websocket-connection-inactive';
+  icon: Icon;
   onClick?: (event) => void;
-  children?: any;
+  size?: 'large' | 'normal' | 'small';
   className?: string;
   label?: any;
+  rounded?: boolean;
+  style?: 'primary' | 'accent' | 'default';
+  disabled?: boolean;
 }
 
-export const IconButton = (props: Props) => (
-  <Ripple>
-    <button
-      type='button'
-      className={'app-icon icon-button ' + props.icon + (props.className ? ' ' + props.className : '') + (props.label ? ' has-label' : '')}
-      onClick={props.onClick}>
-      {props.label && <span>{props.label}</span>}
-    </button>
-  </Ripple>
-);
+export function IconButton(props: Props) {
+  return (
+    <Ripple fixed={props.rounded || props.rounded === undefined}>
+      <button
+        type='button'
+        disabled={props.disabled}
+        className={
+          'icon-button' +
+          (props.className ? ' ' + props.className : '') +
+          (' icon-button--' + (props.style ? props.style : 'primary')) +
+          deriveClassName(props)
+        }
+        onClick={props.onClick}>
+        <i className='material-icons icon-button__icon'>{props.icon}</i>
+        {props.label && <span className='icon-button__label'>{props.label}</span>}
+      </button>
+    </Ripple>
+  );
+}
+
+function deriveClassName(props: Props) {
+  if (props.rounded || (props.rounded === undefined && !props.label))
+    return ` rounded-icon-button rounded-icon-button--${props.size ? props.size : 'normal'}`;
+  return props.label ? ' icon-button--has-label' : '';
+
+}

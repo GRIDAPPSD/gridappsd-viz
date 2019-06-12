@@ -1,7 +1,13 @@
 import * as React from 'react';
 
+import { IconButton } from '@shared/buttons';
+
 import './DrawerOpener.scss';
 
 export const DrawerOpener = ({ onClick }) => (
-  <button className='app-icon drawer-opener' onClick={onClick} />
+  <IconButton
+    style='default'
+    className='drawer-opener'
+    icon='menu'
+    onClick={onClick} />
 );

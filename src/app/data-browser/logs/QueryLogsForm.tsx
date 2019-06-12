@@ -1,8 +1,7 @@
 import * as React from 'react';
 
 import { RequestEditor } from '../RequestEditor';
-import { FormControl, SelectFormControl } from '@shared/form';
-import { MenuItem } from '@shared/dropdown-menu';
+import { Input, Select, Option } from '@shared/form';
 import { BasicButton } from '@shared/buttons';
 import { QueryLogsRequestBody } from './models/QueryLogsRequestBody';
 import { SimulationId } from './models/SimulationId';
@@ -22,7 +21,7 @@ interface State {
 
 export class QueryLogsForm extends React.Component<Props, State> {
 
-  private _formData: QueryLogsRequestBody = {
+  readonly formValue: QueryLogsRequestBody = {
     startTime: '',
     processId: '',
     username: 'system',
@@ -37,7 +36,7 @@ export class QueryLogsForm extends React.Component<Props, State> {
       selectedSimulationId: null
     };
 
-    this._onSimulationIdSelected = this._onSimulationIdSelected.bind(this);
+    this.onSimulationIdSelected = this.onSimulationIdSelected.bind(this);
   }
 
   render() {
@@ -46,42 +45,45 @@ export class QueryLogsForm extends React.Component<Props, State> {
         <RequestEditor styles={{ overflow: 'initial', borderRadius: 'initial', boxShadow: 'initial', height: 'initial' }}>
           <form className='query-logs-form'>
             <div className='query-logs-form__left'>
-              <FormControl
+              <Input
                 label='Start time'
                 name='startTime'
                 value={this.state.selectedSimulationId ? this.state.selectedSimulationId.timestamp : ''}
-                onChange={value => this._formData.startTime = value} />
-              <SelectFormControl
+                onChange={value => this.formValue.startTime = value} />
+              <Select
+                multiple={false}
                 label='Simulation ID'
-                menuItems={this.props.simulationIds.map(id => new MenuItem(`${id.process_id}`, id))}
-                defaultSelectedIndex={0}
-                onChange={this._onSimulationIdSelected} />
-              <FormControl
+                options={this.props.simulationIds.map(id => new Option(`${id.process_id}`, id))}
+                onChange={this.onSimulationIdSelected} />
+              <Input
                 label='Username'
                 name='username'
                 value='system'
-                onChange={value => this._formData.username = value} />
+                onChange={value => this.formValue.username = value} />
             </div>
             <div className='query-logs-form__right'>
-              <SelectFormControl
+              <Select
+                multiple={false}
                 label='Source'
-                menuItems={this.props.sources.map(source => new MenuItem(source, source))}
-                defaultSelectedIndex={0}
-                onChange={menuItem => this._formData.source = menuItem.value} />
-              <SelectFormControl
+                options={this.props.sources.map(source => new Option(source, source))}
+                isOptionSelected={(_, index) => index === 0}
+                onChange={options => this.formValue.source = options[0].value} />
+              <Select
+                multiple={false}
                 label='Log level'
-                menuItems={
-                  ['ALL', 'TRACE', 'DEBUG', 'INFO', 'WARN', 'ERROR', 'FATAL'].map(e => new MenuItem(e, e))
+                options={
+                  ['ALL', 'TRACE', 'DEBUG', 'INFO', 'WARN', 'ERROR', 'FATAL'].map(e => new Option(e, e))
                 }
-                defaultSelectedIndex={0}
-                onChange={menuItem => this._formData.logLevel = menuItem.value} />
-              <SelectFormControl
+                isOptionSelected={(_, index) => index === 0}
+                onChange={selectedOption => this.formValue.logLevel = selectedOption.value} />
+              <Select
+                multiple={false}
                 label='Process status'
-                menuItems={
-                  ['ALL', 'STARTING', 'STARTED', 'RUNNING', 'ERROR', 'CLOSED', 'COMPLETE'].map(e => new MenuItem(e, e))
+                options={
+                  ['ALL', 'STARTING', 'STARTED', 'RUNNING', 'ERROR', 'CLOSED', 'COMPLETE'].map(e => new Option(e, e))
                 }
-                defaultSelectedIndex={0}
-                onChange={menuItem => this._formData.processStatus = menuItem.value} />
+                isOptionSelected={(_, index) => index === 0}
+                onChange={selectedOption => this.formValue.processStatus = selectedOption.value} />
             </div>
           </form>
         </RequestEditor>
@@ -91,19 +93,19 @@ export class QueryLogsForm extends React.Component<Props, State> {
           type='positive'
           onClick={event => {
             event.stopPropagation();
-            this.props.onSubmit(this._formData);
+            this.props.onSubmit(this.formValue);
           }} />
 
       </>
     );
   }
 
-  private _onSimulationIdSelected(menuItem: MenuItem) {
-    const simulationId = menuItem.value as SimulationId;
+  onSimulationIdSelected(selectedOption: Option<SimulationId>) {
+    const simulationId = selectedOption.value;
     this.setState({ selectedSimulationId: simulationId });
     this.props.onSimulationIdSelected(simulationId);
-    this._formData.processId = simulationId.process_id;
-    this._formData.startTime = simulationId.timestamp;
+    this.formValue.processId = simulationId.process_id;
+    this.formValue.startTime = simulationId.timestamp;
   }
 
 }
