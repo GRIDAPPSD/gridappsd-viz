@@ -195,7 +195,7 @@ export class SimulationConfigurationEditor extends React.Component<Props, State>
 
   onApplicationConfigurationFormGroupValueChanged(formValue: ApplicationConfigurationFormGroupValue) {
     if (formValue.applicationId !== '') {
-      const selectedApplication = this.currentConfig.application_config.applications.pop();
+      const selectedApplication = this.currentConfig.application_config.applications.pop() || { name: '', config_string: '' };
       selectedApplication.name = formValue.applicationId;
       selectedApplication.config_string = formValue.configString;
       this.currentConfig.application_config.applications.push(selectedApplication);
