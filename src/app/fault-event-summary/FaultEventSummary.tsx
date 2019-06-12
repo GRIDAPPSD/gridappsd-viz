@@ -2,8 +2,7 @@ import * as React from 'react';
 
 import { Tooltip } from '@shared/tooltip';
 import { IconButton } from '@shared/buttons';
-import { Store } from '@shared/Store';
-import { ApplicationState } from '@shared/ApplicationState';
+import { StateStore } from '@shared/state-store';
 
 import './FaultEventSummary.scss';
 
@@ -18,7 +17,7 @@ interface State {
 
 export class FaultEventSummary extends React.Component<Props, State> {
 
-  private readonly _store = Store.getInstance<ApplicationState>();
+  private readonly _stateStore = StateStore.getInstance();
 
   constructor(props: Props) {
     super(props);
@@ -30,15 +29,15 @@ export class FaultEventSummary extends React.Component<Props, State> {
   }
 
   componentDidMount() {
-    this._store.select(state => state.outageEvents)
+    this._stateStore.select(state => state.outageEvents)
       .subscribe({
         next: (events: any[]) => this.setState({ outageEvents: events })
       });
-    this._store.select(state => state.faultEvents)
+    this._stateStore.select(state => state.faultEvents)
       .subscribe({
         next: (events: any[]) => this.setState({ faultEvents: events })
       });
-    this._store.select(state => state.simulationStartResponse)
+    this._stateStore.select(state => state.startSimulationResponse)
       .subscribe({
         next: state => this.setState({ faultMRIDs: state.events.map(e => e.faultMRID) })
       });

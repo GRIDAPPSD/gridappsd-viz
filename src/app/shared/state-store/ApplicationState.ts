@@ -1,5 +1,5 @@
 export interface ApplicationState {
-  simulationStartResponse: {
+  startSimulationResponse: {
     simulationId: string;
     events: Array<{
       allOutputOutage: boolean;
