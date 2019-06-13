@@ -66,7 +66,7 @@ export class WebsocketStatusWatcher extends React.Component<Props, State> {
           </span>
         </span>
       );
-    else
+    else if (this.state.websocketStatus !== 'CONNECTED')
       return (
         <>
           <span style={{ fontSize: '45px' }}>
@@ -84,6 +84,7 @@ export class WebsocketStatusWatcher extends React.Component<Props, State> {
             label='Click to reconnect' />
         </>
       );
+    return null;
   }
 
 }
