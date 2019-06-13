@@ -3,15 +3,15 @@ import { Subscription } from 'rxjs';
 import { map } from 'rxjs/operators';
 
 import { PowerGridModels } from './PowergridModels';
-import { MRID } from '@shared/MRID';
 import {
   QueryPowerGridModelsRequestBody, QueryPowerGridModelsRequestType, QueryPowerGridModelsRequest
 } from './models/QueryPowerGridModelsRequest';
 import { StompClientService } from '@shared/StompClientService';
+import { FeederModelLine } from '@shared/topology';
 
 
 interface Props {
-  mRIDs: MRID[];
+  feederModelLines: FeederModelLine[];
 }
 
 interface State {
@@ -28,7 +28,7 @@ export class PowergridModelsContainer extends React.Component<Props, State> {
   private _setupSubscription: Subscription;
   private _stompClientStatusSubscription: Subscription;
 
-  constructor(props: any) {
+  constructor(props: Props) {
     super(props);
     this.state = {
       response: null,
@@ -77,7 +77,7 @@ export class PowergridModelsContainer extends React.Component<Props, State> {
   render() {
     return (
       <PowerGridModels
-        mRIDs={this.props.mRIDs}
+        feederModelLines={this.props.feederModelLines}
         onSubmit={this.fetchPowerGridModels}
         response={this.state.response}
         isResponseReady={!this.state.isFetching} />

@@ -67,14 +67,14 @@ export class QueryLogsForm extends React.Component<Props, State> {
                 label='Source'
                 options={this.props.sources.map(source => new Option(source, source))}
                 isOptionSelected={(_, index) => index === 0}
-                onChange={options => this.formValue.source = options[0].value} />
+                onChange={selectedOption => this.formValue.source = selectedOption.value} />
               <Select
                 multiple={false}
                 label='Log level'
                 options={
                   ['ALL', 'TRACE', 'DEBUG', 'INFO', 'WARN', 'ERROR', 'FATAL'].map(e => new Option(e, e))
                 }
-                isOptionSelected={(_, index) => index === 0}
+                isOptionSelected={option => option.label === 'ALL'}
                 onChange={selectedOption => this.formValue.logLevel = selectedOption.value} />
               <Select
                 multiple={false}
@@ -82,7 +82,7 @@ export class QueryLogsForm extends React.Component<Props, State> {
                 options={
                   ['ALL', 'STARTING', 'STARTED', 'RUNNING', 'ERROR', 'CLOSED', 'COMPLETE'].map(e => new Option(e, e))
                 }
-                isOptionSelected={(_, index) => index === 0}
+                isOptionSelected={option => option.label === 'ALL'}
                 onChange={selectedOption => this.formValue.processStatus = selectedOption.value} />
             </div>
           </form>

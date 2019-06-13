@@ -4,17 +4,18 @@ import { NavLink, Route, Redirect } from 'react-router-dom';
 import { PowergridModelsContainer } from './powergrid-models';
 import { LogsContainer } from './logs';
 import { SimulationsContainer } from './simulations';
-import { MRID } from '@shared/MRID';
+import { FeederModel, FeederModelLine } from '@shared/topology';
 
 import './DataBrowser.scss';
 
 interface Props {
   match: any;
-  mRIDs: MRID[];
+  feederModel: FeederModel;
 }
 
 interface State {
   hasError: boolean;
+  feederModelLines: FeederModelLine[];
 }
 
 export class DataBrowser extends React.Component<Props, State> {
@@ -23,7 +24,12 @@ export class DataBrowser extends React.Component<Props, State> {
     super(props);
 
     this.state = {
-      hasError: false
+      hasError: false,
+      feederModelLines: Object.values(props.feederModel)
+        .reduce((accumulator, region) => {
+          accumulator.push(...region.lines);
+          return accumulator;
+        }, [])
     };
   }
 
@@ -71,9 +77,15 @@ export class DataBrowser extends React.Component<Props, State> {
             exact
             path={`${props.match.path}`}
             render={() => <div className='vertical-divider' style={{ width: '1px', boxShadow: '0 0 2px #888', 'height': '100%' }} />} />
-          <Route path={`${props.match.path}/powergrid-models`} component={() => <PowergridModelsContainer mRIDs={props.mRIDs} />} />
-          <Route path={`${props.match.path}/logs`} component={LogsContainer} />
-          <Route path={`${props.match.path}/simulations`} component={SimulationsContainer} />
+          <Route
+            path={`${props.match.path}/powergrid-models`}
+            component={() => <PowergridModelsContainer feederModelLines={this.state.feederModelLines} />} />
+          <Route
+            path={`${props.match.path}/logs`}
+            component={LogsContainer} />
+          <Route
+            path={`${props.match.path}/simulations`}
+            component={SimulationsContainer} />
         </div>
       </div>
     );

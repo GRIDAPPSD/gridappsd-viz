@@ -29,7 +29,7 @@ interface Props {
   onMRIDChanged: (mRID: string, simulationName: string) => void;
   onClose: (event) => void;
   initialConfig: SimulationConfiguration;
-  feederModels: FeederModel;
+  feederModel: FeederModel;
   availableApplications: Application[];
 }
 
@@ -123,7 +123,7 @@ export class SimulationConfigurationEditor extends React.Component<Props, State>
             <TabGroup>
               <Tab label='Power System Configuration'>
                 <PowerSystemConfigurationFormGroup
-                  feederModels={this.props.feederModels}
+                  feederModel={this.props.feederModel}
                   onChange={this.onPowerSystemConfigurationFormGroupValueChanged} />
               </Tab>
               <Tab label='Simulation Configuration'>
@@ -168,21 +168,21 @@ export class SimulationConfigurationEditor extends React.Component<Props, State>
 
   onPowerSystemConfigurationFormGroupValueChanged(formValue: PowerSystemConfigurationFormGroupValue) {
     const currentPowerSystemConfig = this.currentConfig.power_system_config;
-    currentPowerSystemConfig.GeographicalRegion_name = formValue.geographicalRegionId;
-    currentPowerSystemConfig.SubGeographicalRegion_name = formValue.subGeographicalRegionId;
-    if (formValue.lineName === '') {
+    currentPowerSystemConfig.GeographicalRegion_name = formValue.regionId;
+    currentPowerSystemConfig.SubGeographicalRegion_name = formValue.subregionId;
+    if (formValue.lineId === '') {
       currentPowerSystemConfig.Line_name = '';
       this.setState({
         disableSubmitButton: true,
         lineName: ''
       });
     }
-    else if (currentPowerSystemConfig.Line_name !== formValue.lineName) {
-      currentPowerSystemConfig.Line_name = formValue.lineName;
+    else if (currentPowerSystemConfig.Line_name !== formValue.lineId) {
+      currentPowerSystemConfig.Line_name = formValue.lineId;
       this.currentConfig.simulation_config.simulation_name = formValue.simulationName;
-      this.props.onMRIDChanged(formValue.lineName, formValue.simulationName);
+      this.props.onMRIDChanged(formValue.lineId, formValue.simulationName);
       this.setState({
-        lineName: formValue.lineName,
+        lineName: formValue.lineId,
         disableSubmitButton: false
       });
     }
