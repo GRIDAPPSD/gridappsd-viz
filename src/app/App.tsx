@@ -39,7 +39,7 @@ interface Props {
 }
 
 interface State {
-  feederModels: FeederModel;
+  feederModel: FeederModel;
   availableApplications: Application[];
 }
 
@@ -62,7 +62,7 @@ export class App extends React.Component<Props, State> {
     super(props);
 
     this.state = {
-      feederModels: null,
+      feederModel: null,
       availableApplications: null
     };
 
@@ -106,13 +106,9 @@ export class App extends React.Component<Props, State> {
   }
 
   private _fetchFeederModels() {
-    if (sessionStorage.getItem('regions')) {
-      const regions = JSON.parse(sessionStorage.getItem('regions'));
-      const subregions = JSON.parse(sessionStorage.getItem('subregions'));
-      const lines = JSON.parse(sessionStorage.getItem('lines'));
-      const mRIDs = lines.map((line, index) => ({ displayName: line.name, value: line.mRID, index }));
-      this.setState({ feederModels: { regions, subregions, lines, mRIDs } });
-    }
+    const feederModel = sessionStorage.getItem('feederModel');
+    if (feederModel)
+      this.setState({ feederModel: JSON.parse(feederModel) });
     else {
       const getAllFeederModelsRequest = new GetAllFeederModelsRequest();
       this._subscribeToFeederModelsTopic(getAllFeederModelsRequest.replyTo);
@@ -129,40 +125,86 @@ export class App extends React.Component<Props, State> {
       .pipe(map(body => JSON.parse(body)))
       .subscribe({
         next: payload => {
-          const regions = [];
-          const subregions = [];
-          const lines = [];
+          const feederModel = {} as FeederModel;
           if (typeof payload.data === 'string')
             payload.data = JSON.parse(payload.data);
-          payload.data.results.bindings.forEach((binding, index) => {
-            this._addIfNotExists(
-              regions,
-              { regionName: binding.regionName.value, regionID: binding.regionID.value, index },
-              'regionName'
+          /*
+              payload.data.results.bindings is an array of
+                {
+                    "name": {
+                        "type": "literal",
+                        "value": string
+                    },
+                    "mRID": {
+                        "type": "literal",
+                        "value": string
+                    },
+                    "substationName": {
+                        "type": "literal",
+                        "value": string
+                    },
+                    "substationID": {
+                        "type": "literal",
+                        "value": string
+                    },
+                    "subregionName": {
+                        "type": "literal",
+                        "value": string
+                    },
+                    "subregionID": {
+                        "type": "literal",
+                        "value": string
+                    },
+                    "regionName": {
+                        "type": "literal",
+                        "value": string
+                    },
+                    "regionID": {
+                        "type": "literal",
+                        "value": string
+                    }
+                }
+          */
+          for (const binding of payload.data.results.bindings) {
+            const regionId = binding.regionID.value;
+            if (!(regionId in feederModel))
+              feederModel[regionId] = {
+                id: regionId,
+                name: binding.regionName.value,
+                lines: [],
+                subregions: []
+              };
+            // If a line with given name by binding.name.value already exists, then filter it out
+            // to push the new one on
+            this._pushIfNameDoesNotExist(
+              feederModel[regionId].lines,
+              binding.name.value,
+              {
+                name: binding.name.value,
+                id: binding.mRID.value,
+                subregionId: binding.subregionID.value
+              }
             );
-            this._addIfNotExists(
-              subregions,
-              { subregionName: binding.subregionName.value, subregionID: binding.subregionID.value, index },
-              'subregionName'
+            // If a subregion with given name by binding.subregionName.value already exists, then filter it out
+            // to push the new one on
+            this._pushIfNameDoesNotExist(
+              feederModel[regionId].subregions,
+              binding.subregionName.value,
+              {
+                name: binding.subregionName.value,
+                id: binding.subregionID.value
+              }
             );
-            this._addIfNotExists(
-              lines,
-              { name: binding.name.value, mRID: binding.mRID.value, index },
-              'name'
-            );
-          });
-          const mRIDs = lines.map((line, index) => ({ displayName: line.name, value: line.mRID, index }));
-          this.setState({ feederModels: { regions, subregions, lines, mRIDs } });
-          sessionStorage.setItem('regions', JSON.stringify(regions));
-          sessionStorage.setItem('subregions', JSON.stringify(subregions));
-          sessionStorage.setItem('lines', JSON.stringify(lines));
+          }
+          this.setState({ feederModel });
+          sessionStorage.setItem('feederModel', JSON.stringify(feederModel));
         }
       });
   }
 
-  private _addIfNotExists(array: any[], object: any, key: string) {
-    if (array.every(e => e[key] !== object[key]))
-      array.push(object);
+  private _pushIfNameDoesNotExist(array: Array<{ name: string; id: string }>, nameValue: string, value: any) {
+    if (array.every(item => item.name !== nameValue))
+      array.push(value);
   }
 
   render() {
@@ -203,9 +245,17 @@ export class App extends React.Component<Props, State> {
                   </>
                 );
               }} />
-            <Route exact path='/applications' component={AvailableApplicationsAndServices} />
-            <Route exact path='/stomp-client' component={StompClientContainer} />
-            <Route path='/browse' component={props => <DataBrowser mRIDs={this.state.feederModels.mRIDs} match={props.match} />} />
+            <Route
+              exact
+              path='/applications'
+              component={AvailableApplicationsAndServices} />
+            <Route
+              exact
+              path='/stomp-client'
+              component={StompClientContainer} />
+            <Route
+              path='/browse'
+              component={props => <DataBrowser feederModel={this.state.feederModel} match={props.match} />} />
             <WebsocketStatusWatcher />
           </>
       } />
@@ -222,7 +272,7 @@ export class App extends React.Component<Props, State> {
       config = DEFAULT_SIMULATION_CONFIGURATION;
     this._overlayService.show(
       <SimulationConfigurationEditor
-        feederModels={this.state.feederModels}
+        feederModel={this.state.feederModel}
         onSubmit={updatedConfig => this._onSimulationConfigFormSubmitted(updatedConfig, browserHistory)}
         onClose={() => this._overlayService.hide()}
         onMRIDChanged={(mRID, simulationName) => {
