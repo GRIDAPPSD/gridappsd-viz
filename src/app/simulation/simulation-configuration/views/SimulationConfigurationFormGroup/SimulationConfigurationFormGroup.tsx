@@ -105,7 +105,7 @@ export class SimulationConfigurationFormGroup extends React.Component<Props, Sta
           name='simulation_name'
           value={this.state.simulationName}
           onChange={value => {
-            this.formValue.simulationName = value;
+            this.formValue.simulationName = `[NEW]${value}`;
             this.props.onChange(this.formValue);
           }} />
 

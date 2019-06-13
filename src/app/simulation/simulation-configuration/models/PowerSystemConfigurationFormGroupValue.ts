@@ -1,6 +1,6 @@
 export interface PowerSystemConfigurationFormGroupValue {
-  geographicalRegionId: string;
-  subGeographicalRegionId: string;
+  regionId: string;
+  subregionId: string;
   simulationName: string;
-  lineName: string
+  lineId: string
 }
