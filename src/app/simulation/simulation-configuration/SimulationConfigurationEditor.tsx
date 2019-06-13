@@ -189,8 +189,13 @@ export class SimulationConfigurationEditor extends React.Component<Props, State>
   }
 
   onSimulationConfigurationFormGroupValueChanged(formValue: SimulationConfigurationFormGroupValue) {
-    for (const key in formValue)
-      this.currentConfig.simulation_config[key] = formValue[key];
+    this.currentConfig.simulation_config.start_time = formValue.startTime;
+    this.currentConfig.simulation_config.duration = formValue.duration;
+    this.currentConfig.simulation_config.simulator = formValue.simulator;
+    this.currentConfig.simulation_config.run_realtime = formValue.runInRealtime;
+    if (formValue.simulationName.includes('[NEW]'))
+      this.currentConfig.simulation_config.simulation_name = formValue.simulationName.replace('[NEW]', '');
+    this.currentConfig.simulation_config.model_creation_config = formValue.modelCreationConfig;
   }
 
   onApplicationConfigurationFormGroupValueChanged(formValue: ApplicationConfigurationFormGroupValue) {
