@@ -92,6 +92,8 @@ export class TopologyRenderer extends React.Component<Props, State> {
       <div className='model-renderer'>
         <svg
           ref={elem => this._svg = elem}
+          width='1000'
+          height='1000'
           className={this.props.topologyName}
           onClick={this.showMenuOnComponentClicked}
           onMouseOver={this.showTooltip}
