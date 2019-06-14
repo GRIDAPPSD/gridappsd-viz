@@ -36,8 +36,8 @@ export class SimulationControl extends React.Component<Props, State> {
 
       <div className='simulation-control'>
         {
-          this.props.simulationId
-          &&
+          // this.props.simulationId
+          // &&
           <div className='simulation-control__simulation-id'>
             <span className='simulation-control__simulation-id__label'>Simulation ID</span>
             <Ripple>
@@ -53,7 +53,7 @@ export class SimulationControl extends React.Component<Props, State> {
                   className='simulation-control__simulation-id__value'
                   onClick={this.saveSimulationIdToClipboard}
                   style={{ pointerEvents: this.state.simulationIdCopiedSuccessfully ? 'none' : 'all' }}>
-                  {this.props.simulationId}
+                  {this.props.simulationId || '0123456789'}
                 </span>
               </span>
             </Ripple>
@@ -107,14 +107,19 @@ export class SimulationControl extends React.Component<Props, State> {
   }
 
   saveSimulationIdToClipboard(event: React.SyntheticEvent) {
-    const range = document.createRange();
-    const selection = window.getSelection();
-    range.selectNode(event.target as HTMLElement);
-    selection.addRange(range);
+    const fakeInput = document.createElement('input');
+    fakeInput.setAttribute('style', 'position:fixed');
+    fakeInput.value = (event.target as HTMLElement).textContent;
+    document.body.appendChild(fakeInput);
+    fakeInput.select();
+
     this.setState({
       simulationIdCopiedSuccessfully: document.execCommand('copy')
     });
-    selection.removeAllRanges();
+
+    window.getSelection().removeAllRanges();
+    document.body.removeChild(fakeInput);
+
     setTimeout(() => {
       this.setState({
         simulationIdCopiedSuccessfully: false
