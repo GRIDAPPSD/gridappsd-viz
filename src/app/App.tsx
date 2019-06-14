@@ -30,7 +30,7 @@ import { ModelDictionaryTracker } from './simulation/simulation-configuration/se
 import { StateStore } from '@shared/state-store';
 import { DEFAULT_APPLICATION_STATE } from './models/default-application-state';
 import { TabGroup, Tab } from '@shared/tabs';
-import { FaultEventSummary } from './fault-event-summary/FaultEventSummary';
+import { EventSummary } from './simulation/event-summary/EventSummary';
 
 import './App.scss';
 
@@ -232,7 +232,7 @@ export class App extends React.Component<Props, State> {
                             <SimulationStatusLogContainer />
                           </Tab>
                           <Tab label='Events'>
-                            <FaultEventSummary />
+                            <EventSummary />
                           </Tab>
                         </TabGroup>
                       </div>

@@ -4,11 +4,10 @@ import { BasicButton, IconButton } from '@shared/buttons';
 import { ModelDictionary, ModelDictionaryMeasurement } from '@shared/topology/model-dictionary';
 import { FormGroup, CheckBox, Select, Option, Input } from '@shared/form';
 import { COMPONENT_ATTRIBUTES } from '../../models/component-attributes';
-import { OutageEvent, OutageEventInputListItem, OutageEventOutputListItem } from '../../models/OutageEvent';
 import { Tooltip } from '@shared/tooltip';
-import { Phase } from '../../models/Phase';
+import { CommOutageEvent, Phase, CommOutageEventInputListItem, CommOutageEventOutputListItem } from '@shared/test-manager';
 
-import './OutageEventForm.scss';
+import './CommOutageEventForm.scss';
 
 let outputEquipmentTypeOptions: Option<string>[];
 const inputEquipmentTypeOptions = [
@@ -26,8 +25,8 @@ const inputEquipmentTypeOptions = [
 ];
 
 interface Props {
-  onEventAdded: (event: OutageEvent) => void;
-  initialFormValue: OutageEvent;
+  onEventAdded: (event: CommOutageEvent) => void;
+  initialFormValue: CommOutageEvent;
   modelDictionary: ModelDictionary;
 }
 
@@ -40,18 +39,19 @@ interface State {
   outputComponentOptions: Option<ModelDictionaryMeasurement>[];
   outputPhaseOptions: Option<string>[];
   outputMeasurementTypeOptions: Option<any>[];
-  inputList: OutageEventInputListItem[];
-  outputList: OutageEventOutputListItem[];
+  inputList: CommOutageEventInputListItem[];
+  outputList: CommOutageEventOutputListItem[];
   addInputItemButtonDisabled: boolean;
   addOutputItemButtonDisabled: boolean;
   allInputOutageChecked: boolean;
   allOutputOutageChecked: boolean;
 }
 
-export class OutageEventForm extends React.Component<Props, State> {
-  formValue: OutageEvent;
-  currentInputListItem: OutageEventInputListItem;
-  currentOutputListItem: OutageEventOutputListItem;
+export class CommOutageEventForm extends React.Component<Props, State> {
+
+  formValue: CommOutageEvent;
+  currentInputListItem: CommOutageEventInputListItem;
+  currentOutputListItem: CommOutageEventOutputListItem;
   inputComponentTypeSelect: Select<string, boolean>;
   outputComponentTypeSelect: Select<string, boolean>;
 
@@ -109,7 +109,7 @@ export class OutageEventForm extends React.Component<Props, State> {
     return result.map(e => new Option(e));
   }
 
-  private _newInputListItem(): OutageEventInputListItem {
+  private _newInputListItem(): CommOutageEventInputListItem {
     return {
       name: '',
       type: '',
@@ -119,7 +119,7 @@ export class OutageEventForm extends React.Component<Props, State> {
     };
   }
 
-  private _newOutputListItem(): OutageEventOutputListItem {
+  private _newOutputListItem(): CommOutageEventOutputListItem {
     return {
       name: '',
       type: '',
@@ -136,7 +136,7 @@ export class OutageEventForm extends React.Component<Props, State> {
 
   render() {
     return (
-      <div className='outage-event'>
+      <div className='comm-outage-event'>
         <FormGroup label='Input Outage List'>
           <CheckBox
             label='All Input Outage'
@@ -170,13 +170,13 @@ export class OutageEventForm extends React.Component<Props, State> {
             position='right'>
             <IconButton
               disabled={this.state.addInputItemButtonDisabled}
-              className='outage-event-form__add-input'
+              className='comm-outage-event-form__add-input'
               icon='add'
               onClick={this.addNewInputItem} />
           </Tooltip>
           {
             this.state.inputList.length > 0 &&
-            <table className='outage-event-form__input-output-list'>
+            <table className='comm-outage-event-form__input-output-list'>
               <thead>
                 <tr>
                   <th></th>
@@ -258,13 +258,13 @@ export class OutageEventForm extends React.Component<Props, State> {
             position='right'>
             <IconButton
               disabled={this.state.addOutputItemButtonDisabled}
-              className='outage-event-form__add-output'
+              className='comm-outage-event-form__add-output'
               icon='add'
               onClick={this.addNewOutputItem} />
           </Tooltip>
           {
             this.state.outputList.length > 0 &&
-            <table className='outage-event-form__input-output-list'>
+            <table className='comm-outage-event-form__input-output-list'>
               <thead>
                 <tr>
                   <th></th>
@@ -300,7 +300,7 @@ export class OutageEventForm extends React.Component<Props, State> {
         </FormGroup>
         <BasicButton
           disabled={this.disableAddEventButton()}
-          className='outage-event-form__add-event'
+          className='comm-outage-event-form__add-event'
           type='positive'
           label='Add event'
           onClick={this.createNewEvent} />
