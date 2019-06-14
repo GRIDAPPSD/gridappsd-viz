@@ -36,9 +36,9 @@ export class SimulationControl extends React.Component<Props, State> {
 
       <div className='simulation-control'>
         {
-          // this.props.simulationId
-          // &&
-          <div className='simulation-control__simulation-id'>
+          this.props.simulationId
+          &&
+          < div className='simulation-control__simulation-id'>
             <span className='simulation-control__simulation-id__label'>Simulation ID</span>
             <Ripple>
               <span className='simulation-control__simulation-id__value-wrapper'>
@@ -53,7 +53,7 @@ export class SimulationControl extends React.Component<Props, State> {
                   className='simulation-control__simulation-id__value'
                   onClick={this.saveSimulationIdToClipboard}
                   style={{ pointerEvents: this.state.simulationIdCopiedSuccessfully ? 'none' : 'all' }}>
-                  {this.props.simulationId || '0123456789'}
+                  {this.props.simulationId}
                 </span>
               </span>
             </Ripple>
@@ -101,7 +101,7 @@ export class SimulationControl extends React.Component<Props, State> {
                   onClick={this.props.onStartSimulation} />
               </Tooltip>
         }
-      </div>
+      </div >
 
     );
   }
