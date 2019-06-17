@@ -36,6 +36,10 @@ export class SimulationControlService {
     return this._currentSimulationStatusNotifer.asObservable();
   }
 
+  currentStatus() {
+    return this._currentSimulationStatus;
+  }
+
   startSimulation(simulationConfig: SimulationConfiguration) {
     if (this._currentSimulationStatus !== SimulationStatus.STARTED) {
       const startTime = new Date(simulationConfig.simulation_config.start_time.replace(/-/g, '/'));
