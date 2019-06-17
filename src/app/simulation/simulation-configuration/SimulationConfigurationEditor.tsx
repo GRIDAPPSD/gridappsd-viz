@@ -230,7 +230,7 @@ export class SimulationConfigurationEditor extends React.Component<Props, State>
       this.currentConfig.test_config.events.push(this._transformOutageEventForForSubmission(outageEvent));
     for (const faultEvent of this.faultEvents)
       this.currentConfig.test_config.events.push(this._transformFaultEventForForSubmission(faultEvent));
-    this._stateStore.mergeState({
+    this._stateStore.update({
       faultEvents: this.faultEvents,
       outageEvents: this.outageEvents
     });

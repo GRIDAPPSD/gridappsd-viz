@@ -67,7 +67,7 @@ export class SimulationControlService {
     this._stompClientService.readOnceFrom(START_SIMULATION_TOPIC)
       .pipe(map(body => JSON.parse(body)))
       .subscribe({
-        next: payload => this._stateStore.mergeState({ startSimulationResponse: payload })
+        next: payload => this._stateStore.update({ startSimulationResponse: payload })
       });
   }
 

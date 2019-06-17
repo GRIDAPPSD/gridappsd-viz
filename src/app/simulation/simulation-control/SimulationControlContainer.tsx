@@ -56,7 +56,7 @@ export class SimulationControlContainer extends React.Component<Props, State> {
   }
 
   private _readSimulationIdFromStore() {
-    this._stateStore.select(state => state.startSimulationResponse)
+    this._stateStore.select('startSimulationResponse')
       .pipe(
         takeWhile(() => !this._simulationStatusChangeSubscription.closed),
         filter(simulationStartResponse => Boolean(simulationStartResponse)),

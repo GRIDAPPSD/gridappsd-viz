@@ -33,17 +33,17 @@ export class EventSummary extends React.Component<Props, State> {
   }
 
   componentDidMount() {
-    this._stateStore.select(state => state.outageEvents)
+    this._stateStore.select('outageEvents')
       .pipe(takeUntil(this._unmountingNotifier))
       .subscribe({
-        next: (events: any[]) => this.setState({ outageEvents: events })
+        next: events => this.setState({ outageEvents: events })
       });
-    this._stateStore.select(state => state.faultEvents)
+    this._stateStore.select('faultEvents')
       .pipe(takeUntil(this._unmountingNotifier))
       .subscribe({
-        next: (events: any[]) => this.setState({ faultEvents: events })
+        next: events => this.setState({ faultEvents: events })
       });
-    this._stateStore.select(state => state.startSimulationResponse)
+    this._stateStore.select('startSimulationResponse')
       .pipe(takeUntil(this._unmountingNotifier))
       .subscribe({
         next: state => this.setState({ faultMRIDs: state.events.map(e => e.faultMRID) })

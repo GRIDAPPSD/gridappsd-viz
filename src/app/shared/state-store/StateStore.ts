@@ -1,5 +1,4 @@
-import { Subject } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { BehaviorSubject, Observable } from 'rxjs';
 
 import { ApplicationState } from './ApplicationState';
 
@@ -7,9 +6,9 @@ export class StateStore {
 
   private static readonly _INSTANCE = new StateStore();
 
-  private readonly _stateChange = new Subject<ApplicationState>();
+  private readonly _stateChangeNotifiers = new Map<string, BehaviorSubject<any>>();
 
-  private _state: ApplicationState;
+  private _isInitialized = false;
 
   private constructor() {
   }
@@ -19,20 +18,25 @@ export class StateStore {
   }
 
   initialize(defaultState: ApplicationState) {
-    if (this._state)
+    if (this._isInitialized)
       throw new Error('Store has been initialized');
-    this._state = defaultState;
-    this._stateChange.next(this._state);
+    for (const [key, value] of Object.entries(defaultState)) {
+      const notifier = new BehaviorSubject<any>(value);
+      this._stateChangeNotifiers.set(key, notifier);
+      notifier.next(value);
+    }
+    this._isInitialized = true;
   }
 
-  mergeState<K extends keyof ApplicationState>(newState: Pick<ApplicationState, K>) {
+  update<K extends keyof ApplicationState>(newState: Pick<ApplicationState, K>) {
     for (const key in newState)
-      this._state[key] = newState[key];
-    this._stateChange.next(this._state);
+      this._stateChangeNotifiers.get(key)
+        .next(newState[key]);
   }
 
-  select<K>(selector: (state: ApplicationState) => Readonly<K>) {
-    return this._stateChange.pipe(map(selector));
+  select<K extends keyof ApplicationState>(key: K): Observable<ApplicationState[K]> {
+    return this._stateChangeNotifiers.get(key)
+      .asObservable();
   }
 
 }
