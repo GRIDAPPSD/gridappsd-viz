@@ -60,20 +60,26 @@ export class EventSummary extends React.Component<Props, State> {
         {
           this.state.outageEvents.length > 0
           &&
-          <CommOutageEventSummary
-            events={this.state.outageEvents}
-            faultMRIDs={this.state.faultMRIDs}
-            onInitialize={this.initializeEvent}
-            onClear={this.clearEvent} />
+          <>
+            <h1 className='event-summary__table-name'>CommOutage</h1>
+            <CommOutageEventSummary
+              events={this.state.outageEvents}
+              faultMRIDs={this.state.faultMRIDs}
+              onInitialize={this.initializeEvent}
+              onClear={this.clearEvent} />
+          </>
         }
         {
           this.state.faultEvents.length > 0
           &&
-          <FaultEventSummary
-            events={this.state.faultEvents}
-            faultMRIDs={this.state.faultMRIDs.slice(this.state.outageEvents.length)}
-            onInitialize={this.initializeEvent}
-            onClear={this.clearEvent} />
+          <>
+            <h1 className='event-summary__table-name'>Fault</h1>
+            <FaultEventSummary
+              events={this.state.faultEvents}
+              faultMRIDs={this.state.faultMRIDs.slice(this.state.outageEvents.length)}
+              onInitialize={this.initializeEvent}
+              onClear={this.clearEvent} />
+          </>
         }
       </div>
     );
