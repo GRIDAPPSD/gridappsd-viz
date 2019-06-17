@@ -24,6 +24,7 @@ export class SimulationStatusLogContainer extends React.Component<Props, State> 
 
   private readonly _stompClientService = StompClientService.getInstance();
   private readonly _simulationQueue = SimulationQueue.getInstance();
+  private readonly _simulationControlService = SimulationControlService.getInstance();
   private readonly _store = Store.getInstance<ApplicationState>();
   private _stateStoreChangeSubscription: Subscription;
   private _stompClientStatusSubscription: Subscription;
@@ -83,7 +84,8 @@ export class SimulationStatusLogContainer extends React.Component<Props, State> 
   }
 
   private _newObservableForLogMessages(simulationId: string) {
-    return this._stompClientService.readFrom(`${SIMULATION_STATUS_LOG_TOPIC}.${simulationId}`);
+    return this._stompClientService.readFrom(`${SIMULATION_STATUS_LOG_TOPIC}.${simulationId}`)
+      .pipe(takeWhile(() => this._simulationControlService.currentStatus() === SimulationStatus.STARTED));
   }
 
   private _onSimulationStatusLogMessageReceived(logMessage: string) {
