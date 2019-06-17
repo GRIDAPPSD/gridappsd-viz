@@ -13,8 +13,8 @@ interface Props {
 }
 
 interface State {
-  outageEvents: any[];
-  faultEvents: any[];
+  outageEvents: CommOutageEvent[];
+  faultEvents: FaultEvent[];
   faultMRIDs: string[];
 }
 

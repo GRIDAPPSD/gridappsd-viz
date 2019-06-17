@@ -2,7 +2,7 @@ import * as React from 'react';
 import { Subscription } from 'rxjs';
 import { map, filter, takeWhile } from 'rxjs/operators';
 
-import { SimulationControlService, SimulationStatus, SimulationQueue, START_SIMULATION_TOPIC } from '@shared/simulation';
+import { SimulationControlService, SimulationStatus, SimulationQueue } from '@shared/simulation';
 import { SimulationControl } from './SimulationControl';
 import { StateStore } from '@shared/state-store';
 

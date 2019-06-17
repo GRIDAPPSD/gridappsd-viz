@@ -1,3 +1,5 @@
+import { CommOutageEvent, FaultEvent } from '@shared/test-manager';
+
 export interface ApplicationState {
   startSimulationResponse: {
     simulationId: string;
@@ -14,6 +16,6 @@ export interface ApplicationState {
       phases: string;
     }>;
   };
-  outageEvents: any[];
-  faultEvents: any[];
+  outageEvents: CommOutageEvent[];
+  faultEvents: FaultEvent[];
 }
