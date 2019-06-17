@@ -85,7 +85,8 @@ export class PowerSystemConfigurationFormGroup extends React.Component<Props, St
   onRegionSelectionChanged(selectedOption: Option<FeederModelRegion>) {
     this.formValue.regionId = selectedOption.value.id;
     this.setState({
-      subregionOptions: selectedOption.value.subregions.map(e => new Option(e.name, e.id))
+      subregionOptions: selectedOption.value.subregions.map(e => new Option(e.name, e.id)),
+      lineOptions: []
     });
 
     this.props.onChange(this.formValue);
