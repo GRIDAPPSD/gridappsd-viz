@@ -3,8 +3,7 @@ import * as React from 'react';
 import { BasicButton } from '@shared/buttons';
 import { ModelDictionary } from '@shared/topology/model-dictionary';
 import { FormGroup, Select, Option, Input } from '@shared/form';
-import { FaultEvent, FaultKind, FaultImpedence } from '../../models/FaultEvent';
-import { Phase } from '../../models/Phase';
+import { FaultEvent, Phase, FaultKind, FaultImpedence } from '@shared/test-manager';
 
 import './FaultEventForm.scss';
 
