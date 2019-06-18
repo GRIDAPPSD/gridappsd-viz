@@ -1,18 +1,18 @@
 import { Phase } from './Phase';
 
-export interface OutageEvent {
+export interface CommOutageEvent {
   type: 'CommOutage';
   tag: string;
   allInputOutage: boolean;
-  inputList: OutageEventInputListItem[];
+  inputList: CommOutageEventInputListItem[];
   allOutputOutage: boolean;
-  outputList: OutageEventOutputListItem[];
+  outputList: CommOutageEventOutputListItem[];
   startDateTime: string;
   stopDateTime: string;
 }
 
 
-export interface OutageEventInputListItem {
+export interface CommOutageEventInputListItem {
   type: string;
   name: string;
   mRID: any;
@@ -20,7 +20,7 @@ export interface OutageEventInputListItem {
   attribute: string;
 }
 
-export interface OutageEventOutputListItem {
+export interface CommOutageEventOutputListItem {
   type: string;
   name: string;
   mRID: string;

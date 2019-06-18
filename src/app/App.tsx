@@ -27,11 +27,10 @@ import {
 } from './models/message-requests/GetAvailableApplicationsAndServicesRequest';
 import { DEFAULT_SIMULATION_CONFIGURATION } from './models/default-simulation-configuration';
 import { ModelDictionaryTracker } from './simulation/simulation-configuration/services/ModelDictionaryTracker';
-import { Store } from '@shared/Store';
-import { ApplicationState } from '@shared/ApplicationState';
+import { StateStore } from '@shared/state-store';
 import { DEFAULT_APPLICATION_STATE } from './models/default-application-state';
 import { TabGroup, Tab } from '@shared/tabs';
-import { FaultEventSummary } from './fault-event-summary/FaultEventSummary';
+import { EventSummary } from './simulation/event-summary/EventSummary';
 
 import './App.scss';
 
@@ -48,7 +47,7 @@ export class App extends React.Component<Props, State> {
   readonly componentMrids = new Map<string, string & string[]>();
   readonly componentPhases = new Map<string, string[]>();
 
-  private _store = Store.getInstance<ApplicationState>();
+  private _stateStore = StateStore.getInstance();
 
   private readonly _stompClientService = StompClientService.getInstance();
   private readonly _simulationOutputService = SimulationOutputService.getInstance();
@@ -66,7 +65,7 @@ export class App extends React.Component<Props, State> {
       availableApplications: null
     };
 
-    this._store.initialize(DEFAULT_APPLICATION_STATE);
+    this._stateStore.initialize(DEFAULT_APPLICATION_STATE);
   }
 
   componentDidCatch() {
@@ -233,7 +232,7 @@ export class App extends React.Component<Props, State> {
                             <SimulationStatusLogContainer />
                           </Tab>
                           <Tab label='Events'>
-                            <FaultEventSummary />
+                            <EventSummary />
                           </Tab>
                         </TabGroup>
                       </div>

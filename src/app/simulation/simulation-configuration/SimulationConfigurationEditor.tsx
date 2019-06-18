@@ -14,13 +14,12 @@ import { TestConfigurationFormGroup } from './views/TestConfigurationFormGroup';
 import { ModelDictionaryTracker } from './services/ModelDictionaryTracker';
 import { Wait } from '@shared/wait';
 import { DateTimeService } from './services/DateTimeService';
-import { OutageEvent } from './models/OutageEvent';
-import { FaultEvent, FaultKind } from './models/FaultEvent';
+import { CommOutageEvent } from '../../shared/test-manager/CommOutageEvent';
+import { FaultEvent, FaultKind } from '../../shared/test-manager/FaultEvent';
 import { PowerSystemConfigurationFormGroupValue } from './models/PowerSystemConfigurationFormGroupValue';
 import { SimulationConfigurationFormGroupValue } from './models/SimulationConfigurationFormGroupValue';
 import { ApplicationConfigurationFormGroupValue } from './models/ApplicationConfigurationFormGroupValue';
-import { Store } from '@shared/Store';
-import { ApplicationState } from '@shared/ApplicationState';
+import { StateStore } from '@shared/state-store';
 
 import './SimulationConfigurationEditor.scss';
 
@@ -47,13 +46,12 @@ export class SimulationConfigurationEditor extends React.Component<Props, State>
   readonly currentConfig: SimulationConfiguration;
   readonly simulationStartDate = new Date();
   readonly dateTimeService = DateTimeService.getInstance();
-
-  outageEvents: OutageEvent[] = [];
+  outageEvents: CommOutageEvent[] = [];
   faultEvents: FaultEvent[] = [];
 
   private readonly _modelDictionaryTracker = ModelDictionaryTracker.getInstance();
   private readonly _simulationControlService = SimulationControlService.getInstance();
-  private readonly _store = Store.getInstance<ApplicationState>();
+  private readonly _stateStore = StateStore.getInstance();
 
   private _subscription: Subscription;
   private _simulationStatusSubscription: Subscription;
@@ -209,7 +207,7 @@ export class SimulationConfigurationEditor extends React.Component<Props, State>
       this.currentConfig.application_config.applications.pop();
   }
 
-  onFaultEventsAdded(events: { outage: OutageEvent[]; fault: FaultEvent[] }) {
+  onFaultEventsAdded(events: { outage: CommOutageEvent[]; fault: FaultEvent[] }) {
     this.outageEvents = events.outage;
     this.faultEvents = events.fault;
   }
@@ -232,14 +230,14 @@ export class SimulationConfigurationEditor extends React.Component<Props, State>
       this.currentConfig.test_config.events.push(this._transformOutageEventForForSubmission(outageEvent));
     for (const faultEvent of this.faultEvents)
       this.currentConfig.test_config.events.push(this._transformFaultEventForForSubmission(faultEvent));
-    this._store.mergeState({
+    this._stateStore.update({
       faultEvents: this.faultEvents,
       outageEvents: this.outageEvents
     });
     this.props.onSubmit(this.currentConfig);
   }
 
-  private _transformOutageEventForForSubmission(outageEvent: OutageEvent) {
+  private _transformOutageEventForForSubmission(outageEvent: CommOutageEvent) {
     return {
       allInputOutage: outageEvent.allInputOutage,
       allOutputOutage: outageEvent.allOutputOutage,

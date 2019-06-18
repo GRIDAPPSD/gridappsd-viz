@@ -4,15 +4,14 @@ import { filter } from 'rxjs/operators';
 import { FormGroup, Input } from '@shared/form';
 import { RadioButtonGroup, RadioButton } from '@shared/form/radio';
 import { ModelDictionary } from '@shared/topology';
-import { OutageEventForm } from './OutageEventForm';
+import { CommOutageEventForm } from './CommOutageEventForm';
 import { FaultEventForm } from './FaultEventForm';
-import { FaultEvent, FaultKind } from '../../models/FaultEvent';
-import { OutageEvent } from '../../models/OutageEvent';
-import { OutageEventSummaryTable } from './OutageEventSummaryTable';
+import { CommOutageEventSummaryTable } from './CommOutageEventSummaryTable';
 import { IconButton } from '@shared/buttons';
 import { FilePicker, FilePickerService } from '@shared/file-picker';
 import { Tooltip } from '@shared/tooltip';
 import { FaultEventSummaryTable } from './FaultEventSummaryTable';
+import { CommOutageEvent, FaultEvent, FaultKind } from '@shared/test-manager';
 
 import './TestConfigurationFormGroup.scss';
 
@@ -20,15 +19,15 @@ interface Props {
   modelDictionary: ModelDictionary;
   simulationStartDate: string;
   simulationStopDate: string;
-  onEventsAdded: (events: { outage: OutageEvent[]; fault: FaultEvent[] }) => void;
+  onEventsAdded: (events: { outage: CommOutageEvent[]; fault: FaultEvent[] }) => void;
 }
 
 interface State {
   selectedEventType: 'outage' | 'fault';
   selectedEventTypeToView: 'outage' | 'fault';
-  outageEvents: OutageEvent[];
+  outageEvents: CommOutageEvent[];
   faultEvents: FaultEvent[];
-  currentOutageEvent: OutageEvent;
+  currentOutageEvent: CommOutageEvent;
   currentFaultEvent: FaultEvent;
 }
 
@@ -76,7 +75,7 @@ export class TestConfigurationFormGroup extends React.Component<Props, State> {
     };
   }
 
-  defaultOutageEventFormValue(): OutageEvent {
+  defaultOutageEventFormValue(): CommOutageEvent {
     return {
       type: 'CommOutage',
       tag: this._generateEventTag(),
@@ -171,7 +170,7 @@ export class TestConfigurationFormGroup extends React.Component<Props, State> {
 
   showEventFilePicker() {
     this._filePicker.open()
-      .readFileAsJson<{ outageEvents: OutageEvent[]; faultEvents: FaultEvent[] }>()
+      .readFileAsJson<{ outageEvents: CommOutageEvent[]; faultEvents: FaultEvent[] }>()
       /* File content should look like this
         {
           "outageEvents": [...],
@@ -200,7 +199,7 @@ export class TestConfigurationFormGroup extends React.Component<Props, State> {
     switch (this.state.selectedEventType) {
       case 'outage':
         return (
-          <OutageEventForm
+          <CommOutageEventForm
             modelDictionary={this.props.modelDictionary}
             initialFormValue={this.state.currentOutageEvent}
             onEventAdded={this.addOutageEvent} />
@@ -217,7 +216,7 @@ export class TestConfigurationFormGroup extends React.Component<Props, State> {
     }
   }
 
-  addOutageEvent(event: OutageEvent) {
+  addOutageEvent(event: CommOutageEvent) {
     event.tag = this._tagForCurrentEvent;
     const events = [...this.state.outageEvents, event];
     this.setState({
@@ -249,7 +248,7 @@ export class TestConfigurationFormGroup extends React.Component<Props, State> {
     switch (this.state.selectedEventTypeToView) {
       case 'outage':
         return (
-          <OutageEventSummaryTable
+          <CommOutageEventSummaryTable
             events={this.state.outageEvents}
             onDeleteEvent={this.deleteOutageEvent} />
         );
@@ -264,7 +263,7 @@ export class TestConfigurationFormGroup extends React.Component<Props, State> {
     }
   }
 
-  deleteOutageEvent(event: OutageEvent) {
+  deleteOutageEvent(event: CommOutageEvent) {
     this.setState({
       outageEvents: this.state.outageEvents.filter(e => e !== event)
     });

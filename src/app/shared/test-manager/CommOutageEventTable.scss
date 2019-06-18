@@ -1,0 +1,52 @@
+.comm-outage-event-table {
+    border-collapse: collapse;
+    width: 100%;
+
+
+    thead {
+        background-color: #3f51b5;
+        color: #fff;
+        border: 2px solid #CECECE;
+    }
+
+    th,
+    td,
+    div {
+        font-size: 0.9em;
+        text-align: center;
+        white-space: nowrap;
+    }
+
+    th[rowspan='2'] {
+        font-size: 0.8em;
+    }
+
+    th {
+        font-weight: 500;
+        padding: 10px 15px;
+        border: 2px solid #CECECE;
+        white-space: nowrap;
+    }
+
+    .comm-outage-event-table__secondary-heading {
+        font-size: 0.8em;
+    }
+
+    td {
+        border: 2px solid #CECECE;
+        padding: 0;
+
+        &>div {
+            padding: 5px;
+
+            &:not(:last-of-type) {
+                border-bottom: 2px solid #CECECE;
+            }
+        }
+    }
+}
+
+.comm-outage-event-table__row-action {
+    display: inline-flex;
+    justify-content: center;
+}
