@@ -29,6 +29,7 @@
     position: absolute;
     width: 20px;
     height: 20px;
+
     &::after {
         content: '';
         background-color: #555;
@@ -52,6 +53,7 @@
         transform: translateX(-50%);
         top: 100%;
         left: 50%;
+
         &::after {
             transform: translateY(-18px) rotate(45deg);
         }
@@ -60,9 +62,10 @@
 
 .gridappsd-tooltip.right {
     .gridappsd-tooltip__arrow {
-        transform: translateY(-50%) translateX(-20px);
+        transform: translateY(-55%) translateX(-20px);
         top: 50%;
         left: 0;
+
         &::after {
             transform: translateX(65%) rotate(45deg);
         }
@@ -74,6 +77,7 @@
         transform: translateX(-50%);
         top: -20px;
         left: 50%;
+
         &::after {
             transform: translateY(16px) rotate(45deg);
         }
@@ -85,6 +89,7 @@
         transform: translateY(-51%);
         top: 50%;
         left: 100%;
+
         &::after {
             transform: translateX(-85%) rotate(45deg);
         }

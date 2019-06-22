@@ -6,6 +6,7 @@ import { FormGroup, CheckBox, Select, Option, Input } from '@shared/form';
 import { COMPONENT_ATTRIBUTES } from '../../models/component-attributes';
 import { Tooltip } from '@shared/tooltip';
 import { CommOutageEvent, Phase, CommOutageEventInputListItem, CommOutageEventOutputListItem } from '@shared/test-manager';
+import { Validators } from '@shared/form/validation';
 
 import './CommOutageEventForm.scss';
 
@@ -246,12 +247,20 @@ export class CommOutageEventForm extends React.Component<Props, State> {
             name='startDateTime'
             hint='YYYY-MM-DD HH:MM:SS'
             value={this.formValue.startDateTime}
+            validators={[
+              Validators.checkNotEmpty('Start date time is empty'),
+              Validators.checkValidDateTime('Invalid format, YYYY-MM-DD HH:MM:SS expected')
+            ]}
             onChange={this.onStartDateTimeChanged} />
           <Input
             label='Stop Date Time'
             name='stopDateTime'
             hint='YYYY-MM-DD HH:MM:SS'
             value={this.formValue.stopDateTime}
+            validators={[
+              Validators.checkNotEmpty('Stop date time is empty'),
+              Validators.checkValidDateTime('Invalid format, YYYY-MM-DD HH:MM:SS expected')
+            ]}
             onChange={this.onStopDateTimeChanged} />
           <Tooltip
             content='Add output item'

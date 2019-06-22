@@ -4,6 +4,7 @@ import { BasicButton } from '@shared/buttons';
 import { ModelDictionary } from '@shared/topology/model-dictionary';
 import { FormGroup, Select, Option, Input } from '@shared/form';
 import { FaultEvent, Phase, FaultKind, FaultImpedence } from '@shared/test-manager';
+import { Validators } from '@shared/form/validation';
 
 import './FaultEventForm.scss';
 
@@ -118,12 +119,20 @@ export class FaultEventForm extends React.Component<Props, State> {
             name='startDateTime'
             hint='YYYY-MM-DD HH:MM:SS'
             value={this.state.formValue.startDateTime}
+            validators={[
+              Validators.checkNotEmpty('Start date time is empty'),
+              Validators.checkValidDateTime('Invalid format, YYYY-MM-DD HH:MM:SS expected')
+            ]}
             onChange={this.onStartDateTimeChanged} />
           <Input
             label='Stop Date Time'
             hint='YYYY-MM-DD HH:MM:SS'
             name='stopDateTime'
             value={this.state.formValue.stopDateTime}
+            validators={[
+              Validators.checkNotEmpty('Stop date time is empty'),
+              Validators.checkValidDateTime('Invalid format, YYYY-MM-DD HH:MM:SS expected')
+            ]}
             onChange={this.onStopDateTimeChanged} />
         </FormGroup>
         <BasicButton

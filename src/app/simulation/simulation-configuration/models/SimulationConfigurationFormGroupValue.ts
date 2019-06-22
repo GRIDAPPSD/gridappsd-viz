@@ -1,5 +1,5 @@
 export interface SimulationConfigurationFormGroupValue {
-  startTime: string;
+  startDateTime: string;
   duration: string;
   simulator: string;
   runInRealtime: boolean;
@@ -13,4 +13,5 @@ export interface SimulationConfigurationFormGroupValue {
     randomize_zipload_fractions: boolean;
     use_houses: boolean;
   };
+  isValid: boolean;
 }
