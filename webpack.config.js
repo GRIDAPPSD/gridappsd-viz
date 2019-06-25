@@ -8,24 +8,27 @@ const TsConfigPathsPlugin = require('awesome-typescript-loader').TsConfigPathsPl
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 
 module.exports = env => {
-  if (env === 'production')
+  const isProd = env === 'production';
+  if (isProd)
     updateVersion();
   return {
     entry: {
       app: './src/main.tsx',
       vendors: './src/vendors.ts'
     },
+
     output: {
       path: path.resolve(__dirname, 'dist'),
-      filename: '[name].[hash:10].js'
+      filename: '[name].[hash:10].js',
+      publicPath: '',
     },
 
+
     resolve: {
-      // Add '.ts' and '.tsx' as resolvable extensions.
       alias: {
         '@shared': path.resolve('./src/app/shared')
       },
-      extensions: ['.ts', '.js', '.tsx', '.jsx', '.scss', '.css', '.html', '.web.js']
+      extensions: ['.ts', '.js', '.tsx', '.jsx', '.scss', '.css', '.html']
     },
 
     module: {
@@ -42,6 +45,7 @@ module.exports = env => {
       { test: /\.(svg|png|woff|woff2|ttf|eot)$/, use: 'file-loader' },
       ]
     },
+
     plugins: [
       new TsConfigPathsPlugin(),
       new webpack.optimize.CommonsChunkPlugin({
@@ -73,6 +77,7 @@ module.exports = env => {
         htmlAcceptHeaders: ['text/html', 'application/xhtml+xml']
       }
     },
+
     devtool: 'source-map'
   };
 };
@@ -84,15 +89,13 @@ function updateVersion() {
       '/path/to/node',
       '/path/to/webpack',
       '--env=production',
-      '--env.BUILD_VERSION',
-      'some-version',
+      '@arg1=some-value-1',
+      '@arg2=some-value-2',
+      ...
     ]
   */
-  if (process.argv.length === 5) {
-    const buildVersionValue = process.argv.slice(-1)[0];
-    writeVersionNumber(buildVersionValue);
-  }
-  else {
+  const args = process.argv.slice(3);
+  if (args.length === 0)
     childProcess.exec('git rev-parse --abbrev-ref HEAD', {}, (error, stdout) => {
       if (error)
         console.error(`An error occured trying to 'git rev-parse --abbrev-ref HEAD'`);
@@ -100,17 +103,32 @@ function updateVersion() {
         const lastLine = stdout.trim().split('\n').slice(-1)[0];
         const lastIndexOfForwardSlash = lastLine.lastIndexOf('/');
         const versionNumber = lastLine.substr(lastIndexOfForwardSlash + 1);
-        writeVersionNumber(versionNumber);
+        writeVersionNumber({ version: versionNumber });
       }
     });
+  else {
+    for (const [argName, argValue] of args.map(arg => arg.split('='))) {
+      if (argName === '@version')
+        writeVersionNumber({ version: argValue });
+      else if (argName === '@host')
+        writeVersionNumber({ host: argValue });
+      else {
+        console.error(`Unknown argument: ${argName.replace('@', '')}`);
+        throw new Error();
+      }
+    }
   }
 }
 
-function writeVersionNumber(versionNumber) {
-  const runConfig = 'export const RUN_CONFIG = ' + JSON.stringify({
-    'version': versionNumber,
-    'gossServerUrl': 'ws://127.0.0.1:61614'
-  }, null, 2) + ';\n';
+function writeVersionNumber({ version, host }) {
+  const runConfigFileContent = fs.readFileSync('./runConfig.ts')
+    .toString()
+    .replace(/export\s+const\s+RUN_CONFIG\s+=\s+|;/g, '');
+  const existingRunConfig = JSON.parse(runConfigFileContent);
+  if (version)
+    existingRunConfig.version = version;
+  if (host)
+    existingRunConfig.gossServerUrl = `ws://${host}`;
 
-  fs.writeFileSync('./runConfig.ts', runConfig);
+  fs.writeFileSync('./runConfig.ts', `export const RUN_CONFIG = ${JSON.stringify(existingRunConfig, null, 2)};`);
 }
