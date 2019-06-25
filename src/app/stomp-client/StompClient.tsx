@@ -5,7 +5,6 @@ import { BasicButton } from '@shared/buttons';
 import { Wait } from '@shared/wait';
 
 import './StompClient.styles.scss';
-import { FormControl } from '@shared/form/form-control/FormControl';
 
 interface Props {
   response: any;
@@ -40,7 +39,7 @@ export class StompClient extends React.Component<Props, State> {
             className='stomp-client-form__request-body'
             label='Request'
             value={this.state.requestBody}
-            onUpdate={value => this.setState({ requestBody: value })} />
+            onChange={value => this.setState({ requestBody: value })} />
           <BasicButton
             label='Send request'
             type='positive'
@@ -50,7 +49,7 @@ export class StompClient extends React.Component<Props, State> {
             className='stomp-client-form__response'
             label='Response'
             value={this.props.response}
-            onUpdate={null} />
+            onChange={null} />
         </form>
         <Wait show={!this.props.isDone} />
       </>

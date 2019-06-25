@@ -4,6 +4,7 @@ import { FormGroup, Select, TextArea, Option } from '@shared/form';
 import { SimulationConfiguration } from '@shared/simulation';
 import { Application } from '@shared/Application';
 import { ApplicationConfigurationFormGroupValue } from '../../models/ApplicationConfigurationFormGroupValue';
+import { Validators } from '@shared/form/validation';
 
 import './ApplicationConfigurationFormGroup.scss';
 
@@ -15,6 +16,7 @@ interface Props {
 
 interface State {
   availableApplicationOptions: Option<string>[];
+  disabledAppConfigStringInputBox: boolean;
 }
 
 export class ApplicationConfigurationFormGroup extends React.Component<Props, State> {
@@ -24,7 +26,8 @@ export class ApplicationConfigurationFormGroup extends React.Component<Props, St
     super(props);
 
     this.state = {
-      availableApplicationOptions: (props.availableApplications || []).map(app => new Option(app.id))
+      availableApplicationOptions: (props.availableApplications || []).map(app => new Option(app.id)),
+      disabledAppConfigStringInputBox: true
     };
 
     const previousSelectedApplication = this.props.currentConfig.application_config.applications[0];
@@ -50,12 +53,17 @@ export class ApplicationConfigurationFormGroup extends React.Component<Props, St
           multiple={false}
           label='Application name'
           options={this.state.availableApplicationOptions}
+          optional={true}
           onClear={this.onApplicationDeselected}
           onChange={this.onSelectedApplicationChanged} />
         <TextArea
           label='Application configuration'
           value={this.formValue.configString}
-          onUpdate={value => {
+          validators={[
+            Validators.checkNotEmpty('Application config string is empty')
+          ]}
+          disabled={this.state.disabledAppConfigStringInputBox}
+          onChange={value => {
             this.formValue.configString = value;
             this.props.onChange(this.formValue);
           }} />
@@ -66,10 +74,16 @@ export class ApplicationConfigurationFormGroup extends React.Component<Props, St
   onApplicationDeselected() {
     this.formValue.applicationId = '';
     this.props.onChange(this.formValue);
+    this.setState({
+      disabledAppConfigStringInputBox: true
+    });
   }
 
   onSelectedApplicationChanged(selectedOption: Option<string>) {
     this.formValue.applicationId = selectedOption.value;
     this.props.onChange(this.formValue);
+    this.setState({
+      disabledAppConfigStringInputBox: false
+    });
   }
 }

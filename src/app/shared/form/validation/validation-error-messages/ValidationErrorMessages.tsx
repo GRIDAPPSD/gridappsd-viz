@@ -1,7 +1,5 @@
 import * as React from 'react';
 
-import { ValidationResult } from '../ValidationResult';
-
 import './ValidationErrorMessages.scss';
 
 interface Props {

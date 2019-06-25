@@ -165,35 +165,33 @@ export class SimulationConfigurationEditor extends React.Component<Props, State>
   }
 
   onPowerSystemConfigurationFormGroupValueChanged(formValue: PowerSystemConfigurationFormGroupValue) {
-    const currentPowerSystemConfig = this.currentConfig.power_system_config;
-    currentPowerSystemConfig.GeographicalRegion_name = formValue.regionId;
-    currentPowerSystemConfig.SubGeographicalRegion_name = formValue.subregionId;
-    if (formValue.lineId === '') {
-      currentPowerSystemConfig.Line_name = '';
-      this.setState({
-        disableSubmitButton: true,
-        lineName: ''
-      });
-    }
-    else if (currentPowerSystemConfig.Line_name !== formValue.lineId) {
+    if (formValue.isValid) {
+      const currentPowerSystemConfig = this.currentConfig.power_system_config;
+      currentPowerSystemConfig.GeographicalRegion_name = formValue.regionId;
+      currentPowerSystemConfig.SubGeographicalRegion_name = formValue.subregionId;
       currentPowerSystemConfig.Line_name = formValue.lineId;
       this.currentConfig.simulation_config.simulation_name = formValue.simulationName;
       this.props.onMRIDChanged(formValue.lineId, formValue.simulationName);
-      this.setState({
-        lineName: formValue.lineId,
-        disableSubmitButton: false
-      });
     }
+    this.setState({
+      lineName: formValue.lineId,
+      disableSubmitButton: !formValue.isValid
+    });
   }
 
   onSimulationConfigurationFormGroupValueChanged(formValue: SimulationConfigurationFormGroupValue) {
-    this.currentConfig.simulation_config.start_time = formValue.startTime;
-    this.currentConfig.simulation_config.duration = formValue.duration;
-    this.currentConfig.simulation_config.simulator = formValue.simulator;
-    this.currentConfig.simulation_config.run_realtime = formValue.runInRealtime;
-    if (formValue.simulationName.includes('[NEW]'))
-      this.currentConfig.simulation_config.simulation_name = formValue.simulationName.replace('[NEW]', '');
-    this.currentConfig.simulation_config.model_creation_config = formValue.modelCreationConfig;
+    if (formValue.isValid) {
+      this.currentConfig.simulation_config.start_time = formValue.startDateTime;
+      this.currentConfig.simulation_config.duration = formValue.duration;
+      this.currentConfig.simulation_config.simulator = formValue.simulator;
+      this.currentConfig.simulation_config.run_realtime = formValue.runInRealtime;
+      if (formValue.simulationName.includes('[NEW]'))
+        this.currentConfig.simulation_config.simulation_name = formValue.simulationName.replace('[NEW]', '');
+      this.currentConfig.simulation_config.model_creation_config = formValue.modelCreationConfig;
+    }
+    this.setState({
+      disableSubmitButton: !formValue.isValid
+    });
   }
 
   onApplicationConfigurationFormGroupValueChanged(formValue: ApplicationConfigurationFormGroupValue) {

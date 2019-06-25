@@ -8,16 +8,18 @@ import { OptionList } from './OptionList';
 import { OptionListFilter } from './OptionListFilter';
 import { SelectedOptionList } from './SelectedOptionList';
 import { OptionListPaginator } from './OptionListPaginator';
+import { ValidationErrorMessages } from '../validation';
 
 import './Select.scss';
 
 interface Props<T, E extends boolean> {
   label: string;
   options: Option<T>[];
-  onChange: E extends true ? (selections: Option<T>[]) => void : (selection: Option<T>) => void;
-  onClear?: () => void;
+  onChange: E extends true ? (selections: Option<T>[], label: string) => void : (selection: Option<T>, label: string) => void;
+  onClear?: (formControlLabel: string) => void;
   isOptionSelected?: (option: Option<T>, index: number) => boolean;
   defaultLabel?: string;
+  optional?: boolean;
   multiple: E;
 }
 
@@ -30,6 +32,7 @@ interface State<T> {
   top: number;
   currentPage: Option<T>[];
   filteredOptions: Option<T>[];
+  nothingSelectedMessage: string[];
 }
 
 export class Select<T, E extends boolean> extends React.Component<Props<T, E>, State<T>> {
@@ -49,7 +52,8 @@ export class Select<T, E extends boolean> extends React.Component<Props<T, E>, S
       left: 0,
       top: 0,
       currentPage: [],
-      filteredOptions: props.options
+      filteredOptions: props.options,
+      nothingSelectedMessage: []
     };
     this._optionListContainer.className = 'select-option-list-container';
     this._onClose = this._onClose.bind(this);
@@ -75,7 +79,7 @@ export class Select<T, E extends boolean> extends React.Component<Props<T, E>, S
             ? this.state.defaultLabel
             : this._produceCurrentLabelForMultiSelect(),
         });
-        (this.props.onChange as any)(this.state.selectedOptions);
+        (this.props.onChange as any)(this.state.selectedOptions, this.props.label);
       }
     }
   }
@@ -105,13 +109,20 @@ export class Select<T, E extends boolean> extends React.Component<Props<T, E>, S
         selectedOptions
       });
       clickedOption.isSelected = true;
-      (this.props.onChange as any)(clickedOption);
+      (this.props.onChange as any)(clickedOption, this.props.label);
     }
     else {
       this.setState({
         opened: false
       });
     }
+    this._clearSelectionRequiredMessage();
+  }
+
+  private _clearSelectionRequiredMessage() {
+    this.setState({
+      nothingSelectedMessage: []
+    });
   }
 
   private _toggleAllSelectedOptions(isSelected: boolean) {
@@ -132,9 +143,9 @@ export class Select<T, E extends boolean> extends React.Component<Props<T, E>, S
           selectedOptions
         }, () => this._toggleAllSelectedOptions(true));
         if (this.props.multiple)
-          (this.props.onChange as any)(selectedOptions);
+          (this.props.onChange as any)(selectedOptions, this.props.label);
         else
-          (this.props.onChange as any)(selectedOptions[0]);
+          (this.props.onChange as any)(selectedOptions[0], this.props.label);
       }
     }
   }
@@ -154,6 +165,7 @@ export class Select<T, E extends boolean> extends React.Component<Props<T, E>, S
     if (this.props.options !== prevProps.options) {
       this.reset();
       this._selectDefaultSelectedOptions();
+      this._clearSelectionRequiredMessage();
     }
   }
 
@@ -170,7 +182,7 @@ export class Select<T, E extends boolean> extends React.Component<Props<T, E>, S
   render() {
     return (
       <FormControl
-        className={`select${this.props.options.length === 0 ? ' disabled' : ''}`}
+        className={this.calculateClassName()}
         label={this.props.label}>
         <button
           ref={ref => this.optionListOpener = ref}
@@ -181,6 +193,7 @@ export class Select<T, E extends boolean> extends React.Component<Props<T, E>, S
           <span className='text'>{this.state.currentLabel}</span>
           <i className='material-icons'>keyboard_arrow_down</i>
         </button>
+        <ValidationErrorMessages messages={this.state.nothingSelectedMessage} />
         {
           createPortal(
             <PopUp
@@ -206,6 +219,12 @@ export class Select<T, E extends boolean> extends React.Component<Props<T, E>, S
         }
       </FormControl>
     );
+  }
+
+  calculateClassName() {
+    return 'select'
+      + (this.props.options.length === 0 ? ' disabled' : '')
+      + (this.state.nothingSelectedMessage.length === 0 ? ' valid' : ' invalid');
   }
 
   onOpen() {
@@ -242,14 +261,23 @@ export class Select<T, E extends boolean> extends React.Component<Props<T, E>, S
   deselectOption(option: Option<T>) {
     this.setState(state => {
       const selectedOptions = state.selectedOptions.filter(e => e !== option);
-      if (selectedOptions.length === 0 && this.props.onClear)
-        this.props.onClear();
+      if (selectedOptions.length === 0 && this.props.onClear) {
+        this.props.onClear(this.props.label);
+        if (!this.props.optional)
+          this._showSelectionRequiredMessage();
+      }
       return {
         selectedOptions,
         currentLabel: !this.props.multiple ? this.state.defaultLabel : this._produceCurrentLabelForMultiSelect()
       }
     });
     option.isSelected = false;
+  }
+
+  private _showSelectionRequiredMessage() {
+    this.setState({
+      nothingSelectedMessage: this.props.multiple ? ['Please select one or more options'] : ['Please select one option']
+    });
   }
 
   onPageChanged(newPage: Option<T>[]) {

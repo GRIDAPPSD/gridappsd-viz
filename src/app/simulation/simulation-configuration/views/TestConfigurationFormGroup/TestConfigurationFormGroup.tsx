@@ -12,6 +12,7 @@ import { FilePicker, FilePickerService } from '@shared/file-picker';
 import { Tooltip } from '@shared/tooltip';
 import { FaultEventSummaryTable } from './FaultEventSummaryTable';
 import { CommOutageEvent, FaultEvent, FaultKind } from '@shared/test-manager';
+import { Validators } from '@shared/form/validation';
 
 import './TestConfigurationFormGroup.scss';
 
@@ -104,7 +105,10 @@ export class TestConfigurationFormGroup extends React.Component<Props, State> {
               this.state.selectedEventType === 'outage' ? this.state.currentOutageEvent.tag : this.state.currentFaultEvent.tag
             }
             onChange={value => this._tagForCurrentEvent = value}
-            validators={[this.uniqueEventIdValidator]} />
+            validators={[
+              Validators.checkNotEmpty('Event tag is empty'),
+              this.uniqueEventIdValidator
+            ]} />
           <RadioButtonGroup id='event-type' label='Event Type'>
             <RadioButton
               label='CommOutage'

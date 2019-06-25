@@ -58,7 +58,7 @@ export class PowerGridModels extends React.Component<Props, State> {
         <TextArea
           label='Query string'
           value='SELECT ?feeder ?fid  WHERE {?s r:type c:Feeder.?s c:IdentifiedObject.name ?feeder.?s c:IdentifiedObject.mRID ?fid.?s c:Feeder.NormalEnergizingSubstation ?sub.?sub c:IdentifiedObject.name ?station.?sub c:IdentifiedObject.mRID ?sid.?sub c:Substation.Region ?sgr.?sgr c:IdentifiedObject.name ?subregion.?sgr c:IdentifiedObject.mRID ?sgrid.?sgr c:SubGeographicalRegion.Region ?rgn.?rgn c:IdentifiedObject.name ?region.?rgn c:IdentifiedObject.mRID ?rgnid.}  ORDER by ?station ?feeder'
-          onUpdate={value => this.updateRequestBody('queryString', value)} />
+          onChange={value => this.updateRequestBody('queryString', value)} />
       ),
       [QueryPowerGridModelsRequestType.QUERY_OBJECT]: (
         <Select
@@ -87,7 +87,7 @@ export class PowerGridModels extends React.Component<Props, State> {
           <TextArea
             label='Filter'
             value={`?s cim:IdentifiedObject.name \u0027q14733\u0027","objectType":"http://iec.ch/TC57/2012/CIM-schema-cim17#ConnectivityNode`}
-            onUpdate={value => this.updateRequestBody('filter', value)} />
+            onChange={value => this.updateRequestBody('filter', value)} />
         </>
       )
     }

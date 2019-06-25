@@ -17,7 +17,9 @@ export function FormControl(props: Props) {
         &nbsp;
       {props.hint && <span className='form-control__label__hint'>({props.hint})</span>}
       </label>
-      {props.children}
+      <div className='form-control__body'>
+        {props.children}
+      </div>
     </div>
   );
 }
