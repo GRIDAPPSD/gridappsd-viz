@@ -46,11 +46,11 @@ export class TopologyRenderer extends React.Component<Props, State> {
     .y(d => d.node.screenY);
   private readonly _symbolSize = 400;
   private readonly _symbolsForTypes = {
-    capacitor: '../images/capacitor.svg',
-    regulator: '../images/regulator.svg',
-    transformer: '../images/transformer.svg',
-    switch: '../images/switch-closed.svg',
-    swing_node: '../images/substation.svg'
+    capacitor: './assets/images/capacitor.svg',
+    regulator: './assets/images/regulator.svg',
+    transformer: './assets/images/transformer.svg',
+    switch: './assets/images/switch-closed.svg',
+    swing_node: './assets/images/substation.svg'
   };
   private readonly _symbolDimensions = {
     capacitor: { width: 52 * 4, height: 32 * 4 },
@@ -138,13 +138,13 @@ export class TopologyRenderer extends React.Component<Props, State> {
       if (!rotateTransform.includes('rotate'))
         throw new Error('Transform should include rotate()');
       if (open) {
-        clickedElement.attr('href', '../images/switch-open.svg')
+        clickedElement.attr('href', './assets/images/switch-open.svg')
           .attr('height', 22 * 4)
           .style('transform-origin', node => `${node.screenX + this._symbolDimensions[node.type].width / 2}px ${node.screenY + 22}px`)
           .style('transform', node => `translate(${-this._symbolDimensions[node.type].width / 2}px, -55px) ${rotateTransform}`);
       }
       else {
-        clickedElement.attr('href', '../images/switch-closed.svg')
+        clickedElement.attr('href', './assets/images/switch-closed.svg')
           .attr('height', node => this._symbolDimensions[node.type].height)
           .style('transform-origin', node => `${node.screenX + this._symbolDimensions[node.type].width / 2}px ${node.screenY + this._symbolDimensions[node.type].height / 2}px`)
           .style('transform', node => `translate(${-this._symbolDimensions[node.type].width / 2}px, ${-this._symbolDimensions[node.type].height / 2}px) ${rotateTransform}`);
