@@ -4,7 +4,7 @@ import { Input, TextArea } from '@shared/form';
 import { BasicButton } from '@shared/buttons';
 import { Wait } from '@shared/wait';
 
-import './StompClient.styles.scss';
+import './StompClient.scss';
 
 interface Props {
   response: any;
