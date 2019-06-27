@@ -31,6 +31,10 @@ export class Drawer extends React.Component<Props, State> {
     );
   }
 
+  shouldComponentUpdate(_, nextState: State) {
+    return this.state.isOpened !== nextState.isOpened;
+  }
+
   open() {
     this.setState({ isOpened: true });
   }
