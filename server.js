@@ -20,5 +20,9 @@ app.get(['/'], (_, res) => {
   res.sendFile(path.resolve(__dirname, 'dist', 'index.html'));
 });
 
+app.get('/config.json', (_, response) => {
+  response.sendFile(path.resolve(__dirname, 'config.json'));
+});
+
 server.listen(httpPort, () => `Server started on port ${httpPort} successfully`);
 console.log(`Server started on port ${httpPort} successfully`);
