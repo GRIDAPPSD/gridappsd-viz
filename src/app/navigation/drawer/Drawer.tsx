@@ -20,6 +20,11 @@ export class Drawer extends React.Component<Props, State> {
 
     this.close = this.close.bind(this);
   }
+
+  shouldComponentUpdate(_, nextState: State) {
+    return this.state.isOpened !== nextState.isOpened;
+  }
+
   render() {
     return (
       <div className={'drawer' + (this.state.isOpened ? ' opened' : ' closed')}>
