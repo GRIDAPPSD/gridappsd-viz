@@ -64,7 +64,7 @@ export class SimulationStatusLogContainer extends React.Component<Props, State> 
   private _subscribeToStateStoreChanges() {
     return this._stateStore.select('startSimulationResponse')
       .pipe(
-        takeWhile(() => !this._stompClientStatusSubscription.closed),
+        takeWhile(() => this._stompClientStatusSubscription && !this._stompClientStatusSubscription.closed),
         filter(simulationStartResponse => Boolean(simulationStartResponse)),
         map(simulationStartResponse => simulationStartResponse.simulationId),
         tap(simulationId => {
