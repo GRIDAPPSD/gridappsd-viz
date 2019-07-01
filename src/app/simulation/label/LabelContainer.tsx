@@ -33,6 +33,11 @@ const NODES_PER_TOPOLOGY = {
     reg2: ['A', 'B', 'C'],
     reg3: ['A', 'B', 'C'],
     reg4: ['A', 'B', 'C']
+  },
+  ieee8500new_335: {
+    feeder_reg1: ['A', 'B', 'C'],
+    feeder_reg2: ['A', 'B', 'C'],
+    feeder_reg3: ['A', 'B', 'C']
   }
 }
 
