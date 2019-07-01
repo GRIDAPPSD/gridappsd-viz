@@ -127,6 +127,7 @@ export class SimulationConfigurationEditor extends React.Component<Props, State>
               <Tab label='Simulation Configuration'>
                 <SimulationConfigurationFormGroup
                   currentConfig={this.currentConfig}
+                  simulationName={this.state.simulationName}
                   onChange={this.onSimulationConfigurationFormGroupValueChanged} />
               </Tab>
               <Tab label='Application Configuration'>
@@ -171,6 +172,9 @@ export class SimulationConfigurationEditor extends React.Component<Props, State>
       currentPowerSystemConfig.SubGeographicalRegion_name = formValue.subregionId;
       currentPowerSystemConfig.Line_name = formValue.lineId;
       this.currentConfig.simulation_config.simulation_name = formValue.simulationName;
+      this.setState({
+        simulationName: formValue.simulationName
+      });
       this.props.onMRIDChanged(formValue.lineId, formValue.simulationName);
     }
     this.setState({
