@@ -10,4 +10,5 @@ export interface Application {
   launch_on_startup: boolean;
   prereqs: string[];
   multiple_instances: boolean;
+  enabled: boolean;
 }

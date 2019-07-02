@@ -23,7 +23,7 @@ import { TopologyRendererContainer } from './topology-renderer';
 import { WebsocketStatusWatcher } from './websocket-status-watcher';
 import { GetModelDictionaryRequest } from './models/message-requests/GetModelDictionaryRequest';
 import {
-  GetAvailableApplicationsRequest, GetAvailableApplicationsRequestPayload
+  GetAvailableApplicationsAndServicesRequest, GetAvailableApplicationsRequestPayload
 } from './models/message-requests/GetAvailableApplicationsAndServicesRequest';
 import { DEFAULT_SIMULATION_CONFIGURATION } from './models/default-simulation-configuration';
 import { ModelDictionaryTracker } from './simulation/simulation-configuration/services/ModelDictionaryTracker';
@@ -31,6 +31,7 @@ import { StateStore } from '@shared/state-store';
 import { DEFAULT_APPLICATION_STATE } from './models/default-application-state';
 import { TabGroup, Tab } from '@shared/tabs';
 import { EventSummary } from './simulation/event-summary/EventSummary';
+import { Applications } from './simulation/applications/Applications';
 
 import './App.scss';
 
@@ -80,19 +81,20 @@ export class App extends React.Component<Props, State> {
       )
       .subscribe({
         next: () => {
-          this._fetchAvailableApplications();
+          this._fetchAvailableApplicationsAndServices();
           this._fetchFeederModels();
         }
       });
   }
 
-  private _fetchAvailableApplications() {
-    const getAvailableApplications = new GetAvailableApplicationsRequest();
-    this._subscribeToAvailableApplicationsTopic(getAvailableApplications.replyTo);
+  private _fetchAvailableApplicationsAndServices() {
+    GetAvailableApplicationsAndServicesRequest
+    const request = new GetAvailableApplicationsAndServicesRequest();
+    this._subscribeToAvailableApplicationsTopic(request.replyTo);
     this._stompClientService.send(
-      getAvailableApplications.url,
-      { 'reply-to': getAvailableApplications.replyTo },
-      JSON.stringify(getAvailableApplications.requestBody)
+      request.url,
+      { 'reply-to': request.replyTo },
+      JSON.stringify(request.requestBody)
     );
   }
 
@@ -100,7 +102,15 @@ export class App extends React.Component<Props, State> {
     this._stompClientService.readOnceFrom(destination)
       .pipe(map(body => JSON.parse(body) as GetAvailableApplicationsRequestPayload))
       .subscribe({
-        next: payload => this.setState({ availableApplications: payload.applications })
+        next: payload => {
+          this._stateStore.update({
+            applications: payload.applications,
+            services: payload.services
+          });
+          this.setState({
+            availableApplications: payload.applications
+          });
+        }
       });
   }
 
@@ -233,6 +243,9 @@ export class App extends React.Component<Props, State> {
                           </Tab>
                           <Tab label='Events'>
                             <EventSummary />
+                          </Tab>
+                          <Tab label='Applications'>
+                            <Applications />
                           </Tab>
                         </TabGroup>
                       </div>

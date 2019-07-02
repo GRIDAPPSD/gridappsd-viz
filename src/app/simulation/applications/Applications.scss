@@ -1,0 +1,30 @@
+.applications {
+    border-collapse: collapse;
+    width: 100%;
+
+    thead {
+        background-color: #3f51b5;
+        color: #fff;
+    }
+
+    th,
+    td,
+    div {
+        font-size: 0.9em;
+        text-align: center;
+        white-space: nowrap;
+    }
+
+    th {
+        font-weight: 500;
+        padding: 10px 15px;
+        border: 2px solid #CECECE;
+        border-left: 0;
+        white-space: nowrap;
+    }
+
+    th:last-of-type {
+        border-right: 0;
+    }
+
+}

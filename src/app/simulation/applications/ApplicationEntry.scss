@@ -1,0 +1,14 @@
+.application {
+    td {
+        border: 2px solid #CECECE;
+        padding: 0;
+
+        &>div {
+            padding: 5px;
+
+            &:not(:last-of-type) {
+                border-bottom: 2px solid #CECECE;
+            }
+        }
+    }
+}
