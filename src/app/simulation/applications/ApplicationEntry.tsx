@@ -2,9 +2,9 @@ import * as React from 'react';
 
 import { Application } from '@shared/Application';
 import { IconButton } from '@shared/buttons';
+import { Tooltip } from '@shared/tooltip';
 
 import './ApplicationEntry.scss';
-import { Tooltip } from '@shared/tooltip';
 
 interface Props {
   application: Application;
