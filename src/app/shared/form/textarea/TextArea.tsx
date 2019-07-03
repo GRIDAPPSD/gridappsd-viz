@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { Subject } from 'rxjs';
-import { throttleTime } from 'rxjs/operators';
+import { debounceTime } from 'rxjs/operators';
 
 import { FormControl } from '../form-control/FormControl';
 import { ValidationErrorMessages, Validator, ValidationResult } from '../validation';
@@ -37,7 +37,7 @@ export class TextArea extends React.Component<Props, State> {
 
 
   componentDidMount() {
-    this._valueChanges.pipe(throttleTime(250))
+    this._valueChanges.pipe(debounceTime(250))
       .subscribe({
         next: this._onInputValueChanged
       });
