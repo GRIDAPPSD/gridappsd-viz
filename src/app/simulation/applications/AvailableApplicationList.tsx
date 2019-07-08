@@ -3,22 +3,25 @@ import { Subscription } from 'rxjs';
 import { filter } from 'rxjs/operators';
 
 import { Application } from '@shared/Application';
-import { ApplicationEntry } from './ApplicationEntry';
+import { AvailableApplicationListItem } from './AvailableApplicationListItem';
 import { StompClientService } from '@shared/StompClientService';
 import { StateStore } from '@shared/state-store';
 import { EnableApplicationRequest } from './models/EnableApplicationRequest';
 import { DisableApplicationRequest } from './models/DisableApplicationRequest';
+import { Tooltip } from '@shared/tooltip';
+import { IconButton } from '@shared/buttons';
 
-import './Applications.scss';
+import './AvailableApplicationList.scss';
 
 interface Props {
 }
 
 interface State {
   applications: Application[];
+  action: 'enable' | 'disable';
 }
 
-export class Applications extends React.Component<Props, State> {
+export class AvailableApplicationList extends React.Component<Props, State> {
 
   private readonly _stompClientService = StompClientService.getInstance();
   private readonly _stateStore = StateStore.getInstance();
@@ -31,11 +34,13 @@ export class Applications extends React.Component<Props, State> {
     super(props);
 
     this.state = {
-      applications: []
+      applications: [],
+      action: 'disable'
     };
 
-    this.enableSelectedApplication = this.enableSelectedApplication.bind(this);
-    this.disableSelectedApplication = this.disableSelectedApplication.bind(this);
+    this.enableApplication = this.enableApplication.bind(this);
+    this.disableApplication = this.disableApplication.bind(this);
+
   }
 
   componentDidMount() {
@@ -57,31 +62,59 @@ export class Applications extends React.Component<Props, State> {
 
   render() {
     return (
-      <table className='applications'>
-        <thead>
-          <tr>
-            <th>Action</th>
-            <th>Application ID</th>
-            <th>Description</th>
-            <th>Creator</th>
-          </tr>
-        </thead>
-        <tbody>
-          {
-            this.state.applications.map((application, index) => (
-              <ApplicationEntry
-                key={index}
-                application={application}
-                onApplicationEnabled={this.enableSelectedApplication}
-                onApplicationDisabled={this.disableSelectedApplication} />
-            ))
-          }
-        </tbody>
-      </table>
+      <div className='available-application-list'>
+        <div className='available-application-list__action'>
+          {this.showActionButton()}
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>Application ID</th>
+              <th>Description</th>
+              <th>Creator</th>
+            </tr>
+          </thead>
+          <tbody>
+            {
+              this.state.applications.map((application, index) => (
+                <AvailableApplicationListItem
+                  key={index}
+                  application={application} />
+              ))
+            }
+          </tbody>
+        </table>
+      </div>
     );
   }
 
-  enableSelectedApplication(application: Application) {
+  showActionButton() {
+    if (this.state.action === 'enable')
+      return (
+        <Tooltip content='Enable'>
+          <IconButton
+            icon='cached'
+            size='small'
+            onClick={this.enableApplication} />
+        </Tooltip>
+      );
+
+    return (
+      <Tooltip content='Disable'>
+        <IconButton
+          icon='close'
+          style='accent'
+          size='small'
+          onClick={this.disableApplication} />
+      </Tooltip>
+    );
+  }
+
+  enableApplication() {
+    this.setState({
+      action: 'disable'
+    });
+    const application = this.state.applications[0];
     const request = new EnableApplicationRequest(application, this._simulationId);
     this._stompClientService.send(
       request.url,
@@ -90,7 +123,11 @@ export class Applications extends React.Component<Props, State> {
     );
   }
 
-  disableSelectedApplication(application: Application) {
+  disableApplication() {
+    this.setState({
+      action: 'enable'
+    });
+    const application = this.state.applications[0];
     const request = new DisableApplicationRequest(application, this._simulationId);
     this._stompClientService.send(
       request.url,

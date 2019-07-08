@@ -31,7 +31,7 @@ import { StateStore } from '@shared/state-store';
 import { DEFAULT_APPLICATION_STATE } from './models/default-application-state';
 import { TabGroup, Tab } from '@shared/tabs';
 import { EventSummary } from './simulation/event-summary/EventSummary';
-import { Applications } from './simulation/applications/Applications';
+import { AvailableApplicationList } from './simulation/applications/AvailableApplicationList';
 
 import './App.scss';
 
@@ -245,7 +245,7 @@ export class App extends React.Component<Props, State> {
                             <EventSummary />
                           </Tab>
                           <Tab label='Applications'>
-                            <Applications />
+                            <AvailableApplicationList />
                           </Tab>
                         </TabGroup>
                       </div>
