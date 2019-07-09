@@ -15,6 +15,7 @@ interface Props {
   validators?: Validator[];
   onValidate?: (isValid: boolean, formControlLabel: string) => void;
   disabled?: boolean;
+  readonly?: boolean;
 }
 
 interface State {
@@ -78,7 +79,7 @@ export class TextArea extends React.Component<Props, State> {
         label={this.props.label}>
         <div
           className='textarea__input-box'
-          contentEditable
+          contentEditable={!this.props.readonly}
           suppressContentEditableWarning
           onKeyUp={this.onKeyUp}>
           {this.props.value}

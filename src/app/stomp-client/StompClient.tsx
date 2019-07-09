@@ -50,6 +50,7 @@ export class StompClient extends React.Component<Props, State> {
             onClick={() => this.props.onRequestSubmitted(this.state.topic, this.requestBody)} />
           <TextArea
             className='stomp-client-form__response'
+            readonly
             label='Response'
             value={this.props.response}
             onChange={null} />
