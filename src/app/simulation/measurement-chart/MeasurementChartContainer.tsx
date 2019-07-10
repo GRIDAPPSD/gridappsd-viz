@@ -133,22 +133,34 @@ const GRAPH_NAMES_PER_SIMULATION_NAME = {
       'm1047574'
     ],
     power_in_A: [
-      'hvmv69_11sub3'
+      'hvmv69_11sub3',
+      'hvmv69_11sub2',
+      'hvmv69_11sub1'
     ],
     power_in_B: [
-      'hvmv69_11sub3'
+      'hvmv69_11sub3',
+      'hvmv69_11sub2',
+      'hvmv69_11sub1'
     ],
     power_in_C: [
-      'hvmv69_11sub3'
+      'hvmv69_11sub3',
+      'hvmv69_11sub2',
+      'hvmv69_11sub1'
     ],
     tap_A: [
-      'feeder_reg1c'
+      'feeder_reg1a',
+      'feeder_reg2a',
+      'feeder_reg3a'
     ],
     tap_B: [
-      'feeder_reg1c'
+      'feeder_reg1b',
+      'feeder_reg2b',
+      'feeder_reg3b'
     ],
     tap_C: [
-      'feeder_reg1c'
+      'feeder_reg1c',
+      'feeder_reg2c',
+      'feeder_reg3c'
     ]
   }
 };
