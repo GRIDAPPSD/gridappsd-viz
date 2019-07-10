@@ -22,6 +22,7 @@ import { ApplicationConfigurationFormGroupValue } from './models/ApplicationConf
 import { StateStore } from '@shared/state-store';
 
 import './SimulationConfigurationEditor.scss';
+import { NotificationBanner } from '@shared/notification-banner/NotificationBanner';
 
 interface Props {
   onSubmit: (configObject: SimulationConfiguration) => void;
@@ -144,7 +145,9 @@ export class SimulationConfigurationEditor extends React.Component<Props, State>
                       simulationStartDate={this.dateTimeService.format(this.simulationStartDate)}
                       simulationStopDate={this.dateTimeService.format(this.calculateSimulationStopTime())}
                       onEventsAdded={this.onFaultEventsAdded} />
-                    : <Wait show={true} />
+                    : <NotificationBanner persistent={true}>
+                      Please select a line name
+                      </NotificationBanner>
                 }
               </Tab>
             </TabGroup>
