@@ -29,7 +29,9 @@
     ._610 {
         stroke: blue;
     }
-    .__hvmv_sub_lsb {
+    .__hvmv_sub_lsb 
+    ._hvmv11sub1_lsb,
+    ._hvmv69_11sub3 {
         stroke: black;
     }
     ._l2673313,
@@ -54,9 +56,14 @@
     ._m1047574 {
         stroke: lightcoral;
     }
+    ._hvmv69_11sub1,
     ._hvmv_sub {
         stroke: orange;
         stroke-width: 2px;
+    }
+
+    ._hvmv69_11sub2{
+        stroke: rgb(0, 255, 64);
     }
     ._FEEDER_REG {
         stroke: orange;
@@ -69,5 +76,24 @@
     }
     ._VREG4 {
         stroke: blue;
+    }
+
+    ._vreg2_a,
+    ._feeder_reg1a,
+    ._feeder_reg1b,
+    ._feeder_reg1c {
+        stroke: black;
+    }
+
+    ._feeder_reg2a,
+    ._feeder_reg2b,
+    ._feeder_reg2c{
+          stroke: blue;
+     }
+
+    ._feeder_reg3a,
+    ._feeder_reg3b,
+    ._feeder_reg3c {
+         stroke: brown;
     }
 }
