@@ -65,7 +65,7 @@ export class TestConfigurationFormGroup extends React.Component<Props, State> {
       phases: [],
       mRID: '',
       faultKind: FaultKind.LINE_TO_GROUND,
-      impedance: {
+      FaultImpedance: {
         rGround: '',
         xGround: '',
         rLinetoLine: '',
