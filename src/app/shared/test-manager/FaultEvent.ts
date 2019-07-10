@@ -8,7 +8,7 @@ export interface FaultEvent {
   phases: Phase[];
   faultKind: FaultKind;
   mRID: any;
-  impedance: {
+  FaultImpedance: {
     rGround: string;
     xGround: string;
     rLinetoLine: string;

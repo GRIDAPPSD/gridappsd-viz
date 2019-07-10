@@ -26,7 +26,7 @@ export function FaultEventTable(props: Props) {
           <th>Equipment Name</th>
           <th>Phase</th>
           <th>Fault Kind</th>
-          <th>Impedance</th>
+          <th>Fault Impedance</th>
           <th>Start Date Time</th>
           <th>Stop Date Time</th>
         </tr>
@@ -64,7 +64,7 @@ export function FaultEventTable(props: Props) {
               </td>
               <td>
                 {
-                  Object.entries(event.impedance)
+                  Object.entries(event.FaultImpedance)
                     .filter(entry => entry[1] !== '')
                     .map(entry => <div key={entry[0]}>{`${entry[0]}: ${entry[1]}`}</div>)
                 }
