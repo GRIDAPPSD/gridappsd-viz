@@ -68,7 +68,7 @@ export class SimulationStatusLogContainer extends React.Component<Props, State> 
         // So if _stompClientStatusSubscription is still undefined, then
         // we want to keep listening
         takeWhile(() => this._stompClientStatusSubscription === undefined || !this._stompClientStatusSubscription.closed),
-        filter(simulationStartResponse => Boolean(simulationStartResponse)),
+        filter(simulationStartResponse => simulationStartResponse && simulationStartResponse.simulationId !== ''),
         map(simulationStartResponse => simulationStartResponse.simulationId),
         tap(simulationId => {
           this.setState({ isFetching: true });

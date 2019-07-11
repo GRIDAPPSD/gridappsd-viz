@@ -107,9 +107,9 @@ export class FaultEventForm extends React.Component<Props, State> {
                 key={kind}
                 label={kind}
                 name={kind}
-                value={this.state.formValue.impedance[kind]}
+                value={this.state.formValue.FaultImpedance[kind]}
                 onChange={value => {
-                  this.formValue.impedance[kind] = value;
+                  this.formValue.FaultImpedance[kind] = value;
                   this._enableAddEventButtonIfFormIsValid();
                 }} />
             ))
@@ -176,11 +176,11 @@ export class FaultEventForm extends React.Component<Props, State> {
       && this.formValue.stopDateTime !== ''
       && (
         this.formValue.faultKind === FaultKind.LINE_TO_GROUND
-          ? this.formValue.impedance.rGround !== '' && this.formValue.impedance.xGround !== ''
+        ? this.formValue.FaultImpedance.rGround !== '' && this.formValue.FaultImpedance.xGround !== ''
           : this.formValue.faultKind === FaultKind.LINE_TO_LINE
-            ? this.formValue.impedance.rLinetoLine !== '' && this.formValue.impedance.xLineToLine !== ''
-            : this.formValue.impedance.rGround !== '' && this.formValue.impedance.xGround !== ''
-            && this.formValue.impedance.rLinetoLine !== '' && this.formValue.impedance.xLineToLine !== ''
+          ? this.formValue.FaultImpedance.rLinetoLine !== '' && this.formValue.FaultImpedance.xLineToLine !== ''
+          : this.formValue.FaultImpedance.rGround !== '' && this.formValue.FaultImpedance.xGround !== ''
+          && this.formValue.FaultImpedance.rLinetoLine !== '' && this.formValue.FaultImpedance.xLineToLine !== ''
       );
   }
 

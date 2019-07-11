@@ -1,4 +1,6 @@
 import { CommOutageEvent, FaultEvent } from '@shared/test-manager';
+import { Application } from '@shared/Application';
+import { Service } from '@shared/Service';
 
 export interface ApplicationState {
   startSimulationResponse: {
@@ -18,4 +20,6 @@ export interface ApplicationState {
   };
   outageEvents: CommOutageEvent[];
   faultEvents: FaultEvent[];
+  applications: Application[];
+  services: Service[];
 }

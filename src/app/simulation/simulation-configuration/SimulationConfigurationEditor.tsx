@@ -264,33 +264,33 @@ export class SimulationConfigurationEditor extends React.Component<Props, State>
   private _transformFaultEventForForSubmission(faultEvent: FaultEvent) {
     return {
       PhaseConnectedFaultKind: faultEvent.faultKind,
-      impedance: this._getImpedance(faultEvent),
-      equipmentMrid: Array.isArray(faultEvent.mRID)
+      FaultImpedance: this._getImpedance(faultEvent),
+      ObjectMRID: Array.isArray(faultEvent.mRID)
         ? faultEvent.phases.map(phase => faultEvent.mRID[phase.phaseIndex])
         : faultEvent.mRID,
       phases: faultEvent.phases.map(phase => phase.phaseLabel).join(''),
       event_type: faultEvent.type,
-      occuredDateTime: this.dateTimeService.parse(faultEvent.startDateTime).getTime(),
-      stopDateTime: this.dateTimeService.parse(faultEvent.stopDateTime).getTime()
+      occuredDateTime: this.dateTimeService.parse(faultEvent.startDateTime).getTime()/1000.0,
+      stopDateTime: this.dateTimeService.parse(faultEvent.stopDateTime).getTime()/1000.0
     };
   }
 
   private _getImpedance(faultEvent: FaultEvent) {
     if (faultEvent.faultKind === FaultKind.LINE_TO_GROUND)
       return {
-        xGround: faultEvent.impedance.xGround,
-        rGround: faultEvent.impedance.rGround
+        xGround: faultEvent.FaultImpedance.xGround,
+        rGround: faultEvent.FaultImpedance.rGround
       };
     if (faultEvent.faultKind === FaultKind.LINE_TO_LINE)
       return {
-        xLineToLine: faultEvent.impedance.xLineToLine,
-        rLineToLine: faultEvent.impedance.rLinetoLine
+        xLineToLine: faultEvent.FaultImpedance.xLineToLine,
+        rLineToLine: faultEvent.FaultImpedance.rLinetoLine
       };
     return {
-      xGround: faultEvent.impedance.xGround,
-      rGround: faultEvent.impedance.rGround,
-      xLineToLine: faultEvent.impedance.xLineToLine,
-      rLineToLine: faultEvent.impedance.rLinetoLine
+      xGround: faultEvent.FaultImpedance.xGround,
+      rGround: faultEvent.FaultImpedance.rGround,
+      xLineToLine: faultEvent.FaultImpedance.xLineToLine,
+      rLineToLine: faultEvent.FaultImpedance.rLinetoLine
     };
   }
 

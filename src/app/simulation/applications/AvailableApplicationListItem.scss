@@ -1,0 +1,15 @@
+.available-application-list-item {
+    td {
+        border: 2px solid #CECECE;
+        border-bottom: 0;
+        padding: 3px 0;
+
+        &>div {
+            padding: 5px;
+        }
+
+        &:not(:last-of-type) {
+            border-top: 2px solid #CECECE;
+        }
+    }
+}
