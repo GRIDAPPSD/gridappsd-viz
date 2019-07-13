@@ -290,6 +290,8 @@ export class App extends React.Component<Props, State> {
         onMRIDChanged={(mRID, simulationName) => {
           if (!this._modelDictionaryMeasurementsPerSimulationName.has(simulationName))
             this._fetchModelDictionary(mRID, simulationName);
+          else
+            this._modelDictionaryTracker.selectCurrentModelDictionary(this._availableModelDictionaries.get(simulationName));
         }}
         availableApplications={this.state.availableApplications}
         initialConfig={config} />
