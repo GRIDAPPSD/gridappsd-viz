@@ -15,6 +15,9 @@ interface State {
 }
 
 export class NotificationBanner extends React.Component<Props, State> {
+
+  private _scheduler: any;
+
   constructor(props: Props) {
     super(props);
     this.state = {
@@ -25,7 +28,11 @@ export class NotificationBanner extends React.Component<Props, State> {
   }
 
   componentDidMount() {
-    setTimeout(this.hideNotificationBanner, 10_000);
+    this._scheduler = setTimeout(this.hideNotificationBanner, 10_000);
+  }
+
+  componentWillUnmount() {
+    clearTimeout(this._scheduler);
   }
 
   render() {
