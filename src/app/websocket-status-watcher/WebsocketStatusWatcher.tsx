@@ -1,10 +1,10 @@
 import * as React from 'react';
-import { Subscription, timer } from 'rxjs';
-import { takeWhile, tap, switchMap } from 'rxjs/operators';
+import { Subscription } from 'rxjs';
 
 import { IconButton } from '@shared/buttons';
 import { StompClientConnectionStatus, StompClientService } from '@shared/StompClientService';
-import { NotificationBanner } from '@shared/notification-banner/NotificationBanner';
+import { NotificationBanner } from '@shared/notification-banner';
+import { ThreeDots } from '@shared/three-dots';
 
 import './WebsocketStatusWatcher.scss';
 
@@ -31,12 +31,8 @@ export class WebsocketStatusWatcher extends React.Component<Props, State> {
 
   componentDidMount() {
     this._websocketStatusStream = this._stompClientService.statusChanges()
-      .pipe(
-        tap(state => this.setState({ websocketStatus: state })),
-        switchMap(state => timer(0, 1000).pipe(takeWhile(() => state === 'CONNECTING')))
-      )
       .subscribe({
-        next: count => this.setState({ dots: (count + 1) % 4 })
+        next: state => this.setState({ websocketStatus: state })
       });
   }
 
@@ -60,9 +56,7 @@ export class WebsocketStatusWatcher extends React.Component<Props, State> {
       return (
         <span>
           <span>Trying to connect</span>
-          <span style={{ display: 'inline-block', width: '30px', textAlign: 'left' }}>
-            {'.'.repeat(this.state.dots)}
-          </span>
+          <ThreeDots />
         </span>
       );
     else if (this.state.websocketStatus !== 'CONNECTED')

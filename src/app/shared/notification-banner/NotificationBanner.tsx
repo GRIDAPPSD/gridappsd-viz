@@ -27,6 +27,7 @@ export class NotificationBanner extends React.Component<Props, State> {
   componentDidMount() {
     setTimeout(this.hideNotificationBanner, 10_000);
   }
+
   render() {
     if (!this.props.persistent)
       return (
