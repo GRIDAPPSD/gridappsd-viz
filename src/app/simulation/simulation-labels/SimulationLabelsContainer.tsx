@@ -2,13 +2,13 @@ import * as React from 'react';
 import { Subscription } from 'rxjs';
 
 import { SimulationOutputService, SimulationQueue } from '@shared/simulation';
-import { Label } from './Label';
+import { SimulationLabel } from './SimulationLabel';
 
 interface Props {
 }
 
 interface State {
-  labels: React.ReactElement<Label>[];
+  labels: React.ReactElement<SimulationLabel>[];
 }
 
 const NODES_PER_TOPOLOGY = {
@@ -41,7 +41,7 @@ const NODES_PER_TOPOLOGY = {
   }
 }
 
-export class LabelContainer extends React.Component<Props, State> {
+export class SimulationLabelsContainer extends React.Component<Props, State> {
 
   private readonly _simulationOutputService = SimulationOutputService.getInstance();
   private readonly _simulationQueue = SimulationQueue.getInstance();
@@ -171,11 +171,11 @@ export class LabelContainer extends React.Component<Props, State> {
               }
             }
             labels.push(
-              <Label
+              <SimulationLabel
                 key={nodeName}
                 nodeNameToAttachTo={nodeName}>
                 <table>{content}</table>
-              </Label>
+              </SimulationLabel>
             );
           }
           this.setState({ labels });

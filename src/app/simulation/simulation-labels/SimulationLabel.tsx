@@ -3,7 +3,7 @@ import { Subscription } from 'rxjs';
 
 import { MapTransformWatcherService } from '@shared/MapTransformWatcherService';
 
-import './Label.scss';
+import './SimulationLabel.scss';
 
 interface Props {
   nodeNameToAttachTo: string;
@@ -14,7 +14,7 @@ interface State {
   top: number;
 }
 
-export class Label extends React.Component<Props, State> {
+export class SimulationLabel extends React.Component<Props, State> {
 
   simulationLabel: HTMLDivElement;
 
