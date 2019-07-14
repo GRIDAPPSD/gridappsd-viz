@@ -170,7 +170,13 @@ export class LabelContainer extends React.Component<Props, State> {
                 );
               }
             }
-            labels.push(<Label key={nodeName} nodeNameToAttachTo={nodeName} content={<table>{content}</table>} />);
+            labels.push(
+              <Label
+                key={nodeName}
+                nodeNameToAttachTo={nodeName}>
+                <table>{content}</table>
+              </Label>
+            );
           }
           this.setState({ labels });
         }

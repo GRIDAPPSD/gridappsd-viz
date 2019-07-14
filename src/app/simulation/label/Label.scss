@@ -1,29 +1,27 @@
-.label-container {
+.simulation-label {
     position: fixed;
-    pointer-events: none;
-    height: 100vh;
-    width: 100vw;
-    max-width: 100vw;
-    z-index: 0;
-    overflow: hidden;
-    left: 0;
     top: 0;
-    .gridappsd-tooltip.bottom {
-        transform: translateY(-8px);
-        font-size: 0.5em;
-    }
-    .gridappsd-tooltip.bottom .gridappsd-tooltip__content {
-        padding: 2px;
-    }
-    .gridappsd-tooltip.top {
-        transform: translateY(8px);
-    }
+    left: 0;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3), 0 -0.5px 1px rgba(0, 0, 0, 0.2);
+    border-radius: 2px;
+    background-color: #555;
+    white-space: pre-wrap;
+    font-family: 'Roboto', sans-serif;
+    font-size: 0.5em;
+    color: #fff;
+    border: 1px solid #8e8e8e;
+    max-width: 100vw;
+
     td {
         padding: 0 5px;
     }
 }
 
-.label__heading {
+.simulation-label__heading {
     font-weight: bold;
     text-align: center;
+}
+
+.simulation-label__content {
+    padding: 2px;
 }

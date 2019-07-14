@@ -230,31 +230,29 @@ export class App extends React.Component<Props, State> {
               path='/topology'
               component={() => {
                 return (
-                  <>
-                    <div className='topology-renderer-simulation-status-logger-measurement-graphs'>
-                      <div>
-                        <SimulationControlContainer />
-                        <TabGroup>
-                          <Tab label='Simulation'>
-                            <TopologyRendererContainer
-                              mRIDs={this.componentMrids}
-                              phases={this.componentPhases} />
-                            <SimulationStatusLogContainer />
-                          </Tab>
-                          <Tab label='Events'>
-                            <EventSummary />
-                          </Tab>
-                          <Tab label='Applications'>
-                            <AvailableApplicationList />
-                          </Tab>
-                        </TabGroup>
-                      </div>
-                      <div className='measurement-charts'>
-                        <MeasurementChartContainer />
-                      </div>
+                  <div className='topology-renderer-simulation-status-logger-measurement-graphs'>
+                    <div>
+                      <SimulationControlContainer />
+                      <TabGroup>
+                        <Tab label='Simulation'>
+                          <TopologyRendererContainer
+                            mRIDs={this.componentMrids}
+                            phases={this.componentPhases} />
+                          <SimulationStatusLogContainer />
+                          <LabelContainer />
+                        </Tab>
+                        <Tab label='Events'>
+                          <EventSummary />
+                        </Tab>
+                        <Tab label='Applications'>
+                          <AvailableApplicationList />
+                        </Tab>
+                      </TabGroup>
                     </div>
-                    <LabelContainer />
-                  </>
+                    <div className='measurement-charts'>
+                      <MeasurementChartContainer />
+                    </div>
+                  </div>
                 );
               }} />
             <Route
