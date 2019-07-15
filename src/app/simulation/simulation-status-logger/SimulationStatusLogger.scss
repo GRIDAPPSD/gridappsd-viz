@@ -9,7 +9,9 @@
 
     .simulation-status-logger-message:before {
         counter-increment: message-number;
-        content: counter(message-number) ". "
+        content: counter(message-number) ". ";
+        width: 30px;
+        text-align: right;
     }
 }
 
