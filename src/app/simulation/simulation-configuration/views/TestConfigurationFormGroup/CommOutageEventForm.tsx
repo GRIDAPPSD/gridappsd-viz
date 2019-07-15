@@ -60,7 +60,7 @@ export class CommOutageEventForm extends React.Component<Props, State> {
   constructor(props: Props) {
     super(props);
 
-    if (!outputEquipmentTypeOptions && previousModelDictionary !== props.modelDictionary) {
+    if (previousModelDictionary !== props.modelDictionary) {
       outputEquipmentTypeOptions = this._generateUniqueOptions(
         props.modelDictionary.measurements.map(e => e.ConductingEquipment_type)
       );
@@ -131,17 +131,6 @@ export class CommOutageEventForm extends React.Component<Props, State> {
       phases: [],
       measurementTypes: []
     };
-  }
-
-  componentDidUpdate(previousProps: Props) {
-    if (previousProps.initialFormValue !== this.props.initialFormValue)
-      this.formValue = { ...this.props.initialFormValue };
-    else if (previousProps.modelDictionary !== this.props.modelDictionary) {
-      outputEquipmentTypeOptions = this._generateUniqueOptions(
-        this.props.modelDictionary.measurements.map(e => e.ConductingEquipment_type)
-      );
-      previousModelDictionary = this.props.modelDictionary;
-    }
   }
 
   render() {
