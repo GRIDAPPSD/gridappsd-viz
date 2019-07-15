@@ -12,7 +12,6 @@ import { SimulationConfigurationFormGroup } from './views/SimulationConfiguratio
 import { ApplicationConfigurationFormGroup } from './views/ApplicationConfigurationFormGroup';
 import { TestConfigurationFormGroup } from './views/TestConfigurationFormGroup';
 import { ModelDictionaryTracker } from './services/ModelDictionaryTracker';
-import { Wait } from '@shared/wait';
 import { DateTimeService } from './services/DateTimeService';
 import { CommOutageEvent } from '../../shared/test-manager/CommOutageEvent';
 import { FaultEvent, FaultKind } from '../../shared/test-manager/FaultEvent';
@@ -20,6 +19,8 @@ import { PowerSystemConfigurationFormGroupValue } from './models/PowerSystemConf
 import { SimulationConfigurationFormGroupValue } from './models/SimulationConfigurationFormGroupValue';
 import { ApplicationConfigurationFormGroupValue } from './models/ApplicationConfigurationFormGroupValue';
 import { StateStore } from '@shared/state-store';
+import { ThreeDots } from '@shared/three-dots';
+import { NotificationBanner } from '@shared/notification-banner';
 
 import './SimulationConfigurationEditor.scss';
 
@@ -137,15 +138,7 @@ export class SimulationConfigurationEditor extends React.Component<Props, State>
                   onChange={this.onApplicationConfigurationFormGroupValueChanged} />
               </Tab>
               <Tab label='Test Configuration'>
-                {
-                  (this.state.modelDictionary && this.state.lineName)
-                    ? <TestConfigurationFormGroup
-                      modelDictionary={this.state.modelDictionary}
-                      simulationStartDate={this.dateTimeService.format(this.simulationStartDate)}
-                      simulationStopDate={this.dateTimeService.format(this.calculateSimulationStopTime())}
-                      onEventsAdded={this.onFaultEventsAdded} />
-                    : <Wait show={true} />
-                }
+                {this.showCurrentComponentForTestConfigurationTab()}
               </Tab>
             </TabGroup>
           </form>
@@ -212,6 +205,29 @@ export class SimulationConfigurationEditor extends React.Component<Props, State>
   onFaultEventsAdded(events: { outage: CommOutageEvent[]; fault: FaultEvent[] }) {
     this.outageEvents = events.outage;
     this.faultEvents = events.fault;
+  }
+
+  showCurrentComponentForTestConfigurationTab() {
+    if (this.state.lineName === '')
+      return (
+        <NotificationBanner persistent={true}>
+          Please select a line name
+        </NotificationBanner>
+      );
+    if (!this.state.modelDictionary)
+      return (
+        <NotificationBanner persistent={true}>
+          Fetching model dictionary
+          <ThreeDots />
+        </NotificationBanner>
+      );
+    return (
+      <TestConfigurationFormGroup
+        modelDictionary={this.state.modelDictionary}
+        simulationStartDate={this.dateTimeService.format(this.simulationStartDate)}
+        simulationStopDate={this.dateTimeService.format(this.calculateSimulationStopTime())}
+        onEventsAdded={this.onFaultEventsAdded} />
+    );
   }
 
   calculateSimulationStopTime() {
