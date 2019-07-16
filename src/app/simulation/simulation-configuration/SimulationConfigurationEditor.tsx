@@ -11,7 +11,6 @@ import { PowerSystemConfigurationFormGroup } from './views/PowerSystemConfigurat
 import { SimulationConfigurationFormGroup } from './views/SimulationConfigurationFormGroup';
 import { ApplicationConfigurationFormGroup } from './views/ApplicationConfigurationFormGroup';
 import { TestConfigurationFormGroup } from './views/TestConfigurationFormGroup';
-import { ModelDictionaryTracker } from './services/ModelDictionaryTracker';
 import { Wait } from '@shared/wait';
 import { DateTimeService } from './services/DateTimeService';
 import { CommOutageEvent } from '../../shared/test-manager/CommOutageEvent';
@@ -49,7 +48,6 @@ export class SimulationConfigurationEditor extends React.Component<Props, State>
   outageEvents: CommOutageEvent[] = [];
   faultEvents: FaultEvent[] = [];
 
-  private readonly _modelDictionaryTracker = ModelDictionaryTracker.getInstance();
   private readonly _simulationControlService = SimulationControlService.getInstance();
   private readonly _stateStore = StateStore.getInstance();
 
@@ -96,7 +94,7 @@ export class SimulationConfigurationEditor extends React.Component<Props, State>
   }
 
   componentDidMount() {
-    this._modelDictionarySubscription = this._modelDictionaryTracker.changes()
+    this._modelDictionarySubscription = this._stateStore.select('modelDictionary')
       .subscribe({
         next: modelDictionary => this.setState({ modelDictionary })
       });

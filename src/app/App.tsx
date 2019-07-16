@@ -26,7 +26,6 @@ import {
   GetAvailableApplicationsAndServicesRequest, GetAvailableApplicationsRequestPayload
 } from './models/message-requests/GetAvailableApplicationsAndServicesRequest';
 import { DEFAULT_SIMULATION_CONFIGURATION } from './models/default-simulation-configuration';
-import { ModelDictionaryTracker } from './simulation/simulation-configuration/services/ModelDictionaryTracker';
 import { StateStore } from '@shared/state-store';
 import { DEFAULT_APPLICATION_STATE } from './models/default-application-state';
 import { TabGroup, Tab } from '@shared/tabs';
@@ -54,7 +53,6 @@ export class App extends React.Component<Props, State> {
   private readonly _simulationOutputService = SimulationOutputService.getInstance();
   private readonly _overlayService = OverlayService.getInstance();
   private readonly _simulationQueue = SimulationQueue.getInstance();
-  private readonly _modelDictionaryTracker = ModelDictionaryTracker.getInstance();
   private readonly _modelDictionaryMeasurementsPerSimulationName = new Map<string, Map<string, ModelDictionaryMeasurement>>();
   private readonly _availableModelDictionaries = new Map<string, ModelDictionary>();
 
@@ -290,11 +288,15 @@ export class App extends React.Component<Props, State> {
         onMRIDChanged={(mRID, simulationName) => {
           if (!this._modelDictionaryMeasurementsPerSimulationName.has(simulationName)) {
             // Clear out the currently active model dictionary
-            this._modelDictionaryTracker.selectCurrentModelDictionary(null);
+            this._stateStore.update({
+              modelDictionary: null
+            });
             this._fetchModelDictionary(mRID, simulationName);
           }
           else
-            this._modelDictionaryTracker.selectCurrentModelDictionary(this._availableModelDictionaries.get(simulationName));
+            this._stateStore.update({
+              modelDictionary: this._availableModelDictionaries.get(simulationName)
+            });
         }}
         availableApplications={this.state.availableApplications}
         initialConfig={config} />
@@ -312,18 +314,14 @@ export class App extends React.Component<Props, State> {
   }
 
   private _fetchModelDictionary(mrid: string, simulationName: string) {
-    if (!this._availableModelDictionaries.has(simulationName)) {
-      const getModelDictionaryRequest = new GetModelDictionaryRequest();
-      getModelDictionaryRequest.requestBody.parameters.model_id = mrid;
-      this._subscribeToModelDictionaryTopic(getModelDictionaryRequest, simulationName);
-      this._stompClientService.send(
-        getModelDictionaryRequest.url,
-        { 'reply-to': getModelDictionaryRequest.replyTo },
-        JSON.stringify(getModelDictionaryRequest.requestBody)
-      );
-    }
-    else
-      this._modelDictionaryTracker.selectCurrentModelDictionary(this._availableModelDictionaries.get(simulationName));
+    const getModelDictionaryRequest = new GetModelDictionaryRequest();
+    getModelDictionaryRequest.requestBody.parameters.model_id = mrid;
+    this._subscribeToModelDictionaryTopic(getModelDictionaryRequest, simulationName);
+    this._stompClientService.send(
+      getModelDictionaryRequest.url,
+      { 'reply-to': getModelDictionaryRequest.replyTo },
+      JSON.stringify(getModelDictionaryRequest.requestBody)
+    );
   }
 
   private _subscribeToModelDictionaryTopic(getModelDictionaryRequest: GetModelDictionaryRequest, simulationName: string) {
@@ -341,7 +339,7 @@ export class App extends React.Component<Props, State> {
           this._simulationOutputService.setModelDictionaryMeasurements(modelDictionaryMeasurements);
           this._modelDictionaryMeasurementsPerSimulationName.set(simulationName, modelDictionaryMeasurements);
           this._availableModelDictionaries.set(simulationName, modelDictionary);
-          this._modelDictionaryTracker.selectCurrentModelDictionary(this._availableModelDictionaries.get(simulationName));
+          this._stateStore.update({ modelDictionary });
         }
       });
   }
