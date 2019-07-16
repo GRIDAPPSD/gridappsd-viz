@@ -288,8 +288,11 @@ export class App extends React.Component<Props, State> {
         onSubmit={updatedConfig => this._onSimulationConfigFormSubmitted(updatedConfig, browserHistory)}
         onClose={() => this._overlayService.hide()}
         onMRIDChanged={(mRID, simulationName) => {
-          if (!this._modelDictionaryMeasurementsPerSimulationName.has(simulationName))
+          if (!this._modelDictionaryMeasurementsPerSimulationName.has(simulationName)) {
+            // Clear out the currently active model dictionary
+            this._modelDictionaryTracker.selectCurrentModelDictionary(null);
             this._fetchModelDictionary(mRID, simulationName);
+          }
           else
             this._modelDictionaryTracker.selectCurrentModelDictionary(this._availableModelDictionaries.get(simulationName));
         }}
