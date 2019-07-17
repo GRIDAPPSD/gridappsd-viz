@@ -21,6 +21,7 @@ interface Props<T, E extends boolean> {
   defaultLabel?: string;
   optional?: boolean;
   multiple: E;
+  disabled?: boolean;
 }
 
 interface State<T> {
@@ -223,7 +224,7 @@ export class Select<T, E extends boolean> extends React.Component<Props<T, E>, S
 
   calculateClassName() {
     return 'select'
-      + (this.props.options.length === 0 ? ' disabled' : '')
+      + (this.props.options.length === 0 || this.props.disabled ? ' disabled' : '')
       + (this.state.nothingSelectedMessage.length === 0 ? ' valid' : ' invalid');
   }
 
