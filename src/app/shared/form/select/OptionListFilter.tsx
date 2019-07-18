@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Subject, Observable } from 'rxjs';
+import { Subject } from 'rxjs';
 import { distinctUntilChanged, debounceTime } from 'rxjs/operators';
 
 import { IconButton } from '@shared/buttons';
@@ -9,6 +9,7 @@ import './OptionListFilter.scss';
 
 interface Props {
   onChange: (newValue: string, oldValue: string) => void;
+  shouldReset: boolean;
 }
 interface State {
   filterValue: string;
@@ -37,8 +38,12 @@ export class OptionListFilter extends React.Component<Props, State> {
         next: (values: [string, string]) => this.props.onChange(values[0], values[1])
       });
   }
-  componentDidUpdate() {
-    setTimeout(() => this.filterInput.focus(), 250);
+
+  componentDidUpdate(prevProps: Props) {
+    if (this.filterInput && this.state.filterValue === '')
+      setTimeout(() => this.filterInput.focus(), 250);
+    if (this.props.shouldReset && this.props.shouldReset !== prevProps.shouldReset && this.state.filterValue !== '')
+      this.clearFilter();
   }
 
   componentWillUnmount() {
