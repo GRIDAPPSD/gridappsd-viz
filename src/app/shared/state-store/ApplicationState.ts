@@ -1,6 +1,7 @@
 import { CommOutageEvent, FaultEvent } from '@shared/test-manager';
 import { Application } from '@shared/Application';
 import { Service } from '@shared/Service';
+import { ModelDictionary } from '@shared/topology';
 
 export interface ApplicationState {
   startSimulationResponse: {
@@ -22,4 +23,5 @@ export interface ApplicationState {
   faultEvents: FaultEvent[];
   applications: Application[];
   services: Service[];
+  modelDictionary: ModelDictionary;
 }

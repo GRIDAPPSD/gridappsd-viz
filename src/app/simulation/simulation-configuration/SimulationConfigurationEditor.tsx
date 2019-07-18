@@ -11,7 +11,7 @@ import { PowerSystemConfigurationFormGroup } from './views/PowerSystemConfigurat
 import { SimulationConfigurationFormGroup } from './views/SimulationConfigurationFormGroup';
 import { ApplicationConfigurationFormGroup } from './views/ApplicationConfigurationFormGroup';
 import { TestConfigurationFormGroup } from './views/TestConfigurationFormGroup';
-import { ModelDictionaryTracker } from './services/ModelDictionaryTracker';
+import { Wait } from '@shared/wait';
 import { DateTimeService } from './services/DateTimeService';
 import { CommOutageEvent } from '../../shared/test-manager/CommOutageEvent';
 import { FaultEvent, FaultKind } from '../../shared/test-manager/FaultEvent';
@@ -50,11 +50,10 @@ export class SimulationConfigurationEditor extends React.Component<Props, State>
   outageEvents: CommOutageEvent[] = [];
   faultEvents: FaultEvent[] = [];
 
-  private readonly _modelDictionaryTracker = ModelDictionaryTracker.getInstance();
   private readonly _simulationControlService = SimulationControlService.getInstance();
   private readonly _stateStore = StateStore.getInstance();
 
-  private _subscription: Subscription;
+  private _modelDictionarySubscription: Subscription;
   private _simulationStatusSubscription: Subscription;
 
   constructor(props: Props) {
@@ -97,10 +96,11 @@ export class SimulationConfigurationEditor extends React.Component<Props, State>
   }
 
   componentDidMount() {
-    this._subscription = this._modelDictionaryTracker.changes()
+    this._modelDictionarySubscription = this._stateStore.select('modelDictionary')
       .subscribe({
-        next: modelDictionary => this.setState({ modelDictionary: modelDictionary })
+        next: modelDictionary => this.setState({ modelDictionary })
       });
+
     this._simulationStatusSubscription = this._simulationControlService.statusChanges()
       .subscribe({
         next: status => this.setState({
@@ -110,7 +110,7 @@ export class SimulationConfigurationEditor extends React.Component<Props, State>
   }
 
   componentWillUnmount() {
-    this._subscription.unsubscribe();
+    this._modelDictionarySubscription.unsubscribe();
     this._simulationStatusSubscription.unsubscribe();
   }
 
@@ -168,7 +168,8 @@ export class SimulationConfigurationEditor extends React.Component<Props, State>
       this.setState({
         simulationName: formValue.simulationName
       });
-      this.props.onMRIDChanged(formValue.lineId, formValue.simulationName);
+      if (formValue.lineId !== '')
+        this.props.onMRIDChanged(formValue.lineId, formValue.simulationName);
     }
     this.setState({
       lineName: formValue.lineId,
@@ -286,8 +287,8 @@ export class SimulationConfigurationEditor extends React.Component<Props, State>
         : faultEvent.mRID,
       phases: faultEvent.phases.map(phase => phase.phaseLabel).join(''),
       event_type: faultEvent.type,
-      occuredDateTime: this.dateTimeService.parse(faultEvent.startDateTime).getTime()/1000.0,
-      stopDateTime: this.dateTimeService.parse(faultEvent.stopDateTime).getTime()/1000.0
+      occuredDateTime: this.dateTimeService.parse(faultEvent.startDateTime).getTime() / 1000.0,
+      stopDateTime: this.dateTimeService.parse(faultEvent.stopDateTime).getTime() / 1000.0
     };
   }
 

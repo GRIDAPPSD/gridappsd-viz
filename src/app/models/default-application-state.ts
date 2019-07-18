@@ -8,5 +8,6 @@ export const DEFAULT_APPLICATION_STATE: ApplicationState = {
   faultEvents: [],
   outageEvents: [],
   applications: [],
-  services: []
+  services: [],
+  modelDictionary: null
 };

@@ -11,6 +11,7 @@ import { Validators } from '@shared/form/validation';
 import './CommOutageEventForm.scss';
 
 let outputEquipmentTypeOptions: Option<string>[];
+let previousModelDictionary: ModelDictionary;
 const inputEquipmentTypeOptions = [
   new Option('Battery', 'batteries'),
   new Option('Breaker', 'breakers'),
@@ -59,10 +60,12 @@ export class CommOutageEventForm extends React.Component<Props, State> {
   constructor(props: Props) {
     super(props);
 
-    if (!outputEquipmentTypeOptions)
+    if (previousModelDictionary !== props.modelDictionary) {
       outputEquipmentTypeOptions = this._generateUniqueOptions(
         props.modelDictionary.measurements.map(e => e.ConductingEquipment_type)
       );
+      previousModelDictionary = props.modelDictionary;
+    }
 
     this.state = {
       inputEquipmentTypeOptions,
@@ -128,11 +131,6 @@ export class CommOutageEventForm extends React.Component<Props, State> {
       phases: [],
       measurementTypes: []
     };
-  }
-
-  componentDidUpdate(previousProps: Props) {
-    if (previousProps.initialFormValue !== this.props.initialFormValue)
-      this.formValue = { ...this.props.initialFormValue };
   }
 
   render() {
