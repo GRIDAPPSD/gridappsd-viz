@@ -208,7 +208,7 @@ export class FaultEventForm extends React.Component<Props, State> {
         .sort((a, b) => a.label.localeCompare(b.label))
     });
     this.formValue.equipmentName = component.ConductingEquipment_name || component.name || component.bankName;
-    this.formValue.mRID = component.mRID;
+    this.formValue.mRID = component.ConductingEquipment_mRID || component.mRID;
     this._enableAddEventButtonIfFormIsValid();
   }
 
