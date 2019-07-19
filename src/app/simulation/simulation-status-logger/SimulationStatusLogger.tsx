@@ -18,7 +18,7 @@ interface State {
   visibleMessages: string[];
 }
 
-const messageBatchToShowNext = 30;
+const numberOfMessagesToLoadNext = 30;
 
 export class SimulationStatusLogger extends React.Component<Props, State> {
 
@@ -40,7 +40,7 @@ export class SimulationStatusLogger extends React.Component<Props, State> {
     super(props);
     this.state = {
       dragHandlePosition: this._dragHandleMaxPosition,
-      visibleMessages: props.messages.slice(0, messageBatchToShowNext)
+      visibleMessages: []
     };
     this.mouseDown = this.mouseDown.bind(this);
     this._mouseUp = this._mouseUp.bind(this);
@@ -48,11 +48,24 @@ export class SimulationStatusLogger extends React.Component<Props, State> {
     this.loadMoreMessages = this.loadMoreMessages.bind(this);
   }
 
-  componentWillReceiveProps(newProps: Props) {
-    if (newProps !== this.props && newProps.simulationRunning)
-      this.setState({
-        dragHandlePosition: 430
-      });
+  componentDidUpdate(prevProps: Props) {
+    if (prevProps !== this.props) {
+      if (this.props.simulationRunning)
+        this.setState({
+          dragHandlePosition: 430
+        });
+      if (this.props.messages !== prevProps.messages) {
+        const currentNumberOfVisibleMessages = this.state.visibleMessages.length;
+        if (currentNumberOfVisibleMessages <= numberOfMessagesToLoadNext)
+          this.setState({
+            visibleMessages: this.props.messages.slice(0, numberOfMessagesToLoadNext)
+          });
+        else
+          this.setState({
+            visibleMessages: this.props.messages.slice(0, currentNumberOfVisibleMessages)
+          });
+      }
+    }
   }
 
   componentDidMount() {
@@ -68,7 +81,7 @@ export class SimulationStatusLogger extends React.Component<Props, State> {
           // then just keep appending ${messageBatchToShowNext} more messages until there is no more
           if (this.state.visibleMessages.length < this.props.messages.length) {
             this.setState({
-              visibleMessages: this.props.messages.slice(0, this.state.visibleMessages.length + messageBatchToShowNext)
+              visibleMessages: this.props.messages.slice(0, this.state.visibleMessages.length + numberOfMessagesToLoadNext)
             });
             // Move the scroll bar up to the previous scroll top position so that it does not just keep
             // sticking to the bottom and causes the messages to keep getting appended
@@ -115,8 +128,8 @@ export class SimulationStatusLogger extends React.Component<Props, State> {
           ref={elem => this.simulationStatusLoggerBody = elem}
           onScroll={this.loadMoreMessages}>
           {
-            this.state.visibleMessages.map((message, i, messages) => (
-              <SimulationStatusLoggerMessage key={messages.length - i} message={message} />
+            this.state.visibleMessages.map(message => (
+              <SimulationStatusLoggerMessage key={message} message={message} />
             ))
           }
         </section>
