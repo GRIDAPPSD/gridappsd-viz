@@ -244,7 +244,8 @@ export class SimulationConfigurationEditor extends React.Component<Props, State>
   submitForm(event: React.SyntheticEvent) {
     event.stopPropagation();
     this.setState({ show: false });
-    this.currentConfig.test_config.appId = this.state.lineName;
+    const selectedApplication = this.currentConfig.application_config.applications[0];
+    this.currentConfig.test_config.appId = selectedApplication ? selectedApplication.name : '';
     for (const outageEvent of this.outageEvents)
       this.currentConfig.test_config.events.push(this._transformOutageEventForForSubmission(outageEvent));
     for (const faultEvent of this.faultEvents)
