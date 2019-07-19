@@ -284,7 +284,7 @@ export class SimulationConfigurationEditor extends React.Component<Props, State>
       FaultImpedance: this._getImpedance(faultEvent),
       ObjectMRID: Array.isArray(faultEvent.mRID)
         ? faultEvent.phases.map(phase => faultEvent.mRID[phase.phaseIndex])
-        : faultEvent.mRID,
+        : [faultEvent.mRID],
       phases: faultEvent.phases.map(phase => phase.phaseLabel).join(''),
       event_type: faultEvent.type,
       occuredDateTime: this.dateTimeService.parse(faultEvent.startDateTime).getTime() / 1000.0,
