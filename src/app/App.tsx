@@ -7,7 +7,7 @@ import { AvailableApplicationsAndServices } from './available-applications-and-s
 import { DataBrowser } from './data-browser';
 import { FeederModel } from '@shared/topology';
 import { GetAllFeederModelsRequest } from './models/message-requests/GetAllFeederModelsRequest';
-import { LabelContainer } from './simulation/label';
+import { SimulationLabelsContainer } from './simulation/simulation-labels';
 import { MeasurementChartContainer } from './simulation/measurement-chart';
 import { ModelDictionaryMeasurement, ModelDictionary } from '@shared/topology/model-dictionary';
 import { Navigation } from './navigation';
@@ -228,31 +228,29 @@ export class App extends React.Component<Props, State> {
               path='/topology'
               component={() => {
                 return (
-                  <>
-                    <div className='topology-renderer-simulation-status-logger-measurement-graphs'>
-                      <div>
-                        <SimulationControlContainer />
-                        <TabGroup>
-                          <Tab label='Simulation'>
-                            <TopologyRendererContainer
-                              mRIDs={this.componentMrids}
-                              phases={this.componentPhases} />
-                            <SimulationStatusLogContainer />
-                          </Tab>
-                          <Tab label='Events'>
-                            <EventSummary />
-                          </Tab>
-                          <Tab label='Applications'>
-                            <AvailableApplicationList />
-                          </Tab>
-                        </TabGroup>
-                      </div>
-                      <div className='measurement-charts'>
-                        <MeasurementChartContainer />
-                      </div>
+                  <div className='topology-renderer-simulation-status-logger-measurement-graphs'>
+                    <div>
+                      <SimulationControlContainer />
+                      <TabGroup>
+                        <Tab label='Simulation'>
+                          <TopologyRendererContainer
+                            mRIDs={this.componentMrids}
+                            phases={this.componentPhases} />
+                          <SimulationStatusLogContainer />
+                          <SimulationLabelsContainer />
+                        </Tab>
+                        <Tab label='Events'>
+                          <EventSummary />
+                        </Tab>
+                        <Tab label='Applications'>
+                          <AvailableApplicationList />
+                        </Tab>
+                      </TabGroup>
                     </div>
-                    <LabelContainer />
-                  </>
+                    <div className='measurement-charts'>
+                      <MeasurementChartContainer />
+                    </div>
+                  </div>
                 );
               }} />
             <Route
