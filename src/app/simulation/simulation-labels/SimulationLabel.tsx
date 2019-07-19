@@ -48,11 +48,13 @@ export class SimulationLabel extends React.Component<Props, State> {
       const anchor = document.querySelector(`.model-renderer ._${this.props.nodeNameToAttachTo}${phase}_`);
       if (anchor) {
         const anchorRect = anchor.getBoundingClientRect();
-        const offsetParentOfLabel = this.simulationLabel.offsetParent as HTMLElement;
+        const offsetTopOfOffsetParent = this.simulationLabel.offsetParent
+          ? (this.simulationLabel.offsetParent as HTMLElement).offsetTop
+          : 0;
         const toolBarHeight = 60;
         return {
           left: anchorRect.left + anchorRect.width / 2,
-          top: anchorRect.top - offsetParentOfLabel.offsetTop - toolBarHeight + anchorRect.height / 2
+          top: anchorRect.top - offsetTopOfOffsetParent - toolBarHeight + anchorRect.height / 2
         };
       }
     }
