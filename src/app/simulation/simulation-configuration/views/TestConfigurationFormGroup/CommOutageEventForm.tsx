@@ -426,7 +426,7 @@ export class CommOutageEventForm extends React.Component<Props, State> {
       outputComponentOptions: this.props.modelDictionary.measurements.filter(
         e => e.ConductingEquipment_type === selectedType
       )
-        .map(e => new Option(e.ConductingEquipment_name, e)),
+        .map(e => new Option(`${e.ConductingEquipment_name} (${e.phases})`, e)),
       outputPhaseOptions: [],
       outputMeasurementTypeOptions: []
     });
@@ -434,7 +434,7 @@ export class CommOutageEventForm extends React.Component<Props, State> {
   }
 
   onOutputComponentChanged(selectedOption: Option<ModelDictionaryMeasurement>) {
-    this.currentOutputListItem.name = selectedOption.label;
+    this.currentOutputListItem.name = selectedOption.value.ConductingEquipment_name;
     this.setState({
       outputPhaseOptions: this._generateUniqueOptions(this._normalizePhases(selectedOption.value.phases))
         .sort((a, b) => a.label.localeCompare(b.label)),
