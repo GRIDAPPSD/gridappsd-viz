@@ -47,7 +47,23 @@ export class MeasurementChart extends React.Component<Props, State> {
   render() {
     return (
       <div className='measurement-chart'>
-        <header>{this.props.measurementChartModel.name.replace(/_/g, ' ')}</header>
+        <header>
+          {this.props.measurementChartModel.name}
+        </header>
+        <div className='measurement-chart__legends'>
+          {
+            this.props.measurementChartModel.timeSeries.map(timeSeries => (
+              <div
+                key={timeSeries.name}
+                className='measurement-chart__legend'>
+                <div className='measurement-chart__legend__color' />
+                <div className='measurement-chart__legend__label'>
+                  {timeSeries.name}
+                </div>
+              </div>
+            ))
+          }
+        </div>
         <svg
           className='canvas'
           ref={elem => this._canvas = elem}
@@ -115,7 +131,7 @@ export class MeasurementChart extends React.Component<Props, State> {
   private _renderTimeSeriesLineCharts() {
     for (const timeSeries of this.props.measurementChartModel.timeSeries) {
       this._container.append('path')
-        .attr('class', 'time-series-line' + ' _' + timeSeries.name)
+        .attr('class', 'time-series-line')
         .datum(timeSeries.points)
         .attr('d', this._lineGenerator);
     }

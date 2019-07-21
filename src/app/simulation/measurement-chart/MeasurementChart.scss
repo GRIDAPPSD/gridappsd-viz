@@ -1,99 +1,69 @@
+$time-series-colors: red green blue #b729ae orange pink magenta brown lightcoral;
+
 .measurement-chart {
     border: 2px solid rgba(0, 0, 0, 0.3);
     border-radius: 2px;
     background-color: #fff;
     margin: 5px auto;
     width: 95%;
+
     header {
         font-weight: bold;
         text-transform: uppercase;
         padding-left: 5px;
     }
+
     .canvas {
         width: 100%;
         height: 100%;
     }
+
     path.time-series-line {
         fill: none;
     }
-    ._190-7361,
-    ._53 {
-        stroke: red;
-    }
-    ._190-8581,
-    ._82 {
-        stroke: green;
-    }
-    ._190-8593,
-    ._62,
-    ._610 {
-        stroke: blue;
-    }
-    .__hvmv_sub_lsb 
-    ._hvmv11sub1_lsb,
-    ._hvmv69_11sub3 {
-        stroke: black;
-    }
-    ._l2673313,
-    ._reg1a {
-        stroke: orange;
-    }
-    ._l2876814,
-    ._reg2 {
-        stroke: pink;
-    }
-    ._l2955047,
-    ._reg3 {
-        stroke: cyan;
-    }
-    ._l3160107,
-    ._reg4 {
-        stroke: magenta;
-    }
-    ._l3254238 {
-        stroke: brown;
-    }
-    ._m1047574 {
-        stroke: lightcoral;
-    }
-    ._hvmv69_11sub1,
-    ._hvmv_sub {
-        stroke: orange;
-        stroke-width: 2px;
-    }
 
-    ._hvmv69_11sub2{
-        stroke: rgb(0, 255, 64);
-    }
-    ._FEEDER_REG {
-        stroke: orange;
-    }
-    ._VREG2 {
-        stroke: red;
-    }
-    ._VREG3 {
-        stroke: brown;
-    }
-    ._VREG4 {
-        stroke: blue;
-    }
+    @for $index from 1 through length($time-series-colors) {
+        path.time-series-line:nth-of-type(#{$index}) {
+            stroke: #{nth($time-series-colors, $index)};
+        }
 
-    ._vreg2_a,
-    ._feeder_reg1a,
-    ._feeder_reg1b,
-    ._feeder_reg1c {
-        stroke: black;
+        .measurement-chart__legend:nth-child(#{$index}) .measurement-chart__legend__color {
+            background-color: #{nth($time-series-colors, $index)};
+        }
     }
+}
 
-    ._feeder_reg2a,
-    ._feeder_reg2b,
-    ._feeder_reg2c{
-          stroke: blue;
-     }
+.measurement-chart__legends {
+    display: flex;
+    padding: 5px;
+    flex-flow: row wrap;
+}
 
-    ._feeder_reg3a,
-    ._feeder_reg3b,
-    ._feeder_reg3c {
-         stroke: brown;
-    }
+.measurement-chart__legend {
+    display: inline-flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-right: 5px;
+    background-color: #fff;
+    margin-right: 10px;
+    margin-bottom: 5px;
+    border-radius: 3px;
+    box-shadow: 0 0 1px #555;
+    box-sizing: border-box;
+}
+
+.measurement-chart__legend__color {
+    width: 15px;
+    height: 10px;
+    display: inline-block;
+    padding: 2.5px 0;
+    border-top-left-radius: 3px;
+    border-bottom-left-radius: 3px;
+}
+
+.measurement-chart__legend__label {
+    font-size: 0.7em;
+    display: inline-block;
+    margin-left: 5px;
+    color: #000;
 }
