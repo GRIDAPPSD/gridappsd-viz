@@ -21,11 +21,10 @@ module.exports = env => {
     },
 
     resolve: {
-      // Add '.ts' and '.tsx' as resolvable extensions.
       alias: {
         '@shared': path.resolve('./src/app/shared')
       },
-      extensions: ['.ts', '.js', '.tsx', '.jsx', '.scss', '.css', '.html', '.web.js']
+      extensions: ['.ts', '.js', '.tsx', '.jsx', '.scss', '.css', '.html']
     },
 
     module: {

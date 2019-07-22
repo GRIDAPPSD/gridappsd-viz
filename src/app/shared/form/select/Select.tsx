@@ -42,11 +42,12 @@ export class Select<T, E extends boolean> extends React.Component<Props<T, E>, S
 
   private readonly _optionListContainer = document.createElement('div');
   private _defaultFirstPage: Option<T>[] = [];
+  private _defaultSelectedOptions: Option<T>[] = [];
 
   constructor(props: Props<T, E>) {
     super(props);
     this.state = {
-      currentLabel: props.defaultLabel || props.multiple ? 'Select one or more' : 'Select one option',
+      currentLabel: props.defaultLabel || props.multiple ? 'Select one or more' : 'Select an option',
       opened: false,
       selectedOptions: [],
       defaultLabel: props.defaultLabel || props.multiple ? 'Select one or more' : 'Select an option',
@@ -137,16 +138,19 @@ export class Select<T, E extends boolean> extends React.Component<Props<T, E>, S
 
   private _selectDefaultSelectedOptions() {
     if (this.props.options.length !== 0 && this.props.isOptionSelected) {
-      const selectedOptions = this.props.options.filter((option, i) => this.props.isOptionSelected(option, i));
-      if (selectedOptions.length > 0) {
+      if (this._defaultSelectedOptions.length === 0)
+        this._defaultSelectedOptions = this.props.options.filter((option, i) => this.props.isOptionSelected(option, i));
+      if (this._defaultSelectedOptions.length > 0) {
         this.setState({
-          currentLabel: selectedOptions.map(option => option.label).join(', '),
-          selectedOptions
+          currentLabel: this._defaultSelectedOptions.map(option => option.label).join(', '),
+          selectedOptions: this._defaultSelectedOptions
         }, () => this._toggleAllSelectedOptions(true));
+        if (this.props.label === 'Components')
+          return;
         if (this.props.multiple)
-          (this.props.onChange as any)(selectedOptions, this.props.label);
+          (this.props.onChange as any)(this._defaultSelectedOptions, this.props.label);
         else
-          (this.props.onChange as any)(selectedOptions[0], this.props.label);
+          (this.props.onChange as any)(this._defaultSelectedOptions[0], this.props.label);
       }
     }
   }
@@ -172,6 +176,7 @@ export class Select<T, E extends boolean> extends React.Component<Props<T, E>, S
 
   reset() {
     this._defaultFirstPage = [];
+    this._defaultSelectedOptions = [];
     this._toggleAllSelectedOptions(false);
     this.setState({
       selectedOptions: [],

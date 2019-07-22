@@ -104,7 +104,7 @@ export class SimulationConfigurationEditor extends React.Component<Props, State>
     this._simulationStatusSubscription = this._simulationControlService.statusChanges()
       .subscribe({
         next: status => this.setState({
-          disableSubmitButton: status !== SimulationStatus.NEW && status !== SimulationStatus.STOPPED
+          disableSubmitButton: status !== SimulationStatus.STOPPED
         })
       });
   }

@@ -337,7 +337,9 @@ export class App extends React.Component<Props, State> {
           this._simulationOutputService.updateModelDictionaryMeasurementMap(modelDictionaryMeasurementMap);
           this._modelDictionaryMeasurementsPerSimulationName.set(simulationName, modelDictionaryMeasurementMap);
           this._availableModelDictionaries.set(simulationName, modelDictionary);
-          this._stateStore.update({ modelDictionary });
+          this._stateStore.update({
+            modelDictionary
+          });
         }
       });
   }

@@ -8,7 +8,7 @@ import { SimulationQueue } from './SimulationQueue';
 import { StateStore } from '@shared/state-store';
 
 export const enum SimulationStatus {
-  STARTED, PAUSED, STOPPED, NEW, RESUMED
+  STARTED, PAUSED, STOPPED, RESUMED
 }
 /**
  * This class is responsible for communicating with the platform to process the simulation.
@@ -22,7 +22,7 @@ export class SimulationControlService {
   private readonly _stompClientService = StompClientService.getInstance();
   private readonly _currentSimulationStatusNotifer = new Subject<SimulationStatus>();
   private readonly _stateStore = StateStore.getInstance();
-  private _currentSimulationStatus = SimulationStatus.NEW;
+  private _currentSimulationStatus = SimulationStatus.STOPPED;
 
   private constructor() {
   }

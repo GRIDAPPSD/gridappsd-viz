@@ -10,6 +10,7 @@ export class OverlayService {
 
 
   private constructor() {
+    this.hide = this.hide.bind(this);
   }
 
   static getInstance() {
