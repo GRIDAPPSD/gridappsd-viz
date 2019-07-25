@@ -21,6 +21,7 @@ interface Props<T, E extends boolean> {
   defaultLabel?: string;
   optional?: boolean;
   multiple: E;
+  disabled?: boolean;
 }
 
 interface State<T> {
@@ -40,12 +41,12 @@ export class Select<T, E extends boolean> extends React.Component<Props<T, E>, S
   optionListOpener: HTMLButtonElement;
 
   private readonly _optionListContainer = document.createElement('div');
-  private _defaultFirstPage: Option<T>[] = [];
+  private _defaultFirstPage: Option<T>[];
 
   constructor(props: Props<T, E>) {
     super(props);
     this.state = {
-      currentLabel: props.defaultLabel || props.multiple ? 'Select one or more' : 'Select an option',
+      currentLabel: props.defaultLabel || props.multiple ? 'Select one or more' : 'Select one option',
       opened: false,
       selectedOptions: [],
       defaultLabel: props.defaultLabel || props.multiple ? 'Select one or more' : 'Select an option',
@@ -223,7 +224,7 @@ export class Select<T, E extends boolean> extends React.Component<Props<T, E>, S
 
   calculateClassName() {
     return 'select'
-      + (this.props.options.length === 0 ? ' disabled' : '')
+      + (this.props.options.length === 0 || this.props.disabled ? ' disabled' : '')
       + (this.state.nothingSelectedMessage.length === 0 ? ' valid' : ' invalid');
   }
 
