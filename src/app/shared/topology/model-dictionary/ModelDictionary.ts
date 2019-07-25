@@ -1,4 +1,7 @@
 import { ModelDictionaryMeasurement } from './ModelDictionaryMeasurement';
+import { ModelDictionaryCapacitor } from './ModelDictionaryCapacitor';
+import { ModelDictionaryRegulator } from './ModelDictionaryRegulator';
+import { ModelDictionarySwitch } from './ModelDictionarySwitch';
 
 export interface ModelDictionary {
   name: string;
@@ -9,12 +12,16 @@ export interface ModelDictionary {
   subregionID: string;
   region: string;
   regionID: string;
-  capacitors: any[];
-  regulators: any[];
+  synchronousmachines: any[];
+  capacitors: ModelDictionaryCapacitor[];
+  regulators: ModelDictionaryRegulator[];
   solarpanels: any[];
   batteries: any[];
-  switches: any[];
+  switches: ModelDictionarySwitch[];
   fuses: any[];
+  sectionalisers: any[];
+  breakers: any[];
+  reclosers: any[];
   disconnectors: any[];
   measurements: ModelDictionaryMeasurement[];
 }

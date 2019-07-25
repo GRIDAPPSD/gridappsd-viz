@@ -31,15 +31,10 @@ export class TopologyRenderer extends React.Component<Props, State> {
 
   private readonly _transformWatcherService = MapTransformWatcherService.getInstance();
   private readonly _overlay = OverlayService.getInstance();
-
-  private _canvas: Selection<SVGSVGElement, any, any, any> = null;
-  private _container: Selection<SVGGElement, any, any, any> = null;
-  private _svg: SVGSVGElement = null;
-  private _showNodeSymbols = false;
   private readonly _zoomConfigs = {
     ieee8500: { x: 260.4093929510776, y: 73.17314737715492, k: 0.013690402749858915 },
     ieee123: { x: 340.1487935608565, y: 221.36427239273797, k: 0.05812524487428157 }
-  }
+  };
   private readonly _zoomer = zoom();
   private readonly _edgeGenerator = line<{ edge: Edge; node: Node }>()
     .x(d => d.node.screenX)
@@ -60,6 +55,10 @@ export class TopologyRenderer extends React.Component<Props, State> {
     swing_node: { width: this._symbolSize, height: this._symbolSize }
   };
 
+  private _canvas: Selection<SVGSVGElement, any, any, any> = null;
+  private _container: Selection<SVGGElement, any, any, any> = null;
+  private _svg: SVGSVGElement = null;
+  private _showNodeSymbols = false;
   private _tooltip: Tooltip;
 
   constructor(props: any) {

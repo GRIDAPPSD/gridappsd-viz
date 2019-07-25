@@ -6,7 +6,8 @@
     "scripts": {
         "start": "node server.js",
         "launch": "webpack-dev-server --progress --inline",
-        "build": "rm -rf dist && webpack --env=production --env.BUILD_VERSION"
+        "build": "rm -rf dist && webpack --env=production --env.BUILD_VERSION",
+        "lint": "tslint --project ."
     },
     "author": "",
     "license": "ISC",
@@ -40,6 +41,7 @@
         "sass-loader": "^7.1.0",
         "source-map-loader": "0.1.5",
         "style-loader": "0.21.0",
+        "tslint": "^5.18.0",
         "typescript": "^3.0.1",
         "webpack": "3.10.0",
         "webpack-dev-server": "^2.9.7"

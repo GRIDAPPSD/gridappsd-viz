@@ -42,8 +42,8 @@ export function CommOutageEventTable(props: Props) {
       </thead>
       <tbody>
         {
-          props.events.map((event, i) => (
-            <tr key={i}>
+          props.events.map((event, index) => (
+            <tr key={index}>
               <td>
                 <div className='comm-outage-event-table__row-actions'>
                   {props.actions(event)}
@@ -52,7 +52,7 @@ export function CommOutageEventTable(props: Props) {
               {
                 props.faultMRIDs &&
                 <td>
-                  <div>{props.faultMRIDs[i]}</div>
+                  <div>{props.faultMRIDs[index]}</div>
                 </td>
               }
               <td>
@@ -66,7 +66,7 @@ export function CommOutageEventTable(props: Props) {
                 {event.inputList.map((e, i) => <div key={i}>{e.name}</div>)}
               </td>
               <td>
-                {event.inputList.map((e, i) => <div key={i}>{e.phases.map(e => e.phaseLabel).join(', ')}</div>)}
+                {event.inputList.map((inputItem, i) => <div key={i}>{inputItem.phases.map(e => e.phaseLabel).join(', ')}</div>)}
               </td>
               <td>
                 {event.inputList.map((e, i) => <div key={i}>{e.attribute}</div>)}

@@ -187,22 +187,22 @@ export class CommOutageEventForm extends React.Component<Props, State> {
               </thead>
               <tbody>
                 {
-                  this.state.inputList.map((e, i) => (
-                    <tr key={i}>
+                  this.state.inputList.map((inputItem, index) => (
+                    <tr key={index}>
                       <td>
                         <Tooltip content='Delete'>
                           <IconButton
                             style='accent'
                             size='small'
                             icon='delete'
-                            onClick={() => this.setState({ inputList: this.state.inputList.filter(item => item !== e) })} />
+                            onClick={() => this.setState({ inputList: this.state.inputList.filter(item => item !== inputItem) })} />
                         </Tooltip>
                       </td>
-                      <td>{e.type}</td>
-                      <td>{e.name}</td>
-                      <td>{e.phases.map((e, i) => <div key={i}>{e.phaseLabel}</div>)}</td>
+                      <td>{inputItem.type}</td>
+                      <td>{inputItem.name}</td>
+                      <td>{inputItem.phases.map((phase, i) => <div key={i}>{phase.phaseLabel}</div>)}</td>
                       <td>
-                        <div>{e.attribute}</div>
+                        <div>{inputItem.attribute}</div>
                       </td>
                     </tr>
                   ))
@@ -283,21 +283,21 @@ export class CommOutageEventForm extends React.Component<Props, State> {
               </thead>
               <tbody>
                 {
-                  this.state.outputList.map((e, i) => (
-                    <tr key={i}>
+                  this.state.outputList.map((outputItem, index) => (
+                    <tr key={index}>
                       <td>
                         <Tooltip content='Delete'>
                           <IconButton
                             style='accent'
                             size='small'
                             icon='delete'
-                            onClick={() => this.setState({ outputList: this.state.outputList.filter(item => item !== e) })} />
+                            onClick={() => this.setState({ outputList: this.state.outputList.filter(item => item !== outputItem) })} />
                         </Tooltip>
                       </td>
-                      <td>{e.type}</td>
-                      <td>{e.name}</td>
-                      <td>{e.phases.map((e, i) => <div key={i}>{e}</div>)}</td>
-                      <td>{e.measurementTypes.map((e, i) => <div key={i}>{e}</div>)}</td>
+                      <td>{outputItem.type}</td>
+                      <td>{outputItem.name}</td>
+                      <td>{outputItem.phases.map((e, i) => <div key={i}>{e}</div>)}</td>
+                      <td>{outputItem.measurementTypes.map((e, i) => <div key={i}>{e}</div>)}</td>
                     </tr>
                   ))
                 }

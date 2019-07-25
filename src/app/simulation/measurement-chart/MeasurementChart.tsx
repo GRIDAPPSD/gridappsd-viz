@@ -86,7 +86,7 @@ export class MeasurementChart extends React.Component<Props, State> {
   }
 
   private _calculateXYAxisExtents(timeSeries: TimeSeries[]): { xExtent: [Date, Date], yExtent: [number, number] } {
-    const dataPoints: Array<TimeSeriesDataPoint> = timeSeries.reduce((points, timeSeries) => points.concat(timeSeries.points), []);
+    const dataPoints: Array<TimeSeriesDataPoint> = timeSeries.reduce((points, series) => points.concat(series.points), []);
     return {
       xExtent: extent<TimeSeriesDataPoint, Date>(dataPoints, point => point.primitiveX),
       yExtent: extent<TimeSeriesDataPoint, number>(dataPoints, point => point.primitiveY)
@@ -120,4 +120,5 @@ export class MeasurementChart extends React.Component<Props, State> {
         .attr('d', this._lineGenerator);
     }
   }
+
 }

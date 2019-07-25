@@ -40,4 +40,5 @@ export class FilePicker extends React.Component<Props, State> {
   onFilePicked(event) {
     this._filePickerService.selectFile(event.target.files[0]);
   }
+
 }

@@ -33,7 +33,7 @@ export class ThreeDots extends React.Component<Props, State> {
               this._direction = 1;
             return {
               dots: state.dots + this._direction
-            }
+            };
           });
         }
       });
@@ -50,4 +50,5 @@ export class ThreeDots extends React.Component<Props, State> {
       </span>
     );
   }
+
 }

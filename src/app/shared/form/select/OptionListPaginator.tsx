@@ -1,9 +1,9 @@
 import * as React from 'react';
 
 import { Option } from './Option';
+import { IconButton } from '@shared/buttons';
 
 import './OptionListPaginator.scss';
-import { IconButton } from '@shared/buttons';
 
 interface Props<T> {
   options: Option<T>[];
@@ -65,7 +65,7 @@ export class OptionListPaginator<T> extends React.Component<Props<T>, State> {
             style='accent'
             onClick={this.navigateToNextPage} />
         </footer>
-      )
+      );
     return null;
   }
 
@@ -83,7 +83,7 @@ export class OptionListPaginator<T> extends React.Component<Props<T>, State> {
   navigateToNextPage() {
     this.setState(state => {
       const startSlice = (state.currentPageNumber + 1) * pageSize;
-      this.props.onPageChanged(this.props.options.slice(startSlice, startSlice + pageSize))
+      this.props.onPageChanged(this.props.options.slice(startSlice, startSlice + pageSize));
       return {
         currentPageNumber: state.currentPageNumber + 1,
       };

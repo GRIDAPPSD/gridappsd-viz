@@ -2,6 +2,7 @@ import { MessageRequest } from '@shared/MessageRequest';
 import { Application } from '@shared/Application';
 
 export class DisableApplicationRequest implements MessageRequest {
+
   readonly url: string;
   readonly requestBody: any;
   readonly replyTo: string;
@@ -14,4 +15,5 @@ export class DisableApplicationRequest implements MessageRequest {
     };
     this.replyTo = 'dis-application';
   }
+
 }

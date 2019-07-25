@@ -68,4 +68,5 @@ export class SimulationStatusLoggerMessage extends React.Component<Props, State>
     this.messageElement.classList.remove('highlight');
     this.setState({ showMessageAsJson: false });
   }
+
 }

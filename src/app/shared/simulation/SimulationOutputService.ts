@@ -18,6 +18,10 @@ export class SimulationOutputService {
   private _simulationOutputMeasurementsStream = new Subject<SimulationOutputMeasurement[]>();
   private _simulationOutputSubscription: Subscription;
 
+  static getInstance() {
+    return SimulationOutputService._INSTANCE;
+  }
+
   private constructor() {
     this._watchStompClientStatusChanges();
   }
@@ -37,10 +41,6 @@ export class SimulationOutputService {
           }
         }
       });
-  }
-
-  static getInstance() {
-    return SimulationOutputService._INSTANCE;
   }
 
 
@@ -86,4 +86,5 @@ export class SimulationOutputService {
         }
       });
   }
+
 }

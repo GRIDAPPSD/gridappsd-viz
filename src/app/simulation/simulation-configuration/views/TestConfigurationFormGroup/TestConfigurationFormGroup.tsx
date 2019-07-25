@@ -46,7 +46,7 @@ export class TestConfigurationFormGroup extends React.Component<Props, State> {
       faultEvents: [],
       currentFaultEvent: this.defaultFaultEventFormValue(),
       currentOutageEvent: this.defaultOutageEventFormValue()
-    }
+    };
     this.uniqueEventIdValidator = this.uniqueEventIdValidator.bind(this);
     this.addOutageEvent = this.addOutageEvent.bind(this);
     this.addFaultEvent = this.addFaultEvent.bind(this);

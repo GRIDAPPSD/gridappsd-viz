@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { createPortal } from 'react-dom'
+import { createPortal } from 'react-dom';
 
 import { Option } from './Option';
 import { PopUp } from '@shared/pop-up';
@@ -40,12 +40,12 @@ export class Select<T, E extends boolean> extends React.Component<Props<T, E>, S
   optionListOpener: HTMLButtonElement;
 
   private readonly _optionListContainer = document.createElement('div');
-  private _defaultFirstPage: Option<T>[];
+  private _defaultFirstPage: Option<T>[] = [];
 
   constructor(props: Props<T, E>) {
     super(props);
     this.state = {
-      currentLabel: props.defaultLabel || props.multiple ? 'Select one or more' : 'Select one option',
+      currentLabel: props.defaultLabel || props.multiple ? 'Select one or more' : 'Select an option',
       opened: false,
       selectedOptions: [],
       defaultLabel: props.defaultLabel || props.multiple ? 'Select one or more' : 'Select an option',
@@ -269,7 +269,7 @@ export class Select<T, E extends boolean> extends React.Component<Props<T, E>, S
       return {
         selectedOptions,
         currentLabel: !this.props.multiple ? this.state.defaultLabel : this._produceCurrentLabelForMultiSelect()
-      }
+      };
     });
     option.isSelected = false;
   }

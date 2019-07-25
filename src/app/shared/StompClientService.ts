@@ -7,7 +7,9 @@ import { RUN_CONFIG } from '../../../runConfig';
 export type StompClientConnectionStatus = 'NOT_CONNECTED' | 'CONNECTING' | 'CONNECTED' | 'NEW';
 
 export class StompClientService {
+
   private static readonly _INSTANCE = new StompClientService();
+
   private _client: Client;
   private _statusChanges = new BehaviorSubject<StompClientConnectionStatus>('NEW');
   private _status: StompClientConnectionStatus = 'NEW';

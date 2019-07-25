@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Subject, Observable } from 'rxjs';
+import { Subject } from 'rxjs';
 import { distinctUntilChanged, debounceTime } from 'rxjs/operators';
 
 import { IconButton } from '@shared/buttons';
@@ -10,6 +10,7 @@ import './OptionListFilter.scss';
 interface Props {
   onChange: (newValue: string, oldValue: string) => void;
 }
+
 interface State {
   filterValue: string;
 }

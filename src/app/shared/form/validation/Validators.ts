@@ -4,7 +4,7 @@ export type Validator = (value: string) => ValidationResult;
 
 const numberRegex = /^(?:\d+)?$/;
 
-//YYYY-MM-DD HH:MM:SS
+// YYYY-MM-DD HH:MM:SS
 const dateTimePattern = /^(?:\d{4}-\d{2}-\d{2}\s\d{2}:\d{2}:\d{2})?$/;
 
 export class Validators {
@@ -25,8 +25,7 @@ export class Validators {
           isValid: true,
           errorMessage: ''
         };
-      }
-      catch (e) {
+      } catch (e) {
         return {
           errorMessage: errorMessage || `Invalid JSON: ${e.message.replace('JSON.parse: ', '')}`,
           isValid: false

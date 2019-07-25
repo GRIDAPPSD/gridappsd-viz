@@ -11,7 +11,6 @@ import { PowerSystemConfigurationFormGroup } from './views/PowerSystemConfigurat
 import { SimulationConfigurationFormGroup } from './views/SimulationConfigurationFormGroup';
 import { ApplicationConfigurationFormGroup } from './views/ApplicationConfigurationFormGroup';
 import { TestConfigurationFormGroup } from './views/TestConfigurationFormGroup';
-import { Wait } from '@shared/wait';
 import { DateTimeService } from './services/DateTimeService';
 import { CommOutageEvent } from '../../shared/test-manager/CommOutageEvent';
 import { FaultEvent, FaultKind } from '../../shared/test-manager/FaultEvent';

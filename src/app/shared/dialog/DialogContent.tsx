@@ -7,8 +7,10 @@ interface Props {
   styles?: React.CSSProperties;
 }
 
-export const DialogContent = (props: Props) => (
-  <div className='dialog-content' style={{ ...(props.styles || {}) }}>
-    {props.children}
-  </div>
-);
+export function DialogContent(props: Props) {
+  return (
+    <div className='dialog-content' style={{ ...(props.styles || {}) }}>
+      {props.children}
+    </div>
+  );
+}

@@ -30,11 +30,12 @@ interface State {
 
 export class TopologyRendererContainer extends React.Component<Props, State> {
 
+  private static readonly _CACHE = {};
+
   private readonly _stompClientService = StompClientService.getInstance();
   private readonly _simulationQueue = SimulationQueue.getInstance();
   private _activeSimulationConfig = this._simulationQueue.getActiveSimulation().config;
   private _activeSimulationStream: Subscription = null;
-  private static readonly _CACHE = {};
 
   constructor(props: any) {
     super(props);
@@ -117,12 +118,12 @@ export class TopologyRendererContainer extends React.Component<Props, State> {
     const feeder = model.feeders[0];
     const allNodes = Object.keys(feeder)
       .filter(key => groupNames.includes(key))
-      .reduce((allNodes, group) => {
-        feeder[group].forEach(node => {
+      .reduce((accumlator, group) => {
+        for (const node of feeder[group]) {
           node.groupName = group;
-          allNodes.push(node);
-        });
-        return allNodes;
+          accumlator.push(node);
+        }
+        return accumlator;
       }, []);
     for (const node of allNodes) {
       const groupName = node.groupName;

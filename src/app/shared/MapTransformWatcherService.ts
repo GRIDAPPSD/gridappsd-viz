@@ -2,6 +2,7 @@ import { Subject, Observable } from 'rxjs';
 import { debounceTime } from 'rxjs/operators';
 
 export class MapTransformWatcherService {
+
   private static readonly _INSTANCE_ = new MapTransformWatcherService();
 
   private readonly _watcher = new Subject<void>();

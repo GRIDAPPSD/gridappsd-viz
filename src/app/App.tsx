@@ -86,7 +86,6 @@ export class App extends React.Component<Props, State> {
   }
 
   private _fetchAvailableApplicationsAndServices() {
-    GetAvailableApplicationsAndServicesRequest
     const request = new GetAvailableApplicationsAndServicesRequest();
     this._subscribeToAvailableApplicationsTopic(request.replyTo);
     this._stompClientService.send(
@@ -263,7 +262,7 @@ export class App extends React.Component<Props, State> {
               component={StompClientContainer} />
             <Route
               path='/browse'
-              component={props => <DataBrowser feederModel={this.state.feederModel} match={props.match} />} />
+              component={routeProps => <DataBrowser feederModel={this.state.feederModel} match={routeProps.match} />} />
             <WebsocketStatusWatcher />
           </>
       } />
