@@ -329,12 +329,12 @@ export class App extends React.Component<Props, State> {
           if (typeof payload.data === 'string')
             payload.data = JSON.parse(payload.data);
           const modelDictionary = payload.data.feeders[0];
-          const modelDictionaryMeasurements = new Map<string, ModelDictionaryMeasurement>();
+          const modelDictionaryMeasurementMap = new Map<string, ModelDictionaryMeasurement>();
           for (const measurement of modelDictionary.measurements)
-            modelDictionaryMeasurements.set(measurement.mRID, measurement);
+            modelDictionaryMeasurementMap.set(measurement.mRID, measurement);
           this._collectMRIDsAndPhasesForComponents(modelDictionary);
-          this._simulationOutputService.setModelDictionaryMeasurements(modelDictionaryMeasurements);
-          this._modelDictionaryMeasurementsPerSimulationName.set(simulationName, modelDictionaryMeasurements);
+          this._simulationOutputService.updateModelDictionaryMeasurementMap(modelDictionaryMeasurementMap);
+          this._modelDictionaryMeasurementsPerSimulationName.set(simulationName, modelDictionaryMeasurementMap);
           this._availableModelDictionaries.set(simulationName, modelDictionary);
           this._stateStore.update({ modelDictionary });
         }

@@ -13,7 +13,7 @@ export class SimulationOutputService {
 
   private readonly _stompClientService = StompClientService.getInstance();
   private readonly _simulationControlService = SimulationControlService.getInstance();
-  private _modelDictionaryMeasurements: Map<string, ModelDictionaryMeasurement>;
+  private _modelDictionaryMeasurementMap: Map<string, ModelDictionaryMeasurement>;
   private _outputTimestamp: number;
   private _simulationOutputMeasurementsStream = new Subject<SimulationOutputMeasurement[]>();
   private _simulationOutputSubscription: Subscription;
@@ -43,13 +43,12 @@ export class SimulationOutputService {
       });
   }
 
-
   getOutputTimestamp() {
     return this._outputTimestamp;
   }
 
-  setModelDictionaryMeasurements(value: Map<string, ModelDictionaryMeasurement>) {
-    this._modelDictionaryMeasurements = value;
+  updateModelDictionaryMeasurementMap(newMap: Map<string, ModelDictionaryMeasurement>) {
+    this._modelDictionaryMeasurementMap = newMap;
   }
 
   simulationOutputMeasurementsReceived(): Observable<SimulationOutputMeasurement[]> {
@@ -67,7 +66,7 @@ export class SimulationOutputService {
         next: payload => {
           this._outputTimestamp = payload.message.timestamp;
           const measurements: SimulationOutputMeasurement[] = payload.message.measurements.map(measurement => {
-            const measurementInModelDictionary = this._modelDictionaryMeasurements.get(measurement.measurement_mrid);
+            const measurementInModelDictionary = this._modelDictionaryMeasurementMap.get(measurement.measurement_mrid);
             if (measurementInModelDictionary)
               return {
                 name: measurementInModelDictionary.name,
