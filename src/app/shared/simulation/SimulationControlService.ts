@@ -5,8 +5,7 @@ import { SimulationConfiguration } from './SimulationConfiguration';
 import { StompClientService } from '@shared/StompClientService';
 import { START_SIMULATION_TOPIC, CONTROL_SIMULATION_TOPIC } from './topics';
 import { SimulationQueue } from './SimulationQueue';
-import { Store } from '@shared/Store';
-import { ApplicationState } from '@shared/ApplicationState';
+import { StateStore } from '@shared/state-store';
 
 export const enum SimulationStatus {
   STARTED, PAUSED, STOPPED, NEW, RESUMED
@@ -22,7 +21,7 @@ export class SimulationControlService {
   private readonly _simulationQueue = SimulationQueue.getInstance();
   private readonly _stompClientService = StompClientService.getInstance();
   private readonly _currentSimulationStatusNotifer = new Subject<SimulationStatus>();
-  private readonly _store = Store.getInstance<ApplicationState>();
+  private readonly _stateStore = StateStore.getInstance();
   private _currentSimulationStatus = SimulationStatus.NEW;
 
   private constructor() {
@@ -34,6 +33,10 @@ export class SimulationControlService {
 
   statusChanges(): Observable<SimulationStatus> {
     return this._currentSimulationStatusNotifer.asObservable();
+  }
+
+  currentStatus() {
+    return this._currentSimulationStatus;
   }
 
   startSimulation(simulationConfig: SimulationConfiguration) {
@@ -68,7 +71,7 @@ export class SimulationControlService {
     this._stompClientService.readOnceFrom(START_SIMULATION_TOPIC)
       .pipe(map(body => JSON.parse(body)))
       .subscribe({
-        next: payload => this._store.mergeState({ simulationStartResponse: payload })
+        next: payload => this._stateStore.update({ startSimulationResponse: payload })
       });
   }
 

@@ -5,6 +5,7 @@ const ExtractTextPlugin = require('extract-text-webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const webpack = require('webpack');
 const TsConfigPathsPlugin = require('awesome-typescript-loader').TsConfigPathsPlugin;
+const CopyWebpackPlugin = require('copy-webpack-plugin');
 
 module.exports = env => {
   if (env === 'production')
@@ -24,7 +25,7 @@ module.exports = env => {
       alias: {
         '@shared': path.resolve('./src/app/shared')
       },
-      extensions: ['.ts', '.js', '.tsx', '.jsx', '.scss', '.css', '.html', ".web.js"]
+      extensions: ['.ts', '.js', '.tsx', '.jsx', '.scss', '.css', '.html', '.web.js']
     },
 
     module: {
@@ -38,7 +39,7 @@ module.exports = env => {
           use: ['css-loader', 'sass-loader']
         })
       },
-      { test: /\.(svg|png|woff|woff2|ttf|eot)$/, use: "file-loader" },
+      { test: /\.(svg|png|woff|woff2|ttf|eot)$/, use: 'file-loader' },
       ]
     },
     plugins: [
@@ -49,7 +50,13 @@ module.exports = env => {
       new HtmlWebpackPlugin({
         template: './index.template.html'
       }),
-      new ExtractTextPlugin('[hash:10].css')
+      new ExtractTextPlugin('[hash:10].css'),
+      new CopyWebpackPlugin([
+        {
+          from: './src/assets',
+          to: './assets'
+        }
+      ])
     ],
 
     devServer: {
@@ -88,7 +95,7 @@ function updateVersion() {
   else {
     childProcess.exec('git rev-parse --abbrev-ref HEAD', {}, (error, stdout) => {
       if (error)
-        console.error(`An error occured trying to "git rev-parse --abbrev-ref HEAD"`);
+        console.error(`An error occured trying to 'git rev-parse --abbrev-ref HEAD'`);
       else {
         const lastLine = stdout.trim().split('\n').slice(-1)[0];
         const lastIndexOfForwardSlash = lastLine.lastIndexOf('/');
@@ -101,8 +108,8 @@ function updateVersion() {
 
 function writeVersionNumber(versionNumber) {
   const runConfig = 'export const RUN_CONFIG = ' + JSON.stringify({
-    "version": versionNumber,
-    "gossServerUrl": "ws://127.0.0.1:61614"
+    'version': versionNumber,
+    'gossServerUrl': 'ws://127.0.0.1:61614'
   }, null, 2) + ';\n';
 
   fs.writeFileSync('./runConfig.ts', runConfig);

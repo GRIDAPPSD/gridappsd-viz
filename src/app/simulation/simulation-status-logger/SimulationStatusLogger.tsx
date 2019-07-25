@@ -1,4 +1,6 @@
 import * as React from 'react';
+import { Subject } from 'rxjs';
+import { debounceTime, filter } from 'rxjs/operators';
 
 import { SimulationStatusLoggerMessage } from './SimulationStatusLoggerMessage';
 import { Wait } from '@shared/wait';
@@ -13,7 +15,10 @@ interface Props {
 
 interface State {
   dragHandlePosition: number;
+  visibleMessages: string[];
 }
+
+const numberOfMessagesToLoadNext = 30;
 
 export class SimulationStatusLogger extends React.Component<Props, State> {
 
@@ -29,24 +34,68 @@ export class SimulationStatusLogger extends React.Component<Props, State> {
     ['DEBUG', '#E1F5FE'],
     ['TRACE', '#C0CA33']
   ];
+  private readonly _loggerBodyScrollNotifier = new Subject<number>();
 
-  constructor(props: any) {
+  constructor(props: Props) {
     super(props);
     this.state = {
-      dragHandlePosition: this._dragHandleMaxPosition
+      dragHandlePosition: this._dragHandleMaxPosition,
+      visibleMessages: []
     };
     this.mouseDown = this.mouseDown.bind(this);
     this._mouseUp = this._mouseUp.bind(this);
     this._resize = this._resize.bind(this);
+    this.loadMoreMessages = this.loadMoreMessages.bind(this);
   }
 
-  componentWillReceiveProps(newProps: Props) {
-    if (newProps !== this.props && newProps.simulationRunning)
-      this.setState({ dragHandlePosition: 430 });
+  componentDidUpdate(prevProps: Props) {
+    if (prevProps !== this.props) {
+      if (this.props.simulationRunning)
+        this.setState({
+          dragHandlePosition: 430
+        });
+      if (this.props.messages !== prevProps.messages) {
+        const currentNumberOfVisibleMessages = this.state.visibleMessages.length;
+        if (currentNumberOfVisibleMessages <= numberOfMessagesToLoadNext)
+          this.setState({
+            visibleMessages: this.props.messages.slice(0, numberOfMessagesToLoadNext)
+          });
+        else
+          this.setState({
+            visibleMessages: this.props.messages.slice(0, currentNumberOfVisibleMessages)
+          });
+      }
+    }
+  }
+
+  componentDidMount() {
+    this._loggerBodyScrollNotifier.pipe(
+      debounceTime(250),
+      filter(
+        scrollTop => scrollTop === this.simulationStatusLoggerBody.scrollHeight - this.simulationStatusLoggerBody.clientHeight
+      )
+    )
+      .subscribe({
+        next: scrollTop => {
+          // When the user scrolls to the bottom of the messages body
+          // then just keep appending ${messageBatchToShowNext} more messages until there is no more
+          if (this.state.visibleMessages.length < this.props.messages.length) {
+            this.setState({
+              visibleMessages: this.props.messages.slice(0, this.state.visibleMessages.length + numberOfMessagesToLoadNext)
+            });
+            // Move the scroll bar up to the previous scroll top position so that it does not just keep
+            // sticking to the bottom and causes the messages to keep getting appended
+            this.simulationStatusLoggerBody.scrollTop = scrollTop;
+          }
+        }
+      });
+  }
+
+  componentWillUnmount() {
+    this._loggerBodyScrollNotifier.complete();
   }
 
   render() {
-
     return (
       <div
         className='simulation-status-logger'
@@ -76,10 +125,11 @@ export class SimulationStatusLogger extends React.Component<Props, State> {
         </header>
         <section
           className='simulation-status-logger__body'
-          ref={elem => this.simulationStatusLoggerBody = elem}>
+          ref={elem => this.simulationStatusLoggerBody = elem}
+          onScroll={this.loadMoreMessages}>
           {
-            this.props.messages.map((message, i, messages) => (
-              <SimulationStatusLoggerMessage key={messages.length - i} message={message} />
+            this.state.visibleMessages.map(message => (
+              <SimulationStatusLoggerMessage key={message} message={message} />
             ))
           }
         </section>
@@ -107,4 +157,9 @@ export class SimulationStatusLogger extends React.Component<Props, State> {
       dragHandlePosition: newPosition
     });
   }
+
+  loadMoreMessages() {
+    this._loggerBodyScrollNotifier.next(this.simulationStatusLoggerBody.scrollTop);
+  }
+
 }

@@ -4,7 +4,6 @@
 
 .textarea__input-box {
     width: 600px;
-    box-shadow: 0 0 3px #555;
     border-radius: 3px;
     padding: 5px;
     height: 150px;
@@ -12,6 +11,23 @@
     overflow-y: auto;
     white-space: pre;
     vertical-align: top;
-    border: none;
+    border: 2px solid #ccc;
     display: inline-block;
+    transition: border-color 0.1s ease;
+    outline: none;
+}
+
+.textarea__input-box:focus {
+    border: 2px solid #639;
+}
+
+.form-control.invalid .textarea__input-box {
+    border-color: red;
+}
+
+.form-control.disabled .textarea__input-box {
+    border: 2px solid #eee;
+    background-color: #f9f9f9;
+    pointer-events: none;
+    color: #ddd;
 }

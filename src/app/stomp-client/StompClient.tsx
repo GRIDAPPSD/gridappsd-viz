@@ -4,8 +4,7 @@ import { Input, TextArea } from '@shared/form';
 import { BasicButton } from '@shared/buttons';
 import { Wait } from '@shared/wait';
 
-import './StompClient.styles.scss';
-import { FormControl } from '@shared/form/form-control/FormControl';
+import './StompClient.scss';
 
 interface Props {
   response: any;
@@ -19,6 +18,9 @@ interface State {
 }
 
 export class StompClient extends React.Component<Props, State> {
+
+  requestBody = '';
+
   constructor(props: any) {
     super(props);
     this.state = {
@@ -39,18 +41,19 @@ export class StompClient extends React.Component<Props, State> {
           <TextArea
             className='stomp-client-form__request-body'
             label='Request'
-            value={this.state.requestBody}
-            onUpdate={value => this.setState({ requestBody: value })} />
+            value={this.requestBody}
+            onChange={value => this.requestBody = value} />
           <BasicButton
             label='Send request'
             type='positive'
             className='stomp-client__send-request'
-            onClick={() => this.props.onRequestSubmitted(this.state.topic, this.state.requestBody)} />
+            onClick={() => this.props.onRequestSubmitted(this.state.topic, this.requestBody)} />
           <TextArea
             className='stomp-client-form__response'
+            readonly
             label='Response'
             value={this.props.response}
-            onUpdate={null} />
+            onChange={null} />
         </form>
         <Wait show={!this.props.isDone} />
       </>

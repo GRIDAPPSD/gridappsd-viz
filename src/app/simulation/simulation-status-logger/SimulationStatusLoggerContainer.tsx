@@ -7,8 +7,7 @@ import {
   SimulationQueue, START_SIMULATION_TOPIC, SIMULATION_STATUS_LOG_TOPIC, SimulationControlService, SimulationStatus
 } from '@shared/simulation';
 import { StompClientService } from '@shared/StompClientService';
-import { Store } from '@shared/Store';
-import { ApplicationState } from '@shared/ApplicationState';
+import { StateStore } from '@shared/state-store';
 
 interface Props {
 
@@ -24,7 +23,8 @@ export class SimulationStatusLogContainer extends React.Component<Props, State> 
 
   private readonly _stompClientService = StompClientService.getInstance();
   private readonly _simulationQueue = SimulationQueue.getInstance();
-  private readonly _store = Store.getInstance<ApplicationState>();
+  private readonly _simulationControlService = SimulationControlService.getInstance();
+  private readonly _stateStore = StateStore.getInstance();
   private _stateStoreChangeSubscription: Subscription;
   private _stompClientStatusSubscription: Subscription;
 
@@ -62,10 +62,13 @@ export class SimulationStatusLogContainer extends React.Component<Props, State> 
   }
 
   private _subscribeToStateStoreChanges() {
-    return this._store.select(state => state.simulationStartResponse)
+    return this._stateStore.select('startSimulationResponse')
       .pipe(
-        takeWhile(() => !this._stompClientStatusSubscription.closed),
-        filter(simulationStartResponse => Boolean(simulationStartResponse)),
+        // The call in componentDidMount() may not return at this point
+        // So if _stompClientStatusSubscription is still undefined, then
+        // we want to keep listening
+        takeWhile(() => this._stompClientStatusSubscription === undefined || !this._stompClientStatusSubscription.closed),
+        filter(simulationStartResponse => simulationStartResponse && simulationStartResponse.simulationId !== ''),
         map(simulationStartResponse => simulationStartResponse.simulationId),
         tap(simulationId => {
           this.setState({ isFetching: true });
@@ -83,7 +86,8 @@ export class SimulationStatusLogContainer extends React.Component<Props, State> 
   }
 
   private _newObservableForLogMessages(simulationId: string) {
-    return this._stompClientService.readFrom(`${SIMULATION_STATUS_LOG_TOPIC}.${simulationId}`);
+    return this._stompClientService.readFrom(`${SIMULATION_STATUS_LOG_TOPIC}.${simulationId}`)
+      .pipe(filter(() => this._simulationControlService.currentStatus() === SimulationStatus.STARTED));
   }
 
   private _onSimulationStatusLogMessageReceived(logMessage: string) {

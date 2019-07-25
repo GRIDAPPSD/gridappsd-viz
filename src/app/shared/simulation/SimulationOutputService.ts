@@ -1,16 +1,18 @@
 import { Subject, Observable, Subscription } from 'rxjs';
+import { map, filter } from 'rxjs/operators';
 
 import { ModelDictionaryMeasurement } from '../topology/model-dictionary/ModelDictionaryMeasurement';
 import { SimulationOutputMeasurement } from './SimulationOutputMeasurement';
 import { StompClientService } from '@shared/StompClientService';
 import { SIMULATION_OUTPUT_TOPIC } from './topics';
-import { map, filter } from 'rxjs/operators';
+import { SimulationControlService, SimulationStatus } from './SimulationControlService';
 
 export class SimulationOutputService {
 
   private static readonly _INSTANCE = new SimulationOutputService();
 
   private readonly _stompClientService = StompClientService.getInstance();
+  private readonly _simulationControlService = SimulationControlService.getInstance();
   private _modelDictionaryMeasurements: Map<string, ModelDictionaryMeasurement>;
   private _outputTimestamp: number;
   private _simulationOutputMeasurementsStream = new Subject<SimulationOutputMeasurement[]>();
@@ -57,6 +59,7 @@ export class SimulationOutputService {
   private _subscribeToSimulationOutputTopic() {
     return this._stompClientService.readFrom(SIMULATION_OUTPUT_TOPIC)
       .pipe(
+        filter(() => this._simulationControlService.currentStatus() === SimulationStatus.STARTED),
         map(body => JSON.parse(body)),
         filter(payload => Boolean(payload))
       )

@@ -3,9 +3,9 @@ import JSONViewer from 'react-json-viewer';
 import { Panel, Button } from 'react-bootstrap';
 
 import { GetAvailableApplicationsAndServices } from './models/GetAvailableApplicationsAndServicesRequest';
+import { StompClientService } from '@shared/StompClientService';
 
 import './AvailableApplicationsAndServices.scss';
-import { StompClientService } from '@shared/StompClientService';
 
 export interface ApplicationsProps { }
 
@@ -15,7 +15,6 @@ interface State {
   serviceData: string,
   appInstanceData: string,
   serviceInstanceData: string
-
 }
 export class AvailableApplicationsAndServices extends React.Component<ApplicationsProps, State> {
 

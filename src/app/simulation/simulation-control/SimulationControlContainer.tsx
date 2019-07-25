@@ -2,10 +2,10 @@ import * as React from 'react';
 import { Subscription } from 'rxjs';
 import { map, filter, takeWhile } from 'rxjs/operators';
 
-import { SimulationControlService, SimulationStatus, SimulationQueue, START_SIMULATION_TOPIC } from '@shared/simulation';
+import { SimulationControlService, SimulationStatus, SimulationQueue } from '@shared/simulation';
 import { SimulationControl } from './SimulationControl';
-import { Store } from '@shared/Store';
-import { ApplicationState } from '@shared/ApplicationState';
+import { StateStore } from '@shared/state-store';
+import { StompClientService } from '@shared/StompClientService';
 
 interface Props {
 }
@@ -20,10 +20,12 @@ export class SimulationControlContainer extends React.Component<Props, State> {
   activeSimulationId: string;
 
   private readonly _simulationControlService = SimulationControlService.getInstance();
+  private readonly _stompClientService = StompClientService.getInstance();
   private readonly _simulationQueue = SimulationQueue.getInstance();
-  private readonly _store = Store.getInstance<ApplicationState>();
+  private readonly _stateStore = StateStore.getInstance();
 
   private _simulationStatusChangeSubscription: Subscription;
+  private _stompClientStatusChangeSubscription: Subscription;
 
   constructor(props: any) {
     super(props);
@@ -41,6 +43,15 @@ export class SimulationControlContainer extends React.Component<Props, State> {
 
   componentDidMount() {
     this._simulationStatusChangeSubscription = this._subscribeToSimulationStatusChanges();
+    this._stompClientStatusChangeSubscription = this._stopSimulationWhenStompClientStatusChanges();
+  }
+
+  private _stopSimulationWhenStompClientStatusChanges() {
+    return this._stompClientService.statusChanges()
+      .pipe(filter(status => status !== 'CONNECTED'))
+      .subscribe({
+        next: this.stopSimulation
+      });
   }
 
   private _subscribeToSimulationStatusChanges() {
@@ -57,7 +68,7 @@ export class SimulationControlContainer extends React.Component<Props, State> {
   }
 
   private _readSimulationIdFromStore() {
-    this._store.select(state => state.simulationStartResponse)
+    this._stateStore.select('startSimulationResponse')
       .pipe(
         takeWhile(() => !this._simulationStatusChangeSubscription.closed),
         filter(simulationStartResponse => Boolean(simulationStartResponse)),
@@ -70,6 +81,7 @@ export class SimulationControlContainer extends React.Component<Props, State> {
 
   componentWillUnmount() {
     this._simulationStatusChangeSubscription.unsubscribe();
+    this._stompClientStatusChangeSubscription.unsubscribe();
   }
 
   render() {

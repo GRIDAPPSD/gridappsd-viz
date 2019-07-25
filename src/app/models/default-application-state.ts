@@ -1,10 +1,13 @@
-import { ApplicationState } from '@shared/ApplicationState';
+import { ApplicationState } from '@shared/state-store';
 
 export const DEFAULT_APPLICATION_STATE: ApplicationState = {
-  simulationStartResponse: {
+  startSimulationResponse: {
     simulationId: '',
     events: []
   },
   faultEvents: [],
-  outageEvents: []
-}
+  outageEvents: [],
+  applications: [],
+  services: [],
+  modelDictionary: null
+};

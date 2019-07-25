@@ -9,6 +9,7 @@
     display: flex;
     flex-flow: column;
     color: #3f51b5;
+    transition: color 0.1s ease;
 }
 
 .form-control__label__hint {
@@ -16,4 +17,25 @@
     color: rgba(0, 0, 0, 0.5);
     font-size: 12px;
     transform: translateY(-1px);
+    transition: color 0.1s ease;
+
+}
+
+.form-control.invalid {
+
+    .form-control__label,
+    .form-control__label__hint {
+        color: red;
+    }
+}
+
+.form-control.disabled {
+
+    .form-control__label {
+        color: #cdcdcd;
+    }
+
+    .form-control__label__hint {
+        color: #ddd;
+    }
 }

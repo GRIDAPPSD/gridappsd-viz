@@ -3,8 +3,8 @@ import * as React from 'react';
 import { BasicButton } from '@shared/buttons';
 import { ModelDictionary } from '@shared/topology/model-dictionary';
 import { FormGroup, Select, Option, Input } from '@shared/form';
-import { FaultEvent, FaultKind, FaultImpedence } from '../../models/FaultEvent';
-import { Phase } from '../../models/Phase';
+import { FaultEvent, Phase, FaultKind, FaultImpedence } from '@shared/test-manager';
+import { Validators } from '@shared/form/validation';
 
 import './FaultEventForm.scss';
 
@@ -32,11 +32,13 @@ export class FaultEventForm extends React.Component<Props, State> {
     super(props);
     this.state = {
       equipmentTypeOptions: [
+        new Option('ACLineSegment', 'ACLineSegment'),
         new Option('Battery', 'batteries'),
         new Option('Breaker', 'breakers'),
         new Option('Capacitor', 'capacitors'),
         new Option('Disconnector', 'disconnectors'),
         new Option('Fuse', 'fuses'),
+        new Option('PowerTransformer', 'PowerTransformer'),
         new Option('Recloser', 'reclosers'),
         new Option('Regulator', 'regulators'),
         new Option('Sectionaliser', 'sectionalisers'),
@@ -107,9 +109,9 @@ export class FaultEventForm extends React.Component<Props, State> {
                 key={kind}
                 label={kind}
                 name={kind}
-                value={this.state.formValue.impedance[kind]}
+                value={this.state.formValue.FaultImpedance[kind]}
                 onChange={value => {
-                  this.formValue.impedance[kind] = value;
+                  this.formValue.FaultImpedance[kind] = value;
                   this._enableAddEventButtonIfFormIsValid();
                 }} />
             ))
@@ -119,12 +121,20 @@ export class FaultEventForm extends React.Component<Props, State> {
             name='startDateTime'
             hint='YYYY-MM-DD HH:MM:SS'
             value={this.state.formValue.startDateTime}
+            validators={[
+              Validators.checkNotEmpty('Start date time is empty'),
+              Validators.checkValidDateTime('Invalid format, YYYY-MM-DD HH:MM:SS expected')
+            ]}
             onChange={this.onStartDateTimeChanged} />
           <Input
             label='Stop Date Time'
             hint='YYYY-MM-DD HH:MM:SS'
             name='stopDateTime'
             value={this.state.formValue.stopDateTime}
+            validators={[
+              Validators.checkNotEmpty('Stop date time is empty'),
+              Validators.checkValidDateTime('Invalid format, YYYY-MM-DD HH:MM:SS expected')
+            ]}
             onChange={this.onStopDateTimeChanged} />
         </FormGroup>
         <BasicButton
@@ -137,13 +147,25 @@ export class FaultEventForm extends React.Component<Props, State> {
     );
   }
 
-  onEquipmentTypeChanged(selectedOption: Option<string>) {
-    const components = this.props.modelDictionary[selectedOption.value] || [];
-    this.setState({
-      componentOptions: components.map(e => new Option(e.name || e.bankName, e)),
-      phaseOptions: []
-    });
-    this.formValue.equipmentType = selectedOption.label;
+  onEquipmentTypeChanged(option: Option<string>) {
+    switch (option.value) {
+      case 'ACLineSegment':
+      case 'PowerTransformer':
+        this.setState({
+          componentOptions: this.props.modelDictionary.measurements.filter(e => e.ConductingEquipment_type === option.value)
+            .map(e => new Option(`${e.ConductingEquipment_name} (${e.phases})`, e)),
+          phaseOptions: []
+        });
+        break;
+      default:
+        const components = this.props.modelDictionary[option.value] || [];
+        this.setState({
+          componentOptions: components.map(e => new Option(`${e.name || e.bankName} (${e.phases || e.bankPhases})`, e)),
+          phaseOptions: []
+        });
+        break;
+    }
+    this.formValue.equipmentType = option.label;
     this._enableAddEventButtonIfFormIsValid();
   }
 
@@ -168,24 +190,25 @@ export class FaultEventForm extends React.Component<Props, State> {
       && this.formValue.stopDateTime !== ''
       && (
         this.formValue.faultKind === FaultKind.LINE_TO_GROUND
-          ? this.formValue.impedance.rGround !== '' && this.formValue.impedance.xGround !== ''
+          ? this.formValue.FaultImpedance.rGround !== '' && this.formValue.FaultImpedance.xGround !== ''
           : this.formValue.faultKind === FaultKind.LINE_TO_LINE
-            ? this.formValue.impedance.rLinetoLine !== '' && this.formValue.impedance.xLineToLine !== ''
-            : this.formValue.impedance.rGround !== '' && this.formValue.impedance.xGround !== ''
-            && this.formValue.impedance.rLinetoLine !== '' && this.formValue.impedance.xLineToLine !== ''
+            ? this.formValue.FaultImpedance.rLinetoLine !== '' && this.formValue.FaultImpedance.xLineToLine !== ''
+            : this.formValue.FaultImpedance.rGround !== '' && this.formValue.FaultImpedance.xGround !== ''
+            && this.formValue.FaultImpedance.rLinetoLine !== '' && this.formValue.FaultImpedance.xLineToLine !== ''
       );
   }
 
   onComponentChanged(selectedOption: Option<any>) {
+    const component = selectedOption.value;
     this.setState({
       phaseOptions: this._generateUniqueOptions(
-        this._normalizePhases(selectedOption.value.phases || selectedOption.value.bankPhases)
+        this._normalizePhases(component.phases || component.bankPhases)
       )
         .map((option, i) => new Option(option.label, { phaseLabel: option.label, phaseIndex: i }))
         .sort((a, b) => a.label.localeCompare(b.label))
     });
-    this.formValue.equipmentName = selectedOption.label;
-    this.formValue.mRID = selectedOption.value.mRID;
+    this.formValue.equipmentName = component.ConductingEquipment_name || component.name || component.bankName;
+    this.formValue.mRID = component.ConductingEquipment_mRID || component.mRID;
     this._enableAddEventButtonIfFormIsValid();
   }
 

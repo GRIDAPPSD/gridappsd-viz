@@ -23,7 +23,8 @@ export class PowerSystemConfigurationFormGroup extends React.Component<Props, St
     regionId: '',
     subregionId: '',
     lineId: '',
-    simulationName: ''
+    simulationName: '',
+    isValid: false
   };
 
   constructor(props: any) {
@@ -75,50 +76,58 @@ export class PowerSystemConfigurationFormGroup extends React.Component<Props, St
     this.formValue.regionId = '';
     this.formValue.subregionId = '';
     this.formValue.lineId = '';
+    this.formValue.isValid = false;
+    this.props.onChange(this.formValue);
     this.setState({
       lineOptions: [],
       subregionOptions: []
     })
-    this.props.onChange(this.formValue);
   }
 
   onRegionSelectionChanged(selectedOption: Option<FeederModelRegion>) {
     this.formValue.regionId = selectedOption.value.id;
-    this.setState({
-      subregionOptions: selectedOption.value.subregions.map(e => new Option(e.name, e.id))
-    });
-
+    this.formValue.subregionId = '';
+    this.formValue.lineId = '';
+    this.formValue.isValid = false;
     this.props.onChange(this.formValue);
+    this.setState({
+      subregionOptions: selectedOption.value.subregions.map(e => new Option(e.name, e.id)),
+      lineOptions: []
+    });
   }
 
   onSubregionSelectionCleared() {
     this.formValue.subregionId = '';
     this.formValue.lineId = '';
+    this.formValue.isValid = false;
+    this.props.onChange(this.formValue);
     this.setState({
       lineOptions: []
-    })
-    this.props.onChange(this.formValue);
+    });
   }
 
   onSubregionSelectionChanged(selectedOption: Option) {
     this.formValue.subregionId = selectedOption.value;
+    this.formValue.lineId = '';
+    this.formValue.isValid = false;
+    this.props.onChange(this.formValue);
     this.setState({
       lineOptions: this.props.feederModel[this.formValue.regionId].lines
         .filter(line => line.subregionId === selectedOption.value)
         .map(line => new Option(line.name, line))
     });
-
-    this.props.onChange(this.formValue);
   }
 
   onLineSelectionChanged(selectedOption: Option<{ id: string; name: string; }>) {
     this.formValue.lineId = selectedOption.value.id;
     this.formValue.simulationName = selectedOption.value.name;
+    this.formValue.isValid = true;
     this.props.onChange(this.formValue);
   }
 
   onLineSelectionCleared() {
     this.formValue.lineId = '';
+    this.formValue.isValid = false;
     this.props.onChange(this.formValue);
   }
 

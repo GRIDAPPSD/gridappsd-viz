@@ -102,8 +102,67 @@ const GRAPH_NAMES_PER_SIMULATION_NAME = {
     tap_A: ['reg2', 'reg3', 'reg4'],
     tap_B: ['reg2', 'reg3', 'reg4'],
     tap_C: ['reg2', 'reg3', 'reg4']
-  }
+  },
+  ieee8500new_335: {
+    voltage_A: [
+      'hvmv11sub1_lsb',
+      'l2673313',
+      'l2876814',
+      'l2955047',
+      'l3160107',
+      'l3254238',
+      'm1047574'
 
+    ],
+    voltage_B: [
+      'hvmv11sub1_lsb',
+      'l2673313',
+      'l2876814',
+      'l2955047',
+      'l3160107',
+      'l3254238',
+      'm1047574'
+    ],
+    voltage_C: [
+      'hvmv11sub1_lsb',
+      'l2673313',
+      'l2876814',
+      'l2955047',
+      'l3160107',
+      'l3254238',
+      'm1047574'
+    ],
+    power_in_A: [
+      'hvmv69_11sub3',
+      'hvmv69_11sub2',
+      'hvmv69_11sub1'
+    ],
+    power_in_B: [
+      'hvmv69_11sub3',
+      'hvmv69_11sub2',
+      'hvmv69_11sub1'
+    ],
+    power_in_C: [
+      'hvmv69_11sub3',
+      'hvmv69_11sub2',
+      'hvmv69_11sub1'
+    ],
+    tap_A: [
+      'feeder_reg1a',
+      'feeder_reg2a',
+      'feeder_reg3a'
+    ],
+    tap_B: [
+      'feeder_reg1b',
+      'feeder_reg2b',
+      'feeder_reg3b'
+    ],
+    tap_C: [
+      'feeder_reg1c',
+      'feeder_reg2c',
+      'feeder_reg3c'
+    ]
+  }
 };
 
 export class MeasurementChartContainer extends React.Component<Props, State> {
