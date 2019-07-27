@@ -9,7 +9,7 @@ import { FeederModel } from '@shared/topology';
 import { GetAllFeederModelsRequest } from './models/message-requests/GetAllFeederModelsRequest';
 import { SimulationLabelsContainer } from './simulation/simulation-labels';
 import { MeasurementChartContainer } from './simulation/measurement-chart';
-import { ModelDictionaryMeasurement, ModelDictionary } from '@shared/topology/model-dictionary';
+import { ModelDictionaryMeasurement, ModelDictionary, ModelDictionaryComponentType } from '@shared/topology/model-dictionary';
 import { Navigation } from './navigation';
 import { OverlayService } from '@shared/overlay';
 import { SimulationConfiguration } from '@shared/simulation';
@@ -31,6 +31,7 @@ import { DEFAULT_APPLICATION_STATE } from './models/default-application-state';
 import { TabGroup, Tab } from '@shared/tabs';
 import { EventSummary } from './simulation/event-summary/EventSummary';
 import { AvailableApplicationList } from './simulation/applications/AvailableApplicationList';
+import { ModelDictionaryMeasurementComponent } from '@shared/topology/model-dictionary/ModelDictionaryMeasurementComponent';
 
 import './App.scss';
 
@@ -53,7 +54,6 @@ export class App extends React.Component<Props, State> {
   private readonly _simulationOutputService = SimulationOutputService.getInstance();
   private readonly _overlayService = OverlayService.getInstance();
   private readonly _simulationQueue = SimulationQueue.getInstance();
-  private readonly _modelDictionaryMeasurementsPerSimulationName = new Map<string, Map<string, ModelDictionaryMeasurement>>();
   private readonly _availableModelDictionaries = new Map<string, ModelDictionary>();
 
   constructor(props: any) {
@@ -280,27 +280,25 @@ export class App extends React.Component<Props, State> {
     this._overlayService.show(
       <SimulationConfigurationEditor
         feederModel={this.state.feederModel}
-        onSubmit={updatedConfig => this._onSimulationConfigFormSubmitted(updatedConfig, browserHistory)}
-        onClose={() => this._overlayService.hide()}
+        onSubmit={updatedConfig => this.onSimulationConfigFormSubmitted(updatedConfig, browserHistory)}
+        onClose={this._overlayService.hide}
         onMRIDChanged={(mRID, simulationName) => {
-          if (!this._modelDictionaryMeasurementsPerSimulationName.has(simulationName)) {
+          if (!this._availableModelDictionaries.has(simulationName)) {
             // Clear out the currently active model dictionary
             this._stateStore.update({
               modelDictionary: null
             });
-            this._fetchModelDictionary(mRID, simulationName);
+            this.fetchModelDictionary(mRID);
           }
           else
-            this._stateStore.update({
-              modelDictionary: this._availableModelDictionaries.get(simulationName)
-            });
+            this.processNewModelDictionary(this._availableModelDictionaries.get(simulationName));
         }}
         availableApplications={this.state.availableApplications}
         initialConfig={config} />
     );
   }
 
-  private _onSimulationConfigFormSubmitted(config: SimulationConfiguration, history) {
+  onSimulationConfigFormSubmitted(config: SimulationConfiguration, history) {
     this._simulationQueue.push({
       name: config.simulation_config.simulation_name,
       config,
@@ -310,10 +308,10 @@ export class App extends React.Component<Props, State> {
     setTimeout(() => history.push('/topology'), 500);
   }
 
-  private _fetchModelDictionary(mrid: string, simulationName: string) {
+  fetchModelDictionary(mrid: string) {
     const getModelDictionaryRequest = new GetModelDictionaryRequest();
     getModelDictionaryRequest.requestBody.parameters.model_id = mrid;
-    this._subscribeToModelDictionaryTopic(getModelDictionaryRequest, simulationName);
+    this._subscribeToModelDictionaryTopic(getModelDictionaryRequest);
     this._stompClientService.send(
       getModelDictionaryRequest.url,
       { 'reply-to': getModelDictionaryRequest.replyTo },
@@ -321,7 +319,7 @@ export class App extends React.Component<Props, State> {
     );
   }
 
-  private _subscribeToModelDictionaryTopic(getModelDictionaryRequest: GetModelDictionaryRequest, simulationName: string) {
+  private _subscribeToModelDictionaryTopic(getModelDictionaryRequest: GetModelDictionaryRequest) {
     this._stompClientService.readOnceFrom(getModelDictionaryRequest.replyTo)
       .pipe(map(body => JSON.parse(body)))
       .subscribe({
@@ -329,16 +327,21 @@ export class App extends React.Component<Props, State> {
           if (typeof payload.data === 'string')
             payload.data = JSON.parse(payload.data);
           const modelDictionary = payload.data.feeders[0];
-          const modelDictionaryMeasurementMap = new Map<string, ModelDictionaryMeasurement>();
-          for (const measurement of modelDictionary.measurements)
-            modelDictionaryMeasurementMap.set(measurement.mRID, measurement);
-          this._collectMRIDsAndPhasesForComponents(modelDictionary);
-          this._simulationOutputService.updateModelDictionaryMeasurementMap(modelDictionaryMeasurementMap);
-          this._modelDictionaryMeasurementsPerSimulationName.set(simulationName, modelDictionaryMeasurementMap);
-          this._availableModelDictionaries.set(simulationName, modelDictionary);
-          this._stateStore.update({ modelDictionary });
+          this.processNewModelDictionary(modelDictionary);
         }
       });
+  }
+
+  processNewModelDictionary(modelDictionary: ModelDictionary) {
+    const modelDictionaryMeasurementMap = new Map<string, ModelDictionaryMeasurement>();
+    for (const measurement of modelDictionary.measurements)
+      modelDictionaryMeasurementMap.set(measurement.mRID, measurement);
+    this._collectMRIDsAndPhasesForComponents(modelDictionary);
+    this._simulationOutputService.updateModelDictionaryMeasurementMap(modelDictionaryMeasurementMap);
+    this._consolidatePhasesForComponents(modelDictionary);
+    this._stateStore.update({
+      modelDictionary
+    });
   }
 
   private _collectMRIDsAndPhasesForComponents(modelDictionary: any) {
@@ -351,6 +354,41 @@ export class App extends React.Component<Props, State> {
       // Only interested in regulators' phases for now, need phases for regulator menus
       this.componentPhases.set(regulator.bankName, (regulator.bankPhases || '').split(''));
     }
+  }
+
+  // Find components with the same name, and group their phases into one
+  private _consolidatePhasesForComponents(modelDictionary: ModelDictionary) {
+    const componentWithGroupPhasesMap = new Map<string, ModelDictionaryMeasurementComponent>();
+    for (const measurement of modelDictionary.measurements) {
+      const id = measurement.measurementType === ModelDictionaryComponentType.VOLTAGE
+        ? measurement.ConnectivityNode
+        : measurement.ConductingEquipment_name;
+      const phases = measurement.phases;
+      let componentInMeasurement = componentWithGroupPhasesMap.get(id);
+      if (!componentInMeasurement) {
+        componentInMeasurement = {
+          id,
+          conductingEquipmentName: measurement.ConductingEquipment_name,
+          conductingEquipmentType: measurement.ConductingEquipment_type,
+          displayName: `${id} (${phases})`,
+          phases,
+          conductingEquipmentMRIDs: [measurement.ConductingEquipment_mRID]
+        };
+        componentWithGroupPhasesMap.set(id, componentInMeasurement);
+      } else {
+        if (!componentInMeasurement.phases.includes(phases)) {
+          componentInMeasurement.phases += phases;
+          componentInMeasurement.phases = componentInMeasurement.phases.split('')
+            .sort((a, b) => a.localeCompare(b))
+            .join('');
+          componentInMeasurement.displayName = `${id} (${componentInMeasurement.phases})`;
+        }
+        componentInMeasurement.conductingEquipmentMRIDs.push(measurement.ConductingEquipment_mRID);
+      }
+    }
+    this._stateStore.update({
+      modelDictionaryComponentsWithConsolidatedPhases: [...componentWithGroupPhasesMap.values()]
+    });
   }
 
 }

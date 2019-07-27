@@ -1,5 +1,6 @@
 import * as React from 'react';
-import { Subscription } from 'rxjs';
+import { Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 
 import { SimulationConfiguration, SimulationControlService, SimulationStatus } from '@shared/simulation';
 import { FeederModel, ModelDictionary } from '@shared/topology';
@@ -20,6 +21,7 @@ import { ApplicationConfigurationFormGroupValue } from './models/ApplicationConf
 import { StateStore } from '@shared/state-store';
 import { ThreeDots } from '@shared/three-dots';
 import { NotificationBanner } from '@shared/notification-banner';
+import { ModelDictionaryMeasurementComponent } from '@shared/topology/model-dictionary/ModelDictionaryMeasurementComponent';
 
 import './SimulationConfigurationEditor.scss';
 
@@ -39,6 +41,7 @@ interface State {
   modelDictionary: ModelDictionary;
   disableSubmitButton: boolean;
   lineName: string;
+  componentsWithConsolidatedPhases: ModelDictionaryMeasurementComponent[];
 }
 
 export class SimulationConfigurationEditor extends React.Component<Props, State> {
@@ -51,9 +54,7 @@ export class SimulationConfigurationEditor extends React.Component<Props, State>
 
   private readonly _simulationControlService = SimulationControlService.getInstance();
   private readonly _stateStore = StateStore.getInstance();
-
-  private _modelDictionarySubscription: Subscription;
-  private _simulationStatusSubscription: Subscription;
+  private readonly _unsubscriber = new Subject<void>();
 
   constructor(props: Props) {
     super(props);
@@ -63,7 +64,8 @@ export class SimulationConfigurationEditor extends React.Component<Props, State>
       simulationName: props.initialConfig.simulation_config.simulation_name,
       modelDictionary: null,
       disableSubmitButton: true,
-      lineName: props.initialConfig.power_system_config.Line_name
+      lineName: props.initialConfig.power_system_config.Line_name,
+      componentsWithConsolidatedPhases: []
     };
 
     this.currentConfig = this._cloneConfigObject(props.initialConfig);
@@ -95,22 +97,39 @@ export class SimulationConfigurationEditor extends React.Component<Props, State>
   }
 
   componentDidMount() {
-    this._modelDictionarySubscription = this._stateStore.select('modelDictionary')
+    this._stateStore.select('modelDictionary')
+      .pipe(takeUntil(this._unsubscriber))
       .subscribe({
         next: modelDictionary => this.setState({ modelDictionary })
       });
 
-    this._simulationStatusSubscription = this._simulationControlService.statusChanges()
+    this._simulationControlService.statusChanges()
+      .pipe(takeUntil(this._unsubscriber))
       .subscribe({
         next: status => this.setState({
           disableSubmitButton: status !== SimulationStatus.NEW && status !== SimulationStatus.STOPPED
         })
       });
+
+    this._stateStore.select('modelDictionaryComponentsWithConsolidatedPhases')
+      .pipe(takeUntil(this._unsubscriber))
+      .subscribe({
+        next: components => this.setState({
+          componentsWithConsolidatedPhases: components
+        })
+      });
+
+    this._stateStore.select('modelDictionaryComponentsWithConsolidatedPhases')
+      .pipe(takeUntil(this._unsubscriber))
+      .subscribe({
+        next: components => this.setState({
+          componentsWithConsolidatedPhases: components
+        })
+      });
   }
 
   componentWillUnmount() {
-    this._modelDictionarySubscription.unsubscribe();
-    this._simulationStatusSubscription.unsubscribe();
+    this._unsubscriber.complete();
   }
 
   render() {
@@ -226,6 +245,7 @@ export class SimulationConfigurationEditor extends React.Component<Props, State>
         modelDictionary={this.state.modelDictionary}
         simulationStartDate={this.dateTimeService.format(this.simulationStartDate)}
         simulationStopDate={this.dateTimeService.format(this.calculateSimulationStopTime())}
+        componentWithConsolidatedPhases={this.state.componentsWithConsolidatedPhases}
         onEventsAdded={this.onFaultEventsAdded} />
     );
   }
