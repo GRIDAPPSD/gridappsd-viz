@@ -24,7 +24,7 @@ export interface GetAllFeederModelsRequestPayload {
         regionID: { type: string, value: string }
       }>;
     }
-  },
+  };
   id: string;
   responseComplete: boolean;
 }

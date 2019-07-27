@@ -12,9 +12,9 @@ export interface ApplicationsProps { }
 interface State {
   open: boolean;
   appData: string;
-  serviceData: string,
-  appInstanceData: string,
-  serviceInstanceData: string
+  serviceData: string;
+  appInstanceData: string;
+  serviceInstanceData: string;
 }
 export class AvailableApplicationsAndServices extends React.Component<ApplicationsProps, State> {
 
@@ -28,7 +28,7 @@ export class AvailableApplicationsAndServices extends React.Component<Applicatio
       serviceData: '',
       appInstanceData: '',
       serviceInstanceData: ''
-    }
+    };
   }
   componentDidMount() {
     this._fetchApplicationsAndServices();
@@ -40,37 +40,37 @@ export class AvailableApplicationsAndServices extends React.Component<Applicatio
       return (
         <div className='available-applications-and-services'>
 
-          <Button bsStyle="primary" bsSize="large" onClick={() => this.setState({ open: !this.state.open })}>
+          <Button bsStyle='primary' bsSize='large' onClick={() => this.setState({ open: !this.state.open })}>
             Applications
                 </Button>
           <br />
-          <Panel id="collapsible-applications" collapsible expanded={this.state.open}>
+          <Panel id='collapsible-applications' collapsible expanded={this.state.open}>
             <JSONViewer json={appData} />
           </Panel>
-          <Button bsStyle="primary" bsSize="large" onClick={() => this.setState({ open: !this.state.open })}>
+          <Button bsStyle='primary' bsSize='large' onClick={() => this.setState({ open: !this.state.open })}>
             Services
                 </Button>
           <br />
-          <Panel id="collapsible-applications" collapsible expanded={this.state.open}>
+          <Panel id='collapsible-applications' collapsible expanded={this.state.open}>
             <JSONViewer json={serviceData} />
           </Panel>
-          <Button bsStyle="primary" bsSize="large" onClick={() => this.setState({ open: !this.state.open })}>
+          <Button bsStyle='primary' bsSize='large' onClick={() => this.setState({ open: !this.state.open })}>
             Application Instances
                 </Button>
           <br />
-          <Panel id="collapsible-applications" collapsible expanded={this.state.open}>
+          <Panel id='collapsible-applications' collapsible expanded={this.state.open}>
             <JSONViewer json={appInstanceData} />
           </Panel>
-          <Button bsStyle="primary" bsSize="large" onClick={() => this.setState({ open: !this.state.open })}>
+          <Button bsStyle='primary' bsSize='large' onClick={() => this.setState({ open: !this.state.open })}>
             Service Instances
                 </Button>
           <br />
-          <Panel id="collapsible-applications" collapsible expanded={this.state.open}>
+          <Panel id='collapsible-applications' collapsible expanded={this.state.open}>
             <JSONViewer json={serviceInstanceData} />
           </Panel>
 
         </div>
-      )
+      );
     }
     return null;
   }

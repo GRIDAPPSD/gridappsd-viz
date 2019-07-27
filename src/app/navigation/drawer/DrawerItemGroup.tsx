@@ -21,7 +21,7 @@ export class DrawerItemGroup extends React.Component<Props, State> {
     this.state = {
       isExpanded: false,
       maxHeight: 55
-    }
+    };
 
     this.toggle = this.toggle.bind(this);
   }

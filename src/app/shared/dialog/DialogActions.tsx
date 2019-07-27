@@ -6,8 +6,10 @@ interface Props {
   children: any;
 }
 
-export const DialogActions = (props: Props) => (
-  <div className='dialog-actions'>
-    {props.children}
-  </div>
-);
+export function DialogActions(props: Props) {
+  return (
+    <div className='dialog-actions'>
+      {props.children}
+    </div>
+  );
+}

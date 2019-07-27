@@ -213,31 +213,31 @@ export class MeasurementChartContainer extends React.Component<Props, State> {
   private _getDataPointForTimeSeries(graphName: string, timeSeriesName: string, measurements: SimulationOutputMeasurement[]): TimeSeriesDataPoint {
     const dataPoint = { primitiveX: new Date(), primitiveY: 0 };
     if (graphName.includes('voltage')) {
-      const measurement = measurements.filter(
+      const voltageMeasurement = measurements.filter(
         measurement => measurement.connectivityNode === timeSeriesName && graphName.includes(measurement.phases) && measurement.type === 'PNV' && measurement.magnitude !== undefined
       )[0];
-      if (measurement)
-        dataPoint.primitiveY = measurement.magnitude;
+      if (voltageMeasurement)
+        dataPoint.primitiveY = voltageMeasurement.magnitude;
       else
         console.warn(`No measurement found for time series "${timeSeriesName}", plot name "${graphName}"`);
     }
     else if (graphName.includes('power_in')) {
-      const measurement = measurements.filter(
+      const powerMeasurement = measurements.filter(
         measurement => measurement.conductingEquipmentName === timeSeriesName && graphName.includes(measurement.phases) &&
           measurement.magnitude !== undefined && measurement.type === 'VA'
       )[0];
-      if (measurement)
-        dataPoint.primitiveY = measurement.magnitude;
+      if (powerMeasurement)
+        dataPoint.primitiveY = powerMeasurement.magnitude;
       else
         console.warn(`No measurement found for time series "${timeSeriesName}", plot name "${graphName}"`);
     }
     else if (graphName.includes('tap')) {
-      const measurement = measurements.filter(
+      const tapMeasurement = measurements.filter(
         measurement => measurement.conductingEquipmentName === timeSeriesName && graphName.includes(measurement.phases) &&
           measurement.value !== undefined && measurement.type === 'Pos'
       )[0];
-      if (measurement)
-        dataPoint.primitiveY = measurement.value;
+      if (tapMeasurement)
+        dataPoint.primitiveY = tapMeasurement.value;
       else
         console.warn(`No measurement found for time series "${timeSeriesName}", plot name "${graphName}"`);
     }

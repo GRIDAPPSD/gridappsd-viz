@@ -39,7 +39,9 @@ export class DataBrowser extends React.Component<Props, State> {
 
   render() {
     if (this.state.hasError) {
-      this.setState({ hasError: false })
+      this.setState({
+        hasError: false
+      });
       return <Redirect to='/' />;
     }
 

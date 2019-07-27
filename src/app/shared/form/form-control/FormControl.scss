@@ -16,9 +16,9 @@
     display: inline-block;
     color: rgba(0, 0, 0, 0.5);
     font-size: 12px;
-    transform: translateY(-1px);
+    transform: translateY(16px);
     transition: color 0.1s ease;
-
+    position: absolute;
 }
 
 .form-control.invalid {
@@ -30,7 +30,6 @@
 }
 
 .form-control.disabled {
-
     .form-control__label {
         color: #cdcdcd;
     }

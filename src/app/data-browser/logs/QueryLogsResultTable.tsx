@@ -24,7 +24,7 @@ export class QueryLogsResultTable extends React.Component<Props, State> {
       <ReactTable
         filterable={true}
         defaultFilterMethod={(filter, row) => {
-          return row[filter.id] !== undefined ? String(row[filter.id]).includes(filter.value.toLowerCase()) : true
+          return row[filter.id] !== undefined ? String(row[filter.id]).includes(filter.value.toLowerCase()) : true;
         }}
         defaultPageSize={5}
         data={this.props.rows}
@@ -67,4 +67,5 @@ export class QueryLogsResultTable extends React.Component<Props, State> {
         className='query-logs-result-table' />
     );
   }
+
 }

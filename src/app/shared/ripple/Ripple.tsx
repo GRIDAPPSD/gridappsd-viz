@@ -54,4 +54,5 @@ export class Ripple extends React.Component<Props, {}> {
     this._rippleTrigger.appendChild(rippleContainer);
     setTimeout(() => this._rippleTrigger.removeChild(rippleContainer), Ripple.__RIPPLE_DURATION__);
   }
+
 }

@@ -1,7 +1,6 @@
 import * as React from 'react';
 
 import { Tab } from './Tab';
-import { ActiveTabIndicator } from './ActiveTabIndicator';
 
 import './TabGroup.scss';
 
@@ -17,12 +16,11 @@ interface State {
 
 export class TabGroup extends React.Component<Props, State> {
 
-  nativeElement: HTMLElement;
-
   static defaultProps = {
     selectedTabIndex: 0
   };
 
+  nativeElement: HTMLElement;
   tabs: Tab[] = [];
   tabLabels: NodeListOf<HTMLElement>;
 
@@ -47,7 +45,7 @@ export class TabGroup extends React.Component<Props, State> {
     this.tabLabels = this.nativeElement.querySelectorAll('.tabgroup__header__label');
     this.setState({
       activeTab: this.tabLabels[this.state.activeTabIndex]
-    })
+    });
   }
 
   render() {
