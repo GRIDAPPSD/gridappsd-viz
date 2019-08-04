@@ -16,6 +16,7 @@ interface Props {
   className?: string;
   validators?: Validator[];
   onValidate?: (isValid: boolean, formControlLabel: string) => void;
+  disabled?: boolean;
 }
 
 interface State {
@@ -76,9 +77,11 @@ export class Input extends React.Component<Props, State> {
   render() {
     return (
       <FormControl
-        className={this.calculateClassName()}
+        className={`input-field${this.props.className ? ' ' + this.props.className : ''}`}
         label={this.props.label}
-        hint={this.props.hint}>
+        hint={this.props.hint}
+        isInvalid={this.state.validationErrors.length !== 0}
+        disabled={this.props.disabled}>
         <div className='input-field-wrapper'>
           <input
             type='text'
@@ -91,12 +94,6 @@ export class Input extends React.Component<Props, State> {
         <ValidationErrorMessages messages={this.state.validationErrors.map(result => result.errorMessage)} />
       </FormControl>
     );
-  }
-
-  calculateClassName() {
-    return 'input-field'
-      + (this.props.className ? ' ' + this.props.className : '')
-      + (this.state.validationErrors.length === 0 ? ' valid' : ' invalid');
   }
 
   handleChange(event: React.FocusEvent<HTMLInputElement>) {

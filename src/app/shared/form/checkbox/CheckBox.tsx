@@ -15,7 +15,8 @@ interface Props {
 export function CheckBox(props: Props) {
   return (
     <FormControl
-      className={'checkbox' + (props.disabled ? ' disabled-checkbox' : '')}
+      className='checkbox'
+      disabled={props.disabled}
       label={props.label}>
       <div className='checkbox-wrapper'>
         <input

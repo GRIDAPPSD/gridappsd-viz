@@ -41,14 +41,13 @@
     opacity: 1;
 }
 
-.disabled-checkbox {
+.checkbox.disabled {
 
-    .checkbox__label,
     .checkbox__icon {
         color: #ccc;
     }
 
-    cursor: not-allowed;
+    pointer-events: none;
 }
 
 .checkbox__hint {

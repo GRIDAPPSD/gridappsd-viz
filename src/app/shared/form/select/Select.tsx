@@ -184,8 +184,10 @@ export class Select<T, E extends boolean> extends React.Component<Props<T, E>, S
   render() {
     return (
       <FormControl
-        className={this.calculateClassName()}
-        label={this.props.label}>
+        className='select'
+        label={this.props.label}
+        disabled={this.props.options.length === 0 || this.props.disabled}
+        isInvalid={this.state.nothingSelectedMessage.length !== 0}>
         <button
           ref={ref => this.optionListOpener = ref}
           type='button'
@@ -223,12 +225,6 @@ export class Select<T, E extends boolean> extends React.Component<Props<T, E>, S
         }
       </FormControl>
     );
-  }
-
-  calculateClassName() {
-    return 'select'
-      + (this.props.options.length === 0 || this.props.disabled ? ' disabled' : '')
-      + (this.state.nothingSelectedMessage.length === 0 ? ' valid' : ' invalid');
   }
 
   onOpen() {
