@@ -129,6 +129,7 @@ export class SimulationConfigurationEditor extends React.Component<Props, State>
   }
 
   componentWillUnmount() {
+    this._unsubscriber.next();
     this._unsubscriber.complete();
   }
 
