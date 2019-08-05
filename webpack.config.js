@@ -107,10 +107,7 @@ function updateVersion() {
 }
 
 function writeVersionNumber(versionNumber) {
-  const runConfig = 'export const RUN_CONFIG = ' + JSON.stringify({
-    'version': versionNumber,
-    'gossServerUrl': 'ws://127.0.0.1:61614'
-  }, null, 2) + ';\n';
-
-  fs.writeFileSync('./runConfig.ts', runConfig);
+  const config = JSON.parse(fs.readFileSync('config.json').toString());
+  config.version = versionNumber;
+  fs.writeFileSync('config.json', JSON.stringify(config, null, 4));
 }
