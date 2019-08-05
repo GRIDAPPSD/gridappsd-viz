@@ -135,7 +135,7 @@ export class MeasurementChartContainer extends React.Component<Props, State> {
     return {
       name: plotModel.name,
       timeSeries: [],
-      yAxisLabel: plotModel.useAngle ? 'Angle' : plotModel.useMagnitude ? 'Magnitude' : ''
+      yAxisLabel: plotModel.useAngle ? 'Angle' : plotModel.useMagnitude ? 'Magnitude' : 'Value'
     };
   }
 
