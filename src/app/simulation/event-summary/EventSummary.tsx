@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { Subject } from 'rxjs';
-import { takeUntil } from 'rxjs/operators';
+import { takeUntil, filter } from 'rxjs/operators';
 
 import { CommOutageEvent, FaultEvent } from '@shared/test-manager';
 import { StateStore } from '@shared/state-store';
@@ -44,7 +44,10 @@ export class EventSummary extends React.Component<Props, State> {
         next: events => this.setState({ faultEvents: events })
       });
     this._stateStore.select('startSimulationResponse')
-      .pipe(takeUntil(this._unmountingNotifier))
+      .pipe(
+        takeUntil(this._unmountingNotifier),
+        filter(state => Boolean(state))
+      )
       .subscribe({
         next: state => this.setState({ faultMRIDs: state.events.map(e => e.faultMRID) })
       });

@@ -30,7 +30,7 @@ export class QueryLogsForm extends React.Component<Props, State> {
     logLevel: 'ALL'
   };
 
-  constructor(props: any) {
+  constructor(props: Props) {
     super(props);
     this.state = {
       selectedSimulationId: null

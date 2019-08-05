@@ -59,4 +59,5 @@ export class Wait extends React.Component<Props, State> {
       );
     return null;
   }
+
 }

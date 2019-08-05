@@ -22,4 +22,5 @@ export class Tab extends React.Component<Props, State> {
       this.props.children
     );
   }
+
 }

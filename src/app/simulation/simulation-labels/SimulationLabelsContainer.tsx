@@ -2,13 +2,13 @@ import * as React from 'react';
 import { Subscription } from 'rxjs';
 
 import { SimulationOutputService, SimulationQueue } from '@shared/simulation';
-import { Label } from './Label';
+import { SimulationLabel } from './SimulationLabel';
 
 interface Props {
 }
 
 interface State {
-  labels: React.ReactElement<Label>[];
+  labels: React.ReactElement<SimulationLabel>[];
 }
 
 const NODES_PER_TOPOLOGY = {
@@ -33,10 +33,15 @@ const NODES_PER_TOPOLOGY = {
     reg2: ['A', 'B', 'C'],
     reg3: ['A', 'B', 'C'],
     reg4: ['A', 'B', 'C']
+  },
+  ieee8500new_335: {
+    feeder_reg1: ['A', 'B', 'C'],
+    feeder_reg2: ['A', 'B', 'C'],
+    feeder_reg3: ['A', 'B', 'C']
   }
-}
+};
 
-export class LabelContainer extends React.Component<Props, State> {
+export class SimulationLabelsContainer extends React.Component<Props, State> {
 
   private readonly _simulationOutputService = SimulationOutputService.getInstance();
   private readonly _simulationQueue = SimulationQueue.getInstance();
@@ -79,10 +84,10 @@ export class LabelContainer extends React.Component<Props, State> {
             );
             // Only get the measurements for phases A, B, C and discard measurements with duplicate phases
             const measurementsAtPhases = filteredMeasurements.reduce(
-              (measurementsAtPhases, m) => {
-                if (phases.includes(m.phases) && measurementsAtPhases.findIndex(e => e.phases === m.phases) === -1)
-                  measurementsAtPhases.push(m);
-                return measurementsAtPhases;
+              (accumulator, m) => {
+                if (phases.includes(m.phases) && accumulator.findIndex(e => e.phases === m.phases) === -1)
+                  accumulator.push(m);
+                return accumulator;
               },
               []
             ).sort((a, b) => a.phases.localeCompare(b.phases));
@@ -101,22 +106,22 @@ export class LabelContainer extends React.Component<Props, State> {
                 m => measurementsAtPhases[0].connectivityNode === m.connectivityNode && m.type === 'PNV'
               );
               const voltagesAtPhases = voltages.reduce(
-                (voltagesAtPhases, m) => {
+                (accumulator, m) => {
                   // discard measures with phases that were already added
-                  if (phases.includes(m.phases) && voltagesAtPhases.findIndex(e => e.phases === m.phases) === -1)
-                    voltagesAtPhases.push(m);
-                  return voltagesAtPhases;
+                  if (phases.includes(m.phases) && accumulator.findIndex(e => e.phases === m.phases) === -1)
+                    accumulator.push(m);
+                  return accumulator;
                 },
                 []
               ).sort((a, b) => a.phases.localeCompare(b.phases));
 
               const powers = measurements.filter(m => m.conductingEquipmentName === 'hvmv_sub' && m.type === 'VA');
               const powersAtPhases = powers.reduce(
-                (powersAtPhases, m) => {
+                (accumulator, m) => {
                   // Only get the measurements for phases A, B, C and discard measurements with duplicate phases
-                  if (phases.includes(m.phases) && powersAtPhases.findIndex(e => e.phases === m.phases) === -1)
-                    powersAtPhases.push(m);
-                  return powersAtPhases;
+                  if (phases.includes(m.phases) && accumulator.findIndex(e => e.phases === m.phases) === -1)
+                    accumulator.push(m);
+                  return accumulator;
                 },
                 []
               ).sort((a, b) => a.phases.localeCompare(b.phases));
@@ -165,7 +170,13 @@ export class LabelContainer extends React.Component<Props, State> {
                 );
               }
             }
-            labels.push(<Label key={nodeName} nodeNameToAttachTo={nodeName} content={<table>{content}</table>} />);
+            labels.push(
+              <SimulationLabel
+                key={nodeName}
+                nodeNameToAttachTo={nodeName}>
+                <table>{content}</table>
+              </SimulationLabel>
+            );
           }
           this.setState({ labels });
         }

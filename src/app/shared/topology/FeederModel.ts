@@ -10,7 +10,7 @@ export interface FeederModelRegion {
 }
 
 export interface FeederModelSubregion {
-  id: string
+  id: string;
   name: string;
 }
 

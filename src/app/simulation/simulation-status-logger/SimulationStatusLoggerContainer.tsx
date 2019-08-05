@@ -64,8 +64,11 @@ export class SimulationStatusLogContainer extends React.Component<Props, State> 
   private _subscribeToStateStoreChanges() {
     return this._stateStore.select('startSimulationResponse')
       .pipe(
-        takeWhile(() => !this._stompClientStatusSubscription.closed),
-        filter(simulationStartResponse => Boolean(simulationStartResponse)),
+        // The call in componentDidMount() may not return at this point
+        // So if _stompClientStatusSubscription is still undefined, then
+        // we want to keep listening
+        takeWhile(() => this._stompClientStatusSubscription === undefined || !this._stompClientStatusSubscription.closed),
+        filter(simulationStartResponse => simulationStartResponse && simulationStartResponse.simulationId !== ''),
         map(simulationStartResponse => simulationStartResponse.simulationId),
         tap(simulationId => {
           this.setState({ isFetching: true });

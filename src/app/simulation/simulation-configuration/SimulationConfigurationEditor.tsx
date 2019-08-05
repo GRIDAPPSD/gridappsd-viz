@@ -1,5 +1,6 @@
 import * as React from 'react';
-import { Subscription } from 'rxjs';
+import { Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 
 import { SimulationConfiguration, SimulationControlService, SimulationStatus } from '@shared/simulation';
 import { FeederModel, ModelDictionary } from '@shared/topology';
@@ -11,8 +12,6 @@ import { PowerSystemConfigurationFormGroup } from './views/PowerSystemConfigurat
 import { SimulationConfigurationFormGroup } from './views/SimulationConfigurationFormGroup';
 import { ApplicationConfigurationFormGroup } from './views/ApplicationConfigurationFormGroup';
 import { TestConfigurationFormGroup } from './views/TestConfigurationFormGroup';
-import { ModelDictionaryTracker } from './services/ModelDictionaryTracker';
-import { Wait } from '@shared/wait';
 import { DateTimeService } from './services/DateTimeService';
 import { CommOutageEvent } from '../../shared/test-manager/CommOutageEvent';
 import { FaultEvent, FaultKind } from '../../shared/test-manager/FaultEvent';
@@ -20,6 +19,9 @@ import { PowerSystemConfigurationFormGroupValue } from './models/PowerSystemConf
 import { SimulationConfigurationFormGroupValue } from './models/SimulationConfigurationFormGroupValue';
 import { ApplicationConfigurationFormGroupValue } from './models/ApplicationConfigurationFormGroupValue';
 import { StateStore } from '@shared/state-store';
+import { ThreeDots } from '@shared/three-dots';
+import { NotificationBanner } from '@shared/notification-banner';
+import { ModelDictionaryMeasurementComponent } from '@shared/topology/model-dictionary/ModelDictionaryMeasurementComponent';
 
 import './SimulationConfigurationEditor.scss';
 
@@ -39,6 +41,7 @@ interface State {
   modelDictionary: ModelDictionary;
   disableSubmitButton: boolean;
   lineName: string;
+  componentsWithConsolidatedPhases: ModelDictionaryMeasurementComponent[];
 }
 
 export class SimulationConfigurationEditor extends React.Component<Props, State> {
@@ -49,12 +52,9 @@ export class SimulationConfigurationEditor extends React.Component<Props, State>
   outageEvents: CommOutageEvent[] = [];
   faultEvents: FaultEvent[] = [];
 
-  private readonly _modelDictionaryTracker = ModelDictionaryTracker.getInstance();
   private readonly _simulationControlService = SimulationControlService.getInstance();
   private readonly _stateStore = StateStore.getInstance();
-
-  private _subscription: Subscription;
-  private _simulationStatusSubscription: Subscription;
+  private readonly _unsubscriber = new Subject<void>();
 
   constructor(props: Props) {
     super(props);
@@ -64,7 +64,8 @@ export class SimulationConfigurationEditor extends React.Component<Props, State>
       simulationName: props.initialConfig.simulation_config.simulation_name,
       modelDictionary: null,
       disableSubmitButton: true,
-      lineName: props.initialConfig.power_system_config.Line_name
+      lineName: props.initialConfig.power_system_config.Line_name,
+      componentsWithConsolidatedPhases: []
     };
 
     this.currentConfig = this._cloneConfigObject(props.initialConfig);
@@ -96,21 +97,39 @@ export class SimulationConfigurationEditor extends React.Component<Props, State>
   }
 
   componentDidMount() {
-    this._subscription = this._modelDictionaryTracker.changes()
+    this._stateStore.select('modelDictionary')
+      .pipe(takeUntil(this._unsubscriber))
       .subscribe({
-        next: modelDictionary => this.setState({ modelDictionary: modelDictionary })
+        next: modelDictionary => this.setState({ modelDictionary })
       });
-    this._simulationStatusSubscription = this._simulationControlService.statusChanges()
+
+    this._simulationControlService.statusChanges()
+      .pipe(takeUntil(this._unsubscriber))
       .subscribe({
         next: status => this.setState({
           disableSubmitButton: status !== SimulationStatus.NEW && status !== SimulationStatus.STOPPED
         })
       });
+
+    this._stateStore.select('modelDictionaryComponentsWithConsolidatedPhases')
+      .pipe(takeUntil(this._unsubscriber))
+      .subscribe({
+        next: components => this.setState({
+          componentsWithConsolidatedPhases: components
+        })
+      });
+
+    this._stateStore.select('modelDictionaryComponentsWithConsolidatedPhases')
+      .pipe(takeUntil(this._unsubscriber))
+      .subscribe({
+        next: components => this.setState({
+          componentsWithConsolidatedPhases: components
+        })
+      });
   }
 
   componentWillUnmount() {
-    this._subscription.unsubscribe();
-    this._simulationStatusSubscription.unsubscribe();
+    this._unsubscriber.complete();
   }
 
   render() {
@@ -127,6 +146,7 @@ export class SimulationConfigurationEditor extends React.Component<Props, State>
               <Tab label='Simulation Configuration'>
                 <SimulationConfigurationFormGroup
                   currentConfig={this.currentConfig}
+                  simulationName={this.state.simulationName}
                   onChange={this.onSimulationConfigurationFormGroupValueChanged} />
               </Tab>
               <Tab label='Application Configuration'>
@@ -136,15 +156,7 @@ export class SimulationConfigurationEditor extends React.Component<Props, State>
                   onChange={this.onApplicationConfigurationFormGroupValueChanged} />
               </Tab>
               <Tab label='Test Configuration'>
-                {
-                  (this.state.modelDictionary && this.state.lineName)
-                    ? <TestConfigurationFormGroup
-                      modelDictionary={this.state.modelDictionary}
-                      simulationStartDate={this.dateTimeService.format(this.simulationStartDate)}
-                      simulationStopDate={this.dateTimeService.format(this.calculateSimulationStopTime())}
-                      onEventsAdded={this.onFaultEventsAdded} />
-                    : <Wait show={true} />
-                }
+                {this.showCurrentComponentForTestConfigurationTab()}
               </Tab>
             </TabGroup>
           </form>
@@ -171,7 +183,11 @@ export class SimulationConfigurationEditor extends React.Component<Props, State>
       currentPowerSystemConfig.SubGeographicalRegion_name = formValue.subregionId;
       currentPowerSystemConfig.Line_name = formValue.lineId;
       this.currentConfig.simulation_config.simulation_name = formValue.simulationName;
-      this.props.onMRIDChanged(formValue.lineId, formValue.simulationName);
+      this.setState({
+        simulationName: formValue.simulationName
+      });
+      if (formValue.lineId !== '')
+        this.props.onMRIDChanged(formValue.lineId, formValue.simulationName);
     }
     this.setState({
       lineName: formValue.lineId,
@@ -210,6 +226,30 @@ export class SimulationConfigurationEditor extends React.Component<Props, State>
     this.faultEvents = events.fault;
   }
 
+  showCurrentComponentForTestConfigurationTab() {
+    if (this.state.lineName === '')
+      return (
+        <NotificationBanner persistent={true}>
+          Please select a line name
+        </NotificationBanner>
+      );
+    if (!this.state.modelDictionary)
+      return (
+        <NotificationBanner persistent={true}>
+          Fetching model dictionary
+          <ThreeDots />
+        </NotificationBanner>
+      );
+    return (
+      <TestConfigurationFormGroup
+        modelDictionary={this.state.modelDictionary}
+        simulationStartDate={this.dateTimeService.format(this.simulationStartDate)}
+        simulationStopDate={this.dateTimeService.format(this.calculateSimulationStopTime())}
+        componentWithConsolidatedPhases={this.state.componentsWithConsolidatedPhases}
+        onEventsAdded={this.onFaultEventsAdded} />
+    );
+  }
+
   calculateSimulationStopTime() {
     return +this.currentConfig.simulation_config.duration * 1000 + this.simulationStartDate.getTime();
   }
@@ -223,7 +263,8 @@ export class SimulationConfigurationEditor extends React.Component<Props, State>
   submitForm(event: React.SyntheticEvent) {
     event.stopPropagation();
     this.setState({ show: false });
-    this.currentConfig.test_config.appId = this.state.lineName;
+    const selectedApplication = this.currentConfig.application_config.applications[0];
+    this.currentConfig.test_config.appId = selectedApplication ? selectedApplication.name : '';
     for (const outageEvent of this.outageEvents)
       this.currentConfig.test_config.events.push(this._transformOutageEventForForSubmission(outageEvent));
     for (const faultEvent of this.faultEvents)
@@ -260,33 +301,33 @@ export class SimulationConfigurationEditor extends React.Component<Props, State>
   private _transformFaultEventForForSubmission(faultEvent: FaultEvent) {
     return {
       PhaseConnectedFaultKind: faultEvent.faultKind,
-      impedance: this._getImpedance(faultEvent),
-      equipmentMrid: Array.isArray(faultEvent.mRID)
+      FaultImpedance: this._getImpedance(faultEvent),
+      ObjectMRID: Array.isArray(faultEvent.mRID)
         ? faultEvent.phases.map(phase => faultEvent.mRID[phase.phaseIndex])
-        : faultEvent.mRID,
+        : [faultEvent.mRID],
       phases: faultEvent.phases.map(phase => phase.phaseLabel).join(''),
       event_type: faultEvent.type,
-      occuredDateTime: this.dateTimeService.parse(faultEvent.startDateTime).getTime(),
-      stopDateTime: this.dateTimeService.parse(faultEvent.stopDateTime).getTime()
+      occuredDateTime: this.dateTimeService.parse(faultEvent.startDateTime).getTime() / 1000.0,
+      stopDateTime: this.dateTimeService.parse(faultEvent.stopDateTime).getTime() / 1000.0
     };
   }
 
   private _getImpedance(faultEvent: FaultEvent) {
     if (faultEvent.faultKind === FaultKind.LINE_TO_GROUND)
       return {
-        xGround: faultEvent.impedance.xGround,
-        rGround: faultEvent.impedance.rGround
+        xGround: faultEvent.FaultImpedance.xGround,
+        rGround: faultEvent.FaultImpedance.rGround
       };
     if (faultEvent.faultKind === FaultKind.LINE_TO_LINE)
       return {
-        xLineToLine: faultEvent.impedance.xLineToLine,
-        rLineToLine: faultEvent.impedance.rLinetoLine
+        xLineToLine: faultEvent.FaultImpedance.xLineToLine,
+        rLineToLine: faultEvent.FaultImpedance.rLinetoLine
       };
     return {
-      xGround: faultEvent.impedance.xGround,
-      rGround: faultEvent.impedance.rGround,
-      xLineToLine: faultEvent.impedance.xLineToLine,
-      rLineToLine: faultEvent.impedance.rLinetoLine
+      xGround: faultEvent.FaultImpedance.xGround,
+      rGround: faultEvent.FaultImpedance.rGround,
+      xLineToLine: faultEvent.FaultImpedance.xLineToLine,
+      rLineToLine: faultEvent.FaultImpedance.rLinetoLine
     };
   }
 

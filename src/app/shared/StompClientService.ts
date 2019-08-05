@@ -7,6 +7,7 @@ import { ConfigurationManager } from './ConfigurationManager';
 export type StompClientConnectionStatus = 'NOT_CONNECTED' | 'CONNECTING' | 'CONNECTED' | 'NEW';
 
 export class StompClientService {
+
   private static readonly _INSTANCE = new StompClientService();
 
   private readonly _configurationManager = ConfigurationManager.getInstance();

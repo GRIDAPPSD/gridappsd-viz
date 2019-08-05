@@ -12,10 +12,10 @@ import './SimulationConfigurationFormGroup.scss';
 interface Props {
   onChange: (formValue: SimulationConfigurationFormGroupValue) => void;
   currentConfig: SimulationConfiguration;
+  simulationName: string;
 }
 
 interface State {
-  simulationName: string;
   simulatorOptions: Option<string>[];
 }
 
@@ -27,7 +27,6 @@ export class SimulationConfigurationFormGroup extends React.Component<Props, Sta
   constructor(props: Props) {
     super(props);
     this.state = {
-      simulationName: props.currentConfig.simulation_config.simulation_name,
       simulatorOptions: [
         new Option('GridLAB-D', 'GridLAB-D')
       ]
@@ -117,7 +116,7 @@ export class SimulationConfigurationFormGroup extends React.Component<Props, Sta
           validators={[
             Validators.checkNotEmpty('Simulation name is empty')
           ]}
-          value={this.state.simulationName}
+          value={this.props.simulationName}
           onValidate={this.updateInvalidFormControlsMap}
           onChange={this.onSimulationNameChanged} />
 

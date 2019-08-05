@@ -1,5 +1,6 @@
 import { MessageRequest } from '@shared/MessageRequest';
 import { Application } from '@shared/Application';
+import { Service } from '@shared/Service';
 
 interface RequestBody {
   applications: boolean;
@@ -8,19 +9,20 @@ interface RequestBody {
   serviceInstances: boolean;
 }
 
-export class GetAvailableApplicationsRequest implements MessageRequest {
+export class GetAvailableApplicationsAndServicesRequest implements MessageRequest {
 
   readonly url = 'goss.gridappsd.process.request.status.platform';
-  readonly replyTo = 'available-applications';
-  readonly requestBody = {
+  readonly replyTo = 'available-applications-and-services';
+  readonly requestBody: RequestBody = {
     applications: true,
-    services: false,
+    services: true,
     appInstances: false,
     serviceInstances: false
-  } as RequestBody;
+  };
 
 }
 
 export interface GetAvailableApplicationsRequestPayload {
   applications: Application[];
+  services: Service[];
 }

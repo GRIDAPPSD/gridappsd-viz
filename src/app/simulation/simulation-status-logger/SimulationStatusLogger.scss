@@ -1,16 +1,10 @@
 .simulation-status-logger {
     position: absolute;
-    counter-reset: message-number;
     background-color: transparent;
     bottom: 0;
     top: 100%;
     width: 100%;
     z-index: 1;
-
-    .simulation-status-logger-message:before {
-        counter-increment: message-number;
-        content: counter(message-number) ". "
-    }
 }
 
 .simulation-status-logger__header {

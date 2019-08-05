@@ -11,11 +11,13 @@ interface Props {
   styles?: React.CSSProperties;
 }
 
-export const Dialog = (props: Props) => (
-  <PopUp in={props.show}>
-    <div className={'dialog' + (props.className ? ' ' + props.className : '')}
-      style={{ ...(props.styles || {}) }}>
-      {props.children}
-    </div>
-  </PopUp>
-);
+export function Dialog(props: Props) {
+  return (
+    <PopUp in={props.show}>
+      <div className={'dialog' + (props.className ? ' ' + props.className : '')}
+        style={{ ...(props.styles || {}) }}>
+        {props.children}
+      </div>
+    </PopUp>
+  );
+}

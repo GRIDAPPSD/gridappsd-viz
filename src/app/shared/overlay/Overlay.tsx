@@ -6,12 +6,14 @@ import './Overlay.scss';
 
 interface Props {
   element: React.ReactElement<any>;
-  showBackdrop?: boolean
+  showBackdrop?: boolean;
 }
 
-export const Overlay = (props: Props) => (
-  <div className='overlay'>
-    <Backdrop visible={props.showBackdrop} />
-    {props.element}
-  </div>
-);
+export function Overlay(props: Props) {
+  return (
+    <div className='overlay'>
+      <Backdrop visible={props.showBackdrop} />
+      {props.element}
+    </div>
+  );
+}

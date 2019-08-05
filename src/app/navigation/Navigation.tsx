@@ -128,4 +128,5 @@ export class Navigation extends React.Component<Props, State> {
     return this._simulationQueue.queueChanges()
       .subscribe(simulations => this.setState({ previousSimulations: simulations }));
   }
+
 }

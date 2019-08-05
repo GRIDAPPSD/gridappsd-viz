@@ -46,4 +46,5 @@ export class ActiveTabIndicator extends React.Component<Props, State> {
   queryTabLabels(): NodeListOf<HTMLElement> {
     return this.props.tabGroup ? this.props.tabGroup.querySelectorAll('.tabgroup__header__label') as any : this.state.tabLabels;
   }
+
 }

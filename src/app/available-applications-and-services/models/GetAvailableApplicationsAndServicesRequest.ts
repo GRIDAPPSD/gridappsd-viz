@@ -1,7 +1,7 @@
 import { MessageRequest } from '@shared/MessageRequest';
 import { Application } from '@shared/Application';
 
-type RequestBody = {
+interface RequestBody {
   applications: boolean;
   services: boolean;
   appInstances: boolean;

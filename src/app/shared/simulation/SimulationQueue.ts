@@ -4,6 +4,7 @@ import { filter } from 'rxjs/operators';
 import { Simulation } from '@shared/simulation';
 
 export class SimulationQueue {
+
   private static readonly _INSTANCE = new SimulationQueue();
 
   private readonly _activeSimulationChanged = new BehaviorSubject<Simulation>(null);
@@ -52,11 +53,11 @@ export class SimulationQueue {
   }
 
   setActiveSimulation(simulationName: string) {
-    const simulation = this._simulations.filter(simulation => simulation.name === simulationName)[0];
-    if (!simulation)
+    const foundSimulation = this._simulations.filter(simulation => simulation.name === simulationName)[0];
+    if (!foundSimulation)
       throw new Error(`No simulation found with the given name "${simulationName}"`);
-    this._activeSimulation = simulation;
-    this._activeSimulationChanged.next(simulation);
+    this._activeSimulation = foundSimulation;
+    this._activeSimulationChanged.next(foundSimulation);
   }
 
 }

@@ -11,6 +11,7 @@ import { Validators } from '@shared/form/validation';
 import './CommOutageEventForm.scss';
 
 let outputEquipmentTypeOptions: Option<string>[];
+let previousModelDictionary: ModelDictionary;
 const inputEquipmentTypeOptions = [
   new Option('Battery', 'batteries'),
   new Option('Breaker', 'breakers'),
@@ -59,10 +60,12 @@ export class CommOutageEventForm extends React.Component<Props, State> {
   constructor(props: Props) {
     super(props);
 
-    if (!outputEquipmentTypeOptions)
+    if (previousModelDictionary !== props.modelDictionary) {
       outputEquipmentTypeOptions = this._generateUniqueOptions(
         props.modelDictionary.measurements.map(e => e.ConductingEquipment_type)
       );
+      previousModelDictionary = props.modelDictionary;
+    }
 
     this.state = {
       inputEquipmentTypeOptions,
@@ -130,11 +133,6 @@ export class CommOutageEventForm extends React.Component<Props, State> {
     };
   }
 
-  componentDidUpdate(previousProps: Props) {
-    if (previousProps.initialFormValue !== this.props.initialFormValue)
-      this.formValue = { ...this.props.initialFormValue };
-  }
-
   render() {
     return (
       <div className='comm-outage-event'>
@@ -189,22 +187,22 @@ export class CommOutageEventForm extends React.Component<Props, State> {
               </thead>
               <tbody>
                 {
-                  this.state.inputList.map((e, i) => (
-                    <tr key={i}>
+                  this.state.inputList.map((inputItem, index) => (
+                    <tr key={index}>
                       <td>
                         <Tooltip content='Delete'>
                           <IconButton
                             style='accent'
                             size='small'
                             icon='delete'
-                            onClick={() => this.setState({ inputList: this.state.inputList.filter(item => item !== e) })} />
+                            onClick={() => this.setState({ inputList: this.state.inputList.filter(item => item !== inputItem) })} />
                         </Tooltip>
                       </td>
-                      <td>{e.type}</td>
-                      <td>{e.name}</td>
-                      <td>{e.phases.map((e, i) => <div key={i}>{e.phaseLabel}</div>)}</td>
+                      <td>{inputItem.type}</td>
+                      <td>{inputItem.name}</td>
+                      <td>{inputItem.phases.map((phase, i) => <div key={i}>{phase.phaseLabel}</div>)}</td>
                       <td>
-                        <div>{e.attribute}</div>
+                        <div>{inputItem.attribute}</div>
                       </td>
                     </tr>
                   ))
@@ -285,21 +283,21 @@ export class CommOutageEventForm extends React.Component<Props, State> {
               </thead>
               <tbody>
                 {
-                  this.state.outputList.map((e, i) => (
-                    <tr key={i}>
+                  this.state.outputList.map((outputItem, index) => (
+                    <tr key={index}>
                       <td>
                         <Tooltip content='Delete'>
                           <IconButton
                             style='accent'
                             size='small'
                             icon='delete'
-                            onClick={() => this.setState({ outputList: this.state.outputList.filter(item => item !== e) })} />
+                            onClick={() => this.setState({ outputList: this.state.outputList.filter(item => item !== outputItem) })} />
                         </Tooltip>
                       </td>
-                      <td>{e.type}</td>
-                      <td>{e.name}</td>
-                      <td>{e.phases.map((e, i) => <div key={i}>{e}</div>)}</td>
-                      <td>{e.measurementTypes.map((e, i) => <div key={i}>{e}</div>)}</td>
+                      <td>{outputItem.type}</td>
+                      <td>{outputItem.name}</td>
+                      <td>{outputItem.phases.map((e, i) => <div key={i}>{e}</div>)}</td>
+                      <td>{outputItem.measurementTypes.map((e, i) => <div key={i}>{e}</div>)}</td>
                     </tr>
                   ))
                 }
@@ -428,7 +426,7 @@ export class CommOutageEventForm extends React.Component<Props, State> {
       outputComponentOptions: this.props.modelDictionary.measurements.filter(
         e => e.ConductingEquipment_type === selectedType
       )
-        .map(e => new Option(e.ConductingEquipment_name, e)),
+        .map(e => new Option(`${e.ConductingEquipment_name} (${e.phases})`, e)),
       outputPhaseOptions: [],
       outputMeasurementTypeOptions: []
     });
@@ -436,7 +434,7 @@ export class CommOutageEventForm extends React.Component<Props, State> {
   }
 
   onOutputComponentChanged(selectedOption: Option<ModelDictionaryMeasurement>) {
-    this.currentOutputListItem.name = selectedOption.label;
+    this.currentOutputListItem.name = selectedOption.value.ConductingEquipment_name;
     this.setState({
       outputPhaseOptions: this._generateUniqueOptions(this._normalizePhases(selectedOption.value.phases))
         .sort((a, b) => a.label.localeCompare(b.label)),

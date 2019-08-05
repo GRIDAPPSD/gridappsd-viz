@@ -102,8 +102,67 @@ const GRAPH_NAMES_PER_SIMULATION_NAME = {
     tap_A: ['reg2', 'reg3', 'reg4'],
     tap_B: ['reg2', 'reg3', 'reg4'],
     tap_C: ['reg2', 'reg3', 'reg4']
-  }
+  },
+  ieee8500new_335: {
+    voltage_A: [
+      'hvmv11sub1_lsb',
+      'l2673313',
+      'l2876814',
+      'l2955047',
+      'l3160107',
+      'l3254238',
+      'm1047574'
 
+    ],
+    voltage_B: [
+      'hvmv11sub1_lsb',
+      'l2673313',
+      'l2876814',
+      'l2955047',
+      'l3160107',
+      'l3254238',
+      'm1047574'
+    ],
+    voltage_C: [
+      'hvmv11sub1_lsb',
+      'l2673313',
+      'l2876814',
+      'l2955047',
+      'l3160107',
+      'l3254238',
+      'm1047574'
+    ],
+    power_in_A: [
+      'hvmv69_11sub3',
+      'hvmv69_11sub2',
+      'hvmv69_11sub1'
+    ],
+    power_in_B: [
+      'hvmv69_11sub3',
+      'hvmv69_11sub2',
+      'hvmv69_11sub1'
+    ],
+    power_in_C: [
+      'hvmv69_11sub3',
+      'hvmv69_11sub2',
+      'hvmv69_11sub1'
+    ],
+    tap_A: [
+      'feeder_reg1a',
+      'feeder_reg2a',
+      'feeder_reg3a'
+    ],
+    tap_B: [
+      'feeder_reg1b',
+      'feeder_reg2b',
+      'feeder_reg3b'
+    ],
+    tap_C: [
+      'feeder_reg1c',
+      'feeder_reg2c',
+      'feeder_reg3c'
+    ]
+  }
 };
 
 export class MeasurementChartContainer extends React.Component<Props, State> {
@@ -154,31 +213,31 @@ export class MeasurementChartContainer extends React.Component<Props, State> {
   private _getDataPointForTimeSeries(graphName: string, timeSeriesName: string, measurements: SimulationOutputMeasurement[]): TimeSeriesDataPoint {
     const dataPoint = { primitiveX: new Date(), primitiveY: 0 };
     if (graphName.includes('voltage')) {
-      const measurement = measurements.filter(
+      const voltageMeasurement = measurements.filter(
         measurement => measurement.connectivityNode === timeSeriesName && graphName.includes(measurement.phases) && measurement.type === 'PNV' && measurement.magnitude !== undefined
       )[0];
-      if (measurement)
-        dataPoint.primitiveY = measurement.magnitude;
+      if (voltageMeasurement)
+        dataPoint.primitiveY = voltageMeasurement.magnitude;
       else
         console.warn(`No measurement found for time series "${timeSeriesName}", plot name "${graphName}"`);
     }
     else if (graphName.includes('power_in')) {
-      const measurement = measurements.filter(
+      const powerMeasurement = measurements.filter(
         measurement => measurement.conductingEquipmentName === timeSeriesName && graphName.includes(measurement.phases) &&
           measurement.magnitude !== undefined && measurement.type === 'VA'
       )[0];
-      if (measurement)
-        dataPoint.primitiveY = measurement.magnitude;
+      if (powerMeasurement)
+        dataPoint.primitiveY = powerMeasurement.magnitude;
       else
         console.warn(`No measurement found for time series "${timeSeriesName}", plot name "${graphName}"`);
     }
     else if (graphName.includes('tap')) {
-      const measurement = measurements.filter(
+      const tapMeasurement = measurements.filter(
         measurement => measurement.conductingEquipmentName === timeSeriesName && graphName.includes(measurement.phases) &&
           measurement.value !== undefined && measurement.type === 'Pos'
       )[0];
-      if (measurement)
-        dataPoint.primitiveY = measurement.value;
+      if (tapMeasurement)
+        dataPoint.primitiveY = tapMeasurement.value;
       else
         console.warn(`No measurement found for time series "${timeSeriesName}", plot name "${graphName}"`);
     }

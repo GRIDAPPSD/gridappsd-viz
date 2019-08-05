@@ -12,7 +12,7 @@ interface Props {
   checked?: boolean;
 }
 
-export const CheckBox = (props: Props) => {
+export function CheckBox(props: Props) {
   return (
     <FormControl
       className={'checkbox' + (props.disabled ? ' disabled-checkbox' : '')}

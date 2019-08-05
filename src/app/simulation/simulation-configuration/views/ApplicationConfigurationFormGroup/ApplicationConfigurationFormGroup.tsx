@@ -86,4 +86,5 @@ export class ApplicationConfigurationFormGroup extends React.Component<Props, St
       disabledAppConfigStringInputBox: false
     });
   }
+
 }
