@@ -114,6 +114,7 @@ export class SimulationControl extends React.Component<Props, State> {
                 <Tooltip position='bottom' content='Start simulation'>
                   <IconButton
                     icon='play_arrow'
+                    disabled={this.props.modelDictionaryComponentsWithConsolidatedPhases.length === 0}
                     className='simulation-control__action start'
                     onClick={this.props.onStartSimulation} />
                 </Tooltip>
