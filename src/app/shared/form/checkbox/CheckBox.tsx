@@ -10,12 +10,13 @@ interface Props {
   onChange?: (state: boolean) => void;
   disabled?: boolean;
   checked?: boolean;
+  labelPosition?: 'left' | 'right';
 }
 
 export function CheckBox(props: Props) {
   return (
     <FormControl
-      className='checkbox'
+      className={`checkbox label-position-${props.labelPosition === undefined ? 'left' : props.labelPosition}`}
       disabled={props.disabled}
       label={props.label}>
       <div className='checkbox-wrapper'>

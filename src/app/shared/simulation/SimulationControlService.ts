@@ -7,8 +7,14 @@ import { START_SIMULATION_TOPIC, CONTROL_SIMULATION_TOPIC } from './topics';
 import { SimulationQueue } from './SimulationQueue';
 import { StateStore } from '@shared/state-store';
 
+/**
+ * STARTED: Fired when the users request to start a simulation
+ * PAUSED:  Fired when the users request to pause the running simulation
+ * STOPPED: Fired when the users request to stop the running simulation
+ * RESUMED: Fired when the users request to resume the paused simulation
+ */
 export const enum SimulationStatus {
-  STARTED, PAUSED, STOPPED, NEW, RESUMED
+  STARTED, PAUSED, STOPPED, RESUMED
 }
 /**
  * This class is responsible for communicating with the platform to process the simulation.
@@ -22,7 +28,7 @@ export class SimulationControlService {
   private readonly _stompClientService = StompClientService.getInstance();
   private readonly _currentSimulationStatusNotifer = new Subject<SimulationStatus>();
   private readonly _stateStore = StateStore.getInstance();
-  private _currentSimulationStatus = SimulationStatus.NEW;
+  private _currentSimulationStatus = SimulationStatus.STOPPED;
 
   private constructor() {
   }

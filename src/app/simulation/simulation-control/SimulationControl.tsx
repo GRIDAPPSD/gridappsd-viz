@@ -4,6 +4,10 @@ import { IconButton } from '@shared/buttons';
 import { SimulationStatus } from '@shared/simulation';
 import { Tooltip } from '@shared/tooltip';
 import { Ripple } from '@shared/ripple';
+import { PlotModel } from '@shared/plot-model/PlotModel';
+import { OverlayService } from '@shared/overlay';
+import { PlotModelCreator } from './views/plot-model-creator/PlotModelCreator';
+import { ModelDictionaryComponent } from '@shared/topology';
 
 import './SimulationControl.scss';
 
@@ -11,29 +15,37 @@ interface Props {
   timestamp: string;
   simulationStatus: SimulationStatus;
   simulationId: string;
+  existingPlotModels: PlotModel[];
+  modelDictionaryComponentsWithConsolidatedPhases: ModelDictionaryComponent[];
   onStartSimulation: () => void;
   onStopSimulation: () => void;
   onPauseSimulation: () => void;
   onResumeSimulation: () => void;
+  onPlotModelCreationDone: (plotModels: PlotModel[]) => void;
 }
 
 interface State {
   simulationIdCopiedSuccessfully: boolean;
+  showStartSimulationButton: boolean;
 }
 
 export class SimulationControl extends React.Component<Props, State> {
+
+  private readonly _overlayService = OverlayService.getInstance();
+
   constructor(props: Props) {
     super(props);
     this.state = {
-      simulationIdCopiedSuccessfully: false
+      simulationIdCopiedSuccessfully: false,
+      showStartSimulationButton: true
     };
 
     this.saveSimulationIdToClipboard = this.saveSimulationIdToClipboard.bind(this);
+    this.showPlotModelCreator = this.showPlotModelCreator.bind(this);
   }
 
   render() {
     return (
-
       <div className='simulation-control'>
         {
           this.props.simulationId
@@ -59,32 +71,21 @@ export class SimulationControl extends React.Component<Props, State> {
             </Ripple>
           </div>
         }
-        <span className='simulation-control__timestamp'>{this.props.timestamp}</span>
+        <span className='simulation-control__timestamp'>
+          {this.props.timestamp}
+        </span>
         {
-          this.props.simulationStatus === SimulationStatus.STARTED || this.props.simulationStatus === SimulationStatus.RESUMED
-            ?
-            <>
-              <Tooltip position='bottom' content='Pause simulation'>
-                <IconButton
-                  icon='pause'
-                  className='simulation-control__action'
-                  onClick={this.props.onPauseSimulation} />
-              </Tooltip>
-              <Tooltip position='bottom' content='Stop simulation'>
-                <IconButton
-                  icon='stop'
-                  className='simulation-control__action'
-                  onClick={this.props.onStopSimulation} />
-              </Tooltip>
-            </>
-            : this.props.simulationStatus === SimulationStatus.PAUSED
+          this.state.showStartSimulationButton
+          &&
+          (
+            this.props.simulationStatus === SimulationStatus.STARTED || this.props.simulationStatus === SimulationStatus.RESUMED
               ?
               <>
-                <Tooltip position='bottom' content='Resume simulation'>
+                <Tooltip position='bottom' content='Pause simulation'>
                   <IconButton
-                    icon='play_arrow'
-                    className='simulation-control__action resume'
-                    onClick={this.props.onResumeSimulation} />
+                    icon='pause'
+                    className='simulation-control__action'
+                    onClick={this.props.onPauseSimulation} />
                 </Tooltip>
                 <Tooltip position='bottom' content='Stop simulation'>
                   <IconButton
@@ -93,15 +94,41 @@ export class SimulationControl extends React.Component<Props, State> {
                     onClick={this.props.onStopSimulation} />
                 </Tooltip>
               </>
-              :
-              <Tooltip position='bottom' content='Start simulation'>
-                <IconButton
-                  icon='play_arrow'
-                  className='simulation-control__action start'
-                  onClick={this.props.onStartSimulation} />
-              </Tooltip>
+              : this.props.simulationStatus === SimulationStatus.PAUSED
+                ?
+                <>
+                  <Tooltip position='bottom' content='Resume simulation'>
+                    <IconButton
+                      icon='play_arrow'
+                      className='simulation-control__action resume'
+                      onClick={this.props.onResumeSimulation} />
+                  </Tooltip>
+                  <Tooltip position='bottom' content='Stop simulation'>
+                    <IconButton
+                      icon='stop'
+                      className='simulation-control__action'
+                      onClick={this.props.onStopSimulation} />
+                  </Tooltip>
+                </>
+                :
+                <Tooltip position='bottom' content='Start simulation'>
+                  <IconButton
+                    icon='play_arrow'
+                    className='simulation-control__action start'
+                    onClick={this.props.onStartSimulation} />
+                </Tooltip>
+          )
         }
-      </div >
+        <Tooltip
+          position='bottom'
+          content='Edit plots'>
+          <IconButton
+            icon='show_chart'
+            className='simulation-control__action add-component-to-plot'
+            disabled={this.props.modelDictionaryComponentsWithConsolidatedPhases.length === 0}
+            onClick={this.showPlotModelCreator} />
+        </Tooltip>
+      </div>
 
     );
   }
@@ -125,6 +152,22 @@ export class SimulationControl extends React.Component<Props, State> {
         simulationIdCopiedSuccessfully: false
       });
     }, 2000);
+  }
+
+  showPlotModelCreator() {
+    this._overlayService.show(
+      <PlotModelCreator
+        modelDictionaryComponentsWithConsolidatedPhases={this.props.modelDictionaryComponentsWithConsolidatedPhases}
+        existingPlotModels={this.props.existingPlotModels}
+        onSubmit={models => {
+          this.props.onPlotModelCreationDone(models);
+          this._overlayService.hide();
+          this.setState({
+            showStartSimulationButton: true
+          });
+        }}
+        onClose={this._overlayService.hide} />
+    );
   }
 
 }

@@ -2,9 +2,33 @@
     display: flex;
     position: relative;
     line-height: initial;
-    margin: 0 20px;
     flex-flow: row;
     align-items: center;
+    overflow: hidden;
+}
+
+.checkbox.label-position-left {
+    margin: 0 20px;
+}
+
+.checkbox.label-position-right {
+
+    padding-left: 250px;
+
+    .form-control__label {
+        order: 1;
+        width: initial;
+    }
+
+    .checkbox-wrapper {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .checkbox__input {
+        width: 100vw;
+    }
 }
 
 .checkbox-wrapper {

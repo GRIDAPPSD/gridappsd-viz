@@ -6,7 +6,7 @@ import { FormGroup, Select, Option, Input } from '@shared/form';
 import { toOptions } from '@shared/form/select/utils';
 import { FaultEvent, Phase, FaultKind, FaultImpedence } from '@shared/test-manager';
 import { Validators } from '@shared/form/validation';
-import { ModelDictionaryMeasurementComponent } from '@shared/topology/model-dictionary/ModelDictionaryMeasurementComponent';
+import { ModelDictionaryComponent } from '@shared/topology/model-dictionary/ModelDictionaryComponent';
 
 import './FaultEventForm.scss';
 
@@ -14,7 +14,7 @@ interface Props {
   onEventAdded: (event: FaultEvent) => void;
   initialFormValue: FaultEvent;
   modelDictionary: ModelDictionary;
-  componentWithConsolidatedPhases: ModelDictionaryMeasurementComponent[];
+  componentsWithConsolidatedPhases: ModelDictionaryComponent[];
 }
 
 interface State {
@@ -156,7 +156,7 @@ export class FaultEventForm extends React.Component<Props, State> {
       case 'PowerTransformer':
         this.setState({
           componentOptions: toOptions(
-            this.props.componentWithConsolidatedPhases.filter(e => e.conductingEquipmentType === option.value),
+            this.props.componentsWithConsolidatedPhases.filter(e => e.conductingEquipmentType === option.value),
             e => `${e.conductingEquipmentName} (${e.phases})`
           ),
           phaseOptions: []

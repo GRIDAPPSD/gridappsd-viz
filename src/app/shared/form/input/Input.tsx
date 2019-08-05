@@ -15,7 +15,7 @@ interface Props {
   hint?: string;
   className?: string;
   validators?: Validator[];
-  onValidate?: (isValid: boolean, formControlLabel: string) => void;
+  onValidate?: (isValid: boolean, formControlLabel: string, currentValue: string) => void;
   disabled?: boolean;
 }
 
@@ -54,7 +54,7 @@ export class Input extends React.Component<Props, State> {
       });
       const isValid = validationErrors.length === 0;
       if (this.props.onValidate)
-        this.props.onValidate(isValid, this.props.label);
+        this.props.onValidate(isValid, this.props.label, value);
       if (isValid)
         this.props.onChange(value);
     }
