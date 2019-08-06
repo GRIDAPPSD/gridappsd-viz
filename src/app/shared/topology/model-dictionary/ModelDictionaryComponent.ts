@@ -1,3 +1,5 @@
+import { ModelDictionaryComponentType } from './ModelDictionaryComponentType';
+
 /**
  * 
  * Each instance of this interface represents a component
@@ -9,11 +11,12 @@
  * displaying in components dropdowns in test config and plot creation for simulation
  * @see ModelDictionaryMeasurement
  **/
-export interface ModelDictionaryMeasurementComponent {
+export interface ModelDictionaryComponent {
   conductingEquipmentName: string;
   conductingEquipmentType: string;
   phases: string; // 'ABC' or any combinations thereof
   displayName: string;
   id: string;
   conductingEquipmentMRIDs: string[];
+  type: ModelDictionaryComponentType;
 }

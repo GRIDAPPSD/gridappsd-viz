@@ -11,6 +11,7 @@ interface Props {
   id: string;
   label: string;
   style?: 'default' | 'switches';
+  disabled?: boolean;
 }
 
 interface State {
@@ -38,7 +39,8 @@ export class RadioButtonGroup extends React.Component<Props, State> {
     return (
       <FormControl
         className={'radio-button-group style-' + (this.props.style || 'default')}
-        label={this.props.label}>
+        label={this.props.label}
+        disabled={this.props.disabled}>
         <div className='radio-button-group__radio-buttons'>
           <IdContextProvider.Provider value={this.props.id}>
             {this.props.children}

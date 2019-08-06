@@ -2,7 +2,6 @@ import * as React from 'react';
 import { Subscription } from 'rxjs';
 import { map } from 'rxjs/operators';
 
-
 import { StompClientService } from '@shared/StompClientService';
 import { StompClient } from './StompClient';
 

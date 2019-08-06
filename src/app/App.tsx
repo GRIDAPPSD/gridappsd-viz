@@ -31,7 +31,7 @@ import { DEFAULT_APPLICATION_STATE } from './models/default-application-state';
 import { TabGroup, Tab } from '@shared/tabs';
 import { EventSummary } from './simulation/event-summary/EventSummary';
 import { AvailableApplicationList } from './simulation/applications/AvailableApplicationList';
-import { ModelDictionaryMeasurementComponent } from '@shared/topology/model-dictionary/ModelDictionaryMeasurementComponent';
+import { ModelDictionaryComponent } from '@shared/topology/model-dictionary/ModelDictionaryComponent';
 
 import './App.scss';
 
@@ -358,7 +358,7 @@ export class App extends React.Component<Props, State> {
 
   // Find components with the same name, and group their phases into one
   private _consolidatePhasesForComponents(modelDictionary: ModelDictionary) {
-    const componentWithGroupPhasesMap = new Map<string, ModelDictionaryMeasurementComponent>();
+    const componentWithGroupPhasesMap = new Map<string, ModelDictionaryComponent>();
     for (const measurement of modelDictionary.measurements) {
       const id = measurement.measurementType === ModelDictionaryComponentType.VOLTAGE
         ? measurement.ConnectivityNode
@@ -372,7 +372,8 @@ export class App extends React.Component<Props, State> {
           conductingEquipmentType: measurement.ConductingEquipment_type,
           displayName: `${id} (${phases})`,
           phases,
-          conductingEquipmentMRIDs: [measurement.ConductingEquipment_mRID]
+          conductingEquipmentMRIDs: [measurement.ConductingEquipment_mRID],
+          type: measurement.measurementType as ModelDictionaryComponentType
         };
         componentWithGroupPhasesMap.set(id, componentInMeasurement);
       } else {

@@ -21,7 +21,7 @@ interface State {
 export class EventSummary extends React.Component<Props, State> {
 
   private readonly _stateStore = StateStore.getInstance();
-  private readonly _unmountingNotifier = new Subject<void>();
+  private readonly _unsubscriber = new Subject<void>();
 
   constructor(props: Props) {
     super(props);
@@ -34,18 +34,20 @@ export class EventSummary extends React.Component<Props, State> {
 
   componentDidMount() {
     this._stateStore.select('outageEvents')
-      .pipe(takeUntil(this._unmountingNotifier))
+      .pipe(takeUntil(this._unsubscriber))
       .subscribe({
         next: events => this.setState({ outageEvents: events })
       });
+
     this._stateStore.select('faultEvents')
-      .pipe(takeUntil(this._unmountingNotifier))
+      .pipe(takeUntil(this._unsubscriber))
       .subscribe({
         next: events => this.setState({ faultEvents: events })
       });
+
     this._stateStore.select('startSimulationResponse')
       .pipe(
-        takeUntil(this._unmountingNotifier),
+        takeUntil(this._unsubscriber),
         filter(state => Boolean(state))
       )
       .subscribe({
@@ -54,7 +56,8 @@ export class EventSummary extends React.Component<Props, State> {
   }
 
   componentWillUnmount() {
-    this._unmountingNotifier.complete();
+    this._unsubscriber.next();
+    this._unsubscriber.complete();
   }
 
   render() {

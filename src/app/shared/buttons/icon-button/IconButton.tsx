@@ -6,7 +6,7 @@ import './IconButton.scss';
 
 type Icon = 'check_circle' | 'menu' | 'assignment' | 'storage' | 'search' | 'laptop' | 'help' | 'delete' | 'cloud_upload'
   | 'pause' | 'stop' | 'play_arrow' | 'add' | 'remove' | 'cached' | 'save' | 'close' | 'navigate_next' | 'navigate_before'
-  | 'keyboard_arrow_down' | 'memory' | 'send';
+  | 'keyboard_arrow_down' | 'memory' | 'send' | 'show_chart' | 'edit';
 
 
 interface Props {

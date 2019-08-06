@@ -1,8 +1,8 @@
 import { CommOutageEvent, FaultEvent } from '@shared/test-manager';
 import { Application } from '@shared/Application';
 import { Service } from '@shared/Service';
-import { ModelDictionary } from '@shared/topology';
-import { ModelDictionaryMeasurementComponent } from '@shared/topology/model-dictionary/ModelDictionaryMeasurementComponent';
+import { ModelDictionary, ModelDictionaryComponent } from '@shared/topology';
+import { PlotModel } from '@shared/plot-model/PlotModel';
 
 export interface ApplicationState {
   startSimulationResponse: {
@@ -25,5 +25,6 @@ export interface ApplicationState {
   applications: Application[];
   services: Service[];
   modelDictionary: ModelDictionary;
-  modelDictionaryComponentsWithConsolidatedPhases: ModelDictionaryMeasurementComponent[];
+  modelDictionaryComponentsWithConsolidatedPhases: ModelDictionaryComponent[];
+  plotModels: PlotModel[];
 }

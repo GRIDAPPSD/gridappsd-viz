@@ -21,7 +21,7 @@ import { ApplicationConfigurationFormGroupValue } from './models/ApplicationConf
 import { StateStore } from '@shared/state-store';
 import { ThreeDots } from '@shared/three-dots';
 import { NotificationBanner } from '@shared/notification-banner';
-import { ModelDictionaryMeasurementComponent } from '@shared/topology/model-dictionary/ModelDictionaryMeasurementComponent';
+import { ModelDictionaryComponent } from '@shared/topology/model-dictionary/ModelDictionaryComponent';
 
 import './SimulationConfigurationEditor.scss';
 
@@ -41,7 +41,7 @@ interface State {
   modelDictionary: ModelDictionary;
   disableSubmitButton: boolean;
   lineName: string;
-  componentsWithConsolidatedPhases: ModelDictionaryMeasurementComponent[];
+  componentsWithConsolidatedPhases: ModelDictionaryComponent[];
 }
 
 export class SimulationConfigurationEditor extends React.Component<Props, State> {
@@ -107,7 +107,7 @@ export class SimulationConfigurationEditor extends React.Component<Props, State>
       .pipe(takeUntil(this._unsubscriber))
       .subscribe({
         next: status => this.setState({
-          disableSubmitButton: status !== SimulationStatus.NEW && status !== SimulationStatus.STOPPED
+          disableSubmitButton: status !== SimulationStatus.STOPPED
         })
       });
 
@@ -129,6 +129,7 @@ export class SimulationConfigurationEditor extends React.Component<Props, State>
   }
 
   componentWillUnmount() {
+    this._unsubscriber.next();
     this._unsubscriber.complete();
   }
 
