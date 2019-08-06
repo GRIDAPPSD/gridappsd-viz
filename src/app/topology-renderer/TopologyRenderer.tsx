@@ -39,7 +39,7 @@ export class TopologyRenderer extends React.Component<Props, State> {
   private readonly _edgeGenerator = line<{ edge: Edge; node: Node }>()
     .x(d => d.node.screenX)
     .y(d => d.node.screenY);
-  private readonly _symbolSize = 15;
+  private readonly _symbolSize = 35;
   private readonly _symbolsForTypes = {
     capacitor: './assets/images/capacitor.svg',
     regulator: './assets/images/regulator.svg',
