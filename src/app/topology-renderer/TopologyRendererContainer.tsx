@@ -17,6 +17,7 @@ import { CapacitorVarUpdateRequest } from './models/CapacitorVarUpdateRequest';
 import { CapacitorVoltUpdateRequest } from './models/CapacitorVoltUpdateRequest';
 import { RegulatorLineDropUpdateRequest } from './models/RegulatorLineDropUpdateRequest';
 import { RegulatorTapChangerRequest } from './models/RegulatorTapChangerRequest';
+import { RenderableTopology } from './models/RenderableTopology';
 
 interface Props {
   mRIDs: Map<string, string & string[]>;
@@ -24,7 +25,7 @@ interface Props {
 }
 
 interface State {
-  topology: { nodes: Node[], edges: Edge[] };
+  topology: RenderableTopology;
   isFetching: boolean;
 }
 
@@ -98,7 +99,7 @@ export class TopologyRendererContainer extends React.Component<Props, State> {
   private _processModelForRendering(payload: GetTopologyModelRequestPayload) {
     if (typeof payload.data === 'string')
       payload.data = JSON.parse(payload.data);
-    const topology = this._transformModel(payload.data);
+    const topology = this._transformModelForRendering(payload.data);
     this.setState({
       topology,
       isFetching: false
@@ -106,20 +107,38 @@ export class TopologyRendererContainer extends React.Component<Props, State> {
     TopologyRendererContainer._CACHE[this._activeSimulationConfig.power_system_config.Line_name] = topology;
   }
 
-  private _transformModel(model: TopologyModel): { nodes: Node[], edges: Edge[] } {
+  private _transformModelForRendering(model: TopologyModel): RenderableTopology {
     if (!model || model.feeders.length === 0)
       return null;
     const nodes: Node[] = [];
     const edges: Edge[] = [];
 
-    const groupNames = ['batteries', 'switches', 'solarpanels', 'swing_nodes', 'transformers', 'overhead_lines',
-      'capacitors', 'regulators'
+    const keysToLookAt = [
+      'batteries', 'switches', 'solarpanels', 'swing_nodes', 'transformers', 'overhead_lines', 'capacitors', 'regulators'
+    ];
+    const oldModels = [
+      'acep_psil', 'ieee123', 'ieee123pv', 'ieee13nodeckt', 'ieee13nodecktassets', 'ieee37', 'ieee8500', 'j1', 'sourceckt'
     ];
     const feeder = model.feeders[0];
     const allNodes = Object.keys(feeder)
-      .filter(key => groupNames.includes(key))
+      .filter(key => keysToLookAt.includes(key))
       .reduce((accumlator, group) => {
         for (const node of feeder[group]) {
+          // Newer models overload x1/y1, x2/y2 for longitude/latitude
+          // while the older models do not use x1/y1, x2/y2 for longitude/latitude
+          // so we need to convert longitude/latitude to x/y when we get a new model
+          if (!oldModels.includes(feeder.name)) {
+            if ('x1' in node) {
+              const { x, y } = this._latLongToXY(node.x1, node.y1);
+              node.x1 = x;
+              node.y1 = y;
+            }
+            if ('x2' in node) {
+              const { x, y } = this._latLongToXY(node.x2, node.y2);
+              node.x2 = x;
+              node.y2 = y;
+            }
+          }
           node.groupName = group;
           accumlator.push(node);
         }
@@ -224,10 +243,16 @@ export class TopologyRendererContainer extends React.Component<Props, State> {
           break;
       }
     }
-
     return {
       nodes: nodes.filter(node => node.x !== -1 && node.y !== -1),
       edges: edges.filter(edge => [edge.from.x, edge.from.y, edge.to.x, edge.to.y].every(e => e !== -1))
+    };
+  }
+
+  private _latLongToXY(longitude: number, lat: number): { x: number; y: number } {
+    return {
+      x: Math.floor(136.0 * (longitude + 77.0292) / (-77.0075 + 77.0292)) / 10,
+      y: Math.floor(117.0 * (lat - 38.8762) / (38.8901 - 38.8762)) / 10
     };
   }
 
