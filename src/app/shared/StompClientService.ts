@@ -15,6 +15,10 @@ export class StompClientService {
   private _statusChanges = new BehaviorSubject<StompClientConnectionStatus>('NEW');
   private _status: StompClientConnectionStatus = 'NEW';
 
+  static getInstance() {
+    return StompClientService._INSTANCE;
+  }
+
   private constructor() {
     this._connectionFailed = this._connectionFailed.bind(this);
     this._connectionEstablished = this._connectionEstablished.bind(this);
@@ -36,10 +40,6 @@ export class StompClientService {
           this.connect();
         }
       });
-  }
-
-  static getInstance() {
-    return StompClientService._INSTANCE;
   }
 
   connect() {

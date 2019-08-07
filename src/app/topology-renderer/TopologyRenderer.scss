@@ -1,20 +1,17 @@
-.model-renderer {
+.topology-renderer {
     height: 100%;
     width: 100%;
     position: relative;
     overflow: hidden;
+}
 
-    svg {
-        width: 100%;
-        height: 100%;
-    }
+.topology-renderer__canvas {
+    width: 100%;
+    height: 100%;
+}
 
-    .wait {
-        height: calc(100% + 30px);
-        z-index: 0;
-    }
-
-    path.edge {
-        stroke-width: 10px;
-    }
+.topology-renderer__canvas__edge {
+    stroke-width: 0.2px;
+    fill: none;
+    stroke: #000;
 }

@@ -12,6 +12,10 @@ export class ConfigurationManager {
 
   private _configurationChanges = new BehaviorSubject<Configurations>(null);
 
+  static getInstance() {
+    return ConfigurationManager._INSTANCE;
+  }
+
   private constructor() {
     this._fetchConfigurations();
   }
@@ -23,10 +27,6 @@ export class ConfigurationManager {
       this._configurationChanges.next(JSON.parse((event.target as XMLHttpRequest).responseText));
     };
     xhr.send();
-  }
-
-  static getInstance() {
-    return ConfigurationManager._INSTANCE;
   }
 
   configurationChanges() {
