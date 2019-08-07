@@ -191,18 +191,18 @@ export class TopologyRenderer extends React.Component<Props, State> {
     return element;
   }
 
-  private _renderNodes(nodeData: Node[], containerClassName: string) {
-    const nodes = select(this._createSvgElement('g', { 'class': containerClassName }));
-    nodes.selectAll('circle')
-      .data(nodeData)
+  private _renderNodes(nodes: Node[], containerClassName: string) {
+    const nodeContainer = select(this._createSvgElement('g', { 'class': containerClassName }));
+    nodeContainer.selectAll('circle')
+      .data(nodes)
       .enter()
       .append('circle')
       .attr('class', node => `topology-renderer__canvas__node ${node.type} _${node.name}_`)
       .attr('cx', node => node.screenX)
       .attr('cy', node => node.screenY)
-      .attr('r', '3');
+      .attr('r', nodes.length <= 1000 ? 3 : 1);
     this._container.node()
-      .appendChild(nodes.node());
+      .appendChild(nodeContainer.node());
   }
 
   private _renderSymbolsForNodesWithKnownTypes(edgesKeyedByNodeNames: Map<string, Edge>, nodesWithKnownTypes: Node[]) {
