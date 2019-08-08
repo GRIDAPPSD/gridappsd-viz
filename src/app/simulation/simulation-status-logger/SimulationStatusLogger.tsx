@@ -128,8 +128,8 @@ export class SimulationStatusLogger extends React.Component<Props, State> {
           ref={elem => this.simulationStatusLoggerBody = elem}
           onScroll={this.loadMoreMessages}>
           {
-            this.state.visibleMessages.map(message => (
-              <SimulationStatusLoggerMessage key={message} message={message} />
+            this.state.visibleMessages.map((message, i) => (
+              <SimulationStatusLoggerMessage key={message + i} message={message} />
             ))
           }
         </section>
