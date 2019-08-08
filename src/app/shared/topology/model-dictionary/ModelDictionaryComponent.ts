@@ -14,7 +14,7 @@ import { ModelDictionaryComponentType } from './ModelDictionaryComponentType';
 export interface ModelDictionaryComponent {
   conductingEquipmentName: string;
   conductingEquipmentType: string;
-  phases: string; // 'ABC' or any combinations thereof
+  phases: string[];
   displayName: string;
   id: string;
   conductingEquipmentMRIDs: string[];
