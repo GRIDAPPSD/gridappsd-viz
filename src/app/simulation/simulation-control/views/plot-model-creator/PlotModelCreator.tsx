@@ -242,7 +242,6 @@ export class PlotModelCreator extends React.Component<Props, State> {
     return (this.state.currentPlotModel.componentType !== ModelDictionaryComponentType.POWER
       && this.state.currentPlotModel.componentType !== ModelDictionaryComponentType.VOLTAGE)
       || this.state.currentPlotModel.components.length > 0;
-
   }
 
   toggleUseMagnitude(state: boolean) {
@@ -265,7 +264,7 @@ export class PlotModelCreator extends React.Component<Props, State> {
   onComponentChanged(option: Option<ModelDictionaryComponent>) {
     this.setState({
       selectedComponent: option.value,
-      phaseOptions: toOptions(option.value.phases.split(''), e => e)
+      phaseOptions: toOptions(option.value.phases, e => e)
     });
   }
 

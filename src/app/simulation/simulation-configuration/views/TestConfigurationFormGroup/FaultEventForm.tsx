@@ -157,7 +157,7 @@ export class FaultEventForm extends React.Component<Props, State> {
         this.setState({
           componentOptions: toOptions(
             this.props.componentsWithConsolidatedPhases.filter(e => e.conductingEquipmentType === option.value),
-            e => `${e.conductingEquipmentName} (${e.phases})`
+            e => `${e.conductingEquipmentName} (${e.phases.join(', ')})`
           ),
           phaseOptions: []
         });

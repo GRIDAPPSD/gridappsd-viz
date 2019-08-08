@@ -371,18 +371,16 @@ export class App extends React.Component<Props, State> {
           conductingEquipmentName: measurement.ConductingEquipment_name,
           conductingEquipmentType: measurement.ConductingEquipment_type,
           displayName: `${id} (${phases})`,
-          phases,
+          phases: [phases],
           conductingEquipmentMRIDs: [measurement.ConductingEquipment_mRID],
           type: measurement.measurementType as ModelDictionaryComponentType
         };
         componentWithGroupPhasesMap.set(id, componentInMeasurement);
       } else {
         if (!componentInMeasurement.phases.includes(phases)) {
-          componentInMeasurement.phases += phases;
-          componentInMeasurement.phases = componentInMeasurement.phases.split('')
-            .sort((a, b) => a.localeCompare(b))
-            .join('');
-          componentInMeasurement.displayName = `${id} (${componentInMeasurement.phases})`;
+          componentInMeasurement.phases.push(phases);
+          componentInMeasurement.phases.sort((a, b) => a.localeCompare(b));
+          componentInMeasurement.displayName = `${id} (${componentInMeasurement.phases.join(', ')})`;
         }
         componentInMeasurement.conductingEquipmentMRIDs.push(measurement.ConductingEquipment_mRID);
       }
