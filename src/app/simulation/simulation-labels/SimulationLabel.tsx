@@ -45,7 +45,7 @@ export class SimulationLabel extends React.Component<Props, State> {
 
   private _calculateAnchorPosition(): { left: number; top: number; } {
     for (const phase of ['', 'a', 'b', 'c']) {
-      const anchor = document.querySelector(`.model-renderer ._${this.props.nodeNameToAttachTo}${phase}_`);
+      const anchor = document.querySelector(`.topology-renderer ._${this.props.nodeNameToAttachTo}${phase}_`);
       if (anchor) {
         const anchorRect = anchor.getBoundingClientRect();
         const offsetTopOfOffsetParent = this.simulationLabel.offsetParent
