@@ -50,7 +50,7 @@ export class LogsContainer extends React.Component<Props, State> {
     this._stompClientService.send(
       'goss.gridappsd.process.request.data.log',
       { 'reply-to': 'query-logs.process-id' },
-      '{"query": "select distinct(process_id), max(timestamp) as timestamp from log where process_id is not null group by process_id order by timestamp desc limit 10"}'
+      `{"query": "select distinct(process_id), max(timestamp) as timestamp from log where process_id is not null and process_type='/queue/goss.gridappsd.process.request.simulation' group by process_id order by timestamp desc limit 10"}`
     );
   }
 
