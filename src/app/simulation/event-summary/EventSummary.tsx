@@ -88,7 +88,6 @@ export class EventSummary extends React.Component<Props, State> {
     );
   }
 
-
   initializeEvent(event: CommOutageEvent | FaultEvent) {
     console.log(event);
   }
