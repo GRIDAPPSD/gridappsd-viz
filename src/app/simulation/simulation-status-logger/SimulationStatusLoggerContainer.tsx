@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { Subscription } from 'rxjs';
-import { filter, switchMap, tap, map, takeWhile } from 'rxjs/operators';
+import { filter, switchMap, tap, takeWhile } from 'rxjs/operators';
 
 import { SimulationStatusLogger } from './SimulationStatusLogger';
 import {
@@ -25,7 +25,7 @@ export class SimulationStatusLogContainer extends React.Component<Props, State> 
   private readonly _simulationQueue = SimulationQueue.getInstance();
   private readonly _simulationControlService = SimulationControlService.getInstance();
   private readonly _stateStore = StateStore.getInstance();
-  private _stateStoreChangeSubscription: Subscription;
+  private _simulationIdStateChangeSubscription: Subscription;
   private _stompClientStatusSubscription: Subscription;
 
   constructor(props: Props) {
@@ -50,28 +50,29 @@ export class SimulationStatusLogContainer extends React.Component<Props, State> 
         next: status => {
           switch (status) {
             case 'CONNECTING':
-              if (this._stateStoreChangeSubscription)
-                this._stateStoreChangeSubscription.unsubscribe();
+              if (this._simulationIdStateChangeSubscription)
+                this._simulationIdStateChangeSubscription.unsubscribe();
               break;
             case 'CONNECTED':
-              this._stateStoreChangeSubscription = this._subscribeToStateStoreChanges();
+              this._simulationIdStateChangeSubscription = this._subscribeToSimulationIdStateChanges();
               break;
           }
         }
       });
   }
 
-  private _subscribeToStateStoreChanges() {
-    return this._stateStore.select('startSimulationResponse')
+  private _subscribeToSimulationIdStateChanges() {
+    return this._stateStore.select('simulationId')
       .pipe(
         // The call in componentDidMount() may not return at this point
         // So if _stompClientStatusSubscription is still undefined, then
         // we want to keep listening
         takeWhile(() => this._stompClientStatusSubscription === undefined || !this._stompClientStatusSubscription.closed),
-        filter(simulationStartResponse => simulationStartResponse && simulationStartResponse.simulationId !== ''),
-        map(simulationStartResponse => simulationStartResponse.simulationId),
+        filter(simulationId => simulationId !== ''),
         tap(simulationId => {
-          this.setState({ isFetching: true });
+          this.setState({
+            isFetching: true
+          });
           this._simulationQueue.updateIdOfActiveSimulation(simulationId);
         }),
         switchMap(this._newObservableForLogMessages)

@@ -7,6 +7,22 @@ import { START_SIMULATION_TOPIC, CONTROL_SIMULATION_TOPIC } from './topics';
 import { SimulationQueue } from './SimulationQueue';
 import { StateStore } from '@shared/state-store';
 
+interface SimulationStartedEventResponse {
+  simulationId: string;
+  events: Array<{
+    allOutputOutage: boolean;
+    allInputOutage: boolean;
+    inputOutageList: Array<{ objectMrid: string; attribute: string; }>;
+    outputOutageList: string[];
+    faultMRID: string;
+    event_type: string;
+    occuredDateTime: number;
+    stopDateTime: number;
+    PhaseConnectedFaultKind: string;
+    phases: string;
+  }>;
+}
+
 /**
  * STARTED: Fired when the users request to start a simulation
  * PAUSED:  Fired when the users request to pause the running simulation
@@ -75,9 +91,14 @@ export class SimulationControlService {
 
   private _subscribeToStartSimulationTopic() {
     this._stompClientService.readOnceFrom(START_SIMULATION_TOPIC)
-      .pipe(map(body => JSON.parse(body)))
+      .pipe(map(body => JSON.parse(body) as SimulationStartedEventResponse))
       .subscribe({
-        next: payload => this._stateStore.update({ startSimulationResponse: payload })
+        next: payload => {
+          this._stateStore.update({
+            simulationId: payload.simulationId,
+            faultMRIDs: payload.events.map(event => event.faultMRID)
+          });
+        }
       });
   }
 

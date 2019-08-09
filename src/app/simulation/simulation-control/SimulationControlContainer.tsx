@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { Subject } from 'rxjs';
-import { map, filter, takeUntil } from 'rxjs/operators';
+import { filter, takeUntil } from 'rxjs/operators';
 
 import { SimulationControlService, SimulationStatus, SimulationQueue } from '@shared/simulation';
 import { SimulationControl } from './SimulationControl';
@@ -77,12 +77,8 @@ export class SimulationControlContainer extends React.Component<Props, State> {
   }
 
   private _readSimulationIdFromStore() {
-    this._stateStore.select('startSimulationResponse')
-      .pipe(
-        takeUntil(this._unsubscriber),
-        filter(simulationStartResponse => Boolean(simulationStartResponse)),
-        map(simulationStartResponse => simulationStartResponse.simulationId)
-      )
+    this._stateStore.select('simulationId')
+      .pipe(takeUntil(this._unsubscriber))
       .subscribe({
         next: simulationId => this.setState({ activeSimulationId: simulationId })
       });

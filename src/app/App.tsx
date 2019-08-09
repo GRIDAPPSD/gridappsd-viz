@@ -32,6 +32,7 @@ import { TabGroup, Tab } from '@shared/tabs';
 import { EventSummary } from './simulation/event-summary/EventSummary';
 import { AvailableApplicationList } from './simulation/applications/AvailableApplicationList';
 import { ModelDictionaryComponent } from '@shared/topology/model-dictionary/ModelDictionaryComponent';
+import { VoltageViolationContainer } from './simulation/voltage-violation/VoltageViolationContainer';
 
 import './App.scss';
 
@@ -237,6 +238,7 @@ export class App extends React.Component<Props, State> {
                             phases={this.componentPhases} />
                           <SimulationStatusLogContainer />
                           <SimulationLabelsContainer />
+                          <VoltageViolationContainer />
                         </Tab>
                         <Tab label='Events'>
                           <EventSummary />
