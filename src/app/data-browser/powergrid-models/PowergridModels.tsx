@@ -90,7 +90,7 @@ export class PowerGridModels extends React.Component<Props, State> {
             onChange={value => this.updateRequestBody('filter', value)} />
         </>
       )
-    }
+    };
 
     this.updateRequestBody = this.updateRequestBody.bind(this);
   }

@@ -8,6 +8,11 @@
         "launch": "webpack-dev-server --progress --inline",
         "build": "rm -rf dist && webpack --env=production --env.BUILD_VERSION"
     },
+    "husky": {
+        "hooks": {
+            "pre-commit": "tslint --project ."
+        }
+    },
     "author": "",
     "license": "ISC",
     "dependencies": {
@@ -35,11 +40,13 @@
         "extract-text-webpack-plugin": "^3.0.2",
         "file-loader": "1.1.11",
         "html-webpack-plugin": "^3.2.0",
+        "husky": "^3.0.1",
         "jest": "^20.0.4",
         "node-sass": "^4.12.0",
         "sass-loader": "^7.1.0",
         "source-map-loader": "0.1.5",
         "style-loader": "0.21.0",
+        "tslint": "^5.18.0",
         "typescript": "^3.0.1",
         "webpack": "3.10.0",
         "webpack-dev-server": "^2.9.7"

@@ -114,4 +114,5 @@ export class PowergridModelsContainer extends React.Component<Props, State> {
       JSON.stringify(this._queryPowerGridModelsRequest.requestBody)
     );
   }
+
 }

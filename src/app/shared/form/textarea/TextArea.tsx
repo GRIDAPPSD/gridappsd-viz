@@ -10,12 +10,12 @@ import './TextArea.scss';
 interface Props {
   label: string;
   value: string;
-  onChange: (value: string) => void;
   className?: string;
   validators?: Validator[];
-  onValidate?: (isValid: boolean, formControlLabel: string) => void;
   disabled?: boolean;
   readonly?: boolean;
+  onValidate?: (isValid: boolean, formControlLabel: string) => void;
+  onChange: (value: string) => void;
 }
 
 interface State {
@@ -75,8 +75,10 @@ export class TextArea extends React.Component<Props, State> {
   render() {
     return (
       <FormControl
-        className={this.calculateClassName()}
-        label={this.props.label}>
+        className={`textarea${this.props.className ? ` ${this.props.className}` : ''}`}
+        label={this.props.label}
+        disabled={this.props.disabled}
+        isInvalid={this.state.validationErrors.length !== 0}>
         <div
           className='textarea__input-box'
           contentEditable={!this.props.readonly}
@@ -87,13 +89,6 @@ export class TextArea extends React.Component<Props, State> {
         <ValidationErrorMessages messages={this.state.validationErrors.map(error => error.errorMessage)} />
       </FormControl>
     );
-  }
-
-  calculateClassName() {
-    return 'textarea'
-      + (this.props.className ? ` ${this.props.className}` : '')
-      + (this.state.validationErrors.length === 0 ? ' valid' : ' invalid')
-      + (this.props.disabled ? ' disabled' : '');
   }
 
   onKeyUp(event: React.SyntheticEvent) {

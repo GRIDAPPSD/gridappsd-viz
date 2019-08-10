@@ -1,10 +1,9 @@
 import * as React from 'react';
-import { StompSubscription, Message } from '@stomp/stompjs';
+import { Subscription } from 'rxjs';
+import { map } from 'rxjs/operators';
 
 import { StompClientService } from '@shared/StompClientService';
 import { StompClient } from './StompClient';
-import { Subscription } from 'rxjs';
-import { finalize, map } from 'rxjs/operators';
 
 interface Props {
 }

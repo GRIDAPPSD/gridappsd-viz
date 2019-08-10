@@ -3,8 +3,10 @@ import * as React from 'react';
 import { BasicButton } from '@shared/buttons';
 import { ModelDictionary } from '@shared/topology/model-dictionary';
 import { FormGroup, Select, Option, Input } from '@shared/form';
+import { toOptions } from '@shared/form/select/utils';
 import { FaultEvent, Phase, FaultKind, FaultImpedence } from '@shared/test-manager';
 import { Validators } from '@shared/form/validation';
+import { ModelDictionaryComponent } from '@shared/topology/model-dictionary/ModelDictionaryComponent';
 
 import './FaultEventForm.scss';
 
@@ -12,6 +14,7 @@ interface Props {
   onEventAdded: (event: FaultEvent) => void;
   initialFormValue: FaultEvent;
   modelDictionary: ModelDictionary;
+  componentsWithConsolidatedPhases: ModelDictionaryComponent[];
 }
 
 interface State {
@@ -152,8 +155,10 @@ export class FaultEventForm extends React.Component<Props, State> {
       case 'ACLineSegment':
       case 'PowerTransformer':
         this.setState({
-          componentOptions: this.props.modelDictionary.measurements.filter(e => e.ConductingEquipment_type === option.value)
-            .map(e => new Option(`${e.ConductingEquipment_name} (${e.phases})`, e)),
+          componentOptions: toOptions(
+            this.props.componentsWithConsolidatedPhases.filter(e => e.conductingEquipmentType === option.value),
+            e => `${e.conductingEquipmentName} (${e.phases.join(', ')})`
+          ),
           phaseOptions: []
         });
         break;
@@ -199,6 +204,7 @@ export class FaultEventForm extends React.Component<Props, State> {
   }
 
   onComponentChanged(selectedOption: Option<any>) {
+    // component: ModelDictionaryMeasurmentComponent | ModelDictionaryRegulator | ModelDictionaryCapacitor | ModelDictionarySwitch
     const component = selectedOption.value;
     this.setState({
       phaseOptions: this._generateUniqueOptions(
@@ -207,8 +213,8 @@ export class FaultEventForm extends React.Component<Props, State> {
         .map((option, i) => new Option(option.label, { phaseLabel: option.label, phaseIndex: i }))
         .sort((a, b) => a.label.localeCompare(b.label))
     });
-    this.formValue.equipmentName = component.ConductingEquipment_name || component.name || component.bankName;
-    this.formValue.mRID = component.ConductingEquipment_mRID || component.mRID;
+    this.formValue.equipmentName = component.conductingEquipmentName || component.name || component.bankName;
+    this.formValue.mRID = component.conductingEquipmentMRIDs || component.mRID;
     this._enableAddEventButtonIfFormIsValid();
   }
 

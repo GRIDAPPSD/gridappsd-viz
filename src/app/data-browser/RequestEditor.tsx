@@ -1,7 +1,9 @@
 import * as React from 'react';
 
-export const RequestEditor = ({ children, styles = {} }) => (
-  <div className='request-editor' style={{ ...styles }}>
-    {children}
-  </div>
-);
+export function RequestEditor({ children, styles = {} }) {
+  return (
+    <div className='request-editor' style={{ ...styles }}>
+      {children}
+    </div>
+  );
+}

@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { Subject } from 'rxjs';
-import { takeUntil, filter } from 'rxjs/operators';
+import { takeUntil } from 'rxjs/operators';
 
 import { CommOutageEvent, FaultEvent } from '@shared/test-manager';
 import { StateStore } from '@shared/state-store';
@@ -21,7 +21,7 @@ interface State {
 export class EventSummary extends React.Component<Props, State> {
 
   private readonly _stateStore = StateStore.getInstance();
-  private readonly _unmountingNotifier = new Subject<void>();
+  private readonly _unsubscriber = new Subject<void>();
 
   constructor(props: Props) {
     super(props);
@@ -34,27 +34,27 @@ export class EventSummary extends React.Component<Props, State> {
 
   componentDidMount() {
     this._stateStore.select('outageEvents')
-      .pipe(takeUntil(this._unmountingNotifier))
+      .pipe(takeUntil(this._unsubscriber))
       .subscribe({
         next: events => this.setState({ outageEvents: events })
       });
+
     this._stateStore.select('faultEvents')
-      .pipe(takeUntil(this._unmountingNotifier))
+      .pipe(takeUntil(this._unsubscriber))
       .subscribe({
         next: events => this.setState({ faultEvents: events })
       });
-    this._stateStore.select('startSimulationResponse')
-      .pipe(
-        takeUntil(this._unmountingNotifier),
-        filter(state => Boolean(state))
-      )
+
+    this._stateStore.select('faultMRIDs')
+      .pipe(takeUntil(this._unsubscriber))
       .subscribe({
-        next: state => this.setState({ faultMRIDs: state.events.map(e => e.faultMRID) })
+        next: faultMRIDs => this.setState({ faultMRIDs })
       });
   }
 
   componentWillUnmount() {
-    this._unmountingNotifier.complete();
+    this._unsubscriber.next();
+    this._unsubscriber.complete();
   }
 
   render() {
@@ -87,7 +87,6 @@ export class EventSummary extends React.Component<Props, State> {
       </div>
     );
   }
-
 
   initializeEvent(event: CommOutageEvent | FaultEvent) {
     console.log(event);

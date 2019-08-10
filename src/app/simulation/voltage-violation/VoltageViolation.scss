@@ -1,0 +1,33 @@
+.voltage-violation {
+    position: absolute;
+    right: 10px;
+    top: 10px;
+    z-index: 15;
+    display: flex;
+    color: #fff;
+    font-size: 0.8em;
+    align-items: center;
+    justify-content: center;
+}
+
+.voltage-violation__label {
+    padding: 5px 10px;
+    padding-right: 15px;
+    border-top-left-radius: 3px;
+    border-bottom-left-radius: 3px;
+    background-color: rgb(73, 69, 69);
+    box-shadow: 0 0 2px #555;
+    transform: translateX(5px);
+}
+
+.voltage-violation__counts {
+    background-color: #494545;
+    border-radius: 100%;
+    box-shadow: 0 0 2px #555;
+    text-align: right;
+    width: 45px;
+    height: 45px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}

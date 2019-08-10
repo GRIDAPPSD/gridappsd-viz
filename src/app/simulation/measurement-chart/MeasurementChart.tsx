@@ -21,14 +21,16 @@ interface State {
 
 export class MeasurementChart extends React.Component<Props, State> {
 
-  private _canvas: SVGSVGElement = null;
+  readonly height = 270;
+
+  canvas: SVGSVGElement = null;
+  width = 370;
+
   private _container: Selection<SVGGElement, any, any, any> = null;
   private _timeScale: ScaleTime<number, number> = null;
   private _yScale: ScaleLinear<number, number> = null;
   private _lineGenerator: Line<TimeSeriesDataPoint> = null;
-  private readonly _margin = { top: 5, bottom: 35, left: 70, right: 10 };
-  private _width = 370;
-  private readonly _height = 250;
+  private readonly _margin = { top: 20, bottom: 35, left: 70, right: 10 };
 
   constructor(props: any) {
     super(props);
@@ -47,13 +49,29 @@ export class MeasurementChart extends React.Component<Props, State> {
   render() {
     return (
       <div className='measurement-chart'>
-        <header>{this.props.measurementChartModel.name.replace(/_/g, ' ')}</header>
+        <header>
+          {this.props.measurementChartModel.name}
+        </header>
+        <div className='measurement-chart__legends'>
+          {
+            this.props.measurementChartModel.timeSeries.map(timeSeries => (
+              <div
+                key={timeSeries.name}
+                className='measurement-chart__legend'>
+                <div className='measurement-chart__legend__color' />
+                <div className='measurement-chart__legend__label'>
+                  {timeSeries.name}
+                </div>
+              </div>
+            ))
+          }
+        </div>
         <svg
           className='canvas'
-          ref={elem => this._canvas = elem}
-          width={this._width}
-          height={this._height}
-          viewBox={`0 0 ${this._width} ${this._height}`}
+          ref={elem => this.canvas = elem}
+          width={this.width}
+          height={this.height}
+          viewBox={`0 0 ${this.width} ${this.height}`}
           preserveAspectRatio='xMidYMin meet'>
           <g />
         </svg>
@@ -62,11 +80,11 @@ export class MeasurementChart extends React.Component<Props, State> {
   }
 
   private _init() {
-    this._container = select(this._canvas).select('g');
+    this._container = select(this.canvas).select('g');
     this._timeScale = scaleTime()
-      .range([this._margin.left, this._width - this._margin.right]);
+      .range([this._margin.left, this.width - this._margin.right]);
     this._yScale = scaleLinear()
-      .range([this._height - this._margin.bottom, this._margin.top]);
+      .range([this.height - this._margin.bottom, this._margin.top]);
     this._lineGenerator = line<TimeSeriesDataPoint>()
       .x(dataPoint => this._timeScale(dataPoint.primitiveX))
       .y(dataPoint => this._yScale(dataPoint.primitiveY));
@@ -80,23 +98,35 @@ export class MeasurementChart extends React.Component<Props, State> {
     this._timeScale.domain(axisExtents.xExtent);
     this._yScale.domain(axisExtents.yExtent);
 
+    this._renderYAxisLabel();
     this._renderXAxis();
     this._renderYAxis();
     this._renderTimeSeriesLineCharts();
   }
 
   private _calculateXYAxisExtents(timeSeries: TimeSeries[]): { xExtent: [Date, Date], yExtent: [number, number] } {
-    const dataPoints: Array<TimeSeriesDataPoint> = timeSeries.reduce((points, timeSeries) => points.concat(timeSeries.points), []);
+    const dataPoints: Array<TimeSeriesDataPoint> = timeSeries.reduce((points, series) => points.concat(series.points), []);
     return {
       xExtent: extent<TimeSeriesDataPoint, Date>(dataPoints, point => point.primitiveX),
       yExtent: extent<TimeSeriesDataPoint, number>(dataPoints, point => point.primitiveY)
     };
   }
 
+  private _renderYAxisLabel() {
+    const yAxisLabel = this.props.measurementChartModel.yAxisLabel;
+    if (yAxisLabel)
+      this._container.append('text')
+        .text(yAxisLabel)
+        .attr('x', this._margin.left / 2)
+        .attr('y', this._margin.top / 2)
+        .attr('font-size', '0.8em')
+        .attr('font-weight', 'bold');
+  }
+
   private _renderXAxis() {
     this._container.append('g')
       .attr('class', 'axis x')
-      .attr('transform', `translate(0,${this._height - this._margin.bottom})`)
+      .attr('transform', `translate(0,${this.height - this._margin.bottom})`)
       .call(axisBottom(this._timeScale).tickFormat(timeFormat('%H:%M:%S')))
       .selectAll('text')
       .style('text-anchor', 'end')
@@ -115,9 +145,10 @@ export class MeasurementChart extends React.Component<Props, State> {
   private _renderTimeSeriesLineCharts() {
     for (const timeSeries of this.props.measurementChartModel.timeSeries) {
       this._container.append('path')
-        .attr('class', 'time-series-line' + ' _' + timeSeries.name)
+        .attr('class', 'time-series-line')
         .datum(timeSeries.points)
         .attr('d', this._lineGenerator);
     }
   }
+
 }

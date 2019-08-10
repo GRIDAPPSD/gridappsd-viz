@@ -1,0 +1,37 @@
+export interface ModelDictionaryRegulator {
+  bankName: string;
+  size: string;
+  bankPhases: string;
+  tankName: string[];
+  endNumber: number[];
+  endPhase: string[];
+  rtcName: string[];
+  mRID: string[];
+  monitoredPhase: string[];
+  'TapChanger.tculControlMode': string[];
+  highStep: number[];
+  lowStep: number[];
+  neutralStep: number[];
+  normalStep: number[];
+  'TapChanger.controlEnabled': boolean[];
+  lineDropCompensation: boolean[];
+  ltcFlag: boolean[];
+  'RegulatingControl.enabled': boolean[];
+  'RegulatingControl.discrete': boolean[];
+  'RegulatingControl.mode': string[];
+  step: number[];
+  targetValue: number[];
+  targetDeadband: number[];
+  limitVoltage: number[];
+  stepVoltageIncrement: number[];
+  neutralU: number[];
+  initialDelay: number[];
+  subsequentDelay: number[];
+  lineDropR: number[];
+  lineDropX: number[];
+  reverseLineDropR: number[];
+  reverseLineDropX: number[];
+  ctRating: number[];
+  ctRatio: number[];
+  ptRatio: number[];
+}

@@ -13,12 +13,12 @@ export class GetAvailableApplicationsAndServicesRequest implements MessageReques
 
   readonly url = 'goss.gridappsd.process.request.status.platform';
   readonly replyTo = 'available-applications-and-services';
-  readonly requestBody = {
+  readonly requestBody: RequestBody = {
     applications: true,
     services: true,
     appInstances: false,
     serviceInstances: false
-  } as RequestBody;
+  };
 
 }
 

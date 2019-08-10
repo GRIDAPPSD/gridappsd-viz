@@ -13,6 +13,7 @@ import { Tooltip } from '@shared/tooltip';
 import { FaultEventSummaryTable } from './FaultEventSummaryTable';
 import { CommOutageEvent, FaultEvent, FaultKind } from '@shared/test-manager';
 import { Validators } from '@shared/form/validation';
+import { ModelDictionaryComponent } from '@shared/topology/model-dictionary/ModelDictionaryComponent';
 
 import './TestConfigurationFormGroup.scss';
 
@@ -21,6 +22,7 @@ interface Props {
   simulationStartDate: string;
   simulationStopDate: string;
   onEventsAdded: (events: { outage: CommOutageEvent[]; fault: FaultEvent[] }) => void;
+  componentWithConsolidatedPhases: ModelDictionaryComponent[];
 }
 
 interface State {
@@ -46,7 +48,7 @@ export class TestConfigurationFormGroup extends React.Component<Props, State> {
       faultEvents: [],
       currentFaultEvent: this.defaultFaultEventFormValue(),
       currentOutageEvent: this.defaultOutageEventFormValue()
-    }
+    };
     this.uniqueEventIdValidator = this.uniqueEventIdValidator.bind(this);
     this.addOutageEvent = this.addOutageEvent.bind(this);
     this.addFaultEvent = this.addFaultEvent.bind(this);
@@ -213,6 +215,7 @@ export class TestConfigurationFormGroup extends React.Component<Props, State> {
           <FaultEventForm
             modelDictionary={this.props.modelDictionary}
             initialFormValue={this.state.currentFaultEvent}
+            componentsWithConsolidatedPhases={this.props.componentWithConsolidatedPhases}
             onEventAdded={this.addFaultEvent} />
         );
       default:

@@ -81,7 +81,7 @@ export class PowerSystemConfigurationFormGroup extends React.Component<Props, St
     this.setState({
       lineOptions: [],
       subregionOptions: []
-    })
+    });
   }
 
   onRegionSelectionChanged(selectedOption: Option<FeederModelRegion>) {

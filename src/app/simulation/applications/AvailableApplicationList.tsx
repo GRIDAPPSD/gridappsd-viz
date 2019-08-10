@@ -1,6 +1,5 @@
 import * as React from 'react';
 import { Subscription } from 'rxjs';
-import { filter } from 'rxjs/operators';
 
 import { Application } from '@shared/Application';
 import { AvailableApplicationListItem } from './AvailableApplicationListItem';
@@ -27,7 +26,7 @@ export class AvailableApplicationList extends React.Component<Props, State> {
   private readonly _stateStore = StateStore.getInstance();
 
   private _applicationsStateStoreSubscription: Subscription;
-  private _simulationIdStateStoreSubscription: Subscription;
+  private _simulationIdStateChangeSubscription: Subscription;
   private _simulationId: string;
 
   constructor(props: Props) {
@@ -48,16 +47,15 @@ export class AvailableApplicationList extends React.Component<Props, State> {
       .subscribe({
         next: applications => this.setState({ applications: applications })
       });
-    this._simulationIdStateStoreSubscription = this._stateStore.select('startSimulationResponse')
-      .pipe(filter(state => Boolean(state)))
+    this._simulationIdStateChangeSubscription = this._stateStore.select('simulationId')
       .subscribe({
-        next: startSimulationResponse => this._simulationId = startSimulationResponse.simulationId
+        next: simulationId => this._simulationId = simulationId
       });
   }
 
   componentWillUnmount() {
     this._applicationsStateStoreSubscription.unsubscribe();
-    this._simulationIdStateStoreSubscription.unsubscribe();
+    this._simulationIdStateChangeSubscription.unsubscribe();
   }
 
   render() {

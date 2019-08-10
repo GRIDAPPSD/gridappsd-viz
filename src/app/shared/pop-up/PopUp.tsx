@@ -12,19 +12,13 @@ interface State {
 }
 
 export class PopUp extends React.Component<Props, State> {
-  private _element: HTMLElement;
 
-  constructor(props: any) {
-    super(props);
-
-    this.state = {
-    };
-  }
+  private _popupElement: HTMLElement;
 
   componentDidMount() {
-    this._element = ReactDOM.findDOMNode(this) as HTMLElement;
-    this._element.addEventListener('transitionend', this.props.afterClosed, false);
-    this._element.classList.add('pop-up', 'pop-up--leave');
+    this._popupElement = ReactDOM.findDOMNode(this) as HTMLElement;
+    this._popupElement.addEventListener('transitionend', this.props.afterClosed, false);
+    this._popupElement.classList.add('pop-up', 'pop-up--leave');
     this.componentWillReceiveProps(this.props);
     this._shiftIntoViewIfOverflowScreen();
   }
@@ -34,31 +28,32 @@ export class PopUp extends React.Component<Props, State> {
   }
 
   private _shiftIntoViewIfOverflowScreen() {
-    const popupRect = this._element.getBoundingClientRect();
+    const popupRect = this._popupElement.getBoundingClientRect();
 
     if (popupRect.bottom > document.body.clientHeight) {
       // 77 is the magic number figured out by using the Inspector
       const topPositionToShiftTo = popupRect.top - (popupRect.bottom - document.body.clientHeight) - 77;
-      this._element.style.top = `${topPositionToShiftTo > 5 ? topPositionToShiftTo : 0}px`;
+      this._popupElement.style.top = `${topPositionToShiftTo > 5 ? topPositionToShiftTo : 0}px`;
     }
   }
 
   componentWillUnmount() {
-    this._element.removeEventListener('transitionend', this.props.afterClosed, false);
+    this._popupElement.removeEventListener('transitionend', this.props.afterClosed, false);
   }
 
   componentWillReceiveProps(newProps: Props) {
     if (newProps.in) {
-      this._element.classList.remove('pop-up--leave');
-      this._element.classList.add('pop-up--enter');
+      this._popupElement.classList.remove('pop-up--leave');
+      this._popupElement.classList.add('pop-up--enter');
     }
     else {
-      this._element.classList.remove('pop-up--enter');
-      this._element.classList.add('pop-up--leave');
+      this._popupElement.classList.remove('pop-up--enter');
+      this._popupElement.classList.add('pop-up--leave');
     }
   }
 
   render() {
     return (this.props.children);
   }
+
 }

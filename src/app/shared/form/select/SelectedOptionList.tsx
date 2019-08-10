@@ -2,7 +2,6 @@ import * as React from 'react';
 
 import { Option } from './Option';
 import { IconButton } from '@shared/buttons';
-import { Tooltip } from '@shared/tooltip';
 
 import './SelectedOptionList.scss';
 

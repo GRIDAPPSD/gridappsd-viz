@@ -15,7 +15,7 @@ export class RegulatorTapChangerRequest implements MessageRequest {
   readonly requestBody: any;
 
   constructor(inputs: Inputs) {
-    this.replyTo = `/topic/goss.gridappsd.fncs.input.regulator.${inputs.phase}`
+    this.replyTo = `/topic/goss.gridappsd.fncs.input.regulator.${inputs.phase}`;
     this.requestBody = {
       command: 'update',
       input: {
@@ -35,6 +35,5 @@ export class RegulatorTapChangerRequest implements MessageRequest {
       }
     };
   }
-
 
 }

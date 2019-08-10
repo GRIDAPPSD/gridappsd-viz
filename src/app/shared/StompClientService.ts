@@ -2,32 +2,44 @@ import { client, Client, StompHeaders, Message } from '@stomp/stompjs';
 import { BehaviorSubject, Observable, interval, using, timer, iif, of } from 'rxjs';
 import { filter, switchMap, take, timeout } from 'rxjs/operators';
 
-import { RUN_CONFIG } from '../../../runConfig';
+import { ConfigurationManager } from './ConfigurationManager';
 
 export type StompClientConnectionStatus = 'NOT_CONNECTED' | 'CONNECTING' | 'CONNECTED' | 'NEW';
 
 export class StompClientService {
+
   private static readonly _INSTANCE = new StompClientService();
+
+  private readonly _configurationManager = ConfigurationManager.getInstance();
   private _client: Client;
   private _statusChanges = new BehaviorSubject<StompClientConnectionStatus>('NEW');
   private _status: StompClientConnectionStatus = 'NEW';
 
-  private constructor() {
-    this._client = client(RUN_CONFIG.gossServerUrl);
-    this._client.heartbeat.outgoing = 0;
-    this._client.heartbeat.incoming = 0;
+  static getInstance() {
+    return StompClientService._INSTANCE;
+  }
 
+  private constructor() {
     this._connectionFailed = this._connectionFailed.bind(this);
     this._connectionEstablished = this._connectionEstablished.bind(this);
     this._connectionClosed = this._connectionClosed.bind(this);
     this.isActive = this.isActive.bind(this);
     this.connect = this.connect.bind(this);
 
-    this.connect();
+    this._createStompClientAndConnectToGossServer();
   }
 
-  static getInstance() {
-    return StompClientService._INSTANCE;
+  private _createStompClientAndConnectToGossServer() {
+    this._configurationManager.configurationChanges()
+      .subscribe({
+        next: configurations => {
+          this._client = client(`ws://${configurations.host}`);
+          this._client.heartbeat.outgoing = 0;
+          this._client.heartbeat.incoming = 0;
+
+          this.connect();
+        }
+      });
   }
 
   connect() {

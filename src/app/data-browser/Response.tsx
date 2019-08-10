@@ -1,7 +1,9 @@
 import * as React from 'react';
 
-export const Response = ({ children, styles = {} }) => (
-  <div className='response' style={{ ...styles }}>
-    {children}
-  </div>
-);
+export function Response({ children, styles = {} }) {
+  return (
+    <div className='response' style={{ ...styles }}>
+      {children}
+    </div>
+  );
+}
