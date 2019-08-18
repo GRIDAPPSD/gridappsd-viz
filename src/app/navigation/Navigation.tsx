@@ -2,14 +2,17 @@ import * as React from 'react';
 import { Link } from 'react-router-dom';
 import { Subscription } from 'rxjs';
 
-import { ToolBar } from './tool-bar/ToolBar';
-import { Drawer } from './drawer/Drawer';
-import { DrawerOpener } from './drawer/DrawerOpener';
-import { DrawerItem, DrawerItemIcon, DrawerItemLabel } from './drawer/DrawerItem';
-import { DrawerItemGroup } from './drawer/DrawerItemGroup';
 import { SimulationConfiguration, Simulation, SimulationQueue } from '@shared/simulation';
 import { StompClientService, StompClientConnectionStatus } from '@shared/StompClientService';
 import { ConfigurationManager } from '@shared/ConfigurationManager';
+
+import { Drawer } from './views/drawer/Drawer';
+import { ToolBar } from './views/tool-bar/ToolBar';
+import { DrawerOpener } from './views/drawer/DrawerOpener';
+import { DrawerItem, DrawerItemIcon, DrawerItemLabel } from './views/drawer/DrawerItem';
+import { DrawerItemGroup } from './views/drawer/DrawerItemGroup';
+import { AppBranding } from './views/app-branding/AppBranding';
+import { WebSocketConnectedIndicator } from './views/websocket-connected-indicator/WebSocketConnectedIndicator';
 
 import './Navigation.scss';
 
@@ -43,6 +46,8 @@ export class Navigation extends React.Component<Props, State> {
     this._queueChangesStream = this._subscribeToAllSimulationsQueueSteam();
     this._websocketStatusStream = this._stompClientService.statusChanges()
       .subscribe(state => this.setState({ websocketStatus: state }));
+
+    this.openDrawer = this.openDrawer.bind(this);
   }
 
   componentDidMount() {
@@ -64,17 +69,9 @@ export class Navigation extends React.Component<Props, State> {
     return (
       <>
         <ToolBar>
-          <DrawerOpener onClick={() => this.drawer.open()} />
-          <Link className='navigation__app-title' to='/'>GridAPPS-D</Link>
-          <span className='navigation__app-version'>{this.state.version}</span>
-          {
-            this.state.websocketStatus === 'CONNECTED'
-            &&
-            <div className='websocket-status-indicator'>
-              <i className='material-icons websocket-status-indicator__icon'>import_export</i>
-              <div className='websocket-status-indicator__status-text'>Connected</div>
-            </div>
-          }
+          <DrawerOpener onClick={this.openDrawer} />
+          <AppBranding version={this.state.version} />
+          <WebSocketConnectedIndicator websocketStatus={this.state.websocketStatus} />
         </ToolBar>
         <Drawer ref={ref => this.drawer = ref}>
           <DrawerItem onClick={() => this.props.onShowSimulationConfigForm(null)}>
@@ -122,6 +119,10 @@ export class Navigation extends React.Component<Props, State> {
         </Drawer>
       </>
     );
+  }
+
+  openDrawer() {
+    this.drawer.open();
   }
 
   private _subscribeToAllSimulationsQueueSteam(): Subscription {

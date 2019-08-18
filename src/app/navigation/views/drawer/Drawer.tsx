@@ -12,12 +12,14 @@ interface State {
 }
 export class Drawer extends React.Component<Props, State> {
 
-  constructor(props: any) {
+  constructor(props: Props) {
     super(props);
+
     this.state = {
       isOpened: false
     };
 
+    this.open = this.open.bind(this);
     this.close = this.close.bind(this);
   }
 
