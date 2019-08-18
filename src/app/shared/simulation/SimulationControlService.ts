@@ -1,9 +1,9 @@
 import { Subject, Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { map, switchMap, filter, take } from 'rxjs/operators';
 
 import { SimulationConfiguration } from './SimulationConfiguration';
 import { StompClientService } from '@shared/StompClientService';
-import { START_SIMULATION_TOPIC, CONTROL_SIMULATION_TOPIC } from './topics';
+import { START_SIMULATION_TOPIC, CONTROL_SIMULATION_TOPIC, SIMULATION_STATUS_LOG_TOPIC } from './topics';
 import { SimulationQueue } from './SimulationQueue';
 import { StateStore } from '@shared/state-store';
 
@@ -21,6 +21,16 @@ interface SimulationStartedEventResponse {
     PhaseConnectedFaultKind: string;
     phases: string;
   }>;
+}
+
+interface SimulationStatusLogMessage {
+  source: string;
+  processId: string;
+  timestamp: number;
+  processStatus: 'RUNNING' | 'COMPLETE';
+  logMessage: string;
+  logLevel: string;
+  storeToDb: boolean;
 }
 
 /**
@@ -46,11 +56,16 @@ export class SimulationControlService {
   private readonly _stateStore = StateStore.getInstance();
   private _currentSimulationStatus = SimulationStatus.STOPPED;
 
-  private constructor() {
-  }
-
   static getInstance(): SimulationControlService {
     return SimulationControlService._INSTANCE_;
+  }
+
+  private constructor() {
+
+    this.stopSimulation = this.stopSimulation.bind(this);
+    this.pauseSimulation = this.pauseSimulation.bind(this);
+    this.resumeSimulation = this.resumeSimulation.bind(this);
+
   }
 
   statusChanges(): Observable<SimulationStatus> {
@@ -76,6 +91,7 @@ export class SimulationControlService {
       this._currentSimulationStatusNotifer.next(SimulationStatus.STARTED);
 
       this._subscribeToStartSimulationTopic();
+      this._stopSimulationAfterReceivingCompleteProcessStatusMessage();
 
       // Let's wait for all the subscriptions in other components to this topic to complete
       // before sending the message
@@ -99,6 +115,19 @@ export class SimulationControlService {
             faultMRIDs: payload.events.map(event => event.faultMRID)
           });
         }
+      });
+  }
+
+  private _stopSimulationAfterReceivingCompleteProcessStatusMessage() {
+    this._stateStore.select('simulationId')
+      .pipe(
+        switchMap(id => this._stompClientService.readFrom(`${SIMULATION_STATUS_LOG_TOPIC}.${id}`)),
+        map((JSON.parse as any)),
+        filter((message: SimulationStatusLogMessage) => message.processStatus === 'COMPLETE'),
+        take(1)
+      )
+      .subscribe({
+        next: this.stopSimulation
       });
   }
 
