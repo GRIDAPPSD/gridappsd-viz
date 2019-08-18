@@ -1,10 +1,8 @@
 import * as React from 'react';
 import { Link } from 'react-router-dom';
-import { Subscription } from 'rxjs';
 
-import { SimulationConfiguration, Simulation, SimulationQueue } from '@shared/simulation';
-import { StompClientService, StompClientConnectionStatus } from '@shared/StompClientService';
-import { ConfigurationManager } from '@shared/ConfigurationManager';
+import { SimulationConfiguration, Simulation } from '@shared/simulation';
+import { StompClientConnectionStatus } from '@shared/StompClientService';
 
 import { Drawer } from './views/drawer/Drawer';
 import { ToolBar } from './views/tool-bar/ToolBar';
@@ -17,52 +15,20 @@ import { WebSocketConnectedIndicator } from './views/websocket-connected-indicat
 import './Navigation.scss';
 
 interface Props {
-  onShowSimulationConfigForm: (config: SimulationConfiguration) => void;
-}
-
-interface State {
   previousSimulations: Simulation[];
   websocketStatus: StompClientConnectionStatus;
   version: string;
+  onShowSimulationConfigForm: (config: SimulationConfiguration) => void;
 }
 
-export class Navigation extends React.Component<Props, State> {
+export class Navigation extends React.Component<Props, {}> {
 
   drawer: Drawer;
 
-  private readonly _simulationQueue = SimulationQueue.getInstance();
-  private readonly _stompClientService = StompClientService.getInstance();
-  private readonly _configurationManager = ConfigurationManager.getInstance();
-  private _queueChangesStream: Subscription;
-  private _websocketStatusStream: Subscription;
-
   constructor(props: Props) {
     super(props);
-    this.state = {
-      previousSimulations: this._simulationQueue.getAllSimulations(),
-      websocketStatus: this._stompClientService.isActive() ? 'CONNECTED' : 'CONNECTING',
-      version: ''
-    };
-    this._queueChangesStream = this._subscribeToAllSimulationsQueueSteam();
-    this._websocketStatusStream = this._stompClientService.statusChanges()
-      .subscribe(state => this.setState({ websocketStatus: state }));
 
     this.openDrawer = this.openDrawer.bind(this);
-  }
-
-  componentDidMount() {
-    this._configurationManager.configurationChanges()
-      .subscribe({
-        next: configurations => this.setState({ version: configurations.version })
-      });
-  }
-
-
-  componentWillUnmount() {
-    if (this._queueChangesStream)
-      this._queueChangesStream.unsubscribe();
-    if (this._websocketStatusStream)
-      this._websocketStatusStream.unsubscribe();
   }
 
   render() {
@@ -70,8 +36,8 @@ export class Navigation extends React.Component<Props, State> {
       <>
         <ToolBar>
           <DrawerOpener onClick={this.openDrawer} />
-          <AppBranding version={this.state.version} />
-          <WebSocketConnectedIndicator websocketStatus={this.state.websocketStatus} />
+          <AppBranding version={this.props.version} />
+          <WebSocketConnectedIndicator websocketStatus={this.props.websocketStatus} />
         </ToolBar>
         <Drawer ref={ref => this.drawer = ref}>
           <DrawerItem onClick={() => this.props.onShowSimulationConfigForm(null)}>
@@ -79,12 +45,13 @@ export class Navigation extends React.Component<Props, State> {
             <DrawerItemLabel value='Simulations' />
           </DrawerItem>
           {
-            this.state.previousSimulations.length > 0 &&
+            this.props.previousSimulations.length > 0
+            &&
             <DrawerItemGroup
               header='Previous simulations'
               icon='memory'>
               {
-                this.state.previousSimulations.map(simulation => (
+                this.props.previousSimulations.map(simulation => (
                   <DrawerItem
                     key={simulation.name}
                     onClick={() => this.props.onShowSimulationConfigForm(simulation.config)}>
@@ -123,11 +90,6 @@ export class Navigation extends React.Component<Props, State> {
 
   openDrawer() {
     this.drawer.open();
-  }
-
-  private _subscribeToAllSimulationsQueueSteam(): Subscription {
-    return this._simulationQueue.queueChanges()
-      .subscribe(simulations => this.setState({ previousSimulations: simulations }));
   }
 
 }

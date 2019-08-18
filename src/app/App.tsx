@@ -10,7 +10,6 @@ import { GetAllFeederModelsRequest } from './models/message-requests/GetAllFeede
 import { SimulationLabelsContainer } from './simulation/simulation-labels';
 import { MeasurementChartContainer } from './simulation/measurement-chart';
 import { ModelDictionaryMeasurement, ModelDictionary, ModelDictionaryComponentType } from '@shared/topology/model-dictionary';
-import { Navigation } from './navigation';
 import { OverlayService } from '@shared/overlay';
 import { SimulationConfiguration } from '@shared/simulation';
 import { SimulationConfigurationEditor } from './simulation/simulation-configuration';
@@ -33,6 +32,7 @@ import { EventSummary } from './simulation/event-summary/EventSummary';
 import { AvailableApplicationList } from './simulation/applications/AvailableApplicationList';
 import { ModelDictionaryComponent } from '@shared/topology/model-dictionary/ModelDictionaryComponent';
 import { VoltageViolationContainer } from './simulation/voltage-violation/VoltageViolationContainer';
+import { NavigationContainer } from './navigation';
 
 import './App.scss';
 
@@ -219,7 +219,7 @@ export class App extends React.Component<Props, State> {
       <Route path='/' component={(props) =>
         this.shouldRedirect ? this.redirect() :
           <>
-            <Navigation
+            <NavigationContainer
               onShowSimulationConfigForm={
                 (config: SimulationConfiguration) => this.showSimulationConfigForm(config, props.history)
               } />
