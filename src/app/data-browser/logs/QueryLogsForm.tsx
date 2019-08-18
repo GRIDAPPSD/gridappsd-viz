@@ -19,6 +19,8 @@ interface Props {
 interface State {
   selectedSimulationId: SimulationId;
   simulationIdOptions: Option<SimulationId>[];
+  logLevelOptions: Option<string>[];
+  processStatusOptions: Option<string>[];
 }
 
 export class QueryLogsForm extends React.Component<Props, State> {
@@ -36,7 +38,12 @@ export class QueryLogsForm extends React.Component<Props, State> {
     super(props);
     this.state = {
       selectedSimulationId: null,
-      simulationIdOptions: toOptions(props.simulationIds, simulationId => simulationId.process_id)
+      simulationIdOptions: toOptions(props.simulationIds, simulationId => simulationId.process_id),
+      logLevelOptions: toOptions(['ALL', 'TRACE', 'DEBUG', 'INFO', 'WARN', 'ERROR', 'FATAL'], level => level),
+      processStatusOptions: toOptions(
+        ['ALL', 'STARTING', 'STARTED', 'RUNNING', 'ERROR', 'CLOSED', 'COMPLETE'],
+        processStatus => processStatus
+      )
     };
 
     this.onSimulationIdSelected = this.onSimulationIdSelected.bind(this);
@@ -81,17 +88,13 @@ export class QueryLogsForm extends React.Component<Props, State> {
               <Select
                 multiple={false}
                 label='Log level'
-                options={
-                  ['ALL', 'TRACE', 'DEBUG', 'INFO', 'WARN', 'ERROR', 'FATAL'].map(e => new Option(e, e))
-                }
+                options={this.state.logLevelOptions}
                 isOptionSelected={option => option.label === 'ALL'}
                 onChange={selectedOption => this.formValue.logLevel = selectedOption.value} />
               <Select
                 multiple={false}
                 label='Process status'
-                options={
-                  ['ALL', 'STARTING', 'STARTED', 'RUNNING', 'ERROR', 'CLOSED', 'COMPLETE'].map(e => new Option(e, e))
-                }
+                options={this.state.processStatusOptions}
                 isOptionSelected={option => option.label === 'ALL'}
                 onChange={selectedOption => this.formValue.processStatus = selectedOption.value} />
             </div>
