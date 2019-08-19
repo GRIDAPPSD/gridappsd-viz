@@ -8,6 +8,8 @@ import './NotificationBanner.scss';
 
 interface Props {
   persistent?: boolean;
+  show?: boolean;
+  dismissable?: boolean;
 }
 
 interface State {
@@ -16,33 +18,34 @@ interface State {
 
 export class NotificationBanner extends React.Component<Props, State> {
 
-  private _scheduler: any;
-
   constructor(props: Props) {
     super(props);
     this.state = {
-      slide: 'in'
+      slide: props.persistent ? 'in' : props.show ? 'in' : 'out'
     };
 
     this.hideNotificationBanner = this.hideNotificationBanner.bind(this);
   }
 
-  componentDidMount() {
-    this._scheduler = setTimeout(this.hideNotificationBanner, 10_000);
-  }
-
-  componentWillUnmount() {
-    clearTimeout(this._scheduler);
+  componentDidUpdate(prevProps: Props) {
+    if (this.props.show !== prevProps.show)
+      this.setState({
+        slide: this.props.show ? 'in' : 'out'
+      });
   }
 
   render() {
     if (!this.props.persistent)
       return (
-        <div className={'notification-banner not-persistent slide-' + this.state.slide}>
-          <IconButton
-            icon='close'
-            style='accent'
-            onClick={this.hideNotificationBanner} />
+        <div className={`notification-banner not-persistent slide-${this.state.slide}`}>
+          {
+            this.props.dismissable
+            &&
+            <IconButton
+              icon='close'
+              style='accent'
+              onClick={this.hideNotificationBanner} />
+          }
           <div className='notification-banner__content'>
             {this.props.children}
           </div>

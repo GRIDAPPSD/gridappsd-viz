@@ -6,6 +6,7 @@ import { Navigation } from './Navigation';
 import { Simulation, SimulationQueue, SimulationConfiguration } from '@shared/simulation';
 import { StompClientConnectionStatus, StompClientService } from '@shared/StompClientService';
 import { ConfigurationManager } from '@shared/ConfigurationManager';
+import { AuthenticationService } from '@shared/authentication';
 
 interface Props {
   onShowSimulationConfigForm: (config: SimulationConfiguration) => void;
@@ -18,6 +19,8 @@ interface State {
 }
 
 export class NavigationContainer extends React.Component<Props, State> {
+
+  readonly authenticationService = AuthenticationService.getInstance();
 
   private readonly _simulationQueue = SimulationQueue.getInstance();
   private readonly _stompClientService = StompClientService.getInstance();
@@ -76,7 +79,8 @@ export class NavigationContainer extends React.Component<Props, State> {
         version={this.state.version}
         websocketStatus={this.state.websocketStatus}
         previousSimulations={this.state.previousSimulations}
-        onShowSimulationConfigForm={this.props.onShowSimulationConfigForm} />
+        onShowSimulationConfigForm={this.props.onShowSimulationConfigForm}
+        onLogout={this.authenticationService.logout} />
     );
   }
 

@@ -19,6 +19,7 @@ interface Props {
   websocketStatus: StompClientConnectionStatus;
   version: string;
   onShowSimulationConfigForm: (config: SimulationConfiguration) => void;
+  onLogout: () => void;
 }
 
 export class Navigation extends React.Component<Props, {}> {
@@ -82,6 +83,10 @@ export class Navigation extends React.Component<Props, {}> {
               <DrawerItemIcon icon='laptop' />
               <DrawerItemLabel value='Stomp Client' />
             </Link>
+          </DrawerItem>
+          <DrawerItem onClick={this.props.onLogout}>
+            <DrawerItemIcon icon='power_settings_new' />
+            <DrawerItemLabel value='Log Out' />
           </DrawerItem>
         </Drawer>
       </>
