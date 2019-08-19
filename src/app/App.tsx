@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { Route, Redirect } from 'react-router-dom';
-import { map, take, filter } from 'rxjs/operators';
+import { map, take, filter, switchMap } from 'rxjs/operators';
 
 import { Application } from '@shared/Application';
 import { AvailableApplicationsAndServices } from './available-applications-and-services';
@@ -33,6 +33,7 @@ import { AvailableApplicationList } from './simulation/applications/AvailableApp
 import { ModelDictionaryComponent } from '@shared/topology/model-dictionary/ModelDictionaryComponent';
 import { VoltageViolationContainer } from './simulation/voltage-violation/VoltageViolationContainer';
 import { NavigationContainer } from './navigation';
+import { AuthenticationContainer } from './authentication/AuthenticationContainer';
 
 import './App.scss';
 
@@ -76,6 +77,8 @@ export class App extends React.Component<Props, State> {
     this._stompClientService.statusChanges()
       .pipe(
         filter(status => status === 'CONNECTED'),
+        switchMap(() => this._stateStore.select('currentUser')),
+        filter(user => user !== null && user.isAuthenticated),
         take(1)
       )
       .subscribe({
@@ -217,56 +220,59 @@ export class App extends React.Component<Props, State> {
   render() {
     return (
       <Route path='/' component={(props) =>
-        this.shouldRedirect ? this.redirect() :
-          <>
-            <NavigationContainer
-              onShowSimulationConfigForm={
-                (config: SimulationConfiguration) => this.showSimulationConfigForm(config, props.history)
-              } />
-            <Route
-              exact
-              path='/topology'
-              component={() => {
-                return (
-                  <div className='topology-renderer-simulation-status-logger-measurement-graphs'>
-                    <div>
-                      <SimulationControlContainer />
-                      <TabGroup>
-                        <Tab label='Simulation'>
-                          <TopologyRendererContainer
-                            mRIDs={this.componentMrids}
-                            phases={this.componentPhases} />
-                          <SimulationStatusLogContainer />
-                          <SimulationLabelsContainer />
-                          <VoltageViolationContainer />
-                        </Tab>
-                        <Tab label='Events'>
-                          <EventSummary />
-                        </Tab>
-                        <Tab label='Applications'>
-                          <AvailableApplicationList />
-                        </Tab>
-                      </TabGroup>
+        this.shouldRedirect
+          ? this.redirect()
+          : (
+            <AuthenticationContainer>
+              <NavigationContainer
+                onShowSimulationConfigForm={
+                  (config: SimulationConfiguration) => this.showSimulationConfigForm(config, props.history)
+                } />
+              <Route
+                exact
+                path='/topology'
+                component={() => {
+                  return (
+                    <div className='topology-renderer-simulation-status-logger-measurement-graphs'>
+                      <div>
+                        <SimulationControlContainer />
+                        <TabGroup>
+                          <Tab label='Simulation'>
+                            <TopologyRendererContainer
+                              mRIDs={this.componentMrids}
+                              phases={this.componentPhases} />
+                            <SimulationStatusLogContainer />
+                            <SimulationLabelsContainer />
+                            <VoltageViolationContainer />
+                          </Tab>
+                          <Tab label='Events'>
+                            <EventSummary />
+                          </Tab>
+                          <Tab label='Applications'>
+                            <AvailableApplicationList />
+                          </Tab>
+                        </TabGroup>
+                      </div>
+                      <div className='measurement-charts'>
+                        <MeasurementChartContainer />
+                      </div>
                     </div>
-                    <div className='measurement-charts'>
-                      <MeasurementChartContainer />
-                    </div>
-                  </div>
-                );
-              }} />
-            <Route
-              exact
-              path='/applications'
-              component={AvailableApplicationsAndServices} />
-            <Route
-              exact
-              path='/stomp-client'
-              component={StompClientContainer} />
-            <Route
-              path='/browse'
-              component={routeProps => <DataBrowser feederModel={this.state.feederModel} match={routeProps.match} />} />
-            <WebsocketStatusWatcher />
-          </>
+                  );
+                }} />
+              <Route
+                exact
+                path='/applications'
+                component={AvailableApplicationsAndServices} />
+              <Route
+                exact
+                path='/stomp-client'
+                component={StompClientContainer} />
+              <Route
+                path='/browse'
+                component={routeProps => <DataBrowser feederModel={this.state.feederModel} match={routeProps.match} />} />
+              <WebsocketStatusWatcher />
+            </AuthenticationContainer>
+          )
       } />
     );
   }

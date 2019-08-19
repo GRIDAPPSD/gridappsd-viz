@@ -9,5 +9,6 @@ export const DEFAULT_APPLICATION_STATE: ApplicationState = {
   services: [],
   modelDictionary: null,
   modelDictionaryComponentsWithConsolidatedPhases: [],
-  plotModels: []
+  plotModels: [],
+  currentUser: null
 };

@@ -42,6 +42,11 @@ export class Tooltip extends React.Component<Props, State> {
     }
   }
 
+  componentDidUpdate(prevProps: Props) {
+    if (this.props.content !== prevProps.content && this._tooltip)
+      (this._tooltip.querySelector('.gridappsd-tooltip__content') as any).textContent = this.props.content;
+  }
+
   componentWillUnmount() {
     if (this._anchor) {
       this._anchor.removeEventListener('mouseover', this.show, false);

@@ -24,7 +24,7 @@ export function DrawerItem(props: DrawerItemProps) {
   );
 }
 
-type IconName = 'assignment' | 'storage' | 'search' | 'laptop' | 'memory';
+type IconName = 'assignment' | 'storage' | 'search' | 'laptop' | 'memory' | 'power_settings_new';
 
 interface DrawerItemIconProps {
   icon: IconName;
