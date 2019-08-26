@@ -89,13 +89,25 @@ export class TopologyRenderer extends React.Component<Props, State> {
   }
 
   private _toggleNodeSymbols(currentTransformScaleDegree: number) {
-    if (currentTransformScaleDegree > 2.5 && !this._showNodeSymbols) {
-      this._showNodeSymbols = true;
-      this._showSymbols();
+    if ( this.props.topology.nodes.length <= 200 ) {
+      if (currentTransformScaleDegree > 1.5 && !this._showNodeSymbols) {
+        this._showNodeSymbols = true;
+        this._showSymbols();
+      }
+      else if (currentTransformScaleDegree < 1.5 && this._showNodeSymbols) {
+        this._showNodeSymbols = false;
+        this._hideSymbols();
+      }
     }
-    else if (currentTransformScaleDegree < 2.5 && this._showNodeSymbols) {
-      this._showNodeSymbols = false;
-      this._hideSymbols();
+    else if (this.props.topology.nodes.length > 200) {
+      if (currentTransformScaleDegree > 2.5 && !this._showNodeSymbols) {
+        this._showNodeSymbols = true;
+        this._showSymbols();
+      }
+      else if (currentTransformScaleDegree < 2.5 && this._showNodeSymbols) {
+        this._showNodeSymbols = false;
+        this._hideSymbols();
+      }
     }
   }
 
