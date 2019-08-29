@@ -3,7 +3,7 @@ import * as React from 'react';
 import { BasicButton } from '@shared/buttons';
 import { ModelDictionary } from '@shared/topology/model-dictionary';
 import { FormGroup, Select, Option, Input } from '@shared/form';
-import { toOptions } from '@shared/form/select/utils';
+import { toOptions, removeOptionsWithIdenticalLabel } from '@shared/form/select/utils';
 import { FaultEvent, Phase, FaultKind, FaultImpedence } from '@shared/test-manager';
 import { Validators } from '@shared/form/validation';
 import { ModelDictionaryComponent } from '@shared/topology/model-dictionary/ModelDictionaryComponent';
@@ -204,11 +204,13 @@ export class FaultEventForm extends React.Component<Props, State> {
   }
 
   onComponentChanged(selectedOption: Option<any>) {
-    // component: ModelDictionaryMeasurmentComponent | ModelDictionaryRegulator | ModelDictionaryCapacitor | ModelDictionarySwitch
+    // component: ModelDictionaryComponent | ModelDictionaryRegulator | ModelDictionaryCapacitor | ModelDictionarySwitch
     const component = selectedOption.value;
     this.setState({
-      phaseOptions: this._generateUniqueOptions(
-        this._normalizePhases(component.phases || component.bankPhases)
+      phaseOptions: removeOptionsWithIdenticalLabel(
+        toOptions(
+          this._normalizePhases(component.phases || component.bankPhases),
+          e => e)
       )
         .map((option, i) => new Option(option.label, { phaseLabel: option.label, phaseIndex: i }))
         .sort((a, b) => a.label.localeCompare(b.label))
@@ -218,18 +220,12 @@ export class FaultEventForm extends React.Component<Props, State> {
     this._enableAddEventButtonIfFormIsValid();
   }
 
-  private _generateUniqueOptions(iterable: string[] | string): Option[] {
-    const result = [];
-    for (const element of iterable)
-      if (!result.includes(element))
-        result.push(new Option(element));
-    return result;
-  }
-
-  private _normalizePhases(phases: string) {
+  private _normalizePhases(phases: string | string[]) {
+    if (Array.isArray(phases))
+      return phases;
     // If phases is a string containing either A or B or C,
     // then this string needs to be split up
-    return /^[abc]+$/i.test(phases) ? phases : [phases];
+    return /^[abc]+$/i.test(phases) ? [...new Set(phases)] : [phases];
   }
 
   onPhaseChanged(selectedOptions: Option<Phase>[]) {
