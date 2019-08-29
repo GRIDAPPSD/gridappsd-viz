@@ -304,7 +304,7 @@ export class SimulationConfigurationEditor extends React.Component<Props, State>
       PhaseConnectedFaultKind: faultEvent.faultKind,
       FaultImpedance: this._getImpedance(faultEvent),
       ObjectMRID: Array.isArray(faultEvent.mRID)
-        ? faultEvent.phases.map(phase => faultEvent.mRID[phase.phaseIndex])
+        ? [...new Set(faultEvent.phases.map(phase => faultEvent.mRID[phase.phaseIndex]))]
         : [faultEvent.mRID],
       phases: faultEvent.phases.map(phase => phase.phaseLabel).join(''),
       event_type: faultEvent.type,
