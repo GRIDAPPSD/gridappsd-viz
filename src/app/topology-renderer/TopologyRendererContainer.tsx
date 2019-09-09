@@ -117,7 +117,7 @@ export class TopologyRendererContainer extends React.Component<Props, State> {
       'batteries', 'switches', 'solarpanels', 'swing_nodes', 'transformers', 'overhead_lines', 'capacitors', 'regulators'
     ];
     const oldModels = [
-      'acep_psil', 'ieee123', 'ieee123pv', 'ieee13nodeckt', 'ieee13nodecktassets', 'ieee37', 'ieee8500', 'j1', 'sourceckt'
+      'acep_psil', 'ieee123', 'ieee123pv', 'ieee13nodeckt', 'ieee13nodecktassets', 'ieee8500', 'j1', 'sourceckt'
     ];
     const feeder = model.feeders[0];
     const allNodes = Object.keys(feeder)
@@ -165,7 +165,7 @@ export class TopologyRendererContainer extends React.Component<Props, State> {
           }));
           break;
         case 'switches':
-          if ((node.x1 !== 0 && node.y1 !== 0) || (node.x2 !== 0 && node.y2 !== 0)) {
+          // if ((node.x1 !== 0 && node.y1 !== 0) || (node.x2 !== 0 && node.y2 !== 0)) {
             nodes.push(this._createNewNode({
               ...node,
               name: node.name,
@@ -174,7 +174,7 @@ export class TopologyRendererContainer extends React.Component<Props, State> {
               x: Math.trunc(node.x1 !== 0 ? node.x1 : node.x2),
               y: Math.trunc(node.y1 !== 0 ? node.y1 : node.y2),
             }));
-          }
+          // }
           break;
         case 'solarpanels':
           nodes.push(this._createNewNode({
@@ -184,7 +184,7 @@ export class TopologyRendererContainer extends React.Component<Props, State> {
           }));
           break;
         case 'transformers':
-          if ((node.x1 !== 0 && node.y1 !== 0) || (node.x2 !== 0 && node.y2 !== 0)) {
+         // if ((node.x1 !== 0 && node.y1 !== 0) || (node.x2 !== 0 && node.y2 !== 0)) {
             nodes.push(this._createNewNode({
               ...node,
               name: node.name,
@@ -192,7 +192,7 @@ export class TopologyRendererContainer extends React.Component<Props, State> {
               x: Math.trunc(node.x1 !== 0 ? node.x1 : node.x2),
               y: Math.trunc(node.y1 !== 0 ? node.y1 : node.y2)
             }));
-          }
+          // }
           break;
         case 'capacitors':
           nodes.push(this._createNewNode({
@@ -211,7 +211,7 @@ export class TopologyRendererContainer extends React.Component<Props, State> {
         case 'overhead_lines':
           const fromNode: Node = allNodes.filter(e => e.name === node.from)[0] || this._createNewNode({ name: node.from });
           const toNode: Node = allNodes.filter(e => e.name === node.to)[0] || this._createNewNode({ name: node.to });
-          if (node.x1 !== 0.0 && node.y1 !== 0.0 && node.x2 !== 0.0 && node.y2 !== 0.0) {
+          // if (node.x1 !== 0.0 && node.y1 !== 0.0 && node.x2 !== 0.0 && node.y2 !== 0.0) {
             fromNode.x = Math.trunc(node.x1);
             fromNode.y = Math.trunc(node.y1);
             toNode.x = Math.trunc(node.x2);
@@ -223,7 +223,7 @@ export class TopologyRendererContainer extends React.Component<Props, State> {
               from: fromNode,
               to: toNode,
             });
-          }
+          // }
           break;
         case 'regulators':
           nodes.push(this._createNewNode({
