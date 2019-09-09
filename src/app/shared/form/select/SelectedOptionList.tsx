@@ -28,9 +28,10 @@ export class SelectedOptionList<T> extends React.Component<Props<T>, State> {
 
   render() {
     return (
-      <div className={`selected-option-list-container${this.state.show ? ' open' : ''}`}>
+      <div className={`selected-option-list-container${this.state.show ? ' open' : ' closed'}`}>
         {
-          this.props.options.length > 0 &&
+          this.props.options.length > 0
+          &&
           <IconButton
             className='show-selected-option-list'
             icon='keyboard_arrow_down'
@@ -38,9 +39,7 @@ export class SelectedOptionList<T> extends React.Component<Props<T>, State> {
             size='small'
             onClick={this.toggleOptionList} />
         }
-        <ul
-          className='selected-option-list'
-          style={this.state.show ? { height: '100%', paddingTop: '15px' } : { height: 0, paddingTop: 0 }}>
+        <ul className='selected-option-list'>
           {
             this.props.options.map((option, i) => (
               <li

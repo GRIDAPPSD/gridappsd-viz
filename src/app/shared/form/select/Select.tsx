@@ -9,19 +9,20 @@ import { OptionListFilter } from './OptionListFilter';
 import { SelectedOptionList } from './SelectedOptionList';
 import { OptionListPaginator } from './OptionListPaginator';
 import { ValidationErrorMessages } from '../validation';
+import { BasicButton } from '@shared/buttons';
 
 import './Select.scss';
 
 interface Props<T, E extends boolean> {
+  multiple: E;
   label: string;
   options: Option<T>[];
   onChange: E extends true ? (selections: Option<T>[], label: string) => void : (selection: Option<T>, label: string) => void;
-  onClear?: (formControlLabel: string) => void;
-  isOptionSelected?: (option: Option<T>, index: number) => boolean;
   defaultLabel?: string;
   optional?: boolean;
-  multiple: E;
   disabled?: boolean;
+  onClear?: (formControlLabel: string) => void;
+  isOptionSelected?: (option: Option<T>, index: number) => boolean;
 }
 
 interface State<T> {
@@ -59,31 +60,35 @@ export class Select<T, E extends boolean> extends React.Component<Props<T, E>, S
     };
     this._optionListContainer.className = 'select-option-list-container';
     this._onClose = this._onClose.bind(this);
+    this._onPressEscapeToClose = this._onPressEscapeToClose.bind(this);
     this._optionListContainer.onclick = this._onClose;
+    window.onkeydown = this._onPressEscapeToClose;
 
+    this.closeOptionList = this.closeOptionList.bind(this);
     this.onChange = this.onChange.bind(this);
     this.removePortal = this.removePortal.bind(this);
     this.onOpen = this.onOpen.bind(this);
     this.filterOptionList = this.filterOptionList.bind(this);
     this.deselectOption = this.deselectOption.bind(this);
     this.onPageChanged = this.onPageChanged.bind(this);
+    this.closeAndNotifySelectionChange = this.closeAndNotifySelectionChange.bind(this);
   }
 
-  private _onClose(event: MouseEvent) {
+  _onClose(event: MouseEvent) {
     // this should only be triggered when the user clicks off the option list to close
-    if (event.target === this._optionListContainer) {
-      // Wait for the clicked option to fire before closing or else it won't fire
-      setTimeout(() => this.setState({ opened: false }), 100);
-      // if multiple is true, then only fire onChange when the option list is closed
-      if (this.props.multiple) {
-        this.setState({
-          currentLabel: this.state.selectedOptions.length === 0
-            ? this.state.defaultLabel
-            : this._produceCurrentLabelForMultiSelect(),
-        });
-        (this.props.onChange as any)(this.state.selectedOptions, this.props.label);
-      }
-    }
+    if (event.target === this._optionListContainer)
+      this.closeOptionList();
+  }
+
+  closeOptionList() {
+    this.setState({
+      opened: false
+    });
+  }
+
+  private _onPressEscapeToClose(event: KeyboardEvent) {
+    if (event.key === 'Escape')
+      this.closeOptionList();
   }
 
   private _produceCurrentLabelForMultiSelect() {
@@ -110,12 +115,10 @@ export class Select<T, E extends boolean> extends React.Component<Props<T, E>, S
         selectedOptions: [clickedOption]
       });
       clickedOption.isSelected = true;
-      (this.props.onChange as any)(clickedOption, this.props.label);
+      (this.props.onChange as ((selection: Option<T>, label: string) => void))(clickedOption, this.props.label);
     }
     else {
-      this.setState({
-        opened: false
-      });
+      this.closeOptionList();
     }
     this._clearSelectionRequiredMessage();
   }
@@ -144,9 +147,9 @@ export class Select<T, E extends boolean> extends React.Component<Props<T, E>, S
           selectedOptions: this._defaultSelectedOptions
         }, () => this._toggleAllSelectedOptions(true));
         if (this.props.multiple)
-          (this.props.onChange as any)(this._defaultSelectedOptions, this.props.label);
+          (this.props.onChange as ((selections: Option<T>[], label: string) => void))(this._defaultSelectedOptions, this.props.label);
         else
-          (this.props.onChange as any)(this._defaultSelectedOptions[0], this.props.label);
+          (this.props.onChange as ((selection: Option<T>, label: string) => void))(this._defaultSelectedOptions[0], this.props.label);
       }
     }
   }
@@ -219,6 +222,21 @@ export class Select<T, E extends boolean> extends React.Component<Props<T, E>, S
                 <OptionListPaginator
                   options={this.state.filteredOptions}
                   onPageChanged={this.onPageChanged} />
+                {
+                  this.props.multiple
+                  &&
+                  <footer className='select__button-group'>
+                    <BasicButton
+                      type='negative'
+                      label='Close'
+                      onClick={this.closeOptionList} />
+                    <BasicButton
+                      type='positive'
+                      label='Add'
+                      disabled={this.state.selectedOptions.length === 0}
+                      onClick={this.closeAndNotifySelectionChange} />
+                  </footer>
+                }
               </div>
             </PopUp>,
             this._optionListContainer
@@ -286,6 +304,16 @@ export class Select<T, E extends boolean> extends React.Component<Props<T, E>, S
     this.setState({
       currentPage: newPage
     });
+  }
+
+  closeAndNotifySelectionChange() {
+    this.setState({
+      currentLabel: this.state.selectedOptions.length === 0
+        ? this.state.defaultLabel
+        : this._produceCurrentLabelForMultiSelect(),
+      opened: false
+    });
+    (this.props.onChange as ((selections: Option<T>[], label: string) => void))(this.state.selectedOptions, this.props.label);
   }
 
 }
