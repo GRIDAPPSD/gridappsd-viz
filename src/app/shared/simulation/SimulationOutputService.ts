@@ -6,6 +6,7 @@ import { SimulationOutputMeasurement } from './SimulationOutputMeasurement';
 import { StompClientService } from '@shared/StompClientService';
 import { SIMULATION_OUTPUT_TOPIC } from './topics';
 import { SimulationControlService, SimulationStatus } from './SimulationControlService';
+import { SimulationOutputPayload } from './SimulationOutputPayload';
 
 export class SimulationOutputService {
 
@@ -15,7 +16,7 @@ export class SimulationOutputService {
   private readonly _simulationControlService = SimulationControlService.getInstance();
   private _modelDictionaryMeasurementMap: Map<string, ModelDictionaryMeasurement>;
   private _outputTimestamp: number;
-  private _simulationOutputMeasurementsStream = new Subject<SimulationOutputMeasurement[]>();
+  private _simulationOutputMeasurementsStream = new Subject<Map<string, SimulationOutputMeasurement>>();
   private _simulationOutputSubscription: Subscription;
 
   static getInstance() {
@@ -51,7 +52,7 @@ export class SimulationOutputService {
     this._modelDictionaryMeasurementMap = newMap;
   }
 
-  simulationOutputMeasurementsReceived(): Observable<SimulationOutputMeasurement[]> {
+  simulationOutputMeasurementsReceived(): Observable<Map<string, SimulationOutputMeasurement>> {
     return this._simulationOutputMeasurementsStream.asObservable();
   }
 
@@ -59,28 +60,30 @@ export class SimulationOutputService {
     return this._stompClientService.readFrom(SIMULATION_OUTPUT_TOPIC)
       .pipe(
         filter(() => this._simulationControlService.currentStatus() === SimulationStatus.STARTED),
-        map(body => JSON.parse(body)),
+        map(JSON.parse as any),
         filter(payload => Boolean(payload))
       )
       .subscribe({
-        next: payload => {
+        next: (payload: SimulationOutputPayload) => {
           this._outputTimestamp = payload.message.timestamp;
-          const measurements: SimulationOutputMeasurement[] = payload.message.measurements.map(measurement => {
-            const measurementInModelDictionary = this._modelDictionaryMeasurementMap.get(measurement.measurement_mrid);
-            if (measurementInModelDictionary)
-              return {
-                name: measurementInModelDictionary.name,
-                type: measurementInModelDictionary.measurementType,
-                magnitude: measurement.magnitude,
-                angle: measurement.angle,
-                value: measurement.value,
-                mRID: measurement.measurement_mrid,
-                phases: measurementInModelDictionary.phases,
-                conductingEquipmentName: measurementInModelDictionary.ConductingEquipment_name,
-                connectivityNode: measurementInModelDictionary.ConnectivityNode
-              };
-            return null;
-          }).filter(e => e !== null);
+          const measurements = new Map();
+          for (const [mrid, rawSimulationOutputMeasurement] of Object.entries(payload.message.measurements)) {
+            const measurementInModelDictionary = this._modelDictionaryMeasurementMap.get(mrid);
+            const measurement = {
+              name: measurementInModelDictionary.name,
+              type: measurementInModelDictionary.measurementType,
+              magnitude: rawSimulationOutputMeasurement.magnitude,
+              angle: rawSimulationOutputMeasurement.angle,
+              value: rawSimulationOutputMeasurement.value,
+              mRID: rawSimulationOutputMeasurement.measurement_mrid,
+              phases: measurementInModelDictionary.phases,
+              conductingEquipmentName: measurementInModelDictionary.ConductingEquipment_name,
+              connectivityNode: measurementInModelDictionary.ConnectivityNode
+            };
+            measurements.set(mrid, measurement);
+            measurements.set(measurementInModelDictionary.ConductingEquipment_name, measurement);
+            measurements.set(measurementInModelDictionary.ConnectivityNode, measurement);
+          }
           this._simulationOutputMeasurementsStream.next(measurements);
         }
       });
