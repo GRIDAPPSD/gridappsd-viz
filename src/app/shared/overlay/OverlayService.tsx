@@ -17,7 +17,7 @@ export class OverlayService {
     return OverlayService._INSTANCE;
   }
 
-  show(element: React.ReactElement<any>, showBackdrop = true) {
+  show(element: React.ReactElement<any>, showBackdrop = false) {
     this._currentOverlay = document.createElement('div');
     document.body.appendChild(this._currentOverlay);
     ReactDOM.render(<Overlay element={element} showBackdrop={showBackdrop} />, this._currentOverlay);

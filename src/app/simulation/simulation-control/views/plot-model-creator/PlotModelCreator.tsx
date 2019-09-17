@@ -19,6 +19,7 @@ interface Props {
 }
 
 interface State {
+  show: boolean;
   componentOptions: Option<ModelDictionaryComponent>[];
   allPlotModelOptions: Option<PlotModel>[];
   componentTypeOptions: Option<ModelDictionaryComponentType>[];
@@ -53,7 +54,8 @@ export class PlotModelCreator extends React.Component<Props, State> {
       selectedComponent: null,
       disableAddComponentButton: true,
       createdPlotModelComponentsWithPhase: [],
-      phaseOptions: []
+      phaseOptions: [],
+      show: true
     };
 
     this.onPlotNameFormControlValidated = this.onPlotNameFormControlValidated.bind(this);
@@ -70,6 +72,7 @@ export class PlotModelCreator extends React.Component<Props, State> {
     this.onPlotModelUpdated = this.onPlotModelUpdated.bind(this);
     this.addPlotModelComponent = this.addPlotModelComponent.bind(this);
     this.onSubmit = this.onSubmit.bind(this);
+    this.onClose = this.onClose.bind(this);
   }
 
   private _createDefaultPlotModel(plotName = ''): PlotModel {
@@ -85,7 +88,8 @@ export class PlotModelCreator extends React.Component<Props, State> {
   render() {
     return (
       <Dialog
-        show={true}
+        show={this.state.show}
+        showBackdrop={true}
         className='plot-model-creator'>
         <DialogContent>
           <div className='plot-model-creator__body'>
@@ -169,7 +173,7 @@ export class PlotModelCreator extends React.Component<Props, State> {
           <BasicButton
             type='negative'
             label='Close'
-            onClick={this.props.onClose} />
+            onClick={this.onClose} />
           <BasicButton
             type='positive'
             label='Done'
@@ -369,7 +373,15 @@ export class PlotModelCreator extends React.Component<Props, State> {
       else
         resultingPlotModels.push(createdPlotModel);
     }
-    this.props.onSubmit(resultingPlotModels);
+    this.setState({
+      show: false
+    }, () => this.props.onSubmit(resultingPlotModels));
+  }
+
+  onClose() {
+    this.setState({
+      show: false
+    }, this.props.onClose);
   }
 
 }

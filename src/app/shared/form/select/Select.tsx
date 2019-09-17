@@ -1,5 +1,4 @@
 import * as React from 'react';
-import { createPortal } from 'react-dom';
 
 import { Option } from './Option';
 import { PopUp } from '@shared/pop-up';
@@ -41,7 +40,6 @@ export class Select<T, E extends boolean> extends React.Component<Props<T, E>, S
 
   optionListOpener: HTMLButtonElement;
 
-  private readonly _optionListContainer = document.createElement('div');
   private _firstPage: Option<T>[] = [];
   private _defaultSelectedOptions: Option<T>[] = [];
 
@@ -58,26 +56,16 @@ export class Select<T, E extends boolean> extends React.Component<Props<T, E>, S
       filteredOptions: props.options,
       nothingSelectedMessage: []
     };
-    this._optionListContainer.className = 'select-option-list-container';
-    this._onClose = this._onClose.bind(this);
-    this._onPressEscapeToClose = this._onPressEscapeToClose.bind(this);
-    this._optionListContainer.onclick = this._onClose;
     window.onkeydown = this._onPressEscapeToClose;
 
+    this._onPressEscapeToClose = this._onPressEscapeToClose.bind(this);
     this.closeOptionList = this.closeOptionList.bind(this);
     this.onChange = this.onChange.bind(this);
-    this.removePortal = this.removePortal.bind(this);
     this.onOpen = this.onOpen.bind(this);
     this.filterOptionList = this.filterOptionList.bind(this);
     this.deselectOption = this.deselectOption.bind(this);
     this.onPageChanged = this.onPageChanged.bind(this);
     this.closeAndNotifySelectionChange = this.closeAndNotifySelectionChange.bind(this);
-  }
-
-  _onClose(event: MouseEvent) {
-    // this should only be triggered when the user clicks off the option list to close
-    if (event.target === this._optionListContainer)
-      this.closeOptionList();
   }
 
   closeOptionList() {
@@ -155,14 +143,7 @@ export class Select<T, E extends boolean> extends React.Component<Props<T, E>, S
   }
 
   componentWillUnmount() {
-    this.removePortal();
-    this._optionListContainer.onclick = null;
     this._toggleAllSelectedOptions(false);
-  }
-
-  removePortal() {
-    if (!this.state.opened && document.body.contains(this._optionListContainer))
-      document.body.removeChild(this._optionListContainer);
   }
 
   componentDidUpdate(prevProps: Props<T, E>, _: State<T>) {
@@ -202,52 +183,47 @@ export class Select<T, E extends boolean> extends React.Component<Props<T, E>, S
           <i className='material-icons'>keyboard_arrow_down</i>
         </button>
         <ValidationErrorMessages messages={this.state.nothingSelectedMessage} />
-        {
-          createPortal(
-            <PopUp
-              in={this.state.opened}
-              afterClosed={this.removePortal}>
-              <div
-                className='select__option-list-wrapper'
-                style={{ left: this.state.left + 'px', top: this.state.top + 'px' }}>
-                <OptionListFilter
-                  shouldReset={this.state.opened}
-                  onChange={this.filterOptionList} />
-                <SelectedOptionList
-                  options={this.state.selectedOptions}
-                  onDeselectOption={this.deselectOption} />
-                <OptionList
-                  options={this.state.currentPage}
-                  onSelectOption={this.onChange} />
-                <OptionListPaginator
-                  options={this.state.filteredOptions}
-                  onPageChanged={this.onPageChanged} />
-                {
-                  this.props.multiple
-                  &&
-                  <footer className='select__button-group'>
-                    <BasicButton
-                      type='negative'
-                      label='Close'
-                      onClick={this.closeOptionList} />
-                    <BasicButton
-                      type='positive'
-                      label='Add'
-                      disabled={this.state.selectedOptions.length === 0}
-                      onClick={this.closeAndNotifySelectionChange} />
-                  </footer>
-                }
-              </div>
-            </PopUp>,
-            this._optionListContainer
-          )
-        }
+        <PopUp
+          top={this.state.top}
+          left={this.state.left}
+          in={this.state.opened}
+          onBackdropClicked={this.closeOptionList}
+          onAfterClosed={this.closeOptionList}>
+          <div className='select__option-list-wrapper'>
+            <OptionListFilter
+              shouldReset={this.state.opened}
+              onChange={this.filterOptionList} />
+            <SelectedOptionList
+              options={this.state.selectedOptions}
+              onDeselectOption={this.deselectOption} />
+            <OptionList
+              options={this.state.currentPage}
+              onSelectOption={this.onChange} />
+            <OptionListPaginator
+              options={this.state.filteredOptions}
+              onPageChanged={this.onPageChanged} />
+            {
+              this.props.multiple
+              &&
+              <footer className='select__button-group'>
+                <BasicButton
+                  type='negative'
+                  label='Close'
+                  onClick={this.closeOptionList} />
+                <BasicButton
+                  type='positive'
+                  label='Add'
+                  disabled={this.state.selectedOptions.length === 0}
+                  onClick={this.closeAndNotifySelectionChange} />
+              </footer>
+            }
+          </div>
+        </PopUp>
       </FormControl>
     );
   }
 
   onOpen() {
-    document.body.appendChild(this._optionListContainer);
     const rect = this.optionListOpener.getBoundingClientRect();
     this.setState({
       opened: true,
