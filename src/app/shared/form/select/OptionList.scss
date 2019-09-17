@@ -18,6 +18,9 @@
     padding: 15px 10px;
     padding-right: 25px;
     cursor: pointer;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
 
     &:hover {
         background-color: #84811114;

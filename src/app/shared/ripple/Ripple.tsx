@@ -5,6 +5,7 @@ import './Ripple.scss';
 
 interface Props {
   fixed?: boolean;
+  color?: string;
 }
 
 export class Ripple extends React.Component<Props, {}> {
@@ -50,6 +51,7 @@ export class Ripple extends React.Component<Props, {}> {
     rippler.style.width = largerDimension + 'px';
     rippler.style.height = largerDimension + 'px';
     rippler.style.animationDuration = `${Ripple.__RIPPLE_DURATION__}ms`;
+    rippler.style.backgroundColor = this.props.color || 'rgba(0, 0, 0, 0.1)';
     rippleContainer.appendChild(rippler);
     this._rippleTrigger.appendChild(rippleContainer);
     setTimeout(() => this._rippleTrigger.removeChild(rippleContainer), Ripple.__RIPPLE_DURATION__);

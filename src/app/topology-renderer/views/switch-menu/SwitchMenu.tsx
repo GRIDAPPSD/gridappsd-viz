@@ -15,28 +15,36 @@ interface Props {
 }
 
 interface State {
+  show: boolean;
   switchOpen: boolean;
   options: Option<boolean>[];
 }
 
 export class SwitchMenu extends React.Component<Props, State> {
+
   constructor(props: Props) {
     super(props);
+
     this.state = {
+      show: true,
       switchOpen: props.open,
       options: [
         new Option('Open', true),
         new Option('Close', false),
       ]
     };
+
+    this.onCancel = this.onCancel.bind(this);
+    this.onConfirm = this.onConfirm.bind(this);
   }
 
   render() {
     return (
       <Dialog
         className='switch-menu'
-        show={true}
-        styles={{ left: this.props.left + 'px', top: this.props.top + 'px' }}>
+        show={this.state.show}
+        top={this.props.top}
+        left={this.props.left}>
         <DialogContent styles={{ overflow: 'hidden' }}>
           <form className='switch-menu__form'>
             <Select
@@ -51,14 +59,27 @@ export class SwitchMenu extends React.Component<Props, State> {
           <BasicButton
             type='negative'
             label='Cancel'
-            onClick={this.props.onCancel} />
+            onClick={this.onCancel} />
           <BasicButton
             type='positive'
             label='Apply'
             disabled={this.state.switchOpen === this.props.open}
-            onClick={() => this.props.onConfirm(this.state.switchOpen)} />
+            onClick={this.onConfirm} />
         </DialogActions>
       </Dialog>
     );
   }
+
+  onCancel() {
+    this.setState({
+      show: false
+    }, this.props.onCancel);
+  }
+
+  onConfirm() {
+    this.setState({
+      show: false
+    }, () => this.props.onConfirm(this.state.switchOpen));
+  }
+
 }

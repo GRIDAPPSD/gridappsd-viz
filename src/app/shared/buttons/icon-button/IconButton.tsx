@@ -11,18 +11,21 @@ type Icon = 'check_circle' | 'menu' | 'assignment' | 'storage' | 'search' | 'lap
 
 interface Props {
   icon: Icon;
-  onClick?: (event) => void;
   size?: 'large' | 'normal' | 'small';
   className?: string;
   label?: any;
   rounded?: boolean;
   style?: 'primary' | 'accent' | 'default';
   disabled?: boolean;
+  rippleColor?: string;
+  onClick?: (event: React.MouseEvent) => void;
 }
 
 export function IconButton(props: Props) {
   return (
-    <Ripple fixed={props.rounded || props.rounded === undefined}>
+    <Ripple
+      fixed={props.rounded || props.rounded === undefined}
+      color={resolveRippleColor(props)}>
       <button
         type='button'
         disabled={props.disabled}
@@ -44,5 +47,12 @@ function deriveClassName(props: Props) {
   if (props.rounded || (props.rounded === undefined && !props.label))
     return ` rounded-icon-button rounded-icon-button--${props.size ? props.size : 'normal'}`;
   return props.label ? ' icon-button--has-label' : '';
+}
 
+function resolveRippleColor(props: Props) {
+  if (props.style === 'primary')
+    return 'rgba(250, 250, 250, 0.5)';
+  if (props.style === 'accent')
+    return 'rgba(250, 250, 250, 0.5)';
+  return props.rippleColor;
 }
