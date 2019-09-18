@@ -15,7 +15,7 @@ import { CommOutageEvent, FaultEvent, FaultKind } from '@shared/test-manager';
 import { Validators } from '@shared/form/validation';
 import { ModelDictionaryComponent } from '@shared/topology/model-dictionary/ModelDictionaryComponent';
 
-import './TestConfigurationFormGroup.scss';
+import './TestConfiguration.scss';
 
 interface Props {
   modelDictionary: ModelDictionary;
@@ -34,7 +34,7 @@ interface State {
   currentFaultEvent: FaultEvent;
 }
 
-export class TestConfigurationFormGroup extends React.Component<Props, State> {
+export class TestConfiguration extends React.Component<Props, State> {
 
   private readonly _filePicker = FilePickerService.getInstance();
   private _tagForCurrentEvent = '';

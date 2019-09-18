@@ -3,14 +3,14 @@ import * as React from 'react';
 import { FormGroup, Select, TextArea, Option } from '@shared/form';
 import { SimulationConfiguration } from '@shared/simulation';
 import { Application } from '@shared/Application';
-import { ApplicationConfigurationFormGroupValue } from '../../models/ApplicationConfigurationFormGroupValue';
+import { ApplicationConfigurationModel } from '../../models/ApplicationConfigurationModel';
 import { Validators } from '@shared/form/validation';
 
-import './ApplicationConfigurationFormGroup.scss';
+import './ApplicationConfiguration.scss';
 
 interface Props {
   currentConfig: SimulationConfiguration;
-  onChange: (value: ApplicationConfigurationFormGroupValue) => void;
+  onChange: (value: ApplicationConfigurationModel) => void;
   availableApplications: Application[];
 }
 
@@ -19,8 +19,8 @@ interface State {
   disabledAppConfigStringInputBox: boolean;
 }
 
-export class ApplicationConfigurationFormGroup extends React.Component<Props, State> {
-  readonly formValue: ApplicationConfigurationFormGroupValue;
+export class ApplicationConfiguration extends React.Component<Props, State> {
+  readonly formValue: ApplicationConfigurationModel;
 
   constructor(props: Props) {
     super(props);

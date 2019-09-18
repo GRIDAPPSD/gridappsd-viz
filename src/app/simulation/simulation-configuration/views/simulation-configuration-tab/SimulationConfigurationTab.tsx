@@ -3,14 +3,14 @@ import * as React from 'react';
 import { FormGroup, Input, Select, CheckBox, TextArea, Option } from '@shared/form';
 import { Tooltip } from '@shared/tooltip';
 import { IconButton } from '@shared/buttons';
-import { SimulationConfigurationFormGroupValue } from '../../models/SimulationConfigurationFormGroupValue';
+import { SimulationConfigurationTabModel } from '../../models/SimulationConfigurationTabModel';
 import { SimulationConfiguration } from '@shared/simulation';
 import { Validators } from '@shared/form/validation';
 
-import './SimulationConfigurationFormGroup.scss';
+import './SimulationConfigurationTab.scss';
 
 interface Props {
-  onChange: (formValue: SimulationConfigurationFormGroupValue) => void;
+  onChange: (formValue: SimulationConfigurationTabModel) => void;
   currentConfig: SimulationConfiguration;
   simulationName: string;
 }
@@ -19,8 +19,8 @@ interface State {
   simulatorOptions: Option<string>[];
 }
 
-export class SimulationConfigurationFormGroup extends React.Component<Props, State> {
-  readonly formValue: SimulationConfigurationFormGroupValue;
+export class SimulationConfigurationTab extends React.Component<Props, State> {
+  readonly formValue: SimulationConfigurationTabModel;
 
   private _invalidFormControls = new Map<string, true>();
 

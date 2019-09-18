@@ -8,16 +8,16 @@ import { Application } from '@shared/Application';
 import { Dialog, DialogContent, DialogActions } from '@shared/dialog';
 import { TabGroup, Tab } from '@shared/tabs';
 import { BasicButton } from '@shared/buttons';
-import { PowerSystemConfigurationFormGroup } from './views/PowerSystemConfigurationFormGroup';
-import { SimulationConfigurationFormGroup } from './views/SimulationConfigurationFormGroup';
-import { ApplicationConfigurationFormGroup } from './views/ApplicationConfigurationFormGroup';
-import { TestConfigurationFormGroup } from './views/TestConfigurationFormGroup';
+import { PowerSystemConfiguration } from './views/power-system-configuration';
+import { SimulationConfigurationTab } from './views/simulation-configuration-tab';
+import { ApplicationConfiguration } from './views/application-configuration';
+import { TestConfiguration } from './views/test-configuration';
 import { DateTimeService } from './services/DateTimeService';
 import { CommOutageEvent } from '../../shared/test-manager/CommOutageEvent';
 import { FaultEvent, FaultKind } from '../../shared/test-manager/FaultEvent';
-import { PowerSystemConfigurationFormGroupValue } from './models/PowerSystemConfigurationFormGroupValue';
-import { SimulationConfigurationFormGroupValue } from './models/SimulationConfigurationFormGroupValue';
-import { ApplicationConfigurationFormGroupValue } from './models/ApplicationConfigurationFormGroupValue';
+import { PowerSystemConfigurationModel } from './models/PowerSystemConfigurationModel';
+import { SimulationConfigurationTabModel } from './models/SimulationConfigurationTabModel';
+import { ApplicationConfigurationModel } from './models/ApplicationConfigurationModel';
 import { StateStore } from '@shared/state-store';
 import { ThreeDots } from '@shared/three-dots';
 import { NotificationBanner } from '@shared/notification-banner';
@@ -75,9 +75,9 @@ export class SimulationConfigurationEditor extends React.Component<Props, State>
 
     this.currentConfig = this._cloneConfigObject(props.initialConfig);
 
-    this.onPowerSystemConfigurationFormGroupValueChanged = this.onPowerSystemConfigurationFormGroupValueChanged.bind(this);
-    this.onSimulationConfigurationFormGroupValueChanged = this.onSimulationConfigurationFormGroupValueChanged.bind(this);
-    this.onApplicationConfigurationFormGroupValueChanged = this.onApplicationConfigurationFormGroupValueChanged.bind(this);
+    this.onPowerSystemConfigurationChanged = this.onPowerSystemConfigurationChanged.bind(this);
+    this.onSimulationConfigurationChanged = this.onSimulationConfigurationChanged.bind(this);
+    this.onApplicationConfigurationChanged = this.onApplicationConfigurationChanged.bind(this);
     this.onFaultEventsAdded = this.onFaultEventsAdded.bind(this);
     this.onServiceConfigurationsChanged = this.onServiceConfigurationsChanged.bind(this);
     this.onServiceConfigurationValidationChanged = this.onServiceConfigurationValidationChanged.bind(this);
@@ -160,21 +160,21 @@ export class SimulationConfigurationEditor extends React.Component<Props, State>
           <form className='simulation-configuration-form'>
             <TabGroup>
               <Tab label='Power System Configuration'>
-                <PowerSystemConfigurationFormGroup
+                <PowerSystemConfiguration
                   feederModel={this.props.feederModel}
-                  onChange={this.onPowerSystemConfigurationFormGroupValueChanged} />
+                  onChange={this.onPowerSystemConfigurationChanged} />
               </Tab>
               <Tab label='Simulation Configuration'>
-                <SimulationConfigurationFormGroup
+                <SimulationConfigurationTab
                   currentConfig={this.currentConfig}
                   simulationName={this.state.simulationName}
-                  onChange={this.onSimulationConfigurationFormGroupValueChanged} />
+                  onChange={this.onSimulationConfigurationChanged} />
               </Tab>
               <Tab label='Application Configuration'>
-                <ApplicationConfigurationFormGroup
+                <ApplicationConfiguration
                   currentConfig={this.currentConfig}
                   availableApplications={this.props.availableApplications}
-                  onChange={this.onApplicationConfigurationFormGroupValueChanged} />
+                  onChange={this.onApplicationConfigurationChanged} />
               </Tab>
               <Tab label='Test Configuration'>
                 {this.showCurrentComponentForTestConfigurationTab()}
@@ -182,8 +182,8 @@ export class SimulationConfigurationEditor extends React.Component<Props, State>
               <Tab label='Service Configuration'>
                 <ServiceConfiguration
                   services={this.state.services}
-                  onServiceConfigurationsChanged={this.onServiceConfigurationsChanged}
-                  onServiceConfigurationValidationChanged={this.onServiceConfigurationValidationChanged} />
+                  onChange={this.onServiceConfigurationsChanged}
+                  onValidationChange={this.onServiceConfigurationValidationChanged} />
               </Tab>
             </TabGroup>
           </form>
@@ -203,7 +203,7 @@ export class SimulationConfigurationEditor extends React.Component<Props, State>
     );
   }
 
-  onPowerSystemConfigurationFormGroupValueChanged(formValue: PowerSystemConfigurationFormGroupValue) {
+  onPowerSystemConfigurationChanged(formValue: PowerSystemConfigurationModel) {
     if (formValue.isValid) {
       const currentPowerSystemConfig = this.currentConfig.power_system_config;
       currentPowerSystemConfig.GeographicalRegion_name = formValue.regionId;
@@ -222,7 +222,7 @@ export class SimulationConfigurationEditor extends React.Component<Props, State>
     });
   }
 
-  onSimulationConfigurationFormGroupValueChanged(formValue: SimulationConfigurationFormGroupValue) {
+  onSimulationConfigurationChanged(formValue: SimulationConfigurationTabModel) {
     if (formValue.isValid) {
       this.currentConfig.simulation_config.start_time = formValue.startDateTime;
       this.currentConfig.simulation_config.duration = formValue.duration;
@@ -237,7 +237,7 @@ export class SimulationConfigurationEditor extends React.Component<Props, State>
     }));
   }
 
-  onApplicationConfigurationFormGroupValueChanged(formValue: ApplicationConfigurationFormGroupValue) {
+  onApplicationConfigurationChanged(formValue: ApplicationConfigurationModel) {
     if (formValue.applicationId !== '') {
       const selectedApplication = this.currentConfig.application_config.applications.pop() || { name: '', config_string: '' };
       selectedApplication.name = formValue.applicationId;
@@ -268,7 +268,7 @@ export class SimulationConfigurationEditor extends React.Component<Props, State>
         </NotificationBanner>
       );
     return (
-      <TestConfigurationFormGroup
+      <TestConfiguration
         modelDictionary={this.state.modelDictionary}
         simulationStartDate={this.dateTimeService.format(this.simulationStartDate)}
         simulationStopDate={this.dateTimeService.format(this.calculateSimulationStopTime())}

@@ -10,8 +10,8 @@ import './ServiceConfiguration.scss';
 
 interface Props {
   services: Service[];
-  onServiceConfigurationValidationChanged: (isValid: boolean) => void;
-  onServiceConfigurationsChanged: (serviceConfigurationEntryModel: ServiceConfigurationEntryModel[]) => void;
+  onValidationChange: (isValid: boolean) => void;
+  onChange: (serviceConfigurationEntryModel: ServiceConfigurationEntryModel[]) => void;
 }
 
 interface State {
@@ -66,13 +66,13 @@ export class ServiceConfiguration extends React.Component<Props, State> {
       this._invalidServiceConfigurationEntries.delete(service);
     else
       this._invalidServiceConfigurationEntries.set(service, true);
-    this.props.onServiceConfigurationValidationChanged(
+    this.props.onValidationChange(
       this._invalidServiceConfigurationEntries.size === 0
     );
   }
 
   saveChanges() {
-    this.props.onServiceConfigurationsChanged([...this._serviceConfigurationEntries.values()]);
+    this.props.onChange([...this._serviceConfigurationEntries.values()]);
   }
 
 }

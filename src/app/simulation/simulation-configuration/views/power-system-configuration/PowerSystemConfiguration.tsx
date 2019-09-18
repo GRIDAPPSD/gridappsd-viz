@@ -2,13 +2,13 @@ import * as React from 'react';
 
 import { FormGroup, Select, Option } from '@shared/form';
 import { FeederModel, FeederModelRegion, FeederModelLine } from '@shared/topology';
-import { PowerSystemConfigurationFormGroupValue } from '../../models/PowerSystemConfigurationFormGroupValue';
+import { PowerSystemConfigurationModel } from '../../models/PowerSystemConfigurationModel';
 
-import './PowerSystemConfigurationFormGroup.scss';
+import './PowerSystemConfiguration.scss';
 
 interface Props {
   feederModel: FeederModel;
-  onChange: (value: PowerSystemConfigurationFormGroupValue) => void;
+  onChange: (value: PowerSystemConfigurationModel) => void;
 }
 
 interface State {
@@ -17,9 +17,9 @@ interface State {
   lineOptions: Option<FeederModelLine>[];
 }
 
-export class PowerSystemConfigurationFormGroup extends React.Component<Props, State> {
+export class PowerSystemConfiguration extends React.Component<Props, State> {
 
-  readonly formValue: PowerSystemConfigurationFormGroupValue = {
+  readonly formValue: PowerSystemConfigurationModel = {
     regionId: '',
     subregionId: '',
     lineId: '',
