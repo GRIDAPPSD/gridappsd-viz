@@ -99,7 +99,9 @@ export class TestConfigurationFormGroup extends React.Component<Props, State> {
   render() {
     return (
       <div className='test-configuration'>
-        <FormGroup className='test-configuration__form'>
+        <FormGroup
+          className='test-configuration__form'
+          collapsible={false}>
           <Input
             label='Event Tag'
             name='eventTag'

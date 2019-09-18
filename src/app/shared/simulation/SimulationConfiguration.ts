@@ -24,8 +24,9 @@ export interface SimulationConfiguration {
     };
   };
   application_config: {
-    applications: Array<{ name: string; config_string: string }>
+    applications: Array<{ name: string; config_string: string; }>
   };
+  service_configs: Array<{ id: string; user_options: any }>;
   test_config: {
     events: Array<any>;
     appId: string;
