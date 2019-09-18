@@ -105,7 +105,7 @@ export class SimulationConfigurationFormGroup extends React.Component<Props, Sta
               </>
             }>
             <IconButton
-              icon='help'
+              icon='help_outline'
               size='small' />
           </Tooltip>
         </div>

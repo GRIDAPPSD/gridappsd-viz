@@ -7,13 +7,20 @@ export interface Service {
   type: string;
   launch_on_startup: boolean;
   multiple_instances: boolean;
-  environmentVariables: EnvironmentVariable[];
+  environmentVariables: Array<{ envName: string; envValue: string; }>;
   input_topics?: string[];
   output_topics?: any[];
   service_dependencies?: string[];
+  user_input: {
+    [inputName: string]: ServiceConfigUserInputSpec
+  };
 }
 
-export interface EnvironmentVariable {
-  envName: string;
-  envValue: string;
+export interface ServiceConfigUserInputSpec {
+  help: string;
+  help_example: any;
+  type: 'float' | 'object' | 'bool';
+  default_value: any;
+  min?: number;
+  max?: number;
 }

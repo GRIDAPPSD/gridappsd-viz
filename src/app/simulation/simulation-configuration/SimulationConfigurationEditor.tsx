@@ -22,6 +22,9 @@ import { StateStore } from '@shared/state-store';
 import { ThreeDots } from '@shared/three-dots';
 import { NotificationBanner } from '@shared/notification-banner';
 import { ModelDictionaryComponent } from '@shared/topology/model-dictionary/ModelDictionaryComponent';
+import { ServiceConfiguration } from './views/service-configuration';
+import { Service } from '@shared/Service';
+import { ServiceConfigurationEntryModel } from './models/ServiceConfigurationEntryModel';
 
 import './SimulationConfigurationEditor.scss';
 
@@ -42,6 +45,7 @@ interface State {
   disableSubmitButton: boolean;
   lineName: string;
   componentsWithConsolidatedPhases: ModelDictionaryComponent[];
+  services: Service[];
 }
 
 export class SimulationConfigurationEditor extends React.Component<Props, State> {
@@ -65,7 +69,8 @@ export class SimulationConfigurationEditor extends React.Component<Props, State>
       modelDictionary: null,
       disableSubmitButton: true,
       lineName: props.initialConfig.power_system_config.Line_name,
-      componentsWithConsolidatedPhases: []
+      componentsWithConsolidatedPhases: [],
+      services: []
     };
 
     this.currentConfig = this._cloneConfigObject(props.initialConfig);
@@ -74,26 +79,33 @@ export class SimulationConfigurationEditor extends React.Component<Props, State>
     this.onSimulationConfigurationFormGroupValueChanged = this.onSimulationConfigurationFormGroupValueChanged.bind(this);
     this.onApplicationConfigurationFormGroupValueChanged = this.onApplicationConfigurationFormGroupValueChanged.bind(this);
     this.onFaultEventsAdded = this.onFaultEventsAdded.bind(this);
+    this.onServiceConfigurationsChanged = this.onServiceConfigurationsChanged.bind(this);
+    this.onServiceConfigurationValidationChanged = this.onServiceConfigurationValidationChanged.bind(this);
     this.closeForm = this.closeForm.bind(this);
     this.submitForm = this.submitForm.bind(this);
   }
 
   private _cloneConfigObject(original: SimulationConfiguration): SimulationConfiguration {
-    const config = {} as SimulationConfiguration;
-    config.power_system_config = { ...original.power_system_config };
-    config.application_config = {
-      applications: original.application_config.applications.length > 0 ?
-        [{ ...original.application_config.applications[0] }] : []
+    return {
+      power_system_config: {
+        ...original.power_system_config
+      },
+      application_config: {
+        applications: original.application_config.applications.length > 0 ?
+          [{ ...original.application_config.applications[0] }] : []
+      },
+      simulation_config: {
+        ...original.simulation_config,
+        start_time: this.dateTimeService.format(this.simulationStartDate)
+      },
+      test_config: {
+        events: original.test_config.events.map(event => Object.assign({}, event)),
+        appId: original.test_config.appId
+      },
+      service_configs: [
+        ...original.service_configs
+      ]
     };
-    config.simulation_config = {
-      ...original.simulation_config,
-      start_time: this.dateTimeService.format(this.simulationStartDate)
-    };
-    config.test_config = {
-      events: original.test_config.events.map(event => Object.assign({}, event)),
-      appId: original.test_config.appId
-    };
-    return config;
   }
 
   componentDidMount() {
@@ -124,6 +136,14 @@ export class SimulationConfigurationEditor extends React.Component<Props, State>
       .subscribe({
         next: components => this.setState({
           componentsWithConsolidatedPhases: components
+        })
+      });
+
+    this._stateStore.select('services')
+      .pipe(takeUntil(this._unsubscriber))
+      .subscribe({
+        next: services => this.setState({
+          services
         })
       });
   }
@@ -158,6 +178,12 @@ export class SimulationConfigurationEditor extends React.Component<Props, State>
               </Tab>
               <Tab label='Test Configuration'>
                 {this.showCurrentComponentForTestConfigurationTab()}
+              </Tab>
+              <Tab label='Service Configuration'>
+                <ServiceConfiguration
+                  services={this.state.services}
+                  onServiceConfigurationsChanged={this.onServiceConfigurationsChanged}
+                  onServiceConfigurationValidationChanged={this.onServiceConfigurationValidationChanged} />
               </Tab>
             </TabGroup>
           </form>
@@ -253,6 +279,19 @@ export class SimulationConfigurationEditor extends React.Component<Props, State>
 
   calculateSimulationStopTime() {
     return +this.currentConfig.simulation_config.duration * 1000 + this.simulationStartDate.getTime();
+  }
+
+  onServiceConfigurationsChanged(serviceConfigurationEntryModels: ServiceConfigurationEntryModel[]) {
+    this.currentConfig.service_configs = serviceConfigurationEntryModels.map(model => ({
+      id: model.service.id,
+      user_options: model.values
+    }));
+  }
+
+  onServiceConfigurationValidationChanged(isValid: boolean) {
+    this.setState({
+      disableSubmitButton: !isValid
+    });
   }
 
   closeForm(event: React.SyntheticEvent) {

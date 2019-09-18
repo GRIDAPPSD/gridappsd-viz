@@ -10,12 +10,13 @@ import './TextArea.scss';
 interface Props {
   label: string;
   value: string;
+  onChange: (value: string) => void;
   className?: string;
   validators?: Validator[];
   disabled?: boolean;
   readonly?: boolean;
   onValidate?: (isValid: boolean, formControlLabel: string) => void;
-  onChange: (value: string) => void;
+  hint?: string;
 }
 
 interface State {
@@ -78,7 +79,8 @@ export class TextArea extends React.Component<Props, State> {
         className={`textarea${this.props.className ? ` ${this.props.className}` : ''}`}
         label={this.props.label}
         disabled={this.props.disabled}
-        isInvalid={this.state.validationErrors.length !== 0}>
+        isInvalid={this.state.validationErrors.length !== 0}
+        hint={this.props.hint}>
         <div
           className='textarea__input-box'
           contentEditable={!this.props.readonly}
