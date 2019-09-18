@@ -4,6 +4,7 @@ import { Service } from '@shared/Service';
 import { ServiceConfigurationEntry } from './ServiceConfigurationEntry';
 import { ServiceConfigurationEntryModel } from '../../models/ServiceConfigurationEntryModel';
 import { BasicButton } from '@shared/buttons';
+import { NotificationBanner } from '@shared/notification-banner';
 
 import './ServiceConfiguration.scss';
 
@@ -30,6 +31,12 @@ export class ServiceConfiguration extends React.Component<Props, State> {
   }
 
   render() {
+    if (this.props.services.length === 0)
+      return (
+        <NotificationBanner persistent={true}>
+          Unable to fetch services, please refresh your browser
+        </NotificationBanner>
+      );
     return (
       <div className='service-configuration'>
         {
