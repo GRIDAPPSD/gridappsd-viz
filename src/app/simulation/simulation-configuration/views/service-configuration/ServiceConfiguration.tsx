@@ -16,6 +16,7 @@ interface Props {
 
 interface State {
   disableApplyButton: boolean;
+  servicesWithUserInput: Service[];
 }
 
 export class ServiceConfiguration extends React.Component<Props, State> {
@@ -27,12 +28,11 @@ export class ServiceConfiguration extends React.Component<Props, State> {
     super(props);
 
     this.state = {
-      disableApplyButton: false
+      disableApplyButton: false,
+      servicesWithUserInput: props.services.filter(service => 'user_input' in service)
     };
 
-    const userInputs = props.services.filter(service => 'user_input' in service)
-      .map(service => service.user_input);
-    for (const userInput of userInputs)
+    for (const userInput of this.state.servicesWithUserInput.map(service => service.user_input))
       for (const key in userInput)
         userInput[key].help_example = this._formatUserInputExampleValue(userInput[key]);
 
@@ -57,6 +57,12 @@ export class ServiceConfiguration extends React.Component<Props, State> {
       return (
         <NotificationBanner persistent={true}>
           Unable to fetch services, please refresh your browser
+        </NotificationBanner>
+      );
+    if (this.state.servicesWithUserInput.length === 0)
+      return (
+        <NotificationBanner persistent={true}>
+          No services with user_input found
         </NotificationBanner>
       );
     return (
