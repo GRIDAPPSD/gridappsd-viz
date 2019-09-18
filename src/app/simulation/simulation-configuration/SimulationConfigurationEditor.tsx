@@ -232,9 +232,9 @@ export class SimulationConfigurationEditor extends React.Component<Props, State>
         this.currentConfig.simulation_config.simulation_name = formValue.simulationName.replace('[NEW]', '');
       this.currentConfig.simulation_config.model_creation_config = formValue.modelCreationConfig;
     }
-    this.setState({
-      disableSubmitButton: !formValue.isValid
-    });
+    this.setState(prevState => ({
+      disableSubmitButton: prevState.lineName === '' || !formValue.isValid
+    }));
   }
 
   onApplicationConfigurationFormGroupValueChanged(formValue: ApplicationConfigurationFormGroupValue) {
