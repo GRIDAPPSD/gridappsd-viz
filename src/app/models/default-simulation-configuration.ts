@@ -28,6 +28,7 @@ export const DEFAULT_SIMULATION_CONFIGURATION: SimulationConfiguration = {
   application_config: {
     applications: []
   },
+  service_configs: [],
   test_config: {
     events: [],
     appId: ''
