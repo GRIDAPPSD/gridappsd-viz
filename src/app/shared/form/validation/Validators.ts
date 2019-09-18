@@ -49,4 +49,18 @@ export class Validators {
     });
   }
 
+  static checkMin(errorMessage: string, min: number): Validator {
+    return (value: string) => ({
+      isValid: +value >= min,
+      errorMessage
+    });
+  }
+
+  static checkMax(errorMessage: string, max: number): Validator {
+    return (value: string) => ({
+      isValid: +value <= max,
+      errorMessage
+    });
+  }
+
 }

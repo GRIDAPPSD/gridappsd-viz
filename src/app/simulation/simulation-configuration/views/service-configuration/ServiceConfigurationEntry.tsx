@@ -93,16 +93,23 @@ export class ServiceConfigurationEntry extends React.Component<Props, State> {
 
     switch (userInputSpec.type) {
       case 'float':
+        const validators = [
+          Validators.checkNotEmpty(`"${label}" must not be empty`),
+          Validators.checkValidNumber(`"${label}" must be a number`)
+        ];
+        const min = userInputSpec.min;
+        const max = userInputSpec.max;
+        if (typeof min === 'number')
+          validators.push(Validators.checkMin(`"${label}" must be between ${min} and ${max}`, min));
+        if (typeof max === 'number')
+          validators.push(Validators.checkMax(`"${label}" must be between ${min} and ${max}`, max));
         return (
           <Input
             label={label}
             name={label}
             value={userInputSpec.default_value}
             hint={userInputSpec.help}
-            validators={[
-              Validators.checkNotEmpty(`"${label}" must not be empty`),
-              Validators.checkValidNumber(`"${label}" must be a number`)
-            ]}
+            validators={validators}
             onValidate={this.onValidate}
             onChange={value => this.onValueChanged(label, userInputSpec, value)} />
         );
