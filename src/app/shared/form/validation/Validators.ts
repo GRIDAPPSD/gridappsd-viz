@@ -2,7 +2,7 @@ import { ValidationResult } from './ValidationResult';
 
 export type Validator = (value: string) => ValidationResult;
 
-const numberRegex = /^(?:\d+)?$/;
+const numberRegex = /^(?:\d+\.?\d*)?$/;
 
 // YYYY-MM-DD HH:MM:SS
 const dateTimePattern = /^(?:\d{4}-\d{2}-\d{2}\s\d{2}:\d{2}:\d{2})?$/;
