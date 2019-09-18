@@ -21,6 +21,6 @@ export interface ServiceConfigUserInputSpec {
   help_example: string;
   type: 'float' | 'object' | 'bool';
   default_value: any;
-  min?: number;
-  max?: number;
+  min_value?: number;
+  max_value?: number;
 }

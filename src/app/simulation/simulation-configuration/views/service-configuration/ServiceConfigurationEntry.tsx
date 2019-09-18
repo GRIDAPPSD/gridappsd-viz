@@ -97,8 +97,8 @@ export class ServiceConfigurationEntry extends React.Component<Props, State> {
           Validators.checkNotEmpty(`"${label}" must not be empty`),
           Validators.checkValidNumber(`"${label}" must be a number`)
         ];
-        const min = userInputSpec.min;
-        const max = userInputSpec.max;
+        const min = userInputSpec.min_value;
+        const max = userInputSpec.max_value;
         if (typeof min === 'number')
           validators.push(Validators.checkMin(`"${label}" must be between ${min} and ${max}`, min));
         if (typeof max === 'number')
