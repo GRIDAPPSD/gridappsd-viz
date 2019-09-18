@@ -105,7 +105,9 @@ export class FaultEventForm extends React.Component<Props, State> {
           options={this.state.faultKindOptions}
           isOptionSelected={option => option.value === this.formValue.faultKind}
           onChange={this.onFaultKindChanged} />
-        <FormGroup label='Impedance'>
+        <FormGroup
+          label='Impedance'
+          collapsible={false}>
           {
             FaultImpedence[this.state.selectedFaultKind].map(kind => (
               <Input

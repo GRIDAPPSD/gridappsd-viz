@@ -1,4 +1,4 @@
-export interface PowerSystemConfigurationFormGroupValue {
+export interface PowerSystemConfigurationModel {
   regionId: string;
   subregionId: string;
   simulationName: string;

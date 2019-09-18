@@ -71,7 +71,8 @@ module.exports = env => {
       historyApiFallback: {
         disableDotRule: true,
         htmlAcceptHeaders: ['text/html', 'application/xhtml+xml']
-      }
+      },
+      open: true
     },
     devtool: 'source-map'
   };
