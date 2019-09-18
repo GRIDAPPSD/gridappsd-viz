@@ -218,7 +218,7 @@ export class SimulationConfigurationEditor extends React.Component<Props, State>
     }
     this.setState({
       lineName: formValue.lineId,
-      disableSubmitButton: !formValue.isValid
+      disableSubmitButton: formValue.lineId === '' || !formValue.isValid
     });
   }
 
@@ -290,7 +290,7 @@ export class SimulationConfigurationEditor extends React.Component<Props, State>
 
   onServiceConfigurationValidationChanged(isValid: boolean) {
     this.setState({
-      disableSubmitButton: !isValid
+      disableSubmitButton: this.state.lineName === '' || !isValid
     });
   }
 
@@ -306,9 +306,9 @@ export class SimulationConfigurationEditor extends React.Component<Props, State>
     const selectedApplication = this.currentConfig.application_config.applications[0];
     this.currentConfig.test_config.appId = selectedApplication ? selectedApplication.name : '';
     for (const outageEvent of this.outageEvents)
-      this.currentConfig.test_config.events.push(this._transformOutageEventForForSubmission(outageEvent));
+      this.currentConfig.test_config.events.push(this._transformOutageEventForSubmission(outageEvent));
     for (const faultEvent of this.faultEvents)
-      this.currentConfig.test_config.events.push(this._transformFaultEventForForSubmission(faultEvent));
+      this.currentConfig.test_config.events.push(this._transformFaultEventForSubmission(faultEvent));
     this._stateStore.update({
       faultEvents: this.faultEvents,
       outageEvents: this.outageEvents
@@ -316,7 +316,7 @@ export class SimulationConfigurationEditor extends React.Component<Props, State>
     this.props.onSubmit(this.currentConfig);
   }
 
-  private _transformOutageEventForForSubmission(outageEvent: CommOutageEvent) {
+  private _transformOutageEventForSubmission(outageEvent: CommOutageEvent) {
     return {
       allInputOutage: outageEvent.allInputOutage,
       allOutputOutage: outageEvent.allOutputOutage,
@@ -338,7 +338,7 @@ export class SimulationConfigurationEditor extends React.Component<Props, State>
     };
   }
 
-  private _transformFaultEventForForSubmission(faultEvent: FaultEvent) {
+  private _transformFaultEventForSubmission(faultEvent: FaultEvent) {
     return {
       PhaseConnectedFaultKind: faultEvent.faultKind,
       FaultImpedance: this._getImpedance(faultEvent),
