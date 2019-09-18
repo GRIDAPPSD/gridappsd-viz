@@ -6,6 +6,7 @@ import { IconButton } from '@shared/buttons';
 import { Tooltip } from '@shared/tooltip';
 import { ServiceConfigurationEntryModel } from '../../models/ServiceConfigurationEntryModel';
 import { Validators } from '@shared/form/validation';
+import { copyToClipboard } from '@shared/misc';
 
 import './ServiceConfigurationEntry.scss';
 
@@ -67,13 +68,16 @@ export class ServiceConfigurationEntry extends React.Component<Props, State> {
                   className='service-configuration-entry__value'>
                   {this.showUserInputValueFormControl(label, userInputSpec)}
                   <Tooltip
-                    content={`Example value:\n${this.formatExampleValue(userInputSpec)}`}
+                    content={
+                      `Example value:\n${userInputSpec.help_example}\n(Click to copy example value to clipboard)`
+                    }
                     position='right'>
                     <IconButton
                       className='service-configuration-entry__example'
                       icon='help_outline'
                       size='small'
-                      style='accent' />
+                      style='accent'
+                      onClick={() => copyToClipboard(userInputSpec.help_example)} />
                   </Tooltip>
                 </div>
                 <br />
@@ -159,17 +163,6 @@ export class ServiceConfigurationEntry extends React.Component<Props, State> {
       case 'object':
         this._serviceConfigurationEntryModel.values[label] = JSON.parse(value);
         break;
-    }
-  }
-
-  formatExampleValue(userInputSpec: ServiceConfigUserInputSpec) {
-    switch (userInputSpec.type) {
-      case 'object':
-        return JSON.stringify(userInputSpec.help_example, null, 4);
-      case 'bool':
-        return `${userInputSpec.help_example} (${userInputSpec.help_example ? 'Checked' : 'Unchecked'})`;
-      default:
-        return String(userInputSpec.help_example);
     }
   }
 

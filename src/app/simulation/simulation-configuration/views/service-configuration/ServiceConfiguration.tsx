@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { Service } from '@shared/Service';
+import { Service, ServiceConfigUserInputSpec } from '@shared/Service';
 import { ServiceConfigurationEntry } from './ServiceConfigurationEntry';
 import { ServiceConfigurationEntryModel } from '../../models/ServiceConfigurationEntryModel';
 import { BasicButton } from '@shared/buttons';
@@ -30,9 +30,26 @@ export class ServiceConfiguration extends React.Component<Props, State> {
       disableApplyButton: false
     };
 
+    const userInputs = props.services.filter(service => 'user_input' in service)
+      .map(service => service.user_input);
+    for (const userInput of userInputs)
+      for (const key in userInput)
+        userInput[key].help_example = this._formatUserInputExampleValue(userInput[key]);
+
     this.onServiceConfigurationEntryChanged = this.onServiceConfigurationEntryChanged.bind(this);
     this.onServiceConfigurationEntryValidationChanged = this.onServiceConfigurationEntryValidationChanged.bind(this);
     this.saveChanges = this.saveChanges.bind(this);
+  }
+
+  private _formatUserInputExampleValue(userInputSpec: ServiceConfigUserInputSpec) {
+    switch (userInputSpec.type) {
+      case 'object':
+        return JSON.stringify(userInputSpec.help_example, null, 4);
+      case 'bool':
+        return `${userInputSpec.help_example} (${userInputSpec.help_example ? 'Checked' : 'Unchecked'})`;
+      default:
+        return String(userInputSpec.help_example);
+    }
   }
 
   render() {

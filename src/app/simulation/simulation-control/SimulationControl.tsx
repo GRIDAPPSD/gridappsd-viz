@@ -8,6 +8,7 @@ import { PlotModel } from '@shared/plot-model/PlotModel';
 import { PlotModelCreator } from './views/plot-model-creator/PlotModelCreator';
 import { ModelDictionaryComponent } from '@shared/topology';
 import { OverlayService } from '@shared/overlay';
+import { copyToClipboard } from '@shared/misc';
 
 import './SimulationControl.scss';
 
@@ -135,18 +136,9 @@ export class SimulationControl extends React.Component<Props, State> {
   }
 
   saveSimulationIdToClipboard(event: React.SyntheticEvent) {
-    const fakeInput = document.createElement('input');
-    fakeInput.setAttribute('style', 'position:fixed');
-    fakeInput.value = (event.target as HTMLElement).textContent;
-    document.body.appendChild(fakeInput);
-    fakeInput.select();
-
     this.setState({
-      simulationIdCopiedSuccessfully: document.execCommand('copy')
+      simulationIdCopiedSuccessfully: copyToClipboard((event.target as Element).textContent)
     });
-
-    window.getSelection().removeAllRanges();
-    document.body.removeChild(fakeInput);
 
     setTimeout(() => {
       this.setState({

@@ -18,7 +18,7 @@ export interface Service {
 
 export interface ServiceConfigUserInputSpec {
   help: string;
-  help_example: any;
+  help_example: string;
   type: 'float' | 'object' | 'bool';
   default_value: any;
   min?: number;
