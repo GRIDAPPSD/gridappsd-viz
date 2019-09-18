@@ -15,6 +15,7 @@ interface Props {
 }
 
 interface State {
+  disableApplyButton: boolean;
 }
 
 export class ServiceConfiguration extends React.Component<Props, State> {
@@ -24,6 +25,10 @@ export class ServiceConfiguration extends React.Component<Props, State> {
 
   constructor(props: Props) {
     super(props);
+
+    this.state = {
+      disableApplyButton: false
+    };
 
     this.onServiceConfigurationEntryChanged = this.onServiceConfigurationEntryChanged.bind(this);
     this.onServiceConfigurationEntryValidationChanged = this.onServiceConfigurationEntryValidationChanged.bind(this);
@@ -52,6 +57,7 @@ export class ServiceConfiguration extends React.Component<Props, State> {
           className='service-configuration__apply'
           label='Apply'
           type='positive'
+          disabled={this.state.disableApplyButton}
           onClick={this.saveChanges} />
       </div>
     );
@@ -66,9 +72,11 @@ export class ServiceConfiguration extends React.Component<Props, State> {
       this._invalidServiceConfigurationEntries.delete(service);
     else
       this._invalidServiceConfigurationEntries.set(service, true);
-    this.props.onValidationChange(
-      this._invalidServiceConfigurationEntries.size === 0
-    );
+    const isValidOverall = this._invalidServiceConfigurationEntries.size === 0;
+    this.setState({
+      disableApplyButton: !isValidOverall
+    });
+    this.props.onValidationChange(isValidOverall);
   }
 
   saveChanges() {
