@@ -69,20 +69,22 @@ export class SimulationOutputService {
           const measurements = new Map();
           for (const [mrid, rawSimulationOutputMeasurement] of Object.entries(payload.message.measurements)) {
             const measurementInModelDictionary = this._modelDictionaryMeasurementMap.get(mrid);
-            const measurement = {
-              name: measurementInModelDictionary.name,
-              type: measurementInModelDictionary.measurementType,
-              magnitude: rawSimulationOutputMeasurement.magnitude,
-              angle: rawSimulationOutputMeasurement.angle,
-              value: rawSimulationOutputMeasurement.value,
-              mRID: rawSimulationOutputMeasurement.measurement_mrid,
-              phases: measurementInModelDictionary.phases,
-              conductingEquipmentName: measurementInModelDictionary.ConductingEquipment_name,
-              connectivityNode: measurementInModelDictionary.ConnectivityNode
-            };
-            measurements.set(mrid, measurement);
-            measurements.set(measurementInModelDictionary.ConductingEquipment_name, measurement);
-            measurements.set(measurementInModelDictionary.ConnectivityNode, measurement);
+            if (measurementInModelDictionary) {
+              const measurement = {
+                name: measurementInModelDictionary.name,
+                type: measurementInModelDictionary.measurementType,
+                magnitude: rawSimulationOutputMeasurement.magnitude,
+                angle: rawSimulationOutputMeasurement.angle,
+                value: rawSimulationOutputMeasurement.value,
+                mRID: rawSimulationOutputMeasurement.measurement_mrid,
+                phases: measurementInModelDictionary.phases,
+                conductingEquipmentName: measurementInModelDictionary.ConductingEquipment_name,
+                connectivityNode: measurementInModelDictionary.ConnectivityNode
+              };
+              measurements.set(mrid, measurement);
+              measurements.set(measurementInModelDictionary.ConductingEquipment_name, measurement);
+              measurements.set(measurementInModelDictionary.ConnectivityNode, measurement);
+            }
           }
           this._simulationOutputMeasurementsStream.next(measurements);
         }
