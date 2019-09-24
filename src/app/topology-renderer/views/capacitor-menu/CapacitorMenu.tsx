@@ -59,8 +59,12 @@ export class CapacitorMenu extends React.Component<Props, State> {
               options={this.state.options}
               isOptionSelected={option => option.value === this.state.controlMode}
               onChange={selectedOption => {
-                this.capacitor.controlMode = selectedOption.value;
-                this.setState({ controlMode: this.capacitor.controlMode });
+                const selectedControlMode = selectedOption.value;
+                this.capacitor.controlMode = selectedControlMode;
+                this.capacitor.manual = selectedControlMode === CapacitorControlMode.MANUAL;
+                this.setState({
+                  controlMode: this.capacitor.controlMode
+                });
               }} />
             {this.showFormFieldsBasedOnControlMode()}
           </form>
@@ -101,8 +105,8 @@ export class CapacitorMenu extends React.Component<Props, State> {
           };
         else
           this.capacitor.var = {
-            target: '',
-            deadband: ''
+            target: 0,
+            deadband: 0
           };
         return (
           <>
@@ -110,14 +114,14 @@ export class CapacitorMenu extends React.Component<Props, State> {
               label='Target'
               name='target'
               hint='Unit in Var'
-              value={this.capacitor.var.target}
-              onChange={newValue => this.capacitor.var.target = newValue} />
+              value={String(this.capacitor.var.target)}
+              onChange={newValue => this.capacitor.var.target = +newValue || 0} />
             <Input
               label='Deadband'
               name='Deadband'
               hint='Unit in Var'
-              value={this.capacitor.var.deadband}
-              onChange={newValue => this.capacitor.var.deadband = newValue} />
+              value={String(this.capacitor.var.deadband)}
+              onChange={newValue => this.capacitor.var.deadband = +newValue || 0} />
           </>
         );
       case CapacitorControlMode.VOLT:
@@ -128,8 +132,8 @@ export class CapacitorMenu extends React.Component<Props, State> {
           };
         else
           this.capacitor.volt = {
-            target: '',
-            deadband: ''
+            target: 0,
+            deadband: 0
           };
         return (
           <>
@@ -137,14 +141,14 @@ export class CapacitorMenu extends React.Component<Props, State> {
               label='Target'
               name='target'
               hint='Unit in Volt'
-              value={this.capacitor.volt.target}
-              onChange={newValue => this.capacitor.volt.target = newValue} />
+              value={String(this.capacitor.volt.target)}
+              onChange={newValue => this.capacitor.volt.target = +newValue || 0} />
             <Input
               label='Deadband'
               name='Deadband'
               hint='Unit in Volt'
-              value={this.capacitor.volt.deadband}
-              onChange={newValue => this.capacitor.volt.deadband = newValue} />
+              value={String(this.capacitor.volt.deadband)}
+              onChange={newValue => this.capacitor.volt.deadband = +newValue || 0} />
           </>
         );
     }
@@ -158,9 +162,10 @@ export class CapacitorMenu extends React.Component<Props, State> {
   }
 
   onConfirm() {
+    this.props.onConfirm(this.capacitor);
     this.setState({
       show: false
-    }, () => this.props.onConfirm(this.capacitor));
+    });
   }
 
 }

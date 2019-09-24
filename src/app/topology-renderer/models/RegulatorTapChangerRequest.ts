@@ -4,7 +4,7 @@ interface Inputs {
   mRID: string;
   simulationId: string;
   differenceMRID: string;
-  tapValue: string;
+  tapValue: number;
   phase: string;
 }
 

@@ -380,8 +380,8 @@ export class TopologyRendererContainer extends React.Component<Props, State> {
     const capacitorVoltUpdateRequest = new CapacitorVoltUpdateRequest({
       componentMRID: this.props.mRIDs.get(capacitor.name),
       simulationId: this._simulationQueue.getActiveSimulation().id,
-      target: capacitor.var.target,
-      deadband: capacitor.var.deadband,
+      target: capacitor.volt.target,
+      deadband: capacitor.volt.deadband,
       differenceMRID: this._activeSimulationConfig.power_system_config.Line_name
     });
     this._stompClientService.send(
