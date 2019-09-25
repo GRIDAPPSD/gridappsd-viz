@@ -38,7 +38,9 @@ export class RegulatorMenu extends React.Component<Props, State> {
       ]
     };
 
-    this.regulator = { ...props.regulator };
+    this.regulator = {
+      ...props.regulator
+    };
     for (const phase of this.regulator.phases)
       if (!this.regulator.phaseValues[phase])
         this.regulator.phaseValues[phase] = {
@@ -66,8 +68,12 @@ export class RegulatorMenu extends React.Component<Props, State> {
               options={this.state.options}
               isOptionSelected={option => option.value === this.state.controlMode}
               onChange={selectedOption => {
-                this.regulator.controlMode = selectedOption.value;
-                this.setState({ controlMode: this.regulator.controlMode });
+                const selectedControlModel = selectedOption.value;
+                this.regulator.controlMode = selectedControlModel;
+                this.regulator.manual = selectedControlModel === RegulatorControlMode.MANUAL;
+                this.setState({
+                  controlMode: selectedControlModel
+                });
               }} />
             {this.showFormFieldsBasedOnControlMode()}
           </form>

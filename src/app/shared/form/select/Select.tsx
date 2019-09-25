@@ -56,9 +56,7 @@ export class Select<T, E extends boolean> extends React.Component<Props<T, E>, S
       filteredOptions: props.options,
       nothingSelectedMessage: []
     };
-    window.onkeydown = this._onPressEscapeToClose;
 
-    this._onPressEscapeToClose = this._onPressEscapeToClose.bind(this);
     this.closeOptionList = this.closeOptionList.bind(this);
     this.onChange = this.onChange.bind(this);
     this.onOpen = this.onOpen.bind(this);
@@ -72,11 +70,6 @@ export class Select<T, E extends boolean> extends React.Component<Props<T, E>, S
     this.setState({
       opened: false
     });
-  }
-
-  private _onPressEscapeToClose(event: KeyboardEvent) {
-    if (event.key === 'Escape')
-      this.closeOptionList();
   }
 
   private _produceCurrentLabelForMultiSelect() {

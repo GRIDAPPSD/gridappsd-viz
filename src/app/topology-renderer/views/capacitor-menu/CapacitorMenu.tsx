@@ -63,7 +63,7 @@ export class CapacitorMenu extends React.Component<Props, State> {
                 this.capacitor.controlMode = selectedControlMode;
                 this.capacitor.manual = selectedControlMode === CapacitorControlMode.MANUAL;
                 this.setState({
-                  controlMode: this.capacitor.controlMode
+                  controlMode: selectedControlMode
                 });
               }} />
             {this.showFormFieldsBasedOnControlMode()}
