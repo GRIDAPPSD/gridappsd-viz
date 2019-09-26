@@ -72,7 +72,7 @@ export class TabGroup extends React.Component<Props, State> {
             this.state.activeTab &&
             <div className='tabgroup__active-tab-indicator'
               style={{
-                // minus 4 because it has 2 px border
+                // minus 2 because it has 2 px border
                 transform: `translateX(${activeTab.offsetLeft - 2}px)`,
                 width: activeTab.clientWidth + 'px'
               }}>
