@@ -24,14 +24,14 @@ export class OpenOrCloseCapacitorRequest implements MessageRequest {
             {
               object: inputs.componentMRID,
               attribute: 'ShuntCompensator.sections',
-              value: !inputs.open
+              value: inputs.open ? 0 : 1
             }
           ],
           forward_differences: [
             {
               object: inputs.componentMRID,
               attribute: 'ShuntCompensator.sections',
-              value: inputs.open
+              value: inputs.open ? 1 : 0
             }
           ]
         }

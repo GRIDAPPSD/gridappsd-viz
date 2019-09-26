@@ -23,14 +23,14 @@ export class ToggleSwitchStateRequest implements MessageRequest {
           reverse_differences: [
             {
               object: inputs.componentMRID,
-              value: !inputs.open,
+              value: inputs.open ? 0 : 1,
               attribute: 'Switch.open'
             }
           ],
           forward_differences: [
             {
               object: inputs.componentMRID,
-              value: inputs.open,
+              value: inputs.open ? 1 : 0,
               attribute: 'Switch.open'
             }
           ]
