@@ -1,21 +1,35 @@
+.pop-up-container {
+    position: fixed;
+    width: 100vw;
+    height: 100vh;
+    left: 0;
+    top: 0;
+    z-index: 1000;
+}
+
+.pop-up-container.centered {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
 .pop-up {
     transform-origin: 50% 50%;
-    position: absolute;
-    overflow: hidden;
+    position: fixed;
     z-index: 24;
-    transition: opacity 300ms ease, visibility 300ms ease, transform 300ms ease;
+    top: auto;
+    left: auto;
+    animation-duration: 300ms;
+    animation-timing-function: ease;
+    animation-fill-mode: forwards;
 }
 
 .pop-up--enter {
-    visibility: visible;
-    opacity: 1;
-    transform: translateY(0) scale(1, 1);
+    animation-name: pop-up--enter;
 }
 
 .pop-up--leave {
-    visibility: hidden;
-    opacity: 0;
-    transform: translateY(25px) scale(0.9, 0.9);
+    animation-name: pop-up--leave;
 }
 
 @keyframes pop-up--enter {

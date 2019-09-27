@@ -166,14 +166,14 @@ export class TopologyRendererContainer extends React.Component<Props, State> {
           break;
         case 'switches':
           // if ((node.x1 !== 0 && node.y1 !== 0) || (node.x2 !== 0 && node.y2 !== 0)) {
-            nodes.push(this._createNewNode({
-              ...node,
-              name: node.name,
-              type: 'switch',
-              open: node.open === 'open',
-              x: Math.trunc(node.x1 !== 0 ? node.x1 : node.x2),
-              y: Math.trunc(node.y1 !== 0 ? node.y1 : node.y2),
-            }));
+          nodes.push(this._createNewNode({
+            ...node,
+            name: node.name,
+            type: 'switch',
+            open: node.open === 'open',
+            x: Math.trunc(node.x1 !== 0 ? node.x1 : node.x2),
+            y: Math.trunc(node.y1 !== 0 ? node.y1 : node.y2),
+          }));
           // }
           break;
         case 'solarpanels':
@@ -184,14 +184,14 @@ export class TopologyRendererContainer extends React.Component<Props, State> {
           }));
           break;
         case 'transformers':
-         // if ((node.x1 !== 0 && node.y1 !== 0) || (node.x2 !== 0 && node.y2 !== 0)) {
-            nodes.push(this._createNewNode({
-              ...node,
-              name: node.name,
-              type: 'transformer',
-              x: Math.trunc(node.x1 !== 0 ? node.x1 : node.x2),
-              y: Math.trunc(node.y1 !== 0 ? node.y1 : node.y2)
-            }));
+          // if ((node.x1 !== 0 && node.y1 !== 0) || (node.x2 !== 0 && node.y2 !== 0)) {
+          nodes.push(this._createNewNode({
+            ...node,
+            name: node.name,
+            type: 'transformer',
+            x: Math.trunc(node.x1 !== 0 ? node.x1 : node.x2),
+            y: Math.trunc(node.y1 !== 0 ? node.y1 : node.y2)
+          }));
           // }
           break;
         case 'capacitors':
@@ -212,17 +212,17 @@ export class TopologyRendererContainer extends React.Component<Props, State> {
           const fromNode: Node = allNodes.filter(e => e.name === node.from)[0] || this._createNewNode({ name: node.from });
           const toNode: Node = allNodes.filter(e => e.name === node.to)[0] || this._createNewNode({ name: node.to });
           // if (node.x1 !== 0.0 && node.y1 !== 0.0 && node.x2 !== 0.0 && node.y2 !== 0.0) {
-            fromNode.x = Math.trunc(node.x1);
-            fromNode.y = Math.trunc(node.y1);
-            toNode.x = Math.trunc(node.x2);
-            toNode.y = Math.trunc(node.y2);
-            nodes.push(fromNode, toNode);
-            edges.push({
-              ...node,
-              name: node.name,
-              from: fromNode,
-              to: toNode,
-            });
+          fromNode.x = Math.trunc(node.x1);
+          fromNode.y = Math.trunc(node.y1);
+          toNode.x = Math.trunc(node.x2);
+          toNode.y = Math.trunc(node.y2);
+          nodes.push(fromNode, toNode);
+          edges.push({
+            ...node,
+            name: node.name,
+            from: fromNode,
+            to: toNode,
+          });
           // }
           break;
         case 'regulators':

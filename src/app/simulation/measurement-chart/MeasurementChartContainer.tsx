@@ -57,7 +57,7 @@ export class MeasurementChartContainer extends React.Component<Props, State> {
       });
   }
 
-  private _buildMeasurementChartModel(plotModel: PlotModel, measurements: SimulationOutputMeasurement[]): MeasurementChartModel {
+  private _buildMeasurementChartModel(plotModel: PlotModel, measurements: Map<string, SimulationOutputMeasurement>): MeasurementChartModel {
     return plotModel.components.map(component => this._buildTimeSeries(plotModel, component, measurements))
       .reduce((measurementChartModel: MeasurementChartModel, timeSeries: TimeSeries) => {
         measurementChartModel.timeSeries.push(timeSeries);
@@ -68,7 +68,7 @@ export class MeasurementChartContainer extends React.Component<Props, State> {
   private _buildTimeSeries(
     plotModel: PlotModel,
     component: PlotModelComponent,
-    measurements: SimulationOutputMeasurement[]
+    measurements: Map<string, SimulationOutputMeasurement>
   ): TimeSeries {
     const timeSeriesName = component.displayName;
     const timeSeriesId = `${plotModel.name}_${timeSeriesName}`;
@@ -83,7 +83,7 @@ export class MeasurementChartContainer extends React.Component<Props, State> {
   private _getDataPointForTimeSeries(
     plotModel: PlotModel,
     component: PlotModelComponent,
-    measurements: SimulationOutputMeasurement[]
+    measurements: Map<string, SimulationOutputMeasurement>
   ): TimeSeriesDataPoint {
     const dataPoint = {
       primitiveX: new Date(),
@@ -92,36 +92,21 @@ export class MeasurementChartContainer extends React.Component<Props, State> {
     const valueType = plotModel.useMagnitude ? 'magnitude' : 'angle';
     switch (plotModel.componentType) {
       case ModelDictionaryComponentType.VOLTAGE:
-        const voltageMeasurement = measurements.find(
-          measurement => measurement.connectivityNode === component.id
-            && measurement.phases.includes(component.phase)
-            && measurement.type === ModelDictionaryComponentType.VOLTAGE
-            && measurement[valueType] !== undefined
-        );
+        const voltageMeasurement = measurements.get(component.id);
         if (voltageMeasurement !== undefined)
           dataPoint.primitiveY = voltageMeasurement[valueType];
         else
           console.warn(`No measurement found for component "${component.id}", plot name "${plotModel.name}"`);
         break;
       case ModelDictionaryComponentType.POWER:
-        const powerMeasurement = measurements.find(
-          measurement => measurement.conductingEquipmentName === component.id
-            && measurement.phases.includes(component.phase)
-            && measurement.type === ModelDictionaryComponentType.POWER
-            && measurement[valueType] !== undefined
-        );
+        const powerMeasurement = measurements.get(component.id);
         if (powerMeasurement !== undefined)
           dataPoint.primitiveY = powerMeasurement[valueType];
         else
           console.warn(`No measurement found for component "${component.id}", plot name "${plotModel.name}"`);
         break;
       case ModelDictionaryComponentType.TAP:
-        const tapMeasurement = measurements.find(
-          measurement => measurement.conductingEquipmentName === component.id
-            && measurement.phases.includes(component.phase)
-            && measurement.type === ModelDictionaryComponentType.TAP
-            && measurement.value !== undefined
-        );
+        const tapMeasurement = measurements.get(component.id);
         if (tapMeasurement !== undefined)
           dataPoint.primitiveY = tapMeasurement.value;
         else

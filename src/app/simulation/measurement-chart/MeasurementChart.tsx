@@ -38,12 +38,12 @@ export class MeasurementChart extends React.Component<Props, State> {
 
   componentDidMount() {
     this._init();
-    this._render(this.props.measurementChartModel);
+    this._render();
   }
 
-  componentWillReceiveProps(newProps: Props) {
-    if (newProps.measurementChartModel !== this.props.measurementChartModel)
-      this._render(newProps.measurementChartModel);
+  componentDidUpdate(prevProps: Props) {
+    if (prevProps.measurementChartModel !== this.props.measurementChartModel)
+      this._render();
   }
 
   render() {
@@ -90,11 +90,12 @@ export class MeasurementChart extends React.Component<Props, State> {
       .y(dataPoint => this._yScale(dataPoint.primitiveY));
   }
 
-  private _render(measurementChartModel: MeasurementChartModel) {
+  private _render() {
     this._container.selectAll('*').remove();
 
-    const axisExtents = this._calculateXYAxisExtents(measurementChartModel.timeSeries);
-
+    const axisExtents = this._calculateXYAxisExtents(this.props.measurementChartModel.timeSeries);
+    if (axisExtents.yExtent[0] === axisExtents.yExtent[1])
+      axisExtents.yExtent[0] = 0;
     this._timeScale.domain(axisExtents.xExtent);
     this._yScale.domain(axisExtents.yExtent);
 

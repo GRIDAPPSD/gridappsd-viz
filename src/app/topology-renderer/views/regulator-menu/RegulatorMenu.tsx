@@ -17,6 +17,7 @@ interface Props {
 }
 
 interface State {
+  show: boolean;
   controlMode: RegulatorControlMode;
   options: Option<RegulatorControlMode>[];
 }
@@ -27,7 +28,9 @@ export class RegulatorMenu extends React.Component<Props, State> {
 
   constructor(props: Props) {
     super(props);
+
     this.state = {
+      show: true,
       controlMode: props.regulator.controlMode,
       options: [
         new Option('Manual', RegulatorControlMode.MANUAL),
@@ -43,14 +46,18 @@ export class RegulatorMenu extends React.Component<Props, State> {
           lineDropX: '',
           tap: ''
         };
+
+    this.onCancel = this.onCancel.bind(this);
+    this.onConfirm = this.onConfirm.bind(this);
   }
 
   render() {
     return (
       <Dialog
         className='regulator-menu'
-        show={true}
-        styles={{ left: this.props.left + 'px', top: this.props.top + 'px' }}>
+        show={this.state.show}
+        top={this.props.top}
+        left={this.props.left}>
         <DialogContent styles={{ overflow: 'hidden' }}>
           <form className='regulator-menu__form'>
             <Select
@@ -69,11 +76,11 @@ export class RegulatorMenu extends React.Component<Props, State> {
           <BasicButton
             type='negative'
             label='Cancel'
-            onClick={this.props.onCancel} />
+            onClick={this.onCancel} />
           <BasicButton
             type='positive'
             label='Apply'
-            onClick={() => this.props.onConfirm(this.regulator)} />
+            onClick={this.onConfirm} />
         </DialogActions>
       </Dialog>
     );
@@ -131,4 +138,17 @@ export class RegulatorMenu extends React.Component<Props, State> {
     }
     return null;
   }
+
+  onCancel() {
+    this.setState({
+      show: false
+    }, this.props.onCancel);
+  }
+
+  onConfirm() {
+    this.setState({
+      show: false
+    }, () => this.props.onConfirm(this.regulator));
+  }
+
 }

@@ -10,12 +10,13 @@
     flex-flow: column;
     color: #3f51b5;
     transition: color 0.1s ease;
+    position: relative;
 }
 
 .form-control__label__hint {
     display: inline-block;
     color: rgba(0, 0, 0, 0.5);
-    font-size: 12px;
+    font-size: 0.8em;
     transform: translateY(16px);
     transition: color 0.1s ease;
     position: absolute;

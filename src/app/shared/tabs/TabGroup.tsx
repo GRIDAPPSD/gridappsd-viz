@@ -72,7 +72,7 @@ export class TabGroup extends React.Component<Props, State> {
             this.state.activeTab &&
             <div className='tabgroup__active-tab-indicator'
               style={{
-                // minus 4 because it has 2 px border
+                // minus 2 because it has 2 px border
                 transform: `translateX(${activeTab.offsetLeft - 2}px)`,
                 width: activeTab.clientWidth + 'px'
               }}>
@@ -86,12 +86,15 @@ export class TabGroup extends React.Component<Props, State> {
               style={{ transform: `translateX(${-activeTabIndex * 100}%)` }}>
               {
                 tabs.map((tab, index) => (
-                  <div key={index}
-                    className={`tab-content tab-content-${index}`}
-                    style={{
-                      visibility: activeTabIndex === index || previousTabIndex === index ? 'visible' : 'hidden'
-                    }}>
-                    {tab.props.children}
+                  <div
+                    key={index}
+                    id={`tab-content-${index}`}
+                    className='tab-content'>
+                    {
+                      (activeTabIndex === index || previousTabIndex === index)
+                      &&
+                      tab.props.children
+                    }
                   </div>
                 ))
               }

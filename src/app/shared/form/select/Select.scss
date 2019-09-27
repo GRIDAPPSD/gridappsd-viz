@@ -73,15 +73,17 @@
 }
 
 .select__option-list-wrapper {
+    max-width: 300px;
     left: 0;
     top: 0;
     box-shadow: 2px 5px 20px -10px rgba(0, 0, 0, 0.2), 2px 5px 40px rgba(0, 0, 0, 0.25);
     border-radius: 5px;
     background-color: #fff;
     z-index: 300;
-    max-height: 100vh;
+    max-height: 99.5vh;
     display: flex;
     flex-flow: column;
+    padding-bottom: 5px;
 }
 
 
@@ -90,4 +92,14 @@
     color: rgba(0, 0, 0, 0.3);
     box-shadow: none;
     pointer-events: none;
+}
+
+.select__button-group {
+    padding-top: 5px;
+    box-shadow: 0 -1px 5px #eee;
+
+    button {
+        margin-right: 5px;
+        margin-left: 5px
+    }
 }

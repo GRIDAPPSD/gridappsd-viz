@@ -12,8 +12,22 @@
     }
 }
 
-.selected-option-list-container.open .show-selected-option-list {
-    transform: rotate(180deg) scale(1.1, 1.1);
+.selected-option-list-container.open {
+
+    .show-selected-option-list {
+        transform: rotate(180deg) scale(1.1, 1.1);
+    }
+
+    .selected-option-list {
+        height: 100%;
+        padding-top: 15px;
+    }
+}
+
+.selected-option-list-container.closed .selected-option-list {
+    height: 0;
+    padding-top: 0;
+    overflow: hidden;
 }
 
 .selected-option-list {
@@ -22,8 +36,10 @@
     border-bottom: 2px solid rgba(0, 0, 0, 0.01);
     border-top: 2px solid rgba(0, 0, 0, 0.01);
     width: 100%;
-    overflow: hidden;
-    background-color: #fcfcfc;
+    overflow-x: hidden;
+    overflow-y: auto;
+    background-color: #f2f9fb;
+    max-height: 60vh;
 
     .selected-option-list__option__deselect {
         transform: scale(0.7, 0.7);

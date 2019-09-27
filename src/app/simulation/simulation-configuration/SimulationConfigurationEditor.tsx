@@ -8,20 +8,23 @@ import { Application } from '@shared/Application';
 import { Dialog, DialogContent, DialogActions } from '@shared/dialog';
 import { TabGroup, Tab } from '@shared/tabs';
 import { BasicButton } from '@shared/buttons';
-import { PowerSystemConfigurationFormGroup } from './views/PowerSystemConfigurationFormGroup';
-import { SimulationConfigurationFormGroup } from './views/SimulationConfigurationFormGroup';
-import { ApplicationConfigurationFormGroup } from './views/ApplicationConfigurationFormGroup';
-import { TestConfigurationFormGroup } from './views/TestConfigurationFormGroup';
+import { PowerSystemConfiguration } from './views/power-system-configuration';
+import { SimulationConfigurationTab } from './views/simulation-configuration-tab';
+import { ApplicationConfiguration } from './views/application-configuration';
+import { TestConfiguration } from './views/test-configuration';
 import { DateTimeService } from './services/DateTimeService';
 import { CommOutageEvent } from '../../shared/test-manager/CommOutageEvent';
 import { FaultEvent, FaultKind } from '../../shared/test-manager/FaultEvent';
-import { PowerSystemConfigurationFormGroupValue } from './models/PowerSystemConfigurationFormGroupValue';
-import { SimulationConfigurationFormGroupValue } from './models/SimulationConfigurationFormGroupValue';
-import { ApplicationConfigurationFormGroupValue } from './models/ApplicationConfigurationFormGroupValue';
+import { PowerSystemConfigurationModel } from './models/PowerSystemConfigurationModel';
+import { SimulationConfigurationTabModel } from './models/SimulationConfigurationTabModel';
+import { ApplicationConfigurationModel } from './models/ApplicationConfigurationModel';
 import { StateStore } from '@shared/state-store';
 import { ThreeDots } from '@shared/three-dots';
 import { NotificationBanner } from '@shared/notification-banner';
 import { ModelDictionaryComponent } from '@shared/topology/model-dictionary/ModelDictionaryComponent';
+import { ServiceConfiguration } from './views/service-configuration';
+import { Service } from '@shared/Service';
+import { ServiceConfigurationEntryModel } from './models/ServiceConfigurationEntryModel';
 
 import './SimulationConfigurationEditor.scss';
 
@@ -42,6 +45,7 @@ interface State {
   disableSubmitButton: boolean;
   lineName: string;
   componentsWithConsolidatedPhases: ModelDictionaryComponent[];
+  services: Service[];
 }
 
 export class SimulationConfigurationEditor extends React.Component<Props, State> {
@@ -65,35 +69,43 @@ export class SimulationConfigurationEditor extends React.Component<Props, State>
       modelDictionary: null,
       disableSubmitButton: true,
       lineName: props.initialConfig.power_system_config.Line_name,
-      componentsWithConsolidatedPhases: []
+      componentsWithConsolidatedPhases: [],
+      services: []
     };
 
     this.currentConfig = this._cloneConfigObject(props.initialConfig);
 
-    this.onPowerSystemConfigurationFormGroupValueChanged = this.onPowerSystemConfigurationFormGroupValueChanged.bind(this);
-    this.onSimulationConfigurationFormGroupValueChanged = this.onSimulationConfigurationFormGroupValueChanged.bind(this);
-    this.onApplicationConfigurationFormGroupValueChanged = this.onApplicationConfigurationFormGroupValueChanged.bind(this);
+    this.onPowerSystemConfigurationChanged = this.onPowerSystemConfigurationChanged.bind(this);
+    this.onSimulationConfigurationChanged = this.onSimulationConfigurationChanged.bind(this);
+    this.onApplicationConfigurationChanged = this.onApplicationConfigurationChanged.bind(this);
     this.onFaultEventsAdded = this.onFaultEventsAdded.bind(this);
+    this.onServiceConfigurationsChanged = this.onServiceConfigurationsChanged.bind(this);
+    this.onServiceConfigurationValidationChanged = this.onServiceConfigurationValidationChanged.bind(this);
     this.closeForm = this.closeForm.bind(this);
     this.submitForm = this.submitForm.bind(this);
   }
 
   private _cloneConfigObject(original: SimulationConfiguration): SimulationConfiguration {
-    const config = {} as SimulationConfiguration;
-    config.power_system_config = { ...original.power_system_config };
-    config.application_config = {
-      applications: original.application_config.applications.length > 0 ?
-        [{ ...original.application_config.applications[0] }] : []
+    return {
+      power_system_config: {
+        ...original.power_system_config
+      },
+      application_config: {
+        applications: original.application_config.applications.length > 0 ?
+          [{ ...original.application_config.applications[0] }] : []
+      },
+      simulation_config: {
+        ...original.simulation_config,
+        start_time: this.dateTimeService.format(this.simulationStartDate)
+      },
+      test_config: {
+        events: original.test_config.events.map(event => Object.assign({}, event)),
+        appId: original.test_config.appId
+      },
+      service_configs: [
+        ...original.service_configs
+      ]
     };
-    config.simulation_config = {
-      ...original.simulation_config,
-      start_time: this.dateTimeService.format(this.simulationStartDate)
-    };
-    config.test_config = {
-      events: original.test_config.events.map(event => Object.assign({}, event)),
-      appId: original.test_config.appId
-    };
-    return config;
   }
 
   componentDidMount() {
@@ -126,6 +138,14 @@ export class SimulationConfigurationEditor extends React.Component<Props, State>
           componentsWithConsolidatedPhases: components
         })
       });
+
+    this._stateStore.select('services')
+      .pipe(takeUntil(this._unsubscriber))
+      .subscribe({
+        next: services => this.setState({
+          services
+        })
+      });
   }
 
   componentWillUnmount() {
@@ -140,24 +160,30 @@ export class SimulationConfigurationEditor extends React.Component<Props, State>
           <form className='simulation-configuration-form'>
             <TabGroup>
               <Tab label='Power System Configuration'>
-                <PowerSystemConfigurationFormGroup
+                <PowerSystemConfiguration
                   feederModel={this.props.feederModel}
-                  onChange={this.onPowerSystemConfigurationFormGroupValueChanged} />
+                  onChange={this.onPowerSystemConfigurationChanged} />
               </Tab>
               <Tab label='Simulation Configuration'>
-                <SimulationConfigurationFormGroup
+                <SimulationConfigurationTab
                   currentConfig={this.currentConfig}
                   simulationName={this.state.simulationName}
-                  onChange={this.onSimulationConfigurationFormGroupValueChanged} />
+                  onChange={this.onSimulationConfigurationChanged} />
               </Tab>
               <Tab label='Application Configuration'>
-                <ApplicationConfigurationFormGroup
+                <ApplicationConfiguration
                   currentConfig={this.currentConfig}
                   availableApplications={this.props.availableApplications}
-                  onChange={this.onApplicationConfigurationFormGroupValueChanged} />
+                  onChange={this.onApplicationConfigurationChanged} />
               </Tab>
               <Tab label='Test Configuration'>
                 {this.showCurrentComponentForTestConfigurationTab()}
+              </Tab>
+              <Tab label='Service Configuration'>
+                <ServiceConfiguration
+                  services={this.state.services}
+                  onChange={this.onServiceConfigurationsChanged}
+                  onValidationChange={this.onServiceConfigurationValidationChanged} />
               </Tab>
             </TabGroup>
           </form>
@@ -177,7 +203,7 @@ export class SimulationConfigurationEditor extends React.Component<Props, State>
     );
   }
 
-  onPowerSystemConfigurationFormGroupValueChanged(formValue: PowerSystemConfigurationFormGroupValue) {
+  onPowerSystemConfigurationChanged(formValue: PowerSystemConfigurationModel) {
     if (formValue.isValid) {
       const currentPowerSystemConfig = this.currentConfig.power_system_config;
       currentPowerSystemConfig.GeographicalRegion_name = formValue.regionId;
@@ -192,11 +218,11 @@ export class SimulationConfigurationEditor extends React.Component<Props, State>
     }
     this.setState({
       lineName: formValue.lineId,
-      disableSubmitButton: !formValue.isValid
+      disableSubmitButton: formValue.lineId === '' || !formValue.isValid
     });
   }
 
-  onSimulationConfigurationFormGroupValueChanged(formValue: SimulationConfigurationFormGroupValue) {
+  onSimulationConfigurationChanged(formValue: SimulationConfigurationTabModel) {
     if (formValue.isValid) {
       this.currentConfig.simulation_config.start_time = formValue.startDateTime;
       this.currentConfig.simulation_config.duration = formValue.duration;
@@ -206,12 +232,12 @@ export class SimulationConfigurationEditor extends React.Component<Props, State>
         this.currentConfig.simulation_config.simulation_name = formValue.simulationName.replace('[NEW]', '');
       this.currentConfig.simulation_config.model_creation_config = formValue.modelCreationConfig;
     }
-    this.setState({
-      disableSubmitButton: !formValue.isValid
-    });
+    this.setState(prevState => ({
+      disableSubmitButton: prevState.lineName === '' || !formValue.isValid
+    }));
   }
 
-  onApplicationConfigurationFormGroupValueChanged(formValue: ApplicationConfigurationFormGroupValue) {
+  onApplicationConfigurationChanged(formValue: ApplicationConfigurationModel) {
     if (formValue.applicationId !== '') {
       const selectedApplication = this.currentConfig.application_config.applications.pop() || { name: '', config_string: '' };
       selectedApplication.name = formValue.applicationId;
@@ -242,7 +268,7 @@ export class SimulationConfigurationEditor extends React.Component<Props, State>
         </NotificationBanner>
       );
     return (
-      <TestConfigurationFormGroup
+      <TestConfiguration
         modelDictionary={this.state.modelDictionary}
         simulationStartDate={this.dateTimeService.format(this.simulationStartDate)}
         simulationStopDate={this.dateTimeService.format(this.calculateSimulationStopTime())}
@@ -253,6 +279,19 @@ export class SimulationConfigurationEditor extends React.Component<Props, State>
 
   calculateSimulationStopTime() {
     return +this.currentConfig.simulation_config.duration * 1000 + this.simulationStartDate.getTime();
+  }
+
+  onServiceConfigurationsChanged(serviceConfigurationEntryModels: ServiceConfigurationEntryModel[]) {
+    this.currentConfig.service_configs = serviceConfigurationEntryModels.map(model => ({
+      id: model.service.id,
+      user_options: model.values
+    }));
+  }
+
+  onServiceConfigurationValidationChanged(isValid: boolean) {
+    this.setState({
+      disableSubmitButton: this.state.lineName === '' || !isValid
+    });
   }
 
   closeForm(event: React.SyntheticEvent) {
@@ -267,9 +306,9 @@ export class SimulationConfigurationEditor extends React.Component<Props, State>
     const selectedApplication = this.currentConfig.application_config.applications[0];
     this.currentConfig.test_config.appId = selectedApplication ? selectedApplication.name : '';
     for (const outageEvent of this.outageEvents)
-      this.currentConfig.test_config.events.push(this._transformOutageEventForForSubmission(outageEvent));
+      this.currentConfig.test_config.events.push(this._transformOutageEventForSubmission(outageEvent));
     for (const faultEvent of this.faultEvents)
-      this.currentConfig.test_config.events.push(this._transformFaultEventForForSubmission(faultEvent));
+      this.currentConfig.test_config.events.push(this._transformFaultEventForSubmission(faultEvent));
     this._stateStore.update({
       faultEvents: this.faultEvents,
       outageEvents: this.outageEvents
@@ -277,7 +316,7 @@ export class SimulationConfigurationEditor extends React.Component<Props, State>
     this.props.onSubmit(this.currentConfig);
   }
 
-  private _transformOutageEventForForSubmission(outageEvent: CommOutageEvent) {
+  private _transformOutageEventForSubmission(outageEvent: CommOutageEvent) {
     return {
       allInputOutage: outageEvent.allInputOutage,
       allOutputOutage: outageEvent.allOutputOutage,
@@ -299,7 +338,7 @@ export class SimulationConfigurationEditor extends React.Component<Props, State>
     };
   }
 
-  private _transformFaultEventForForSubmission(faultEvent: FaultEvent) {
+  private _transformFaultEventForSubmission(faultEvent: FaultEvent) {
     return {
       PhaseConnectedFaultKind: faultEvent.faultKind,
       FaultImpedance: this._getImpedance(faultEvent),

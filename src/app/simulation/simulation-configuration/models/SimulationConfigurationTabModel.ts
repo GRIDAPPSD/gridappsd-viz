@@ -1,4 +1,4 @@
-export interface SimulationConfigurationFormGroupValue {
+export interface SimulationConfigurationTabModel {
   startDateTime: string;
   duration: string;
   simulator: string;

@@ -79,18 +79,18 @@ export class SimulationLabelsContainer extends React.Component<Props, State> {
           for (const [nodeName, phases] of Object.entries(nodeNames)) {
             let content = [];
             // getting values for taps
-            const filteredMeasurements = measurements.filter(
-              m => m.conductingEquipmentName.includes(nodeName) && m.type === 'Pos'
-            );
-            // Only get the measurements for phases A, B, C and discard measurements with duplicate phases
-            const measurementsAtPhases = filteredMeasurements.reduce(
-              (accumulator, m) => {
-                if (phases.includes(m.phases) && accumulator.findIndex(e => e.phases === m.phases) === -1)
-                  accumulator.push(m);
-                return accumulator;
-              },
-              []
-            ).sort((a, b) => a.phases.localeCompare(b.phases));
+            const measurementsAtPhases = [];
+            measurements.forEach(measurement => {
+              if (
+                measurement.conductingEquipmentName.includes(nodeName) &&
+                measurement.type === 'Pos' &&
+                phases.includes(measurement.phases) &&
+                // Discard measurements with duplicate phases
+                measurementsAtPhases.find(e => e.phases === measurement.phases) === undefined
+              ) {
+                measurementsAtPhases.push(measurement);
+              }
+            });
 
             if (nodeName.includes('capbank') || nodeName.includes('c83')) {
               content = measurementsAtPhases.map(node => (
@@ -102,29 +102,33 @@ export class SimulationLabelsContainer extends React.Component<Props, State> {
             }
             else {
               // get measurements for voltages
-              const voltages = measurements.filter(
-                m => measurementsAtPhases[0].connectivityNode === m.connectivityNode && m.type === 'PNV'
-              );
-              const voltagesAtPhases = voltages.reduce(
-                (accumulator, m) => {
-                  // discard measures with phases that were already added
-                  if (phases.includes(m.phases) && accumulator.findIndex(e => e.phases === m.phases) === -1)
-                    accumulator.push(m);
-                  return accumulator;
-                },
-                []
-              ).sort((a, b) => a.phases.localeCompare(b.phases));
+              const voltagesAtPhases = [];
+              measurements.forEach(measurement => {
+                if (
+                  measurementsAtPhases[0].connectivityNode === measurement.connectivityNode &&
+                  measurement.type === 'PNV' &&
+                  phases.includes(measurement.phases) &&
+                  // Discard measurements with duplicate phases
+                  voltagesAtPhases.find(e => e.phases === measurement.phases) === undefined
+                ) {
+                  voltagesAtPhases.push(measurement);
+                }
+              });
+              voltagesAtPhases.sort((a, b) => a.phases.localeCompare(b.phases));
 
-              const powers = measurements.filter(m => m.conductingEquipmentName === 'hvmv_sub' && m.type === 'VA');
-              const powersAtPhases = powers.reduce(
-                (accumulator, m) => {
-                  // Only get the measurements for phases A, B, C and discard measurements with duplicate phases
-                  if (phases.includes(m.phases) && accumulator.findIndex(e => e.phases === m.phases) === -1)
-                    accumulator.push(m);
-                  return accumulator;
-                },
-                []
-              ).sort((a, b) => a.phases.localeCompare(b.phases));
+              const powersAtPhases = [];
+              measurements.forEach(measurement => {
+                if (
+                  measurement.conductingEquipmentName === 'hvmv_sub' &&
+                  measurement.type === 'VA' &&
+                  phases.includes(measurement.phases) &&
+                  // Discard measurements with duplicate phases
+                  powersAtPhases.find(e => e.phases === measurement.phases) === undefined
+                ) {
+                  powersAtPhases.push(measurement);
+                }
+              });
+              powersAtPhases.sort((a, b) => a.phases.localeCompare(b.phases));
 
               content.push(
                 <tr key='header'>

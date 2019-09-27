@@ -136,7 +136,9 @@ export class CommOutageEventForm extends React.Component<Props, State> {
   render() {
     return (
       <div className='comm-outage-event'>
-        <FormGroup label='Input Outage List'>
+        <FormGroup
+          label='Input Outage List'
+          collapsible={false}>
           <CheckBox
             label='All Input Outage'
             name='allInputOutage'
@@ -211,7 +213,9 @@ export class CommOutageEventForm extends React.Component<Props, State> {
             </table>
           }
         </FormGroup>
-        <FormGroup label='Output Outage List'>
+        <FormGroup
+          label='Output Outage List'
+          collapsible={false}>
           <CheckBox
             label='All Ouput Outage'
             name='allOutputOutage'

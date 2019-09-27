@@ -32,9 +32,9 @@ interface State {
 export class TopologyRenderer extends React.Component<Props, State> {
 
   svg: SVGSVGElement = null;
+  readonly overlay = OverlayService.getInstance();
 
   private readonly _transformWatcherService = MapTransformWatcherService.getInstance();
-  private readonly _overlay = OverlayService.getInstance();
   private readonly _zoomer = zoom();
   private readonly _edgeGenerator = line<{ edge: Edge; node: Node }>()
     .x(d => d.node.screenX)
@@ -63,10 +63,8 @@ export class TopologyRenderer extends React.Component<Props, State> {
   private _showNodeSymbols = false;
   private _tooltip: Tooltip;
 
-  constructor(props: any) {
+  constructor(props: Props) {
     super(props);
-    this.state = {
-    };
 
     this.showMenuOnComponentClicked = this.showMenuOnComponentClicked.bind(this);
     this.showTooltip = this.showTooltip.bind(this);
@@ -89,7 +87,7 @@ export class TopologyRenderer extends React.Component<Props, State> {
   }
 
   private _toggleNodeSymbols(currentTransformScaleDegree: number) {
-    if ( this.props.topology.nodes.length <= 200 ) {
+    if (this.props.topology.nodes.length <= 200) {
       if (currentTransformScaleDegree > 1.5 && !this._showNodeSymbols) {
         this._showNodeSymbols = true;
         this._showSymbols();
@@ -278,7 +276,7 @@ export class TopologyRenderer extends React.Component<Props, State> {
     // First quadrant or third quadrant
     if (to.x > from.x && to.y < from.y || to.x < from.x && to.y > from.y)
       return -angle;
-    // Second quadrant or fourth quadrant 
+    // Second quadrant or fourth quadrant
     if (to.x < from.x && to.y < from.y || to.x > from.x && to.y > from.y)
       return angle;
     // No rotation
@@ -322,17 +320,16 @@ export class TopologyRenderer extends React.Component<Props, State> {
     const clickedElementRect = clickedElement.node()
       .getBoundingClientRect();
     const swjtch = clickedElement.datum() as Switch;
-    this._overlay.show(
+    this.overlay.show(
       <SwitchMenu
         left={clickedElementRect.left}
         top={clickedElementRect.top}
         open={swjtch.open}
-        onCancel={() => this._overlay.hide(false)}
+        onCancel={this.overlay.hide}
         onConfirm={open => {
-          this._overlay.hide(false);
+          this.overlay.hide();
           this._toggleSwitch(open, swjtch, clickedElement);
-        }} />,
-      false
+        }} />
     );
   }
 
@@ -378,17 +375,16 @@ export class TopologyRenderer extends React.Component<Props, State> {
     const clickedElementRect = clickedElement.node()
       .getBoundingClientRect();
     const capacitor = clickedElement.datum() as Capacitor;
-    this._overlay.show(
+    this.overlay.show(
       <CapacitorMenu
         left={clickedElementRect.left}
         top={clickedElementRect.top}
         capacitor={capacitor}
-        onCancel={() => this._overlay.hide(false)}
+        onCancel={this.overlay.hide}
         onConfirm={newCapacitor => {
-          this._overlay.hide(false);
+          this.overlay.hide();
           this.props.onCapacitorMenuFormSubmitted(capacitor, newCapacitor);
-        }} />,
-      false
+        }} />
     );
   }
 
@@ -396,17 +392,16 @@ export class TopologyRenderer extends React.Component<Props, State> {
     const clickedElementRect = clickedElement.node()
       .getBoundingClientRect();
     const regulator = clickedElement.datum() as Regulator;
-    this._overlay.show(
+    this.overlay.show(
       <RegulatorMenu
         left={clickedElementRect.left}
         top={clickedElementRect.top}
         regulator={regulator}
-        onCancel={() => this._overlay.hide(false)}
+        onCancel={this.overlay.hide}
         onConfirm={newRegulator => {
-          this._overlay.hide(false);
+          this.overlay.hide();
           this.props.onRegulatorMenuFormSubmitted(regulator, newRegulator);
-        }} />,
-      false
+        }} />
     );
   }
 

@@ -5,9 +5,10 @@ import { SimulationStatus } from '@shared/simulation';
 import { Tooltip } from '@shared/tooltip';
 import { Ripple } from '@shared/ripple';
 import { PlotModel } from '@shared/plot-model/PlotModel';
-import { OverlayService } from '@shared/overlay';
 import { PlotModelCreator } from './views/plot-model-creator/PlotModelCreator';
 import { ModelDictionaryComponent } from '@shared/topology';
+import { OverlayService } from '@shared/overlay';
+import { copyToClipboard } from '@shared/misc';
 
 import './SimulationControl.scss';
 
@@ -31,7 +32,7 @@ interface State {
 
 export class SimulationControl extends React.Component<Props, State> {
 
-  private readonly _overlayService = OverlayService.getInstance();
+  readonly overlayService = OverlayService.getInstance();
 
   constructor(props: Props) {
     super(props);
@@ -42,6 +43,7 @@ export class SimulationControl extends React.Component<Props, State> {
 
     this.saveSimulationIdToClipboard = this.saveSimulationIdToClipboard.bind(this);
     this.showPlotModelCreator = this.showPlotModelCreator.bind(this);
+    this.onPlotModelsCreated = this.onPlotModelsCreated.bind(this);
   }
 
   render() {
@@ -130,23 +132,13 @@ export class SimulationControl extends React.Component<Props, State> {
             onClick={this.showPlotModelCreator} />
         </Tooltip>
       </div>
-
     );
   }
 
   saveSimulationIdToClipboard(event: React.SyntheticEvent) {
-    const fakeInput = document.createElement('input');
-    fakeInput.setAttribute('style', 'position:fixed');
-    fakeInput.value = (event.target as HTMLElement).textContent;
-    document.body.appendChild(fakeInput);
-    fakeInput.select();
-
     this.setState({
-      simulationIdCopiedSuccessfully: document.execCommand('copy')
+      simulationIdCopiedSuccessfully: copyToClipboard((event.target as Element).textContent)
     });
-
-    window.getSelection().removeAllRanges();
-    document.body.removeChild(fakeInput);
 
     setTimeout(() => {
       this.setState({
@@ -156,19 +148,18 @@ export class SimulationControl extends React.Component<Props, State> {
   }
 
   showPlotModelCreator() {
-    this._overlayService.show(
+    this.overlayService.show(
       <PlotModelCreator
         modelDictionaryComponentsWithConsolidatedPhases={this.props.modelDictionaryComponentsWithConsolidatedPhases}
         existingPlotModels={this.props.existingPlotModels}
-        onSubmit={models => {
-          this.props.onPlotModelCreationDone(models);
-          this._overlayService.hide();
-          this.setState({
-            showStartSimulationButton: true
-          });
-        }}
-        onClose={this._overlayService.hide} />
+        onSubmit={this.onPlotModelsCreated}
+        onClose={this.overlayService.hide} />
     );
+  }
+
+  onPlotModelsCreated(plotModels: PlotModel[]) {
+    this.props.onPlotModelCreationDone(plotModels);
+    this.overlayService.hide();
   }
 
 }
