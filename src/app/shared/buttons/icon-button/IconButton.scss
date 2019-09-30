@@ -16,18 +16,23 @@
         box-shadow: 0px 3px 10px rgba(0, 0, 0, 0.2), 0px 2px 7px rgba(0, 0, 0, 0.2);
     }
 
-    i {
+    i,
+    span {
         pointer-events: none;
     }
-
 }
 
 .icon-button--primary:disabled,
-.icon-button--accent:disabled,
 .icon-button--default:disabled {
     background-color: #e0e0e0;
     box-shadow: none;
     color: #efefef;
+}
+
+.icon-button--accent:disabled {
+    background-color: #e0e0e0;
+    box-shadow: none;
+    color: #c9bfbf;
 }
 
 .icon-button--primary {

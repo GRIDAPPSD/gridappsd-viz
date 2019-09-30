@@ -42,7 +42,9 @@ export class Wait extends React.Component<Props, State> {
         <div
           ref={element => this.waitElement = element}
           className='wait'
-          style={{ height: this.state.height + 'px' }}>
+          style={{
+            height: this.state.height > 0 ? this.state.height + 'px' : '100vh'
+          }}>
           <Backdrop visible />
           <div className='dots'>
             <span className='dot' />

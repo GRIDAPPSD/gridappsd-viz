@@ -4,9 +4,10 @@ import { Ripple } from '../../ripple/Ripple';
 
 import './IconButton.scss';
 
-type Icon = 'check_circle' | 'menu' | 'assignment' | 'storage' | 'search' | 'laptop' | 'delete' | 'cloud_upload'
-  | 'pause' | 'stop' | 'play_arrow' | 'add' | 'remove' | 'cached' | 'save' | 'close' | 'navigate_next' | 'navigate_before'
-  | 'keyboard_arrow_down' | 'memory' | 'send' | 'show_chart' | 'edit' | 'help_outline';
+type Icon = 'check_circle' | 'menu' | 'assignment' | 'storage' | 'search' | 'laptop' | 'delete'
+  | 'cloud_upload' | 'pause' | 'stop' | 'play_arrow' | 'add' | 'remove' | 'cached' | 'save'
+  | 'close' | 'navigate_next' | 'navigate_before' | 'keyboard_arrow_down' | 'memory' | 'send'
+  | 'show_chart' | 'edit' | 'help_outline' | 'arrow_downward';
 
 
 interface Props {
@@ -24,7 +25,7 @@ interface Props {
 export function IconButton(props: Props) {
   return (
     <Ripple
-      fixed={props.rounded || props.rounded === undefined}
+      fixed={props.label ? false : props.rounded || props.rounded === undefined}
       color={resolveRippleColor(props)}>
       <button
         type='button'
@@ -44,9 +45,17 @@ export function IconButton(props: Props) {
 }
 
 function deriveClassName(props: Props) {
+  const classNames = [
+    'icon-button',
+    `icon-button--${props.style ? props.style : 'primary'}`
+  ];
+  if (props.label)
+    classNames.push('icon-button--has-label');
+  if (props.className)
+    classNames.push(props.className);
   if (props.rounded || (props.rounded === undefined && !props.label))
-    return ` rounded-icon-button rounded-icon-button--${props.size ? props.size : 'normal'}`;
-  return props.label ? ' icon-button--has-label' : '';
+    classNames.push(`rounded-icon-button rounded-icon-button--${props.size ? props.size : 'normal'}`);
+  return classNames.join(' ');
 }
 
 function resolveRippleColor(props: Props) {
