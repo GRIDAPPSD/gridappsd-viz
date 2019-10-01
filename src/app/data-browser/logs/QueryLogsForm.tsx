@@ -59,7 +59,7 @@ export class QueryLogsForm extends React.Component<Props, State> {
   render() {
     return (
       <>
-        <RequestEditor styles={{ overflow: 'initial', borderRadius: 'initial', boxShadow: 'initial', height: 'initial' }}>
+        <RequestEditor>
           <form className='query-logs-form'>
             <div className='query-logs-form__left'>
               <Input

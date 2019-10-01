@@ -8,6 +8,9 @@ import { SimulationId } from './models/SimulationId';
 import { QueryLogsForm } from './QueryLogsForm';
 import { QueryLogsResultTable } from './QueryLogsResultTable';
 import { Response } from '../Response';
+import { NotificationBanner } from '@shared/notification-banner';
+
+import './Logs';
 
 interface Props {
 }
@@ -101,21 +104,21 @@ export class LogsContainer extends React.Component<Props, State> {
 
   render() {
     return (
-      <div style={{ boxShadow: '0 0 2px #888', height: '100%', position: 'relative' }}>
+      <div className='log-data-browser'>
         <QueryLogsForm
           simulationIds={this.state.simulationIds}
           sources={this.state.sources}
           onSimulationIdSelected={this.getSource}
           onSubmit={this.getLogs} />
-        <Response styles={{ boxShadow: 'initial', borderRadius: '0', height: '60vh', maxHeight: '60vh', overflow: 'initial' }}>
+        <Response>
           {
             this.state.result.length > 0
               ?
               <QueryLogsResultTable rows={this.state.result} />
               :
-              <div style={{ textAlign: 'center', transform: 'translateY(200px)', fontSize: '2em' }}>
+              <NotificationBanner persistent>
                 No result
-              </div>
+              </NotificationBanner>
           }
         </Response>
       </div>
