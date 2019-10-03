@@ -34,7 +34,7 @@ export class Ripple extends React.Component<Props, {}> {
     );
   }
 
-  private _showRipple(event) {
+  private _showRipple(event: MouseEvent) {
     const rect = this._rippleTrigger.getBoundingClientRect();
     const rippleContainer = document.createElement('div');
     rippleContainer.className = 'ripple';

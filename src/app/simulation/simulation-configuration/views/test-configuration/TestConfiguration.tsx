@@ -14,6 +14,7 @@ import { FaultEventSummaryTable } from './FaultEventSummaryTable';
 import { CommOutageEvent, FaultEvent, FaultKind } from '@shared/test-manager';
 import { Validators } from '@shared/form/validation';
 import { ModelDictionaryComponent } from '@shared/topology/model-dictionary/ModelDictionaryComponent';
+import { download, DownloadType } from '@shared/misc';
 
 import './TestConfiguration.scss';
 
@@ -301,20 +302,14 @@ export class TestConfiguration extends React.Component<Props, State> {
   }
 
   saveEventsIntoFile() {
-    const a = document.createElement('a');
-    a.setAttribute('style', 'display:none');
-    const fileContent = JSON.stringify({
-      outageEvents: this.state.outageEvents,
-      faultEvents: this.state.faultEvents
-    }, null, 4);
-    const blob = new Blob([fileContent], { type: 'application/json' });
-    const downloadUrl = URL.createObjectURL(blob);
-    a.href = downloadUrl;
-    a.download = 'events.json';
-    document.body.appendChild(a);
-    a.click();
-    URL.revokeObjectURL(downloadUrl);
-    document.body.removeChild(a);
+    download(
+      'events.json',
+      JSON.stringify({
+        outageEvents: this.state.outageEvents,
+        faultEvents: this.state.faultEvents
+      }, null, 4),
+      DownloadType.JSON
+    );
   }
 
 }
