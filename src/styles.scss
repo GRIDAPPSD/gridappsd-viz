@@ -24,6 +24,17 @@ main {
     overflow: hidden;
 }
 
+body.resizing * {
+    pointer-events: none;
+    -moz-user-select: none;
+    -webkit-user-select: none;
+    user-select: none;
+}
+
+body.resizing {
+    cursor: nwse-resize;
+}
+
 a {
     outline: none;
     text-decoration: none;

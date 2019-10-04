@@ -25,7 +25,15 @@ interface State {
 
 export class TextArea extends React.Component<Props, State> {
 
+  inputBox: HTMLElement;
+
   private readonly _valueChanges = new Subject<string>();
+  private _isResizing = false;
+  // The x coordinate of the mousedown event when the user begins the resize
+  private _initialClientX = 0;
+  // The y coordinate of the mousedown event when the user begins the resize
+  private _initialClientY = 0;
+  private _inputBoxBoundingBox: ClientRect;
 
   constructor(props: Props) {
     super(props);
@@ -33,16 +41,42 @@ export class TextArea extends React.Component<Props, State> {
       validationErrors: []
     };
 
+    this.resize = this.resize.bind(this);
+    this.stopResize = this.stopResize.bind(this);
     this._onInputValueChanged = this._onInputValueChanged.bind(this);
     this.onKeyUp = this.onKeyUp.bind(this);
+    this.beginResize = this.beginResize.bind(this);
   }
 
 
   componentDidMount() {
+    this._inputBoxBoundingBox = this.inputBox.getBoundingClientRect();
     this._valueChanges.pipe(debounceTime(250))
       .subscribe({
         next: this._onInputValueChanged
       });
+
+    window.addEventListener('mousemove', this.resize, false);
+    window.addEventListener('mouseup', this.stopResize, false);
+  }
+
+  resize(event: MouseEvent) {
+    if (this._isResizing) {
+      const styles = [];
+      const newWidth = this._inputBoxBoundingBox.width + event.clientX - this._initialClientX;
+      if (newWidth > 0 && newWidth + this._inputBoxBoundingBox.left < document.body.clientWidth)
+        styles.push(`width:${newWidth}px`);
+      const newHeight = this._inputBoxBoundingBox.height + event.clientY - this._initialClientY;
+      if (newHeight > 0 && newHeight + this._inputBoxBoundingBox.top < document.body.clientHeight)
+        styles.push(`height:${newHeight}px;max-height:${newHeight}px`);
+      this.inputBox.setAttribute('style', styles.join(';'));
+    }
+  }
+
+  stopResize() {
+    this._isResizing = false;
+    this._inputBoxBoundingBox = this.inputBox.getBoundingClientRect();
+    document.body.classList.remove('resizing');
   }
 
   private _onInputValueChanged(value: string) {
@@ -71,6 +105,7 @@ export class TextArea extends React.Component<Props, State> {
 
   componentWillUnmount() {
     this._valueChanges.complete();
+    window.removeEventListener('click', this.stopResize, false);
   }
 
   render() {
@@ -82,11 +117,18 @@ export class TextArea extends React.Component<Props, State> {
         isInvalid={this.state.validationErrors.length !== 0}
         hint={this.props.hint}>
         <div
-          className='textarea__input-box'
-          contentEditable={!this.props.readonly}
-          suppressContentEditableWarning
-          onKeyUp={this.onKeyUp}>
-          {this.props.value}
+          ref={ref => this.inputBox = ref}
+          className='textarea__input-box-container'>
+          <div
+            className='textarea__input-box'
+            contentEditable={!this.props.readonly}
+            suppressContentEditableWarning
+            onKeyUp={this.onKeyUp}>
+            {this.props.value}
+          </div>
+          <div
+            className='textarea__input-box-resize-handle'
+            onMouseDown={this.beginResize} />
         </div>
         <ValidationErrorMessages messages={this.state.validationErrors.map(error => error.errorMessage)} />
       </FormControl>
@@ -96,6 +138,13 @@ export class TextArea extends React.Component<Props, State> {
   onKeyUp(event: React.SyntheticEvent) {
     const value = (event.target as HTMLDivElement).textContent;
     this._valueChanges.next(value);
+  }
+
+  beginResize(event: React.MouseEvent) {
+    document.body.classList.add('resizing');
+    this._isResizing = true;
+    this._initialClientX = event.clientX;
+    this._initialClientY = event.clientY;
   }
 
 }
