@@ -82,7 +82,7 @@ export class TabGroup extends React.Component<Props, State> {
                     id={`tab-content-${index}`}
                     className='tab-content'
                     style={{
-                      visibility: activeTabIndex === index || previousTabIndex === index ? 'visible' : 'hidden'
+                      opacity: activeTabIndex === index || previousTabIndex === index ? 1 : 0
                     }}>
                     {
                       tab.props.children
