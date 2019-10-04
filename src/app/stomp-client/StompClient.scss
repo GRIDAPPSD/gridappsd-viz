@@ -31,8 +31,8 @@
     }
 }
 
-.stomp-client-form__request-body .textarea__input-box {
-    width: 100%;
+.stomp-client-form__request-body .textarea__input-box-container {
+    width: calc(100% + 14px);
 }
 
 .stomp-client__send-request {
@@ -59,13 +59,11 @@
         height: 100%;
     }
 
-    .textarea__input-box {
+    .textarea__input-box-container {
         height: 100%;
         white-space: pre;
         max-height: 100%;
-        padding: 5px;
         overflow: auto;
         width: calc(100% + 14px);
-        box-sizing: border-box;
     }
 }
