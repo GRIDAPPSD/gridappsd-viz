@@ -106,6 +106,7 @@ export class TabGroup extends React.Component<Props, State> {
   }
 
   setSelectedTabIndex(index: number) {
+    this.nativeElement.querySelector('.tabgroup__body__wrapper').scrollTop = 0;
     this.setState(prevState => {
       if (prevState.activeTabIndex !== index)
         return {
