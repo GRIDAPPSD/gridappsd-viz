@@ -75,8 +75,7 @@ export class TextArea extends React.Component<Props, State> {
 
   stopResize() {
     this._isResizing = false;
-    this._inputBoxBoundingBox = this.inputBox.getBoundingClientRect();
-    document.body.classList.remove('resizing');
+    document.body.classList.remove('frozen');
   }
 
   private _onInputValueChanged(value: string) {
@@ -141,10 +140,11 @@ export class TextArea extends React.Component<Props, State> {
   }
 
   beginResize(event: React.MouseEvent) {
-    document.body.classList.add('resizing');
+    document.body.classList.add('frozen');
     this._isResizing = true;
     this._initialClientX = event.clientX;
     this._initialClientY = event.clientY;
+    this._inputBoxBoundingBox = this.inputBox.getBoundingClientRect();
   }
 
 }

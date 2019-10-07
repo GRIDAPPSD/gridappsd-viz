@@ -71,7 +71,7 @@ export class ServiceConfigurationEntry extends React.Component<Props, State> {
                 {this.showUserInputValueFormControl(label, userInputSpec)}
                 <Tooltip
                   content={
-                    `Example value:\n${userInputSpec.help_example}\n(Click to copy example value to clipboard)`
+                    `Example value:\n${userInputSpec.help_example}\n(Click question mark to copy example value to clipboard)`
                   }
                   position='right'>
                   <IconButton

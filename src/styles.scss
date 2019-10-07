@@ -24,7 +24,7 @@ main {
     overflow: hidden;
 }
 
-body.resizing * {
+body.frozen * {
     pointer-events: none;
     -moz-user-select: none;
     -webkit-user-select: none;
