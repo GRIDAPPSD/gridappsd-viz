@@ -66,3 +66,27 @@ a {
     /* Support for IE. */
     font-feature-settings: 'liga';
 }
+
+@keyframes fadein {
+    from {
+        visibility: hidden;
+        opacity: 0;
+    }
+
+    to {
+        visibility: visible;
+        opacity: 1;
+    }
+}
+
+@keyframes fadeout {
+    from {
+        visibility: visible;
+        opacity: 1;
+    }
+
+    to {
+        visibility: hidden;
+        opacity: 0;
+    }
+}

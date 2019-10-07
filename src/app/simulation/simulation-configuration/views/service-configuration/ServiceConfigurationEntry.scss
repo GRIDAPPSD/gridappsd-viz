@@ -4,6 +4,7 @@
         align-items: flex-start;
         display: inline-flex;
         margin-bottom: 0;
+        margin-top: 0;
     }
 
     .form-control__label {
@@ -20,6 +21,7 @@
         display: flex;
         position: relative;
         flex-flow: column nowrap;
+        margin-bottom: 20px;
     }
 
     .service-configuration-entry__example {

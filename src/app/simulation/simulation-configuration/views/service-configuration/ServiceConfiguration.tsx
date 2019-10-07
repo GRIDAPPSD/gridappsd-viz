@@ -17,6 +17,7 @@ interface Props {
 interface State {
   disableApplyButton: boolean;
   servicesWithUserInput: Service[];
+  showChangesAppliedSuccessfullyMessage: boolean;
 }
 
 export class ServiceConfiguration extends React.Component<Props, State> {
@@ -29,16 +30,21 @@ export class ServiceConfiguration extends React.Component<Props, State> {
 
     this.state = {
       disableApplyButton: false,
-      servicesWithUserInput: props.services.filter(service => 'user_input' in service)
+      servicesWithUserInput: this._findServicesWithUserInput(),
+      showChangesAppliedSuccessfullyMessage: false
     };
-
-    for (const userInput of this.state.servicesWithUserInput.map(service => service.user_input))
-      for (const key in userInput)
-        userInput[key].help_example = this._formatUserInputExampleValue(userInput[key]);
 
     this.onServiceConfigurationEntryChanged = this.onServiceConfigurationEntryChanged.bind(this);
     this.onServiceConfigurationEntryValidationChanged = this.onServiceConfigurationEntryValidationChanged.bind(this);
     this.saveChanges = this.saveChanges.bind(this);
+  }
+
+  private _findServicesWithUserInput() {
+    const servicesWithUserInput = this.props.services.filter(service => 'user_input' in service);
+    for (const userInput of servicesWithUserInput.map(service => service.user_input))
+      for (const key in userInput)
+        userInput[key].help_example = this._formatUserInputExampleValue(userInput[key]);
+    return servicesWithUserInput;
   }
 
   private _formatUserInputExampleValue(userInputSpec: ServiceConfigUserInputSpec) {
@@ -51,6 +57,14 @@ export class ServiceConfiguration extends React.Component<Props, State> {
         return String(userInputSpec.help_example);
     }
   }
+
+  componentDidUpdate(prevProps: Props) {
+    if (this.props.services !== prevProps.services)
+      this.setState({
+        servicesWithUserInput: this._findServicesWithUserInput()
+      });
+  }
+
 
   render() {
     if (this.props.services.length === 0)
@@ -68,7 +82,7 @@ export class ServiceConfiguration extends React.Component<Props, State> {
     return (
       <div className='service-configuration'>
         {
-          this.props.services.map(service => (
+          this.state.servicesWithUserInput.map(service => (
             <ServiceConfigurationEntry
               key={service.id}
               service={service}
@@ -82,12 +96,25 @@ export class ServiceConfiguration extends React.Component<Props, State> {
           type='positive'
           disabled={this.state.disableApplyButton}
           onClick={this.saveChanges} />
+        <NotificationBanner
+          show={this.state.showChangesAppliedSuccessfullyMessage}
+          onHide={() => {
+            this.setState({
+              showChangesAppliedSuccessfullyMessage: false
+            });
+          }}>
+          Changes applied successfully
+        </NotificationBanner>
       </div>
     );
   }
 
   onServiceConfigurationEntryChanged(serviceConfigurationEntry: ServiceConfigurationEntryModel) {
     this._serviceConfigurationEntries.set(serviceConfigurationEntry.service, serviceConfigurationEntry);
+    this.setState({
+      disableApplyButton: false,
+      showChangesAppliedSuccessfullyMessage: false
+    });
   }
 
   onServiceConfigurationEntryValidationChanged(isValid: boolean, service: Service) {
@@ -97,12 +124,17 @@ export class ServiceConfiguration extends React.Component<Props, State> {
       this._invalidServiceConfigurationEntries.set(service, true);
     const isValidOverall = this._invalidServiceConfigurationEntries.size === 0;
     this.setState({
-      disableApplyButton: !isValidOverall
+      disableApplyButton: !isValidOverall,
+      showChangesAppliedSuccessfullyMessage: false
     });
     this.props.onValidationChange(isValidOverall);
   }
 
   saveChanges() {
+    this.setState({
+      showChangesAppliedSuccessfullyMessage: true,
+      disableApplyButton: true
+    });
     this.props.onChange([...this._serviceConfigurationEntries.values()]);
   }
 

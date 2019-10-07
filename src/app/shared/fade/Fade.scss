@@ -5,27 +5,3 @@
 .fade-out {
     animation: fadeout 500ms ease forwards;
 }
-
-@keyframes fadein {
-    from {
-        visibility: hidden;
-        opacity: 0;
-    }
-
-    to {
-        visibility: visible;
-        opacity: 1;
-    }
-}
-
-@keyframes fadeout {
-    from {
-        visibility: visible;
-        opacity: 1;
-    }
-
-    to {
-        visibility: hidden;
-        opacity: 0;
-    }
-}
