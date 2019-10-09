@@ -10,6 +10,19 @@
     height: 100%;
 }
 
+.topology-renderer__toolbox {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    padding: 5px 0;
+    border-radius: 5px;
+    box-shadow: 0 0 3px #555;
+    background-color: rgb(233, 204, 204);
+    display: flex;
+    flex-flow: column nowrap;
+    margin-bottom: 6px;
+}
+
 .topology-renderer__canvas__edge {
     stroke-width: 0.2px;
     fill: none;

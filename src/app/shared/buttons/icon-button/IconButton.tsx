@@ -7,7 +7,7 @@ import './IconButton.scss';
 type Icon = 'check_circle' | 'menu' | 'assignment' | 'storage' | 'search' | 'laptop' | 'delete'
   | 'cloud_upload' | 'pause' | 'stop' | 'play_arrow' | 'add' | 'remove' | 'cached' | 'save'
   | 'close' | 'navigate_next' | 'navigate_before' | 'keyboard_arrow_down' | 'memory' | 'send'
-  | 'show_chart' | 'edit' | 'help_outline' | 'arrow_downward';
+  | 'show_chart' | 'edit' | 'help_outline' | 'arrow_downward' | 'refresh';
 
 
 interface Props {

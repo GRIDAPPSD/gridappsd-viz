@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { extent } from 'd3-array';
 import { line } from 'd3-shape';
-import { zoom } from 'd3-zoom';
+import { zoom, zoomIdentity } from 'd3-zoom';
 import { select, event as currentEvent, Selection } from 'd3-selection';
 import { scaleLinear, ScaleLinear } from 'd3';
 
@@ -14,6 +14,7 @@ import { SwitchMenu } from './views/switch-menu/SwitchMenu';
 import { CapacitorMenu } from './views/capacitor-menu/CapacitorMenu';
 import { RegulatorMenu } from './views/regulator-menu/RegulatorMenu';
 import { RenderableTopology } from './models/RenderableTopology';
+import { IconButton } from '@shared/buttons';
 
 import './TopologyRenderer.scss';
 
@@ -69,6 +70,7 @@ export class TopologyRenderer extends React.Component<Props, State> {
     this.showMenuOnComponentClicked = this.showMenuOnComponentClicked.bind(this);
     this.showTooltip = this.showTooltip.bind(this);
     this.hideTooltip = this.hideTooltip.bind(this);
+    this.reset = this.reset.bind(this);
   }
 
   componentDidMount() {
@@ -301,6 +303,15 @@ export class TopologyRenderer extends React.Component<Props, State> {
           onMouseOut={this.hideTooltip}>
           <g className='topology-renderer__canvas__container' />
         </svg>
+        <div className='topology-renderer__toolbox'>
+          <Tooltip content='Reset'>
+            <IconButton
+              icon='refresh'
+              size='small'
+              style='accent'
+              onClick={this.reset} />
+          </Tooltip>
+        </div>
         <Wait show={this.props.showWait} />
       </div>
     );
@@ -435,6 +446,14 @@ export class TopologyRenderer extends React.Component<Props, State> {
       this._tooltip.hide();
       this._tooltip = null;
     }
+  }
+
+  reset() {
+    this._container.transition()
+      .on('end', () => {
+        this._canvas.call(this._zoomer.transform, zoomIdentity);
+      })
+      .attr('transform', 'translate(0, 0) scale(1)');
   }
 
 }
