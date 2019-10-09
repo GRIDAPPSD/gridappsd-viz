@@ -73,7 +73,8 @@ export class NotificationBanner extends React.Component<Props, State> {
   }
 
   componentWillUnmount() {
-    document.body.removeChild(this.notificationBannerContainer);
+    if (document.body.contains(this.notificationBannerContainer))
+      document.body.removeChild(this.notificationBannerContainer);
     clearTimeout(this._scheduler);
   }
 
