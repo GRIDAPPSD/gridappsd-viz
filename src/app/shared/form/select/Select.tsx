@@ -240,15 +240,18 @@ export class Select<T, E extends boolean> extends React.Component<Props<T, E>, S
       });
     else
       this.setState((state, props) => {
+        // Input sanitization
+        newFilterValue = newFilterValue.replace(/([\\[(+.*?{])/g, '\\$1');
+        const pattern = new RegExp(newFilterValue.split('').join('[\\s\\S]*'), 'ig');
         // If the user keeps typing
         // then it's more performant to use the filtered list to narrow down the result
         // otherwise, if the user is deleting, then use the props option list
         if (newFilterValue.length > oldFilterValue.length)
           return {
-            filteredOptions: state.filteredOptions.filter(option => option.label.toLowerCase().startsWith(newFilterValue))
+            filteredOptions: state.filteredOptions.filter(option => pattern.test(option.label))
           };
         return {
-          filteredOptions: props.options.filter(option => option.label.toLowerCase().startsWith(newFilterValue))
+          filteredOptions: props.options.filter(option => pattern.test(option.label))
         };
       });
   }
