@@ -1,34 +1,42 @@
 import { MessageRequest } from '@shared/MessageRequest';
 
+interface Inputs {
+  componentMRID: string;
+  simulationId: string;
+  target: number;
+  deadband: number;
+  differenceMRID: string;
+}
+
 export class CapacitorVoltUpdateRequest implements MessageRequest {
   readonly url = '/topic/goss.gridappsd.fncs.input';
   readonly replyTo = '/topic/goss.gridappsd.fncs.input.capacitor';
   readonly requestBody: any;
 
-  constructor(values: { componentMRID: string; simulationId: string; target: string; deadband: string; differenceMRID: string; }) {
+  constructor(inputs: Inputs) {
     this.requestBody = {
       command: 'update',
       input: {
-        simulation_id: values.simulationId,
+        simulation_id: inputs.simulationId,
         message: {
           timestamp: new Date().toISOString(),
-          difference_mrid: values.differenceMRID,
+          difference_mrid: inputs.differenceMRID,
           reverse_differences: [],
           forward_differences: [
             {
-              object: values.componentMRID,
+              object: inputs.componentMRID,
               attribute: 'RegulatingControl.mode',
-              value: '2'
+              value: 2
             },
             {
-              object: values.componentMRID,
+              object: inputs.componentMRID,
               attribute: 'RegulatingControl.targetValue',
-              value: values.target
+              value: inputs.target
             },
             {
-              object: values.componentMRID,
+              object: inputs.componentMRID,
               attribute: 'RegulatingControl.targetDeadband',
-              value: values.deadband
+              value: inputs.deadband
             }
           ]
         }

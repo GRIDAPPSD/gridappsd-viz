@@ -4,8 +4,8 @@ interface Inputs {
   mRID: string;
   simulationId: string;
   differenceMRID: string;
-  lineDropX: string;
-  lineDropR: string;
+  lineDropX: number;
+  lineDropR: number;
   phase: string;
 }
 
@@ -29,7 +29,7 @@ export class RegulatorLineDropUpdateRequest implements MessageRequest {
             {
               object: inputs.mRID,
               attribute: 'TapChanger.lineDropCompensation',
-              value: 'true'
+              value: true
             },
             {
               object: inputs.mRID,

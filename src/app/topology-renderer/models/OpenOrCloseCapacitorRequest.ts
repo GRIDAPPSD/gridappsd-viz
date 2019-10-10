@@ -1,30 +1,37 @@
 import { MessageRequest } from '@shared/MessageRequest';
 
+interface Inputs {
+  componentMRID: string;
+  simulationId: string;
+  open: boolean;
+  differenceMRID: string;
+}
+
 export class OpenOrCloseCapacitorRequest implements MessageRequest {
   readonly url = '/topic/goss.gridappsd.fncs.input';
   readonly replyTo = '/topic/goss.gridappsd.fncs.input.capacitor';
   readonly requestBody: any;
 
-  constructor(values: { componentMRID: string; simulationId: string; open: boolean, differenceMRID: string; }) {
+  constructor(inputs: Inputs) {
     this.requestBody = {
       command: 'update',
       input: {
-        simulation_id: values.simulationId,
+        simulation_id: inputs.simulationId,
         message: {
           timestamp: Math.floor((new Date).getTime() / 1000.0),
-          difference_mrid: values.differenceMRID,
+          difference_mrid: inputs.differenceMRID,
           reverse_differences: [
             {
-              object: values.componentMRID,
+              object: inputs.componentMRID,
               attribute: 'ShuntCompensator.sections',
-              value: values.open ? '1' : '0'
+              value: inputs.open ? 0 : 1
             }
           ],
           forward_differences: [
             {
-              object: values.componentMRID,
+              object: inputs.componentMRID,
               attribute: 'ShuntCompensator.sections',
-              value: values.open ? '0' : '1'
+              value: inputs.open ? 1 : 0
             }
           ]
         }

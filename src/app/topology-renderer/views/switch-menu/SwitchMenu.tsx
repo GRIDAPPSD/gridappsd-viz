@@ -77,9 +77,10 @@ export class SwitchMenu extends React.Component<Props, State> {
   }
 
   onConfirm() {
+    this.props.onConfirm(this.state.switchOpen);
     this.setState({
       show: false
-    }, () => this.props.onConfirm(this.state.switchOpen));
+    });
   }
 
 }

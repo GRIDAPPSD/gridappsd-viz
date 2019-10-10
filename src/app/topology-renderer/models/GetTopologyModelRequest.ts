@@ -12,7 +12,7 @@ export class GetTopologyModelRequest implements MessageRequest {
     }
   } as GetTopologyModelRequestBody;
 
-  constructor(lineName) {
+  constructor(lineName: string) {
     this.requestBody.parameters.model_id = lineName;
   }
 

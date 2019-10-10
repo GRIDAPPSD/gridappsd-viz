@@ -14,11 +14,11 @@ export interface Capacitor extends Node {
   open: boolean;
   manual: boolean;
   volt: {
-    target: string;
-    deadband: string;
+    target: number;
+    deadband: number;
   };
   var: {
-    target: string;
-    deadband: string;
+    target: number;
+    deadband: number;
   };
 }

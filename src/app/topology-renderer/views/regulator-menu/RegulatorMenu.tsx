@@ -38,13 +38,15 @@ export class RegulatorMenu extends React.Component<Props, State> {
       ]
     };
 
-    this.regulator = { ...props.regulator };
+    this.regulator = {
+      ...props.regulator
+    };
     for (const phase of this.regulator.phases)
       if (!this.regulator.phaseValues[phase])
         this.regulator.phaseValues[phase] = {
-          lineDropR: '',
-          lineDropX: '',
-          tap: ''
+          lineDropR: 0,
+          lineDropX: 0,
+          tap: 0
         };
 
     this.onCancel = this.onCancel.bind(this);
@@ -66,8 +68,12 @@ export class RegulatorMenu extends React.Component<Props, State> {
               options={this.state.options}
               isOptionSelected={option => option.value === this.state.controlMode}
               onChange={selectedOption => {
-                this.regulator.controlMode = selectedOption.value;
-                this.setState({ controlMode: this.regulator.controlMode });
+                const selectedControlModel = selectedOption.value;
+                this.regulator.controlMode = selectedControlModel;
+                this.regulator.manual = selectedControlModel === RegulatorControlMode.MANUAL;
+                this.setState({
+                  controlMode: selectedControlModel
+                });
               }} />
             {this.showFormFieldsBasedOnControlMode()}
           </form>
@@ -106,16 +112,16 @@ export class RegulatorMenu extends React.Component<Props, State> {
                           label='LineDropR'
                           name='LineDropR'
                           hint='Unit in Ohms'
-                          value={this.regulator.phaseValues[phase].lineDropR}
-                          onChange={newValue => this.regulator.phaseValues[phase].lineDropR = newValue} />
+                          value={String(this.regulator.phaseValues[phase].lineDropR)}
+                          onChange={newValue => this.regulator.phaseValues[phase].lineDropR = +newValue || 0} />
                       </li>
                       <li>
                         <Input
                           label='LineDropX'
                           name='LineDropX'
                           hint='Unit in Ohms'
-                          value={this.regulator.phaseValues[phase].lineDropX}
-                          onChange={newValue => this.regulator.phaseValues[phase].lineDropX = newValue} />
+                          value={String(this.regulator.phaseValues[phase].lineDropX)}
+                          onChange={newValue => this.regulator.phaseValues[phase].lineDropX = +newValue || 0} />
                       </li>
                     </ul>
                   </li>
@@ -131,8 +137,8 @@ export class RegulatorMenu extends React.Component<Props, State> {
                 key={phase}
                 label={`Tap ${phase}`}
                 name={`Tap${phase}`}
-                value={this.regulator.phaseValues[phase].tap}
-                onChange={newValue => this.regulator.phaseValues[phase].tap = newValue} />
+                value={String(this.regulator.phaseValues[phase].tap)}
+                onChange={newValue => this.regulator.phaseValues[phase].tap = +newValue || 0} />
             ))
         );
     }
@@ -146,9 +152,10 @@ export class RegulatorMenu extends React.Component<Props, State> {
   }
 
   onConfirm() {
+    this.props.onConfirm(this.regulator);
     this.setState({
       show: false
-    }, () => this.props.onConfirm(this.regulator));
+    });
   }
 
 }
