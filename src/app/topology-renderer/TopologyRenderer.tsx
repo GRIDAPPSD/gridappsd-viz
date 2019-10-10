@@ -52,7 +52,7 @@ export class TopologyRenderer extends React.Component<Props, State> {
     capacitor: { width: 52 / 9, height: 32 / 9 },
     regulator: { width: 48 / 9, height: 103 / 9 },
     transformer: { width: 31 / 9, height: 149 / 9 },
-    switch: { width: 123 / 9, height: 16 / 9 },
+    switch: { width: 10, height: 10 },
     switch_open: { width: 123 / 9, height: 22 / 9 },
     swing_node: { width: this._symbolSize / 9, height: this._symbolSize / 9 }
   };
@@ -165,13 +165,21 @@ export class TopologyRenderer extends React.Component<Props, State> {
     return edgesKeyedByNodeNames;
   }
 
-  private _categorizeNodes(nodes: Node[]) {
+  private _categorizeNodes(nodes: any[]) {
     const categories: { nodesWithKnownTypes: Node[]; nodesWithUnknownType: Node[] } = {
       nodesWithKnownTypes: [],
       nodesWithUnknownType: []
     };
 
     for (const node of nodes) {
+      if (node.type === 'switch') {
+        node.screenX1 = this._xScale(node.x);
+        node.screenY1 = this._yScale(node.y);
+        node.screenX2 = this._xScale(node.x2);
+        node.screenY2 = this._yScale(node.y2);
+        node.dx = node.screenX2 - node.screenX1;
+        node.dy = node.screenY2 - node.screenY1;
+      }
       node.screenX = this._xScale(node.x);
       node.screenY = this._yScale(node.y);
       if (node.type === 'unknown')
@@ -217,77 +225,128 @@ export class TopologyRenderer extends React.Component<Props, State> {
       .appendChild(nodeContainer.node());
   }
 
-  private _renderSymbolsForNodesWithKnownTypes(edgesKeyedByNodeNames: Map<string, Edge>, nodesWithKnownTypes: Node[]) {
+  private _renderSymbolsForNodesWithKnownTypes(edgesByNodeNames: Map<string, Edge>, nodesWithKnownTypes: Node[]) {
     const symbols = select(this._createSvgElement('g', { class: 'topology-renderer__canvas__symbol-container', style: 'visibility: hidden' }));
-    const notSwitches = symbols.append('g')
-      .selectAll('image')
-      .data(nodesWithKnownTypes.filter(node => node.type !== 'switch'));
-    const switches = symbols.append('g')
-      .selectAll('image')
-      .data(nodesWithKnownTypes.filter(node => node.type === 'switch'));
-    for (const selection of [notSwitches, switches]) {
-      selection.enter()
-        .append('image')
-        .attr('class', node => `topology-renderer__canvas__symbol${node.type ? ' ' + node.type : ''}`)
-        .attr('href', node => this._symbolsForTypes[node.type])
-        .attr('width', node => this._symbolDimensions[node.type] ? this._symbolDimensions[node.type].width : this._symbolSize)
-        .attr('height', node => this._symbolDimensions[node.type] ? this._symbolDimensions[node.type].height : this._symbolSize)
-        .attr('x', node => node.screenX)
-        .attr('y', node => node.screenY)
-        .style('transform-origin', node => {
-          const transformOriginStringTemplate = '${horizontal}px ${vertical}px';
-          const symbolDimensions = this._symbolDimensions[node.type];
-          return transformOriginStringTemplate.replace(
-            '${horizontal}',
-            `${node.screenX + (symbolDimensions ? symbolDimensions.width : this._symbolSize) / 2}`
-          ).replace(
-            '${vertical}',
-            `${node.screenY + (symbolDimensions ? symbolDimensions.height : this._symbolSize) / 2}`
-          );
-        })
-        .style('transform', (node: any) => {
-          if (!node.from || !node.to)
-            return 'rotate(0) translate(0, 0)';
-          const edge = edgesKeyedByNodeNames.get(node.from) || edgesKeyedByNodeNames.get(node.to);
-          const symbolDimensions = this._symbolDimensions[node.type];
-          if (!edge)
-            return 'rotate(0) translate(0, 0)';
-          const transformStringTemplate = 'translate(${horizontal}px, ${vertical}px) rotate(${angle}deg)';
-          return transformStringTemplate.replace(
-            '${horizontal}',
-            `${-(symbolDimensions ? symbolDimensions.width : this._symbolSize) / 2}`
-          ).replace(
-            '${vertical}',
-            `${-(symbolDimensions ? symbolDimensions.height : this._symbolSize) / 2}`
-          ).replace(
-            '${angle}',
-            `${this._calculateAngleBetweenEdgeAndXAxis(edge)}`
-          );
-        });
-    }
+    this._renderNonSwitchSymbols(
+      symbols,
+      nodesWithKnownTypes.filter(node => node.type !== 'switch'),
+      edgesByNodeNames
+    );
+    this._renderSwitchSymbols(symbols, nodesWithKnownTypes.filter(node => node.type === 'switch'));
+
     this._container.node()
       .appendChild(symbols.node());
   }
 
-  private _calculateAngleBetweenEdgeAndXAxis(edge: Edge): number {
-    const from = edge.from;
-    const to = edge.to;
-    const horizontal = Math.abs(from.x - to.x);
-    const vertical = Math.abs(from.y - to.y);
+  private _renderNonSwitchSymbols(
+    container: Selection<SVGElement, any, SVGElement, any>,
+    nonSwitchNodes: Node[],
+    edgesByNodeNames: Map<string, Edge>
+  ) {
+    container.append('g')
+      .selectAll('image')
+      .data(nonSwitchNodes)
+      .enter()
+      .append('image')
+      .attr('class', node => `topology-renderer__canvas__symbol${node.type ? ' ' + node.type : ''}`)
+      .attr('href', node => this._symbolsForTypes[node.type])
+      .attr('width', node => this._symbolDimensions[node.type] ? this._symbolDimensions[node.type].width : this._symbolSize)
+      .attr('height', node => this._symbolDimensions[node.type] ? this._symbolDimensions[node.type].height : this._symbolSize)
+      .attr('x', node => node.screenX)
+      .attr('y', node => node.screenY)
+      .style('transform-origin', node => {
+        const transformOriginStringTemplate = '${horizontal}px ${vertical}px';
+        const symbolDimensions = this._symbolDimensions[node.type];
+        return transformOriginStringTemplate.replace(
+          '${horizontal}',
+          `${node.screenX + (symbolDimensions ? symbolDimensions.width : this._symbolSize) / 2}`
+        ).replace(
+          '${vertical}',
+          `${node.screenY + (symbolDimensions ? symbolDimensions.height : this._symbolSize) / 2}`
+        );
+      })
+      .style('transform', (node: any) => {
+        if (!node.from || !node.to)
+          return 'rotate(0) translate(0, 0)';
+        const edge = edgesByNodeNames.get(node.from) || edgesByNodeNames.get(node.to);
+        const symbolDimensions = this._symbolDimensions[node.type];
+        if (!edge)
+          return 'rotate(0) translate(0, 0)';
+        const transformStringTemplate = 'translate(${horizontal}px, ${vertical}px) rotate(${angle}deg)';
+        return transformStringTemplate.replace(
+          '${horizontal}',
+          `${-(symbolDimensions ? symbolDimensions.width : this._symbolSize) / 2}`
+        ).replace(
+          '${vertical}',
+          `${-(symbolDimensions ? symbolDimensions.height : this._symbolSize) / 2}`
+        ).replace(
+          '${angle}',
+          `${this._calculateAngleBetweenLineAndXAxis(edge.from.x, edge.from.y, edge.to.x, edge.to.y)}`
+        );
+      });
+  }
+
+  private _calculateAngleBetweenLineAndXAxis(x1: number, y1: number, x2: number, y2: number): number {
+    const horizontal = Math.abs(x2 - x1);
+    const vertical = Math.abs(y2 - y1);
     const angle = Math.atan(vertical / horizontal) * 180 / Math.PI;
     // First quadrant or third quadrant
-    if (to.x > from.x && to.y < from.y || to.x < from.x && to.y > from.y)
+    if (x2 > x1 && y2 < y1 || x2 < x1 && y2 > y1)
       return -angle;
     // Second quadrant or fourth quadrant
-    if (to.x < from.x && to.y < from.y || to.x > from.x && to.y > from.y)
+    if (x2 < x1 && y2 < y1 || x2 > x1 && y2 > y1)
       return angle;
     // No rotation
-    if (from.y === to.y)
+    if (y1 === y2)
       return 0;
     // Perpendicular to x axis
-    if (from.x === to.x)
+    if (x1 === x2)
       return 90;
     return angle;
+  }
+
+  private _renderSwitchSymbols(container: Selection<SVGElement, any, SVGElement, any>, switchNodes: Node[]) {
+    if (this.props.topology.nodes.length > 1000) {
+      this._symbolDimensions.switch.width = 3;
+      this._symbolDimensions.switch.height = 3;
+    }
+    const width = this._symbolDimensions.switch.width;
+    const height = this._symbolDimensions.switch.height;
+
+    const switches = container.append('g')
+      .selectAll('.topology-renderer__canvas__symbol.switch')
+      .data(switchNodes as Switch[])
+      .enter()
+      .append('g')
+      .attr('class', node => `topology-renderer__canvas__symbol switch ${node.name}`)
+      .attr('transform', node => `translate(${node.screenX1},${node.screenY1})`);
+    switches.append('line')
+      .attr('x1', 0)
+      .attr('y1', 0)
+      .attr('x2', node => node.dx)
+      .attr('y2', node => node.dy)
+      .attr('stroke-width', '0.2')
+      .attr('stroke', '#000');
+    switches.append('rect')
+      .attr('class', node => `topology-renderer__canvas__symbol switch ${node.name}`)
+      .attr('x', node => (node.dx - width) / 2)
+      .attr('y', node => (node.dy - height) / 2)
+      .attr('width', this._symbolDimensions.switch.width)
+      .attr('height', this._symbolDimensions.switch.height)
+      .attr('fill', node => node.open ? node.colorWhenOpen : node.colorWhenClosed)
+      .attr('transform', node => {
+        if (!node.from || !node.to)
+          return 'rotate(0) translate(0, 0)';
+        const angle = this._calculateAngleBetweenLineAndXAxis(
+          node.screenX1,
+          node.screenY1,
+          node.screenX2,
+          node.screenY2
+        );
+        const transformOriginX = (node.dx - width) / 2 + width / 2;
+        const transformOriginY = (node.dy - height) / 2 + height / 2;
+        return `${angle},${transformOriginX},${transformOriginY}`;
+      });
   }
 
   render() {
@@ -346,37 +405,7 @@ export class TopologyRenderer extends React.Component<Props, State> {
 
   private _toggleSwitch(open: boolean, swjtch: Switch, clickedElement: Selection<SVGElement, Node, SVGElement, any>) {
     if (swjtch.open !== open) {
-      const rotateTransform = clickedElement.node().style.transform.split(' ').pop();
-      if (!rotateTransform.includes('rotate'))
-        throw new Error('Transform should include rotate()');
-      const switchDimensions = open ? this._symbolDimensions.switch_open : this._symbolDimensions.switch;
-      const switchImage = `./assets/images/${open ? 'switch-open' : 'switch-closed'}.svg`;
-      clickedElement.attr('href', switchImage)
-        .attr('width', switchDimensions.width)
-        .attr('height', switchDimensions.height)
-        .style('transform-origin', node => {
-          const transformOriginStringTemplate = '${horizontal}px ${vertical}px';
-          return transformOriginStringTemplate.replace(
-            '${horizontal}',
-            `${node.screenX + (switchDimensions.width / 2)}`
-          ).replace(
-            '${vertical}',
-            `${node.screenY + (switchDimensions.height / 2)}`
-          );
-        })
-        .style('transform', () => {
-          const transformStringTemplate = 'translate(${horizontal}px, ${vertical}px) ${rotate}';
-          return transformStringTemplate.replace(
-            '${horizontal}',
-            `${-switchDimensions.width / 2}`
-          ).replace(
-            '${vertical}',
-            `${-switchDimensions.height / 2}`
-          ).replace(
-            '${rotate}',
-            rotateTransform
-          );
-        });
+      clickedElement.attr('fill', open ? swjtch.colorWhenOpen : swjtch.colorWhenClosed);
       swjtch.open = open;
       this.props.onToggleSwitch(swjtch);
     }

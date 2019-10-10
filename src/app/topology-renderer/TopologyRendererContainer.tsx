@@ -165,7 +165,16 @@ export class TopologyRendererContainer extends React.Component<Props, State> {
           }));
           break;
         case 'switches':
-          // if ((node.x1 !== 0 && node.y1 !== 0) || (node.x2 !== 0 && node.y2 !== 0)) {
+          if (node.x1 > node.x2) {
+            const temp = node.x1;
+            node.x1 = node.x2;
+            node.x2 = temp;
+          }
+          if (node.y1 > node.y2) {
+            const temp = node.y1;
+            node.y1 = node.y2;
+            node.y2 = temp;
+          }
           nodes.push(this._createNewNode({
             ...node,
             name: node.name,
@@ -173,8 +182,13 @@ export class TopologyRendererContainer extends React.Component<Props, State> {
             open: node.open === 'open',
             x: Math.trunc(node.x1 !== 0 ? node.x1 : node.x2),
             y: Math.trunc(node.y1 !== 0 ? node.y1 : node.y2),
+            screenX1: 0,
+            screenY1: 0,
+            screenX2: 0,
+            screenY2: 0,
+            colorWhenOpen: '#4aff4a',
+            colorWhenClosed: '#f00'
           }));
-          // }
           break;
         case 'solarpanels':
           nodes.push(this._createNewNode({
@@ -184,7 +198,6 @@ export class TopologyRendererContainer extends React.Component<Props, State> {
           }));
           break;
         case 'transformers':
-          // if ((node.x1 !== 0 && node.y1 !== 0) || (node.x2 !== 0 && node.y2 !== 0)) {
           nodes.push(this._createNewNode({
             ...node,
             name: node.name,
@@ -192,7 +205,6 @@ export class TopologyRendererContainer extends React.Component<Props, State> {
             x: Math.trunc(node.x1 !== 0 ? node.x1 : node.x2),
             y: Math.trunc(node.y1 !== 0 ? node.y1 : node.y2)
           }));
-          // }
           break;
         case 'capacitors':
           nodes.push(this._createNewNode({
@@ -211,7 +223,6 @@ export class TopologyRendererContainer extends React.Component<Props, State> {
         case 'overhead_lines':
           const fromNode: Node = allNodes.filter(e => e.name === node.from)[0] || this._createNewNode({ name: node.from });
           const toNode: Node = allNodes.filter(e => e.name === node.to)[0] || this._createNewNode({ name: node.to });
-          // if (node.x1 !== 0.0 && node.y1 !== 0.0 && node.x2 !== 0.0 && node.y2 !== 0.0) {
           fromNode.x = Math.trunc(node.x1);
           fromNode.y = Math.trunc(node.y1);
           toNode.x = Math.trunc(node.x2);
@@ -223,7 +234,6 @@ export class TopologyRendererContainer extends React.Component<Props, State> {
             from: fromNode,
             to: toNode,
           });
-          // }
           break;
         case 'regulators':
           nodes.push(this._createNewNode({
