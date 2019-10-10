@@ -51,7 +51,7 @@ export class OptionListFilter extends React.Component<Props, State> {
 
   render() {
     return (
-      <form className='option-list-filter'>
+      <div className='option-list-filter'>
         <input
           ref={ref => this.filterInput = ref}
           type='text'
@@ -66,7 +66,7 @@ export class OptionListFilter extends React.Component<Props, State> {
           size='small'
           style='accent'
           onClick={this.clearFilter} />
-      </form>
+      </div>
     );
   }
 
