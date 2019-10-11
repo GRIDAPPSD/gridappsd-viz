@@ -1,8 +1,19 @@
+type NodeType = (
+  'battery'
+  | 'switch'
+  | 'solarpanel'
+  | 'swing_node'
+  | 'transformer'
+  | 'capacitor'
+  | 'regulator'
+  | 'unknown'
+);
+
 export interface Node {
   name: string;
-  type: 'battery' | 'switch' | 'solarpanel' | 'swing_node' | 'transformer' | 'capacitor' | 'regulator' | 'unknown';
-  x: number;
-  y: number;
-  screenX: number;
-  screenY: number;
+  type: NodeType;
+  x1: number;
+  y1: number;
+  screenX1: number;
+  screenY1: number;
 }

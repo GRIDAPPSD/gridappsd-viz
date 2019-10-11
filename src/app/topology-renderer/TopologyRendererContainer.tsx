@@ -110,9 +110,11 @@ export class TopologyRendererContainer extends React.Component<Props, State> {
   private _transformModelForRendering(model: TopologyModel): RenderableTopology {
     if (!model || model.feeders.length === 0)
       return null;
-    const nodes: Node[] = [];
     const edges: Edge[] = [];
-
+    const renderableTopology: RenderableTopology = {
+      nodes: [],
+      edges
+    };
     const keysToLookAt = [
       'batteries', 'switches', 'solarpanels', 'swing_nodes', 'transformers', 'overhead_lines', 'capacitors', 'regulators'
     ];
@@ -149,74 +151,95 @@ export class TopologyRendererContainer extends React.Component<Props, State> {
       delete node.groupName;
       switch (groupName) {
         case 'swing_nodes':
-          nodes.push(this._createNewNode({
-            ...node,
-            name: node.name,
-            type: 'swing_node',
-            x: Math.trunc(node.x1),
-            y: Math.trunc(node.y1)
-          }));
+          renderableTopology.nodes.push(
+            this._createNewNode({
+              ...node,
+              name: node.name,
+              type: 'swing_node',
+              x1: Math.trunc(node.x1),
+              y1: Math.trunc(node.y1)
+            })
+          );
           break;
         case 'batteries':
-          nodes.push(this._createNewNode({
-            ...node,
-            name: node.name,
-            type: 'battery'
-          }));
+          renderableTopology.nodes.push(
+            this._createNewNode({
+              ...node,
+              name: node.name,
+              type: 'battery'
+            })
+          );
           break;
         case 'switches':
-          // if ((node.x1 !== 0 && node.y1 !== 0) || (node.x2 !== 0 && node.y2 !== 0)) {
-          nodes.push(this._createNewNode({
-            ...node,
-            name: node.name,
-            type: 'switch',
-            open: node.open === 'open',
-            x: Math.trunc(node.x1 !== 0 ? node.x1 : node.x2),
-            y: Math.trunc(node.y1 !== 0 ? node.y1 : node.y2),
-          }));
-          // }
+          if (node.x1 > node.x2) {
+            const temp = node.x1;
+            node.x1 = node.x2;
+            node.x2 = temp;
+          }
+          if (node.y1 > node.y2) {
+            const temp = node.y1;
+            node.y1 = node.y2;
+            node.y2 = temp;
+          }
+          renderableTopology.nodes.push(
+            this._createNewNode({
+              ...node,
+              name: node.name,
+              type: 'switch',
+              open: node.open === 'open',
+              x1: Math.trunc(node.x1 !== 0 ? node.x1 : node.x2),
+              y1: Math.trunc(node.y1 !== 0 ? node.y1 : node.y2),
+              screenX2: 0,
+              screenY2: 0,
+              colorWhenOpen: '#4aff4a',
+              colorWhenClosed: '#f00'
+            })
+          );
           break;
         case 'solarpanels':
-          nodes.push(this._createNewNode({
-            ...node,
-            name: node.name,
-            type: 'solarpanel'
-          }));
+          renderableTopology.nodes.push(
+            this._createNewNode({
+              ...node,
+              name: node.name,
+              type: 'solarpanel'
+            })
+          );
           break;
         case 'transformers':
-          // if ((node.x1 !== 0 && node.y1 !== 0) || (node.x2 !== 0 && node.y2 !== 0)) {
-          nodes.push(this._createNewNode({
-            ...node,
-            name: node.name,
-            type: 'transformer',
-            x: Math.trunc(node.x1 !== 0 ? node.x1 : node.x2),
-            y: Math.trunc(node.y1 !== 0 ? node.y1 : node.y2)
-          }));
-          // }
+          renderableTopology.nodes.push(
+            this._createNewNode({
+              ...node,
+              name: node.name,
+              type: 'transformer',
+              x1: Math.trunc(node.x1 !== 0 ? node.x1 : node.x2),
+              y1: Math.trunc(node.y1 !== 0 ? node.y1 : node.y2)
+            })
+          );
           break;
         case 'capacitors':
-          nodes.push(this._createNewNode({
-            ...node,
-            name: node.name,
-            type: 'capacitor',
-            open: node.open === 'open',
-            x: Math.trunc(node.x1),
-            y: Math.trunc(node.y1),
-            manual: node.manual === 'manual',
-            controlMode: CapacitorControlMode.UNSPECIFIED,
-            volt: null,
-            var: null
-          }));
+          renderableTopology.nodes.push(
+            this._createNewNode({
+              ...node,
+              name: node.name,
+              type: 'capacitor',
+              open: node.open === 'open',
+              x1: Math.trunc(node.x1),
+              y1: Math.trunc(node.y1),
+              manual: node.manual === 'manual',
+              controlMode: CapacitorControlMode.UNSPECIFIED,
+              volt: null,
+              var: null
+            })
+          );
           break;
         case 'overhead_lines':
-          const fromNode: Node = allNodes.filter(e => e.name === node.from)[0] || this._createNewNode({ name: node.from });
-          const toNode: Node = allNodes.filter(e => e.name === node.to)[0] || this._createNewNode({ name: node.to });
-          // if (node.x1 !== 0.0 && node.y1 !== 0.0 && node.x2 !== 0.0 && node.y2 !== 0.0) {
-          fromNode.x = Math.trunc(node.x1);
-          fromNode.y = Math.trunc(node.y1);
-          toNode.x = Math.trunc(node.x2);
-          toNode.y = Math.trunc(node.y2);
-          nodes.push(fromNode, toNode);
+          const fromNode: Node = allNodes.find(e => e.name === node.from) || this._createNewNode({ name: node.from });
+          const toNode: Node = allNodes.find(e => e.name === node.to) || this._createNewNode({ name: node.to });
+          fromNode.x1 = Math.trunc(node.x1);
+          fromNode.y1 = Math.trunc(node.y1);
+          toNode.x1 = Math.trunc(node.x2);
+          toNode.y1 = Math.trunc(node.y2);
+          renderableTopology.nodes.push(fromNode, toNode);
           edges.push({
             ...node,
             name: node.name,
@@ -226,27 +249,26 @@ export class TopologyRendererContainer extends React.Component<Props, State> {
           // }
           break;
         case 'regulators':
-          nodes.push(this._createNewNode({
-            ...node,
-            name: node.name,
-            type: 'regulator',
-            x: Math.trunc(node.x2),
-            y: Math.trunc(node.y2),
-            manual: node.manual === 'manual',
-            controlModel: RegulatorControlMode.UNSPECIFIED,
-            phaseValues: {},
-            phases: this.props.phases.get(node.name)
-          }));
+          renderableTopology.nodes.push(
+            this._createNewNode({
+              ...node,
+              name: node.name,
+              type: 'regulator',
+              x1: Math.trunc(node.x2),
+              y1: Math.trunc(node.y2),
+              manual: node.manual === 'manual',
+              controlModel: RegulatorControlMode.UNSPECIFIED,
+              phaseValues: {},
+              phases: this.props.phases.get(node.name)
+            })
+          );
           break;
         default:
           console.warn(`${node.groupName} is in the model, but there's no switch case for it. Skipping`);
           break;
       }
     }
-    return {
-      nodes: nodes.filter(node => node.x !== -1 && node.y !== -1),
-      edges: edges.filter(edge => [edge.from.x, edge.from.y, edge.to.x, edge.to.y].every(e => e !== -1))
-    };
+    return renderableTopology;
   }
 
   private _latLongToXY(longitude: number, lat: number): { x: number; y: number } {
@@ -258,10 +280,10 @@ export class TopologyRendererContainer extends React.Component<Props, State> {
 
   private _createNewNode(properties: { [key: string]: any }): Node {
     return {
-      x: -1,
-      y: -1,
-      screenX: 0,
-      screenY: 0,
+      x1: -1,
+      y1: -1,
+      screenX1: 0,
+      screenY1: 0,
       name: '',
       type: 'unknown',
       ...properties
