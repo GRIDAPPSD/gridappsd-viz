@@ -233,9 +233,11 @@ export class Select<T, E extends boolean> extends React.Component<Props<T, E>, S
       });
     else
       this.setState((state, props) => {
+        const specialTokens = ['(', ')', '[', ']', '{', '}', '?', '\\', '/', '*', '+', '-', '.', '^', '$'];
         // Input sanitization
-        newFilterValue = newFilterValue.replace(/([\\[(+.*?{])/g, '');
-        const pattern = new RegExp(newFilterValue.split('').join('[\\s\\S]*'), 'ig');
+        const tokens = newFilterValue.split('')
+          .map(token => specialTokens.includes(token) ? `\\${token}` : token);
+        const pattern = new RegExp(tokens.join('[\\s\\S]*'), 'ig');
         // If the user keeps typing
         // then it's more performant to use the filtered list to narrow down the result
         // otherwise, if the user is deleting, then use the props option list
