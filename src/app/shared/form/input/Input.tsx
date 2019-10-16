@@ -74,7 +74,6 @@ export class Input extends React.Component<Props, State> {
       });
   }
 
-
   render() {
     return (
       <FormControl

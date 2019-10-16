@@ -61,7 +61,7 @@ export interface FuzzySearchResult {
 /**
  *
  * @param needle The string to search for in {@see haystack}
- * @param hightlightMatches Whether or not the match boundaries should be remembered
+ * @param hightlightMatches Whether or not the matched boundaries should be highlighted
  */
 export function fuzzySearch(needle: string, hightlightMatches = false): (haystack?: string) => null | FuzzySearchResult {
   if (needle === '' || needle === undefined)

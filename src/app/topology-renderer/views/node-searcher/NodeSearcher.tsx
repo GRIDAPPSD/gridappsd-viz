@@ -11,6 +11,7 @@ import { fuzzySearch, FuzzySearchResult } from '@shared/misc';
 import { Ripple } from '@shared/ripple';
 
 import './NodeSearcher.scss';
+import { Paginator } from '@shared/paginator';
 
 interface Props {
   show: boolean;
@@ -22,7 +23,13 @@ interface Props {
 interface State {
   show: boolean;
   searchTerm: string;
-  matches: Array<{ node: Node; result: FuzzySearchResult; }>;
+  matches: Match[];
+  visibleMatches: Match[];
+}
+
+interface Match {
+  node: Node;
+  result: FuzzySearchResult;
 }
 
 export class NodeSearcher extends React.Component<Props, State> {
@@ -38,7 +45,8 @@ export class NodeSearcher extends React.Component<Props, State> {
     this.state = {
       show: undefined,
       searchTerm: '',
-      matches: []
+      matches: [],
+      visibleMatches: []
     };
 
     this._matchedNodes = new Set(props.nodes);
@@ -105,7 +113,7 @@ export class NodeSearcher extends React.Component<Props, State> {
               </div>
               <ul className='node-searcher__body__search-result-container'>
                 {
-                  this.state.matches.map((matchedNode, index) => (
+                  this.state.visibleMatches.map((matchedNode, index) => (
                     <Ripple key={index}>
                       <li
                         className='node-searcher__body__search-result'
@@ -120,6 +128,9 @@ export class NodeSearcher extends React.Component<Props, State> {
                 }
               </ul>
             </div>
+            <Paginator
+              items={this.state.matches}
+              onPageChanged={page => this.setState({ visibleMatches: page })} />
           </div>
         </Fade>
       </PortalRenderer>
@@ -138,7 +149,7 @@ export class NodeSearcher extends React.Component<Props, State> {
       searchTerm
     });
 
-    const matches: Array<{ node: Node; result: FuzzySearchResult; }> = [];
+    const matches: Match[] = [];
     const searcher = fuzzySearch(searchTerm, true);
 
     if (searchTerm.length < this._previousSearchTerm.length || this._matchedNodes.size === 0)
@@ -185,7 +196,7 @@ export class NodeSearcher extends React.Component<Props, State> {
     this._matchedNodes = new Set(this.props.nodes);
   }
 
-  renderMatchedNode(matchedNode: { node: Node; result: FuzzySearchResult; }) {
+  renderMatchedNode(matchedNode: Match) {
     const common = matchedNode.result.boundaries.map((boundary, i) => {
       if (boundary.highlight)
         return (

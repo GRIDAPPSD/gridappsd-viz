@@ -5,6 +5,9 @@
     width: 100vw;
     height: 100vh;
     z-index: 1000;
+    display: flex;
+    flex-flow: column;
+    align-items: center;
 
     .backdrop {
         background-color: rgba(0, 0, 0, 0.8);
@@ -33,14 +36,12 @@
 
     &__body {
         width: 100vw;
-        position: absolute;
-        left: 50%;
-        transform: translateX(-50%);
+        position: relative;
         top: 0;
         display: flex;
         flex-flow: column nowrap;
         align-items: center;
-        height: 100vh;
+        min-height: 90%;
 
         &__search {
             display: flex;
@@ -121,6 +122,13 @@
             }
         }
     }
+
+    .paginator {
+        padding-bottom: 5px;
+        color: #fff;
+        flex-shrink: 0;
+        margin-top: auto;
+    }
 }
 
 .node-searcher.show {
@@ -179,7 +187,7 @@
         }
     }
 
-    .icon-button {
+    .node-searcher__body .icon-button {
         opacity: 0;
         animation: node-searcher-fade-animation 750ms 600ms ease forwards, node-searcher-shift-right-animation 500ms 1000ms ease forwards;
     }
@@ -311,7 +319,7 @@
         }
     }
 
-    .icon-button,
+    .node-searcher__body .icon-button,
     .input-field-wrapper {
         animation: node-searcher-restore-right-shift-animation 500ms ease forwards;
     }
