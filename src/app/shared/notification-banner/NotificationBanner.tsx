@@ -96,7 +96,7 @@ export class NotificationBanner extends React.Component<Props, State> {
       );
     }
     return (
-      <Fade fadeIn={true}>
+      <Fade in={true}>
         <div className='notification-banner persistent'>
           <Backdrop visible={true} />
           <div className='notification-banner__content'>

@@ -26,6 +26,8 @@ interface State {
 
 export class Input extends React.Component<Props, State> {
 
+  inputElement: HTMLInputElement;
+
   private readonly _valueChanges = new Subject<string>();
 
   constructor(props: Props) {
@@ -74,6 +76,7 @@ export class Input extends React.Component<Props, State> {
       });
   }
 
+
   render() {
     return (
       <FormControl
@@ -84,6 +87,7 @@ export class Input extends React.Component<Props, State> {
         disabled={this.props.disabled}>
         <div className='input-field-wrapper'>
           <input
+            ref={ref => this.inputElement = ref}
             type='text'
             name={this.props.name}
             className='input-field__input'
