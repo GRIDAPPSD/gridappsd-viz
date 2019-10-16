@@ -9,9 +9,9 @@ import { Tooltip } from '@shared/tooltip';
 import { Node } from '@shared/topology';
 import { fuzzySearch, FuzzySearchResult } from '@shared/misc';
 import { Ripple } from '@shared/ripple';
+import { Paginator } from '@shared/paginator';
 
 import './NodeSearcher.scss';
-import { Paginator } from '@shared/paginator';
 
 interface Props {
   show: boolean;

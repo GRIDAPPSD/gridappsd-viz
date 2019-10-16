@@ -577,7 +577,7 @@ export class TopologyRenderer extends React.Component<Props, State> {
     let currentZoom = 1;
     if (currentTransform.k < 3) {
       // Zoom in 3 degrees
-      currentZoom = 3;
+      currentZoom = this.props.topology.nodes.length <= 1000 ? 3 : 6;
       currentTransform = currentTransform.scale((1 / currentTransform.k) * currentZoom);
     } else {
       currentZoom = currentTransform.k;
