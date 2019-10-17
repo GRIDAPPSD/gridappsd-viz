@@ -16,6 +16,7 @@ import { RegulatorMenu } from './views/regulator-menu/RegulatorMenu';
 import { RenderableTopology } from './models/RenderableTopology';
 import { IconButton } from '@shared/buttons';
 import { NodeSearcher } from './views/node-searcher/NodeSearcher';
+import { MatchedNodeLocator } from './views/matched-node-locator/MatchedNodeLocator';
 
 import './TopologyRenderer.scss';
 
@@ -30,6 +31,7 @@ interface Props {
 
 interface State {
   showNodeSearcher: boolean;
+  nodeToLocate: SVGCircleElement;
 }
 
 export class TopologyRenderer extends React.Component<Props, State> {
@@ -70,7 +72,8 @@ export class TopologyRenderer extends React.Component<Props, State> {
     super(props);
 
     this.state = {
-      showNodeSearcher: false
+      showNodeSearcher: false,
+      nodeToLocate: null
     };
 
     this.showMenuOnComponentClicked = this.showMenuOnComponentClicked.bind(this);
@@ -446,6 +449,13 @@ export class TopologyRenderer extends React.Component<Props, State> {
           onClose={this.onNodeSearcherClosed}
           onNodeSelected={this.locateNode} />
         <Wait show={this.props.showWait} />
+        {
+          this.state.nodeToLocate
+          &&
+          <MatchedNodeLocator
+            node={this.state.nodeToLocate}
+            onDimissed={() => this.setState({ nodeToLocate: null })} />
+        }
       </div>
     );
   }
@@ -595,7 +605,13 @@ export class TopologyRenderer extends React.Component<Props, State> {
 
     currentTransform = currentTransform.translate(centerX, centerY);
     currentTransform = currentTransform.scale(currentZoom);
-    this._zoomer.transform(this._canvas.transition(), currentTransform);
+    const transformTransition = this._canvas.transition()
+      .on('end', () => {
+        this.setState({
+          nodeToLocate: elementForNode
+        });
+      });
+    this._zoomer.transform(transformTransition, currentTransform);
   }
 
 }

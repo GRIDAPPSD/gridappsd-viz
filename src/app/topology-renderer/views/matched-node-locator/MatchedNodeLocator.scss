@@ -1,0 +1,32 @@
+.matched-node-locator {
+    position: fixed;
+    width: 100vw;
+    height: 100vh;
+    z-index: 1000;
+}
+
+.matched-node-locator__ripple {
+    animation: ripple 4s ease infinite forwards;
+    transform-origin: 50% 50%;
+    border-radius: 100%;
+    background-color: rgba(0, 0, 0, 0.7);
+    position: absolute;
+
+    @keyframes ripple {
+        0% {
+            opacity: 1;
+            transform: scale(0, 0);
+        }
+
+        /* Animation is 75% of 4s long, so it runs for 3 seconds, and "delays" for 1*/
+        75% {
+            opacity: 0;
+            transform: scale(3, 3);
+        }
+
+        100% {
+            opacity: 0;
+            transform: scale(3, 3);
+        }
+    }
+}
