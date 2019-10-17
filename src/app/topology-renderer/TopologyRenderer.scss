@@ -10,10 +10,16 @@
     height: 100%;
 }
 
-.topology-renderer__toolbox {
+.topology-renderer__toolbox-container {
     position: absolute;
     top: 5px;
     right: 5px;
+    display: flex;
+    justify-content: center;
+    flex-flow: column nowrap;
+}
+
+.topology-renderer__toolbox {
     padding: 5px 0;
     border-radius: 5px;
     box-shadow: 0 0 3px #555;

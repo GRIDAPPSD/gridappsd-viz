@@ -1,0 +1,13 @@
+.paginator {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-top: 2px solid rgba(0, 0, 0, 0.05);
+    box-sizing: border-box;
+}
+
+.paginator__page-indicator {
+    width: 100px;
+    text-align: center;
+}

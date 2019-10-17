@@ -6,7 +6,7 @@ import './Backdrop.scss';
 
 export function Backdrop({ visible, onClick = null }) {
   return (
-    <Fade fadeIn={visible}>
+    <Fade in={visible}>
       <div className={'backdrop'} onClick={onClick} />
     </Fade>
   );

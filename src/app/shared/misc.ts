@@ -39,3 +39,102 @@ export function download(filename: string, fileContent: any, contentType: Downlo
   URL.revokeObjectURL(downloadUrl);
   document.body.removeChild(a);
 }
+
+
+interface FuzzySearchBoundary {
+  /**
+   * Inclusive
+   */
+  start: number;
+  /**
+   * Exclusive
+   */
+  end: number;
+  highlight: boolean;
+}
+
+export interface FuzzySearchResult {
+  inaccuracy: number;
+  input: string;
+  boundaries: FuzzySearchBoundary[];
+}
+/**
+ *
+ * @param needle The string to search for in {@see haystack}
+ * @param hightlightMatches Whether or not the matched boundaries should be highlighted
+ */
+export function fuzzySearch(needle: string, hightlightMatches = false): (haystack?: string) => null | FuzzySearchResult {
+  if (needle === '' || needle === undefined)
+    return () => null;
+
+  if (!hightlightMatches) {
+    const specialTokens = ['(', ')', '[', ']', '{', '}', '?', '\\', '/', '*', '+', '-', '.', '^', '$'];
+    const tokens = needle.split('')
+      .map(token => specialTokens.includes(token) ? `\\${token}` : hightlightMatches ? `(${token})` : token);
+    const pattern = new RegExp(tokens.join('[\\s\\S]*'), 'i');
+    return (haystack: string) => {
+      const matches = pattern.test(haystack);
+      if (!matches)
+        return null;
+      return {
+        inaccuracy: Infinity,
+        input: haystack,
+        boundaries: [
+          {
+            start: 0,
+            end: undefined,
+            highlight: false
+          }
+        ]
+      };
+    };
+  }
+
+  return (haystack: string) => {
+    if (!haystack)
+      return null;
+    const originalHaystack = haystack;
+    haystack = haystack.toLowerCase();
+    needle = needle.toLowerCase();
+    let startOfCurrentMatch = haystack.indexOf(needle[0]);
+    if (startOfCurrentMatch === -1)
+      return null;
+    const boundaries: FuzzySearchBoundary[] = [];
+    if (startOfCurrentMatch > 0)
+      boundaries.push({
+        start: 0,
+        end: startOfCurrentMatch,
+        highlight: false
+      });
+    let inaccuracy = needle.length === 1 ? startOfCurrentMatch : 0;
+    for (const piece of needle) {
+      const endOfLastMatch = boundaries.length > 0 ? boundaries[boundaries.length - 1].end : 0;
+      startOfCurrentMatch = haystack.indexOf(piece, endOfLastMatch);
+      if (startOfCurrentMatch === -1)
+        return null;
+      if (startOfCurrentMatch > endOfLastMatch) {
+        boundaries.push({
+          start: endOfLastMatch,
+          end: startOfCurrentMatch,
+          highlight: false
+        });
+        inaccuracy += startOfCurrentMatch - endOfLastMatch;
+      }
+      boundaries.push({
+        start: startOfCurrentMatch,
+        end: startOfCurrentMatch + 1,
+        highlight: true
+      });
+    }
+    boundaries.push({
+      start: boundaries[boundaries.length - 1].end,
+      end: undefined,
+      highlight: false
+    });
+    return {
+      inaccuracy,
+      input: originalHaystack,
+      boundaries
+    };
+  };
+}

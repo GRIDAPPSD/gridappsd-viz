@@ -4,4 +4,5 @@
 
 .fade-out {
     animation: fadeout 500ms ease forwards;
+    pointer-events: none;
 }

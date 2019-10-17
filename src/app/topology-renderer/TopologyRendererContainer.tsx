@@ -90,7 +90,9 @@ export class TopologyRendererContainer extends React.Component<Props, State> {
 
   private _subscribeToTopologyModelTopic(destination: string) {
     this._stompClientService.readOnceFrom(destination)
-      .pipe(map(body => JSON.parse(body) as GetTopologyModelRequestPayload))
+      .pipe(
+        takeWhile(() => !this._activeSimulationStream.closed),
+        map(body => JSON.parse(body) as GetTopologyModelRequestPayload))
       .subscribe({
         next: payload => this._processModelForRendering(payload)
       });
@@ -148,6 +150,9 @@ export class TopologyRendererContainer extends React.Component<Props, State> {
       }, []);
     for (const node of allNodes) {
       const groupName = node.groupName;
+      const mRIDs = this.props.mRIDs.get(node.name) || [];
+      const resolvedMRIDs = Array.isArray(mRIDs) ? mRIDs : [mRIDs];
+
       delete node.groupName;
       switch (groupName) {
         case 'swing_nodes':
@@ -157,7 +162,8 @@ export class TopologyRendererContainer extends React.Component<Props, State> {
               name: node.name,
               type: 'swing_node',
               x1: Math.trunc(node.x1),
-              y1: Math.trunc(node.y1)
+              y1: Math.trunc(node.y1),
+              mRIDs: resolvedMRIDs
             })
           );
           break;
@@ -166,7 +172,8 @@ export class TopologyRendererContainer extends React.Component<Props, State> {
             this._createNewNode({
               ...node,
               name: node.name,
-              type: 'battery'
+              type: 'battery',
+              mRIDs: resolvedMRIDs
             })
           );
           break;
@@ -192,7 +199,8 @@ export class TopologyRendererContainer extends React.Component<Props, State> {
               screenX2: 0,
               screenY2: 0,
               colorWhenOpen: '#4aff4a',
-              colorWhenClosed: '#f00'
+              colorWhenClosed: '#f00',
+              mRIDs: resolvedMRIDs
             })
           );
           break;
@@ -201,7 +209,8 @@ export class TopologyRendererContainer extends React.Component<Props, State> {
             this._createNewNode({
               ...node,
               name: node.name,
-              type: 'solarpanel'
+              type: 'solarpanel',
+              mRIDs: resolvedMRIDs
             })
           );
           break;
@@ -212,7 +221,8 @@ export class TopologyRendererContainer extends React.Component<Props, State> {
               name: node.name,
               type: 'transformer',
               x1: Math.trunc(node.x1 !== 0 ? node.x1 : node.x2),
-              y1: Math.trunc(node.y1 !== 0 ? node.y1 : node.y2)
+              y1: Math.trunc(node.y1 !== 0 ? node.y1 : node.y2),
+              mRIDs: resolvedMRIDs
             })
           );
           break;
@@ -228,7 +238,8 @@ export class TopologyRendererContainer extends React.Component<Props, State> {
               manual: node.manual === 'manual',
               controlMode: CapacitorControlMode.UNSPECIFIED,
               volt: null,
-              var: null
+              var: null,
+              mRIDs: resolvedMRIDs
             })
           );
           break;
@@ -259,7 +270,8 @@ export class TopologyRendererContainer extends React.Component<Props, State> {
               manual: node.manual === 'manual',
               controlModel: RegulatorControlMode.UNSPECIFIED,
               phaseValues: {},
-              phases: this.props.phases.get(node.name)
+              phases: this.props.phases.get(node.name),
+              mRIDs: resolvedMRIDs
             })
           );
           break;

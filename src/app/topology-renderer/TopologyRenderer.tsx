@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { extent } from 'd3-array';
 import { line } from 'd3-shape';
-import { zoom, zoomIdentity } from 'd3-zoom';
+import { zoom, zoomIdentity, zoomTransform } from 'd3-zoom';
 import { select, event as currentEvent, Selection } from 'd3-selection';
 import { scaleLinear, ScaleLinear } from 'd3';
 
@@ -15,6 +15,8 @@ import { CapacitorMenu } from './views/capacitor-menu/CapacitorMenu';
 import { RegulatorMenu } from './views/regulator-menu/RegulatorMenu';
 import { RenderableTopology } from './models/RenderableTopology';
 import { IconButton } from '@shared/buttons';
+import { NodeSearcher } from './views/node-searcher/NodeSearcher';
+import { MatchedNodeLocator } from './views/matched-node-locator/MatchedNodeLocator';
 
 import './TopologyRenderer.scss';
 
@@ -28,6 +30,8 @@ interface Props {
 }
 
 interface State {
+  showNodeSearcher: boolean;
+  nodeToLocate: SVGCircleElement;
 }
 
 export class TopologyRenderer extends React.Component<Props, State> {
@@ -36,7 +40,7 @@ export class TopologyRenderer extends React.Component<Props, State> {
   readonly overlay = OverlayService.getInstance();
 
   private readonly _transformWatcherService = MapTransformWatcherService.getInstance();
-  private readonly _zoomer = zoom();
+  private readonly _zoomer = zoom<SVGElement, any>();
   private readonly _edgeGenerator = line<{ edge: Edge; node: Node }>()
     .x(d => d.node.screenX1)
     .y(d => d.node.screenY1);
@@ -67,10 +71,18 @@ export class TopologyRenderer extends React.Component<Props, State> {
   constructor(props: Props) {
     super(props);
 
+    this.state = {
+      showNodeSearcher: false,
+      nodeToLocate: null
+    };
+
     this.showMenuOnComponentClicked = this.showMenuOnComponentClicked.bind(this);
     this.showTooltip = this.showTooltip.bind(this);
     this.hideTooltip = this.hideTooltip.bind(this);
     this.reset = this.reset.bind(this);
+    this.showNodeSearcher = this.showNodeSearcher.bind(this);
+    this.onNodeSearcherClosed = this.onNodeSearcherClosed.bind(this);
+    this.locateNode = this.locateNode.bind(this);
   }
 
   componentDidMount() {
@@ -245,7 +257,7 @@ export class TopologyRenderer extends React.Component<Props, State> {
       .data(switchNodes)
       .enter()
       .append('g')
-      .attr('class', node => `topology-renderer__canvas__switch-node _${node.name}_`);
+      .attr('class', 'topology-renderer__canvas__switch-node');
 
     switches.append('line')
       .attr('x1', node => node.screenX1)
@@ -256,7 +268,7 @@ export class TopologyRenderer extends React.Component<Props, State> {
       .attr('stroke', '#000');
 
     switches.append('circle')
-      .attr('class', 'topology-renderer__canvas__node switch')
+      .attr('class', node => `topology-renderer__canvas__node switch _${node.name}_`)
       .attr('cx', node => (node.screenX1 + node.screenX2) / 2)
       .attr('cy', node => (node.screenY1 + node.screenY2) / 2)
       .attr('r', nodeRadius)
@@ -363,11 +375,11 @@ export class TopologyRenderer extends React.Component<Props, State> {
     const height = this._symbolDimensions.switch.height;
 
     const switches = container.append('g')
-      .selectAll('.topology-renderer__canvas__symbol.switch')
+      .selectAll('.topology-renderer__canvas__switch-symbol')
       .data(switchNodes as Switch[])
       .enter()
       .append('g')
-      .attr('class', node => `topology-renderer__canvas__symbol switch _${node.name}_`)
+      .attr('class', node => `topology-renderer__canvas__switch-symbol  _${node.name}_`)
       .attr('transform', node => `translate(${node.screenX1},${node.screenY1})`);
     switches.append('line')
       .attr('x1', 0)
@@ -411,16 +423,39 @@ export class TopologyRenderer extends React.Component<Props, State> {
           onMouseOut={this.hideTooltip}>
           <g className='topology-renderer__canvas__container' />
         </svg>
-        <div className='topology-renderer__toolbox'>
-          <Tooltip content='Reset'>
-            <IconButton
-              icon='refresh'
-              size='small'
-              style='accent'
-              onClick={this.reset} />
-          </Tooltip>
+        <div className='topology-renderer__toolbox-container'>
+          <div className='topology-renderer__toolbox'>
+            <Tooltip content='Reset'>
+              <IconButton
+                icon='refresh'
+                size='small'
+                style='accent'
+                onClick={this.reset} />
+            </Tooltip>
+          </div>
+          <div className='topology-renderer__toolbox'>
+            <Tooltip content='Search for nodes by name or MRID'>
+              <IconButton
+                icon='search'
+                size='small'
+                style='accent'
+                onClick={this.showNodeSearcher} />
+            </Tooltip>
+          </div>
         </div>
+        <NodeSearcher
+          show={this.state.showNodeSearcher}
+          nodes={this.props.topology ? this.props.topology.nodes : []}
+          onClose={this.onNodeSearcherClosed}
+          onNodeSelected={this.locateNode} />
         <Wait show={this.props.showWait} />
+        {
+          this.state.nodeToLocate
+          &&
+          <MatchedNodeLocator
+            node={this.state.nodeToLocate}
+            onDimissed={() => this.setState({ nodeToLocate: null })} />
+        }
       </div>
     );
   }
@@ -532,11 +567,51 @@ export class TopologyRenderer extends React.Component<Props, State> {
   }
 
   reset() {
-    this._container.transition()
+    this._zoomer.transform(this._canvas.transition(), zoomIdentity);
+  }
+
+  showNodeSearcher() {
+    this.setState({
+      showNodeSearcher: true
+    });
+  }
+
+  onNodeSearcherClosed() {
+    this.setState({
+      showNodeSearcher: false
+    });
+  }
+
+  locateNode(node: Node) {
+    let currentTransform = zoomTransform(this._canvas.node());
+    let currentZoom = 1;
+    if (currentTransform.k < 3) {
+      // Zoom in 3 degrees
+      currentZoom = this.props.topology.nodes.length <= 1000 ? 3 : 6;
+      currentTransform = currentTransform.scale((1 / currentTransform.k) * currentZoom);
+    } else {
+      currentZoom = currentTransform.k;
+    }
+    this._zoomer.transform(this._canvas, currentTransform);
+
+    // Reset the zoom level to 1
+    currentTransform = currentTransform.scale(1 / currentZoom);
+
+    const canvasBoundingBox = this.svg.getBoundingClientRect();
+    const elementForNode = document.querySelector(`.topology-renderer__canvas__node.${node.type}._${node.name}_`) as SVGCircleElement;
+    const nodeBoundingBox = elementForNode.getBoundingClientRect();
+    const centerX = (canvasBoundingBox.left + (this.svg.clientWidth / 2)) - nodeBoundingBox.left;
+    const centerY = (canvasBoundingBox.top + (this.svg.clientHeight / 2)) - nodeBoundingBox.top;
+
+    currentTransform = currentTransform.translate(centerX, centerY);
+    currentTransform = currentTransform.scale(currentZoom);
+    const transformTransition = this._canvas.transition()
       .on('end', () => {
-        this._canvas.call(this._zoomer.transform, zoomIdentity);
-      })
-      .attr('transform', 'translate(0, 0) scale(1)');
+        this.setState({
+          nodeToLocate: elementForNode
+        });
+      });
+    this._zoomer.transform(transformTransition, currentTransform);
   }
 
 }

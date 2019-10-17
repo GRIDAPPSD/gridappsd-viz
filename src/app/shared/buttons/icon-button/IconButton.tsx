@@ -7,7 +7,7 @@ import './IconButton.scss';
 type Icon = 'check_circle' | 'menu' | 'assignment' | 'storage' | 'search' | 'laptop' | 'delete'
   | 'cloud_upload' | 'pause' | 'stop' | 'play_arrow' | 'add' | 'remove' | 'cached' | 'save'
   | 'close' | 'navigate_next' | 'navigate_before' | 'keyboard_arrow_down' | 'memory' | 'send'
-  | 'show_chart' | 'edit' | 'help_outline' | 'arrow_downward' | 'refresh';
+  | 'show_chart' | 'edit' | 'help_outline' | 'arrow_downward' | 'refresh' | 'search';
 
 
 interface Props {
@@ -30,12 +30,7 @@ export function IconButton(props: Props) {
       <button
         type='button'
         disabled={props.disabled}
-        className={
-          'icon-button' +
-          (props.className ? ' ' + props.className : '') +
-          (' icon-button--' + (props.style ? props.style : 'primary')) +
-          deriveClassName(props)
-        }
+        className={deriveClassName(props)}
         onClick={props.onClick}>
         <i className='material-icons icon-button__icon'>{props.icon}</i>
         {props.label && <span className='icon-button__label'>{props.label}</span>}

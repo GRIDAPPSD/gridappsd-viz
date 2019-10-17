@@ -1,3 +1,7 @@
+.input-field {
+    align-items: center;
+}
+
 .input-field-wrapper {
     display: inline-block;
     position: relative;
@@ -12,6 +16,7 @@
     box-sizing: border-box;
     transition: border-bottom-color 0.15s ease, color 0.1s ease;
     font-size: 0.8em;
+    background-color: transparent;
 }
 
 .input-field__ripple-bar {
