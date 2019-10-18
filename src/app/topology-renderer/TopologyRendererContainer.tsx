@@ -18,6 +18,8 @@ import { CapacitorVoltUpdateRequest } from './models/CapacitorVoltUpdateRequest'
 import { RegulatorLineDropUpdateRequest } from './models/RegulatorLineDropUpdateRequest';
 import { RegulatorTapChangerRequest } from './models/RegulatorTapChangerRequest';
 import { RenderableTopology } from './models/RenderableTopology';
+import { waitUntil } from '@shared/misc';
+import { Wait } from '@shared/wait';
 
 interface Props {
   mRIDs: Map<string, string & string[]>;
@@ -101,12 +103,15 @@ export class TopologyRendererContainer extends React.Component<Props, State> {
   private _processModelForRendering(payload: GetTopologyModelRequestPayload) {
     if (typeof payload.data === 'string')
       payload.data = JSON.parse(payload.data);
-    const topology = this._transformModelForRendering(payload.data);
-    this.setState({
-      topology,
-      isFetching: false
-    });
-    TopologyRendererContainer._CACHE[this._activeSimulationConfig.power_system_config.Line_name] = topology;
+    waitUntil(() => this.props.mRIDs.size > 0)
+      .then(() => {
+        const topology = this._transformModelForRendering(payload.data);
+        this.setState({
+          topology,
+          isFetching: false
+        });
+        TopologyRendererContainer._CACHE[this._activeSimulationConfig.power_system_config.Line_name] = topology;
+      });
   }
 
   private _transformModelForRendering(model: TopologyModel): RenderableTopology {
@@ -308,13 +313,16 @@ export class TopologyRendererContainer extends React.Component<Props, State> {
 
   render() {
     return (
-      <TopologyRenderer
-        topology={this.state.topology}
-        showWait={this.state.isFetching}
-        topologyName={this._activeSimulationConfig.simulation_config.simulation_name}
-        onToggleSwitch={this.onToggleSwitchState}
-        onCapacitorMenuFormSubmitted={this.onCapacitorMenuFormSubmitted}
-        onRegulatorMenuFormSubmitted={this.onRegulatorMenuFormSubmitted} />
+      <>
+        <TopologyRenderer
+          topology={this.state.topology}
+          showWait={this.state.isFetching}
+          topologyName={this._activeSimulationConfig.simulation_config.simulation_name}
+          onToggleSwitch={this.onToggleSwitchState}
+          onCapacitorMenuFormSubmitted={this.onCapacitorMenuFormSubmitted}
+          onRegulatorMenuFormSubmitted={this.onRegulatorMenuFormSubmitted} />
+        <Wait show={this.state.isFetching} />
+      </>
     );
   }
 
