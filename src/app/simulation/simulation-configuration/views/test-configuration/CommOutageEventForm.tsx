@@ -176,7 +176,8 @@ export class CommOutageEventForm extends React.Component<Props, State> {
               onClick={this.addNewInputItem} />
           </Tooltip>
           {
-            this.state.inputList.length > 0 &&
+            this.state.inputList.length > 0
+            &&
             <table className='comm-outage-event-form__input-output-list'>
               <thead>
                 <tr>
@@ -184,7 +185,7 @@ export class CommOutageEventForm extends React.Component<Props, State> {
                   <th>Type</th>
                   <th>Name</th>
                   <th>Phases</th>
-                  <th>Attributes</th>
+                  <th>Attribute</th>
                 </tr>
               </thead>
               <tbody>
@@ -274,7 +275,8 @@ export class CommOutageEventForm extends React.Component<Props, State> {
               onClick={this.addNewOutputItem} />
           </Tooltip>
           {
-            this.state.outputList.length > 0 &&
+            this.state.outputList.length > 0
+            &&
             <table className='comm-outage-event-form__input-output-list'>
               <thead>
                 <tr>
@@ -282,7 +284,7 @@ export class CommOutageEventForm extends React.Component<Props, State> {
                   <th>Type</th>
                   <th>Name</th>
                   <th>Phases</th>
-                  <th>Measurement types</th>
+                  <th>Measurement type</th>
                 </tr>
               </thead>
               <tbody>
