@@ -42,11 +42,13 @@ interface Props {
 interface State {
   feederModel: FeederModel;
   availableApplications: Application[];
-  componentMRIDs: Map<string, string & string[]>;
-  componentPhases: Map<string, string[]>;
 }
 
 export class App extends React.Component<Props, State> {
+
+  readonly componentMRIDs = new Map<string, string & string[]>();
+  readonly componentPhases = new Map<string, string[]>();
+
   shouldRedirect = false;
 
   private _stateStore = StateStore.getInstance();
@@ -62,9 +64,7 @@ export class App extends React.Component<Props, State> {
 
     this.state = {
       feederModel: null,
-      availableApplications: null,
-      componentMRIDs: new Map(),
-      componentPhases: new Map()
+      availableApplications: null
     };
 
     this._stateStore.initialize(DEFAULT_APPLICATION_STATE);
@@ -236,8 +236,8 @@ export class App extends React.Component<Props, State> {
                       <TabGroup>
                         <Tab label='Simulation'>
                           <TopologyRendererContainer
-                            mRIDs={this.state.componentMRIDs}
-                            phases={this.state.componentPhases} />
+                            mRIDs={this.componentMRIDs}
+                            phases={this.componentPhases} />
                           <SimulationStatusLogContainer />
                           <SimulationLabelsContainer />
                           <VoltageViolationContainer />
@@ -349,21 +349,17 @@ export class App extends React.Component<Props, State> {
   }
 
   private _collectMRIDsAndPhasesForComponents(modelDictionary: any) {
-    const componentMRIDs = new Map();
-    const componentPhases = new Map();
+    this.componentMRIDs.clear();
+    this.componentPhases.clear();
     for (const swjtch of modelDictionary.switches)
-      componentMRIDs.set(swjtch.name, swjtch.mRID);
+      this.componentMRIDs.set(swjtch.name, swjtch.mRID);
     for (const capacitor of modelDictionary.capacitors)
-      componentMRIDs.set(capacitor.name, capacitor.mRID);
+      this.componentMRIDs.set(capacitor.name, capacitor.mRID);
     for (const regulator of modelDictionary.regulators) {
-      componentMRIDs.set(regulator.bankName, regulator.mRID);
+      this.componentMRIDs.set(regulator.bankName, regulator.mRID);
       // Only interested in regulators' phases for now, need phases for regulator menus
-      componentPhases.set(regulator.bankName, (regulator.bankPhases || '').split(''));
+      this.componentPhases.set(regulator.bankName, (regulator.bankPhases || '').split(''));
     }
-    this.setState({
-      componentMRIDs,
-      componentPhases
-    });
   }
 
   // Find components with the same name, and group their phases into one

@@ -138,3 +138,23 @@ export function fuzzySearch(needle: string, hightlightMatches = false): (haystac
     };
   };
 }
+
+/**
+ * Returns a promise that resolves when the predicate returns true
+ * @param predicate A function that determines when to stop waiting
+ * @param waitDelay How often to check if the predicate function returns true
+ */
+export function waitUntil(predicate: () => boolean, waitDelay = 500): Promise<void> {
+  return new Promise(resolve => {
+    if (predicate())
+      resolve();
+    else {
+      const repeater = setTimeout(() => {
+        if (predicate()) {
+          resolve();
+          clearInterval(repeater);
+        }
+      }, waitDelay);
+    }
+  });
+}

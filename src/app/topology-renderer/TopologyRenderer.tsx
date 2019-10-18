@@ -8,7 +8,6 @@ import { scaleLinear, ScaleLinear } from 'd3';
 import { MapTransformWatcherService } from '@shared/MapTransformWatcherService';
 import { Switch, Capacitor, Node, Edge, Regulator } from '@shared/topology';
 import { Tooltip } from '@shared/tooltip';
-import { Wait } from '@shared/wait';
 import { OverlayService } from '@shared/overlay';
 import { SwitchMenu } from './views/switch-menu/SwitchMenu';
 import { CapacitorMenu } from './views/capacitor-menu/CapacitorMenu';
@@ -448,7 +447,6 @@ export class TopologyRenderer extends React.Component<Props, State> {
           nodes={this.props.topology ? this.props.topology.nodes : []}
           onClose={this.onNodeSearcherClosed}
           onNodeSelected={this.locateNode} />
-        <Wait show={this.props.showWait} />
         {
           this.state.nodeToLocate
           &&
