@@ -115,18 +115,13 @@ export class App extends React.Component<Props, State> {
   }
 
   private _fetchFeederModels() {
-    const feederModel = sessionStorage.getItem('feederModel');
-    if (feederModel)
-      this.setState({ feederModel: JSON.parse(feederModel) });
-    else {
-      const getAllFeederModelsRequest = new GetAllFeederModelsRequest();
-      this._subscribeToFeederModelsTopic(getAllFeederModelsRequest.replyTo);
-      this._stompClientService.send(
-        getAllFeederModelsRequest.url,
-        { 'reply-to': getAllFeederModelsRequest.replyTo },
-        getAllFeederModelsRequest.requestBody
-      );
-    }
+    const getAllFeederModelsRequest = new GetAllFeederModelsRequest();
+    this._subscribeToFeederModelsTopic(getAllFeederModelsRequest.replyTo);
+    this._stompClientService.send(
+      getAllFeederModelsRequest.url,
+      { 'reply-to': getAllFeederModelsRequest.replyTo },
+      getAllFeederModelsRequest.requestBody
+    );
   }
 
   private _subscribeToFeederModelsTopic(destination: string) {
@@ -205,8 +200,9 @@ export class App extends React.Component<Props, State> {
               }
             );
           }
-          this.setState({ feederModel });
-          sessionStorage.setItem('feederModel', JSON.stringify(feederModel));
+          this.setState({
+            feederModel
+          });
         }
       });
   }
