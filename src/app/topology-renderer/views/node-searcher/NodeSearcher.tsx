@@ -183,7 +183,16 @@ export class NodeSearcher extends React.Component<Props, State> {
       }
     }
     this.setState({
-      matches: matches.sort((a, b) => a.result.inaccuracy - b.result.inaccuracy || a.result.boundaries[1].start - b.result.boundaries[1].start)
+      matches: matches.sort((a, b) => {
+        if (a.result.inaccuracy === b.result.inaccuracy)
+          // If both matches have the same inaccuracy
+          // we want to sort them by their inputs' length,
+          // the one with shorter input should come first,
+          // if their input lengths are the same,
+          // then we want to sort them by their start of the first matched boundary
+          return a.result.input.length - b.result.input.length || a.result.boundaries[1].start - b.result.boundaries[1].start;
+        return a.result.inaccuracy - b.result.inaccuracy;
+      })
     });
   }
 
