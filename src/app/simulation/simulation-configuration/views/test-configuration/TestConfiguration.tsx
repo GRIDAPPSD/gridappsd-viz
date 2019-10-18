@@ -197,9 +197,9 @@ export class TestConfiguration extends React.Component<Props, State> {
       .pipe(filter(content => Boolean(content)))
       .subscribe({
         next: content => {
-          const faultEvents = content.faultEvents || [];
-          const outageEvents = content.outageEvents || [];
-          const commandEvents = content.commandEvents || [];
+          const faultEvents = this.state.faultEvents.concat(content.faultEvents || []);
+          const outageEvents = this.state.outageEvents.concat(content.outageEvents || []);
+          const commandEvents = this.state.commandEvents.concat(content.commandEvents || []);
           this.setState({
             faultEvents,
             outageEvents,
