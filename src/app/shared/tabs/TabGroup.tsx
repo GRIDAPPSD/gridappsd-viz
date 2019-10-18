@@ -73,8 +73,11 @@ export class TabGroup extends React.Component<Props, State> {
         </header>
         <div className='tabgroup__body'>
           <div className='tabgroup__body__wrapper'>
-            <div className='tabgroup__body__slider'
-              style={{ transform: `translateX(${-activeTabIndex * 100}%)` }}>
+            <div
+              className='tabgroup__body__slider'
+              style={{
+                transform: `translateX(${-activeTabIndex * 100}%)`
+              }}>
               {
                 tabs.map((tab, index) => (
                   <div

@@ -8,7 +8,6 @@
         overflow: auto auto;
         width: 40%;
         border-right: 2px solid rgba(0, 0, 0, 0.1);
-        margin-right: 5px;
     }
 }
 
@@ -21,6 +20,7 @@
     display: flex;
     flex-flow: column nowrap;
     width: 60%;
+    padding: 2px;
 }
 
 .test-configuration__save-events {

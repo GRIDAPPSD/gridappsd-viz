@@ -2,10 +2,11 @@ import * as React from 'react';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 
-import { CommOutageEvent, FaultEvent } from '@shared/test-manager';
+import { CommOutageEvent, FaultEvent, CommandEvent } from '@shared/test-manager';
 import { StateStore } from '@shared/state-store';
 import { CommOutageEventSummary } from './CommOutageEventSummary';
 import { FaultEventSummary } from './FaultEventSummary';
+import { CommandEventSummary } from './CommandEventSummary';
 
 import './EventSummary.scss';
 
@@ -15,6 +16,7 @@ interface Props {
 interface State {
   outageEvents: CommOutageEvent[];
   faultEvents: FaultEvent[];
+  commandEvents: CommandEvent[];
   faultMRIDs: string[];
 }
 
@@ -28,6 +30,7 @@ export class EventSummary extends React.Component<Props, State> {
     this.state = {
       outageEvents: [],
       faultEvents: [],
+      commandEvents: [],
       faultMRIDs: []
     };
   }
@@ -49,6 +52,12 @@ export class EventSummary extends React.Component<Props, State> {
       .pipe(takeUntil(this._unsubscriber))
       .subscribe({
         next: faultMRIDs => this.setState({ faultMRIDs })
+      });
+
+    this._stateStore.select('commandEvents')
+      .pipe(takeUntil(this._unsubscriber))
+      .subscribe({
+        next: commandEvents => this.setState({ commandEvents })
       });
   }
 
@@ -82,6 +91,14 @@ export class EventSummary extends React.Component<Props, State> {
               faultMRIDs={this.state.faultMRIDs.slice(this.state.outageEvents.length)}
               onInitialize={this.initializeEvent}
               onClear={this.clearEvent} />
+          </>
+        }
+        {
+          this.state.commandEvents.length > 0
+          &&
+          <>
+            <h1 className='event-summary__table-name'>Command</h1>
+            <CommandEventSummary events={this.state.commandEvents} />
           </>
         }
       </div>
