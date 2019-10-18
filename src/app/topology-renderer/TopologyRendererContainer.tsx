@@ -37,7 +37,9 @@ export class TopologyRendererContainer extends React.Component<Props, State> {
 
   private readonly _stompClientService = StompClientService.getInstance();
   private readonly _simulationQueue = SimulationQueue.getInstance();
-  private _activeSimulationConfig = this._simulationQueue.getActiveSimulation().config;
+  private _activeSimulationConfig = this._simulationQueue.getActiveSimulation()
+    ? this._simulationQueue.getActiveSimulation().config
+    : null;
   private _activeSimulationStream: Subscription = null;
 
   constructor(props: any) {
