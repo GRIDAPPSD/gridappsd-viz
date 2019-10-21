@@ -90,3 +90,33 @@ a {
         opacity: 0;
     }
 }
+
+
+table {
+    border-collapse: collapse;
+    width: 100%;
+}
+
+thead {
+    background-color: #3f51b5;
+    color: #fff;
+}
+
+th,
+td {
+    font-size: 0.9em;
+    text-align: center;
+    white-space: nowrap;
+}
+
+th {
+    font-weight: 500;
+    padding: 10px 15px;
+    border: 2px solid #CECECE;
+    white-space: nowrap;
+}
+
+td {
+    border: 2px solid #CECECE;
+    position: relative;
+}

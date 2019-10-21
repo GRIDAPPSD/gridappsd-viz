@@ -12,7 +12,6 @@
     white-space: nowrap;
     font-weight: 500;
     padding: 10px 15px;
-    white-space: nowrap;
 }
 
 .command-event-table__cell-value {
@@ -29,6 +28,7 @@
 
 .command-event-table__difference-table__header {
     font-size: 0.9em;
+    border: none;
     border-right: 2px solid #eee;
     border-bottom: 2px solid #eee;
     padding: 3px 5px;
@@ -41,6 +41,7 @@
 
 .command-event-table__difference-table__cell-value {
     padding: 5px;
+    border: none;
     border-right: 2px solid #eee;
     font-size: 0.9em;
 }
