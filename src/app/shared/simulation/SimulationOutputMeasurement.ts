@@ -8,4 +8,5 @@ export interface SimulationOutputMeasurement {
   connectivityNode: string;
   name: string;
   type: string;
+  conductingEquipmentMRID: string;
 }

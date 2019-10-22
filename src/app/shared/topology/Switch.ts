@@ -7,7 +7,6 @@ export interface Switch extends Node {
   phases: string;
   x2: number;
   y2: number;
-  mRID: string;
   screenX2: number;
   screenY2: number;
   dx: number;

@@ -66,11 +66,11 @@ export class SimulationOutputService {
       .subscribe({
         next: (payload: SimulationOutputPayload) => {
           this._outputTimestamp = payload.message.timestamp;
-          const measurements = new Map();
+          const measurements = new Map<string, SimulationOutputMeasurement>();
           for (const [mrid, rawSimulationOutputMeasurement] of Object.entries(payload.message.measurements)) {
             const measurementInModelDictionary = this._modelDictionaryMeasurementMap.get(mrid);
             if (measurementInModelDictionary) {
-              const measurement = {
+              const measurement: SimulationOutputMeasurement = {
                 name: measurementInModelDictionary.name,
                 type: measurementInModelDictionary.measurementType,
                 magnitude: rawSimulationOutputMeasurement.magnitude,
@@ -79,7 +79,8 @@ export class SimulationOutputService {
                 mRID: rawSimulationOutputMeasurement.measurement_mrid,
                 phases: measurementInModelDictionary.phases,
                 conductingEquipmentName: measurementInModelDictionary.ConductingEquipment_name,
-                connectivityNode: measurementInModelDictionary.ConnectivityNode
+                connectivityNode: measurementInModelDictionary.ConnectivityNode,
+                conductingEquipmentMRID: measurementInModelDictionary.ConductingEquipment_mRID
               };
               measurements.set(mrid, measurement);
               measurements.set(measurementInModelDictionary.ConductingEquipment_name, measurement);
