@@ -62,16 +62,14 @@ export class TopologyRendererContainer extends React.Component<Props, State> {
     this._simulationOutputStream = this._simulationOutputService.simulationOutputMeasurementsReceived()
       .subscribe({
         next: measurements => {
-          const switches = new Set<Switch>();
           for (const swjtch of this._switches) {
             measurements.forEach(measurement => {
-              if (measurement.conductingEquipmentMRID === swjtch.mRIDs[0] && measurement.type === 'Pos') {
+              if (measurement.conductingEquipmentMRID === swjtch.mRIDs[0] && measurement.type === 'Pos')
                 swjtch.open = measurement.value === 0;
-                switches.add(swjtch);
-              }
             });
-            const switchCircle = document.querySelector(`.topology-renderer__canvas__symbol.switch_${swjtch.name}_`);
-            switchCircle.setAttribute('fill', swjtch.open ? swjtch.colorWhenOpen : swjtch.colorWhenClosed);
+            const switchSymbol = document.querySelector(`.topology-renderer__canvas__symbol.switch._${swjtch.name}_`);
+            if (switchSymbol)
+              switchSymbol.setAttribute('fill', swjtch.open ? swjtch.colorWhenOpen : swjtch.colorWhenClosed);
           }
         }
       });
