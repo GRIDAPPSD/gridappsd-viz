@@ -138,7 +138,8 @@ export class TestConfiguration extends React.Component<Props, State> {
           {this.showFormForSelectedEventType()}
         </FormGroup>
         {
-          (this.state.faultEvents.length > 0 || this.state.outageEvents.length > 0) &&
+          (this.state.faultEvents.length > 0 || this.state.outageEvents.length > 0 || this.state.commandEvents.length > 0)
+          &&
           <div className='test-configuration__event-summary'>
             <RadioButtonGroup
               id='event-summary'
