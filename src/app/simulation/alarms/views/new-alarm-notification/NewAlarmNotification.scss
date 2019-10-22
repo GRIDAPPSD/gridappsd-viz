@@ -1,0 +1,52 @@
+.new-alarm-notification-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 1000;
+    pointer-events: none;
+
+    .icon-button {
+        pointer-events: all;
+    }
+}
+
+.new-alarm-notification {
+    position: absolute;
+    right: 20px;
+    bottom: 20px;
+    transition: visibility 0.25s ease, opacity 0.25s ease, transform 0.25s ease;
+    visibility: hidden;
+    opacity: 0;
+    transform: translateX(50px);
+
+    &.show {
+        visibility: visible;
+        opacity: 1;
+        transform: translateX(0px);
+    }
+
+    &.hide {
+        visibility: hidden;
+        opacity: 0;
+        transform: translateX(50px);
+    }
+}
+
+.new-alarm-notification__counts {
+    position: absolute;
+    top: 0px;
+    font-size: 1vw;
+    font-weight: bold;
+    left: 50%;
+    border-radius: 1000px;
+    color: #fff;
+    border-radius: 1000px;
+    background: #bebbb6;
+    padding: 0.25vw;
+    box-shadow: 0 0 5px #555;
+    min-width: 1vw;
+    min-height: 1vw;
+    text-align: center;
+}

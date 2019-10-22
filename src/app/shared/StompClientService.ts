@@ -25,6 +25,8 @@ export class StompClientService {
     this._connectionClosed = this._connectionClosed.bind(this);
     this.isActive = this.isActive.bind(this);
     this.connect = this.connect.bind(this);
+    this.readOnceFrom = this.readOnceFrom.bind(this);
+    this.readFrom = this.readFrom.bind(this);
 
     this._createStompClientAndConnectToGossServer();
   }

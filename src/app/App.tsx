@@ -19,7 +19,7 @@ import { SimulationQueue, SimulationOutputService } from '@shared/simulation';
 import { SimulationStatusLogContainer } from './simulation/simulation-status-logger';
 import { StompClientContainer } from './stomp-client';
 import { StompClientService } from '@shared/StompClientService';
-import { TopologyRendererContainer } from './topology-renderer';
+import { TopologyRendererContainer } from './simulation/topology-renderer';
 import { WebsocketStatusWatcher } from './websocket-status-watcher';
 import { GetModelDictionaryRequest } from './models/message-requests/GetModelDictionaryRequest';
 import {
@@ -33,6 +33,7 @@ import { EventSummary } from './simulation/event-summary/EventSummary';
 import { AvailableApplicationList } from './simulation/applications/AvailableApplicationList';
 import { ModelDictionaryComponent } from '@shared/topology/model-dictionary/ModelDictionaryComponent';
 import { VoltageViolationContainer } from './simulation/voltage-violation/VoltageViolationContainer';
+import { AlarmsContainer } from './simulation/alarms';
 
 import './App.scss';
 
@@ -50,6 +51,7 @@ export class App extends React.Component<Props, State> {
   readonly componentPhases = new Map<string, string[]>();
 
   shouldRedirect = false;
+  tabGroup: TabGroup;
 
   private _stateStore = StateStore.getInstance();
 
@@ -229,7 +231,7 @@ export class App extends React.Component<Props, State> {
                   <div className='topology-renderer-simulation-status-logger-measurement-graphs'>
                     <div>
                       <SimulationControlContainer />
-                      <TabGroup>
+                      <TabGroup ref={ref => this.tabGroup = ref}>
                         <Tab label='Simulation'>
                           <TopologyRendererContainer
                             mRIDs={this.componentMRIDs}
@@ -243,6 +245,9 @@ export class App extends React.Component<Props, State> {
                         </Tab>
                         <Tab label='Applications'>
                           <AvailableApplicationList />
+                        </Tab>
+                        <Tab label='Alarms'>
+                          <AlarmsContainer onNewAlarmsConfirmed={() => this.tabGroup.setSelectedTabIndex(3)} />
                         </Tab>
                       </TabGroup>
                     </div>
