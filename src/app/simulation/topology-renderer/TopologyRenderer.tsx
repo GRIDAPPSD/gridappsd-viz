@@ -23,7 +23,7 @@ interface Props {
   topology: RenderableTopology;
   showWait: boolean;
   topologyName: string;
-  onToggleSwitch: (swjtch: Switch) => void;
+  onToggleSwitch: (swjtch: Switch, open: boolean) => void;
   onCapacitorMenuFormSubmitted: (currentCapacitor: Capacitor, newCapacitor: Capacitor) => void;
   onRegulatorMenuFormSubmitted: (currentRegulator: Regulator, newRegulator: Regulator) => void;
 }
@@ -486,10 +486,8 @@ export class TopologyRenderer extends React.Component<Props, State> {
   }
 
   private _toggleSwitch(open: boolean, swjtch: Switch) {
-    if (swjtch.open !== open) {
-      swjtch.open = open;
-      this.props.onToggleSwitch(swjtch);
-    }
+    if (swjtch.open !== open)
+      this.props.onToggleSwitch(swjtch, open);
   }
 
   private _onCapacitorClicked(clickedElement: Selection<SVGElement, any, SVGElement, any>) {

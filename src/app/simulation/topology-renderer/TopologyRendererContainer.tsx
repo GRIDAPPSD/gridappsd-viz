@@ -347,11 +347,11 @@ export class TopologyRendererContainer extends React.Component<Props, State> {
     );
   }
 
-  onToggleSwitchState(swjtch: Switch) {
+  onToggleSwitchState(swjtch: Switch, open: boolean) {
     const toggleSwitchStateRequest = new ToggleSwitchStateRequest({
       componentMRID: this.props.mRIDs.get(swjtch.name),
       simulationId: this._simulationQueue.getActiveSimulation().id,
-      open: swjtch.open,
+      open,
       differenceMRID: this._activeSimulationConfig.power_system_config.Line_name
     });
     this._stompClientService.send(
