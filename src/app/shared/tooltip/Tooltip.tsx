@@ -58,7 +58,7 @@ export class Tooltip extends React.Component<Props, State> {
 
   private _updateTooltipContent() {
     if (this.tooltip)
-      this.tooltip.querySelector('.gridappsd-tooltip__content').textContent = String(this.props.content);
+      this.tooltip.querySelector('.td-tooltip__content').textContent = String(this.props.content);
   }
 
   render() {
@@ -103,10 +103,10 @@ export class Tooltip extends React.Component<Props, State> {
     this._tooltipContainer = container;
     ReactDOM.render(
       <div
-        className={`gridappsd-tooltip ${this.props.position}`}
+        className={`td-tooltip ${this.props.position}`}
         ref={elem => this.tooltip = elem}>
-        <div className='gridappsd-tooltip__arrow' />
-        <div className='gridappsd-tooltip__content'>{this.props.content}</div>
+        <div className='td-tooltip__arrow' />
+        <div className='td-tooltip__content'>{this.props.content}</div>
       </div>,
       container
     );
@@ -144,24 +144,38 @@ export class Tooltip extends React.Component<Props, State> {
         this.tooltip.classList.add('bottom');
         top = top + originRect.height + this._tooltipRect.height + 25;
       }
+      if (!this._shiftTooltipIntoViewFromRight(left))
+        this._shiftTooltipIntoViewFromLeft(left);
       this.tooltip.style.left = left + 'px';
       this.tooltip.style.top = top + 'px';
     }, 0);
-
   }
 
-  private _showRight(originRect: ClientRect) {
-    setTimeout(() => {
-      let left = originRect.left + originRect.width + 15;
-      const top = originRect.top + (originRect.height - this._tooltipRect.height) / 2;
-      if (left + this._tooltipRect.width > document.body.clientWidth) {
-        this.tooltip.classList.remove('right');
-        this.tooltip.classList.add('left');
-        left = left - originRect.width - this._tooltipRect.width - 30;
-      }
-      this.tooltip.style.left = left + 'px';
-      this.tooltip.style.top = top + 'px';
-    }, 0);
+  /**
+   * Returns true if tooltip overflows the right edge of the screen, false otherwise
+   */
+  private _shiftTooltipIntoViewFromRight(left: number) {
+    const difference = left + this._tooltipRect.width - document.body.clientWidth + 5;
+    if (difference > 5) {
+      this.tooltip.style.transform = `translateX(-${difference}px)`;
+      (this.tooltip.querySelector('.td-tooltip__arrow') as HTMLElement).style.left = `calc(50% + ${difference}px)`;
+      return true;
+    }
+    return false;
+  }
+
+  /**
+   *
+   * Returns true if tooltip overflows the left edge of the screen, false otherwise
+   */
+  private _shiftTooltipIntoViewFromLeft(left: number) {
+    if (left < 0) {
+      left = Math.abs(left) + 5;
+      this.tooltip.style.transform = `translateX(${left}px)`;
+      (this.tooltip.querySelector('.td-tooltip__arrow') as HTMLElement).style.left = `calc(50% - ${left}px)`;
+      return true;
+    }
+    return false;
   }
 
   private _showBottom(originRect: ClientRect) {
@@ -173,10 +187,55 @@ export class Tooltip extends React.Component<Props, State> {
         this.tooltip.classList.add('top');
         top = top - originRect.height - this._tooltipRect.height - 30;
       }
+      if (!this._shiftTooltipIntoViewFromRight(left))
+        this._shiftTooltipIntoViewFromLeft(left);
       this.tooltip.style.left = left + 'px';
       this.tooltip.style.top = top + 'px';
     }, 0);
+  }
 
+  private _showRight(originRect: ClientRect) {
+    setTimeout(() => {
+      let left = originRect.left + originRect.width + 15;
+      const top = originRect.top + (originRect.height - this._tooltipRect.height) / 2;
+      if (left + this._tooltipRect.width > document.body.clientWidth) {
+        this.tooltip.classList.remove('right');
+        this.tooltip.classList.add('left');
+        left = left - originRect.width - this._tooltipRect.width - 30;
+      }
+      if (!this._shiftTooltipIntoViewFromBottom(top))
+        this._shiftTooltipIntoViewFromTop(top);
+      this.tooltip.style.left = left + 'px';
+      this.tooltip.style.top = top + 'px';
+    }, 0);
+  }
+
+  /**
+   *
+   * Returns true if tooltip overflows the bottom edge of the screen, false otherwise
+   */
+  private _shiftTooltipIntoViewFromBottom(top: number) {
+    const difference = top + this._tooltipRect.height - document.body.clientHeight + 5;
+    if (difference > 5) {
+      this.tooltip.style.transform = `translateY(-${difference}px)`;
+      (this.tooltip.querySelector('.td-tooltip__arrow') as HTMLElement).style.top = `calc(50% + ${difference}px)`;
+      return true;
+    }
+    return false;
+  }
+
+  /**
+   *
+   * Returns true if tooltip overflows the bottom top of the screen, false otherwise
+   */
+  private _shiftTooltipIntoViewFromTop(top: number) {
+    if (top < 0) {
+      top = Math.abs(top) + 5;
+      this.tooltip.style.transform = `translateY(${top}px)`;
+      (this.tooltip.querySelector('.td-tooltip__arrow') as HTMLElement).style.top = `calc(50% - ${top}px)`;
+      return true;
+    }
+    return false;
   }
 
   private _showLeft(originRect: ClientRect) {
@@ -192,10 +251,11 @@ export class Tooltip extends React.Component<Props, State> {
         this.tooltip.classList.add('right');
         left = left + originRect.width + this._tooltipRect.width + 30;
       }
+      if (!this._shiftTooltipIntoViewFromBottom(top))
+        this._shiftTooltipIntoViewFromTop(top);
       this.tooltip.style.left = left + 'px';
       this.tooltip.style.top = top + 'px';
     }, 0);
-
   }
 
 }

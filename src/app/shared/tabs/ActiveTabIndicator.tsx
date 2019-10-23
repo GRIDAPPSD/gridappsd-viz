@@ -3,48 +3,25 @@ import * as React from 'react';
 import './ActiveTabIndicator.scss';
 
 interface Props {
-  activeTabIndex: number;
-  tabGroup: HTMLElement;
+  activeTab: HTMLElement;
 }
 
-interface State {
-  tabLabels: NodeListOf<HTMLElement>;
-}
-
-export class ActiveTabIndicator extends React.Component<Props, State> {
-
-  constructor(props: any) {
-    super(props);
-    this.state = {
-      tabLabels: null
-    };
-  }
-
-  componentDidMount() {
-    this.setState({
-      tabLabels: this.queryTabLabels()
-    });
-  }
-
-  render() {
-    const tabLabels = this.queryTabLabels();
-    if (!tabLabels)
-      return null;
-    const activeTab = tabLabels[this.props.activeTabIndex];
-    return (
-      <div className='tabgroup__active-tab-indicator'
-        style={{
-          // minus 4 because it has 2 px border
-          transform: `translateX(${activeTab.offsetLeft - 2}px)`,
-          width: activeTab.clientWidth + 'px'
-        }}>
-        <div className='tabgroup__active-tab-indicator__rubber-band' />
-      </div>
-    );
-  }
-
-  queryTabLabels(): NodeListOf<HTMLElement> {
-    return this.props.tabGroup ? this.props.tabGroup.querySelectorAll('.tabgroup__header__label') as any : this.state.tabLabels;
-  }
-
+export function ActiveTabIndicator(props: Props) {
+  if (!props.activeTab)
+    return null;
+  const leftEdgeOfActiveTab = props.activeTab.offsetLeft;
+  // The container for tab lables can overflow and scroll
+  // So we need to know how much to the right it has scrolled,
+  // We get this distance, and subtract it from the left edge of the
+  // active tab currently on screen to position the indicator correctly
+  const offset = props.activeTab.parentElement ? props.activeTab.parentElement.scrollLeft : 0;
+  return (
+    <div className='tabgroup__active-tab-indicator'
+      style={{
+        // minus 2 because it has 2px border
+        transform: `translateX(${leftEdgeOfActiveTab - offset - 2}px)`,
+        width: props.activeTab.clientWidth + 'px'
+      }}>
+    </div>
+  );
 }

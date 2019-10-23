@@ -14,9 +14,9 @@ export interface Regulator extends Node {
   controlMode: RegulatorControlMode;
   phaseValues: {
     [phase: string]: {
-      lineDropR: string;
-      lineDropX: string;
-      tap: string;
+      lineDropR: number;
+      lineDropX: number;
+      tap: number;
     };
   };
 }

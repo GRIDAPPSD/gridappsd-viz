@@ -19,7 +19,7 @@ import { SimulationQueue, SimulationOutputService } from '@shared/simulation';
 import { SimulationStatusLogContainer } from './simulation/simulation-status-logger';
 import { StompClientContainer } from './stomp-client';
 import { StompClientService } from '@shared/StompClientService';
-import { TopologyRendererContainer } from './topology-renderer';
+import { TopologyRendererContainer } from './simulation/topology-renderer';
 import { WebsocketStatusWatcher } from './websocket-status-watcher';
 import { GetModelDictionaryRequest } from './models/message-requests/GetModelDictionaryRequest';
 import {
@@ -33,6 +33,7 @@ import { EventSummary } from './simulation/event-summary/EventSummary';
 import { AvailableApplicationList } from './simulation/applications/AvailableApplicationList';
 import { ModelDictionaryComponent } from '@shared/topology/model-dictionary/ModelDictionaryComponent';
 import { VoltageViolationContainer } from './simulation/voltage-violation/VoltageViolationContainer';
+import { AlarmsContainer } from './simulation/alarms';
 
 import './App.scss';
 
@@ -45,9 +46,12 @@ interface State {
 }
 
 export class App extends React.Component<Props, State> {
-  shouldRedirect = false;
-  readonly componentMrids = new Map<string, string & string[]>();
+
+  readonly componentMRIDs = new Map<string, string & string[]>();
   readonly componentPhases = new Map<string, string[]>();
+
+  shouldRedirect = false;
+  tabGroup: TabGroup;
 
   private _stateStore = StateStore.getInstance();
 
@@ -113,18 +117,13 @@ export class App extends React.Component<Props, State> {
   }
 
   private _fetchFeederModels() {
-    const feederModel = sessionStorage.getItem('feederModel');
-    if (feederModel)
-      this.setState({ feederModel: JSON.parse(feederModel) });
-    else {
-      const getAllFeederModelsRequest = new GetAllFeederModelsRequest();
-      this._subscribeToFeederModelsTopic(getAllFeederModelsRequest.replyTo);
-      this._stompClientService.send(
-        getAllFeederModelsRequest.url,
-        { 'reply-to': getAllFeederModelsRequest.replyTo },
-        getAllFeederModelsRequest.requestBody
-      );
-    }
+    const getAllFeederModelsRequest = new GetAllFeederModelsRequest();
+    this._subscribeToFeederModelsTopic(getAllFeederModelsRequest.replyTo);
+    this._stompClientService.send(
+      getAllFeederModelsRequest.url,
+      { 'reply-to': getAllFeederModelsRequest.replyTo },
+      getAllFeederModelsRequest.requestBody
+    );
   }
 
   private _subscribeToFeederModelsTopic(destination: string) {
@@ -203,8 +202,9 @@ export class App extends React.Component<Props, State> {
               }
             );
           }
-          this.setState({ feederModel });
-          sessionStorage.setItem('feederModel', JSON.stringify(feederModel));
+          this.setState({
+            feederModel
+          });
         }
       });
   }
@@ -231,10 +231,10 @@ export class App extends React.Component<Props, State> {
                   <div className='topology-renderer-simulation-status-logger-measurement-graphs'>
                     <div>
                       <SimulationControlContainer />
-                      <TabGroup>
+                      <TabGroup ref={ref => this.tabGroup = ref}>
                         <Tab label='Simulation'>
                           <TopologyRendererContainer
-                            mRIDs={this.componentMrids}
+                            mRIDs={this.componentMRIDs}
                             phases={this.componentPhases} />
                           <SimulationStatusLogContainer />
                           <SimulationLabelsContainer />
@@ -245,6 +245,9 @@ export class App extends React.Component<Props, State> {
                         </Tab>
                         <Tab label='Applications'>
                           <AvailableApplicationList />
+                        </Tab>
+                        <Tab label='Alarms'>
+                          <AlarmsContainer onNewAlarmsConfirmed={() => this.tabGroup.setSelectedTabIndex(3)} />
                         </Tab>
                       </TabGroup>
                     </div>
@@ -347,12 +350,14 @@ export class App extends React.Component<Props, State> {
   }
 
   private _collectMRIDsAndPhasesForComponents(modelDictionary: any) {
+    this.componentMRIDs.clear();
+    this.componentPhases.clear();
     for (const swjtch of modelDictionary.switches)
-      this.componentMrids.set(swjtch.name, swjtch.mRID);
+      this.componentMRIDs.set(swjtch.name, swjtch.mRID);
     for (const capacitor of modelDictionary.capacitors)
-      this.componentMrids.set(capacitor.name, capacitor.mRID);
+      this.componentMRIDs.set(capacitor.name, capacitor.mRID);
     for (const regulator of modelDictionary.regulators) {
-      this.componentMrids.set(regulator.bankName, regulator.mRID);
+      this.componentMRIDs.set(regulator.bankName, regulator.mRID);
       // Only interested in regulators' phases for now, need phases for regulator menus
       this.componentPhases.set(regulator.bankName, (regulator.bankPhases || '').split(''));
     }

@@ -10,6 +10,10 @@
     src: url(./assets/fonts/MaterialIcons-Regular.ttf);
 }
 
+html {
+    font-size: 16px;
+}
+
 body,
 main {
     width: 100vw;
@@ -18,6 +22,17 @@ main {
     margin: 0;
     padding: 0;
     overflow: hidden;
+}
+
+body.frozen * {
+    pointer-events: none;
+    -moz-user-select: none;
+    -webkit-user-select: none;
+    user-select: none;
+}
+
+body.frozen {
+    cursor: nwse-resize;
 }
 
 a {
@@ -50,4 +65,58 @@ a {
 
     /* Support for IE. */
     font-feature-settings: 'liga';
+}
+
+@keyframes fadein {
+    from {
+        visibility: hidden;
+        opacity: 0;
+    }
+
+    to {
+        visibility: visible;
+        opacity: 1;
+    }
+}
+
+@keyframes fadeout {
+    from {
+        visibility: visible;
+        opacity: 1;
+    }
+
+    to {
+        visibility: hidden;
+        opacity: 0;
+    }
+}
+
+
+table {
+    border-collapse: collapse;
+    width: 100%;
+}
+
+thead {
+    background-color: #3f51b5;
+    color: #fff;
+}
+
+th,
+td {
+    font-size: 0.9em;
+    text-align: center;
+    white-space: nowrap;
+}
+
+th {
+    font-weight: 500;
+    padding: 10px 15px;
+    border: 2px solid #CECECE;
+    white-space: nowrap;
+}
+
+td {
+    border: 2px solid #CECECE;
+    position: relative;
 }

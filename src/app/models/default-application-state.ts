@@ -5,6 +5,7 @@ export const DEFAULT_APPLICATION_STATE: ApplicationState = {
   faultMRIDs: [],
   faultEvents: [],
   outageEvents: [],
+  commandEvents: [],
   applications: [],
   services: [],
   modelDictionary: null,

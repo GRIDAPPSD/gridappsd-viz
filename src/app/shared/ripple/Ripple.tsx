@@ -22,6 +22,7 @@ export class Ripple extends React.Component<Props, {}> {
   componentDidMount() {
     this._rippleTrigger = findDOMNode(this) as HTMLElement;
     this._rippleTrigger.addEventListener('mousedown', this._showRipple, false);
+    this._rippleTrigger.style.cursor = 'pointer';
   }
 
   componentWillUnmount() {
@@ -34,7 +35,7 @@ export class Ripple extends React.Component<Props, {}> {
     );
   }
 
-  private _showRipple(event) {
+  private _showRipple(event: MouseEvent) {
     const rect = this._rippleTrigger.getBoundingClientRect();
     const rippleContainer = document.createElement('div');
     rippleContainer.className = 'ripple';

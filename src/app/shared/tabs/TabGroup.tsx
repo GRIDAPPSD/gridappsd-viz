@@ -1,6 +1,7 @@
 import * as React from 'react';
 
 import { Tab } from './Tab';
+import { ActiveTabIndicator } from './ActiveTabIndicator';
 
 import './TabGroup.scss';
 
@@ -68,31 +69,25 @@ export class TabGroup extends React.Component<Props, State> {
               </div>
             ))
           }
-          {
-            this.state.activeTab &&
-            <div className='tabgroup__active-tab-indicator'
-              style={{
-                // minus 2 because it has 2 px border
-                transform: `translateX(${activeTab.offsetLeft - 2}px)`,
-                width: activeTab.clientWidth + 'px'
-              }}>
-              <div className='tabgroup__active-tab-indicator__rubber-band' />
-            </div>
-          }
+          <ActiveTabIndicator activeTab={activeTab} />
         </header>
         <div className='tabgroup__body'>
           <div className='tabgroup__body__wrapper'>
-            <div className='tabgroup__body__slider'
-              style={{ transform: `translateX(${-activeTabIndex * 100}%)` }}>
+            <div
+              className='tabgroup__body__slider'
+              style={{
+                transform: `translateX(${-activeTabIndex * 100}%)`
+              }}>
               {
                 tabs.map((tab, index) => (
                   <div
                     key={index}
                     id={`tab-content-${index}`}
-                    className='tab-content'>
+                    className='tab-content'
+                    style={{
+                      opacity: activeTabIndex === index || previousTabIndex === index ? 1 : 0
+                    }}>
                     {
-                      (activeTabIndex === index || previousTabIndex === index)
-                      &&
                       tab.props.children
                     }
                   </div>
@@ -106,6 +101,7 @@ export class TabGroup extends React.Component<Props, State> {
   }
 
   setSelectedTabIndex(index: number) {
+    this.nativeElement.querySelector('.tabgroup__body__wrapper').scrollTop = 0;
     this.setState(prevState => {
       if (prevState.activeTabIndex !== index)
         return {

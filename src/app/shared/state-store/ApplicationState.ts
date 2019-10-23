@@ -1,4 +1,4 @@
-import { CommOutageEvent, FaultEvent } from '@shared/test-manager';
+import { CommOutageEvent, FaultEvent, CommandEvent } from '@shared/test-manager';
 import { Application } from '@shared/Application';
 import { Service } from '@shared/Service';
 import { ModelDictionary, ModelDictionaryComponent } from '@shared/topology';
@@ -9,6 +9,7 @@ export interface ApplicationState {
   faultMRIDs: string[];
   outageEvents: CommOutageEvent[];
   faultEvents: FaultEvent[];
+  commandEvents: CommandEvent[];
   applications: Application[];
   services: Service[];
   modelDictionary: ModelDictionary;

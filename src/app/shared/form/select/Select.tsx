@@ -56,9 +56,7 @@ export class Select<T, E extends boolean> extends React.Component<Props<T, E>, S
       filteredOptions: props.options,
       nothingSelectedMessage: []
     };
-    window.onkeydown = this._onPressEscapeToClose;
 
-    this._onPressEscapeToClose = this._onPressEscapeToClose.bind(this);
     this.closeOptionList = this.closeOptionList.bind(this);
     this.onChange = this.onChange.bind(this);
     this.onOpen = this.onOpen.bind(this);
@@ -72,11 +70,6 @@ export class Select<T, E extends boolean> extends React.Component<Props<T, E>, S
     this.setState({
       opened: false
     });
-  }
-
-  private _onPressEscapeToClose(event: KeyboardEvent) {
-    if (event.key === 'Escape')
-      this.closeOptionList();
   }
 
   private _produceCurrentLabelForMultiSelect() {
@@ -240,15 +233,20 @@ export class Select<T, E extends boolean> extends React.Component<Props<T, E>, S
       });
     else
       this.setState((state, props) => {
+        const specialTokens = ['(', ')', '[', ']', '{', '}', '?', '\\', '/', '*', '+', '-', '.', '^', '$'];
+        // Input sanitization
+        const tokens = newFilterValue.split('')
+          .map(token => specialTokens.includes(token) ? `\\${token}` : token);
+        const pattern = new RegExp(tokens.join('[\\s\\S]*'), 'ig');
         // If the user keeps typing
         // then it's more performant to use the filtered list to narrow down the result
         // otherwise, if the user is deleting, then use the props option list
         if (newFilterValue.length > oldFilterValue.length)
           return {
-            filteredOptions: state.filteredOptions.filter(option => option.label.toLowerCase().startsWith(newFilterValue))
+            filteredOptions: state.filteredOptions.filter(option => pattern.test(option.label))
           };
         return {
-          filteredOptions: props.options.filter(option => option.label.toLowerCase().startsWith(newFilterValue))
+          filteredOptions: props.options.filter(option => pattern.test(option.label))
         };
       });
   }

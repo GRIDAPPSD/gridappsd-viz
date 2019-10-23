@@ -11,9 +11,11 @@ import { IconButton } from '@shared/buttons';
 import { FilePicker, FilePickerService } from '@shared/file-picker';
 import { Tooltip } from '@shared/tooltip';
 import { FaultEventSummaryTable } from './FaultEventSummaryTable';
-import { CommOutageEvent, FaultEvent, FaultKind } from '@shared/test-manager';
+import { CommOutageEvent, FaultEvent, FaultKind, CommandEvent } from '@shared/test-manager';
 import { Validators } from '@shared/form/validation';
 import { ModelDictionaryComponent } from '@shared/topology/model-dictionary/ModelDictionaryComponent';
+import { download, DownloadType } from '@shared/misc';
+import { CommandEventSummaryTable } from './CommandEventSummaryTable';
 
 import './TestConfiguration.scss';
 
@@ -21,15 +23,16 @@ interface Props {
   modelDictionary: ModelDictionary;
   simulationStartDate: string;
   simulationStopDate: string;
-  onEventsAdded: (events: { outage: CommOutageEvent[]; fault: FaultEvent[] }) => void;
+  onEventsAdded: (payload: { outageEvents: CommOutageEvent[]; faultEvents: FaultEvent[]; commandEvents: CommandEvent[]; }) => void;
   componentWithConsolidatedPhases: ModelDictionaryComponent[];
 }
 
 interface State {
-  selectedEventType: 'outage' | 'fault';
-  selectedEventTypeToView: 'outage' | 'fault';
+  selectedEventType: 'outage' | 'fault' | 'command';
+  selectedEventTypeToView: 'outage' | 'fault' | 'command';
   outageEvents: CommOutageEvent[];
   faultEvents: FaultEvent[];
+  commandEvents: CommandEvent[];
   currentOutageEvent: CommOutageEvent;
   currentFaultEvent: FaultEvent;
 }
@@ -46,6 +49,7 @@ export class TestConfiguration extends React.Component<Props, State> {
       selectedEventTypeToView: null,
       outageEvents: [],
       faultEvents: [],
+      commandEvents: [],
       currentFaultEvent: this.defaultFaultEventFormValue(),
       currentOutageEvent: this.defaultOutageEventFormValue()
     };
@@ -60,7 +64,7 @@ export class TestConfiguration extends React.Component<Props, State> {
 
   defaultFaultEventFormValue(): FaultEvent {
     return {
-      type: 'Fault',
+      event_type: 'Fault',
       tag: this._generateEventTag(),
       equipmentType: '',
       equipmentName: '',
@@ -80,7 +84,7 @@ export class TestConfiguration extends React.Component<Props, State> {
 
   defaultOutageEventFormValue(): CommOutageEvent {
     return {
-      type: 'CommOutage',
+      event_type: 'CommOutage',
       tag: this._generateEventTag(),
       allInputOutage: false,
       inputList: [],
@@ -134,7 +138,8 @@ export class TestConfiguration extends React.Component<Props, State> {
           {this.showFormForSelectedEventType()}
         </FormGroup>
         {
-          (this.state.faultEvents.length > 0 || this.state.outageEvents.length > 0) &&
+          (this.state.faultEvents.length > 0 || this.state.outageEvents.length > 0 || this.state.commandEvents.length > 0)
+          &&
           <div className='test-configuration__event-summary'>
             <RadioButtonGroup
               id='event-summary'
@@ -148,6 +153,10 @@ export class TestConfiguration extends React.Component<Props, State> {
                 label='Fault'
                 selected={this.state.selectedEventTypeToView === 'fault'}
                 onSelect={() => this.setState({ selectedEventTypeToView: 'fault' })} />
+              <RadioButton
+                label='Command'
+                selected={this.state.selectedEventTypeToView === 'command'}
+                onSelect={() => this.setState({ selectedEventTypeToView: 'command' })} />
             </RadioButtonGroup>
             {this.showEventSummaryTable()}
           </div>
@@ -178,25 +187,29 @@ export class TestConfiguration extends React.Component<Props, State> {
 
   showEventFilePicker() {
     this._filePicker.open()
-      .readFileAsJson<{ outageEvents: CommOutageEvent[]; faultEvents: FaultEvent[] }>()
+      .readFileAsJson<{ outageEvents: CommOutageEvent[]; faultEvents: FaultEvent[]; commandEvents: CommandEvent[]; }>()
       /* File content should look like this
         {
           "outageEvents": [...],
-          "faultEvents": [...]
+          "faultEvents": [...],
+          "commandEvents": [...]
         }
       */
       .pipe(filter(content => Boolean(content)))
       .subscribe({
         next: content => {
-          const faultEvents = content.faultEvents || [];
-          const outageEvents = content.outageEvents || [];
+          const faultEvents = this.state.faultEvents.concat(content.faultEvents || []);
+          const outageEvents = this.state.outageEvents.concat(content.outageEvents || []);
+          const commandEvents = this.state.commandEvents.concat(content.commandEvents || []);
           this.setState({
             faultEvents,
-            outageEvents
+            outageEvents,
+            commandEvents
           });
           this.props.onEventsAdded({
-            fault: faultEvents,
-            outage: outageEvents
+            faultEvents,
+            outageEvents,
+            commandEvents
           });
         }
       });
@@ -234,8 +247,9 @@ export class TestConfiguration extends React.Component<Props, State> {
       currentOutageEvent: this.defaultOutageEventFormValue()
     });
     this.props.onEventsAdded({
-      outage: events,
-      fault: this.state.faultEvents
+      outageEvents: events,
+      faultEvents: this.state.faultEvents,
+      commandEvents: this.state.commandEvents
     });
   }
 
@@ -248,8 +262,9 @@ export class TestConfiguration extends React.Component<Props, State> {
       currentFaultEvent: this.defaultFaultEventFormValue()
     });
     this.props.onEventsAdded({
-      fault: events,
-      outage: this.state.outageEvents
+      faultEvents: events,
+      outageEvents: this.state.outageEvents,
+      commandEvents: this.state.commandEvents
     });
   }
 
@@ -266,6 +281,10 @@ export class TestConfiguration extends React.Component<Props, State> {
           <FaultEventSummaryTable
             events={this.state.faultEvents}
             onDeleteEvent={this.deleteFaultEvent} />
+        );
+      case 'command':
+        return (
+          <CommandEventSummaryTable events={this.state.commandEvents} />
         );
       default:
         return null;
@@ -301,20 +320,15 @@ export class TestConfiguration extends React.Component<Props, State> {
   }
 
   saveEventsIntoFile() {
-    const a = document.createElement('a');
-    a.setAttribute('style', 'display:none');
-    const fileContent = JSON.stringify({
-      outageEvents: this.state.outageEvents,
-      faultEvents: this.state.faultEvents
-    }, null, 4);
-    const blob = new Blob([fileContent], { type: 'application/json' });
-    const downloadUrl = URL.createObjectURL(blob);
-    a.href = downloadUrl;
-    a.download = 'events.json';
-    document.body.appendChild(a);
-    a.click();
-    URL.revokeObjectURL(downloadUrl);
-    document.body.removeChild(a);
+    download(
+      'events.json',
+      JSON.stringify({
+        outageEvents: this.state.outageEvents,
+        faultEvents: this.state.faultEvents,
+        commandEvents: this.state.commandEvents
+      }, null, 4),
+      DownloadType.JSON
+    );
   }
 
 }

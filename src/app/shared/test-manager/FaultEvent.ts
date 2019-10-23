@@ -1,7 +1,8 @@
 import { Phase } from './Phase';
 
 export interface FaultEvent {
-  type: 'Fault';
+  // snake case due to requirement
+  event_type: 'Fault';
   tag: string;
   equipmentType: string;
   equipmentName: string;

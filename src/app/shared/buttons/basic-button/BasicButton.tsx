@@ -15,10 +15,10 @@ interface Props {
 
 export function BasicButton(props: Props) {
   return (
-    <Ripple color={props.rippleColor || props.type === 'positive' ? 'rgba(250, 250, 250, 0.5)' : undefined}>
+    <Ripple color={props.rippleColor || (props.type === 'positive' ? 'rgba(250, 250, 250, 0.5)' : undefined)}>
       <button
         type='button'
-        className={props.type + (props.className ? ` ${props.className}` : '')}
+        className={'basic-button ' + props.type + (props.className ? ` ${props.className}` : '')}
         disabled={props.disabled}
         onClick={props.onClick}>
         {props.label}

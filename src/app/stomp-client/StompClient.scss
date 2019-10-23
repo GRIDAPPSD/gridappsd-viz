@@ -1,40 +1,69 @@
 .stomp-client-form {
+    height: calc(100vh - 60px);
     max-height: calc(100vh - 60px);
     background-color: #fff;
-    width: 100vw;
     position: relative;
+    display: flex;
+    flex-flow: column;
+    align-items: flex-start;
+    width: 100vw;
+
+    .form-control {
+        width: 100%;
+        margin-bottom: 10px;
+    }
 
     label {
         width: 100px;
     }
 
     .form-control__body {
-        width: 100%;
+        width: calc(100% - 140px);
     }
+
 }
 
 .stomp-client-form__topic .input-field-wrapper {
-    width: 100%;
+    width: calc(100% + 10px);
 
     input {
         width: 100%;
     }
 }
 
-.stomp-client-form__request-body .textarea__input-box {
-    width: 100%;
+.stomp-client-form__request-body .textarea__input-box-container {
+    width: calc(100% + 14px);
 }
 
 .stomp-client__send-request {
-    margin-left: 110px;
+    margin-left: 120px;
     display: block;
 }
 
-.stomp-client-form__response .textarea__input-box {
-    height: 52.5vh;
-    white-space: pre;
-    max-height: 52.5vh;
-    padding: 5px;
-    overflow: auto;
-    width: 100%;
+.stomp-client-form__download-type {
+    margin-top: 10px;
+    margin-left: 120px;
+    margin-bottom: -10px;
+
+    .icon-button {
+        margin: 0;
+        margin-right: 10px;
+    }
+}
+
+.stomp-client-form__response {
+    min-height: 10%;
+    flex: auto;
+
+    .form-control__body {
+        height: 100%;
+    }
+
+    .textarea__input-box-container {
+        height: 100%;
+        white-space: pre;
+        max-height: 100%;
+        overflow: auto;
+        width: calc(100% + 14px);
+    }
 }

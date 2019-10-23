@@ -1,3 +1,15 @@
+.notification-banner-container {
+    position: fixed;
+    width: 100vw;
+    height: 100vh;
+    pointer-events: none;
+    z-index: 1000;
+}
+
+.notification-banner:empty {
+    display: none;
+}
+
 .notification-banner {
     position: absolute;
     z-index: 10000;
@@ -28,6 +40,7 @@
     animation-duration: 0.5s;
     animation-timing-function: ease;
     animation-iteration-count: 1;
+    pointer-events: all;
 
     .notification-banner__content {
         height: 120px;

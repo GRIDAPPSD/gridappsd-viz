@@ -29,7 +29,7 @@ interface State {
 
 export class PowerGridModels extends React.Component<Props, State> {
 
-  private readonly _COMPONENT_TO_SHOW_FOR_QUERY_TYPE = null;
+  readonly componentToShowForQueryType = null;
 
   constructor(props: Props) {
     super(props);
@@ -53,7 +53,7 @@ export class PowerGridModels extends React.Component<Props, State> {
       ]
     };
 
-    this._COMPONENT_TO_SHOW_FOR_QUERY_TYPE = {
+    this.componentToShowForQueryType = {
       [QueryPowerGridModelsRequestType.QUERY]: (
         <TextArea
           label='Query string'
@@ -122,7 +122,7 @@ export class PowerGridModels extends React.Component<Props, State> {
                 options={this.state.resultFormatOptions}
                 isOptionSelected={option => option.value === QueryPowerGridModelsResultFormat.JSON} />
               {
-                this._COMPONENT_TO_SHOW_FOR_QUERY_TYPE[this.state.requestBody.requestType]
+                this.componentToShowForQueryType[this.state.requestBody.requestType]
               }
               <BasicButton
                 label='Submit'

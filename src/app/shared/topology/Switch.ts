@@ -5,9 +5,12 @@ export interface Switch extends Node {
   to: string;
   open: boolean;
   phases: string;
-  x1: number;
   x2: number;
-  y1: number;
   y2: number;
-  mRID: string;
+  screenX2: number;
+  screenY2: number;
+  dx: number;
+  dy: number;
+  colorWhenOpen: '#4aff4a';
+  colorWhenClosed: '#f00';
 }

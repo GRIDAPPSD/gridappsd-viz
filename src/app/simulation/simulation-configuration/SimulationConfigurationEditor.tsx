@@ -25,6 +25,7 @@ import { ModelDictionaryComponent } from '@shared/topology/model-dictionary/Mode
 import { ServiceConfiguration } from './views/service-configuration';
 import { Service } from '@shared/Service';
 import { ServiceConfigurationEntryModel } from './models/ServiceConfigurationEntryModel';
+import { CommandEvent } from '@shared/test-manager';
 
 import './SimulationConfigurationEditor.scss';
 
@@ -53,8 +54,10 @@ export class SimulationConfigurationEditor extends React.Component<Props, State>
   readonly currentConfig: SimulationConfiguration;
   readonly simulationStartDate = new Date();
   readonly dateTimeService = DateTimeService.getInstance();
+
   outageEvents: CommOutageEvent[] = [];
   faultEvents: FaultEvent[] = [];
+  commandEvents: CommandEvent[] = [];
 
   private readonly _simulationControlService = SimulationControlService.getInstance();
   private readonly _stateStore = StateStore.getInstance();
@@ -78,7 +81,7 @@ export class SimulationConfigurationEditor extends React.Component<Props, State>
     this.onPowerSystemConfigurationChanged = this.onPowerSystemConfigurationChanged.bind(this);
     this.onSimulationConfigurationChanged = this.onSimulationConfigurationChanged.bind(this);
     this.onApplicationConfigurationChanged = this.onApplicationConfigurationChanged.bind(this);
-    this.onFaultEventsAdded = this.onFaultEventsAdded.bind(this);
+    this.onTestConfigurationEventsAdded = this.onTestConfigurationEventsAdded.bind(this);
     this.onServiceConfigurationsChanged = this.onServiceConfigurationsChanged.bind(this);
     this.onServiceConfigurationValidationChanged = this.onServiceConfigurationValidationChanged.bind(this);
     this.closeForm = this.closeForm.bind(this);
@@ -248,11 +251,6 @@ export class SimulationConfigurationEditor extends React.Component<Props, State>
       this.currentConfig.application_config.applications.pop();
   }
 
-  onFaultEventsAdded(events: { outage: CommOutageEvent[]; fault: FaultEvent[] }) {
-    this.outageEvents = events.outage;
-    this.faultEvents = events.fault;
-  }
-
   showCurrentComponentForTestConfigurationTab() {
     if (this.state.lineName === '')
       return (
@@ -273,12 +271,18 @@ export class SimulationConfigurationEditor extends React.Component<Props, State>
         simulationStartDate={this.dateTimeService.format(this.simulationStartDate)}
         simulationStopDate={this.dateTimeService.format(this.calculateSimulationStopTime())}
         componentWithConsolidatedPhases={this.state.componentsWithConsolidatedPhases}
-        onEventsAdded={this.onFaultEventsAdded} />
+        onEventsAdded={this.onTestConfigurationEventsAdded} />
     );
   }
 
   calculateSimulationStopTime() {
     return +this.currentConfig.simulation_config.duration * 1000 + this.simulationStartDate.getTime();
+  }
+
+  onTestConfigurationEventsAdded(payload: { outageEvents: CommOutageEvent[]; faultEvents: FaultEvent[]; commandEvents: CommandEvent[]; }) {
+    this.outageEvents = payload.outageEvents;
+    this.faultEvents = payload.faultEvents;
+    this.commandEvents = payload.commandEvents;
   }
 
   onServiceConfigurationsChanged(serviceConfigurationEntryModels: ServiceConfigurationEntryModel[]) {
@@ -309,9 +313,12 @@ export class SimulationConfigurationEditor extends React.Component<Props, State>
       this.currentConfig.test_config.events.push(this._transformOutageEventForSubmission(outageEvent));
     for (const faultEvent of this.faultEvents)
       this.currentConfig.test_config.events.push(this._transformFaultEventForSubmission(faultEvent));
+    for (const commandEvent of this.commandEvents)
+      this.currentConfig.test_config.events.push(commandEvent);
     this._stateStore.update({
       faultEvents: this.faultEvents,
-      outageEvents: this.outageEvents
+      outageEvents: this.outageEvents,
+      commandEvents: this.commandEvents
     });
     this.props.onSubmit(this.currentConfig);
   }
@@ -332,7 +339,7 @@ export class SimulationConfigurationEditor extends React.Component<Props, State>
         };
       })),
       outputOutageList: outageEvent.outputList.map(outputItem => outputItem.mRID),
-      event_type: outageEvent.type,
+      event_type: outageEvent.event_type,
       occuredDateTime: this.dateTimeService.parse(outageEvent.startDateTime).getTime(),
       stopDateTime: this.dateTimeService.parse(outageEvent.stopDateTime).getTime()
     };
@@ -346,7 +353,7 @@ export class SimulationConfigurationEditor extends React.Component<Props, State>
         ? [...new Set(faultEvent.phases.map(phase => faultEvent.mRID[phase.phaseIndex]))]
         : [faultEvent.mRID],
       phases: faultEvent.phases.map(phase => phase.phaseLabel).join(''),
-      event_type: faultEvent.type,
+      event_type: faultEvent.event_type,
       occuredDateTime: this.dateTimeService.parse(faultEvent.startDateTime).getTime() / 1000.0,
       stopDateTime: this.dateTimeService.parse(faultEvent.stopDateTime).getTime() / 1000.0
     };
