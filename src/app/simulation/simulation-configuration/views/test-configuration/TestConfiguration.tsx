@@ -324,7 +324,8 @@ export class TestConfiguration extends React.Component<Props, State> {
       'events.json',
       JSON.stringify({
         outageEvents: this.state.outageEvents,
-        faultEvents: this.state.faultEvents
+        faultEvents: this.state.faultEvents,
+        commandEvents: this.state.commandEvents
       }, null, 4),
       DownloadType.JSON
     );
