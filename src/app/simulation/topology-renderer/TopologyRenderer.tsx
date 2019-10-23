@@ -23,7 +23,7 @@ interface Props {
   topology: RenderableTopology;
   showWait: boolean;
   topologyName: string;
-  onToggleSwitch: (swjtch: Switch) => void;
+  onToggleSwitch: (swjtch: Switch, open: boolean) => void;
   onCapacitorMenuFormSubmitted: (currentCapacitor: Capacitor, newCapacitor: Capacitor) => void;
   onRegulatorMenuFormSubmitted: (currentRegulator: Regulator, newRegulator: Regulator) => void;
 }
@@ -480,22 +480,14 @@ export class TopologyRenderer extends React.Component<Props, State> {
         onCancel={this.overlay.hide}
         onConfirm={open => {
           this.overlay.hide();
-          this._toggleSwitch(open, swjtch, clickedElement);
+          this._toggleSwitch(open, swjtch);
         }} />
     );
   }
 
-  private _toggleSwitch(open: boolean, swjtch: Switch, clickedElement: Selection<SVGElement, Node, SVGElement, any>) {
-    if (swjtch.open !== open) {
-      if (clickedElement.classed('topology-renderer__canvas__symbol'))
-        clickedElement.attr('fill', open ? swjtch.colorWhenOpen : swjtch.colorWhenClosed);
-      // The switch circle node was clicked, so update the fill of the switch symbol
-      else
-        select(`.topology-renderer__canvas__symbol.switch._${swjtch.name}_`)
-          .attr('fill', open ? swjtch.colorWhenOpen : swjtch.colorWhenClosed);
-      swjtch.open = open;
-      this.props.onToggleSwitch(swjtch);
-    }
+  private _toggleSwitch(open: boolean, swjtch: Switch) {
+    if (swjtch.open !== open)
+      this.props.onToggleSwitch(swjtch, open);
   }
 
   private _onCapacitorClicked(clickedElement: Selection<SVGElement, any, SVGElement, any>) {

@@ -3,7 +3,7 @@ import { Subscription } from 'rxjs';
 import { map, takeWhile } from 'rxjs/operators';
 
 import { TopologyRenderer } from './TopologyRenderer';
-import { SimulationQueue } from '@shared/simulation';
+import { SimulationQueue, SimulationOutputService } from '@shared/simulation';
 import { Node, Edge, Regulator, RegulatorControlMode } from '@shared/topology';
 import { StompClientService } from '@shared/StompClientService';
 import { Switch, TopologyModel, Capacitor } from '@shared/topology';
@@ -37,10 +37,14 @@ export class TopologyRendererContainer extends React.Component<Props, State> {
 
   private readonly _stompClientService = StompClientService.getInstance();
   private readonly _simulationQueue = SimulationQueue.getInstance();
+  private readonly _simulationOutputService = SimulationOutputService.getInstance();
+  private readonly _switches = new Set<Switch>();
+
   private _activeSimulationConfig = this._simulationQueue.getActiveSimulation()
     ? this._simulationQueue.getActiveSimulation().config
     : null;
   private _activeSimulationStream: Subscription = null;
+  private _simulationOutputStream: Subscription = null;
 
   constructor(props: any) {
     super(props);
@@ -55,6 +59,20 @@ export class TopologyRendererContainer extends React.Component<Props, State> {
 
   componentDidMount() {
     this._activeSimulationStream = this._observeActiveSimulationChangeEvent();
+    this._simulationOutputStream = this._simulationOutputService.simulationOutputMeasurementsReceived()
+      .subscribe({
+        next: measurements => {
+          for (const swjtch of this._switches) {
+            measurements.forEach(measurement => {
+              if (measurement.conductingEquipmentMRID === swjtch.mRIDs[0] && measurement.type === 'Pos')
+                swjtch.open = measurement.value === 0;
+            });
+            const switchSymbol = document.querySelector(`.topology-renderer__canvas__symbol.switch._${swjtch.name}_`);
+            if (switchSymbol)
+              switchSymbol.setAttribute('fill', swjtch.open ? swjtch.colorWhenOpen : swjtch.colorWhenClosed);
+          }
+        }
+      });
   }
 
   private _observeActiveSimulationChangeEvent() {
@@ -195,21 +213,21 @@ export class TopologyRendererContainer extends React.Component<Props, State> {
             node.y1 = node.y2;
             node.y2 = temp;
           }
-          renderableTopology.nodes.push(
-            this._createNewNode({
-              ...node,
-              name: node.name,
-              type: 'switch',
-              open: node.open === 'open',
-              x1: Math.trunc(node.x1 !== 0 ? node.x1 : node.x2),
-              y1: Math.trunc(node.y1 !== 0 ? node.y1 : node.y2),
-              screenX2: 0,
-              screenY2: 0,
-              colorWhenOpen: '#4aff4a',
-              colorWhenClosed: '#f00',
-              mRIDs: resolvedMRIDs
-            })
-          );
+          const swjtch = this._createNewNode({
+            ...node,
+            name: node.name,
+            type: 'switch',
+            open: node.open === 'open',
+            x1: Math.trunc(node.x1 !== 0 ? node.x1 : node.x2),
+            y1: Math.trunc(node.y1 !== 0 ? node.y1 : node.y2),
+            screenX2: 0,
+            screenY2: 0,
+            colorWhenOpen: '#4aff4a',
+            colorWhenClosed: '#f00',
+            mRIDs: resolvedMRIDs
+          }) as Switch;
+          renderableTopology.nodes.push(swjtch);
+          this._switches.add(swjtch);
           break;
         case 'solarpanels':
           renderableTopology.nodes.push(
@@ -311,6 +329,7 @@ export class TopologyRendererContainer extends React.Component<Props, State> {
 
   componentWillUnmount() {
     this._activeSimulationStream.unsubscribe();
+    this._simulationOutputStream.unsubscribe();
   }
 
   render() {
@@ -328,11 +347,11 @@ export class TopologyRendererContainer extends React.Component<Props, State> {
     );
   }
 
-  onToggleSwitchState(swjtch: Switch) {
+  onToggleSwitchState(swjtch: Switch, open: boolean) {
     const toggleSwitchStateRequest = new ToggleSwitchStateRequest({
       componentMRID: this.props.mRIDs.get(swjtch.name),
       simulationId: this._simulationQueue.getActiveSimulation().id,
-      open: swjtch.open,
+      open,
       differenceMRID: this._activeSimulationConfig.power_system_config.Line_name
     });
     this._stompClientService.send(
