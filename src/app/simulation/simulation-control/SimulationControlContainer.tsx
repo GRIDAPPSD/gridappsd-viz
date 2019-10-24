@@ -1,13 +1,21 @@
 import * as React from 'react';
 import { Subject } from 'rxjs';
-import { filter, takeUntil } from 'rxjs/operators';
+import { filter, takeUntil, map, switchMap, take, tap } from 'rxjs/operators';
 
-import { SimulationControlService, SimulationStatus, SimulationQueue } from '@shared/simulation';
+import {
+  SimulationControlService,
+  SimulationStatus,
+  SimulationQueue,
+  START_SIMULATION_TOPIC,
+  SIMULATION_STATUS_LOG_TOPIC
+} from '@shared/simulation';
 import { SimulationControl } from './SimulationControl';
 import { StateStore } from '@shared/state-store';
 import { StompClientService } from '@shared/StompClientService';
 import { ModelDictionaryComponent } from '@shared/topology';
 import { PlotModel } from '@shared/plot-model/PlotModel';
+import { SimulationStartedEventResponse } from './models/SimulationStartedEventResponse';
+import { SimulationStatusLogMessage } from './models/SimulationStatusLogMessage';
 
 interface Props {
 }
@@ -62,25 +70,29 @@ export class SimulationControlContainer extends React.Component<Props, State> {
       });
   }
 
-  private _subscribeToSimulationStatusChanges() {
-    this._simulationControlService.statusChanges()
-      .pipe(takeUntil(this._unsubscriber))
-      .subscribe({
-        next: status => {
-          this.setState({
-            simulationStatus: status
-          });
-          if (status === SimulationStatus.STARTED)
-            this._readSimulationIdFromStore();
-        }
-      });
+  stopSimulation() {
+    this._stateStore.update({
+      simulationId: ''
+    });
+    this._simulationControlService.stopSimulation();
   }
 
-  private _readSimulationIdFromStore() {
-    this._stateStore.select('simulationId')
-      .pipe(takeUntil(this._unsubscriber))
+  private _subscribeToSimulationStatusChanges() {
+    this._simulationControlService.statusChanges()
+      .pipe(
+        takeUntil(this._unsubscriber),
+        tap(status => this.setState({ simulationStatus: status })),
+        filter(status => status === SimulationStatus.STARTED),
+        switchMap(() => this._stateStore.select('simulationId')),
+        takeUntil(this._unsubscriber),
+        filter(simulationId => simulationId !== '')
+      )
       .subscribe({
-        next: simulationId => this.setState({ activeSimulationId: simulationId })
+        next: simulationId => {
+          this.setState({
+            activeSimulationId: simulationId
+          });
+        }
       });
   }
 
@@ -108,7 +120,6 @@ export class SimulationControlContainer extends React.Component<Props, State> {
   render() {
     return (
       <SimulationControl
-        timestamp=''
         simulationId={this.state.activeSimulationId}
         simulationStatus={this.state.simulationStatus}
         existingPlotModels={this.state.existingPlotModels}
@@ -122,11 +133,36 @@ export class SimulationControlContainer extends React.Component<Props, State> {
   }
 
   startSimulation() {
+    this._subscribeToStartSimulationTopic();
+    this._stopSimulationAfterReceivingCompleteProcessStatusMessage();
     this._simulationControlService.startSimulation(this._simulationQueue.getActiveSimulation().config);
   }
 
-  stopSimulation() {
-    this._simulationControlService.stopSimulation();
+  private _subscribeToStartSimulationTopic() {
+    this._stompClientService.readOnceFrom(START_SIMULATION_TOPIC)
+      .pipe(map(JSON.parse as (payload: string) => SimulationStartedEventResponse))
+      .subscribe({
+        next: payload => {
+          this._stateStore.update({
+            simulationId: payload.simulationId,
+            faultMRIDs: payload.events.map(event => event.faultMRID)
+          });
+        }
+      });
+  }
+
+  private _stopSimulationAfterReceivingCompleteProcessStatusMessage() {
+    this._stateStore.select('simulationId')
+      .pipe(
+        filter(simulationId => simulationId !== ''),
+        switchMap(id => this._stompClientService.readFrom(`${SIMULATION_STATUS_LOG_TOPIC}.${id}`)),
+        map((JSON.parse as (payload: string) => SimulationStatusLogMessage)),
+        filter(message => message.processStatus === 'COMPLETE'),
+        take(1)
+      )
+      .subscribe({
+        next: this.stopSimulation
+      });
   }
 
   pauseSimulation() {

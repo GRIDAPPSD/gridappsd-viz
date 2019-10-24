@@ -33,7 +33,7 @@ export class VoltageViolationContainer extends React.Component<Props, State> {
       .pipe(
         filter(simulationId => simulationId !== ''),
         switchMap(id => this._stompClientService.readFrom(`/topic/goss.gridappsd.simulation.voltage_violation.${id}.output`)),
-        map(body => JSON.parse(body))
+        map(JSON.parse as (payload: string) => any[])
       )
       .subscribe({
         next: payload => {
@@ -51,7 +51,9 @@ export class VoltageViolationContainer extends React.Component<Props, State> {
 
   render() {
     return (
-      this.state.violationCounts !== -1 && <VoltageViolation violationCounts={this.state.violationCounts} />
+      this.state.violationCounts !== -1
+      &&
+      <VoltageViolation violationCounts={this.state.violationCounts} />
     );
   }
 

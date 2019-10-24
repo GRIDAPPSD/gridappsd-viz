@@ -13,7 +13,6 @@ import { copyToClipboard } from '@shared/misc';
 import './SimulationControl.scss';
 
 interface Props {
-  timestamp: string;
   simulationStatus: SimulationStatus;
   simulationId: string;
   existingPlotModels: PlotModel[];
@@ -73,9 +72,6 @@ export class SimulationControl extends React.Component<Props, State> {
             </Ripple>
           </div>
         }
-        <span className='simulation-control__timestamp'>
-          {this.props.timestamp}
-        </span>
         {
           this.state.showStartSimulationButton
           &&
