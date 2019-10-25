@@ -1,10 +1,10 @@
 import * as React from 'react';
 import { Subscription } from 'rxjs';
-import { filter, switchMap, tap, takeWhile } from 'rxjs/operators';
+import { filter, switchMap, tap } from 'rxjs/operators';
 
 import { SimulationStatusLogger } from './SimulationStatusLogger';
 import {
-  SimulationQueue, START_SIMULATION_TOPIC, SIMULATION_STATUS_LOG_TOPIC, SimulationControlService, SimulationStatus
+  SimulationQueue, SIMULATION_STATUS_LOG_TOPIC, SimulationControlService, SimulationStatus
 } from '@shared/simulation';
 import { StompClientService } from '@shared/StompClientService';
 import { StateStore } from '@shared/state-store';
@@ -25,8 +25,7 @@ export class SimulationStatusLogContainer extends React.Component<Props, State> 
   private readonly _simulationQueue = SimulationQueue.getInstance();
   private readonly _simulationControlService = SimulationControlService.getInstance();
   private readonly _stateStore = StateStore.getInstance();
-  private _simulationIdStateChangeSubscription: Subscription;
-  private _stompClientStatusSubscription: Subscription;
+  private _statusLogMessageStreamSubscription: Subscription;
 
   constructor(props: Props) {
     super(props);
@@ -35,39 +34,19 @@ export class SimulationStatusLogContainer extends React.Component<Props, State> 
       isFetching: false
     };
 
-    this._newObservableToReadSimulationId = this._newObservableToReadSimulationId.bind(this);
     this._newObservableForLogMessages = this._newObservableForLogMessages.bind(this);
     this._onSimulationStatusLogMessageReceived = this._onSimulationStatusLogMessageReceived.bind(this);
   }
 
   componentDidMount() {
-    this._stompClientStatusSubscription = this._watchStompClientStatusChanges();
+    this._statusLogMessageStreamSubscription = this._subscribeToSimulationStatusLogMessageStream();
   }
 
-  private _watchStompClientStatusChanges() {
+  private _subscribeToSimulationStatusLogMessageStream() {
     return this._stompClientService.statusChanges()
-      .subscribe({
-        next: status => {
-          switch (status) {
-            case 'CONNECTING':
-              if (this._simulationIdStateChangeSubscription)
-                this._simulationIdStateChangeSubscription.unsubscribe();
-              break;
-            case 'CONNECTED':
-              this._simulationIdStateChangeSubscription = this._subscribeToSimulationIdStateChanges();
-              break;
-          }
-        }
-      });
-  }
-
-  private _subscribeToSimulationIdStateChanges() {
-    return this._stateStore.select('simulationId')
       .pipe(
-        // The call in componentDidMount() may not return at this point
-        // So if _stompClientStatusSubscription is still undefined, then
-        // we want to keep listening
-        takeWhile(() => this._stompClientStatusSubscription === undefined || !this._stompClientStatusSubscription.closed),
+        filter(status => status === 'CONNECTED'),
+        switchMap(() => this._stateStore.select('simulationId')),
         filter(simulationId => simulationId !== ''),
         tap(simulationId => {
           this.setState({
@@ -82,13 +61,15 @@ export class SimulationStatusLogContainer extends React.Component<Props, State> 
       });
   }
 
-  private _newObservableToReadSimulationId() {
-    return this._stompClientService.readOnceFrom(START_SIMULATION_TOPIC);
-  }
-
   private _newObservableForLogMessages(simulationId: string) {
+    this.setState({
+      logMessages: []
+    });
+
     return this._stompClientService.readFrom(`${SIMULATION_STATUS_LOG_TOPIC}.${simulationId}`)
-      .pipe(filter(() => this._simulationControlService.currentStatus() === SimulationStatus.STARTED));
+      .pipe(
+        filter(() => this._simulationControlService.currentStatus() === SimulationStatus.STARTED)
+      );
   }
 
   private _onSimulationStatusLogMessageReceived(logMessage: string) {
@@ -99,14 +80,16 @@ export class SimulationStatusLogContainer extends React.Component<Props, State> 
   }
 
   componentWillUnmount() {
-    this._stompClientStatusSubscription.unsubscribe();
+    this._statusLogMessageStreamSubscription.unsubscribe();
   }
 
   render() {
-    return <SimulationStatusLogger
-      simulationRunning={this.state.isFetching}
-      messages={this.state.logMessages}
-      isFetching={this.state.isFetching} />;
+    return (
+      <SimulationStatusLogger
+        simulationRunning={this.state.isFetching}
+        messages={this.state.logMessages}
+        isFetching={this.state.isFetching} />
+    );
   }
 
 }

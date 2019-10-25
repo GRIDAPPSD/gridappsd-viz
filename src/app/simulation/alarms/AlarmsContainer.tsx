@@ -39,7 +39,7 @@ export class AlarmsContainer extends React.Component<Props, State> {
   componentDidMount() {
     this._subscription = this._stateStore.select('simulationId')
       .pipe(
-        filter(id => Boolean(id)),
+        filter(simulationId => simulationId !== ''),
         map(id => `/topic/goss.gridappsd.simulation.gridappsd-alarms.${id}.output`),
         switchMap(this._stompClientService.readFrom),
         map(JSON.parse as (str: string) => Alarm[])

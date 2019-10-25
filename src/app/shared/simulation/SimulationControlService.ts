@@ -1,37 +1,9 @@
 import { Subject, Observable } from 'rxjs';
-import { map, switchMap, filter, take } from 'rxjs/operators';
 
 import { SimulationConfiguration } from './SimulationConfiguration';
 import { StompClientService } from '@shared/StompClientService';
-import { START_SIMULATION_TOPIC, CONTROL_SIMULATION_TOPIC, SIMULATION_STATUS_LOG_TOPIC } from './topics';
+import { START_SIMULATION_TOPIC, CONTROL_SIMULATION_TOPIC } from './topics';
 import { SimulationQueue } from './SimulationQueue';
-import { StateStore } from '@shared/state-store';
-
-interface SimulationStartedEventResponse {
-  simulationId: string;
-  events: Array<{
-    allOutputOutage: boolean;
-    allInputOutage: boolean;
-    inputOutageList: Array<{ objectMrid: string; attribute: string; }>;
-    outputOutageList: string[];
-    faultMRID: string;
-    event_type: string;
-    occuredDateTime: number;
-    stopDateTime: number;
-    PhaseConnectedFaultKind: string;
-    phases: string;
-  }>;
-}
-
-interface SimulationStatusLogMessage {
-  source: string;
-  processId: string;
-  timestamp: number;
-  processStatus: 'RUNNING' | 'COMPLETE';
-  logMessage: string;
-  logLevel: string;
-  storeToDb: boolean;
-}
 
 /**
  * STARTED: Fired when the users request to start a simulation
@@ -53,7 +25,6 @@ export class SimulationControlService {
   private readonly _simulationQueue = SimulationQueue.getInstance();
   private readonly _stompClientService = StompClientService.getInstance();
   private readonly _currentSimulationStatusNotifer = new Subject<SimulationStatus>();
-  private readonly _stateStore = StateStore.getInstance();
   private _currentSimulationStatus = SimulationStatus.STOPPED;
 
   static getInstance(): SimulationControlService {
@@ -90,9 +61,6 @@ export class SimulationControlService {
       this._currentSimulationStatus = SimulationStatus.STARTED;
       this._currentSimulationStatusNotifer.next(SimulationStatus.STARTED);
 
-      this._subscribeToStartSimulationTopic();
-      this._stopSimulationAfterReceivingCompleteProcessStatusMessage();
-
       // Let's wait for all the subscriptions in other components to this topic to complete
       // before sending the message
       setTimeout(() => {
@@ -103,32 +71,6 @@ export class SimulationControlService {
         );
       }, 1000);
     }
-  }
-
-  private _subscribeToStartSimulationTopic() {
-    this._stompClientService.readOnceFrom(START_SIMULATION_TOPIC)
-      .pipe(map(body => JSON.parse(body) as SimulationStartedEventResponse))
-      .subscribe({
-        next: payload => {
-          this._stateStore.update({
-            simulationId: payload.simulationId,
-            faultMRIDs: payload.events.map(event => event.faultMRID)
-          });
-        }
-      });
-  }
-
-  private _stopSimulationAfterReceivingCompleteProcessStatusMessage() {
-    this._stateStore.select('simulationId')
-      .pipe(
-        switchMap(id => this._stompClientService.readFrom(`${SIMULATION_STATUS_LOG_TOPIC}.${id}`)),
-        map((JSON.parse as any)),
-        filter((message: SimulationStatusLogMessage) => message.processStatus === 'COMPLETE'),
-        take(1)
-      )
-      .subscribe({
-        next: this.stopSimulation
-      });
   }
 
   stopSimulation() {
