@@ -20,17 +20,21 @@ export class ToggleSwitchStateRequest implements MessageRequest {
         message: {
           timestamp: Math.floor((new Date).getTime() / 1000.0),
           difference_mrid: inputs.differenceMRID,
+          // Previous value
           reverse_differences: [
             {
               object: inputs.componentMRID,
-              value: inputs.open ? 0 : 1,
+              // Open is 0
+              // Closed is 1
+              value: inputs.open ? 1 : 0,
               attribute: 'Switch.open'
             }
           ],
+          // Current value
           forward_differences: [
             {
               object: inputs.componentMRID,
-              value: inputs.open ? 1 : 0,
+              value: inputs.open ? 0 : 1,
               attribute: 'Switch.open'
             }
           ]
