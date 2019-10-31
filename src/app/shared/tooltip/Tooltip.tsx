@@ -1,7 +1,8 @@
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 
-import './Tooltip.scss';
+import './Tooltip.light.scss';
+import './Tooltip.dark.scss';
 
 interface Props {
   position?: 'top' | 'left' | 'right' | 'bottom';

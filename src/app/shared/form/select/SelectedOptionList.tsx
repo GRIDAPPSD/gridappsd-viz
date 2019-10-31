@@ -3,7 +3,8 @@ import * as React from 'react';
 import { Option } from './Option';
 import { IconButton } from '@shared/buttons';
 
-import './SelectedOptionList.scss';
+import './SelectedOptionList.light.scss';
+import './SelectedOptionList.dark.scss';
 
 interface Props<T> {
   options: Option<T>[];

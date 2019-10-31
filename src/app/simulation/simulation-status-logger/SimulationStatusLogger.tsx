@@ -5,7 +5,8 @@ import { debounceTime, filter } from 'rxjs/operators';
 import { SimulationStatusLoggerMessage } from './SimulationStatusLoggerMessage';
 import { Wait } from '@shared/wait';
 
-import './SimulationStatusLogger.scss';
+import './SimulationStatusLogger.light.scss';
+import './SimulationStatusLogger.dark.scss';
 
 interface Props {
   messages: string[];
@@ -19,6 +20,14 @@ interface State {
 }
 
 const numberOfMessagesToLoadNext = 30;
+const logLevelAndColorTupleList = [
+  ['FATAL', '#B71C1C'],
+  ['ERROR', '#D32F2F'],
+  ['WARN', '#FFFF00'],
+  ['INFO', '#F0F4C3'],
+  ['DEBUG', '#686868'],
+  ['TRACE', '#C0CA33']
+];
 
 export class SimulationStatusLogger extends React.Component<Props, State> {
 
@@ -26,14 +35,6 @@ export class SimulationStatusLogger extends React.Component<Props, State> {
 
   private readonly _dragHandleMinPosition = 30;
   private readonly _dragHandleMaxPosition = document.body.clientHeight - 110;
-  private readonly _logLevelAndColorTupleList = [
-    ['FATAL', '#B71C1C'],
-    ['ERROR', '#D32F2F'],
-    ['WARN', '#FFFF00'],
-    ['INFO', '#F0F4C3'],
-    ['DEBUG', '#E1F5FE'],
-    ['TRACE', '#C0CA33']
-  ];
   private readonly _loggerBodyScrollNotifier = new Subject<number>();
 
   constructor(props: Props) {
@@ -102,21 +103,27 @@ export class SimulationStatusLogger extends React.Component<Props, State> {
         style={{
           top: `${this.state.dragHandlePosition}px`
         }}>
-        <header
-          className='simulation-status-logger__header'
-          onMouseDown={this.mouseDown} >
-          <span className='simulation-status-logger__header__label'>Simulation Status</span>
+        <header className='simulation-status-logger__header'>
+          <span
+            className='simulation-status-logger__header__label'
+            onMouseDown={this.mouseDown}>
+            Simulation Status
+          </span>
           {
             this.props.messages.length > 0
             &&
             <div className='simulation-status-logger__header__legends'>
               {
-                this._logLevelAndColorTupleList.map((tuple, i) => (
-                  <div key={i} className='simulation-status-logger__header__legends__level'>
+                logLevelAndColorTupleList.map((tuple, i) => (
+                  <div
+                    key={i}
+                    className='simulation-status-logger__header__legends__level'>
                     <span
                       className='simulation-status-logger__header__legends__level__color'
                       style={{ backgroundColor: tuple[1] }} />
-                    <span className='simulation-status-logger__header__legends__level__label'>{tuple[0]}</span>
+                    <span className='simulation-status-logger__header__legends__level__label'>
+                      {tuple[0]}
+                    </span>
                   </div>
                 ))
               }

@@ -1,0 +1,7 @@
+@import '@constants.dark';
+@import 'Dialog.common';
+
+.dialog {
+    background-color: $theme-color;
+    box-shadow: $hovering-shadow;
+}

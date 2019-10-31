@@ -10,7 +10,8 @@ import { ModelDictionaryComponent } from '@shared/topology';
 import { OverlayService } from '@shared/overlay';
 import { copyToClipboard } from '@shared/misc';
 
-import './SimulationControl.scss';
+import './SimulationControl.light.scss';
+import './SimulationControl.dark.scss';
 
 interface Props {
   simulationStatus: SimulationStatus;

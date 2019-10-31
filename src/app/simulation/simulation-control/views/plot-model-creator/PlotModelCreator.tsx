@@ -9,7 +9,8 @@ import { toOptions } from '@shared/form/select/utils';
 import { PlotModel, PlotModelComponent } from '@shared/plot-model';
 import { Validators } from '@shared/form/validation';
 
-import './PlotModelCreator.scss';
+import './PlotModelCreator.light.scss';
+import './PlotModelCreator.dark.scss';
 
 interface Props {
   modelDictionaryComponentsWithConsolidatedPhases: ModelDictionaryComponent[];

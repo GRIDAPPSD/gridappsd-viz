@@ -1,6 +1,7 @@
 import * as React from 'react';
 
-import './VoltageViolation.scss';
+import './VoltageViolation.light.scss';
+import './VoltageViolation.dark.scss';
 
 interface Props {
   violationCounts: number;

@@ -2,7 +2,8 @@ import * as React from 'react';
 
 import { Backdrop } from '@shared/backdrop';
 
-import './Drawer.scss';
+import './Drawer.light.scss';
+import './Drawer.dark.scss';
 
 interface Props {
 }
@@ -18,6 +19,7 @@ export class Drawer extends React.Component<Props, State> {
       isOpened: false
     };
 
+    this.open = this.open.bind(this);
     this.close = this.close.bind(this);
   }
 

@@ -4,7 +4,8 @@ import { PortalRenderer } from '@shared/portal-renderer';
 import { Backdrop } from '@shared/backdrop';
 import { Fade } from '@shared/fade';
 
-import './MatchedNodeLocator.scss';
+import './MatchedNodeLocator.light.scss';
+import './MatchedNodeLocator.dark.scss';
 
 interface Props {
   node: SVGCircleElement;

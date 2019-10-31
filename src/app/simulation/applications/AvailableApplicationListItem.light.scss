@@ -1,0 +1,11 @@
+@import 'AvailableApplicationListItem.common';
+
+.available-application-list-item {
+    td {
+        border: 2px solid #cecece;
+
+        &:not(:last-of-type) {
+            border-top: 2px solid #cecece;
+        }
+    }
+}

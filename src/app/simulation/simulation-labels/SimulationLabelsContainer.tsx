@@ -47,11 +47,13 @@ export class SimulationLabelsContainer extends React.Component<Props, State> {
   private readonly _simulationQueue = SimulationQueue.getInstance();
   private _simulationOutputMeasurementsStream: Subscription;
 
-  constructor(props: any) {
+  constructor(props: Props) {
     super(props);
+
     this.state = {
       labels: []
     };
+
   }
 
   componentDidMount() {

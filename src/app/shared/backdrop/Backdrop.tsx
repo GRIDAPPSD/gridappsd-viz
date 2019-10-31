@@ -2,7 +2,8 @@ import * as React from 'react';
 
 import { Fade } from '../fade/Fade';
 
-import './Backdrop.scss';
+import './Backdrop.light.scss';
+import './Backdrop.dark.scss';
 
 export function Backdrop({ visible, onClick = null }) {
   return (

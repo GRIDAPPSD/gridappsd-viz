@@ -1,0 +1,36 @@
+@import '@constants.dark';
+@import 'BasicButton.common';
+
+button {
+    background-color: $theme-color;
+}
+
+button.negative {
+    color: rgba($accent-text-color, 0.7);
+
+    .ripple-effect {
+        background-color: rgba(#fff, 0.8);
+    }
+}
+
+button.positive {
+    background-color: $primary-color;
+    color: $primary-text-color;
+    box-shadow: 0px 3px 5px #000;
+
+    &:hover {
+        box-shadow: 1px 6px 15px rgba(0, 0, 0, 1);
+    }
+
+    .ripple-effect {
+        background-color: rgba(255, 255, 255, 0.7);
+    }
+
+    &:disabled {
+        box-shadow: none;
+    }
+}
+
+button.negative:hover {
+    background-color: rgba(#fff, 0.1);
+}

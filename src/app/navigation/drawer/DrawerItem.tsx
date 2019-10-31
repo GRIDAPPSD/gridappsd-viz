@@ -2,7 +2,8 @@ import * as React from 'react';
 
 import { Ripple } from '@shared/ripple';
 
-import './DrawerItem.scss';
+import './DrawerItem.light.scss';
+import './DrawerItem.dark.scss';
 
 interface DrawerItemProps {
   className?: string;

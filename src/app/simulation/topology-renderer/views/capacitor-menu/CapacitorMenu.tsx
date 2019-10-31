@@ -6,7 +6,8 @@ import { BasicButton } from '@shared/buttons';
 import { CapacitorControlMode } from '@shared/topology/CapacitorControlMode';
 import { Capacitor } from '@shared/topology';
 
-import './CapacitorMenu.scss';
+import './CapacitorMenu.light.scss';
+import './CapacitorMenu.dark.scss';
 
 interface Props {
   onConfirm: (capacitor: Capacitor) => void;

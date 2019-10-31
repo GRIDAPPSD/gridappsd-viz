@@ -1,0 +1,10 @@
+.available-application-list-item {
+    td {
+        border-bottom: 0;
+        padding: 3px 0;
+
+        &>div {
+            padding: 5px;
+        }
+    }
+}

@@ -5,7 +5,8 @@ import { debounceTime } from 'rxjs/operators';
 import { FormControl } from '../form-control/FormControl';
 import { ValidationErrorMessages, Validator, ValidationResult } from '../validation';
 
-import './TextArea.scss';
+import './TextArea.light.scss';
+import './TextArea.dark.scss';
 
 interface Props {
   label: string;
@@ -122,6 +123,7 @@ export class TextArea extends React.Component<Props, State> {
             className='textarea__input-box'
             contentEditable={!this.props.readonly}
             suppressContentEditableWarning
+            tabIndex={1}
             onKeyUp={this.onKeyUp}>
             {this.props.value}
           </div>

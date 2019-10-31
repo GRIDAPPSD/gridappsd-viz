@@ -6,7 +6,8 @@ import { LogsContainer } from './logs';
 import { SimulationsContainer } from './simulations';
 import { FeederModel, FeederModelLine } from '@shared/topology';
 
-import './DataBrowser.scss';
+import './DataBrowser.light.scss';
+import './DataBrowser.dark.scss';
 
 interface Props {
   match: any;

@@ -2,7 +2,8 @@ import * as React from 'react';
 
 import { IconButton } from '@shared/buttons';
 
-import './Paginator.scss';
+import './Paginator.light.scss';
+import './Paginator.dark.scss';
 
 interface Props<T> {
   items: T[];

@@ -5,7 +5,8 @@ import { debounceTime } from 'rxjs/operators';
 import { FormControl } from '../form-control/FormControl';
 import { ValidationErrorMessages, Validator, ValidationResult } from '../validation';
 
-import './Input.scss';
+import './Input.light.scss';
+import './Input.dark.scss';
 
 interface Props {
   label: string;

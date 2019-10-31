@@ -1,0 +1,16 @@
+.available-application-list {
+    position: relative;
+    display: flex;
+    align-items: center;
+    padding: 5px;
+
+    table {
+        width: calc(100% - 50px);
+    }
+}
+
+.available-application-list__action {
+    width: 50px;
+    text-align: center;
+    transform: translateX(-2px);
+}

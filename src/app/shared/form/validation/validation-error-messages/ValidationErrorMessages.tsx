@@ -1,6 +1,7 @@
 import * as React from 'react';
 
-import './ValidationErrorMessages.scss';
+import './ValidationErrorMessages.light.scss';
+import './ValidationErrorMessages.dark.scss';
 
 interface Props {
   messages: string[];

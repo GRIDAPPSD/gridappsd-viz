@@ -1,6 +1,7 @@
 import * as React from 'react';
 
-import './Tab.scss';
+import './Tab.light.scss';
+import './Tab.dark.scss';
 
 interface Props {
   label: string;

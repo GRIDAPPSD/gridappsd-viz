@@ -1,0 +1,8 @@
+@import '@constants.dark';
+@import 'FormGroup.common';
+
+.form-group__header {
+    border-bottom: 2px inset rgba(255, 255, 255, 0.5);
+    color: $active-item-color;
+    padding-bottom: 5px;
+}

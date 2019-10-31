@@ -6,7 +6,8 @@ import { BasicButton } from '@shared/buttons';
 import { RegulatorControlMode } from '@shared/topology/RegulatorControlMode';
 import { Regulator } from '@shared/topology';
 
-import './RegulatorMenu.scss';
+import './RegulatorMenu.light.scss';
+import './RegulatorMenu.dark.scss';
 
 interface Props {
   onConfirm: (newRegulator: Regulator) => void;

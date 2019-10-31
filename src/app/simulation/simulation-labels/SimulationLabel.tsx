@@ -3,7 +3,8 @@ import { Subscription } from 'rxjs';
 
 import { MapTransformWatcherService } from '@shared/MapTransformWatcherService';
 
-import './SimulationLabel.scss';
+import './SimulationLabel.light.scss';
+import './SimulationLabel.dark.scss';
 
 interface Props {
   nodeNameToAttachTo: string;

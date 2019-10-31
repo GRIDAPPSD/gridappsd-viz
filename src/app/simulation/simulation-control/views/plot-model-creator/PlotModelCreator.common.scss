@@ -1,0 +1,38 @@
+.plot-model-creator__body {
+    display: flex;
+    height: 70vh;
+    overflow: hidden;
+    counter-reset: plot-number;
+
+    .plot-model-summary .plot-model-summary__header:before {
+        counter-increment: plot-number;
+        content: counter(plot-number);
+        text-align: center;
+        display: inline-flex;
+        justify-content: center;
+        align-items: center;
+        padding: 5px 15px;
+    }
+
+    button.positive {
+        margin-left: 270px;
+    }
+
+    .form-control:nth-child(4) {
+        margin-bottom: 0;
+        margin-left: 270px;
+    }
+
+    .form-control:nth-child(5) {
+        margin-top: 5px;
+        margin-left: 270px;
+    }
+}
+
+.plot-model-creator__body__created-plot-models {
+    width: 30vw;
+    height: 100%;
+    overflow-y: auto;
+    padding: 0 5px;
+    text-align: center;
+}

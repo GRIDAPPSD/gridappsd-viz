@@ -1,0 +1,18 @@
+@import 'Simulations.common';
+
+.blazegraph-form {
+    .control {
+        input {
+            border-bottom: 2px solid #e3e3e3;
+        }
+
+        .str-editor {
+            box-shadow: 0 0 3px #555;
+        }
+    }
+
+    .submit {
+        box-shadow: 0 0 5px #888;
+        background-color: #009688;
+    }
+}

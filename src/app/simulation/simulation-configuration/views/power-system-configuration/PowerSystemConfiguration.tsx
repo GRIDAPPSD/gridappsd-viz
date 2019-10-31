@@ -4,7 +4,8 @@ import { FormGroup, Select, Option } from '@shared/form';
 import { FeederModel, FeederModelRegion, FeederModelLine } from '@shared/topology';
 import { PowerSystemConfigurationModel } from '../../models/PowerSystemConfigurationModel';
 
-import './PowerSystemConfiguration.scss';
+import './PowerSystemConfiguration.light.scss';
+import './PowerSystemConfiguration.dark.scss';
 
 interface Props {
   feederModel: FeederModel;

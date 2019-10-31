@@ -1,0 +1,20 @@
+@import '@constants.dark';
+@import 'SimulationControl.common';
+
+.simulation-control__simulation-id__label {
+    color: $primary-text-color;
+    background-color: $primary-color;
+    box-shadow: 0 0 5px #000;
+    z-index: 2;
+}
+
+.simulation-control__simulation-id__value {
+    border: 2px solid $primary-color;
+    box-shadow: 0 0 5px #000;
+    color: $primary-text-color;
+    padding: 6px 7px;
+}
+
+.simulation-control__simulation-id__value-wrapper {
+    transform: translateX(-2px);
+}

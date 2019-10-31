@@ -1,0 +1,6 @@
+@import '@constants.dark';
+@import 'StompClient.common';
+
+.stomp-client {
+    background-color: $theme-color;
+}

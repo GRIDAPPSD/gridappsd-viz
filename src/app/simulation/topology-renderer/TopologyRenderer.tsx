@@ -17,7 +17,8 @@ import { IconButton } from '@shared/buttons';
 import { NodeSearcher } from './views/node-searcher/NodeSearcher';
 import { MatchedNodeLocator } from './views/matched-node-locator/MatchedNodeLocator';
 
-import './TopologyRenderer.scss';
+import './TopologyRenderer.light.scss';
+import './TopologyRenderer.dark.scss';
 
 interface Props {
   topology: RenderableTopology;
@@ -44,13 +45,6 @@ export class TopologyRenderer extends React.Component<Props, State> {
     .x(d => d.node.screenX1)
     .y(d => d.node.screenY1);
   private readonly _symbolSize = 35;
-  private readonly _symbolsForTypes = {
-    capacitor: './assets/images/capacitor.svg',
-    regulator: './assets/images/regulator.svg',
-    transformer: './assets/images/transformer.svg',
-    switch: './assets/images/switch-closed.svg',
-    swing_node: './assets/images/substation.svg'
-  };
   private readonly _symbolDimensions = {
     capacitor: { width: 52 / 9, height: 32 / 9 },
     regulator: { width: 48 / 9, height: 103 / 9 },
@@ -263,8 +257,8 @@ export class TopologyRenderer extends React.Component<Props, State> {
       .attr('y1', node => node.screenY1)
       .attr('x2', node => node.screenX2)
       .attr('y2', node => node.screenY2)
-      .attr('stroke-width', '0.2')
-      .attr('stroke', '#000');
+      .attr('class', 'topology-renderer__canvas__edge')
+      .attr('stroke-width', '0.2');
 
     switches.append('circle')
       .attr('class', node => `topology-renderer__canvas__node switch _${node.name}_`)
@@ -307,9 +301,8 @@ export class TopologyRenderer extends React.Component<Props, State> {
       .selectAll('image')
       .data(nonSwitchNodes)
       .enter()
-      .append('image')
+      .append('foreignObject')
       .attr('class', node => `topology-renderer__canvas__symbol${node.type ? ' ' + node.type : ''}`)
-      .attr('href', node => this._symbolsForTypes[node.type])
       .attr('width', node => this._symbolDimensions[node.type] ? this._symbolDimensions[node.type].width : this._symbolSize)
       .attr('height', node => this._symbolDimensions[node.type] ? this._symbolDimensions[node.type].height : this._symbolSize)
       .attr('x', node => node.screenX1)
@@ -343,7 +336,9 @@ export class TopologyRenderer extends React.Component<Props, State> {
           '${angle}',
           `${this._calculateAngleBetweenLineAndXAxis(edge.from.x1, edge.from.y1, edge.to.x1, edge.to.y1)}`
         );
-      });
+      })
+      .append('xhtml:div')
+      .attr('class', 'topology-renderer__canvas__symbol__image');
   }
 
   private _calculateAngleBetweenLineAndXAxis(x1: number, y1: number, x2: number, y2: number): number {
@@ -380,13 +375,16 @@ export class TopologyRenderer extends React.Component<Props, State> {
       .append('g')
       .attr('class', node => `topology-renderer__canvas__switch-symbol  _${node.name}_`)
       .attr('transform', node => `translate(${node.screenX1},${node.screenY1})`);
+
     switches.append('line')
+      .attr('class', 'topology-renderer__canvas__edge')
       .attr('x1', 0)
       .attr('y1', 0)
       .attr('x2', node => node.dx)
       .attr('y2', node => node.dy)
       .attr('stroke-width', '0.2')
       .attr('stroke', '#000');
+
     switches.append('rect')
       .attr('class', node => `topology-renderer__canvas__symbol switch _${node.name}_`)
       .attr('x', node => (node.dx - width) / 2)

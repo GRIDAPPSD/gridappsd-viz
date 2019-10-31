@@ -1,0 +1,12 @@
+.event-summary {
+    overflow: auto;
+    width: 100%;
+    max-width: 100%;
+    height: 100%;
+    padding: 5px;
+    box-sizing: border-box;
+}
+
+.event-summary__table-name {
+    margin-bottom: 0;
+}

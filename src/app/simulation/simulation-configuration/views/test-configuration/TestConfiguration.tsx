@@ -3,21 +3,21 @@ import { filter } from 'rxjs/operators';
 
 import { FormGroup, Input } from '@shared/form';
 import { RadioButtonGroup, RadioButton } from '@shared/form/radio';
-import { ModelDictionary } from '@shared/topology';
-import { CommOutageEventForm } from './CommOutageEventForm';
-import { FaultEventForm } from './FaultEventForm';
-import { CommOutageEventSummaryTable } from './CommOutageEventSummaryTable';
+import { ModelDictionary, ModelDictionaryComponent } from '@shared/topology';
+import { CommOutageEventForm } from './comm-outage/CommOutageEventForm';
+import { FaultEventForm } from './fault/FaultEventForm';
+import { CommOutageEventSummaryTable } from './comm-outage/CommOutageEventSummaryTable';
 import { IconButton } from '@shared/buttons';
 import { FilePicker, FilePickerService } from '@shared/file-picker';
 import { Tooltip } from '@shared/tooltip';
-import { FaultEventSummaryTable } from './FaultEventSummaryTable';
+import { FaultEventSummaryTable } from './fault/FaultEventSummaryTable';
 import { CommOutageEvent, FaultEvent, FaultKind, CommandEvent } from '@shared/test-manager';
 import { Validators } from '@shared/form/validation';
-import { ModelDictionaryComponent } from '@shared/topology/model-dictionary/ModelDictionaryComponent';
 import { download, DownloadType } from '@shared/misc';
-import { CommandEventSummaryTable } from './CommandEventSummaryTable';
+import { CommandEventSummaryTable } from './command/CommandEventSummaryTable';
 
-import './TestConfiguration.scss';
+import './TestConfiguration.light.scss';
+import './TestConfiguration.dark.scss';
 
 interface Props {
   modelDictionary: ModelDictionary;

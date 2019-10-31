@@ -1,0 +1,25 @@
+@import '@constants.dark';
+@import 'DataBrowser.common';
+
+.data-browser__selection__item {
+    box-shadow: 0 0 2px #fff;
+    color: $active-item-color;
+}
+
+.data-browser__selection__item.selected {
+    &:before {
+        background-color: $theme-color;
+    }
+
+    &:after {
+        border-top: 1px solid #999;
+        border-bottom: 1px solid #999;
+        background-color: $theme-color;
+    }
+}
+
+.request-editor,
+.response {
+    box-shadow: 0 0 2px #fff;
+    color: $primary-text-color;
+}

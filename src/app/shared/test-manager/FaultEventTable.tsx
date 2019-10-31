@@ -2,7 +2,8 @@ import * as React from 'react';
 
 import { FaultEvent } from './FaultEvent';
 
-import './FaultEventTable.scss';
+import './FaultEventTable.light.scss';
+import './FaultEventTable.dark.scss';
 
 interface Props {
   events: FaultEvent[];

@@ -1,16 +1,20 @@
 import * as React from 'react';
 import { findDOMNode } from 'react-dom';
 
-import './Ripple.scss';
+import './Ripple.light.scss';
+import './Ripple.dark.scss';
 
 interface Props {
   fixed?: boolean;
-  color?: string;
+  duration?: number;
 }
 
 export class Ripple extends React.Component<Props, {}> {
 
-  private static readonly __RIPPLE_DURATION__ = 2000;
+  static defaultProps: Props = {
+    fixed: false,
+    duration: 2000
+  };
 
   private _rippleTrigger: HTMLElement = null;
 
@@ -36,26 +40,31 @@ export class Ripple extends React.Component<Props, {}> {
   }
 
   private _showRipple(event: MouseEvent) {
-    const rect = this._rippleTrigger.getBoundingClientRect();
-    const rippleContainer = document.createElement('div');
-    rippleContainer.className = 'ripple';
-    rippleContainer.style.borderRadius = getComputedStyle(this._rippleTrigger, null).borderRadius;
-    const rippler = document.createElement('span');
-    const largerDimension = Math.max(rect.width, rect.height);
+    const rippleTriggerBoundingBox = this._rippleTrigger.getBoundingClientRect();
+    const rippleTriggerComputedStyles = getComputedStyle(this._rippleTrigger, null);
+    const rippleTriggerLargerDimension = Math.max(rippleTriggerBoundingBox.width, rippleTriggerBoundingBox.height);
+    const ripple = document.createElement('div');
+    const rippleEffect = document.createElement('span');
+
+    ripple.className = 'ripple';
+    ripple.style.borderRadius = rippleTriggerComputedStyles.borderRadius;
+
+    rippleEffect.className = 'ripple-effect';
+    rippleEffect.style.width = rippleTriggerLargerDimension + 'px';
+    rippleEffect.style.height = rippleTriggerLargerDimension + 'px';
+    rippleEffect.style.animationDuration = `${this.props.duration}ms`;
+
     if (this.props.fixed)
-      rippleContainer.setAttribute('style', 'display:inline-flex;justify-content:center;align-items:center;');
+      ripple.className += ' fixed';
     else {
-      const x = event.clientX - rect.left - largerDimension / 2;
-      const y = event.clientY - rect.top - largerDimension / 2;
-      rippler.setAttribute('style', `left:${x}px;top:${y}px;`);
+      const x = event.clientX - rippleTriggerBoundingBox.left - rippleTriggerLargerDimension / 2;
+      const y = event.clientY - rippleTriggerBoundingBox.top - rippleTriggerLargerDimension / 2;
+      rippleEffect.style.left = x + 'px';
+      rippleEffect.style.top = y + 'px';
     }
-    rippler.style.width = largerDimension + 'px';
-    rippler.style.height = largerDimension + 'px';
-    rippler.style.animationDuration = `${Ripple.__RIPPLE_DURATION__}ms`;
-    rippler.style.backgroundColor = this.props.color || 'rgba(0, 0, 0, 0.1)';
-    rippleContainer.appendChild(rippler);
-    this._rippleTrigger.appendChild(rippleContainer);
-    setTimeout(() => this._rippleTrigger.removeChild(rippleContainer), Ripple.__RIPPLE_DURATION__);
+    ripple.appendChild(rippleEffect);
+    this._rippleTrigger.appendChild(ripple);
+    setTimeout(() => this._rippleTrigger.removeChild(ripple), this.props.duration);
   }
 
 }

@@ -6,7 +6,8 @@ import { Tooltip } from '@shared/tooltip';
 import { Ripple } from '@shared/ripple';
 import { copyToClipboard } from '@shared/misc';
 
-import './Alarms.scss';
+import './Alarms.light.scss';
+import './Alarms.dark.scss';
 
 interface Props {
   onAcknowledgeAlarm: (alarm: Alarm) => void;
@@ -65,7 +66,6 @@ export class Alarms extends React.Component<Props, State> {
             <IconButton
               icon='check'
               size='small'
-              rippleColor='#fff'
               onClick={() => this.props.onAcknowledgeAlarm(alarm)} />
           </Tooltip>
         </td>

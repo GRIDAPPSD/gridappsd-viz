@@ -1,0 +1,22 @@
+.option-list-filter {
+    position: relative;
+    border-radius: 5px;
+    padding: 3px 0;
+    padding-left: 5px;
+    margin: 0 10px;
+    margin-top: 15px;
+    display: flex;
+    box-sizing: border-box;
+}
+
+.option-list-filter__input {
+    border: none;
+    font-size: 0.9em;
+    outline: none;
+    width: 100%;
+    background-color: transparent;
+}
+
+.option-list-filter__clear {
+    margin-right: 5px;
+}

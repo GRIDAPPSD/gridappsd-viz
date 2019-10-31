@@ -1,0 +1,59 @@
+.simulation-control {
+    height: 50px;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    position: absolute;
+    top: -2px;
+    right: 20px;
+    width: 100%;
+}
+
+.simulation-control__simulation-id {
+    display: inline-flex;
+    width: 100%;
+    justify-content: flex-start;
+    box-sizing: border-box;
+    padding-left: 10px;
+    align-items: center;
+    font-size: 0.7em;
+    margin: 0 12px;
+}
+
+.simulation-control__simulation-id__label {
+    display: inline-block;
+    padding: 8px 10px;
+    border-top-left-radius: 7px;
+}
+
+.simulation-control__simulation-id__value-wrapper {
+    position: relative;
+    display: inline-block;
+    z-index: 1;
+}
+
+.simulation-control__simulation-id__value__copied-successfully-tooltip {
+    position: absolute;
+    display: inline-block;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    cursor: pointer;
+}
+
+.simulation-control__simulation-id__value {
+    position: relative;
+    display: inline-block;
+    border-left: none;
+    border-bottom-right-radius: 7px;
+    cursor: pointer;
+}
+
+.simulation-control__action {
+    z-index: 1;
+
+    &:not(:last-of-type) {
+        margin-right: 5px;
+    }
+}

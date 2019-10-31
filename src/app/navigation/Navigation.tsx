@@ -4,14 +4,15 @@ import { Subscription } from 'rxjs';
 
 import { ToolBar } from './tool-bar/ToolBar';
 import { Drawer } from './drawer/Drawer';
-import { DrawerOpener } from './drawer/DrawerOpener';
 import { DrawerItem, DrawerItemIcon, DrawerItemLabel } from './drawer/DrawerItem';
 import { DrawerItemGroup } from './drawer/DrawerItemGroup';
 import { SimulationConfiguration, Simulation, SimulationQueue } from '@shared/simulation';
 import { StompClientService, StompClientConnectionStatus } from '@shared/StompClientService';
 import { ConfigurationManager } from '@shared/ConfigurationManager';
+import { IconButton } from '@shared/buttons';
 
-import './Navigation.scss';
+import './Navigation.light.scss';
+import './Navigation.dark.scss';
 
 interface Props {
   onShowSimulationConfigForm: (config: SimulationConfiguration) => void;
@@ -64,17 +65,29 @@ export class Navigation extends React.Component<Props, State> {
     return (
       <>
         <ToolBar>
-          <DrawerOpener onClick={() => this.drawer.open()} />
+          <IconButton
+            style='primary'
+            className='drawer-opener'
+            icon='menu'
+            size='large'
+            rippleDuration={550}
+            noBackground={true}
+            onClick={this.drawer ? this.drawer.open : null} />
           <Link className='navigation__app-title' to='/'>GridAPPS-D</Link>
           <span className='navigation__app-version'>{this.state.version}</span>
-          {
-            this.state.websocketStatus === 'CONNECTED'
-            &&
-            <div className='websocket-status-indicator'>
-              <i className='material-icons websocket-status-indicator__icon'>import_export</i>
-              <div className='websocket-status-indicator__status-text'>Connected</div>
-            </div>
-          }
+          <div className='right-aligned'>
+            {
+              this.state.websocketStatus === 'CONNECTED'
+              &&
+              <div className='websocket-status-indicator'>
+                <i className='material-icons websocket-status-indicator__icon'>import_export</i>
+                <div className='websocket-status-indicator__status-text'>Connected</div>
+              </div>
+            }
+            {
+              this.props.children
+            }
+          </div>
         </ToolBar>
         <Drawer ref={ref => this.drawer = ref}>
           <DrawerItem onClick={() => this.props.onShowSimulationConfigForm(null)}>

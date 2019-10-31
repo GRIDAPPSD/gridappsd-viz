@@ -1,6 +1,7 @@
 import * as React from 'react';
 
-import './ActiveTabIndicator.scss';
+import './ActiveTabIndicator.light.scss';
+import './ActiveTabIndicator.dark.scss';
 
 interface Props {
   activeTab: HTMLElement;

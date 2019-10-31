@@ -2,7 +2,8 @@ import * as React from 'react';
 
 import { Application } from '@shared/Application';
 
-import './AvailableApplicationListItem.scss';
+import './AvailableApplicationListItem.light.scss';
+import './AvailableApplicationListItem.dark.scss';
 
 interface Props {
   application: Application;

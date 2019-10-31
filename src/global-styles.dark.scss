@@ -1,0 +1,21 @@
+@import '@constants.dark';
+@import 'global-styles.common';
+
+body {
+    background-color: $theme-color;
+}
+
+thead {
+    background-color: $primary-color;
+    color: $primary-text-color;
+    border: 2px solid #cecece;
+}
+
+th {
+    border: 2px solid #cecece;
+}
+
+td {
+    border: 2px solid #cecece;
+    color: $primary-text-color;
+}

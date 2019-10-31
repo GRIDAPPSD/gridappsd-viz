@@ -10,7 +10,8 @@ import { MeasurementChartModel } from './models/MeasurementChartModel';
 import { TimeSeriesDataPoint } from './models/TimeSeriesDataPoint';
 import { TimeSeries } from './models/TimeSeries';
 
-import './MeasurementChart.scss';
+import './MeasurementChart.light.scss';
+import './MeasurementChart.dark.scss';
 
 interface Props {
   measurementChartModel: MeasurementChartModel;
@@ -49,7 +50,7 @@ export class MeasurementChart extends React.Component<Props, State> {
   render() {
     return (
       <div className='measurement-chart'>
-        <header>
+        <header className='measurement-chart__name'>
           {this.props.measurementChartModel.name}
         </header>
         <div className='measurement-chart__legends'>
@@ -67,7 +68,7 @@ export class MeasurementChart extends React.Component<Props, State> {
           }
         </div>
         <svg
-          className='canvas'
+          className='measurement-chart__canvas'
           ref={elem => this.canvas = elem}
           width={this.width}
           height={this.height}
@@ -117,6 +118,7 @@ export class MeasurementChart extends React.Component<Props, State> {
     const yAxisLabel = this.props.measurementChartModel.yAxisLabel;
     if (yAxisLabel)
       this._container.append('text')
+        .attr('class', 'measurement-chart__canvas__axis-label')
         .text(yAxisLabel)
         .attr('x', this._margin.left / 2)
         .attr('y', this._margin.top / 2)

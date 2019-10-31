@@ -1,6 +1,7 @@
 import * as React from 'react';
 
-import './FormControl.scss';
+import './FormControl.light.scss';
+import './FormControl.dark.scss';
 
 interface Props {
   label: string;

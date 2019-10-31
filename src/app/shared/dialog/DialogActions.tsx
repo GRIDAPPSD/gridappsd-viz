@@ -1,6 +1,7 @@
 import * as React from 'react';
 
-import './DialogActions.scss';
+import './DialogActions.light.scss';
+import './DialogActions.dark.scss';
 
 interface Props {
   children: any;

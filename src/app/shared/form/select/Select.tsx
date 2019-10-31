@@ -6,11 +6,12 @@ import { FormControl } from '../form-control/FormControl';
 import { OptionList } from './OptionList';
 import { OptionListFilter } from './OptionListFilter';
 import { SelectedOptionList } from './SelectedOptionList';
-import { OptionListPaginator } from './OptionListPaginator';
 import { ValidationErrorMessages } from '../validation';
 import { BasicButton } from '@shared/buttons';
+import { Paginator } from '@shared/paginator';
 
-import './Select.scss';
+import './Select.light.scss';
+import './Select.dark.scss';
 
 interface Props<T, E extends boolean> {
   multiple: E;
@@ -192,8 +193,8 @@ export class Select<T, E extends boolean> extends React.Component<Props<T, E>, S
             <OptionList
               options={this.state.currentPage}
               onSelectOption={this.onChange} />
-            <OptionListPaginator
-              options={this.state.filteredOptions}
+            <Paginator
+              items={this.state.filteredOptions}
               onPageChanged={this.onPageChanged} />
             {
               this.props.multiple

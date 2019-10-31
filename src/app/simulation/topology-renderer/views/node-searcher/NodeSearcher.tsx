@@ -11,7 +11,8 @@ import { fuzzySearch, FuzzySearchResult } from '@shared/misc';
 import { Ripple } from '@shared/ripple';
 import { Paginator } from '@shared/paginator';
 
-import './NodeSearcher.scss';
+import './NodeSearcher.light.scss';
+import './NodeSearcher.dark.scss';
 
 interface Props {
   show: boolean;

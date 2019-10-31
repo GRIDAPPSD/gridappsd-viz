@@ -7,7 +7,8 @@ import { BasicButton } from '@shared/buttons';
 import { QueryLogsRequestBody } from './models/QueryLogsRequestBody';
 import { SimulationId } from './models/SimulationId';
 
-import './QueryLogsForm.scss';
+import './QueryLogsForm.light.scss';
+import './QueryLogsForm.dark.scss';
 
 interface Props {
   onSubmit: (body: QueryLogsRequestBody) => void;

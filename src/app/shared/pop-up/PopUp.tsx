@@ -3,7 +3,8 @@ import * as ReactDOM from 'react-dom';
 
 import { Backdrop } from '@shared/backdrop';
 
-import './PopUp.scss';
+import './PopUp.light.scss';
+import './PopUp.dark.scss';
 
 interface Props {
   top?: number;

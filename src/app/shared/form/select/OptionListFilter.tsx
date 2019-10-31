@@ -4,7 +4,8 @@ import { distinctUntilChanged, debounceTime } from 'rxjs/operators';
 
 import { IconButton } from '@shared/buttons';
 
-import './OptionListFilter.scss';
+import './OptionListFilter.light.scss';
+import './OptionListFilter.dark.scss';
 
 interface Props {
   onChange: (newValue: string, oldValue: string) => void;

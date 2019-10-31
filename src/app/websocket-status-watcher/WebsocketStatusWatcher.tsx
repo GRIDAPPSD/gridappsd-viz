@@ -6,7 +6,8 @@ import { StompClientConnectionStatus, StompClientService } from '@shared/StompCl
 import { NotificationBanner } from '@shared/notification-banner';
 import { ThreeDots } from '@shared/three-dots';
 
-import './WebsocketStatusWatcher.scss';
+import './WebsocketStatusWatcher.light.scss';
+import './WebsocketStatusWatcher.dark.scss';
 
 interface Props {
 }

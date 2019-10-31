@@ -8,7 +8,8 @@ import { ServiceConfigurationEntryModel } from '../../models/ServiceConfiguratio
 import { Validators } from '@shared/form/validation';
 import { copyToClipboard } from '@shared/misc';
 
-import './ServiceConfigurationEntry.scss';
+import './ServiceConfigurationEntry.light.scss';
+import './ServiceConfigurationEntry.dark.scss';
 
 interface Props {
   service: Service;

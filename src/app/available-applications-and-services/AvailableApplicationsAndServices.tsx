@@ -5,7 +5,8 @@ import { Panel, Button } from 'react-bootstrap';
 import { GetAvailableApplicationsAndServices } from './models/GetAvailableApplicationsAndServicesRequest';
 import { StompClientService } from '@shared/StompClientService';
 
-import './AvailableApplicationsAndServices.scss';
+import './AvailableApplicationsAndServices.light.scss';
+import './AvailableApplicationsAndServices.dark.scss';
 
 export interface ApplicationsProps { }
 

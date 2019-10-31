@@ -1,0 +1,17 @@
+@import 'DrawerItem.common';
+
+.drawer-item {
+    border-bottom: 2px solid #BDBDBD;
+
+    &:hover {
+        background-color: rgba(0, 0, 0, 0.05);
+    }
+}
+
+.drawer-item-icon {
+    color: #757575;
+}
+
+.drawer-item-label {
+    color: #666;
+}

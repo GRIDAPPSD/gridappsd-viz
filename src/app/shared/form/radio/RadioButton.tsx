@@ -2,7 +2,8 @@ import * as React from 'react';
 
 import { IdContextProvider } from './RadioButtonGroup';
 
-import './RadioButton.scss';
+import './RadioButton.light.scss';
+import './RadioButton.dark.scss';
 
 interface Props {
   selected?: boolean;
