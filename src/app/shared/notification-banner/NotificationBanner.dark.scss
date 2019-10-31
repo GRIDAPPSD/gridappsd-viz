@@ -1,0 +1,14 @@
+@import 'NotificationBanner.common';
+
+.notification-banner.persistent .notification-banner__content {
+        background-color: rgba(0, 0, 0, 0.2);
+}
+
+.notification-banner.not-persistent .notification-banner__content {
+        box-shadow: 0 -2px 5px #555;
+        background-color: rgba(0, 0, 0, 0.65);
+}
+
+.notification-banner__content {
+    color: #fff;
+}

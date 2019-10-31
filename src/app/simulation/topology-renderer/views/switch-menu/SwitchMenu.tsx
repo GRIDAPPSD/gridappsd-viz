@@ -4,7 +4,8 @@ import { Dialog, DialogContent, DialogActions } from '@shared/dialog';
 import { Select, Option } from '@shared/form';
 import { BasicButton } from '@shared/buttons';
 
-import './SwitchMenu.scss';
+import './SwitchMenu.light.scss';
+import './SwitchMenu.dark.scss';
 
 interface Props {
   onConfirm: (open: boolean) => void;

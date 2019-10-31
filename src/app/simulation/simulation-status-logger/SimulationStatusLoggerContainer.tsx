@@ -18,7 +18,6 @@ interface State {
   isFetching: boolean;
 }
 
-
 export class SimulationStatusLogContainer extends React.Component<Props, State> {
 
   private readonly _stompClientService = StompClientService.getInstance();

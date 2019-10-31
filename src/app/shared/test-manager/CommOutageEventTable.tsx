@@ -2,7 +2,8 @@ import * as React from 'react';
 
 import { CommOutageEvent } from './CommOutageEvent';
 
-import './CommOutageEventTable.scss';
+import './CommOutageEventTable.light.scss';
+import './CommOutageEventTable.dark.scss';
 
 interface Props {
   events: CommOutageEvent[];

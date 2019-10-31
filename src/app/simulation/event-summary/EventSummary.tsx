@@ -8,7 +8,8 @@ import { CommOutageEventSummary } from './CommOutageEventSummary';
 import { FaultEventSummary } from './FaultEventSummary';
 import { CommandEventSummary } from './CommandEventSummary';
 
-import './EventSummary.scss';
+import './EventSummary.light.scss';
+import './EventSummary.dark.scss';
 
 interface Props {
 }

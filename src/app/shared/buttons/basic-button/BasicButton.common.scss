@@ -1,0 +1,26 @@
+button {
+    border: none;
+    outline: none;
+    transition: background-color 0.2s ease, box-shadow 0.2s ease;
+    border-radius: 3px;
+    cursor: pointer;
+    position: relative;
+    font-size: 13px;
+}
+
+button.negative {
+    padding: 8px 20px;
+}
+
+button.positive {
+    padding: 8px 20px;
+
+    &:disabled {
+        opacity: 0.25;
+    }
+}
+
+button:disabled {
+    box-shadow: none;
+    pointer-events: none;
+}

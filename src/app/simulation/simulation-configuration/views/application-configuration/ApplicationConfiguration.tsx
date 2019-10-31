@@ -6,7 +6,8 @@ import { Application } from '@shared/Application';
 import { ApplicationConfigurationModel } from '../../models/ApplicationConfigurationModel';
 import { Validators } from '@shared/form/validation';
 
-import './ApplicationConfiguration.scss';
+import './ApplicationConfiguration.light.scss';
+import './ApplicationConfiguration.dark.scss';
 
 interface Props {
   currentConfig: SimulationConfiguration;

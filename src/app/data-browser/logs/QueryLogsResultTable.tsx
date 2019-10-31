@@ -3,9 +3,8 @@ import ReactTable from 'react-table';
 
 import { Tooltip } from '@shared/tooltip';
 
-import './QueryLogsResultTable.scss';
-import 'react-table/react-table.css';
-
+import './QueryLogsResultTable.light.scss';
+import './QueryLogsResultTable.dark.scss';
 
 interface Props {
   rows: any;

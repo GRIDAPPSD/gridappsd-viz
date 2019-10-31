@@ -4,7 +4,8 @@ import { IconButton } from '@shared/buttons';
 import { Tooltip } from '@shared/tooltip';
 import { FaultEventTable, FaultEvent } from '@shared/test-manager';
 
-import './FaultEventSummary.scss';
+import './FaultEventSummary.light.scss';
+import './FaultEventSummary.dark.scss';
 
 interface Props {
   events: FaultEvent[];

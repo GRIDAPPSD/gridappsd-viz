@@ -5,7 +5,8 @@ import { IconButton } from '@shared/buttons';
 import { PlotModelComponent } from '@shared/plot-model';
 import { Tooltip } from '@shared/tooltip';
 
-import './PlotModelSummary.scss';
+import './PlotModelSummary.light.scss';
+import './PlotModelSummary.dark.scss';
 
 interface Props {
   plotModel: PlotModel;
@@ -46,13 +47,12 @@ export class PlotModelSummary extends React.Component<Props, State> {
           </div>
           <Tooltip content='Edit plot name'>
             <IconButton
-              rounded={false}
               size='small'
               icon='edit'
               onClick={this.beginEditingPlotName} />
           </Tooltip>
           <IconButton
-            rounded={false}
+            size='small'
             icon='close'
             style='accent'
             onClick={this.removePlotModel} />

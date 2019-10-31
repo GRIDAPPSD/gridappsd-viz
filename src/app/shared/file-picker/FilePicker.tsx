@@ -3,7 +3,8 @@ import { createPortal } from 'react-dom';
 
 import { FilePickerService } from './FilePickerService';
 
-import './FilePicker.scss';
+import './FilePicker.light.scss';
+import './FilePicker.dark.scss';
 
 interface Props {
 }

@@ -27,7 +27,8 @@ import { Service } from '@shared/Service';
 import { ServiceConfigurationEntryModel } from './models/ServiceConfigurationEntryModel';
 import { CommandEvent } from '@shared/test-manager';
 
-import './SimulationConfigurationEditor.scss';
+import './SimulationConfigurationEditor.light.scss';
+import './SimulationConfigurationEditor.dark.scss';
 
 interface Props {
   onSubmit: (configObject: SimulationConfiguration) => void;

@@ -6,7 +6,8 @@ import { Wait } from '@shared/wait';
 import { Tooltip } from '@shared/tooltip';
 import { DownloadType } from '@shared/misc';
 
-import './StompClient.scss';
+import './StompClient.light.scss';
+import './StompClient.dark.scss';
 
 interface Props {
   response: any;
@@ -40,12 +41,11 @@ export class StompClient extends React.Component<Props, State> {
   }
 
   render() {
-    /**/
     return (
       <>
-        <form className='stomp-client-form'>
+        <form className='stomp-client'>
           <Input
-            className='stomp-client-form__topic'
+            className='stomp-client__topic'
             label='Topic'
             name='topic'
             value={this.state.topic}
@@ -59,7 +59,7 @@ export class StompClient extends React.Component<Props, State> {
               });
             }} />
           <TextArea
-            className='stomp-client-form__request-body'
+            className='stomp-client__request-body'
             label='Request'
             value={this.requestBody}
             onChange={value => this.requestBody = value} />
@@ -68,13 +68,12 @@ export class StompClient extends React.Component<Props, State> {
             type='positive'
             className='stomp-client__send-request'
             onClick={() => this.props.onRequestSubmitted(this.state.topic, this.requestBody)} />
-          <div className='stomp-client-form__download-type'>
+          <div className='stomp-client__download-types'>
             <Tooltip content='Download response as CSV'>
               <IconButton
                 icon='arrow_downward'
                 label='CSV'
                 disabled={this.state.disableCsvExport}
-                rippleColor='rgba(0, 0, 0, 0.08)'
                 style='accent'
                 onClick={() => this.props.onDownloadResponse(DownloadType.CSV)} />
             </Tooltip>
@@ -82,14 +81,13 @@ export class StompClient extends React.Component<Props, State> {
               <IconButton
                 icon='arrow_downward'
                 label='JSON'
-                rippleColor='rgba(0, 0, 0, 0.08)'
                 style='accent'
                 disabled={!this.props.response}
                 onClick={() => this.props.onDownloadResponse(DownloadType.JSON)} />
             </Tooltip>
           </div>
           <TextArea
-            className='stomp-client-form__response'
+            className='stomp-client__response'
             readonly
             label='Response'
             value={this.props.response}

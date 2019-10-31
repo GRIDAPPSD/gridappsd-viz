@@ -1,0 +1,10 @@
+@import '@constants.dark';
+@import 'ActiveTabIndicator.common';
+
+.tabgroup__active-tab-indicator {
+    border: 2px solid rgba(219, 221, 233, 0.502);
+
+    &::after {
+        background-color: $theme-color;
+    }
+}

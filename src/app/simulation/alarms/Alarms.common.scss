@@ -1,0 +1,11 @@
+.alarms {
+    position: relative;
+    overflow-x: auto;
+    overflow-y: auto;
+    max-height: 100%;
+    padding: 5px;
+
+    table {
+        margin-bottom: 15px;
+    }
+}

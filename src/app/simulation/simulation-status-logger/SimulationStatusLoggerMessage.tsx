@@ -2,7 +2,8 @@ import * as React from 'react';
 
 import { IconButton } from '@shared/buttons';
 
-import './SimulationStatusLoggerMessage.scss';
+import './SimulationStatusLoggerMessage.light.scss';
+import './SimulationStatusLoggerMessage.dark.scss';
 
 interface Props {
   message: string;

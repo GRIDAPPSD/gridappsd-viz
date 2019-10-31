@@ -1,0 +1,12 @@
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg xmlns="http://www.w3.org/2000/svg"
+    xmlns:xlink="http://www.w3.org/1999/xlink" width="48px" height="103px" version="1.1" content="&lt;mxfile userAgent=&quot;Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/69.0.3497.100 Safari/537.36&quot; version=&quot;9.3.0&quot; editor=&quot;www.draw.io&quot; type=&quot;device&quot;&gt;&lt;diagram id=&quot;15556e97-47ba-de8d-ba38-35f35dbfb31a&quot; name=&quot;Page-1&quot;&gt;1VXLbtswEPwaXQ1ZcpxcEzdNDi1gIIe2p4IW1xIbiiusKFvq15cUST2iOA2QXuqLucN9cWbXjtJd2T4Qq4qvyEFGSczbKP0UJcl6k2zNl0U6j9wkVw7JSXCPjcCT+A0ejD3aCA71zFEjSi2qOZihUpDpGcaI8Dx3O6KcV61YDgvgKWNyiX4TXBcOvbmKR/wRRF6EyuvY3xxY9pwTNsrXi5L02H/cdclCLu9fF4zjeQKl91G6I0TtTmW7A2nJDbS5uM8Xboe+CZR+T0DiAk5MNhA67vvSXeDiBKSFoeYLO4DcYy20QGWuDqg1llF6N7whNgZndQHcG0yK3LpmphsgAxyFlDuUSH3qQE16V+hSGmhtjqHcrY/VWNkamvB50CJxVSvbYdnmdghXIM0gkI1cCcWbTCPVK8Z/NbVmBwk/NTFVH5HKvhH/bFML2ovUrQdBzKQDlqCpMy4+IEjYzc3zOC8bvwbFZFS23o35Cc2HvKNK5uCFel209O+igeK3dg+MpVDBnGLzQOq+W41Wm+tg/5he7oGEactS1Qu5pN9VBL7Yoxf0mcVllIOejNuS0QlnYcWmnAWMQDItTvOKrxHpK+xRmF4GwTbJTLBhZ0OGGhvKwAdNd+ZFnuv47TzuwYs8varDo98l9PaDQi9luyh9fEn6/1jojwqb/CthjTn+pDv38Y8zvf8D&lt;/diagram&gt;&lt;/mxfile&gt;">
+    <defs/>
+    <g transform="translate(0.5,0.5)">
+        <ellipse cx="22" cy="39" rx="17.829457364341085" ry="17.647058823529413" fill="none" stroke="#ffa500" stroke-width="2" pointer-events="none"/>
+        <ellipse cx="22" cy="63" rx="17.829457364341085" ry="17.647058823529413" fill="none" stroke="#ffa500" stroke-width="2" pointer-events="none"/>
+        <path d="M 1 50.65 L 43.43 24.53 M 44.5 25.94 L 42.36 23.12 L 47 22.06 Z" fill="#3b3b3b" stroke="#ffa500" stroke-width="2" stroke-miterlimit="10" pointer-events="none"/>
+        <path d="M 23 101 L 23 81" fill="none" stroke="#ffa500" stroke-width="2" stroke-miterlimit="10" pointer-events="none"/>
+        <path d="M 23 1 L 23 21" fill="none" stroke="#ffa500" stroke-width="2" stroke-miterlimit="10" pointer-events="none"/>
+    </g>
+</svg>

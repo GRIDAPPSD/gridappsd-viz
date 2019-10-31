@@ -3,7 +3,8 @@ import * as React from 'react';
 import { Tab } from './Tab';
 import { ActiveTabIndicator } from './ActiveTabIndicator';
 
-import './TabGroup.scss';
+import './TabGroup.light.scss';
+import './TabGroup.dark.scss';
 
 interface Props {
   selectedTabIndex?: number;

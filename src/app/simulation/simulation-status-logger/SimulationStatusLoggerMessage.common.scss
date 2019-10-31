@@ -1,0 +1,15 @@
+.simulation-status-logger-message {
+    display: flex;
+    align-items: center;
+    padding: 5px;
+    max-width: 100%;
+    overflow: auto hidden;
+
+    .icon-button {
+        margin-right: 10px;
+    }
+}
+
+.simulation-status-logger-message__body {
+    display: inline-block;
+}

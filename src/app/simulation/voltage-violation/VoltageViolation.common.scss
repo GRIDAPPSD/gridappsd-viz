@@ -1,0 +1,30 @@
+.voltage-violation {
+    position: absolute;
+    right: 5px;
+    top: 95px;
+    z-index: 15;
+    display: flex;
+    font-size: 0.8em;
+    align-items: center;
+    justify-content: center;
+    z-index: 0;
+}
+
+.voltage-violation__label {
+    padding: 5px 10px;
+    padding-right: 15px;
+    border-top-left-radius: 3px;
+    border-bottom-left-radius: 3px;
+    transform: translateX(5px);
+}
+
+.voltage-violation__counts {
+    border-radius: 100%;
+    text-align: right;
+    width: 45px;
+    height: 45px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0px -0.5px 2px #555;
+}

@@ -2,7 +2,8 @@ import * as React from 'react';
 
 import { FormControl } from '../form-control/FormControl';
 
-import './CheckBox.scss';
+import './CheckBox.light.scss';
+import './CheckBox.dark.scss';
 
 interface Props<T> {
   label: string;

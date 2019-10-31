@@ -3,16 +3,28 @@ import { Subscription } from 'rxjs';
 import { map, takeWhile } from 'rxjs/operators';
 
 import { TopologyRenderer } from './TopologyRenderer';
-import { SimulationQueue, SimulationOutputService } from '@shared/simulation';
-import { Node, Edge, Regulator, RegulatorControlMode } from '@shared/topology';
+import {
+  SimulationQueue,
+  SimulationOutputService,
+  SimulationConfiguration,
+  DEFAULT_SIMULATION_CONFIGURATION
+} from '@shared/simulation';
 import { StompClientService } from '@shared/StompClientService';
-import { Switch, TopologyModel, Capacitor } from '@shared/topology';
+import {
+  Node,
+  Edge,
+  Regulator,
+  RegulatorControlMode,
+  Switch,
+  TopologyModel,
+  Capacitor,
+  CapacitorControlMode
+} from '@shared/topology';
 import { OpenOrCloseCapacitorRequest } from './models/OpenOrCloseCapacitorRequest';
 import { ToggleSwitchStateRequest } from './models/ToggleSwitchStateRequest';
 import { GetTopologyModelRequest, GetTopologyModelRequestPayload } from './models/GetTopologyModelRequest';
 import { ToggleCapacitorManualModeRequest } from './models/ToggleCapacitorManualModeRequest';
 import { ToggleRegulatorManualModeRequest } from './models/ToggleRegulatorManualModeRequest';
-import { CapacitorControlMode } from '@shared/topology';
 import { CapacitorVarUpdateRequest } from './models/CapacitorVarUpdateRequest';
 import { CapacitorVoltUpdateRequest } from './models/CapacitorVoltUpdateRequest';
 import { RegulatorLineDropUpdateRequest } from './models/RegulatorLineDropUpdateRequest';
@@ -31,27 +43,32 @@ interface State {
   isFetching: boolean;
 }
 
+const cache = new Map<string, RenderableTopology>();
+
 export class TopologyRendererContainer extends React.Component<Props, State> {
 
-  private static readonly _CACHE = {};
+
+  activeSimulationConfig: SimulationConfiguration = DEFAULT_SIMULATION_CONFIGURATION;
 
   private readonly _stompClientService = StompClientService.getInstance();
   private readonly _simulationQueue = SimulationQueue.getInstance();
   private readonly _simulationOutputService = SimulationOutputService.getInstance();
   private readonly _switches = new Set<Switch>();
 
-  private _activeSimulationConfig = this._simulationQueue.getActiveSimulation()
-    ? this._simulationQueue.getActiveSimulation().config
-    : null;
   private _activeSimulationStream: Subscription = null;
   private _simulationOutputStream: Subscription = null;
 
-  constructor(props: any) {
+  constructor(props: Props) {
     super(props);
+
     this.state = {
       topology: null,
       isFetching: true
     };
+
+    if (this._simulationQueue.getActiveSimulation())
+      this.activeSimulationConfig = this._simulationQueue.getActiveSimulation().config;
+
     this.onToggleSwitchState = this.onToggleSwitchState.bind(this);
     this.onCapacitorMenuFormSubmitted = this.onCapacitorMenuFormSubmitted.bind(this);
     this.onRegulatorMenuFormSubmitted = this.onRegulatorMenuFormSubmitted.bind(this);
@@ -80,27 +97,24 @@ export class TopologyRendererContainer extends React.Component<Props, State> {
       .pipe(takeWhile(() => this._activeSimulationStream === null))
       .subscribe({
         next: simulation => {
-          this._activeSimulationConfig = simulation.config;
-          if (this._topologyModelExistsInCache())
+          this.activeSimulationConfig = simulation.config;
+          if (cache.has(this.activeSimulationConfig.power_system_config.Line_name))
             this._useTopologyModelFromCache();
           else
             this._fetchTopologyModel();
         }
       });
   }
-  private _topologyModelExistsInCache() {
-    return this._activeSimulationConfig && this._activeSimulationConfig.power_system_config.Line_name in TopologyRendererContainer._CACHE;
-  }
 
   private _useTopologyModelFromCache() {
     this.setState({
-      topology: TopologyRendererContainer._CACHE[this._activeSimulationConfig.power_system_config.Line_name],
+      topology: cache.get(this.activeSimulationConfig.power_system_config.Line_name),
       isFetching: false
     });
   }
 
   private _fetchTopologyModel() {
-    const lineName = this._activeSimulationConfig.power_system_config.Line_name;
+    const lineName = this.activeSimulationConfig.power_system_config.Line_name;
     const getTopologyModelRequest = new GetTopologyModelRequest(lineName);
     this._subscribeToTopologyModelTopic(getTopologyModelRequest.replyTo);
     this._stompClientService.send(
@@ -130,7 +144,7 @@ export class TopologyRendererContainer extends React.Component<Props, State> {
           topology,
           isFetching: false
         });
-        TopologyRendererContainer._CACHE[this._activeSimulationConfig.power_system_config.Line_name] = topology;
+        cache.set(this.activeSimulationConfig.power_system_config.Line_name, topology);
       });
   }
 
@@ -338,7 +352,7 @@ export class TopologyRendererContainer extends React.Component<Props, State> {
         <TopologyRenderer
           topology={this.state.topology}
           showWait={this.state.isFetching}
-          topologyName={this._activeSimulationConfig.simulation_config.simulation_name}
+          topologyName={this.activeSimulationConfig.simulation_config.simulation_name}
           onToggleSwitch={this.onToggleSwitchState}
           onCapacitorMenuFormSubmitted={this.onCapacitorMenuFormSubmitted}
           onRegulatorMenuFormSubmitted={this.onRegulatorMenuFormSubmitted} />
@@ -352,7 +366,7 @@ export class TopologyRendererContainer extends React.Component<Props, State> {
       componentMRID: this.props.mRIDs.get(swjtch.name),
       simulationId: this._simulationQueue.getActiveSimulation().id,
       open,
-      differenceMRID: this._activeSimulationConfig.power_system_config.Line_name
+      differenceMRID: this.activeSimulationConfig.power_system_config.Line_name
     });
     this._stompClientService.send(
       toggleSwitchStateRequest.url,
@@ -400,7 +414,7 @@ export class TopologyRendererContainer extends React.Component<Props, State> {
       componentMRID: this.props.mRIDs.get(capacitor.name),
       simulationId: this._simulationQueue.getActiveSimulation().id,
       manual: capacitor.manual,
-      differenceMRID: this._activeSimulationConfig.power_system_config.Line_name
+      differenceMRID: this.activeSimulationConfig.power_system_config.Line_name
     });
     this._stompClientService.send(
       toggleCapacitorManualModeRequest.url,
@@ -414,7 +428,7 @@ export class TopologyRendererContainer extends React.Component<Props, State> {
       componentMRID: this.props.mRIDs.get(capacitor.name),
       simulationId: this._simulationQueue.getActiveSimulation().id,
       open: capacitor.open,
-      differenceMRID: this._activeSimulationConfig.power_system_config.Line_name
+      differenceMRID: this.activeSimulationConfig.power_system_config.Line_name
     });
     this._stompClientService.send(
       openOrCloseCapacitorRequest.url,
@@ -429,7 +443,7 @@ export class TopologyRendererContainer extends React.Component<Props, State> {
       simulationId: this._simulationQueue.getActiveSimulation().id,
       target: capacitor.var.target,
       deadband: capacitor.var.deadband,
-      differenceMRID: this._activeSimulationConfig.power_system_config.Line_name
+      differenceMRID: this.activeSimulationConfig.power_system_config.Line_name
     });
     this._stompClientService.send(
       capacitorVarUpdateRequest.url,
@@ -444,7 +458,7 @@ export class TopologyRendererContainer extends React.Component<Props, State> {
       simulationId: this._simulationQueue.getActiveSimulation().id,
       target: capacitor.volt.target,
       deadband: capacitor.volt.deadband,
-      differenceMRID: this._activeSimulationConfig.power_system_config.Line_name
+      differenceMRID: this.activeSimulationConfig.power_system_config.Line_name
     });
     this._stompClientService.send(
       capacitorVoltUpdateRequest.url,
@@ -474,7 +488,7 @@ export class TopologyRendererContainer extends React.Component<Props, State> {
       componentMRID: this.props.mRIDs.get(regulator.name),
       simulationId: this._simulationQueue.getActiveSimulation().id,
       manual: regulator.manual,
-      differenceMRID: this._activeSimulationConfig.power_system_config.Line_name
+      differenceMRID: this.activeSimulationConfig.power_system_config.Line_name
     });
     this._stompClientService.send(
       toggleRegulatorManualModeRequest.url,
@@ -491,7 +505,7 @@ export class TopologyRendererContainer extends React.Component<Props, State> {
         return new RegulatorTapChangerRequest({
           mRID,
           simulationId: this._simulationQueue.getActiveSimulation().id,
-          differenceMRID: this._activeSimulationConfig.power_system_config.Line_name,
+          differenceMRID: this.activeSimulationConfig.power_system_config.Line_name,
           phase,
           tapValue: phaseValue.tap
         });
@@ -509,7 +523,7 @@ export class TopologyRendererContainer extends React.Component<Props, State> {
         return new RegulatorLineDropUpdateRequest({
           mRID,
           simulationId: this._simulationQueue.getActiveSimulation().id,
-          differenceMRID: this._activeSimulationConfig.power_system_config.Line_name,
+          differenceMRID: this.activeSimulationConfig.power_system_config.Line_name,
           lineDropR: phaseValue.lineDropR,
           lineDropX: phaseValue.lineDropX,
           phase

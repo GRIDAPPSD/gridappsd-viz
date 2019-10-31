@@ -1,0 +1,14 @@
+@import '@constants.dark';
+@import 'OptionList.common';
+
+.option-list__option {
+    color: $primary-text-color;
+
+    &:hover {
+        background-color: rgba(122, 92, 98, 0.5);
+    }
+}
+
+.option-list__option.selected {
+    background-color: rgba(111, 83, 89, 0.5);
+}

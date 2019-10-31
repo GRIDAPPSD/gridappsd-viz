@@ -1,0 +1,15 @@
+@import '@constants.dark';
+@import 'DrawerItemGroup.common';
+
+.drawer-item-group__nested-drawer-items:not(:empty) {
+    background-color: #373737;
+    box-shadow: 0 3px 5px #1e1e1e inset;
+}
+
+.drawer-item-group.expanded {
+    background-color: rgba(0, 0, 0, 0.15);
+}
+
+.drawer-item-group__angle {
+    color: $accent-color;
+}

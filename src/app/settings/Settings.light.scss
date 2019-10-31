@@ -1,0 +1,19 @@
+@import '@constants.light';
+@import 'Settings.common';
+
+.settings__trigger {
+    color: #fff !important;
+
+    .ripple-effect {
+        background-color: #fff;
+    }
+}
+
+.settings__menu {
+    box-shadow: $hovering-shadow;
+    background-color: $theme-color;
+
+    &__item__name {
+        color: $label-color;
+    }
+}

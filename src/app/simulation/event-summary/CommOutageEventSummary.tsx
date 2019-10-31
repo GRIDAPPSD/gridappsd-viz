@@ -4,7 +4,8 @@ import { IconButton } from '@shared/buttons';
 import { Tooltip } from '@shared/tooltip';
 import { CommOutageEventTable, CommOutageEvent } from '@shared/test-manager';
 
-import './CommOutageEventSummary.scss';
+import './CommOutageEventSummary.light.scss';
+import './CommOutageEventSummary.dark.scss';
 
 interface Props {
   events: CommOutageEvent[];

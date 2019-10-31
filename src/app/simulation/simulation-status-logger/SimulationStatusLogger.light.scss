@@ -1,0 +1,26 @@
+@import '@constants.light';
+@import 'SimulationStatusLogger.common';
+
+.simulation-status-logger__header__label {
+    background-color: $primary-color;
+    color: $primary-text-color;
+    border-top-right-radius: 3px;
+}
+
+.simulation-status-logger__header__legends {
+    background-color: #a29494;
+    box-shadow: 0px -0.5px 2px #555;
+}
+
+.simulation-status-logger__header__legends__level:not(:last-of-type) {
+    border-right: 1px solid #fff;
+}
+
+.simulation-status-logger__header__legends__level__label {
+    color: #fff;
+}
+
+.simulation-status-logger__body {
+    background-color: scale-color($theme-color, $lightness: -5%);
+    box-shadow: 0 -1px 5px #ccc;
+}

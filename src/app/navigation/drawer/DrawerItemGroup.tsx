@@ -2,7 +2,8 @@ import * as React from 'react';
 
 import { DrawerItemIcon, DrawerItemLabel } from './DrawerItem';
 
-import './DrawerItemGroup.scss';
+import './DrawerItemGroup.light.scss';
+import './DrawerItemGroup.dark.scss';
 
 interface Props {
   header: string;

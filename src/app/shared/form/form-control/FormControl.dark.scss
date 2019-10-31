@@ -1,0 +1,28 @@
+@import '@constants.dark';
+@import 'FormControl.common';
+
+.form-control__label {
+    color: $label-color;
+}
+
+.form-control__label__hint {
+    color: rgba($primary-text-color, 0.5);
+}
+
+.form-control.invalid {
+
+    .form-control__label,
+    .form-control__label__hint {
+        color: red;
+    }
+}
+
+.form-control.disabled {
+    .form-control__label {
+        color: rgba($primary-text-color, 0.1);
+    }
+
+    .form-control__label__hint {
+        color: #ddd;
+    }
+}

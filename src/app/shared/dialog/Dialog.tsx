@@ -2,7 +2,8 @@ import * as React from 'react';
 
 import { PopUp } from '../pop-up/PopUp';
 
-import './Dialog.scss';
+import './Dialog.light.scss';
+import './Dialog.dark.scss';
 
 interface Props {
   children: any;

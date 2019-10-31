@@ -1,0 +1,11 @@
+@import 'VoltageViolation.common';
+
+.voltage-violation {
+    color: #fff;
+}
+
+.voltage-violation__label,
+.voltage-violation__counts {
+    background-color: #8a6d6d;
+    box-shadow: 0 0 2px #8a6d6d;
+}

@@ -2,7 +2,8 @@ import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import { BrowserRouter } from 'react-router-dom';
 
-import './styles.scss';
+import './global-styles.light.scss';
+import './global-styles.dark.scss';
 
 import { App } from './app/App';
 

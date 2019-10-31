@@ -1,7 +1,8 @@
 import * as React from 'react';
 import { timer, Subscription } from 'rxjs';
 
-import './ThreeDots.scss';
+import './ThreeDots.light.scss';
+import './ThreeDots.dark.scss';
 
 interface Props {
 }

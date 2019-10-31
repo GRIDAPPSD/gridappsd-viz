@@ -1,0 +1,48 @@
+@import '@constants.dark';
+@import 'QueryLogsResultTable.common';
+
+.query-logs-result-table.ReactTable {
+
+    border: 1px solid rgba(#fff, 0.25);
+
+    .rt-thead.-header {
+        box-shadow: 0 1px 3px 0 rgba(150, 150, 150, 0.9);
+    }
+
+    .rt-thead.-filters input {
+        background: $theme-color;
+        border: 2px solid rgba(255, 255, 255, 0.5);
+        color: $primary-text-color;
+    }
+
+    .rt-tbody .rt-td,
+    .rt-thead .rt-th,
+    .rt-thead .rt-td {
+        border-right: 1px solid rgba(#fff, 0.25);
+    }
+
+    .rt-tbody .rt-tr-group {
+        border-bottom: solid 1px rgba(#fff, 0.25);
+    }
+
+    .-pagination {
+        box-shadow: 0 0 2px 0 rgba(150, 150, 150, 0.5);
+        border-top: 2px solid rgba(255, 255, 255, 0.25);
+    }
+
+    .-previous button,
+    .-next button {
+        background-color: $accent-color;
+        color: $accent-text-color;
+        transition: background-color 0.25s ease;
+
+        &:disabled {
+            background-color: rgba($accent-color, 0.25);
+        }
+
+        &:hover {
+            background-color: #556d79 !important;
+        }
+    }
+
+}

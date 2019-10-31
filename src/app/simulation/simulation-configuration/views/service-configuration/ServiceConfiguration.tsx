@@ -6,7 +6,8 @@ import { ServiceConfigurationEntryModel } from '../../models/ServiceConfiguratio
 import { BasicButton } from '@shared/buttons';
 import { NotificationBanner } from '@shared/notification-banner';
 
-import './ServiceConfiguration.scss';
+import './ServiceConfiguration.light.scss';
+import './ServiceConfiguration.dark.scss';
 
 interface Props {
   services: Service[];

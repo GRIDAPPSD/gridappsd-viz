@@ -1,0 +1,44 @@
+@import 'SlideToggle.common';
+
+.slide-toggle__slider-container {
+    background-color: #ccc;
+    box-shadow: 0 0 5px #7b7b7b inset;
+
+    .ripple-effect {
+        background-color: rgba(0, 0, 0, 0.3) !important;
+    }
+}
+
+
+.slide-toggle__thumb {
+    box-shadow: 0 1px 5px #555;
+    background-color: #ffa500;
+}
+
+.slide-toggle.on {
+    .slide-toggle__thumb {
+        background-color: #ffa500;
+    }
+
+    .slide-toggle__status-text.on-text {
+        color: #000;
+    }
+
+    .slide-toggle__status-text.off-text {
+        color: #eee;
+    }
+}
+
+.slide-toggle.off {
+    .slide-toggle__thumb {
+        background-color: #c1c1c1;
+    }
+
+    .slide-toggle__status-text.on-text {
+        color: #c1c1c1;
+    }
+
+    .slide-toggle__status-text.off-text {
+        color: #000;
+    }
+}

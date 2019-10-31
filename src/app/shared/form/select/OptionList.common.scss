@@ -1,0 +1,28 @@
+.option-list {
+    overflow: hidden auto;
+    min-width: 200px;
+    padding: 15px 0 0 0;
+    margin: 0;
+
+    &:empty {
+        box-shadow: none;
+    }
+}
+
+.option-list__option {
+    backface-visibility: hidden;
+    list-style-type: none;
+    white-space: nowrap;
+    font-weight: normal;
+    padding: 15px 10px;
+    padding-right: 25px;
+    cursor: pointer;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    transition: background-color 0.25s ease;
+}
+
+.option-list__option__label {
+    font-weight: normal;
+}

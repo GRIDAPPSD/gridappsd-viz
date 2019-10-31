@@ -9,13 +9,17 @@ import { FeederModel } from '@shared/topology';
 import { GetAllFeederModelsRequest } from './models/message-requests/GetAllFeederModelsRequest';
 import { SimulationLabelsContainer } from './simulation/simulation-labels';
 import { MeasurementChartContainer } from './simulation/measurement-chart';
-import { ModelDictionaryMeasurement, ModelDictionary, ModelDictionaryComponentType } from '@shared/topology/model-dictionary';
+import {
+  ModelDictionaryMeasurement, ModelDictionary,
+  ModelDictionaryComponentType,
+  ModelDictionaryComponent
+} from '@shared/topology/model-dictionary';
 import { Navigation } from './navigation';
 import { OverlayService } from '@shared/overlay';
 import { SimulationConfiguration } from '@shared/simulation';
 import { SimulationConfigurationEditor } from './simulation/simulation-configuration';
 import { SimulationControlContainer } from './simulation/simulation-control';
-import { SimulationQueue, SimulationOutputService } from '@shared/simulation';
+import { SimulationQueue, SimulationOutputService, DEFAULT_SIMULATION_CONFIGURATION } from '@shared/simulation';
 import { SimulationStatusLogContainer } from './simulation/simulation-status-logger';
 import { StompClientContainer } from './stomp-client';
 import { StompClientService } from '@shared/StompClientService';
@@ -25,17 +29,17 @@ import { GetModelDictionaryRequest } from './models/message-requests/GetModelDic
 import {
   GetAvailableApplicationsAndServicesRequest, GetAvailableApplicationsRequestPayload
 } from './models/message-requests/GetAvailableApplicationsAndServicesRequest';
-import { DEFAULT_SIMULATION_CONFIGURATION } from './models/default-simulation-configuration';
 import { StateStore } from '@shared/state-store';
 import { DEFAULT_APPLICATION_STATE } from './models/default-application-state';
 import { TabGroup, Tab } from '@shared/tabs';
 import { EventSummary } from './simulation/event-summary/EventSummary';
 import { AvailableApplicationList } from './simulation/applications/AvailableApplicationList';
-import { ModelDictionaryComponent } from '@shared/topology/model-dictionary/ModelDictionaryComponent';
 import { VoltageViolationContainer } from './simulation/voltage-violation/VoltageViolationContainer';
 import { AlarmsContainer } from './simulation/alarms';
+import { Settings } from './settings';
 
-import './App.scss';
+import './App.light.scss';
+import './App.dark.scss';
 
 interface Props {
 }
@@ -222,7 +226,9 @@ export class App extends React.Component<Props, State> {
             <Navigation
               onShowSimulationConfigForm={
                 (config: SimulationConfiguration) => this.showSimulationConfigForm(config, props.history)
-              } />
+              }>
+              <Settings />
+            </Navigation>
             <Route
               exact
               path='/topology'

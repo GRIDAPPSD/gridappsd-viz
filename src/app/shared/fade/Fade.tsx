@@ -1,7 +1,8 @@
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 
-import './Fade.scss';
+import './Fade.light.scss';
+import './Fade.dark.scss';
 
 interface Props {
   in: boolean;

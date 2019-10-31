@@ -2,7 +2,8 @@ import * as React from 'react';
 
 import { Tooltip } from '@shared/tooltip';
 
-import './FormGroup.scss';
+import './FormGroup.light.scss';
+import './FormGroup.dark.scss';
 
 interface Props {
   className?: string;

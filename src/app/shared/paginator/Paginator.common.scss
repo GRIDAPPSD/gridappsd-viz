@@ -1,0 +1,12 @@
+.paginator {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-sizing: border-box;
+}
+
+.paginator__page-indicator {
+    width: 100px;
+    text-align: center;
+}

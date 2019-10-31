@@ -1,7 +1,8 @@
 import * as React from 'react';
 import { createPortal, render, unmountComponentAtNode } from 'react-dom';
 
-import './PortalRenderer.scss';
+import './PortalRenderer.light.scss';
+import './PortalRenderer.dark.scss';
 
 interface Props {
   containerClassName?: string;

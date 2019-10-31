@@ -2,7 +2,8 @@ import * as React from 'react';
 
 import { CommandEvent, CommandEventDifference } from './CommandEvent';
 
-import './CommandEventTable.scss';
+import './CommandEventTable.light.scss';
+import './CommandEventTable.dark.scss';
 
 interface Props {
   events: CommandEvent[];

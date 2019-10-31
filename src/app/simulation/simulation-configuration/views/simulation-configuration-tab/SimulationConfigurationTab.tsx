@@ -7,7 +7,8 @@ import { SimulationConfigurationTabModel } from '../../models/SimulationConfigur
 import { SimulationConfiguration } from '@shared/simulation';
 import { Validators } from '@shared/form/validation';
 
-import './SimulationConfigurationTab.scss';
+import './SimulationConfigurationTab.light.scss';
+import './SimulationConfigurationTab.dark.scss';
 
 interface Props {
   onChange: (formValue: SimulationConfigurationTabModel) => void;
@@ -85,8 +86,8 @@ export class SimulationConfigurationTab extends React.Component<Props, State> {
             isOptionSelected={option => option.value === 'GridLAB-D'}
             onClear={this.onSimulatorSelectionCleared}
             onChange={this.onSimulatorChanged} />
-          <div style={{ fontSize: '13px' }}>
-            <div style={{ fontWeight: 'bold' }}>Power flow solver method</div>
+          <div className='accompanying-text'>
+            <div>Power flow solver method</div>
             <div>NR</div>
           </div>
         </div>
@@ -106,6 +107,7 @@ export class SimulationConfigurationTab extends React.Component<Props, State> {
             }>
             <IconButton
               icon='help_outline'
+              style='accent'
               size='small' />
           </Tooltip>
         </div>

@@ -2,7 +2,8 @@ import * as React from 'react';
 
 import { RequestEditor } from '../RequestEditor';
 
-import './Simulations.scss';
+import './Simulations.light.scss';
+import './Simulations.dark.scss';
 
 interface Props {
 }

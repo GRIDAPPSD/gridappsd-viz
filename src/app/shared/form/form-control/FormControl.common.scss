@@ -1,0 +1,22 @@
+.form-control {
+    margin: 20px;
+    display: flex;
+    z-index: 10;
+    position: relative;
+}
+
+.form-control__label {
+    width: 250px;
+    display: flex;
+    flex-flow: column;
+    transition: color 0.1s ease;
+    position: relative;
+}
+
+.form-control__label__hint {
+    display: inline-block;
+    font-size: 0.8em;
+    transform: translateY(16px);
+    transition: color 0.1s ease;
+    position: absolute;
+}

@@ -3,7 +3,8 @@ import { findDOMNode } from 'react-dom';
 
 import { FormControl } from '../form-control/FormControl';
 
-import './RadioButtonGroup.scss';
+import './RadioButtonGroup.light.scss';
+import './RadioButtonGroup.dark.scss';
 
 export const IdContextProvider = React.createContext('');
 

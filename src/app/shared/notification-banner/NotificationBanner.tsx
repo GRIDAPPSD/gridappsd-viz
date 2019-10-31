@@ -5,7 +5,8 @@ import { Fade } from '@shared/fade';
 import { IconButton } from '@shared/buttons';
 import { Backdrop } from '@shared/backdrop';
 
-import './NotificationBanner.scss';
+import './NotificationBanner.light.scss';
+import './NotificationBanner.dark.scss';
 
 interface Props {
   persistent?: boolean;

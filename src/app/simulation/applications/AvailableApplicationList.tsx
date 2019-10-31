@@ -10,7 +10,8 @@ import { DisableApplicationRequest } from './models/DisableApplicationRequest';
 import { Tooltip } from '@shared/tooltip';
 import { IconButton } from '@shared/buttons';
 
-import './AvailableApplicationList.scss';
+import './AvailableApplicationList.light.scss';
+import './AvailableApplicationList.dark.scss';
 
 interface Props {
 }

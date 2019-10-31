@@ -1,0 +1,6 @@
+@import '@constants.dark';
+@import 'EventSummary.common';
+
+.event-summary__table-name {
+    color: $active-item-color;
+}

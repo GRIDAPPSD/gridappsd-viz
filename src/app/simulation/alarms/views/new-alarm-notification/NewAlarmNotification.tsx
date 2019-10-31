@@ -2,7 +2,8 @@ import * as React from 'react';
 
 import { PortalRenderer } from '@shared/portal-renderer';
 
-import './NewAlarmNotification.scss';
+import './NewAlarmNotification.light.scss';
+import './NewAlarmNotification.dark.scss';
 
 interface Props {
   newAlarmCounts: number;

@@ -6,8 +6,14 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 const webpack = require('webpack');
 const TsConfigPathsPlugin = require('awesome-typescript-loader').TsConfigPathsPlugin;
 const CopyWebpackPlugin = require('copy-webpack-plugin');
+const HtmlWebpackExcludeAssetsPlugin = require('html-webpack-exclude-assets-plugin');
+
+const darkThemeStyleExtractor = new ExtractTextPlugin('[hash:10].dark.css');
+const lightThemeStyleExtractor = new ExtractTextPlugin('[hash:10].light.css');
+const excludedThemeFilenamePattern = /(?:light\.css)$/;
 
 module.exports = env => {
+
   if (env === 'production')
     updateVersion();
   return {
@@ -15,42 +21,72 @@ module.exports = env => {
       app: './src/main.tsx',
       vendors: './src/vendors.ts'
     },
+
     output: {
       path: path.resolve(__dirname, 'dist'),
-      filename: '[name].[hash:10].js'
+      filename: '[name].[hash:10].js',
+      publicPath: '/'
     },
 
     resolve: {
-      // Add '.ts' and '.tsx' as resolvable extensions.
       alias: {
-        '@shared': path.resolve('./src/app/shared')
+        '@shared': path.resolve('./src/app/shared'),
+        '@constants.light': path.resolve('./src/constants.light.scss'),
+        '@constants.dark': path.resolve('./src/constants.dark.scss')
       },
-      extensions: ['.ts', '.js', '.tsx', '.jsx', '.scss', '.css', '.html', '.web.js']
+      extensions: ['.ts', '.js', '.tsx', '.jsx', '.scss', '.css', '.html']
     },
 
     module: {
-      rules: [{
-        test: /(\.tsx?)$/,
-        use: 'awesome-typescript-loader'
-      },
-      {
-        test: /(\.s?css)$/,
-        use: ExtractTextPlugin.extract({
-          use: ['css-loader', 'sass-loader']
-        })
-      },
-      { test: /\.(svg|png|woff|woff2|ttf|eot)$/, use: 'file-loader' },
+      rules: [
+        {
+          test: /(\.tsx?)$/,
+          use: 'awesome-typescript-loader'
+        },
+        // Dark theme style extractor
+        {
+          test: function(filename) {
+            return filename.endsWith('.dark.scss');
+          },
+          use: darkThemeStyleExtractor.extract({
+            use: ['css-loader', 'sass-loader']
+          })
+        },
+        // Light theme style extractor
+        {
+          test: function(filename) {
+            return filename.endsWith('.light.scss');
+          },
+          use: lightThemeStyleExtractor.extract({
+            use: ['css-loader', 'sass-loader']
+          })
+        },
+        {
+          test: /\.(svg|png|woff|woff2|ttf|eot)$/,
+          use: [
+            {
+              loader: 'url-loader',
+              options: {
+                fallback: 'file-loader'
+              }
+            }
+          ]
+        }
       ]
     },
     plugins: [
+      new RefReplacerPlugin(),
       new TsConfigPathsPlugin(),
       new webpack.optimize.CommonsChunkPlugin({
         names: ['app', 'vendors', 'webpack-runtime']
       }),
       new HtmlWebpackPlugin({
-        template: './index.template.html'
+        template: './index.template.html',
+        excludeAssets: [excludedThemeFilenamePattern]
       }),
-      new ExtractTextPlugin('[hash:10].css'),
+      new HtmlWebpackExcludeAssetsPlugin(),
+      darkThemeStyleExtractor,
+      lightThemeStyleExtractor,
       new CopyWebpackPlugin([
         {
           from: './src/assets',
@@ -98,10 +134,7 @@ function updateVersion() {
       if (error)
         console.error(`An error occured trying to 'git rev-parse --abbrev-ref HEAD'`);
       else {
-        const lastLine = stdout.trim().split('\n').slice(-1)[0];
-        const lastIndexOfForwardSlash = lastLine.lastIndexOf('/');
-        const versionNumber = lastLine.substr(lastIndexOfForwardSlash + 1);
-        writeVersionNumber(versionNumber);
+        writeVersionNumber(stdout);
       }
     });
   }
@@ -111,4 +144,51 @@ function writeVersionNumber(versionNumber) {
   const config = JSON.parse(fs.readFileSync('config.json').toString());
   config.version = versionNumber;
   fs.writeFileSync('config.json', JSON.stringify(config, null, 4));
+}
+
+let previousLightThemeFilename = ''
+let previousDarkThemeFilename = '';
+class RefReplacerPlugin {
+
+  constructor() {
+  }
+
+  apply(compiler) {
+    const lightThemeStyleFilenameRef = '__LIGHT_THEME_STYLE_FILENAME__';
+    const darkThemeStyleFilenameRef = '__DARK_THEME_STYLE_FILENAME__';
+    const defaultSelectedThemeRef = '__DEFAULT_SELECTED_THEME__';
+
+    compiler.plugin('compilation', compilation => {
+      compilation.plugin('html-webpack-plugin-before-html-generation', (data, cb) => {
+        const newLightThemeFilename = data.assets.css.find(stylesheetName => stylesheetName.includes('light'));
+        const newDarkThemeFilename = data.assets.css.find(stylesheetName => stylesheetName.includes('dark'));
+
+        compiler.plugin('emit', (data, cb) => {
+          const appChunkName = Object.keys(data.assets)
+            .find(assetName => assetName.startsWith('app') && assetName.endsWith('.js'));
+          const app = data.assets[appChunkName];
+          const sourceCode = app.children[0]._value;
+
+          if (sourceCode.includes(lightThemeStyleFilenameRef)) {
+            app.children[0]._value = sourceCode
+              .replace(lightThemeStyleFilenameRef, `"${newLightThemeFilename}"`)
+              .replace(darkThemeStyleFilenameRef, `"${newDarkThemeFilename}"`)
+              .replace(defaultSelectedThemeRef, `"${excludedThemeFilenamePattern.source.includes('light') ? 'dark' : 'light'}"`);
+          } else {
+            app.children[0]._value = sourceCode
+              .replace(previousLightThemeFilename, newLightThemeFilename)
+              .replace(previousDarkThemeFilename, newDarkThemeFilename);
+          }
+
+          previousLightThemeFilename = newLightThemeFilename;
+          previousDarkThemeFilename = newDarkThemeFilename;
+
+          cb(null, data);
+        });
+
+        cb(null, data);
+      });
+
+    });
+  }
 }

@@ -2,7 +2,8 @@ import * as React from 'react';
 
 import { Option } from './Option';
 
-import './OptionList.scss';
+import './OptionList.light.scss';
+import './OptionList.dark.scss';
 
 interface Props<T> {
   options: Option<T>[];

@@ -2,7 +2,8 @@ import * as React from 'react';
 
 import { Backdrop } from '../backdrop/Backdrop';
 
-import './Wait.scss';
+import './Wait.light.scss';
+import './Wait.dark.scss';
 
 interface Props {
   show: boolean;

@@ -10,7 +10,8 @@ import { BasicButton } from '@shared/buttons';
 import { Wait } from '@shared/wait';
 import { FeederModelLine } from '@shared/topology';
 
-import './PowergridModels.scss';
+import './PowergridModels.light.scss';
+import './PowergridModels.dark.scss';
 
 interface Props {
   feederModelLines: FeederModelLine[];

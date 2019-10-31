@@ -1,0 +1,34 @@
+@import '@constants.dark';
+@import 'RadioButton.common';
+
+.radio-button-group.style-default {
+    .radio-button__circle {
+        border: 2px solid $primary-color;
+        box-shadow: 0 0 5px #252121;
+
+        &::after {
+            background-color: $primary-color;
+            box-shadow: 0 0 5px #252121;
+            border: 1px solid $primary-color;
+        }
+    }
+
+    .radio-button__label {
+        color: $primary-text-color;
+    }
+}
+
+.radio-button-group.style-switches {
+    .radio-button:not(:last-of-type) {
+        border-right: 2px solid $primary-color;
+    }
+
+    .radio-button__label {
+        color: $primary-color;
+    }
+
+    .radio-button__input:checked~.radio-button__label {
+        background-color: $primary-color;
+        color: $primary-text-color;
+    }
+}

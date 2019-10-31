@@ -1,0 +1,8 @@
+@import '@constants.light';
+@import 'FormGroup.common';
+
+.form-group__header {
+    border-bottom: 2px inset rgba(0, 0, 0, 0.5);
+    color: $primary-color;
+    padding-bottom: 5px;
+}

@@ -10,7 +10,8 @@ import { QueryLogsResultTable } from './QueryLogsResultTable';
 import { Response } from '../Response';
 import { NotificationBanner } from '@shared/notification-banner';
 
-import './Logs';
+import './Logs.light.scss';
+import './Logs.dark.scss';
 
 interface Props {
 }

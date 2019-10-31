@@ -1,0 +1,43 @@
+.command-event-table {
+    border-collapse: collapse;
+    width: 100%;
+}
+
+.command-event-table__header {
+    font-size: 0.9em;
+    text-align: center;
+    white-space: nowrap;
+    font-weight: 500;
+    padding: 10px 15px;
+}
+
+.command-event-table__cell-value {
+    font-size: 0.9em;
+    text-align: center;
+    white-space: nowrap;
+    padding: 0;
+}
+
+.command-event-table__difference-table {
+    border-collapse: collapse;
+}
+
+.command-event-table__difference-table__header {
+    font-size: 0.9em;
+    border: none;
+    padding: 3px 5px;
+}
+
+.command-event-table__difference-table__header:last-of-type {
+    border: none;
+}
+
+.command-event-table__difference-table__cell-value {
+    padding: 10px;
+    border: none;
+    font-size: 0.9em;
+}
+
+.command-event-table__difference-table__cell-value:last-of-type {
+    border: none;
+}
