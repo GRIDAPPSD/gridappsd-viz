@@ -252,31 +252,31 @@
 .node-searcher.hide {
 
     .node-searcher__close__line:first-of-type {
-        animation-name: node-searcher-restore-down-rotation-animation;
+        animation-name: node-searcher-90deg-rotation-animation-1;
         animation-delay: 0s;
 
-        @keyframes node-searcher-restore-down-rotation-animation {
+        @keyframes node-searcher-90deg-rotation-animation-1 {
             from {
-                transform: rotate(45deg);
+                transform: rotate(45deg) scale(1);
             }
 
             to {
-                transform: rotate(0);
+                transform: rotate(135deg) scale(0.5);
             }
         }
     }
 
     .node-searcher__close__line:last-of-type {
-        animation-name: node-searcher-restore-up-rotation-animation;
+        animation-name: node-searcher-90deg-rotation-animation-2;
         animation-delay: 0s;
 
-        @keyframes node-searcher-restore-up-rotation-animation {
+        @keyframes node-searcher-90deg-rotation-animation-2 {
             from {
-                transform: rotate(-45deg);
+                transform: rotate(-45deg) scale(1);
             }
 
             to {
-                transform: rotate(0);
+                transform: rotate(35deg) scale(0.5);
             }
         }
     }
