@@ -3,7 +3,7 @@ export interface SimulationStartedEventResponse {
   events: Array<{
     allOutputOutage: boolean;
     allInputOutage: boolean;
-    inputOutageList: Array<{ objectMrid: string; attribute: string; }>;
+    inputOutageList: Array<{ objectMRID: string; attribute: string; }>;
     outputOutageList: string[];
     faultMRID: string;
     event_type: string;
