@@ -307,7 +307,9 @@ export class SimulationConfigurationEditor extends React.Component<Props, State>
 
   submitForm(event: React.SyntheticEvent) {
     event.stopPropagation();
-    this.setState({ show: false });
+    this.setState({
+      show: false
+    });
     const selectedApplication = this.currentConfig.application_config.applications[0];
     this.currentConfig.test_config.appId = selectedApplication ? selectedApplication.name : '';
     for (const outageEvent of this.outageEvents)
@@ -341,8 +343,8 @@ export class SimulationConfigurationEditor extends React.Component<Props, State>
       })),
       outputOutageList: outageEvent.outputList.map(outputItem => outputItem.mRID),
       event_type: outageEvent.event_type,
-      occuredDateTime: this.dateTimeService.parse(outageEvent.startDateTime).getTime(),
-      stopDateTime: this.dateTimeService.parse(outageEvent.stopDateTime).getTime()
+      occuredDateTime: this.dateTimeService.parse(outageEvent.startDateTime).getTime() / 1000,
+      stopDateTime: this.dateTimeService.parse(outageEvent.stopDateTime).getTime() / 1000
     };
   }
 
