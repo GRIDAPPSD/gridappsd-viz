@@ -102,7 +102,7 @@ export class Navigation extends React.Component<Props, State> {
               {
                 this.state.previousSimulations.map(simulation => (
                   <DrawerItem
-                    key={simulation.name}
+                    key={simulation.id}
                     onClick={() => this.props.onShowSimulationConfigForm(simulation.config)}>
                     <strong>Name:&nbsp;</strong>
                     {simulation.name}

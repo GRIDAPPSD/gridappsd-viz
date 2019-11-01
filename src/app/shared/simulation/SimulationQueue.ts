@@ -1,16 +1,18 @@
 import { Subject, Observable, BehaviorSubject } from 'rxjs';
 import { filter } from 'rxjs/operators';
 
-import { Simulation } from '@shared/simulation';
+import { Simulation } from './Simulation';
+import { DEFAULT_SIMULATION_CONFIGURATION } from './default-simulation-configuration';
 
 export class SimulationQueue {
 
   private static readonly _INSTANCE = new SimulationQueue();
 
-  private readonly _activeSimulationChanged = new BehaviorSubject<Simulation>(null);
-  private readonly _queueChanges = new Subject<Simulation[]>();
+  private readonly _activeSimulationChangeSubject = new BehaviorSubject<Simulation>(null);
+  private readonly _queueChangeSubject = new Subject<Simulation[]>();
+
   private _simulations: Simulation[] = [];
-  private _activeSimulation: Simulation;
+  private _activeSimulation: Simulation = new Simulation(DEFAULT_SIMULATION_CONFIGURATION);
 
   private constructor() {
   }
@@ -20,7 +22,7 @@ export class SimulationQueue {
   }
 
   activeSimulationChanged(): Observable<Simulation> {
-    return this._activeSimulationChanged.asObservable()
+    return this._activeSimulationChangeSubject.asObservable()
       .pipe(filter(simulation => simulation !== null));
   }
 
@@ -32,32 +34,20 @@ export class SimulationQueue {
     return this._simulations;
   }
 
-  push(simulation: Simulation) {
-    this._simulations = [{ ...simulation }, ...this._simulations.filter(sim => sim.name !== simulation.name)];
-    this._activeSimulation = this._simulations[0];
-    this._activeSimulationChanged.next(simulation);
-    this._queueChanges.next(this._simulations);
+  push(newSimulation: Simulation) {
+    this._simulations.unshift(newSimulation);
+    this._activeSimulation = newSimulation;
+    this._activeSimulationChangeSubject.next(newSimulation);
+    this._queueChangeSubject.next(this._simulations);
   }
 
   queueChanges(): Observable<Simulation[]> {
-    return this._queueChanges.asObservable();
+    return this._queueChangeSubject.asObservable();
   }
 
   updateIdOfActiveSimulation(id: string) {
-    this._simulations = [
-      { ...this._activeSimulation, id },
-      ...this._simulations.filter(sim => sim !== this._activeSimulation)
-    ];
-    this._activeSimulation = this._simulations[0];
-    this._queueChanges.next(this._simulations);
-  }
-
-  setActiveSimulation(simulationName: string) {
-    const foundSimulation = this._simulations.filter(simulation => simulation.name === simulationName)[0];
-    if (!foundSimulation)
-      throw new Error(`No simulation found with the given name "${simulationName}"`);
-    this._activeSimulation = foundSimulation;
-    this._activeSimulationChanged.next(foundSimulation);
+    this._activeSimulation.id = id;
+    this._queueChangeSubject.next(this._simulations);
   }
 
 }
