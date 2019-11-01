@@ -333,11 +333,11 @@ export class SimulationConfigurationEditor extends React.Component<Props, State>
       inputOutageList: this._flattenArray(outageEvent.inputList.map(inputItem => {
         if (Array.isArray(inputItem.mRID))
           return inputItem.phases.map(phase => ({
-            objectMrid: inputItem.mRID[phase.phaseIndex],
+            objectMRID: inputItem.mRID[phase.phaseIndex],
             attribute: inputItem.attribute
           }));
         return {
-          objectMrid: inputItem.mRID,
+          objectMRID: inputItem.mRID,
           attribute: inputItem.attribute
         };
       })),
