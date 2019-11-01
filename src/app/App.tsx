@@ -16,7 +16,7 @@ import {
 } from '@shared/topology/model-dictionary';
 import { Navigation } from './navigation';
 import { OverlayService } from '@shared/overlay';
-import { SimulationConfiguration } from '@shared/simulation';
+import { SimulationConfiguration, Simulation } from '@shared/simulation';
 import { SimulationConfigurationEditor } from './simulation/simulation-configuration';
 import { SimulationControlContainer } from './simulation/simulation-control';
 import { SimulationQueue, SimulationOutputService, DEFAULT_SIMULATION_CONFIGURATION } from '@shared/simulation';
@@ -310,11 +310,7 @@ export class App extends React.Component<Props, State> {
   }
 
   onSimulationConfigFormSubmitted(config: SimulationConfiguration, history) {
-    this._simulationQueue.push({
-      name: config.simulation_config.simulation_name,
-      config,
-      id: ''
-    });
+    this._simulationQueue.push(new Simulation(config));
     this._overlayService.hide();
     setTimeout(() => history.push('/topology'), 500);
   }

@@ -12,11 +12,7 @@ export class SimulationQueue {
   private readonly _queueChangeSubject = new Subject<Simulation[]>();
 
   private _simulations: Simulation[] = [];
-  private _activeSimulation: Simulation = {
-    config: DEFAULT_SIMULATION_CONFIGURATION,
-    id: '',
-    name: DEFAULT_SIMULATION_CONFIGURATION.simulation_config.simulation_name
-  };
+  private _activeSimulation: Simulation = new Simulation(DEFAULT_SIMULATION_CONFIGURATION);
 
   private constructor() {
   }
@@ -39,7 +35,6 @@ export class SimulationQueue {
   }
 
   push(newSimulation: Simulation) {
-    this._simulations = this._simulations.filter(sim => sim.name !== newSimulation.name);
     this._simulations.unshift(newSimulation);
     this._activeSimulation = newSimulation;
     this._activeSimulationChangeSubject.next(newSimulation);
