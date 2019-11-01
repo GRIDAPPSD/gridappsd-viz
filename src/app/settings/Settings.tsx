@@ -24,7 +24,6 @@ const menuWidth = 270;
 export class Settings extends React.Component<Props, State> {
 
   settingsMenuAnchor: HTMLElement;
-  settingsMenuContainer = document.createElement('div');
 
   constructor(props: Props) {
     super(props);
@@ -35,8 +34,6 @@ export class Settings extends React.Component<Props, State> {
       left: 0,
       themeSelectedPreviously: this._getPreviouslySelectedTheme()
     };
-    this.settingsMenuContainer.className = 'settings-menu-container';
-    document.body.appendChild(this.settingsMenuContainer);
 
     this.showSettingsMenu = this.showSettingsMenu.bind(this);
     this.hideSettingsMenu = this.hideSettingsMenu.bind(this);
@@ -66,10 +63,6 @@ export class Settings extends React.Component<Props, State> {
     const link = document.head.querySelector('link[rel=stylesheet]') as HTMLLinkElement;
     link.href = styleFilename;
     localStorage.setItem('theme', isDarkThemeSelected ? 'dark' : 'light');
-  }
-
-  componentWillMount() {
-    document.body.removeChild(this.settingsMenuContainer);
   }
 
   render() {

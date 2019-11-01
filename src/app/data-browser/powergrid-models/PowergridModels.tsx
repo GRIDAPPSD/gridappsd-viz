@@ -96,9 +96,11 @@ export class PowerGridModels extends React.Component<Props, State> {
     this.updateRequestBody = this.updateRequestBody.bind(this);
   }
 
-  componentWillReceiveProps(newProps: Props) {
-    if (newProps !== this.props)
-      this.setState({ response: newProps.response });
+  componentDidUpdate(prevProps: Props) {
+    if (prevProps !== this.props)
+      this.setState({
+        response: this.props.response
+      });
   }
 
   render() {
@@ -113,7 +115,9 @@ export class PowerGridModels extends React.Component<Props, State> {
                 label='Request type'
                 options={this.state.requestTypeOptions}
                 onChange={selectedOption => {
-                  this.setState({ response: null });
+                  this.setState({
+                    response: null
+                  });
                   this.updateRequestBody('requestType', selectedOption.value);
                 }} />
               <Select
