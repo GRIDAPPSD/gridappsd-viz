@@ -1,4 +1,4 @@
-@import '@constants.dark';
+@import '@constants.light';
 @import 'RadioButton.common';
 
 .radio-button-group.style-default {
@@ -13,9 +13,6 @@
         }
     }
 
-    .radio-button__label {
-        color: $primary-text-color;
-    }
 }
 
 .radio-button-group.style-switches {
