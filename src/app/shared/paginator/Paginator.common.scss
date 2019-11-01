@@ -8,5 +8,19 @@
 
 .paginator__page-indicator {
     width: 100px;
-    text-align: center;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 0 10px;
+
+    &__current-page-input {
+        background: transparent;
+        padding: 5px 3px;
+        width: 35px;
+        outline: none;
+        border-radius: 3px;
+        text-align: center;
+        font-size: 0.8rem;
+        transition: border-color 0.25s ease;
+    }
 }
