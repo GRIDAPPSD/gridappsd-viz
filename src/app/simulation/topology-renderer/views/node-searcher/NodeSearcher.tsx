@@ -62,10 +62,17 @@ export class NodeSearcher extends React.Component<Props, State> {
       this.setState({
         show: this.props.show
       });
-      if (this.props.show)
+      if (this.props.show) {
+        // Because we don't clear the entered search term when this component is hidden,
+        // so if the user searched for something, closed this component, and opened it again,
+        // then pasted a longer search term into the input, we want to search through the input
+        // list of nodes rather than the cache of currently matched nodes by clearning
+        // this cache
+        this._matchedNodes.clear();
         setTimeout(() => {
           this.nodeSearcherElement.querySelector('input').focus();
         }, 1250);
+      }
     }
   }
 
