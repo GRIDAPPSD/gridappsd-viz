@@ -13,6 +13,7 @@ interface Props<T> {
 
 interface State {
   currentPageNumber: number;
+  currentPageNumberDisplay: string;
   totalPages: number;
 }
 
@@ -22,10 +23,12 @@ export class Paginator<T> extends React.Component<Props<T>, State> {
     super(props);
     this.state = {
       currentPageNumber: 0,
+      currentPageNumberDisplay: '1',
       totalPages: Math.ceil(props.items.length / this.props.pageSize)
     };
 
     this.navigateToNextPage = this.navigateToNextPage.bind(this);
+    this.updateCurrentPageNumber = this.updateCurrentPageNumber.bind(this);
     this.navigateToPreviousPage = this.navigateToPreviousPage.bind(this);
   }
 
@@ -57,7 +60,15 @@ export class Paginator<T> extends React.Component<Props<T>, State> {
             style='accent'
             onClick={this.navigateToPreviousPage} />
           <div className='paginator__page-indicator'>
-            {`${this.state.currentPageNumber + 1} / ${this.state.totalPages}`}
+            <input
+              type='text'
+              className='paginator__page-indicator__current-page-input'
+              value={this.state.currentPageNumberDisplay}
+              onChange={this.updateCurrentPageNumber} />
+            &nbsp;
+            /
+            &nbsp;
+            {this.state.totalPages}
           </div>
           <IconButton
             disabled={this.state.currentPageNumber === this.state.totalPages - 1}
@@ -69,25 +80,36 @@ export class Paginator<T> extends React.Component<Props<T>, State> {
     return null;
   }
 
-
   navigateToPreviousPage() {
-    this.setState(state => {
-      const startSlice = (state.currentPageNumber - 1) * this.props.pageSize;
-      this.props.onPageChanged(this.props.items.slice(startSlice, startSlice + this.props.pageSize));
-      return {
-        currentPageNumber: state.currentPageNumber - 1
-      };
+    this._goToPage(this.state.currentPageNumber - 1);
+  }
+
+  private _goToPage(pageNumber: number) {
+    const startSlice = pageNumber * this.props.pageSize;
+    this.props.onPageChanged(this.props.items.slice(startSlice, startSlice + this.props.pageSize));
+    this.setState({
+      currentPageNumber: pageNumber,
+      currentPageNumberDisplay: String(pageNumber + 1)
     });
   }
 
+  updateCurrentPageNumber(event: React.ChangeEvent<HTMLInputElement>) {
+    const enteredPageNumber = event.target.value;
+    const newPageNumber = +enteredPageNumber - 1;
+    if (newPageNumber >= 0 && newPageNumber < this.state.totalPages) {
+      this.setState({
+        currentPageNumber: newPageNumber,
+      });
+      this._goToPage(newPageNumber);
+    }
+    else if (enteredPageNumber === '')
+      this.setState({
+        currentPageNumberDisplay: ''
+      });
+  }
+
   navigateToNextPage() {
-    this.setState(state => {
-      const startSlice = (state.currentPageNumber + 1) * this.props.pageSize;
-      this.props.onPageChanged(this.props.items.slice(startSlice, startSlice + this.props.pageSize));
-      return {
-        currentPageNumber: state.currentPageNumber + 1,
-      };
-    });
+    this._goToPage(this.state.currentPageNumber + 1);
   }
 
 }

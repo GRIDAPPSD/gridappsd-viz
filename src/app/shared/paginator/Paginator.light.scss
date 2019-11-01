@@ -3,3 +3,11 @@
 .paginator {
     border-top: 2px solid rgba(0, 0, 0, 0.05);
 }
+
+.paginator__page-indicator__current-page-input {
+    border: 2px solid rgba(#555, 0.25);
+
+    &:focus {
+        border-color: #555;
+    }
+}
