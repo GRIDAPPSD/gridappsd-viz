@@ -20,14 +20,7 @@ interface State {
 }
 
 const numberOfMessagesToLoadNext = 30;
-const logLevelAndColorTupleList = [
-  ['FATAL', '#B71C1C'],
-  ['ERROR', '#D32F2F'],
-  ['WARN', '#FFFF00'],
-  ['INFO', '#F0F4C3'],
-  ['DEBUG', '#686868'],
-  ['TRACE', '#C0CA33']
-];
+const logLevels = ['FATAL', 'ERROR', 'WARN', 'INFO', 'DEBUG', 'TRACE'];
 
 export class SimulationStatusLogger extends React.Component<Props, State> {
 
@@ -114,15 +107,13 @@ export class SimulationStatusLogger extends React.Component<Props, State> {
             &&
             <div className='simulation-status-logger__header__legends'>
               {
-                logLevelAndColorTupleList.map((tuple, i) => (
+                logLevels.map(logLevel => (
                   <div
-                    key={i}
+                    key={logLevel}
                     className='simulation-status-logger__header__legends__level'>
-                    <span
-                      className='simulation-status-logger__header__legends__level__color'
-                      style={{ backgroundColor: tuple[1] }} />
+                    <span className={`simulation-status-logger__header__legends__level__color ${logLevel}`} />
                     <span className='simulation-status-logger__header__legends__level__label'>
-                      {tuple[0]}
+                      {logLevel}
                     </span>
                   </div>
                 ))
