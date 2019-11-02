@@ -44,15 +44,16 @@ export class SlideToggle extends React.Component<Props, State> {
         <div className='slide-toggle__status-text off-text'>
           {this.props.offText}
         </div>
-        <div className='slide-toggle__slider-container'>
+        <div
+          className='slide-toggle__slider-container'
+          onClick={this.toggle}>
           <Ripple
             fixed
             duration={1000}>
             <div className='slide-toggle__thumb-container'>
               <button
                 type='button'
-                className='slide-toggle__thumb'
-                onClick={this.toggle} />
+                className='slide-toggle__thumb' />
             </div>
           </Ripple>
         </div>
