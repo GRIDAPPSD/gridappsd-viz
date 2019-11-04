@@ -1,0 +1,40 @@
+.login-screen-container {
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.login-screen {
+    position: relative;
+    border-radius: 100%;
+    width: 450px;
+    height: 450px;
+    display: flex;
+    flex-flow: column;
+    justify-content: center;
+    align-items: center;
+
+    .form-control__label {
+        width: 100px;
+    }
+
+    .input-field__input {
+        width: 200px;
+        font-size: 1em;
+    }
+
+}
+
+.login-screen__password-container {
+    display: flex;
+    align-items: center;
+
+    .icon-button {
+        position: absolute;
+        left: 85%;
+    }
+}

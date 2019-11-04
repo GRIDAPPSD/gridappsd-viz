@@ -18,6 +18,7 @@ interface Props {
   validators?: Validator[];
   onValidate?: (isValid: boolean, formControlLabel: string, currentValue: string) => void;
   disabled?: boolean;
+  type?: string;
 }
 
 interface State {
@@ -85,7 +86,7 @@ export class Input extends React.Component<Props, State> {
         disabled={this.props.disabled}>
         <div className='input-field-wrapper'>
           <input
-            type='text'
+            type={this.props.type || 'text'}
             name={this.props.name}
             className='input-field__input'
             onChange={this.handleChange}

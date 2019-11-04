@@ -1,64 +1,35 @@
 import * as React from 'react';
 import { Link } from 'react-router-dom';
-import { Subscription } from 'rxjs';
 
-import { ToolBar } from './tool-bar/ToolBar';
-import { Drawer } from './drawer/Drawer';
-import { DrawerItem, DrawerItemIcon, DrawerItemLabel } from './drawer/DrawerItem';
-import { DrawerItemGroup } from './drawer/DrawerItemGroup';
-import { SimulationConfiguration, Simulation, SimulationQueue } from '@shared/simulation';
-import { StompClientService, StompClientConnectionStatus } from '@shared/StompClientService';
-import { ConfigurationManager } from '@shared/ConfigurationManager';
+import { Drawer } from './views/drawer/Drawer';
+import { ToolBar } from './views/tool-bar/ToolBar';
+import { DrawerItem, DrawerItemIcon, DrawerItemLabel } from './views/drawer/DrawerItem';
+import { DrawerItemGroup } from './views/drawer/DrawerItemGroup';
+import { AppBranding } from './views/app-branding/AppBranding';
+import { WebSocketConnectedIndicator } from './views/websocket-connected-indicator/WebSocketConnectedIndicator';
+import { SimulationConfiguration, Simulation } from '@shared/simulation';
+import { StompClientConnectionStatus } from '@shared/StompClientService';
 import { IconButton } from '@shared/buttons';
 
 import './Navigation.light.scss';
 import './Navigation.dark.scss';
 
 interface Props {
-  onShowSimulationConfigForm: (config: SimulationConfiguration) => void;
-}
-
-interface State {
   previousSimulations: Simulation[];
   websocketStatus: StompClientConnectionStatus;
   version: string;
+  onShowSimulationConfigForm: (config: SimulationConfiguration) => void;
+  onLogout: () => void;
 }
 
-export class Navigation extends React.Component<Props, State> {
+export class Navigation extends React.Component<Props, {}> {
 
   drawer: Drawer;
 
-  private readonly _simulationQueue = SimulationQueue.getInstance();
-  private readonly _stompClientService = StompClientService.getInstance();
-  private readonly _configurationManager = ConfigurationManager.getInstance();
-  private _queueChangesStream: Subscription;
-  private _websocketStatusStream: Subscription;
-
   constructor(props: Props) {
     super(props);
-    this.state = {
-      previousSimulations: this._simulationQueue.getAllSimulations(),
-      websocketStatus: this._stompClientService.isActive() ? 'CONNECTED' : 'CONNECTING',
-      version: ''
-    };
-    this._queueChangesStream = this._subscribeToAllSimulationsQueueSteam();
-    this._websocketStatusStream = this._stompClientService.statusChanges()
-      .subscribe(state => this.setState({ websocketStatus: state }));
-  }
 
-  componentDidMount() {
-    this._configurationManager.configurationChanges()
-      .subscribe({
-        next: configurations => this.setState({ version: configurations.version })
-      });
-  }
-
-
-  componentWillUnmount() {
-    if (this._queueChangesStream)
-      this._queueChangesStream.unsubscribe();
-    if (this._websocketStatusStream)
-      this._websocketStatusStream.unsubscribe();
+    this.openDrawer = this.openDrawer.bind(this);
   }
 
   render() {
@@ -73,17 +44,9 @@ export class Navigation extends React.Component<Props, State> {
             rippleDuration={550}
             noBackground={true}
             onClick={this.drawer ? this.drawer.open : null} />
-          <Link className='navigation__app-title' to='/'>GridAPPS-D</Link>
-          <span className='navigation__app-version'>{this.state.version}</span>
+          <AppBranding version={this.props.version} />
           <div className='right-aligned'>
-            {
-              this.state.websocketStatus === 'CONNECTED'
-              &&
-              <div className='websocket-status-indicator'>
-                <i className='material-icons websocket-status-indicator__icon'>import_export</i>
-                <div className='websocket-status-indicator__status-text'>Connected</div>
-              </div>
-            }
+            <WebSocketConnectedIndicator websocketStatus={this.props.websocketStatus} />
             {
               this.props.children
             }
@@ -95,14 +58,15 @@ export class Navigation extends React.Component<Props, State> {
             <DrawerItemLabel value='Simulations' />
           </DrawerItem>
           {
-            this.state.previousSimulations.length > 0 &&
+            this.props.previousSimulations.length > 0
+            &&
             <DrawerItemGroup
               header='Previous simulations'
               icon='memory'>
               {
-                this.state.previousSimulations.map(simulation => (
+                this.props.previousSimulations.map(simulation => (
                   <DrawerItem
-                    key={simulation.id}
+                    key={simulation.name}
                     onClick={() => this.props.onShowSimulationConfigForm(simulation.config)}>
                     <strong>Name:&nbsp;</strong>
                     {simulation.name}
@@ -132,14 +96,17 @@ export class Navigation extends React.Component<Props, State> {
               <DrawerItemLabel value='Stomp Client' />
             </Link>
           </DrawerItem>
+          <DrawerItem onClick={this.props.onLogout}>
+            <DrawerItemIcon icon='power_settings_new' />
+            <DrawerItemLabel value='Log Out' />
+          </DrawerItem>
         </Drawer>
       </>
     );
   }
 
-  private _subscribeToAllSimulationsQueueSteam(): Subscription {
-    return this._simulationQueue.queueChanges()
-      .subscribe(simulations => this.setState({ previousSimulations: simulations }));
+  openDrawer() {
+    this.drawer.open();
   }
 
 }

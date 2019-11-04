@@ -1,0 +1,10 @@
+@import '@constants.dark';
+@import './AppBranding.common';
+
+.app-branding__app-title {
+    color: $active-item-color;
+}
+
+.app-branding__app-version {
+    color: scale-color($accent-color, $lightness: +50%);
+}
