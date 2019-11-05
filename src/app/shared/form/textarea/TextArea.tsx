@@ -111,7 +111,7 @@ export class TextArea extends React.Component<Props, State> {
   render() {
     return (
       <FormControl
-        className={`textarea${this.props.className ? ` ${this.props.className}` : ''}`}
+        className={`textarea${this.props.className ? ' ' + this.props.className : ''}`}
         label={this.props.label}
         disabled={this.props.disabled}
         isInvalid={this.state.validationErrors.length !== 0}
