@@ -7,7 +7,38 @@
     background-color: #363636;
 
     &[contenteditable=true]:focus {
-        border-color: $primary-text-color;
+        &::before {
+            transform: scale(1, 1);
+            background-color: $primary-text-color;
+        }
+
+        &::after {
+            transition-delay: 0.35s;
+            transform: scale(1, 1);
+            background-color: $primary-text-color;
+        }
+
+        &~.textarea__input-box-focus-indicator {
+            &::before {
+                transform: scale(1, 1);
+                background-color: $primary-text-color;
+            }
+
+            &::after {
+                transition-delay: 0.35s;
+                transform: scale(1, 1);
+                background-color: $primary-text-color;
+            }
+        }
+    }
+}
+
+.textarea__input-box,
+.textarea__input-box-focus-indicator {
+
+    &::before,
+    &::after {
+        background-color: rgba($primary-text-color, 0.5)
     }
 }
 
