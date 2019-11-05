@@ -4,7 +4,6 @@ import { FormGroup, Select, TextArea, Option } from '@shared/form';
 import { SimulationConfiguration } from '@shared/simulation';
 import { Application } from '@shared/Application';
 import { ApplicationConfigurationModel } from '../../models/ApplicationConfigurationModel';
-import { Validators } from '@shared/form/validation';
 
 import './ApplicationConfiguration.light.scss';
 import './ApplicationConfiguration.dark.scss';
@@ -54,15 +53,13 @@ export class ApplicationConfiguration extends React.Component<Props, State> {
           multiple={false}
           label='Application name'
           options={this.state.availableApplicationOptions}
+          isOptionSelected={option => option.label === this.formValue.applicationId}
           optional={true}
           onClear={this.onApplicationDeselected}
           onChange={this.onSelectedApplicationChanged} />
         <TextArea
           label='Application configuration'
           value={this.formValue.configString}
-          validators={[
-            Validators.checkNotEmpty('Application config string is empty')
-          ]}
           disabled={this.state.disabledAppConfigStringInputBox}
           onChange={value => {
             this.formValue.configString = value;

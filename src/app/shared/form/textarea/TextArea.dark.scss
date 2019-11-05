@@ -2,12 +2,43 @@
 @import 'TextArea.common';
 
 .textarea__input-box {
-    border: 2px solid #d87798;
+    border: 2px solid rgba($primary-text-color, 0.5);
     color: $primary-text-color;
     background-color: #363636;
 
-    &:focus {
-        border-color: $primary-text-color;
+    &[contenteditable=true]:focus {
+        &::before {
+            transform: scale(1, 1);
+            background-color: $primary-text-color;
+        }
+
+        &::after {
+            transition-delay: 0.35s;
+            transform: scale(1, 1);
+            background-color: $primary-text-color;
+        }
+
+        &~.textarea__input-box-focus-indicator {
+            &::before {
+                transform: scale(1, 1);
+                background-color: $primary-text-color;
+            }
+
+            &::after {
+                transition-delay: 0.35s;
+                transform: scale(1, 1);
+                background-color: $primary-text-color;
+            }
+        }
+    }
+}
+
+.textarea__input-box,
+.textarea__input-box-focus-indicator {
+
+    &::before,
+    &::after {
+        background-color: rgba($primary-text-color, 0.5)
     }
 }
 

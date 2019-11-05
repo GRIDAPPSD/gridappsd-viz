@@ -2,12 +2,12 @@
 @import 'Input.common';
 
 .input-field__input {
-    border-bottom: 2px solid rgba($primary-text-color, 0.75);
+    border-bottom: 2px solid rgba($primary-text-color, 0.5);
     color: $primary-text-color;
 }
 
 .input-field__ripple-bar {
-    background-color: $primary-color;
+    background-color: $primary-text-color;
 }
 
 .form-control.invalid {
