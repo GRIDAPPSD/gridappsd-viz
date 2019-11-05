@@ -134,6 +134,11 @@ export class CommOutageEventForm extends React.Component<Props, State> {
     };
   }
 
+  componentDidUpdate(prevProps: Props) {
+    if (this.props.initialFormValue !== prevProps.initialFormValue)
+      this.formValue = { ...this.props.initialFormValue };
+  }
+
   render() {
     return (
       <div className='comm-outage-event'>
@@ -522,6 +527,8 @@ export class CommOutageEventForm extends React.Component<Props, State> {
       allInputOutageChecked: false,
       allOutputOutageChecked: false
     });
+    this.currentInputListItem = this._newInputListItem();
+    this.currentOutputListItem = this._newOutputListItem();
   }
 
 }
