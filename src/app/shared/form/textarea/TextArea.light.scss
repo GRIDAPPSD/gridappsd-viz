@@ -2,15 +2,17 @@
 
 .textarea__input-box {
     border: 2px solid #ccc;
+
+
+    &[contenteditable=true]:focus {
+        border: 2px solid #639;
+    }
+
 }
 
 .textarea__input-box-resize-handle {
     border-right: 3px solid #999;
     border-bottom: 3px solid #999;
-}
-
-.textarea__input-box:focus {
-    border: 2px solid #639;
 }
 
 .form-control.invalid .textarea__input-box {
