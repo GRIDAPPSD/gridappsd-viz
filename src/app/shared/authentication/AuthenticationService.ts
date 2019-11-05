@@ -27,6 +27,8 @@ export class AuthenticationService {
   }
 
   findAuthenticatedUserInCurrentSession(): User {
+    if (this._currentUser && this._currentUser.isAuthenticated)
+      return this._currentUser;
     this._currentUser = JSON.parse(sessionStorage.getItem('currentUser'));
     return this._currentUser;
   }

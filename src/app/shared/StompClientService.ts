@@ -3,6 +3,7 @@ import { BehaviorSubject, Observable, interval, using, timer, iif, of } from 'rx
 import { filter, switchMap, take, timeout } from 'rxjs/operators';
 
 import { ConfigurationManager } from './ConfigurationManager';
+import { AuthenticationService } from './authentication';
 
 export type StompClientConnectionStatus = 'NOT_CONNECTED' | 'CONNECTING' | 'CONNECTED' | 'NEW';
 
@@ -11,6 +12,8 @@ export class StompClientService {
   private static readonly _INSTANCE = new StompClientService();
 
   private readonly _configurationManager = ConfigurationManager.getInstance();
+  private readonly _authenticationService = AuthenticationService.getInstance();
+
   private _client: Client;
   private _statusChanges = new BehaviorSubject<StompClientConnectionStatus>('NEW');
   private _status: StompClientConnectionStatus = 'NEW';
@@ -88,6 +91,11 @@ export class StompClientService {
   }
 
   send(destination: string, headers: StompHeaders, body: string) {
+    headers = {
+      ...headers,
+      GOSS_HAS_SUBJECT: true as any,
+      GOSS_SUBJECT: this._authenticationService.findAuthenticatedUserInCurrentSession().username
+    };
     timer(0, 500)
       .pipe(filter(this.isActive), take(1))
       .subscribe(() => this._client.send(destination, headers, body));
