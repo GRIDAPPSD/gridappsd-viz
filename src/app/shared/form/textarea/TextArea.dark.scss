@@ -2,11 +2,11 @@
 @import 'TextArea.common';
 
 .textarea__input-box {
-    border: 2px solid #d87798;
+    border: 2px solid rgba($primary-text-color, 0.5);
     color: $primary-text-color;
     background-color: #363636;
 
-    &:focus {
+    &[contenteditable=true]:focus {
         border-color: $primary-text-color;
     }
 }

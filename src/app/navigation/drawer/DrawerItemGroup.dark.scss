@@ -2,8 +2,8 @@
 @import 'DrawerItemGroup.common';
 
 .drawer-item-group__nested-drawer-items:not(:empty) {
-    background-color: #373737;
-    box-shadow: 0 3px 5px #1e1e1e inset;
+    background-color: #2b2b2b;
+    box-shadow: 0 3px 5px #000 inset;
 }
 
 .drawer-item-group.expanded {
