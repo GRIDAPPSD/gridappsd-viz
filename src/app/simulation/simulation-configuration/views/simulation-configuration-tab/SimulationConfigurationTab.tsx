@@ -53,6 +53,11 @@ export class SimulationConfigurationTab extends React.Component<Props, State> {
     this.onModelCreationConfigurationChanged = this.onModelCreationConfigurationChanged.bind(this);
   }
 
+  componentDidUpdate(prevProps: Props) {
+    if (prevProps.simulationName !== this.props.simulationName)
+      this.formValue.simulationName = this.props.simulationName;
+  }
+
   render() {
     return (
       <FormGroup label=''>
