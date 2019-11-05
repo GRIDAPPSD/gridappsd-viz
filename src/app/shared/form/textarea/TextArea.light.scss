@@ -3,11 +3,40 @@
 .textarea__input-box {
     border: 2px solid #ccc;
 
-
     &[contenteditable=true]:focus {
-        border: 2px solid #639;
-    }
+        &::before {
+            transform: scale(1, 1);
+            background-color: #639;
+        }
 
+        &::after {
+            transition-delay: 0.35s;
+            transform: scale(1, 1);
+            background-color: #639;
+        }
+
+        &~.textarea__input-box-focus-indicator {
+            &::before {
+                transform: scale(1, 1);
+                background-color: #639;
+            }
+
+            &::after {
+                transition-delay: 0.35s;
+                transform: scale(1, 1);
+                background-color: #639;
+            }
+        }
+    }
+}
+
+.textarea__input-box,
+.textarea__input-box-focus-indicator {
+
+    &::before,
+    &::after {
+        background-color: #639;
+    }
 }
 
 .textarea__input-box-resize-handle {

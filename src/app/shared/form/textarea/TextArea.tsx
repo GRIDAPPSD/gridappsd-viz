@@ -127,6 +127,7 @@ export class TextArea extends React.Component<Props, State> {
             onKeyUp={this.onKeyUp}>
             {this.props.value}
           </div>
+          <div className='textarea__input-box-focus-indicator' />
           <div
             className='textarea__input-box-resize-handle'
             onMouseDown={this.beginResize} />
