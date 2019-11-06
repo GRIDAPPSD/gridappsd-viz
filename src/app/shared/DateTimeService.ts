@@ -13,7 +13,7 @@ export class DateTimeService {
 
   format(date: Date | number) {
     if (typeof date === 'number')
-      return this._formatter(new Date(date));
+      return this._formatter(new Date(date * 1000));
     return this._formatter(date);
   }
 

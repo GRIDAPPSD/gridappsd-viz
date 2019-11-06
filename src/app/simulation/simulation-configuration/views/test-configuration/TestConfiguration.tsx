@@ -21,8 +21,8 @@ import './TestConfiguration.dark.scss';
 
 interface Props {
   modelDictionary: ModelDictionary;
-  simulationStartDate: string;
-  simulationStopDate: string;
+  simulationStartTime: number;
+  simulationStopTime: number;
   onEventsAdded: (payload: { outageEvents: CommOutageEvent[]; faultEvents: FaultEvent[]; commandEvents: CommandEvent[]; }) => void;
   componentWithConsolidatedPhases: ModelDictionaryComponent[];
 }
@@ -78,8 +78,8 @@ export class TestConfiguration extends React.Component<Props, State> {
         rLinetoLine: '',
         xLineToLine: ''
       },
-      startDateTime: this.props.simulationStartDate,
-      stopDateTime: this.props.simulationStopDate
+      startDateTime: this.props.simulationStartTime,
+      stopDateTime: this.props.simulationStopTime
     };
   }
 
@@ -91,8 +91,8 @@ export class TestConfiguration extends React.Component<Props, State> {
       inputList: [],
       allOutputOutage: false,
       outputList: [],
-      startDateTime: this.props.simulationStartDate,
-      stopDateTime: this.props.simulationStopDate
+      startDateTime: this.props.simulationStartTime,
+      stopDateTime: this.props.simulationStopTime
     };
   }
 
