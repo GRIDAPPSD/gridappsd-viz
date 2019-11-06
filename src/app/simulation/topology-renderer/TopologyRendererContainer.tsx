@@ -47,7 +47,6 @@ const cache = new Map<string, RenderableTopology>();
 
 export class TopologyRendererContainer extends React.Component<Props, State> {
 
-
   activeSimulationConfig: SimulationConfiguration = DEFAULT_SIMULATION_CONFIGURATION;
 
   private readonly _stompClientService = StompClientService.getInstance();
@@ -62,7 +61,12 @@ export class TopologyRendererContainer extends React.Component<Props, State> {
     super(props);
 
     this.state = {
-      topology: null,
+      topology: {
+        name: this.activeSimulationConfig.simulation_config.simulation_name,
+        nodes: [],
+        edges: [],
+        inverted: false
+      },
       isFetching: true
     };
 
@@ -153,8 +157,10 @@ export class TopologyRendererContainer extends React.Component<Props, State> {
       return null;
     const edges: Edge[] = [];
     const renderableTopology: RenderableTopology = {
+      name: this.activeSimulationConfig.simulation_config.simulation_name,
       nodes: [],
-      edges
+      edges,
+      inverted: false
     };
     const keysToLookAt = [
       'batteries', 'switches', 'solarpanels', 'swing_nodes', 'transformers', 'overhead_lines', 'capacitors', 'regulators'
@@ -352,7 +358,6 @@ export class TopologyRendererContainer extends React.Component<Props, State> {
         <TopologyRenderer
           topology={this.state.topology}
           showWait={this.state.isFetching}
-          topologyName={this.activeSimulationConfig.simulation_config.simulation_name}
           onToggleSwitch={this.onToggleSwitchState}
           onCapacitorMenuFormSubmitted={this.onCapacitorMenuFormSubmitted}
           onRegulatorMenuFormSubmitted={this.onRegulatorMenuFormSubmitted} />
