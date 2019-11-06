@@ -15,8 +15,9 @@ export interface FaultEvent {
     rLinetoLine: string;
     xLineToLine: string;
   };
-  startDateTime: string;
-  stopDateTime: string;
+  // Epoch time with second precision
+  startDateTime: number;
+  stopDateTime: number;
 }
 
 export const enum FaultKind {

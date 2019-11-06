@@ -7,6 +7,7 @@ import { toOptions, removeOptionsWithIdenticalLabel } from '@shared/form/select/
 import { FaultEvent, Phase, FaultKind, FaultImpedence } from '@shared/test-manager';
 import { Validators } from '@shared/form/validation';
 import { ModelDictionaryComponent } from '@shared/topology/model-dictionary/ModelDictionaryComponent';
+import { DateTimeService } from '@shared/DateTimeService';
 
 import './FaultEventForm.light.scss';
 import './FaultEventForm.dark.scss';
@@ -29,6 +30,9 @@ interface State {
 }
 
 export class FaultEventForm extends React.Component<Props, State> {
+
+  readonly dateTimeService = DateTimeService.getInstance();
+
   formValue: FaultEvent;
   equipmentTypeSelect: Select<string, boolean>;
 
@@ -126,7 +130,7 @@ export class FaultEventForm extends React.Component<Props, State> {
             label='Start Date Time'
             name='startDateTime'
             hint='YYYY-MM-DD HH:MM:SS'
-            value={this.state.formValue.startDateTime}
+            value={this.dateTimeService.format(this.state.formValue.startDateTime)}
             validators={[
               Validators.checkNotEmpty('Start date time is empty'),
               Validators.checkValidDateTime('Invalid format, YYYY-MM-DD HH:MM:SS expected')
@@ -136,7 +140,7 @@ export class FaultEventForm extends React.Component<Props, State> {
             label='Stop Date Time'
             hint='YYYY-MM-DD HH:MM:SS'
             name='stopDateTime'
-            value={this.state.formValue.stopDateTime}
+            value={this.dateTimeService.format(this.state.formValue.stopDateTime)}
             validators={[
               Validators.checkNotEmpty('Stop date time is empty'),
               Validators.checkValidDateTime('Invalid format, YYYY-MM-DD HH:MM:SS expected')
@@ -194,8 +198,8 @@ export class FaultEventForm extends React.Component<Props, State> {
       && this.formValue.tag !== ''
       && this.formValue.mRID.length !== 0
       && this.formValue.phases.length !== 0
-      && this.formValue.startDateTime !== ''
-      && this.formValue.stopDateTime !== ''
+      && this.formValue.startDateTime !== null
+      && this.formValue.stopDateTime !== null
       && (
         this.formValue.faultKind === FaultKind.LINE_TO_GROUND
           ? this.formValue.FaultImpedance.rGround !== '' && this.formValue.FaultImpedance.xGround !== ''
@@ -244,12 +248,14 @@ export class FaultEventForm extends React.Component<Props, State> {
   }
 
   onStartDateTimeChanged(value: string) {
-    this.formValue.startDateTime = value;
+    const parsedDateTime = this.dateTimeService.parse(value);
+    this.formValue.startDateTime = parsedDateTime ? parsedDateTime.getTime() / 1000 : null;
     this._enableAddEventButtonIfFormIsValid();
   }
 
   onStopDateTimeChanged(value: string) {
-    this.formValue.stopDateTime = value;
+    const parsedDateTime = this.dateTimeService.parse(value);
+    this.formValue.stopDateTime = parsedDateTime ? parsedDateTime.getTime() / 1000 : null;
     this._enableAddEventButtonIfFormIsValid();
   }
 

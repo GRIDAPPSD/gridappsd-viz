@@ -1,6 +1,7 @@
 import * as React from 'react';
 
 import { FaultEvent } from './FaultEvent';
+import { DateTimeService } from '@shared/DateTimeService';
 
 import './FaultEventTable.light.scss';
 import './FaultEventTable.dark.scss';
@@ -10,6 +11,8 @@ interface Props {
   faultMRIDs?: string[];
   actions: (event: FaultEvent) => React.ReactNode;
 }
+
+const dateTimeService = DateTimeService.getInstance();
 
 export function FaultEventTable(props: Props) {
   return (
@@ -71,10 +74,10 @@ export function FaultEventTable(props: Props) {
                 }
               </td>
               <td>
-                <div>{event.startDateTime}</div>
+                <div>{dateTimeService.format(event.startDateTime)}</div>
               </td>
               <td>
-                <div>{event.stopDateTime}</div>
+                <div>{dateTimeService.format(event.stopDateTime)}</div>
               </td>
             </tr>
           ))

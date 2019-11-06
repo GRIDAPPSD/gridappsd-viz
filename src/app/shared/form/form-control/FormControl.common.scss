@@ -11,6 +11,7 @@
     flex-flow: column;
     transition: color 0.1s ease;
     position: relative;
+    flex-shrink: 0;
 }
 
 .form-control__label__hint {
