@@ -60,11 +60,11 @@ export class SimulationOutputService {
     return this._stompClientService.readFrom(SIMULATION_OUTPUT_TOPIC)
       .pipe(
         filter(() => this._simulationControlService.currentStatus() === SimulationStatus.STARTED),
-        map(JSON.parse as any),
+        map(JSON.parse as (value: string) => SimulationOutputPayload),
         filter(payload => Boolean(payload))
       )
       .subscribe({
-        next: (payload: SimulationOutputPayload) => {
+        next: payload => {
           this._outputTimestamp = payload.message.timestamp;
           const measurements = new Map<string, SimulationOutputMeasurement>();
           for (const [mrid, rawSimulationOutputMeasurement] of Object.entries(payload.message.measurements)) {
