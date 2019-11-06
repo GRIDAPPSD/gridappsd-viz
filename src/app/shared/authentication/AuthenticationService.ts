@@ -1,11 +1,11 @@
-import { Observable, of } from 'rxjs';
-import { take } from 'rxjs/operators';
-
 import { User } from './User';
+import { StompClientService } from '@shared/StompClientService';
 
 export class AuthenticationService {
 
   private static readonly _INSTANCE = new AuthenticationService();
+
+  private readonly _stompClientService = StompClientService.getInstance();
 
   private _currentUser: User;
 
@@ -17,13 +17,15 @@ export class AuthenticationService {
     return AuthenticationService._INSTANCE;
   }
 
-  authenticate(username: string, password: string): Observable<User> {
+  authenticate(username: string, password: string): Promise<User> {
     this._currentUser = new User(username);
-    if (username === 'system' && password === 'manager') {
-      this._currentUser.isAuthenticated = true;
-      sessionStorage.setItem('currentUser', JSON.stringify(this._currentUser));
-    }
-    return of(this._currentUser).pipe(take(1));
+    return this._stompClientService.connect(username, password)
+      .then(() => {
+        this._currentUser.isAuthenticated = true;
+        sessionStorage.setItem('currentUser', JSON.stringify(this._currentUser));
+        return this._currentUser;
+      })
+      .catch(() => this._currentUser);
   }
 
   findAuthenticatedUserInCurrentSession(): User {
@@ -35,7 +37,7 @@ export class AuthenticationService {
 
   logout() {
     this._currentUser = null;
-    sessionStorage.removeItem('currentUser');
+    sessionStorage.clear();
   }
 
 }

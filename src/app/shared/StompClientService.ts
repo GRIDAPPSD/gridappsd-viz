@@ -3,7 +3,6 @@ import { BehaviorSubject, Observable, interval, using, timer, iif, of } from 'rx
 import { filter, switchMap, take, timeout } from 'rxjs/operators';
 
 import { ConfigurationManager } from './ConfigurationManager';
-import { AuthenticationService } from './authentication';
 
 export type StompClientConnectionStatus = 'NOT_CONNECTED' | 'CONNECTING' | 'CONNECTED' | 'NEW';
 
@@ -12,11 +11,15 @@ export class StompClientService {
   private static readonly _INSTANCE = new StompClientService();
 
   private readonly _configurationManager = ConfigurationManager.getInstance();
-  private readonly _authenticationService = AuthenticationService.getInstance();
 
   private _client: Client;
   private _statusChanges = new BehaviorSubject<StompClientConnectionStatus>('NEW');
   private _status: StompClientConnectionStatus = 'NEW';
+  private _username = '';
+  // Need to store the password for reconnecting after timeout,
+  // the backend should listen to hearbeat messages
+  // so that this wouldn't be neccessary
+  private _password = '';
 
   static getInstance() {
     return StompClientService._INSTANCE;
@@ -27,14 +30,14 @@ export class StompClientService {
     this._connectionEstablished = this._connectionEstablished.bind(this);
     this._connectionClosed = this._connectionClosed.bind(this);
     this.isActive = this.isActive.bind(this);
-    this.connect = this.connect.bind(this);
+    this.reconnect = this.reconnect.bind(this);
     this.readOnceFrom = this.readOnceFrom.bind(this);
     this.readFrom = this.readFrom.bind(this);
 
-    this._createStompClientAndConnectToGossServer();
+    this._initializeStompClient();
   }
 
-  private _createStompClientAndConnectToGossServer() {
+  private _initializeStompClient() {
     this._configurationManager.configurationChanges()
       .subscribe({
         next: configurations => {
@@ -42,12 +45,42 @@ export class StompClientService {
           this._client.heartbeat.outgoing = 0;
           this._client.heartbeat.incoming = 0;
 
-          this.connect();
+          this._username = sessionStorage.getItem('username');
+          this._password = sessionStorage.getItem('password');
+
+          if (this._username && this._password)
+            this.reconnect();
         }
       });
   }
 
-  connect() {
+  connect(username: string, password: string): Promise<void> {
+    this._username = username;
+    this._password = password;
+    return new Promise<void>((resolve, reject) => {
+      this._client.connect(
+        this._username,
+        this._password,
+        () => {
+          resolve();
+          this._connectionEstablished();
+
+          // need to reevaluate this
+          sessionStorage.setItem('username', username);
+          sessionStorage.setItem('password', password);
+        },
+        reject,
+        reject
+      );
+    });
+  }
+
+  private _connectionEstablished() {
+    this._status = 'CONNECTED';
+    this._statusChanges.next(this._status);
+  }
+
+  reconnect() {
     timer(0, 5000)
       .pipe(
         switchMap(() => iif(this.isActive, of(null), of(this._connect()))),
@@ -68,20 +101,21 @@ export class StompClientService {
     if (!this.isActive()) {
       this._status = 'CONNECTING';
       this._statusChanges.next(this._status);
-      return this._client.connect('system', 'manager', this._connectionEstablished, undefined, this._connectionClosed);
+      return this._client.connect(
+        this._username,
+        this._password,
+        this._connectionEstablished,
+        undefined,
+        this._connectionClosed
+      );
     }
     return {};
-  }
-
-  private _connectionEstablished() {
-    this._status = 'CONNECTED';
-    this._statusChanges.next(this._status);
   }
 
   private _connectionClosed() {
     if (this._status === 'CONNECTED') {
       this._status = 'NOT_CONNECTED';
-      this.connect();
+      this.reconnect();
     }
   }
 
@@ -94,7 +128,7 @@ export class StompClientService {
     headers = {
       ...headers,
       GOSS_HAS_SUBJECT: true as any,
-      GOSS_SUBJECT: this._authenticationService.findAuthenticatedUserInCurrentSession().username
+      GOSS_SUBJECT: this._username
     };
     timer(0, 500)
       .pipe(filter(this.isActive), take(1))

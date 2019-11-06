@@ -14,24 +14,23 @@ interface Props {
 
 interface State {
   websocketStatus: StompClientConnectionStatus;
-  dots: number;
 }
 
 export class WebsocketStatusWatcher extends React.Component<Props, State> {
 
-  private readonly _stompClientService = StompClientService.getInstance();
+  readonly stompClientService = StompClientService.getInstance();
+
   private _websocketStatusStream: Subscription;
 
-  constructor(props: any) {
+  constructor(props: Props) {
     super(props);
     this.state = {
-      websocketStatus: this._stompClientService.isActive() ? 'CONNECTED' : 'NEW',
-      dots: 1
+      websocketStatus: this.stompClientService.isActive() ? 'CONNECTED' : 'NEW'
     };
   }
 
   componentDidMount() {
-    this._websocketStatusStream = this._stompClientService.statusChanges()
+    this._websocketStatusStream = this.stompClientService.statusChanges()
       .subscribe({
         next: state => this.setState({ websocketStatus: state })
       });
@@ -67,13 +66,13 @@ export class WebsocketStatusWatcher extends React.Component<Props, State> {
             Unable to establish a connection
           </span>
           <br />
-          <span style={{ fontSize: '30px' }}>
+          <span style={{ fontSize: '30px', marginRight: 10 }}>
             Check server or
           </span>
           <IconButton
             icon='cached'
             rounded={false}
-            onClick={this._stompClientService.connect}
+            onClick={this.stompClientService.reconnect}
             label='Click to reconnect' />
         </>
       );
