@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { Route, Redirect } from 'react-router-dom';
-import { map, take, filter } from 'rxjs/operators';
+import { map, take, filter, switchMap } from 'rxjs/operators';
 
 import { Application } from '@shared/Application';
 import { AvailableApplicationsAndServices } from './available-applications-and-services';
@@ -10,16 +10,21 @@ import { GetAllFeederModelsRequest } from './models/message-requests/GetAllFeede
 import { SimulationLabelsContainer } from './simulation/simulation-labels';
 import { MeasurementChartContainer } from './simulation/measurement-chart';
 import {
-  ModelDictionaryMeasurement, ModelDictionary,
+  ModelDictionary,
   ModelDictionaryComponentType,
+  ModelDictionaryMeasurement,
   ModelDictionaryComponent
 } from '@shared/topology/model-dictionary';
-import { Navigation } from './navigation';
 import { OverlayService } from '@shared/overlay';
-import { SimulationConfiguration, Simulation } from '@shared/simulation';
+import {
+  SimulationConfiguration,
+  DEFAULT_SIMULATION_CONFIGURATION,
+  Simulation,
+  SimulationQueue,
+  SimulationOutputService
+} from '@shared/simulation';
 import { SimulationConfigurationEditor } from './simulation/simulation-configuration';
 import { SimulationControlContainer } from './simulation/simulation-control';
-import { SimulationQueue, SimulationOutputService, DEFAULT_SIMULATION_CONFIGURATION } from '@shared/simulation';
 import { SimulationStatusLogContainer } from './simulation/simulation-status-logger';
 import { StompClientContainer } from './stomp-client';
 import { StompClientService } from '@shared/StompClientService';
@@ -35,6 +40,8 @@ import { TabGroup, Tab } from '@shared/tabs';
 import { EventSummary } from './simulation/event-summary/EventSummary';
 import { AvailableApplicationList } from './simulation/applications/AvailableApplicationList';
 import { VoltageViolationContainer } from './simulation/voltage-violation/VoltageViolationContainer';
+import { NavigationContainer } from './navigation';
+import { AuthenticationContainer } from './authentication/AuthenticationContainer';
 import { AlarmsContainer } from './simulation/alarms';
 import { Settings } from './settings';
 
@@ -84,6 +91,8 @@ export class App extends React.Component<Props, State> {
     this._stompClientService.statusChanges()
       .pipe(
         filter(status => status === 'CONNECTED'),
+        switchMap(() => this._stateStore.select('currentUser')),
+        filter(user => user !== null && user.isAuthenticated),
         take(1)
       )
       .subscribe({
@@ -221,19 +230,20 @@ export class App extends React.Component<Props, State> {
   render() {
     return (
       <Route path='/' component={(props) =>
-        this.shouldRedirect ? this.redirect() :
-          <>
-            <Navigation
-              onShowSimulationConfigForm={
-                (config: SimulationConfiguration) => this.showSimulationConfigForm(config, props.history)
-              }>
-              <Settings />
-            </Navigation>
-            <Route
-              exact
-              path='/topology'
-              component={() => {
-                return (
+        this.shouldRedirect
+          ? this.redirect()
+          : (
+            <AuthenticationContainer>
+              <NavigationContainer
+                onShowSimulationConfigForm={
+                  (config: SimulationConfiguration) => this.showSimulationConfigForm(config, props.history)
+                }>
+                <Settings />
+              </NavigationContainer>
+              <Route
+                exact
+                path='/topology'
+                component={() => (
                   <div className='topology-renderer-simulation-status-logger-measurement-graphs'>
                     <div>
                       <SimulationControlContainer />
@@ -261,21 +271,21 @@ export class App extends React.Component<Props, State> {
                       <MeasurementChartContainer />
                     </div>
                   </div>
-                );
-              }} />
-            <Route
-              exact
-              path='/applications'
-              component={AvailableApplicationsAndServices} />
-            <Route
-              exact
-              path='/stomp-client'
-              component={StompClientContainer} />
-            <Route
-              path='/browse'
-              component={routeProps => <DataBrowser feederModel={this.state.feederModel} match={routeProps.match} />} />
-            <WebsocketStatusWatcher />
-          </>
+                )} />
+              <Route
+                exact
+                path='/applications'
+                component={AvailableApplicationsAndServices} />
+              <Route
+                exact
+                path='/stomp-client'
+                component={StompClientContainer} />
+              <Route
+                path='/browse'
+                component={routeProps => <DataBrowser feederModel={this.state.feederModel} match={routeProps.match} />} />
+              <WebsocketStatusWatcher />
+            </AuthenticationContainer>
+          )
       } />
     );
   }

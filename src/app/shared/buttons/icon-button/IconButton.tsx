@@ -9,7 +9,7 @@ type Icon = 'check_circle' | 'menu' | 'assignment' | 'storage' | 'search' | 'lap
   | 'cloud_upload' | 'pause' | 'stop' | 'play_arrow' | 'add' | 'remove' | 'cached' | 'save'
   | 'close' | 'navigate_next' | 'navigate_before' | 'keyboard_arrow_down' | 'memory' | 'send'
   | 'show_chart' | 'edit' | 'help_outline' | 'arrow_downward' | 'refresh' | 'search' | 'check'
-  | 'notifications' | 'more_vert';
+  | 'notifications' | 'more_vert' | 'visibility' | 'visibility_off';
 
 interface Props {
   icon: Icon;

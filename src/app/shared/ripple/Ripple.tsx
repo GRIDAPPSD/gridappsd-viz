@@ -54,6 +54,9 @@ export class Ripple extends React.Component<Props, {}> {
     rippleEffect.style.height = rippleTriggerLargerDimension + 'px';
     rippleEffect.style.animationDuration = `${this.props.duration}ms`;
 
+    if (rippleTriggerComputedStyles.position === 'static')
+      this._rippleTrigger.style.position = 'relative';
+
     if (this.props.fixed)
       ripple.className += ' fixed';
     else {
