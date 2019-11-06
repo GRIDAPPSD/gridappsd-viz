@@ -25,6 +25,7 @@ export class NotificationBanner extends React.Component<Props, State> {
   } as Props;
 
   static readonly LIFE_TIME = 5_000;
+  static readonly ANIMATION_DURATION = 500;
 
   notificationBannerContainer = document.createElement('div');
 
@@ -68,9 +69,11 @@ export class NotificationBanner extends React.Component<Props, State> {
   }
 
   hideNotificationBanner() {
+    if (this.props.onHide)
+      setTimeout(this.props.onHide, NotificationBanner.ANIMATION_DURATION);
     this.setState({
       slide: 'out'
-    }, this.props.onHide);
+    });
   }
 
   componentWillUnmount() {
