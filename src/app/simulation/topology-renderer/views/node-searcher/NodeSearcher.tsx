@@ -17,8 +17,8 @@ import './NodeSearcher.dark.scss';
 interface Props {
   show: boolean;
   nodes: Node[];
+  onNodeSelected: (node: Node) => boolean;
   onClose: () => void;
-  onNodeSelected: (node: Node) => void;
 }
 
 interface State {
@@ -126,8 +126,8 @@ export class NodeSearcher extends React.Component<Props, State> {
                       <li
                         className='node-searcher__body__search-result'
                         onClick={() => {
-                          this.props.onNodeSelected(matchedNode.node);
-                          this.close();
+                          if (this.props.onNodeSelected(matchedNode.node))
+                            this.close();
                         }}>
                         {this.renderMatchedNode(matchedNode)}
                       </li>

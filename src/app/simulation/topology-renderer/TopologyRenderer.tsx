@@ -16,6 +16,7 @@ import { RenderableTopology } from './models/RenderableTopology';
 import { IconButton } from '@shared/buttons';
 import { NodeSearcher } from './views/node-searcher/NodeSearcher';
 import { MatchedNodeLocator } from './views/matched-node-locator/MatchedNodeLocator';
+import { NotificationBanner } from '@shared/notification-banner';
 
 import './TopologyRenderer.light.scss';
 import './TopologyRenderer.dark.scss';
@@ -31,6 +32,7 @@ interface Props {
 interface State {
   showNodeSearcher: boolean;
   nodeToLocate: SVGCircleElement;
+  nonExistingSearchedNode: Node;
 }
 
 export class TopologyRenderer extends React.Component<Props, State> {
@@ -65,7 +67,8 @@ export class TopologyRenderer extends React.Component<Props, State> {
 
     this.state = {
       showNodeSearcher: false,
-      nodeToLocate: null
+      nodeToLocate: null,
+      nonExistingSearchedNode: null
     };
 
     this.showMenuOnComponentClicked = this.showMenuOnComponentClicked.bind(this);
@@ -466,6 +469,14 @@ export class TopologyRenderer extends React.Component<Props, State> {
             node={this.state.nodeToLocate}
             onDimissed={() => this.setState({ nodeToLocate: null })} />
         }
+        {
+          this.state.nonExistingSearchedNode
+          &&
+          <NotificationBanner onHide={() => this.setState({ nonExistingSearchedNode: null })}>
+            Unable to locate node&nbsp;
+            <span className='topology-renderer__non-existing-searched-node'>{this.state.nonExistingSearchedNode.name}</span>
+          </NotificationBanner>
+        }
       </div>
     );
   }
@@ -601,19 +612,28 @@ export class TopologyRenderer extends React.Component<Props, State> {
 
     const canvasBoundingBox = this.svg.getBoundingClientRect();
     const elementForNode = document.querySelector(`.topology-renderer__canvas__node.${node.type}._${node.name}_`) as SVGCircleElement;
-    const nodeBoundingBox = elementForNode.getBoundingClientRect();
-    const centerX = (canvasBoundingBox.left + (this.svg.clientWidth / 2)) - nodeBoundingBox.left;
-    const centerY = (canvasBoundingBox.top + (this.svg.clientHeight / 2)) - nodeBoundingBox.top;
+    if (elementForNode) {
+      const nodeBoundingBox = elementForNode.getBoundingClientRect();
+      const centerX = (canvasBoundingBox.left + (this.svg.clientWidth / 2)) - nodeBoundingBox.left;
+      const centerY = (canvasBoundingBox.top + (this.svg.clientHeight / 2)) - nodeBoundingBox.top;
 
-    currentTransform = currentTransform.translate(centerX, centerY);
-    currentTransform = currentTransform.scale(currentZoom);
-    const transformTransition = this._canvas.transition()
-      .on('end', () => {
-        this.setState({
-          nodeToLocate: elementForNode
+      currentTransform = currentTransform.translate(centerX, centerY);
+      currentTransform = currentTransform.scale(currentZoom);
+      const transformTransition = this._canvas.transition()
+        .on('end', () => {
+          this.setState({
+            nodeToLocate: elementForNode
+          });
         });
+      this._zoomer.transform(transformTransition, currentTransform);
+      return true;
+    } else {
+      this.setState({
+        nonExistingSearchedNode: node
       });
-    this._zoomer.transform(transformTransition, currentTransform);
+      return false;
+    }
+
   }
 
 }
