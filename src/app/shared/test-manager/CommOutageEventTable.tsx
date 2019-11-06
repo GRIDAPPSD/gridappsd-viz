@@ -44,7 +44,7 @@ export function CommOutageEventTable(props: Props) {
       <tbody>
         {
           props.events.map((event, index) => (
-            <tr key={index}>
+            <tr key={event.tag}>
               <td>
                 <div className='comm-outage-event-table__row-actions'>
                   {props.actions(event)}

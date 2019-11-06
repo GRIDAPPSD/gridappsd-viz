@@ -1,8 +1,9 @@
 import { SimulationConfiguration } from './SimulationConfiguration';
+import { generateUniqueId } from '@shared/misc';
 
 export class Simulation {
 
-  id = btoa(String(Math.random())).toLowerCase().substr(10, 10);
+  id = generateUniqueId();
 
   constructor(readonly config: SimulationConfiguration, readonly name = config.simulation_config.simulation_name) {
   }
