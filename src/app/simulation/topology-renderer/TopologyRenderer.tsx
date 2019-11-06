@@ -23,7 +23,6 @@ import './TopologyRenderer.dark.scss';
 interface Props {
   topology: RenderableTopology;
   showWait: boolean;
-  topologyName: string;
   onToggleSwitch: (swjtch: Switch, open: boolean) => void;
   onCapacitorMenuFormSubmitted: (currentCapacitor: Capacitor, newCapacitor: Capacitor) => void;
   onRegulatorMenuFormSubmitted: (currentRegulator: Regulator, newRegulator: Regulator) => void;
@@ -155,6 +154,11 @@ export class TopologyRenderer extends React.Component<Props, State> {
       extent(topology.nodes, (d: Node) => d.y1)
     );
 
+    if (topology.name.includes('9500') && !topology.inverted) {
+      topology.inverted = true;
+      this._invert9500Model(topology.nodes);
+    }
+
     const categories = this._categorizeNodes(topology.nodes);
 
     this._container.selectAll('g')
@@ -177,6 +181,16 @@ export class TopologyRenderer extends React.Component<Props, State> {
       categories.nonSwitchNodes,
       categories.switchNodes as Switch[]
     );
+  }
+
+  private _invert9500Model(nodes: Node[]) {
+    const [minYCoordinate, maxYCoordinate] = this._yScale.domain();
+    for (const node of nodes) {
+      node.y1 = minYCoordinate + (maxYCoordinate - node.y1);
+      if ('x2' in node)
+        (node as any).y2 = minYCoordinate + (maxYCoordinate - (node as any).y2);
+    }
+
   }
 
   private _categorizeNodes(nodes: Node[]) {
@@ -414,7 +428,7 @@ export class TopologyRenderer extends React.Component<Props, State> {
           ref={elem => this.svg = elem}
           width='1000'
           height='1000'
-          className={`topology-renderer__canvas ${this.props.topologyName}`}
+          className={`topology-renderer__canvas ${this.props.topology.name}`}
           onClick={this.showMenuOnComponentClicked}
           onMouseOver={this.showTooltip}
           onMouseOut={this.hideTooltip}>
