@@ -85,8 +85,8 @@ export class MeasurementChartContainer extends React.Component<Props, State> {
     component: PlotModelComponent,
     measurements: Map<string, SimulationOutputMeasurement>
   ): TimeSeriesDataPoint {
-    const dataPoint = {
-      primitiveX: new Date(),
+    const dataPoint: TimeSeriesDataPoint = {
+      primitiveX: new Date(this._simulationOutputService.getOutputTimestamp() * 1000),
       primitiveY: 0
     };
     const valueType = plotModel.useMagnitude ? 'magnitude' : 'angle';
