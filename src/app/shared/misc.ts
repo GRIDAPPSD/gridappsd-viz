@@ -158,3 +158,7 @@ export function waitUntil(predicate: () => boolean, waitDelay = 500): Promise<vo
     }
   });
 }
+
+export function generateUniqueId() {
+  return btoa(String(Math.random())).toLowerCase().substr(10, 10);
+}

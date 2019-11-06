@@ -1,6 +1,7 @@
 import * as React from 'react';
 
 import { CommOutageEvent } from './CommOutageEvent';
+import { DateTimeService } from '@shared/DateTimeService';
 
 import './CommOutageEventTable.light.scss';
 import './CommOutageEventTable.dark.scss';
@@ -10,6 +11,8 @@ interface Props {
   faultMRIDs?: string[];
   actions: (event: CommOutageEvent) => React.ReactNode;
 }
+
+const dateTimeService = DateTimeService.getInstance();
 
 export function CommOutageEventTable(props: Props) {
   return (
@@ -44,7 +47,7 @@ export function CommOutageEventTable(props: Props) {
       <tbody>
         {
           props.events.map((event, index) => (
-            <tr key={index}>
+            <tr key={event.tag}>
               <td>
                 <div className='comm-outage-event-table__row-actions'>
                   {props.actions(event)}
@@ -86,10 +89,10 @@ export function CommOutageEventTable(props: Props) {
                 {event.outputList.map((e, i) => <div key={i}>{e.measurementTypes.join(', ')}</div>)}
               </td>
               <td>
-                <div>{event.startDateTime}</div>
+                <div>{dateTimeService.format(event.startDateTime)}</div>
               </td>
               <td>
-                <div>{event.stopDateTime}</div>
+                <div>{dateTimeService.format(event.stopDateTime)}</div>
               </td>
             </tr>
           ))

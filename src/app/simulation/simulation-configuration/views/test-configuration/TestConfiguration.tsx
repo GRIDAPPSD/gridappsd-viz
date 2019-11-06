@@ -13,7 +13,7 @@ import { Tooltip } from '@shared/tooltip';
 import { FaultEventSummaryTable } from './fault/FaultEventSummaryTable';
 import { CommOutageEvent, FaultEvent, FaultKind, CommandEvent } from '@shared/test-manager';
 import { Validators } from '@shared/form/validation';
-import { download, DownloadType } from '@shared/misc';
+import { download, DownloadType, generateUniqueId } from '@shared/misc';
 import { CommandEventSummaryTable } from './command/CommandEventSummaryTable';
 
 import './TestConfiguration.light.scss';
@@ -21,8 +21,8 @@ import './TestConfiguration.dark.scss';
 
 interface Props {
   modelDictionary: ModelDictionary;
-  simulationStartDate: string;
-  simulationStopDate: string;
+  simulationStartTime: number;
+  simulationStopTime: number;
   onEventsAdded: (payload: { outageEvents: CommOutageEvent[]; faultEvents: FaultEvent[]; commandEvents: CommandEvent[]; }) => void;
   componentWithConsolidatedPhases: ModelDictionaryComponent[];
 }
@@ -39,8 +39,9 @@ interface State {
 
 export class TestConfiguration extends React.Component<Props, State> {
 
+  tagForCurrentEvent = '';
+
   private readonly _filePicker = FilePickerService.getInstance();
-  private _tagForCurrentEvent = '';
 
   constructor(props: Props) {
     super(props);
@@ -65,7 +66,7 @@ export class TestConfiguration extends React.Component<Props, State> {
   defaultFaultEventFormValue(): FaultEvent {
     return {
       event_type: 'Fault',
-      tag: this._generateEventTag(),
+      tag: generateUniqueId(),
       equipmentType: '',
       equipmentName: '',
       phases: [],
@@ -77,27 +78,22 @@ export class TestConfiguration extends React.Component<Props, State> {
         rLinetoLine: '',
         xLineToLine: ''
       },
-      startDateTime: this.props.simulationStartDate,
-      stopDateTime: this.props.simulationStopDate
+      startDateTime: this.props.simulationStartTime,
+      stopDateTime: this.props.simulationStopTime
     };
   }
 
   defaultOutageEventFormValue(): CommOutageEvent {
     return {
       event_type: 'CommOutage',
-      tag: this._generateEventTag(),
+      tag: generateUniqueId(),
       allInputOutage: false,
       inputList: [],
       allOutputOutage: false,
       outputList: [],
-      startDateTime: this.props.simulationStartDate,
-      stopDateTime: this.props.simulationStopDate
+      startDateTime: this.props.simulationStartTime,
+      stopDateTime: this.props.simulationStopTime
     };
-  }
-
-  private _generateEventTag() {
-    this._tagForCurrentEvent = btoa(String(Math.random())).toLowerCase().substr(0, 8);
-    return this._tagForCurrentEvent;
   }
 
   render() {
@@ -112,12 +108,14 @@ export class TestConfiguration extends React.Component<Props, State> {
             value={
               this.state.selectedEventType === 'outage' ? this.state.currentOutageEvent.tag : this.state.currentFaultEvent.tag
             }
-            onChange={value => this._tagForCurrentEvent = value}
+            onChange={value => this.tagForCurrentEvent = value}
             validators={[
               Validators.checkNotEmpty('Event tag is empty'),
               this.uniqueEventIdValidator
             ]} />
-          <RadioButtonGroup id='event-type' label='Event Type'>
+          <RadioButtonGroup
+            id='event-type'
+            label='Event Type'>
             <RadioButton
               label='CommOutage'
               onSelect={() => this.setState({ selectedEventType: 'outage', selectedEventTypeToView: 'outage' })} />
@@ -239,7 +237,10 @@ export class TestConfiguration extends React.Component<Props, State> {
   }
 
   addOutageEvent(event: CommOutageEvent) {
-    event.tag = this._tagForCurrentEvent;
+    if (this.tagForCurrentEvent !== '') {
+      event.tag = this.tagForCurrentEvent;
+      this.tagForCurrentEvent = '';
+    }
     const events = [...this.state.outageEvents, event];
     this.setState({
       outageEvents: events,
@@ -254,7 +255,10 @@ export class TestConfiguration extends React.Component<Props, State> {
   }
 
   addFaultEvent(event: FaultEvent) {
-    event.tag = this._tagForCurrentEvent;
+    if (this.tagForCurrentEvent !== '') {
+      event.tag = this.tagForCurrentEvent;
+      this.tagForCurrentEvent = '';
+    }
     const events = [...this.state.faultEvents, event];
     this.setState({
       faultEvents: events,

@@ -379,17 +379,19 @@ export class App extends React.Component<Props, State> {
   private _consolidatePhasesForComponents(modelDictionary: ModelDictionary) {
     const componentWithGroupPhasesMap = new Map<string, ModelDictionaryComponent>();
     for (const measurement of modelDictionary.measurements) {
-      const id = measurement.measurementType === ModelDictionaryComponentType.VOLTAGE
+      const name = measurement.measurementType === ModelDictionaryComponentType.VOLTAGE
         ? measurement.ConnectivityNode
         : measurement.ConductingEquipment_name;
       const phases = measurement.phases;
+      const id = measurement.name;
       let componentInMeasurement = componentWithGroupPhasesMap.get(id);
       if (!componentInMeasurement) {
         componentInMeasurement = {
           id,
+          name,
           conductingEquipmentName: measurement.ConductingEquipment_name,
           conductingEquipmentType: measurement.ConductingEquipment_type,
-          displayName: `${id} (${phases})`,
+          displayName: `${name} (${phases})`,
           phases: [phases],
           conductingEquipmentMRIDs: [measurement.ConductingEquipment_mRID],
           type: measurement.measurementType as ModelDictionaryComponentType
@@ -399,7 +401,7 @@ export class App extends React.Component<Props, State> {
         if (!componentInMeasurement.phases.includes(phases)) {
           componentInMeasurement.phases.push(phases);
           componentInMeasurement.phases.sort((a, b) => a.localeCompare(b));
-          componentInMeasurement.displayName = `${id} (${componentInMeasurement.phases.join(', ')})`;
+          componentInMeasurement.displayName = `${name} (${componentInMeasurement.phases.join(', ')})`;
         }
         componentInMeasurement.conductingEquipmentMRIDs.push(measurement.ConductingEquipment_mRID);
       }

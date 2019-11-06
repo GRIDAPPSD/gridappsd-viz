@@ -7,6 +7,7 @@ import { COMPONENT_ATTRIBUTES } from '../../../models/component-attributes';
 import { Tooltip } from '@shared/tooltip';
 import { CommOutageEvent, Phase, CommOutageEventInputListItem, CommOutageEventOutputListItem } from '@shared/test-manager';
 import { Validators } from '@shared/form/validation';
+import { DateTimeService } from '@shared/DateTimeService';
 
 import './CommOutageEventForm.light.scss';
 import './CommOutageEventForm.dark.scss';
@@ -51,6 +52,8 @@ interface State {
 }
 
 export class CommOutageEventForm extends React.Component<Props, State> {
+
+  readonly dateTimeService = DateTimeService.getInstance();
 
   formValue: CommOutageEvent;
   currentInputListItem: CommOutageEventInputListItem;
@@ -132,6 +135,11 @@ export class CommOutageEventForm extends React.Component<Props, State> {
       phases: [],
       measurementTypes: []
     };
+  }
+
+  componentDidUpdate(prevProps: Props) {
+    if (this.props.initialFormValue !== prevProps.initialFormValue)
+      this.formValue = { ...this.props.initialFormValue };
   }
 
   render() {
@@ -250,7 +258,7 @@ export class CommOutageEventForm extends React.Component<Props, State> {
             label='Start Date Time'
             name='startDateTime'
             hint='YYYY-MM-DD HH:MM:SS'
-            value={this.formValue.startDateTime}
+            value={this.dateTimeService.format(this.formValue.startDateTime)}
             validators={[
               Validators.checkNotEmpty('Start date time is empty'),
               Validators.checkValidDateTime('Invalid format, YYYY-MM-DD HH:MM:SS expected')
@@ -260,7 +268,7 @@ export class CommOutageEventForm extends React.Component<Props, State> {
             label='Stop Date Time'
             name='stopDateTime'
             hint='YYYY-MM-DD HH:MM:SS'
-            value={this.formValue.stopDateTime}
+            value={this.dateTimeService.format(this.formValue.stopDateTime)}
             validators={[
               Validators.checkNotEmpty('Stop date time is empty'),
               Validators.checkValidDateTime('Invalid format, YYYY-MM-DD HH:MM:SS expected')
@@ -492,11 +500,13 @@ export class CommOutageEventForm extends React.Component<Props, State> {
   }
 
   onStartDateTimeChanged(value: string) {
-    this.formValue.startDateTime = value;
+    const parsedDateTime = this.dateTimeService.parse(value);
+    this.formValue.startDateTime = parsedDateTime ? parsedDateTime.getTime() / 1000 : null;
   }
 
   onStopDateTimeChanged(value: string) {
-    this.formValue.stopDateTime = value;
+    const parsedDateTime = this.dateTimeService.parse(value);
+    this.formValue.stopDateTime = parsedDateTime ? parsedDateTime.getTime() / 1000 : null;
   }
 
   disableAddEventButton(): boolean {
@@ -522,6 +532,8 @@ export class CommOutageEventForm extends React.Component<Props, State> {
       allInputOutageChecked: false,
       allOutputOutageChecked: false
     });
+    this.currentInputListItem = this._newInputListItem();
+    this.currentOutputListItem = this._newOutputListItem();
   }
 
 }

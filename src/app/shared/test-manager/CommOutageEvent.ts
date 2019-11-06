@@ -8,8 +8,9 @@ export interface CommOutageEvent {
   inputList: CommOutageEventInputListItem[];
   allOutputOutage: boolean;
   outputList: CommOutageEventOutputListItem[];
-  startDateTime: string;
-  stopDateTime: string;
+  // Epoch time with second precision
+  startDateTime: number;
+  stopDateTime: number;
 }
 
 

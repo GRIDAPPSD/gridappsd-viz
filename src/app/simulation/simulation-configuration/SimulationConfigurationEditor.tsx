@@ -3,7 +3,7 @@ import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 
 import { SimulationConfiguration, SimulationControlService, SimulationStatus } from '@shared/simulation';
-import { FeederModel, ModelDictionary } from '@shared/topology';
+import { FeederModel, ModelDictionary, ModelDictionaryComponent } from '@shared/topology';
 import { Application } from '@shared/Application';
 import { Dialog, DialogContent, DialogActions } from '@shared/dialog';
 import { TabGroup, Tab } from '@shared/tabs';
@@ -12,20 +12,17 @@ import { PowerSystemConfiguration } from './views/power-system-configuration';
 import { SimulationConfigurationTab } from './views/simulation-configuration-tab';
 import { ApplicationConfiguration } from './views/application-configuration';
 import { TestConfiguration } from './views/test-configuration';
-import { DateTimeService } from './services/DateTimeService';
-import { CommOutageEvent } from '../../shared/test-manager/CommOutageEvent';
-import { FaultEvent, FaultKind } from '../../shared/test-manager/FaultEvent';
+import { DateTimeService } from '@shared/DateTimeService';
+import { FaultEvent, FaultKind, CommOutageEvent, CommandEvent } from '@shared/test-manager';
 import { PowerSystemConfigurationModel } from './models/PowerSystemConfigurationModel';
 import { SimulationConfigurationTabModel } from './models/SimulationConfigurationTabModel';
 import { ApplicationConfigurationModel } from './models/ApplicationConfigurationModel';
 import { StateStore } from '@shared/state-store';
 import { ThreeDots } from '@shared/three-dots';
 import { NotificationBanner } from '@shared/notification-banner';
-import { ModelDictionaryComponent } from '@shared/topology/model-dictionary/ModelDictionaryComponent';
 import { ServiceConfiguration } from './views/service-configuration';
 import { Service } from '@shared/Service';
 import { ServiceConfigurationEntryModel } from './models/ServiceConfigurationEntryModel';
-import { CommandEvent } from '@shared/test-manager';
 
 import './SimulationConfigurationEditor.light.scss';
 import './SimulationConfigurationEditor.dark.scss';
@@ -53,7 +50,7 @@ interface State {
 export class SimulationConfigurationEditor extends React.Component<Props, State> {
 
   readonly currentConfig: SimulationConfiguration;
-  readonly simulationStartDate = new Date();
+  readonly simulationStartDate = Date.now() / 1000;
   readonly dateTimeService = DateTimeService.getInstance();
 
   outageEvents: CommOutageEvent[] = [];
@@ -269,15 +266,11 @@ export class SimulationConfigurationEditor extends React.Component<Props, State>
     return (
       <TestConfiguration
         modelDictionary={this.state.modelDictionary}
-        simulationStartDate={this.dateTimeService.format(this.simulationStartDate)}
-        simulationStopDate={this.dateTimeService.format(this.calculateSimulationStopTime())}
+        simulationStartTime={this.simulationStartDate}
+        simulationStopTime={+this.currentConfig.simulation_config.duration + this.simulationStartDate}
         componentWithConsolidatedPhases={this.state.componentsWithConsolidatedPhases}
         onEventsAdded={this.onTestConfigurationEventsAdded} />
     );
-  }
-
-  calculateSimulationStopTime() {
-    return +this.currentConfig.simulation_config.duration * 1000 + this.simulationStartDate.getTime();
   }
 
   onTestConfigurationEventsAdded(payload: { outageEvents: CommOutageEvent[]; faultEvents: FaultEvent[]; commandEvents: CommandEvent[]; }) {
@@ -343,8 +336,8 @@ export class SimulationConfigurationEditor extends React.Component<Props, State>
       })),
       outputOutageList: outageEvent.outputList.map(outputItem => outputItem.mRID),
       event_type: outageEvent.event_type,
-      occuredDateTime: this.dateTimeService.parse(outageEvent.startDateTime).getTime() / 1000,
-      stopDateTime: this.dateTimeService.parse(outageEvent.stopDateTime).getTime() / 1000
+      occuredDateTime: outageEvent.startDateTime,
+      stopDateTime: outageEvent.stopDateTime
     };
   }
 
@@ -357,8 +350,8 @@ export class SimulationConfigurationEditor extends React.Component<Props, State>
         : [faultEvent.mRID],
       phases: faultEvent.phases.map(phase => phase.phaseLabel).join(''),
       event_type: faultEvent.event_type,
-      occuredDateTime: this.dateTimeService.parse(faultEvent.startDateTime).getTime() / 1000.0,
-      stopDateTime: this.dateTimeService.parse(faultEvent.stopDateTime).getTime() / 1000.0
+      occuredDateTime: faultEvent.startDateTime,
+      stopDateTime: faultEvent.stopDateTime
     };
   }
 

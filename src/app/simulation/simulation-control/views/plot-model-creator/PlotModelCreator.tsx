@@ -286,7 +286,7 @@ export class PlotModelCreator extends React.Component<Props, State> {
     const createdPlotModelComponentsWithPhase = [];
     for (const option of options) {
       const selectedPhase = option.value;
-      const plotModelComponentDisplayName = `${selectedComponent.id} (${selectedPhase})`;
+      const plotModelComponentDisplayName = `${selectedComponent.name} (${selectedPhase})`;
       if (currentPlotModel.components.find(e => e.displayName === plotModelComponentDisplayName) === undefined) {
         const plotModelComponentAtSelectedPhase: PlotModelComponent = {
           id: selectedComponent.id,
