@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { Subscription } from 'rxjs';
 import { map, takeWhile } from 'rxjs/operators';
+import { extent } from 'd3-array';
 
 import { TopologyRenderer } from './TopologyRenderer';
 import {
@@ -165,34 +166,18 @@ export class TopologyRendererContainer extends React.Component<Props, State> {
     const keysToLookAt = [
       'batteries', 'switches', 'solarpanels', 'swing_nodes', 'transformers', 'overhead_lines', 'capacitors', 'regulators'
     ];
-    const oldModels = [
-      'acep_psil', 'ieee123', 'ieee123pv', 'ieee13nodeckt', 'ieee13nodecktassets', 'ieee8500', 'j1', 'sourceckt'
-    ];
     const feeder = model.feeders[0];
     const allNodes = Object.keys(feeder)
       .filter(key => keysToLookAt.includes(key))
       .reduce((accumlator, group) => {
         for (const node of feeder[group]) {
-          // Newer models overload x1/y1, x2/y2 for longitude/latitude
-          // while the older models do not use x1/y1, x2/y2 for longitude/latitude
-          // so we need to convert longitude/latitude to x/y when we get a new model
-          if (!oldModels.includes(feeder.name)) {
-            if ('x1' in node) {
-              const { x, y } = this._latLongToXY(node.x1, node.y1);
-              node.x1 = x;
-              node.y1 = y;
-            }
-            if ('x2' in node) {
-              const { x, y } = this._latLongToXY(node.x2, node.y2);
-              node.x2 = x;
-              node.y2 = y;
-            }
-          }
           node.groupName = group;
           accumlator.push(node);
         }
         return accumlator;
       }, []);
+    this._convertLatLongToXYIfNeeded(allNodes);
+
     for (const node of allNodes) {
       const groupName = node.groupName;
       const mRIDs = this.props.mRIDs.get(node.name) || [];
@@ -302,7 +287,6 @@ export class TopologyRendererContainer extends React.Component<Props, State> {
             from: fromNode,
             to: toNode,
           });
-          // }
           break;
         case 'regulators':
           renderableTopology.nodes.push(
@@ -326,6 +310,23 @@ export class TopologyRendererContainer extends React.Component<Props, State> {
       }
     }
     return renderableTopology;
+  }
+
+  private _convertLatLongToXYIfNeeded(nodes: any[]) {
+    const minMax = extent(nodes, node => node.x1);
+    if (minMax[1] - minMax[0] <= 1)
+      for (const node of nodes) {
+        if ('x1' in node) {
+          const { x, y } = this._latLongToXY(node.x1, node.y1);
+          node.x1 = x;
+          node.y1 = y;
+        }
+        if ('x2' in node) {
+          const { x, y } = this._latLongToXY(node.x2, node.y2);
+          node.x2 = x;
+          node.y2 = y;
+        }
+      }
   }
 
   private _latLongToXY(longitude: number, lat: number): { x: number; y: number } {
