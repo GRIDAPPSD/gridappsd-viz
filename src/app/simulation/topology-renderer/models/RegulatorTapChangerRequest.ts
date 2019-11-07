@@ -10,12 +10,13 @@ interface Inputs {
 
 export class RegulatorTapChangerRequest implements MessageRequest {
 
-  readonly url = '/topic/goss.gridappsd.fncs.input';
+  readonly url: string;
   readonly replyTo: string;
   readonly requestBody: any;
 
   constructor(inputs: Inputs) {
-    this.replyTo = `/topic/goss.gridappsd.fncs.input.regulator.${inputs.phase}`;
+    this.url = `/topic/goss.gridappsd.simulation.input.${inputs.simulationId}`;
+    this.replyTo = `/topic/goss.gridappsd.simulation.input.regulator.${inputs.phase}`;
     this.requestBody = {
       command: 'update',
       input: {

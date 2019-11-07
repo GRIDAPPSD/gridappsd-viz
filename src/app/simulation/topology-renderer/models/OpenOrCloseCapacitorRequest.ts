@@ -8,17 +8,18 @@ interface Inputs {
 }
 
 export class OpenOrCloseCapacitorRequest implements MessageRequest {
-  readonly url = '/topic/goss.gridappsd.fncs.input';
-  readonly replyTo = '/topic/goss.gridappsd.fncs.input.capacitor';
+  readonly url: string;
+  readonly replyTo = '/topic/goss.gridappsd.simulation.input.capacitor';
   readonly requestBody: any;
 
   constructor(inputs: Inputs) {
+    this.url = `/topic/goss.gridappsd.simulation.input.${inputs.simulationId}`;
     this.requestBody = {
       command: 'update',
       input: {
         simulation_id: inputs.simulationId,
         message: {
-          timestamp: Math.floor((new Date).getTime() / 1000.0),
+          timestamp: Math.floor(Date.now() / 1000.0),
           difference_mrid: inputs.differenceMRID,
           reverse_differences: [
             {
