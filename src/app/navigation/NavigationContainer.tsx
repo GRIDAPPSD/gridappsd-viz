@@ -6,11 +6,10 @@ import { Navigation } from './Navigation';
 import { Simulation, SimulationQueue, SimulationConfiguration } from '@shared/simulation';
 import { StompClientConnectionStatus, StompClientService } from '@shared/StompClientService';
 import { ConfigurationManager } from '@shared/ConfigurationManager';
-import { AuthenticationService } from '@shared/authentication';
-import { StateStore } from '@shared/state-store';
 
 interface Props {
   onShowSimulationConfigForm: (config: SimulationConfiguration) => void;
+  onLogout: () => void;
 }
 
 interface State {
@@ -21,12 +20,9 @@ interface State {
 
 export class NavigationContainer extends React.Component<Props, State> {
 
-  readonly authenticationService = AuthenticationService.getInstance();
-
   private readonly _simulationQueue = SimulationQueue.getInstance();
   private readonly _stompClientService = StompClientService.getInstance();
   private readonly _configurationManager = ConfigurationManager.getInstance();
-  private readonly _stateStore = StateStore.getInstance();
   private readonly _unsubscriber = new Subject<void>();
 
   constructor(props: Props) {
@@ -38,7 +34,6 @@ export class NavigationContainer extends React.Component<Props, State> {
       version: ''
     };
 
-    this.onLogout = this.onLogout.bind(this);
   }
 
   componentDidMount() {
@@ -83,20 +78,12 @@ export class NavigationContainer extends React.Component<Props, State> {
         websocketStatus={this.state.websocketStatus}
         previousSimulations={this.state.previousSimulations}
         onShowSimulationConfigForm={this.props.onShowSimulationConfigForm}
-        onLogout={this.onLogout}>
+        onLogout={this.props.onLogout}>
         {
           this.props.children
         }
       </Navigation>
     );
-  }
-
-  onLogout() {
-    this._stateStore.update({
-      currentUser: null
-    });
-    this.authenticationService.logout();
-
   }
 
 }

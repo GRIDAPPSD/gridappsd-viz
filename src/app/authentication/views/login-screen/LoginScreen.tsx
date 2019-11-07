@@ -3,14 +3,12 @@ import * as React from 'react';
 import { Input } from '@shared/form';
 import { BasicButton, IconButton } from '@shared/buttons';
 import { Validators } from '@shared/form/validation';
-import { User } from '@shared/authentication';
 import { Tooltip } from '@shared/tooltip';
 
 import './LoginScreen.light.scss';
 import './LoginScreen.dark.scss';
 
 interface Props {
-  authenticatingUser: User;
   onLogin: (username: string, password: string) => void;
 }
 
