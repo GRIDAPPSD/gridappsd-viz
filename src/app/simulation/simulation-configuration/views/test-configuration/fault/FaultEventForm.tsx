@@ -248,14 +248,12 @@ export class FaultEventForm extends React.Component<Props, State> {
   }
 
   onStartDateTimeChanged(value: string) {
-    const parsedDateTime = this.dateTimeService.parse(value);
-    this.formValue.startDateTime = parsedDateTime ? parsedDateTime.getTime() / 1000 : null;
+    this.formValue.startDateTime = this.dateTimeService.parse(value);
     this._enableAddEventButtonIfFormIsValid();
   }
 
   onStopDateTimeChanged(value: string) {
-    const parsedDateTime = this.dateTimeService.parse(value);
-    this.formValue.stopDateTime = parsedDateTime ? parsedDateTime.getTime() / 1000 : null;
+    this.formValue.stopDateTime = this.dateTimeService.parse(value);
     this._enableAddEventButtonIfFormIsValid();
   }
 

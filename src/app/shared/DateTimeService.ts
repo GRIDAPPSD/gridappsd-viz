@@ -17,8 +17,13 @@ export class DateTimeService {
     return this._formatter(date);
   }
 
+  /**
+   * Parse the given date time string and return epoch time in second precision
+   * @param dateString Date time string in YYYY-MM-DD HH:MM:SS
+   */
   parse(dateString: string) {
-    return this._parser(dateString);
+    const parsedDateTime = this._parser(dateString);
+    return parsedDateTime ? parsedDateTime.getTime() / 1000 : null;
   }
 
 }

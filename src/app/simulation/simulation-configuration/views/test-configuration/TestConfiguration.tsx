@@ -15,6 +15,7 @@ import { CommOutageEvent, FaultEvent, FaultKind, CommandEvent } from '@shared/te
 import { Validators } from '@shared/form/validation';
 import { download, DownloadType, generateUniqueId } from '@shared/misc';
 import { CommandEventSummaryTable } from './command/CommandEventSummaryTable';
+import { DateTimeService } from '@shared/DateTimeService';
 
 import './TestConfiguration.light.scss';
 import './TestConfiguration.dark.scss';
@@ -42,6 +43,7 @@ export class TestConfiguration extends React.Component<Props, State> {
   tagForCurrentEvent = '';
 
   private readonly _filePicker = FilePickerService.getInstance();
+  private readonly _dateTimeService = DateTimeService.getInstance();
 
   constructor(props: Props) {
     super(props);
@@ -196,9 +198,18 @@ export class TestConfiguration extends React.Component<Props, State> {
       .pipe(filter(content => Boolean(content)))
       .subscribe({
         next: content => {
-          const faultEvents = this.state.faultEvents.concat(content.faultEvents || []);
-          const outageEvents = this.state.outageEvents.concat(content.outageEvents || []);
-          const commandEvents = this.state.commandEvents.concat(content.commandEvents || []);
+          const faultEvents = this._parseDateTimeStringsToEpochTimesWithSecondPrecision(
+            this.state.faultEvents.concat(content.faultEvents || [])
+          ) as FaultEvent[];
+
+          const outageEvents = this._parseDateTimeStringsToEpochTimesWithSecondPrecision(
+            this.state.outageEvents.concat(content.outageEvents || [])
+          ) as CommOutageEvent[];
+
+          const commandEvents = this._parseDateTimeStringsToEpochTimesWithSecondPrecision(
+            this.state.commandEvents.concat(content.commandEvents || [])
+          ) as CommandEvent[];
+
           this.setState({
             faultEvents,
             outageEvents,
@@ -211,7 +222,18 @@ export class TestConfiguration extends React.Component<Props, State> {
           });
         }
       });
+  }
 
+  private _parseDateTimeStringsToEpochTimesWithSecondPrecision(events: Array<FaultEvent | CommOutageEvent | CommandEvent>) {
+    for (const event of events) {
+      if (typeof event.stopDateTime === 'string')
+        event.stopDateTime = this._dateTimeService.parse(event.stopDateTime);
+      if ('startDateTime' in event && typeof event.startDateTime === 'string')
+        event.startDateTime = this._dateTimeService.parse(event.startDateTime);
+      else if ('occuredDateTime' in event && typeof event.occuredDateTime === 'string')
+        event.occuredDateTime = this._dateTimeService.parse(event.occuredDateTime);
+    }
+    return events;
   }
 
   showFormForSelectedEventType() {
@@ -327,12 +349,26 @@ export class TestConfiguration extends React.Component<Props, State> {
     download(
       'events.json',
       JSON.stringify({
-        outageEvents: this.state.outageEvents,
-        faultEvents: this.state.faultEvents,
-        commandEvents: this.state.commandEvents
+        outageEvents: this._convertEpochTimesToDateTimeStrings(this.state.outageEvents),
+        faultEvents: this._convertEpochTimesToDateTimeStrings(this.state.faultEvents),
+        commandEvents: this._convertEpochTimesToDateTimeStrings(this.state.commandEvents)
       }, null, 4),
       DownloadType.JSON
     );
+  }
+
+  private _convertEpochTimesToDateTimeStrings(events: Array<FaultEvent | CommOutageEvent | CommandEvent>) {
+    const resultedEvents = [];
+    for (const event of events) {
+      const clonedEvent = { ...event } as any;
+      clonedEvent.stopDateTime = this._dateTimeService.format(event.stopDateTime);
+      if ('startDateTime' in event)
+        clonedEvent.startDateTime = this._dateTimeService.format(event.startDateTime);
+      else if ('occuredDateTime' in event)
+        clonedEvent.occuredDateTime = this._dateTimeService.format(event.occuredDateTime);
+      resultedEvents.push(clonedEvent);
+    }
+    return resultedEvents;
   }
 
 }

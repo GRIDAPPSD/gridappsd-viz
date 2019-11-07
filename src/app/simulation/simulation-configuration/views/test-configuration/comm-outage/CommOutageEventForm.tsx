@@ -500,13 +500,11 @@ export class CommOutageEventForm extends React.Component<Props, State> {
   }
 
   onStartDateTimeChanged(value: string) {
-    const parsedDateTime = this.dateTimeService.parse(value);
-    this.formValue.startDateTime = parsedDateTime ? parsedDateTime.getTime() / 1000 : null;
+    this.formValue.startDateTime = this.dateTimeService.parse(value);
   }
 
   onStopDateTimeChanged(value: string) {
-    const parsedDateTime = this.dateTimeService.parse(value);
-    this.formValue.stopDateTime = parsedDateTime ? parsedDateTime.getTime() / 1000 : null;
+    this.formValue.stopDateTime = this.dateTimeService.parse(value);
   }
 
   disableAddEventButton(): boolean {
