@@ -3,7 +3,6 @@ import { Application } from '@shared/Application';
 import { Service } from '@shared/Service';
 import { ModelDictionary, ModelDictionaryComponent } from '@shared/topology';
 import { PlotModel } from '@shared/plot-model/PlotModel';
-import { User } from '@shared/authentication';
 
 export interface ApplicationState {
   simulationId: string;
@@ -16,5 +15,4 @@ export interface ApplicationState {
   modelDictionary: ModelDictionary;
   modelDictionaryComponentsWithConsolidatedPhases: ModelDictionaryComponent[];
   plotModels: PlotModel[];
-  currentUser: User;
 }

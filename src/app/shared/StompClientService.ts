@@ -6,6 +6,12 @@ import { ConfigurationManager } from './ConfigurationManager';
 
 export type StompClientConnectionStatus = 'NOT_CONNECTED' | 'CONNECTING' | 'CONNECTED' | 'NEW';
 
+export const enum StompClientInitializationResult {
+  OK = '0K',
+  AUTHENTICATION_FAILURE = 'AUTHENTICATION_FAILURE',
+  CONNECTION_FAILURE = 'CONNECTION_FAILURE'
+}
+
 export class StompClientService {
 
   private static readonly _INSTANCE = new StompClientService();
@@ -54,23 +60,23 @@ export class StompClientService {
       });
   }
 
-  connect(username: string, password: string): Promise<void> {
+  connect(username: string, password: string): Promise<StompClientInitializationResult> {
     this._username = username;
     this._password = password;
-    return new Promise<void>((resolve, reject) => {
+    return new Promise<StompClientInitializationResult>((resolve, reject) => {
       this._client.connect(
         this._username,
         this._password,
         () => {
-          resolve();
+          resolve(StompClientInitializationResult.OK);
           this._connectionEstablished();
 
           // need to reevaluate this
           sessionStorage.setItem('username', username);
           sessionStorage.setItem('password', password);
         },
-        reject,
-        reject
+        () => reject(StompClientInitializationResult.AUTHENTICATION_FAILURE),
+        () => reject(StompClientInitializationResult.CONNECTION_FAILURE)
       );
     });
   }

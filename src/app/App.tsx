@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { Route, Redirect } from 'react-router-dom';
-import { map, take, filter, switchMap } from 'rxjs/operators';
+import { map, take, filter } from 'rxjs/operators';
 
 import { Application } from '@shared/Application';
 import { AvailableApplicationsAndServices } from './available-applications-and-services';
@@ -42,6 +42,7 @@ import { AvailableApplicationList } from './simulation/applications/AvailableApp
 import { VoltageViolationContainer } from './simulation/voltage-violation/VoltageViolationContainer';
 import { NavigationContainer } from './navigation';
 import { AuthenticationContainer } from './authentication/AuthenticationContainer';
+import { AuthenticationService } from './authentication/services/AuthenticationService';
 import { AlarmsContainer } from './simulation/alarms';
 import { Settings } from './settings';
 
@@ -71,6 +72,7 @@ export class App extends React.Component<Props, State> {
   private readonly _overlayService = OverlayService.getInstance();
   private readonly _simulationQueue = SimulationQueue.getInstance();
   private readonly _availableModelDictionaries = new Map<string, ModelDictionary>();
+  private readonly _authenticationService = AuthenticationService.getInstance();
 
   constructor(props: any) {
     super(props);
@@ -91,8 +93,7 @@ export class App extends React.Component<Props, State> {
     this._stompClientService.statusChanges()
       .pipe(
         filter(status => status === 'CONNECTED'),
-        switchMap(() => this._stateStore.select('currentUser')),
-        filter(user => user !== null && user.isAuthenticated),
+        filter(() => this._authenticationService.isAuthenticated()),
         take(1)
       )
       .subscribe({
@@ -237,7 +238,8 @@ export class App extends React.Component<Props, State> {
               <NavigationContainer
                 onShowSimulationConfigForm={
                   (config: SimulationConfiguration) => this.showSimulationConfigForm(config, props.history)
-                }>
+                }
+                onLogout={() => this._authenticationService.logout()}>
                 <Settings />
               </NavigationContainer>
               <Route

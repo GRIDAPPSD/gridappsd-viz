@@ -1,53 +1,62 @@
 import * as React from 'react';
-import { Subscription } from 'rxjs';
 
-import { User, AuthenticationService } from '@shared/authentication';
-import { StateStore } from '@shared/state-store';
 import { Authentication } from './Authentication';
+import { AuthenticationService } from './services/AuthenticationService';
+import { AuthenticationResult } from './models/AuthenticationResult';
+import { AuthenticationStatusCode } from './models/AuthenticationStatusCode';
 
 interface Props {
 }
 
 interface State {
-  authenticatingUser: User;
+  authenticationResult: AuthenticationResult;
 }
 
 export class AuthenticationContainer extends React.Component<Props, State> {
 
-  private readonly _stateStore = StateStore.getInstance();
   private readonly _authenticationService = AuthenticationService.getInstance();
-
-  private _authenticatingUserSubscription: Subscription;
 
   constructor(props: Props) {
     super(props);
 
     this.state = {
-      authenticatingUser: null
+      authenticationResult: this._login()
     };
-
-    this._stateStore.update({
-      currentUser: this._authenticationService.findAuthenticatedUserInCurrentSession()
-    });
 
     this.tryLogin = this.tryLogin.bind(this);
   }
 
+  private _login() {
+    if (this._authenticationService.isAuthenticated())
+      return {
+        statusCode: AuthenticationStatusCode.OK
+      };
+    return {
+      statusCode: AuthenticationStatusCode.UKNOWN
+    };
+  }
+
   componentDidMount() {
-    this._authenticatingUserSubscription = this._stateStore.select('currentUser')
+    this._authenticationService.sessionEnded()
       .subscribe({
-        next: user => this.setState({ authenticatingUser: user })
+        next: () => {
+          this._logout();
+        }
       });
   }
 
-  componentWillUnmount() {
-    this._authenticatingUserSubscription.unsubscribe();
+  private _logout() {
+    this.setState({
+      authenticationResult: {
+        statusCode: AuthenticationStatusCode.UKNOWN
+      }
+    });
   }
 
   render() {
     return (
       <Authentication
-        authenticatingUser={this.state.authenticatingUser}
+        authenticationResult={this.state.authenticationResult}
         tryLogin={this.tryLogin}>
         {this.props.children}
       </Authentication>
@@ -56,12 +65,9 @@ export class AuthenticationContainer extends React.Component<Props, State> {
 
   tryLogin(username: string, password: string) {
     this._authenticationService.authenticate(username, password)
-      .then(user => {
-        this._stateStore.update({
-          currentUser: user
-        });
+      .then(authenticationResult => {
         this.setState({
-          authenticatingUser: user
+          authenticationResult
         });
       });
   }
