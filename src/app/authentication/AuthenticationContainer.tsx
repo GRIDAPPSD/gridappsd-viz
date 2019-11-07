@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { Subscription } from 'rxjs';
 
 import { Authentication } from './Authentication';
 import { AuthenticationService } from './services/AuthenticationService';
@@ -15,6 +16,8 @@ interface State {
 export class AuthenticationContainer extends React.Component<Props, State> {
 
   private readonly _authenticationService = AuthenticationService.getInstance();
+
+  private _sessionSubscription: Subscription;
 
   constructor(props: Props) {
     super(props);
@@ -37,7 +40,7 @@ export class AuthenticationContainer extends React.Component<Props, State> {
   }
 
   componentDidMount() {
-    this._authenticationService.sessionEnded()
+    this._sessionSubscription = this._authenticationService.sessionEnded()
       .subscribe({
         next: () => {
           this._logout();
@@ -51,6 +54,10 @@ export class AuthenticationContainer extends React.Component<Props, State> {
         statusCode: AuthenticationStatusCode.UKNOWN
       }
     });
+  }
+
+  componentWillUnmount() {
+    this._sessionSubscription.unsubscribe();
   }
 
   render() {

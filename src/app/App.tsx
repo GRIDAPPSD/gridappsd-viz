@@ -61,6 +61,7 @@ export class App extends React.Component<Props, State> {
 
   readonly componentMRIDs = new Map<string, string & string[]>();
   readonly componentPhases = new Map<string, string[]>();
+  readonly authenticationService = AuthenticationService.getInstance();
 
   shouldRedirect = false;
   tabGroup: TabGroup;
@@ -72,9 +73,8 @@ export class App extends React.Component<Props, State> {
   private readonly _overlayService = OverlayService.getInstance();
   private readonly _simulationQueue = SimulationQueue.getInstance();
   private readonly _availableModelDictionaries = new Map<string, ModelDictionary>();
-  private readonly _authenticationService = AuthenticationService.getInstance();
 
-  constructor(props: any) {
+  constructor(props: Props) {
     super(props);
 
     this.state = {
@@ -93,7 +93,6 @@ export class App extends React.Component<Props, State> {
     this._stompClientService.statusChanges()
       .pipe(
         filter(status => status === 'CONNECTED'),
-        filter(() => this._authenticationService.isAuthenticated()),
         take(1)
       )
       .subscribe({
@@ -239,7 +238,7 @@ export class App extends React.Component<Props, State> {
                 onShowSimulationConfigForm={
                   (config: SimulationConfiguration) => this.showSimulationConfigForm(config, props.history)
                 }
-                onLogout={() => this._authenticationService.logout()}>
+                onLogout={this.authenticationService.logout}>
                 <Settings />
               </NavigationContainer>
               <Route
