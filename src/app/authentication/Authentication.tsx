@@ -1,14 +1,15 @@
 import * as React from 'react';
 
-import { User } from '@shared/authentication';
+import { NotificationBanner } from '@shared/notification-banner';
 import { LoginScreen } from './views/login-screen/LoginScreen';
+import { AuthenticationStatusCode } from './models/AuthenticationStatusCode';
+import { AuthenticationResult } from './models/AuthenticationResult';
 
 import './Authentication.light.scss';
 import './Authentication.dark.scss';
-import { NotificationBanner } from '@shared/notification-banner';
 
 interface Props {
-  authenticatingUser: User;
+  authenticationResult: AuthenticationResult;
   tryLogin: (username: string, password: string) => void;
 }
 
@@ -32,9 +33,8 @@ export class Authentication extends React.Component<Props, State> {
 
   componentDidUpdate(prevProps: Props) {
     if (
-      this.props.authenticatingUser &&
-      this.props.authenticatingUser !== prevProps.authenticatingUser &&
-      !this.props.authenticatingUser.isAuthenticated
+      this.props.authenticationResult !== prevProps.authenticationResult &&
+      this.props.authenticationResult.statusCode !== AuthenticationStatusCode.OK
     ) {
       this.setState({
         showFailedLoginNofitification: true
@@ -48,18 +48,35 @@ export class Authentication extends React.Component<Props, State> {
   }
 
   render() {
-    if (this.props.authenticatingUser && this.props.authenticatingUser.isAuthenticated)
-      return this.props.children;
-    return (
-      <>
-        <LoginScreen
-          authenticatingUser={this.props.authenticatingUser}
-          onLogin={this.tryLogin} />
-        <NotificationBanner show={this.state.showFailedLoginNofitification}>
-          Incorrect username or password
-        </NotificationBanner>
-      </>
-    );
+    switch (this.props.authenticationResult.statusCode) {
+      case AuthenticationStatusCode.OK:
+        return this.props.children;
+
+      case AuthenticationStatusCode.INCORRECT_CREDENTIALS:
+        return (
+          <>
+            <LoginScreen onLogin={this.tryLogin} />
+            <NotificationBanner show={this.state.showFailedLoginNofitification}>
+              Incorrect username or password
+            </NotificationBanner>
+          </>
+        );
+
+      case AuthenticationStatusCode.SERVER_FAILURE:
+        return (
+          <>
+            <LoginScreen onLogin={this.tryLogin} />
+            <NotificationBanner show={this.state.showFailedLoginNofitification}>
+              There was a problem contacting the server
+            </NotificationBanner>
+          </>
+        );
+
+      default:
+        return (
+          <LoginScreen onLogin={this.tryLogin} />
+        );
+    }
   }
 
   tryLogin(username: string, password: string) {
