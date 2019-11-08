@@ -1,4 +1,4 @@
 export interface TimeSeriesDataPoint {
-  primitiveX: Date;
-  primitiveY: number;
+  unscaledX: Date;
+  unscaledY: number;
 }

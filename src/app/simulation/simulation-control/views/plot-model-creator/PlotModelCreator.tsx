@@ -280,16 +280,17 @@ export class PlotModelCreator extends React.Component<Props, State> {
     });
   }
 
-  onComponentPhasesSelected(options: Option<string>[]) {
+  onComponentPhasesSelected(selectedPhaseOptions: Option<string>[]) {
     const currentPlotModel = this.state.currentPlotModel;
     const selectedComponent = this.state.selectedComponent;
     const createdPlotModelComponentsWithPhase = [];
-    for (const option of options) {
-      const selectedPhase = option.value;
+    for (let i = 0; i < selectedPhaseOptions.length; i++) {
+      const selectedPhaseOption = selectedPhaseOptions[i];
+      const selectedPhase = selectedPhaseOption.value;
       const plotModelComponentDisplayName = `${selectedComponent.name} (${selectedPhase})`;
       if (currentPlotModel.components.find(e => e.displayName === plotModelComponentDisplayName) === undefined) {
         const plotModelComponentAtSelectedPhase: PlotModelComponent = {
-          id: selectedComponent.id,
+          id: selectedComponent.measurementMRIDs[i],
           displayName: plotModelComponentDisplayName,
           phase: selectedPhase
         };

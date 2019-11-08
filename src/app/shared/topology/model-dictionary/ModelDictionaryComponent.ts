@@ -20,4 +20,5 @@ export interface ModelDictionaryComponent {
   conductingEquipmentMRIDs: string[];
   type: ModelDictionaryComponentType;
   name: string;
+  measurementMRIDs: string[];
 }

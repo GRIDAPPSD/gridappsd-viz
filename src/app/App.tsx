@@ -379,6 +379,7 @@ export class App extends React.Component<Props, State> {
   // Find components with the same name, and group their phases into one
   private _consolidatePhasesForComponents(modelDictionary: ModelDictionary) {
     const componentWithGroupPhasesMap = new Map<string, ModelDictionaryComponent>();
+    const measurementMRIDMap = new Map<string, Array<{ phase: string; mrid: string; }>>();
     for (const measurement of modelDictionary.measurements) {
       const name = measurement.measurementType === ModelDictionaryComponentType.VOLTAGE
         ? measurement.ConnectivityNode
@@ -395,11 +396,18 @@ export class App extends React.Component<Props, State> {
           displayName: `${name} (${phases})`,
           phases: [phases],
           conductingEquipmentMRIDs: [measurement.ConductingEquipment_mRID],
-          type: measurement.measurementType as ModelDictionaryComponentType
+          type: measurement.measurementType as ModelDictionaryComponentType,
+          measurementMRIDs: []
         };
+        measurementMRIDMap.set(id, [{ phase: phases, mrid: measurement.mRID }]);
         componentWithGroupPhasesMap.set(id, componentInMeasurement);
       } else {
         if (!componentInMeasurement.phases.includes(phases)) {
+          const measurementMRIDAndPhaseArray = measurementMRIDMap.get(id);
+          measurementMRIDAndPhaseArray.push({ phase: phases, mrid: measurement.mRID });
+          componentInMeasurement.measurementMRIDs = measurementMRIDAndPhaseArray.sort(
+            (a, b) => a.phase.localeCompare(b.phase)
+          ).map(e => e.mrid);
           componentInMeasurement.phases.push(phases);
           componentInMeasurement.phases.sort((a, b) => a.localeCompare(b));
           componentInMeasurement.displayName = `${name} (${componentInMeasurement.phases.join(', ')})`;
