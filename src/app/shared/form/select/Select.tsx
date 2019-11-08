@@ -9,6 +9,7 @@ import { SelectedOptionList } from './SelectedOptionList';
 import { ValidationErrorMessages } from '../validation';
 import { BasicButton } from '@shared/buttons';
 import { Paginator } from '@shared/paginator';
+import { fuzzySearch } from '@shared/misc';
 
 import './Select.light.scss';
 import './Select.dark.scss';
@@ -234,20 +235,16 @@ export class Select<T, E extends boolean> extends React.Component<Props<T, E>, S
       });
     else
       this.setState((state, props) => {
-        const specialTokens = ['(', ')', '[', ']', '{', '}', '?', '\\', '/', '*', '+', '-', '.', '^', '$'];
-        // Input sanitization
-        const tokens = newFilterValue.split('')
-          .map(token => specialTokens.includes(token) ? `\\${token}` : token);
-        const pattern = new RegExp(tokens.join('[\\s\\S]*'), 'ig');
+        const matchFinder = fuzzySearch(newFilterValue);
         // If the user keeps typing
         // then it's more performant to use the filtered list to narrow down the result
         // otherwise, if the user is deleting, then use the props option list
         if (newFilterValue.length > oldFilterValue.length)
           return {
-            filteredOptions: state.filteredOptions.filter(option => pattern.test(option.label))
+            filteredOptions: state.filteredOptions.filter(option => matchFinder(option.label))
           };
         return {
-          filteredOptions: props.options.filter(option => pattern.test(option.label))
+          filteredOptions: props.options.filter(option => matchFinder(option.label))
         };
       });
   }

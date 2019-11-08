@@ -67,46 +67,47 @@ export function fuzzySearch(needle: string, hightlightMatches = false): (haystac
   if (needle === '' || needle === undefined)
     return () => null;
 
-  if (!hightlightMatches) {
-    const specialTokens = ['(', ')', '[', ']', '{', '}', '?', '\\', '/', '*', '+', '-', '.', '^', '$'];
-    const tokens = needle.split('')
-      .map(token => specialTokens.includes(token) ? `\\${token}` : hightlightMatches ? `(${token})` : token);
-    const pattern = new RegExp(tokens.join('[\\s\\S]*'), 'i');
-    return (haystack: string) => {
-      const matches = pattern.test(haystack);
-      if (!matches)
-        return null;
-      return {
-        inaccuracy: Infinity,
-        input: haystack,
-        boundaries: [
-          {
-            start: 0,
-            end: undefined,
-            highlight: false
-          }
-        ]
-      };
-    };
-  }
+  if (!hightlightMatches)
+    return _fuzzySearchWithNoHighlighting(needle);
 
+  return _fuzzySearchWithHighlighting(needle);
+}
+
+function _fuzzySearchWithNoHighlighting(needle: string) {
+  const specialTokens = ['(', ')', '[', ']', '{', '}', '?', '\\', '/', '*', '+', '-', '.', '^', '$'];
+  const tokens = needle.split('')
+    .map(token => specialTokens.includes(token) ? `\\${token}` : token);
+  const pattern = new RegExp(tokens.join('[\\s\\S]*'), 'i');
+  return (haystack: string) => {
+    const matches = pattern.test(haystack);
+    if (!matches)
+      return null;
+    return {
+      inaccuracy: Infinity,
+      input: haystack,
+      boundaries: [
+        {
+          start: 0,
+          end: undefined,
+          highlight: false
+        }
+      ]
+    };
+  };
+}
+
+function _fuzzySearchWithHighlighting(needle: string) {
   return (haystack: string) => {
     if (!haystack)
       return null;
     const originalHaystack = haystack;
+    const boundaries: FuzzySearchBoundary[] = [];
+    let startOfCurrentMatch = haystack.indexOf(needle[0]);
+    let inaccuracy = needle.length === 1 ? startOfCurrentMatch : 0;
+
     haystack = haystack.toLowerCase();
     needle = needle.toLowerCase();
-    let startOfCurrentMatch = haystack.indexOf(needle[0]);
-    if (startOfCurrentMatch === -1)
-      return null;
-    const boundaries: FuzzySearchBoundary[] = [];
-    if (startOfCurrentMatch > 0)
-      boundaries.push({
-        start: 0,
-        end: startOfCurrentMatch,
-        highlight: false
-      });
-    let inaccuracy = needle.length === 1 ? startOfCurrentMatch : 0;
+
     for (const piece of needle) {
       const endOfLastMatch = boundaries.length > 0 ? boundaries[boundaries.length - 1].end : 0;
       startOfCurrentMatch = haystack.indexOf(piece, endOfLastMatch);
