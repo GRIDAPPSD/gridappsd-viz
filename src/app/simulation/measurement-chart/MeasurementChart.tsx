@@ -87,8 +87,8 @@ export class MeasurementChart extends React.Component<Props, State> {
     this._yScale = scaleLinear()
       .range([this.height - this._margin.bottom, this._margin.top]);
     this._lineGenerator = line<TimeSeriesDataPoint>()
-      .x(dataPoint => this._timeScale(dataPoint.primitiveX))
-      .y(dataPoint => this._yScale(dataPoint.primitiveY));
+      .x(dataPoint => this._timeScale(dataPoint.unscaledX))
+      .y(dataPoint => this._yScale(dataPoint.unscaledY));
   }
 
   private _render() {
@@ -109,8 +109,8 @@ export class MeasurementChart extends React.Component<Props, State> {
   private _calculateXYAxisExtents(timeSeries: TimeSeries[]): { xExtent: [Date, Date], yExtent: [number, number] } {
     const dataPoints: Array<TimeSeriesDataPoint> = timeSeries.reduce((points, series) => points.concat(series.points), []);
     return {
-      xExtent: extent<TimeSeriesDataPoint, Date>(dataPoints, point => point.primitiveX),
-      yExtent: extent<TimeSeriesDataPoint, number>(dataPoints, point => point.primitiveY)
+      xExtent: extent<TimeSeriesDataPoint, Date>(dataPoints, point => point.unscaledX),
+      yExtent: extent<TimeSeriesDataPoint, number>(dataPoints, point => point.unscaledY)
     };
   }
 

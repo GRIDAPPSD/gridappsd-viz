@@ -82,7 +82,6 @@ export class SimulationOutputService {
                 connectivityNode: measurementInModelDictionary.ConnectivityNode,
                 conductingEquipmentMRID: measurementInModelDictionary.ConductingEquipment_mRID
               };
-              measurements.set(measurementInModelDictionary.name, measurement);
               measurements.set(mrid, measurement);
               measurements.set(measurementInModelDictionary.ConductingEquipment_name, measurement);
               measurements.set(measurementInModelDictionary.ConnectivityNode, measurement);

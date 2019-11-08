@@ -73,9 +73,13 @@ export class MeasurementChartContainer extends React.Component<Props, State> {
     const timeSeriesName = component.displayName;
     const timeSeriesId = `${plotModel.name}_${timeSeriesName}`;
     const timeSeries: TimeSeries = this._timeSeries.get(timeSeriesId) || { name: timeSeriesName, points: [] };
-    if (timeSeries.points.length === 20)
-      timeSeries.points.shift();
-    timeSeries.points.push(this._getDataPointForTimeSeries(plotModel, component, measurements));
+    const nextTimeStepDataPoint = this._getDataPointForTimeSeries(plotModel, component, measurements);
+
+    if (nextTimeStepDataPoint) {
+      if (timeSeries.points.length === 20)
+        timeSeries.points.shift();
+      timeSeries.points.push(nextTimeStepDataPoint);
+    }
     this._timeSeries.set(timeSeriesId, timeSeries);
     return timeSeries;
   }
@@ -85,35 +89,26 @@ export class MeasurementChartContainer extends React.Component<Props, State> {
     component: PlotModelComponent,
     measurements: Map<string, SimulationOutputMeasurement>
   ): TimeSeriesDataPoint {
-    const dataPoint: TimeSeriesDataPoint = {
-      primitiveX: new Date(this._simulationOutputService.getOutputTimestamp() * 1000),
-      primitiveY: 0
-    };
-    const valueType = plotModel.useMagnitude ? 'magnitude' : 'angle';
-    switch (plotModel.componentType) {
-      case ModelDictionaryComponentType.VOLTAGE:
-        const voltageMeasurement = measurements.get(component.id);
-        if (voltageMeasurement !== undefined)
-          dataPoint.primitiveY = voltageMeasurement[valueType];
-        else
-          console.warn(`No measurement found for component "${component.id}", plot name "${plotModel.name}"`);
-        break;
-      case ModelDictionaryComponentType.POWER:
-        const powerMeasurement = measurements.get(component.id);
-        if (powerMeasurement !== undefined)
-          dataPoint.primitiveY = powerMeasurement[valueType];
-        else
-          console.warn(`No measurement found for component "${component.id}", plot name "${plotModel.name}"`);
-        break;
-      case ModelDictionaryComponentType.TAP:
-        const tapMeasurement = measurements.get(component.id);
-        if (tapMeasurement !== undefined)
-          dataPoint.primitiveY = tapMeasurement.value;
-        else
-          console.warn(`No measurement found for component "${component.id}", plot name "${plotModel.name}"`);
-        break;
+    const measurement = measurements.get(component.id);
+    if (measurement !== undefined) {
+      const dataPoint: TimeSeriesDataPoint = {
+        unscaledX: new Date(this._simulationOutputService.getOutputTimestamp() * 1000),
+        unscaledY: 0
+      };
+      switch (plotModel.componentType) {
+        case ModelDictionaryComponentType.VOLTAGE:
+        case ModelDictionaryComponentType.POWER:
+          const valueType = plotModel.useMagnitude ? 'magnitude' : 'angle';
+          dataPoint.unscaledY = measurement[valueType];
+          return dataPoint;
+        case ModelDictionaryComponentType.TAP:
+          dataPoint.unscaledY = measurement.value;
+          return dataPoint;
+      }
+    } else {
+      console.warn(`No measurement found for component "${component.id}", plot name "${plotModel.name}"`);
     }
-    return dataPoint;
+    return null;
   }
 
   private _createDefaultMeasurementChartModel(plotModel: PlotModel): MeasurementChartModel {
