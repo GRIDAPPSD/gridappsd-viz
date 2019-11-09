@@ -86,7 +86,7 @@ export class SimulationControlService {
   }
 
   resumeSimulation() {
-    this._currentSimulationStatus = SimulationStatus.RESUMED;
+    this._currentSimulationStatus = SimulationStatus.STARTED;
     this._currentSimulationStatusNotifer.next(SimulationStatus.RESUMED);
     this._sendSimulationControlCommand('resume');
   }
