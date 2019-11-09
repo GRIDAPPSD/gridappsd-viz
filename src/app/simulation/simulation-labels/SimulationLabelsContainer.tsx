@@ -1,7 +1,8 @@
 import * as React from 'react';
-import { Subscription } from 'rxjs';
+import { Subject } from 'rxjs';
+import { takeUntil, filter } from 'rxjs/operators';
 
-import { SimulationOutputService, SimulationQueue } from '@shared/simulation';
+import { SimulationOutputService, SimulationQueue, SimulationStatus, SimulationControlService } from '@shared/simulation';
 import { SimulationLabel } from './SimulationLabel';
 
 interface Props {
@@ -45,7 +46,8 @@ export class SimulationLabelsContainer extends React.Component<Props, State> {
 
   private readonly _simulationOutputService = SimulationOutputService.getInstance();
   private readonly _simulationQueue = SimulationQueue.getInstance();
-  private _simulationOutputMeasurementsStream: Subscription;
+  private readonly _simulationControlService = SimulationControlService.getInstance();
+  private readonly _unsubscriber = new Subject<void>();
 
   constructor(props: Props) {
     super(props);
@@ -58,10 +60,26 @@ export class SimulationLabelsContainer extends React.Component<Props, State> {
 
   componentDidMount() {
     this._subscribeToSimulationOutputMeasurementsStream();
+    this._resetLabelsWhenSimulationStarts();
   }
 
+  private _resetLabelsWhenSimulationStarts() {
+    this._simulationControlService.statusChanges()
+      .pipe(
+        takeUntil(this._unsubscriber),
+        filter(status => status === SimulationStatus.STARTED)
+      )
+      .subscribe({
+        next: () => {
+          this.setState({
+            labels: []
+          });
+        }
+      });
+  }
   componentWillUnmount() {
-    this._simulationOutputMeasurementsStream.unsubscribe();
+    this._unsubscriber.next();
+    this._unsubscriber.complete();
   }
 
   render() {
@@ -73,7 +91,8 @@ export class SimulationLabelsContainer extends React.Component<Props, State> {
   private _subscribeToSimulationOutputMeasurementsStream() {
     const simulationName = this._simulationQueue.getActiveSimulation().name;
 
-    this._simulationOutputMeasurementsStream = this._simulationOutputService.simulationOutputMeasurementsReceived()
+    this._simulationOutputService.simulationOutputMeasurementsReceived()
+      .pipe(takeUntil(this._unsubscriber))
       .subscribe({
         next: measurements => {
           const nodeNames: { [key: string]: string[] } = NODES_PER_TOPOLOGY[simulationName];
