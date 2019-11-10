@@ -393,25 +393,24 @@ export class App extends React.Component<Props, State> {
           name,
           conductingEquipmentName: measurement.ConductingEquipment_name,
           conductingEquipmentType: measurement.ConductingEquipment_type,
-          displayName: `${name} (${phases})`,
-          phases: [phases],
-          conductingEquipmentMRIDs: [measurement.ConductingEquipment_mRID],
+          displayName: '',
+          phases: [],
+          conductingEquipmentMRIDs: [],
           type: measurement.measurementType as ModelDictionaryComponentType,
           measurementMRIDs: []
         };
-        measurementMRIDMap.set(id, [{ phase: phases, mrid: measurement.mRID }]);
+        measurementMRIDMap.set(id, []);
         componentWithGroupPhasesMap.set(id, componentInMeasurement);
-      } else {
-        if (!componentInMeasurement.phases.includes(phases)) {
-          const measurementMRIDAndPhaseArray = measurementMRIDMap.get(id);
-          measurementMRIDAndPhaseArray.push({ phase: phases, mrid: measurement.mRID });
-          componentInMeasurement.measurementMRIDs = measurementMRIDAndPhaseArray.sort(
-            (a, b) => a.phase.localeCompare(b.phase)
-          ).map(e => e.mrid);
-          componentInMeasurement.phases.push(phases);
-          componentInMeasurement.phases.sort((a, b) => a.localeCompare(b));
-          componentInMeasurement.displayName = `${name} (${componentInMeasurement.phases.join(', ')})`;
-        }
+      }
+      if (!componentInMeasurement.phases.includes(phases)) {
+        const measurementMRIDAndPhaseArray = measurementMRIDMap.get(id);
+        measurementMRIDAndPhaseArray.push({ phase: phases, mrid: measurement.mRID });
+        componentInMeasurement.measurementMRIDs = measurementMRIDAndPhaseArray.sort(
+          (a, b) => a.phase.localeCompare(b.phase)
+        ).map(e => e.mrid);
+        componentInMeasurement.phases.push(phases);
+        componentInMeasurement.phases.sort((a, b) => a.localeCompare(b));
+        componentInMeasurement.displayName = `${name} (${componentInMeasurement.phases.join(', ')})`;
         componentInMeasurement.conductingEquipmentMRIDs.push(measurement.ConductingEquipment_mRID);
       }
     }
