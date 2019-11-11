@@ -149,7 +149,7 @@
 
     .form-control__label {
         opacity: 0;
-        animation: node-searcher-fade-animation 750ms 600ms ease forwards, node-searcher-shift-left-animation 500ms 1000ms ease forwards;
+        animation: node-searcher-fade-animation 650ms 500ms ease forwards, node-searcher-shift-left-animation 400ms 900ms ease forwards;
     }
 
     @keyframes node-searcher-fade-animation {
@@ -174,7 +174,7 @@
 
     .node-searcher__body .icon-button {
         opacity: 0;
-        animation: node-searcher-fade-animation 750ms 600ms ease forwards, node-searcher-shift-right-animation 500ms 1000ms ease forwards;
+        animation: node-searcher-fade-animation 650ms 500ms ease forwards, node-searcher-shift-right-animation 400ms 900ms ease forwards;
     }
 
     @keyframes node-searcher-shift-right-animation {
@@ -190,7 +190,7 @@
     .input-field__input {
         opacity: 0;
         transform: scale(0);
-        animation: node-searcher-fade-and-scale-animation 500ms 175ms ease forwards, node-searcher-search-text-color-animation 500ms 1500ms ease forwards;
+        animation: node-searcher-fade-and-scale-animation 400ms 175ms ease forwards, node-searcher-search-text-color-animation 500ms 1400ms ease forwards;
         transform-origin: 50% 100%;
         position: relative;
         transition: transform 0.25s ease;
@@ -220,7 +220,7 @@
     }
 
     .input-field-wrapper {
-        animation: node-searcher-shift-right-animation 500ms 1000ms ease forwards;
+        animation: node-searcher-shift-right-animation 400ms 900ms ease forwards;
     }
 
     .node-searcher__body__search-result:not(:empty):nth-child(odd) {
