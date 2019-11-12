@@ -101,14 +101,14 @@ export class FaultEventForm extends React.Component<Props, State> {
         <Select
           label='Phase'
           multiple
-          isOptionSelected={() => this.state.phaseOptions.length === 1}
+          selectedOptionFinder={() => this.state.phaseOptions.length === 1}
           options={this.state.phaseOptions}
           onChange={this.onPhaseChanged} />
         <Select
           multiple={false}
           label='Phase Connected Fault Kind'
           options={this.state.faultKindOptions}
-          isOptionSelected={option => option.value === this.formValue.faultKind}
+          selectedOptionFinder={option => option.value === this.formValue.faultKind}
           onChange={this.onFaultKindChanged} />
         <FormGroup
           label='Impedance'

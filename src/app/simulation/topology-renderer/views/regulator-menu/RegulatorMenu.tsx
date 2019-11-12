@@ -67,7 +67,7 @@ export class RegulatorMenu extends React.Component<Props, State> {
               multiple={false}
               label='Control mode'
               options={this.state.options}
-              isOptionSelected={option => option.value === this.state.controlMode}
+              selectedOptionFinder={option => option.value === this.state.controlMode}
               onChange={selectedOption => {
                 const selectedControlModel = selectedOption.value;
                 this.regulator.controlMode = selectedControlModel;

@@ -67,7 +67,7 @@ export class PowerGridModels extends React.Component<Props, State> {
           label='Object ID'
           options={this.state.lineOptions}
           onChange={selectedOption => this.updateRequestBody('objectId', selectedOption.value)}
-          isOptionSelected={option => option.label === 'ieee8500'} />
+          selectedOptionFinder={option => option.label === 'ieee8500'} />
       ),
       [QueryPowerGridModelsRequestType.QUERY_OBJECT_TYPES]: (
         <Select
@@ -75,7 +75,7 @@ export class PowerGridModels extends React.Component<Props, State> {
           label='Model ID'
           options={this.state.lineOptions}
           onChange={selectedOption => this.updateRequestBody('modelId', selectedOption.value)}
-          isOptionSelected={option => option.label === 'ieee8500'} />
+          selectedOptionFinder={option => option.label === 'ieee8500'} />
       ),
       [QueryPowerGridModelsRequestType.QUERY_MODEL]: (
         <>
@@ -84,7 +84,7 @@ export class PowerGridModels extends React.Component<Props, State> {
             label='Model ID'
             options={this.state.lineOptions}
             onChange={selectedOption => this.updateRequestBody('modelId', selectedOption.value)}
-            isOptionSelected={option => option.label === 'ieee8500'} />
+            selectedOptionFinder={option => option.label === 'ieee8500'} />
           <TextArea
             label='Filter'
             value={`?s cim:IdentifiedObject.name \u0027q14733\u0027","objectType":"http://iec.ch/TC57/2012/CIM-schema-cim17#ConnectivityNode`}
@@ -125,7 +125,7 @@ export class PowerGridModels extends React.Component<Props, State> {
                 label='Result format'
                 onChange={selectedOption => this.updateRequestBody('resultFormat', selectedOption.value)}
                 options={this.state.resultFormatOptions}
-                isOptionSelected={option => option.value === QueryPowerGridModelsResultFormat.JSON} />
+                selectedOptionFinder={option => option.value === QueryPowerGridModelsResultFormat.JSON} />
               {
                 this.componentToShowForQueryType[this.state.requestBody.requestType]
               }

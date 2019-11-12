@@ -7,13 +7,15 @@
         border-radius: 50%;
         width: 20px;
         height: 20px;
-        transform: translate(-20px, -0.5px);
+        transform: translate(-35px, 0);
         padding: 0;
+        z-index: 15;
     }
 }
 
 .accompanying-text {
     font-size: 13px;
+
     div {
         font-weight: bold;
     }

@@ -84,19 +84,19 @@ export class QueryLogsForm extends React.Component<Props, State> {
                 multiple={false}
                 label='Source'
                 options={this.props.sources.map(source => new Option(source, source))}
-                isOptionSelected={(_, index) => index === 0}
+                selectedOptionFinder={(_, index) => index === 0}
                 onChange={selectedOption => this.formValue.source = selectedOption.value} />
               <Select
                 multiple={false}
                 label='Log level'
                 options={this.state.logLevelOptions}
-                isOptionSelected={option => option.label === 'ALL'}
+                selectedOptionFinder={option => option.label === 'ALL'}
                 onChange={selectedOption => this.formValue.logLevel = selectedOption.value} />
               <Select
                 multiple={false}
                 label='Process status'
                 options={this.state.processStatusOptions}
-                isOptionSelected={option => option.label === 'ALL'}
+                selectedOptionFinder={option => option.label === 'ALL'}
                 onChange={selectedOption => this.formValue.processStatus = selectedOption.value} />
             </div>
           </form>

@@ -168,7 +168,7 @@ export class CommOutageEventForm extends React.Component<Props, State> {
             label='Phase'
             multiple
             options={this.state.inputPhaseOptions}
-            isOptionSelected={() => this.state.inputPhaseOptions.length === 1}
+            selectedOptionFinder={() => this.state.inputPhaseOptions.length === 1}
             onChange={this.onInputPhasesChanged} />
           <Select
             multiple={false}
@@ -246,13 +246,13 @@ export class CommOutageEventForm extends React.Component<Props, State> {
             label='Phase'
             multiple
             options={this.state.outputPhaseOptions}
-            isOptionSelected={() => this.state.outputPhaseOptions.length === 1}
+            selectedOptionFinder={() => this.state.outputPhaseOptions.length === 1}
             onChange={this.onOutputPhasesChanged} />
           <Select
             multiple
             label='Measurement Type'
             options={this.state.outputMeasurementTypeOptions}
-            isOptionSelected={() => this.state.outputMeasurementTypeOptions.length === 1}
+            selectedOptionFinder={() => this.state.outputMeasurementTypeOptions.length === 1}
             onChange={this.onOutputMeasurementTypesChanged} />
           <Input
             label='Start Date Time'

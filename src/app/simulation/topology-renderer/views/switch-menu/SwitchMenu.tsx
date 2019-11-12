@@ -52,7 +52,7 @@ export class SwitchMenu extends React.Component<Props, State> {
               multiple={false}
               label='Action'
               options={this.state.options}
-              isOptionSelected={option => option.value === this.props.open}
+              selectedOptionFinder={option => option.value === this.props.open}
               onChange={selectedOption => this.setState({ switchOpen: selectedOption.value })} />
           </form>
         </DialogContent>
