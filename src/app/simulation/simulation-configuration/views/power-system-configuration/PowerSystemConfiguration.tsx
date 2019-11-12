@@ -51,7 +51,7 @@ export class PowerSystemConfiguration extends React.Component<Props, State> {
           label='Geographical region name'
           multiple={false}
           options={this.state.regionOptions}
-          isOptionSelected={option => option.label.toLowerCase() === 'ieee'}
+          selectedOptionFinder={option => option.label.toLowerCase() === 'ieee'}
           onClear={this.onRegionSelectionCleared}
           onChange={this.onRegionSelectionChanged} />
 
@@ -59,7 +59,7 @@ export class PowerSystemConfiguration extends React.Component<Props, State> {
           multiple={false}
           label='Sub-geographical region name'
           options={this.state.subregionOptions}
-          isOptionSelected={option => option.label.toLowerCase() === 'large'}
+          selectedOptionFinder={option => option.label.toLowerCase() === 'large'}
           onClear={this.onSubregionSelectionCleared}
           onChange={this.onSubregionSelectionChanged} />
 

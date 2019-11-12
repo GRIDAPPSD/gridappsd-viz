@@ -53,7 +53,7 @@ export class ApplicationConfiguration extends React.Component<Props, State> {
           multiple={false}
           label='Application name'
           options={this.state.availableApplicationOptions}
-          isOptionSelected={option => option.label === this.formValue.applicationId}
+          selectedOptionFinder={option => option.label === this.formValue.applicationId}
           optional={true}
           onClear={this.onApplicationDeselected}
           onChange={this.onSelectedApplicationChanged} />

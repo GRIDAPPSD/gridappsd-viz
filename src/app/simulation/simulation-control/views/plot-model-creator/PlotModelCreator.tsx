@@ -101,7 +101,7 @@ export class PlotModelCreator extends React.Component<Props, State> {
                 label='Created plots'
                 optional={true}
                 options={this.state.allPlotModelOptions}
-                isOptionSelected={
+                selectedOptionFinder={
                   option => option.value === this.state.currentPlotModel
                 }
                 onChange={this.onPlotNameChanged} />
@@ -119,7 +119,7 @@ export class PlotModelCreator extends React.Component<Props, State> {
                 optional={false}
                 label='Component type'
                 disabled={this.state.currentPlotModel.components.length > 0 || this.state.currentPlotModel.name === ''}
-                isOptionSelected={option => option.value === this.state.currentPlotModel.componentType}
+                selectedOptionFinder={option => option.value === this.state.currentPlotModel.componentType}
                 options={this.state.componentTypeOptions}
                 onClear={this.onComponentTypeSelectionCleared}
                 onChange={this.onComponentTypeChanged} />
@@ -151,6 +151,7 @@ export class PlotModelCreator extends React.Component<Props, State> {
                 optional={false}
                 disabled={!this.state.selectedComponent}
                 options={this.state.phaseOptions}
+                selectedOptionFinder={() => this.state.phaseOptions.length === 1}
                 onClear={this.onComponentPhasesSelectionCleared}
                 onChange={this.onComponentPhasesSelected} />
               <BasicButton

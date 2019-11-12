@@ -88,7 +88,7 @@ export class SimulationConfigurationTab extends React.Component<Props, State> {
             multiple={false}
             label='Simulator'
             options={this.state.simulatorOptions}
-            isOptionSelected={option => option.value === 'GridLAB-D'}
+            selectedOptionFinder={option => option.value === 'GridLAB-D'}
             onClear={this.onSimulatorSelectionCleared}
             onChange={this.onSimulatorChanged} />
           <div className='accompanying-text'>

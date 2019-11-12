@@ -58,7 +58,7 @@ export class CapacitorMenu extends React.Component<Props, State> {
               multiple={false}
               label='Control mode'
               options={this.state.options}
-              isOptionSelected={option => option.value === this.state.controlMode}
+              selectedOptionFinder={option => option.value === this.state.controlMode}
               onChange={selectedOption => {
                 const selectedControlMode = selectedOption.value;
                 this.capacitor.controlMode = selectedControlMode;
@@ -95,7 +95,7 @@ export class CapacitorMenu extends React.Component<Props, State> {
               new Option('Open', true),
               new Option('Close', false),
             ]}
-            isOptionSelected={option => option.value === this.capacitor.open}
+            selectedOptionFinder={option => option.value === this.capacitor.open}
             onChange={selectedOption => this.capacitor.open = selectedOption.value} />
         );
       case CapacitorControlMode.VAR:

@@ -23,7 +23,7 @@ interface Props<T, E extends boolean> {
   optional?: boolean;
   disabled?: boolean;
   onClear?: (formControlLabel: string) => void;
-  isOptionSelected?: (option: Option<T>, index: number) => boolean;
+  selectedOptionFinder?: (option: Option<T>, index: number) => boolean;
 }
 
 interface State<T> {
@@ -122,8 +122,8 @@ export class Select<T, E extends boolean> extends React.Component<Props<T, E>, S
   }
 
   private _selectDefaultSelectedOptions() {
-    if (this.props.options.length !== 0 && this.props.isOptionSelected) {
-      this._defaultSelectedOptions = this.props.options.filter((option, i) => this.props.isOptionSelected(option, i));
+    if (this.props.options.length !== 0 && this.props.selectedOptionFinder) {
+      this._defaultSelectedOptions = this.props.options.filter((option, i) => this.props.selectedOptionFinder(option, i));
       if (this._defaultSelectedOptions.length > 0) {
         this.setState({
           currentLabel: this._defaultSelectedOptions.map(option => option.label).join(', '),
