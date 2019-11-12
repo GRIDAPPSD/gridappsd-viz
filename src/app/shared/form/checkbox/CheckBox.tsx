@@ -1,5 +1,6 @@
 import * as React from 'react';
 
+import { Ripple } from '@shared/ripple';
 import { FormControl } from '../form-control/FormControl';
 
 import './CheckBox.light.scss';
@@ -36,25 +37,29 @@ export class CheckBox<T> extends React.Component<Props<T>, State> {
         label={this.props.label}
         htmlFor={this.props.label}
         hint={this.props.hint}>
-        <div className='checkbox-wrapper'>
-          <input
-            className={'checkbox__input'}
-            id={this.props.label}
-            ref={checkbox => {
-              if (checkbox)
-                checkbox.checked = this.props.checked;
-            }}
-            type='checkbox'
-            name={this.props.name}
-            disabled={this.props.disabled}
-            onChange={this.onCheckBoxToggled} />
-          <i className='material-icons checkbox__icon checkbox__icon__unchecked'>
-            check_box_outline_blank
-          </i>
-          <i className='material-icons checkbox__icon checkbox__icon__checked'>
-            check_box
-          </i>
-        </div>
+        <Ripple
+          fixed
+          duration={1500}>
+          <div className='checkbox-wrapper'>
+            <input
+              className={'checkbox__input'}
+              id={this.props.label}
+              ref={checkbox => {
+                if (checkbox)
+                  checkbox.checked = this.props.checked;
+              }}
+              type='checkbox'
+              name={this.props.name}
+              disabled={this.props.disabled}
+              onChange={this.onCheckBoxToggled} />
+            <i className='material-icons checkbox__icon checkbox__icon__unchecked'>
+              check_box_outline_blank
+            </i>
+            <i className='material-icons checkbox__icon checkbox__icon__checked'>
+              check_box
+            </i>
+          </div>
+        </Ripple>
       </FormControl>
     );
   }

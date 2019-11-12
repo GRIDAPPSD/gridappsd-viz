@@ -38,11 +38,15 @@
     position: relative;
     display: flex;
     align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 1000px;
+    left: -10px;
 }
 
 .checkbox__icon {
     position: relative;
-    left: 0;
     font-size: 1.5em;
     pointer-events: none;
 }
