@@ -11,7 +11,7 @@ import {
 } from '@shared/simulation';
 import { SimulationControl } from './SimulationControl';
 import { StateStore } from '@shared/state-store';
-import { StompClientService } from '@shared/StompClientService';
+import { StompClientService, StompClientConnectionStatus } from '@shared/StompClientService';
 import { ModelDictionaryComponent } from '@shared/topology';
 import { PlotModel } from '@shared/plot-model/PlotModel';
 import { SimulationStartedEventResponse } from './models/SimulationStartedEventResponse';
@@ -63,7 +63,7 @@ export class SimulationControlContainer extends React.Component<Props, State> {
     this._stompClientService.statusChanges()
       .pipe(
         takeUntil(this._unsubscriber),
-        filter(status => status !== 'CONNECTED')
+        filter(status => status !== StompClientConnectionStatus.CONNECTED)
       )
       .subscribe({
         next: this.stopSimulation

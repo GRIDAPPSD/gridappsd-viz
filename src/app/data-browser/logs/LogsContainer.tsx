@@ -2,7 +2,7 @@ import * as React from 'react';
 import { Subscription } from 'rxjs';
 import { map } from 'rxjs/operators';
 
-import { StompClientService } from '@shared/StompClientService';
+import { StompClientService, StompClientConnectionStatus } from '@shared/StompClientService';
 import { QueryLogsRequestBody } from './models/QueryLogsRequestBody';
 import { SimulationId } from './models/SimulationId';
 import { QueryLogsForm } from './QueryLogsForm';
@@ -63,13 +63,13 @@ export class LogsContainer extends React.Component<Props, State> {
       .subscribe({
         next: status => {
           switch (status) {
-            case 'CONNECTING':
+            case StompClientConnectionStatus.CONNECTING:
               if (this._queryLogsResultSubscription)
                 this._queryLogsResultSubscription.unsubscribe();
               if (this._sourcesSubscription)
                 this._sourcesSubscription.unsubscribe();
               break;
-            case 'CONNECTED':
+            case StompClientConnectionStatus.CONNECTED:
               this._queryLogsResultSubscription = this._observeQueryLogsResult();
               this._sourcesSubscription = this._observeSources();
               break;

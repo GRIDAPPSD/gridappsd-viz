@@ -1,0 +1,333 @@
+import * as React from 'react';
+import { map, take, filter } from 'rxjs/operators';
+
+import { App } from './App';
+import { Application } from '@shared/Application';
+import { FeederModel } from '@shared/topology';
+import { GetAllFeederModelsRequest } from './models/message-requests/GetAllFeederModelsRequest';
+import {
+  ModelDictionary,
+  ModelDictionaryComponentType,
+  ModelDictionaryMeasurement,
+  ModelDictionaryComponent
+} from '@shared/topology/model-dictionary';
+import {
+  SimulationConfiguration,
+  Simulation,
+  SimulationQueue,
+  SimulationOutputService
+} from '@shared/simulation';
+import { StompClientService, StompClientConnectionStatus } from '@shared/StompClientService';
+import { GetModelDictionaryRequest } from './models/message-requests/GetModelDictionaryRequest';
+import {
+  GetAvailableApplicationsAndServicesRequest, GetAvailableApplicationsRequestPayload
+} from './models/message-requests/GetAvailableApplicationsAndServicesRequest';
+import { StateStore } from '@shared/state-store';
+import { DEFAULT_APPLICATION_STATE } from './models/default-application-state';
+import { AuthenticationService } from './authentication/services/AuthenticationService';
+
+import './App.light.scss';
+import './App.dark.scss';
+
+interface Props {
+}
+
+interface State {
+  feederModel: FeederModel;
+  availableApplications: Application[];
+  stompClientStatus: StompClientConnectionStatus;
+}
+
+export class AppContainer extends React.Component<Props, State> {
+
+  readonly componentMRIDs = new Map<string, string & string[]>();
+  readonly componentPhases = new Map<string, string[]>();
+  readonly authenticationService = AuthenticationService.getInstance();
+
+  private _stateStore = StateStore.getInstance();
+
+  private readonly _stompClientService = StompClientService.getInstance();
+  private readonly _simulationOutputService = SimulationOutputService.getInstance();
+  private readonly _simulationQueue = SimulationQueue.getInstance();
+  private readonly _availableModelDictionaries = new Map<string, ModelDictionary>();
+
+  constructor(props: Props) {
+    super(props);
+
+    this.state = {
+      feederModel: null,
+      availableApplications: null,
+      stompClientStatus: StompClientConnectionStatus.UNINITIALIZED
+    };
+
+    this._stateStore.initialize(DEFAULT_APPLICATION_STATE);
+
+    this.retrieveModelDictionary = this.retrieveModelDictionary.bind(this);
+    this.onSimulationConfigFormSubmitted = this.onSimulationConfigFormSubmitted.bind(this);
+  }
+
+  componentDidMount() {
+    this._stompClientService.statusChanges()
+      .pipe(
+        filter(status => status === StompClientConnectionStatus.CONNECTED),
+        take(1)
+      )
+      .subscribe({
+        next: status => {
+          this.setState({
+            stompClientStatus: status
+          });
+          this._fetchAvailableApplicationsAndServices();
+          this._fetchFeederModels();
+        }
+      });
+  }
+
+  private _fetchAvailableApplicationsAndServices() {
+    const request = new GetAvailableApplicationsAndServicesRequest();
+    this._subscribeToAvailableApplicationsTopic(request.replyTo);
+    this._stompClientService.send(
+      request.url,
+      { 'reply-to': request.replyTo },
+      JSON.stringify(request.requestBody)
+    );
+  }
+
+  private _subscribeToAvailableApplicationsTopic(destination: string) {
+    this._stompClientService.readOnceFrom(destination)
+      .pipe(map(body => JSON.parse(body) as GetAvailableApplicationsRequestPayload))
+      .subscribe({
+        next: payload => {
+          this._stateStore.update({
+            applications: payload.applications,
+            services: payload.services
+          });
+          this.setState({
+            availableApplications: payload.applications
+          });
+        }
+      });
+  }
+
+  private _fetchFeederModels() {
+    const getAllFeederModelsRequest = new GetAllFeederModelsRequest();
+    this._subscribeToFeederModelsTopic(getAllFeederModelsRequest.replyTo);
+    this._stompClientService.send(
+      getAllFeederModelsRequest.url,
+      { 'reply-to': getAllFeederModelsRequest.replyTo },
+      getAllFeederModelsRequest.requestBody
+    );
+  }
+
+  private _subscribeToFeederModelsTopic(destination: string) {
+    this._stompClientService.readOnceFrom(destination)
+      .pipe(map(body => JSON.parse(body)))
+      .subscribe({
+        next: payload => {
+          const feederModel = {} as FeederModel;
+          if (typeof payload.data === 'string')
+            payload.data = JSON.parse(payload.data);
+          /*
+              payload.data.results.bindings is an array of
+                {
+                    "name": {
+                        "type": "literal",
+                        "value": string
+                    },
+                    "mRID": {
+                        "type": "literal",
+                        "value": string
+                    },
+                    "substationName": {
+                        "type": "literal",
+                        "value": string
+                    },
+                    "substationID": {
+                        "type": "literal",
+                        "value": string
+                    },
+                    "subregionName": {
+                        "type": "literal",
+                        "value": string
+                    },
+                    "subregionID": {
+                        "type": "literal",
+                        "value": string
+                    },
+                    "regionName": {
+                        "type": "literal",
+                        "value": string
+                    },
+                    "regionID": {
+                        "type": "literal",
+                        "value": string
+                    }
+                }
+          */
+          for (const binding of payload.data.results.bindings) {
+            const regionId = binding.regionID.value;
+            if (!(regionId in feederModel))
+              feederModel[regionId] = {
+                id: regionId,
+                name: binding.regionName.value,
+                lines: [],
+                subregions: []
+              };
+            // If a line with given name by binding.name.value already exists, then filter it out
+            // to push the new one on
+            this._pushIfNameDoesNotExist(
+              feederModel[regionId].lines,
+              binding.name.value,
+              {
+                name: binding.name.value,
+                id: binding.mRID.value,
+                subregionId: binding.subregionID.value
+              }
+            );
+            // If a subregion with given name by binding.subregionName.value already exists, then filter it out
+            // to push the new one on
+            this._pushIfNameDoesNotExist(
+              feederModel[regionId].subregions,
+              binding.subregionName.value,
+              {
+                name: binding.subregionName.value,
+                id: binding.subregionID.value
+              }
+            );
+          }
+          this.setState({
+            feederModel
+          });
+        }
+      });
+  }
+
+  private _pushIfNameDoesNotExist(array: Array<{ name: string; id: string }>, nameValue: string, value: any) {
+    if (array.every(item => item.name !== nameValue))
+      array.push(value);
+  }
+
+  render() {
+    return (
+      <App
+        connectionStatus={this.state.stompClientStatus}
+        feederModel={this.state.feederModel}
+        availableApplications={this.state.availableApplications}
+        componentMRIDs={this.componentMRIDs}
+        componentPhases={this.componentPhases}
+        onLogout={this.authenticationService.logout}
+        onMRIDChanged={this.retrieveModelDictionary}
+        onSimulationConfigFormSubmitted={this.onSimulationConfigFormSubmitted} />
+    );
+  }
+
+  retrieveModelDictionary(mRID: string, simulationName: string) {
+    if (!this._availableModelDictionaries.has(simulationName)) {
+      // Clear out the currently active model dictionary
+      this._stateStore.update({
+        modelDictionary: null
+      });
+      this._fetchModelDictionary(mRID);
+    }
+    else
+      this._processNewModelDictionary(this._availableModelDictionaries.get(simulationName));
+  }
+
+  private _fetchModelDictionary(mrid: string) {
+    const getModelDictionaryRequest = new GetModelDictionaryRequest();
+    getModelDictionaryRequest.requestBody.parameters.model_id = mrid;
+    this._subscribeToModelDictionaryTopic(getModelDictionaryRequest);
+    this._stompClientService.send(
+      getModelDictionaryRequest.url,
+      { 'reply-to': getModelDictionaryRequest.replyTo },
+      JSON.stringify(getModelDictionaryRequest.requestBody)
+    );
+  }
+
+  private _subscribeToModelDictionaryTopic(getModelDictionaryRequest: GetModelDictionaryRequest) {
+    this._stompClientService.readOnceFrom(getModelDictionaryRequest.replyTo)
+      .pipe(map(body => JSON.parse(body)))
+      .subscribe({
+        next: payload => {
+          if (typeof payload.data === 'string')
+            payload.data = JSON.parse(payload.data);
+          const modelDictionary = payload.data.feeders[0];
+          this._processNewModelDictionary(modelDictionary);
+        }
+      });
+  }
+
+  private _processNewModelDictionary(modelDictionary: ModelDictionary) {
+    const modelDictionaryMeasurementMap = new Map<string, ModelDictionaryMeasurement>();
+    for (const measurement of modelDictionary.measurements)
+      modelDictionaryMeasurementMap.set(measurement.mRID, measurement);
+    this._collectMRIDsAndPhasesForComponents(modelDictionary);
+    this._simulationOutputService.updateModelDictionaryMeasurementMap(modelDictionaryMeasurementMap);
+    this._consolidatePhasesForComponents(modelDictionary);
+    this._stateStore.update({
+      modelDictionary
+    });
+  }
+
+  private _collectMRIDsAndPhasesForComponents(modelDictionary: any) {
+    this.componentMRIDs.clear();
+    this.componentPhases.clear();
+    for (const swjtch of modelDictionary.switches)
+      this.componentMRIDs.set(swjtch.name, swjtch.mRID);
+    for (const capacitor of modelDictionary.capacitors)
+      this.componentMRIDs.set(capacitor.name, capacitor.mRID);
+    for (const regulator of modelDictionary.regulators) {
+      this.componentMRIDs.set(regulator.bankName, regulator.mRID);
+      // Only interested in regulators' phases for now, need phases for regulator menus
+      this.componentPhases.set(regulator.bankName, (regulator.bankPhases || '').split(''));
+    }
+  }
+
+  // Find components with the same name, and group their phases into one
+  private _consolidatePhasesForComponents(modelDictionary: ModelDictionary) {
+    const componentWithGroupPhasesMap = new Map<string, ModelDictionaryComponent>();
+    const measurementMRIDMap = new Map<string, Array<{ phase: string; mrid: string; }>>();
+    for (const measurement of modelDictionary.measurements) {
+      const name = measurement.measurementType === ModelDictionaryComponentType.VOLTAGE
+        ? measurement.ConnectivityNode
+        : measurement.ConductingEquipment_name;
+      const phases = measurement.phases;
+      const id = measurement.name;
+      let componentInMeasurement = componentWithGroupPhasesMap.get(id);
+      if (!componentInMeasurement) {
+        componentInMeasurement = {
+          id,
+          name,
+          conductingEquipmentName: measurement.ConductingEquipment_name,
+          conductingEquipmentType: measurement.ConductingEquipment_type,
+          displayName: '',
+          phases: [],
+          conductingEquipmentMRIDs: [],
+          type: measurement.measurementType as ModelDictionaryComponentType,
+          measurementMRIDs: []
+        };
+        measurementMRIDMap.set(id, []);
+        componentWithGroupPhasesMap.set(id, componentInMeasurement);
+      }
+      if (!componentInMeasurement.phases.includes(phases)) {
+        const measurementMRIDAndPhaseArray = measurementMRIDMap.get(id);
+        measurementMRIDAndPhaseArray.push({ phase: phases, mrid: measurement.mRID });
+        componentInMeasurement.measurementMRIDs = measurementMRIDAndPhaseArray.sort(
+          (a, b) => a.phase.localeCompare(b.phase)
+        ).map(e => e.mrid);
+        componentInMeasurement.phases.push(phases);
+        componentInMeasurement.phases.sort((a, b) => a.localeCompare(b));
+        componentInMeasurement.displayName = `${name} (${componentInMeasurement.phases.join(', ')})`;
+        componentInMeasurement.conductingEquipmentMRIDs.push(measurement.ConductingEquipment_mRID);
+      }
+    }
+    this._stateStore.update({
+      modelDictionaryComponentsWithConsolidatedPhases: [...componentWithGroupPhasesMap.values()]
+    });
+  }
+
+  onSimulationConfigFormSubmitted(config: SimulationConfiguration) {
+    this._simulationQueue.push(new Simulation(config));
+  }
+
+}

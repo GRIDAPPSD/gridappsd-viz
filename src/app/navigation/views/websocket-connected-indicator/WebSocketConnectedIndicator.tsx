@@ -10,7 +10,7 @@ interface Props {
 }
 
 export function WebSocketConnectedIndicator(props: Props) {
-  if (props.websocketStatus === 'CONNECTED')
+  if (props.websocketStatus === StompClientConnectionStatus.CONNECTED)
     return (
       <section className='websocket-connected-indicator'>
         <i className='material-icons websocket-connected-indicator__icon'>import_export</i>

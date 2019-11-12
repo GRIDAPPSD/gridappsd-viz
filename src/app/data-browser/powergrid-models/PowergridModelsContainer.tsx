@@ -6,7 +6,7 @@ import { PowerGridModels } from './PowergridModels';
 import {
   QueryPowerGridModelsRequestBody, QueryPowerGridModelsRequestType, QueryPowerGridModelsRequest
 } from './models/QueryPowerGridModelsRequest';
-import { StompClientService } from '@shared/StompClientService';
+import { StompClientService, StompClientConnectionStatus } from '@shared/StompClientService';
 import { FeederModelLine } from '@shared/topology';
 
 
@@ -46,11 +46,11 @@ export class PowergridModelsContainer extends React.Component<Props, State> {
       .subscribe({
         next: status => {
           switch (status) {
-            case 'CONNECTING':
+            case StompClientConnectionStatus.CONNECTING:
               if (this._setupSubscription)
                 this._setupSubscription.unsubscribe();
               break;
-            case 'CONNECTED':
+            case StompClientConnectionStatus.CONNECTED:
               this._setupSubscription = this._subscribeToPowerGridModelsTopic();
               break;
           }

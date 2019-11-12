@@ -25,7 +25,7 @@ export class WebsocketStatusWatcher extends React.Component<Props, State> {
   constructor(props: Props) {
     super(props);
     this.state = {
-      websocketStatus: this.stompClientService.isActive() ? 'CONNECTED' : 'NEW'
+      websocketStatus: this.stompClientService.isActive() ? StompClientConnectionStatus.CONNECTED : StompClientConnectionStatus.UNINITIALIZED
     };
   }
 
@@ -42,7 +42,7 @@ export class WebsocketStatusWatcher extends React.Component<Props, State> {
   }
 
   render() {
-    if (this.state.websocketStatus === 'CONNECTED' || this.state.websocketStatus === 'NEW')
+    if (this.state.websocketStatus === StompClientConnectionStatus.CONNECTED || this.state.websocketStatus === StompClientConnectionStatus.UNINITIALIZED)
       return null;
     return (
       <NotificationBanner persistent={true}>
@@ -52,14 +52,14 @@ export class WebsocketStatusWatcher extends React.Component<Props, State> {
   }
 
   private _showComponentForCurrentStatus() {
-    if (this.state.websocketStatus === 'CONNECTING')
+    if (this.state.websocketStatus === StompClientConnectionStatus.CONNECTING)
       return (
         <span>
           <span>Trying to connect</span>
           <ThreeDots />
         </span>
       );
-    else if (this.state.websocketStatus !== 'CONNECTED')
+    else if (this.state.websocketStatus !== StompClientConnectionStatus.CONNECTED)
       return (
         <>
           <span>
