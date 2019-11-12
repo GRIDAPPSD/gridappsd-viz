@@ -6,7 +6,7 @@ import { SimulationStatusLogger } from './SimulationStatusLogger';
 import {
   SimulationQueue, SIMULATION_STATUS_LOG_TOPIC, SimulationControlService, SimulationStatus
 } from '@shared/simulation';
-import { StompClientService } from '@shared/StompClientService';
+import { StompClientService, StompClientConnectionStatus } from '@shared/StompClientService';
 import { StateStore } from '@shared/state-store';
 
 interface Props {
@@ -44,7 +44,7 @@ export class SimulationStatusLogContainer extends React.Component<Props, State> 
   private _subscribeToSimulationStatusLogMessageStream() {
     return this._stompClientService.statusChanges()
       .pipe(
-        filter(status => status === 'CONNECTED'),
+        filter(status => status === StompClientConnectionStatus.CONNECTED),
         switchMap(() => this._stateStore.select('simulationId')),
         filter(simulationId => simulationId !== ''),
         tap(simulationId => {
@@ -85,7 +85,6 @@ export class SimulationStatusLogContainer extends React.Component<Props, State> 
   render() {
     return (
       <SimulationStatusLogger
-        simulationRunning={this.state.isFetching}
         messages={this.state.logMessages}
         isFetching={this.state.isFetching} />
     );

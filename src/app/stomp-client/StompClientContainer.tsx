@@ -2,7 +2,7 @@ import * as React from 'react';
 import { Subscription } from 'rxjs';
 import { map } from 'rxjs/operators';
 
-import { StompClientService } from '@shared/StompClientService';
+import { StompClientService, StompClientConnectionStatus } from '@shared/StompClientService';
 import { StompClient } from './StompClient';
 import { download, DownloadType } from '@shared/misc';
 import { NotificationBanner } from '@shared/notification-banner';
@@ -43,11 +43,11 @@ export class StompClientContainer extends React.Component<Props, State> {
       .subscribe({
         next: status => {
           switch (status) {
-            case 'CONNECTING':
+            case StompClientConnectionStatus.CONNECTING:
               if (this._responseSubscription)
                 this._responseSubscription.unsubscribe();
               break;
-            case 'CONNECTED':
+            case StompClientConnectionStatus.CONNECTED:
               this._responseSubscription = this._subscribeForResponse();
               break;
           }

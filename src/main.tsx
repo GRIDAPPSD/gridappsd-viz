@@ -5,12 +5,12 @@ import { BrowserRouter } from 'react-router-dom';
 import './global-styles.light.scss';
 import './global-styles.dark.scss';
 
-import { App } from './app/App';
+import { AppContainer } from './app/AppContainer';
 
 
 ReactDOM.render(
   <BrowserRouter>
-    <App />
+    <AppContainer />
   </BrowserRouter>,
   document.querySelector('main')
 );

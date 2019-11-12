@@ -3,7 +3,7 @@ import { map, filter } from 'rxjs/operators';
 
 import { ModelDictionaryMeasurement } from '../topology/model-dictionary/ModelDictionaryMeasurement';
 import { SimulationOutputMeasurement } from './SimulationOutputMeasurement';
-import { StompClientService } from '@shared/StompClientService';
+import { StompClientService, StompClientConnectionStatus } from '@shared/StompClientService';
 import { SIMULATION_OUTPUT_TOPIC } from './topics';
 import { SimulationControlService, SimulationStatus } from './SimulationControlService';
 import { SimulationOutputPayload } from './SimulationOutputPayload';
@@ -32,11 +32,11 @@ export class SimulationOutputService {
       .subscribe({
         next: status => {
           switch (status) {
-            case 'CONNECTING':
+            case StompClientConnectionStatus.CONNECTING:
               if (this._simulationOutputSubscription)
                 this._simulationOutputSubscription.unsubscribe();
               break;
-            case 'CONNECTED':
+            case StompClientConnectionStatus.CONNECTED:
               this._simulationOutputSubscription = this._subscribeToSimulationOutputTopic();
               break;
           }

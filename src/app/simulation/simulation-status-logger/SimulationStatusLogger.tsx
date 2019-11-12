@@ -11,7 +11,6 @@ import './SimulationStatusLogger.dark.scss';
 interface Props {
   messages: string[];
   isFetching: boolean;
-  simulationRunning: boolean;
 }
 
 interface State {
@@ -44,7 +43,7 @@ export class SimulationStatusLogger extends React.Component<Props, State> {
 
   componentDidUpdate(prevProps: Props) {
     if (prevProps !== this.props) {
-      if (this.props.simulationRunning)
+      if (this.props.isFetching)
         this.setState({
           dragHandlePosition: 430
         });
@@ -126,8 +125,8 @@ export class SimulationStatusLogger extends React.Component<Props, State> {
           ref={elem => this.simulationStatusLoggerBody = elem}
           onScroll={this.loadMoreMessages}>
           {
-            this.state.visibleMessages.map((message, i) => (
-              <SimulationStatusLoggerMessage key={message + i} message={message} />
+            this.state.visibleMessages.map(message => (
+              <SimulationStatusLoggerMessage key={message} message={message} />
             ))
           }
         </section>

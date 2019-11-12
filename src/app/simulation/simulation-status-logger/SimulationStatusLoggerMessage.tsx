@@ -23,8 +23,8 @@ export class SimulationStatusLoggerMessage extends React.Component<Props, State>
       showMessageAsJson: false,
       messageAsJson: JSON.parse(this.props.message)
     };
-    this._showAsJson = this._showAsJson.bind(this);
-    this._showAsString = this._showAsString.bind(this);
+    this.showAsJson = this.showAsJson.bind(this);
+    this.showAsString = this.showAsString.bind(this);
   }
   render() {
     return (
@@ -39,7 +39,7 @@ export class SimulationStatusLoggerMessage extends React.Component<Props, State>
                 size='small'
                 style='accent'
                 icon='remove'
-                onClick={this._showAsString} />
+                onClick={this.showAsString} />
               <span>
                 {JSON.stringify(this.state.messageAsJson, null, 4)}
               </span>
@@ -50,7 +50,7 @@ export class SimulationStatusLoggerMessage extends React.Component<Props, State>
                 size='small'
                 style='accent'
                 icon='add'
-                onClick={this._showAsJson} />
+                onClick={this.showAsJson} />
               <span className='simulation-status-logger-message__body'>
                 {this.state.messageAsJson.logMessage}
               </span>
@@ -59,15 +59,19 @@ export class SimulationStatusLoggerMessage extends React.Component<Props, State>
       </div>
     );
   }
-  private _showAsJson() {
-    this.setState({ showMessageAsJson: true });
+
+  showAsJson() {
+    this.setState({
+      showMessageAsJson: true
+    });
     this.messageElement.classList.add('highlight');
-    // setTimeout(() => this._messageElement.scrollIntoView(), 0);
   }
 
-  private _showAsString() {
+  showAsString() {
+    this.setState({
+      showMessageAsJson: false
+    });
     this.messageElement.classList.remove('highlight');
-    this.setState({ showMessageAsJson: false });
   }
 
 }

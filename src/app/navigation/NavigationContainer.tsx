@@ -30,7 +30,7 @@ export class NavigationContainer extends React.Component<Props, State> {
 
     this.state = {
       previousSimulations: this._simulationQueue.getAllSimulations(),
-      websocketStatus: this._stompClientService.isActive() ? 'CONNECTED' : 'CONNECTING',
+      websocketStatus: this._stompClientService.isActive() ? StompClientConnectionStatus.CONNECTED : StompClientConnectionStatus.CONNECTING,
       version: ''
     };
 

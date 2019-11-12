@@ -4,7 +4,12 @@ import { filter, switchMap, take, timeout } from 'rxjs/operators';
 
 import { ConfigurationManager } from './ConfigurationManager';
 
-export type StompClientConnectionStatus = 'NOT_CONNECTED' | 'CONNECTING' | 'CONNECTED' | 'NEW';
+export const enum StompClientConnectionStatus {
+  DISCONNECTED = 'DISCONNECTED',
+  CONNECTING = 'CONNECTING',
+  CONNECTED = 'CONNECTED',
+  UNINITIALIZED = 'UNINITIALIZED'
+}
 
 export const enum StompClientInitializationResult {
   OK = '0K',
@@ -19,8 +24,8 @@ export class StompClientService {
   private readonly _configurationManager = ConfigurationManager.getInstance();
 
   private _client: Client;
-  private _statusChanges = new BehaviorSubject<StompClientConnectionStatus>('NEW');
-  private _status: StompClientConnectionStatus = 'NEW';
+  private _statusChanges = new BehaviorSubject<StompClientConnectionStatus>(StompClientConnectionStatus.UNINITIALIZED);
+  private _status: StompClientConnectionStatus = StompClientConnectionStatus.UNINITIALIZED;
   private _username = '';
   // Need to store the password for reconnecting after timeout,
   // the backend should listen to hearbeat messages
@@ -82,7 +87,7 @@ export class StompClientService {
   }
 
   private _connectionEstablished() {
-    this._status = 'CONNECTED';
+    this._status = StompClientConnectionStatus.CONNECTED;
     this._statusChanges.next(this._status);
   }
 
@@ -105,7 +110,7 @@ export class StompClientService {
 
   private _connect() {
     if (!this.isActive()) {
-      this._status = 'CONNECTING';
+      this._status = StompClientConnectionStatus.CONNECTING;
       this._statusChanges.next(this._status);
       return this._client.connect(
         this._username,
@@ -119,14 +124,14 @@ export class StompClientService {
   }
 
   private _connectionClosed() {
-    if (this._status === 'CONNECTED') {
-      this._status = 'NOT_CONNECTED';
+    if (this._status === StompClientConnectionStatus.CONNECTED) {
+      this._status = StompClientConnectionStatus.DISCONNECTED;
       this.reconnect();
     }
   }
 
   private _connectionFailed() {
-    this._status = 'NOT_CONNECTED';
+    this._status = StompClientConnectionStatus.DISCONNECTED;
     this._statusChanges.next(this._status);
   }
 
