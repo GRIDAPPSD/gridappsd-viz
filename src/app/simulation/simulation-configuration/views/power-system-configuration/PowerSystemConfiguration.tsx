@@ -3,12 +3,14 @@ import * as React from 'react';
 import { FormGroup, Select, Option } from '@shared/form';
 import { FeederModel, FeederModelRegion, FeederModelLine } from '@shared/topology';
 import { PowerSystemConfigurationModel } from '../../models/PowerSystemConfigurationModel';
+import { SimulationConfiguration } from '@shared/simulation';
 
 import './PowerSystemConfiguration.light.scss';
 import './PowerSystemConfiguration.dark.scss';
 
 interface Props {
   feederModel: FeederModel;
+  powerSystemConfig: SimulationConfiguration['power_system_config'];
   onChange: (value: PowerSystemConfigurationModel) => void;
 }
 
@@ -28,7 +30,7 @@ export class PowerSystemConfiguration extends React.Component<Props, State> {
     isValid: false
   };
 
-  constructor(props: any) {
+  constructor(props: Props) {
     super(props);
     this.state = {
       regionOptions: Object.keys(this.props.feederModel)
@@ -51,7 +53,9 @@ export class PowerSystemConfiguration extends React.Component<Props, State> {
           label='Geographical region name'
           multiple={false}
           options={this.state.regionOptions}
-          selectedOptionFinder={option => option.label.toLowerCase() === 'ieee'}
+          selectedOptionFinder={
+            option => option.value.id === this.props.powerSystemConfig.GeographicalRegion_name
+          }
           onClear={this.onRegionSelectionCleared}
           onChange={this.onRegionSelectionChanged} />
 
@@ -59,7 +63,9 @@ export class PowerSystemConfiguration extends React.Component<Props, State> {
           multiple={false}
           label='Sub-geographical region name'
           options={this.state.subregionOptions}
-          selectedOptionFinder={option => option.label.toLowerCase() === 'large'}
+          selectedOptionFinder={
+            option => option.value === this.props.powerSystemConfig.SubGeographicalRegion_name
+          }
           onClear={this.onSubregionSelectionCleared}
           onChange={this.onSubregionSelectionChanged} />
 
@@ -67,6 +73,9 @@ export class PowerSystemConfiguration extends React.Component<Props, State> {
           multiple={false}
           label='Line name'
           options={this.state.lineOptions}
+          selectedOptionFinder={
+            option => option.value.id === this.props.powerSystemConfig.Line_name
+          }
           onClear={this.onLineSelectionCleared}
           onChange={this.onLineSelectionChanged} />
       </FormGroup>
