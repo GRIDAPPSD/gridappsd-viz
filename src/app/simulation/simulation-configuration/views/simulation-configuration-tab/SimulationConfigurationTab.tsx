@@ -12,7 +12,7 @@ import './SimulationConfigurationTab.dark.scss';
 
 interface Props {
   onChange: (formValue: SimulationConfigurationTabModel) => void;
-  currentConfig: SimulationConfiguration;
+  simulationConfig: SimulationConfiguration['simulation_config'];
   simulationName: string;
 }
 
@@ -34,12 +34,12 @@ export class SimulationConfigurationTab extends React.Component<Props, State> {
     };
 
     this.formValue = {
-      startDateTime: props.currentConfig.simulation_config.start_time,
-      duration: props.currentConfig.simulation_config.duration,
-      runInRealtime: props.currentConfig.simulation_config.run_realtime,
-      simulationName: props.currentConfig.simulation_config.simulation_name,
-      simulator: props.currentConfig.simulation_config.simulator,
-      modelCreationConfig: props.currentConfig.simulation_config.model_creation_config,
+      startDateTime: props.simulationConfig.start_time,
+      duration: props.simulationConfig.duration,
+      runInRealtime: props.simulationConfig.run_realtime,
+      simulationName: props.simulationConfig.simulation_name,
+      simulator: props.simulationConfig.simulator,
+      modelCreationConfig: props.simulationConfig.model_creation_config,
       isValid: true
     };
 

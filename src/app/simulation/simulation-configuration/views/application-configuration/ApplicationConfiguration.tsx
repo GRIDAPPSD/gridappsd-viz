@@ -9,7 +9,7 @@ import './ApplicationConfiguration.light.scss';
 import './ApplicationConfiguration.dark.scss';
 
 interface Props {
-  currentConfig: SimulationConfiguration;
+  applicationConfig: SimulationConfiguration['application_config'];
   onChange: (value: ApplicationConfigurationModel) => void;
   availableApplications: Application[];
 }
@@ -30,7 +30,7 @@ export class ApplicationConfiguration extends React.Component<Props, State> {
       disabledAppConfigStringInputBox: true
     };
 
-    const previousSelectedApplication = this.props.currentConfig.application_config.applications[0];
+    const previousSelectedApplication = this.props.applicationConfig.applications[0];
     if (previousSelectedApplication)
       this.formValue = {
         applicationId: previousSelectedApplication.name,

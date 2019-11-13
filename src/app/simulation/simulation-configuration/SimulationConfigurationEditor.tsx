@@ -30,7 +30,7 @@ import './SimulationConfigurationEditor.dark.scss';
 interface Props {
   onSubmit: (configObject: SimulationConfiguration) => void;
   onMRIDChanged: (mRID: string, simulationName: string) => void;
-  onClose: (event) => void;
+  onClose: () => void;
   initialConfig: SimulationConfiguration;
   feederModel: FeederModel;
   availableApplications: Application[];
@@ -162,18 +162,19 @@ export class SimulationConfigurationEditor extends React.Component<Props, State>
             <TabGroup>
               <Tab label='Power System Configuration'>
                 <PowerSystemConfiguration
+                  powerSystemConfig={this.currentConfig.power_system_config}
                   feederModel={this.props.feederModel}
                   onChange={this.onPowerSystemConfigurationChanged} />
               </Tab>
               <Tab label='Simulation Configuration'>
                 <SimulationConfigurationTab
-                  currentConfig={this.currentConfig}
+                  simulationConfig={this.currentConfig.simulation_config}
                   simulationName={this.state.simulationName}
                   onChange={this.onSimulationConfigurationChanged} />
               </Tab>
               <Tab label='Application Configuration'>
                 <ApplicationConfiguration
-                  currentConfig={this.currentConfig}
+                  applicationConfig={this.currentConfig.application_config}
                   availableApplications={this.props.availableApplications}
                   onChange={this.onApplicationConfigurationChanged} />
               </Tab>
@@ -294,8 +295,10 @@ export class SimulationConfigurationEditor extends React.Component<Props, State>
 
   closeForm(event: React.SyntheticEvent) {
     event.stopPropagation();
-    this.props.onClose(event);
-    this.setState({ show: false });
+    this.props.onClose();
+    this.setState({
+      show: false
+    });
   }
 
   submitForm(event: React.SyntheticEvent) {
