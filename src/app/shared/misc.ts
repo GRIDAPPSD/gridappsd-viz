@@ -113,6 +113,19 @@ function _fuzzySearchWithHighlighting(needle: string) {
       startOfCurrentMatch = haystack.indexOf(piece, endOfLastMatch);
       if (startOfCurrentMatch === -1)
         return null;
+      // If the haystack is an exact match to the needle
+      // we want it to have the smallest possible inaccuracy
+      // which is negative infinity
+      // then we want to break out of the loop
+      if (needle === haystack) {
+        inaccuracy = -Infinity;
+        boundaries.push({
+          start: 0,
+          end: Infinity,
+          highlight: true
+        });
+        break;
+      }
       if (startOfCurrentMatch > endOfLastMatch) {
         boundaries.push({
           start: endOfLastMatch,
