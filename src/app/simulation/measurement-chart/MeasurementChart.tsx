@@ -49,6 +49,7 @@ export class MeasurementChart extends React.Component<Props, State> {
       .range([this.margin.left, this.width - this.margin.right]);
 
     this._yScale = scaleLinear()
+      .domain([Infinity, -Infinity])
       .range([this.height - this.margin.bottom, this.margin.top]);
 
     this.lineGenerator = line<TimeSeriesDataPoint>()
@@ -107,8 +108,17 @@ export class MeasurementChart extends React.Component<Props, State> {
 
   private _renderYAxis(updatedYAxisExtent: [number, number]) {
     const currentExtent = this._yScale.domain();
-    if (updatedYAxisExtent[0] < currentExtent[0] || updatedYAxisExtent[1] > currentExtent[1]) {
-      this._yScale.domain(updatedYAxisExtent);
+    let shouldUpdate = false;
+    if (updatedYAxisExtent[0] < currentExtent[0]) {
+      currentExtent[0] = updatedYAxisExtent[0];
+      shouldUpdate = true;
+    }
+    if (updatedYAxisExtent[1] > currentExtent[1]) {
+      currentExtent[1] = updatedYAxisExtent[1];
+      shouldUpdate = true;
+    }
+    if (shouldUpdate) {
+      this._yScale.domain(currentExtent);
       this._yAxisGenerator.scale(this._yScale);
       this._yAxis.call(this._yAxisGenerator);
     }
