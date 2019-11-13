@@ -1,4 +1,5 @@
-import { Subject } from 'rxjs';
+import { Subject, Observable, of } from 'rxjs';
+import { map, catchError } from 'rxjs/operators';
 
 import { StompClientService, StompClientInitializationResult } from '@shared/StompClientService';
 import { AuthenticationResult } from '../models/AuthenticationResult';
@@ -24,24 +25,26 @@ export class AuthenticationService {
     return AuthenticationService._INSTANCE;
   }
 
-  authenticate(username: string, password: string): Promise<AuthenticationResult> {
+  authenticate(username: string, password: string): Observable<AuthenticationResult> {
     return this._stompClientService.connect(username, password)
-      .then(() => {
-        this._isAuthenticated = true;
-        sessionStorage.setItem('isAuthenticated', 'true');
-        return {
-          statusCode: AuthenticationStatusCode.OK
-        };
-      })
-      .catch(code => {
-        if (code === StompClientInitializationResult.AUTHENTICATION_FAILURE)
+      .pipe(
+        map(() => {
+          this._isAuthenticated = true;
+          sessionStorage.setItem('isAuthenticated', 'true');
           return {
-            statusCode: AuthenticationStatusCode.INCORRECT_CREDENTIALS
+            statusCode: AuthenticationStatusCode.OK
           };
-        return {
-          statusCode: AuthenticationStatusCode.SERVER_FAILURE
-        };
-      });
+        }),
+        catchError(code => {
+          if (code === StompClientInitializationResult.AUTHENTICATION_FAILURE)
+            return of({
+              statusCode: AuthenticationStatusCode.INCORRECT_CREDENTIALS
+            });
+          return of({
+            statusCode: AuthenticationStatusCode.SERVER_FAILURE
+          });
+        })
+      );
   }
 
   isAuthenticated() {

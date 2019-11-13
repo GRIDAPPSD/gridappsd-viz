@@ -1,5 +1,5 @@
 import { client, Client, StompHeaders, Message } from '@stomp/stompjs';
-import { BehaviorSubject, Observable, interval, using, timer, iif, of } from 'rxjs';
+import { BehaviorSubject, Observable, interval, using, timer, iif, of, Subject } from 'rxjs';
 import { filter, switchMap, take, timeout } from 'rxjs/operators';
 
 import { ConfigurationManager } from './ConfigurationManager';
@@ -65,25 +65,34 @@ export class StompClientService {
       });
   }
 
-  connect(username: string, password: string): Promise<StompClientInitializationResult> {
+  connect(username: string, password: string): Observable<StompClientInitializationResult> {
+    const subject = new Subject<StompClientInitializationResult>();
     this._username = username;
     this._password = password;
-    return new Promise<StompClientInitializationResult>((resolve, reject) => {
-      this._client.connect(
-        this._username,
-        this._password,
-        () => {
-          resolve(StompClientInitializationResult.OK);
-          this._connectionEstablished();
 
-          // need to reevaluate this
-          sessionStorage.setItem('username', username);
-          sessionStorage.setItem('password', password);
-        },
-        () => reject(StompClientInitializationResult.AUTHENTICATION_FAILURE),
-        () => reject(StompClientInitializationResult.CONNECTION_FAILURE)
-      );
-    });
+    this._client.connect(
+      this._username,
+      this._password,
+      () => {
+        subject.next(StompClientInitializationResult.OK);
+        subject.complete();
+        subject.unsubscribe();
+        this._connectionEstablished();
+
+        // need to reevaluate this
+        sessionStorage.setItem('username', username);
+        sessionStorage.setItem('password', password);
+      },
+      () => {
+        subject.error(StompClientInitializationResult.AUTHENTICATION_FAILURE);
+        subject.unsubscribe();
+      },
+      () => {
+        subject.error(StompClientInitializationResult.CONNECTION_FAILURE);
+        subject.unsubscribe();
+      }
+    );
+    return subject.pipe(take(1));
   }
 
   private _connectionEstablished() {

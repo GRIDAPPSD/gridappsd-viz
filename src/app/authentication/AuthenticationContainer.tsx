@@ -72,10 +72,17 @@ export class AuthenticationContainer extends React.Component<Props, State> {
 
   tryLogin(username: string, password: string) {
     this._authenticationService.authenticate(username, password)
-      .then(authenticationResult => {
-        this.setState({
-          authenticationResult
-        });
+      .subscribe({
+        next: authenticationResult => {
+          this.setState({
+            authenticationResult
+          });
+        },
+        error: authenticationResult => {
+          this.setState({
+            authenticationResult
+          });
+        }
       });
   }
 
