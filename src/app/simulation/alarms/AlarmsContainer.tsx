@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { Subscription } from 'rxjs';
-import { filter, map, switchMap } from 'rxjs/operators';
+import { filter, map, switchMap, tap } from 'rxjs/operators';
 
 import { Alarms } from './Alarms';
 import { StateStore } from '@shared/state-store';
@@ -40,6 +40,16 @@ export class AlarmsContainer extends React.Component<Props, State> {
     this._subscription = this._stateStore.select('simulationId')
       .pipe(
         filter(simulationId => simulationId !== ''),
+        // We got a new simulation ID which means
+        // a new simulation was started
+        // so reset the list of alarms to empty
+        // as well as the number of current alarms
+        tap(() => {
+          this.setState({
+            alarms: [],
+            newAlarmCounts: 0
+          });
+        }),
         map(id => `/topic/goss.gridappsd.simulation.gridappsd-alarms.${id}.output`),
         switchMap(this._stompClientService.readFrom),
         map(JSON.parse as (str: string) => Alarm[])
