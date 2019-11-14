@@ -5,25 +5,19 @@
 
     &[contenteditable=true]:focus {
         &::before {
-            transform: scale(1, 1);
             background-color: #639;
         }
 
         &::after {
-            transition-delay: 0.35s;
-            transform: scale(1, 1);
             background-color: #639;
         }
 
         &~.textarea__input-box-focus-indicator {
             &::before {
-                transform: scale(1, 1);
                 background-color: #639;
             }
 
             &::after {
-                transition-delay: 0.35s;
-                transform: scale(1, 1);
                 background-color: #639;
             }
         }
