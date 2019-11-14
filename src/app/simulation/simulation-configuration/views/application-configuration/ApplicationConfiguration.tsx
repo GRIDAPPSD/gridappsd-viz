@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { FormGroup, Select, TextArea, Option } from '@shared/form';
+import { FormGroup, Select, TextArea, SelectionOptionBuilder } from '@shared/form';
 import { SimulationConfiguration } from '@shared/simulation';
 import { Application } from '@shared/Application';
 import { ApplicationConfigurationModel } from '../../models/ApplicationConfigurationModel';
@@ -15,7 +15,7 @@ interface Props {
 }
 
 interface State {
-  availableApplicationOptions: Option<string>[];
+  availableApplicationOptionBuilder: SelectionOptionBuilder<string>;
   disabledAppConfigStringInputBox: boolean;
 }
 
@@ -26,7 +26,9 @@ export class ApplicationConfiguration extends React.Component<Props, State> {
     super(props);
 
     this.state = {
-      availableApplicationOptions: (props.availableApplications || []).map(app => new Option(app.id)),
+      availableApplicationOptionBuilder: new SelectionOptionBuilder(
+        (props.availableApplications || []).map(app => app.id)
+      ),
       disabledAppConfigStringInputBox: true
     };
 
@@ -50,10 +52,9 @@ export class ApplicationConfiguration extends React.Component<Props, State> {
     return (
       <FormGroup label=''>
         <Select
-          multiple={false}
           label='Application name'
-          options={this.state.availableApplicationOptions}
-          selectedOptionFinder={option => option.label === this.formValue.applicationId}
+          selectionOptionBuilder={this.state.availableApplicationOptionBuilder}
+          selectedOptionFinder={appId => appId === this.formValue.applicationId}
           optional={true}
           onClear={this.onApplicationDeselected}
           onChange={this.onSelectedApplicationChanged} />
@@ -77,8 +78,8 @@ export class ApplicationConfiguration extends React.Component<Props, State> {
     });
   }
 
-  onSelectedApplicationChanged(selectedOption: Option<string>) {
-    this.formValue.applicationId = selectedOption.value;
+  onSelectedApplicationChanged(selectedAppId: string) {
+    this.formValue.applicationId = selectedAppId;
     this.props.onChange(this.formValue);
     this.setState({
       disabledAppConfigStringInputBox: false

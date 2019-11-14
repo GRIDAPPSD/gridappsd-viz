@@ -2,10 +2,9 @@ import * as React from 'react';
 
 import { Dialog, DialogContent, DialogActions } from '@shared/dialog';
 import { BasicButton } from '@shared/buttons';
-import { Input, Option, Select, CheckBox } from '@shared/form';
+import { Input, Select, CheckBox, SelectionOptionBuilder } from '@shared/form';
 import { ModelDictionaryComponentType, ModelDictionaryComponent } from '@shared/topology';
 import { PlotModelSummary } from './PlotModelSummary';
-import { toOptions } from '@shared/form/select/utils';
 import { PlotModel, PlotModelComponent } from '@shared/plot-model';
 import { Validators } from '@shared/form/validation';
 
@@ -21,9 +20,9 @@ interface Props {
 
 interface State {
   show: boolean;
-  componentOptions: Option<ModelDictionaryComponent>[];
-  allPlotModelOptions: Option<PlotModel>[];
-  componentTypeOptions: Option<ModelDictionaryComponentType>[];
+  componentOptionBuilder: SelectionOptionBuilder<ModelDictionaryComponent>;
+  allPlotModelOptionBuilder: SelectionOptionBuilder<PlotModel>;
+  componentTypeOptionBuilder: SelectionOptionBuilder<ModelDictionaryComponentType>;
   createdPlotModels: PlotModel[];
   currentPlotModel: PlotModel;
   selectedComponent: ModelDictionaryComponent;
@@ -32,7 +31,7 @@ interface State {
   // they can then select the desired phases(A, B, C) for this component,
   // this list keeps track of the selected component at those phases
   createdPlotModelComponentsWithPhase: PlotModelComponent[];
-  phaseOptions: Option<string>[];
+  phaseOptionBuilder: SelectionOptionBuilder<string>;
 }
 
 export class PlotModelCreator extends React.Component<Props, State> {
@@ -43,19 +42,36 @@ export class PlotModelCreator extends React.Component<Props, State> {
   constructor(props: Props) {
     super(props);
     this.state = {
-      componentOptions: [],
-      allPlotModelOptions: toOptions(props.existingPlotModels, plotModel => plotModel.name),
-      componentTypeOptions: [
-        new Option('Power', ModelDictionaryComponentType.POWER),
-        new Option('Tap', ModelDictionaryComponentType.TAP),
-        new Option('Voltage', ModelDictionaryComponentType.VOLTAGE)
-      ],
+      componentOptionBuilder: SelectionOptionBuilder.defaultBuilder(),
+      allPlotModelOptionBuilder: new SelectionOptionBuilder(
+        props.existingPlotModels,
+        plotModel => plotModel.name
+      ),
+      componentTypeOptionBuilder: new SelectionOptionBuilder(
+        [
+          ModelDictionaryComponentType.POWER,
+          ModelDictionaryComponentType.TAP,
+          ModelDictionaryComponentType.VOLTAGE
+        ],
+        type => {
+          switch (type) {
+            case ModelDictionaryComponentType.POWER:
+              return 'Power';
+            case ModelDictionaryComponentType.TAP:
+              return 'Tap';
+            case ModelDictionaryComponentType.VOLTAGE:
+              return 'Voltage';
+            default:
+              return '';
+          }
+        }
+      ),
       createdPlotModels: props.existingPlotModels,
       currentPlotModel: this._createDefaultPlotModel(),
       selectedComponent: null,
       disableAddComponentButton: true,
       createdPlotModelComponentsWithPhase: [],
-      phaseOptions: [],
+      phaseOptionBuilder: SelectionOptionBuilder.defaultBuilder(),
       show: true
     };
 
@@ -97,13 +113,10 @@ export class PlotModelCreator extends React.Component<Props, State> {
             <form className='plot-model-creator__body__form'>
               <Select
                 ref={ref => this.allPlotSelect = ref}
-                multiple={false}
                 label='Created plots'
                 optional={true}
-                options={this.state.allPlotModelOptions}
-                selectedOptionFinder={
-                  option => option.value === this.state.currentPlotModel
-                }
+                selectionOptionBuilder={this.state.allPlotModelOptionBuilder}
+                selectedOptionFinder={plot => plot === this.state.currentPlotModel}
                 onChange={this.onPlotNameChanged} />
               <Input
                 label='Plot name'
@@ -115,12 +128,11 @@ export class PlotModelCreator extends React.Component<Props, State> {
                 onValidate={this.onPlotNameFormControlValidated}
                 onChange={this.onPlotNameChanged} />
               <Select
-                multiple={false}
                 optional={false}
                 label='Component type'
                 disabled={this.state.currentPlotModel.components.length > 0 || this.state.currentPlotModel.name === ''}
-                selectedOptionFinder={option => option.value === this.state.currentPlotModel.componentType}
-                options={this.state.componentTypeOptions}
+                selectedOptionFinder={type => type === this.state.currentPlotModel.componentType}
+                selectionOptionBuilder={this.state.componentTypeOptionBuilder}
                 onClear={this.onComponentTypeSelectionCleared}
                 onChange={this.onComponentTypeChanged} />
               <CheckBox
@@ -139,10 +151,9 @@ export class PlotModelCreator extends React.Component<Props, State> {
                 onChange={this.toggleUseAngle} />
               <Select
                 ref={ref => this.componentSelect = ref}
-                multiple={false}
                 optional={false}
                 label='Component'
-                options={this.state.componentOptions}
+                selectionOptionBuilder={this.state.componentOptionBuilder}
                 onClear={this.onComponentSelectionCleared}
                 onChange={this.onComponentChanged} />
               <Select
@@ -150,8 +161,8 @@ export class PlotModelCreator extends React.Component<Props, State> {
                 label='Phases'
                 optional={false}
                 disabled={!this.state.selectedComponent}
-                options={this.state.phaseOptions}
-                selectedOptionFinder={() => this.state.phaseOptions.length === 1}
+                selectionOptionBuilder={this.state.phaseOptionBuilder}
+                selectedOptionFinder={() => this.state.phaseOptionBuilder.numberOfOptions() === 1}
                 onClear={this.onComponentPhasesSelectionCleared}
                 onChange={this.onComponentPhasesSelected} />
               <BasicButton
@@ -194,7 +205,7 @@ export class PlotModelCreator extends React.Component<Props, State> {
     }
   }
 
-  onPlotNameChanged(item: string | Option<PlotModel>) {
+  onPlotNameChanged(item: string | PlotModel) {
     // When the "Add component" is clicked to add a new plot model component,
     // the "Created plots" dropdown's option list is refreshed, so the function
     // passed to "Created plots" select's isOptionSelected prop is called, and this.allPlotSelect
@@ -202,19 +213,19 @@ export class PlotModelCreator extends React.Component<Props, State> {
     if (this.allPlotSelect) {
       const newPlotModel = typeof item === 'string'
         ? this.state.createdPlotModels.find(e => e.name === item) || this._createDefaultPlotModel(item)
-        : item.value;
+        : item;
 
       this.setState({
         currentPlotModel: newPlotModel,
         selectedComponent: null,
-        componentOptions: newPlotModel.componentType === ModelDictionaryComponentType.NONE
-          ? []
-          : toOptions(
+        componentOptionBuilder: newPlotModel.componentType === ModelDictionaryComponentType.NONE
+          ? SelectionOptionBuilder.defaultBuilder()
+          : new SelectionOptionBuilder(
             this.props.modelDictionaryComponentsWithConsolidatedPhases.filter(e => e.type === newPlotModel.componentType),
             e => e.displayName
           ),
-        phaseOptions: [],
-        componentTypeOptions: [...this.state.componentTypeOptions]
+        phaseOptionBuilder: SelectionOptionBuilder.defaultBuilder(),
+        componentTypeOptionBuilder: this.state.componentTypeOptionBuilder.clone()
       });
       // When "Plot name" text input changes, we want to reset the "Created plots" drop down
       // so that if it has a selected value, it needs to show the default text
@@ -226,22 +237,22 @@ export class PlotModelCreator extends React.Component<Props, State> {
   onComponentTypeSelectionCleared() {
     this.setState({
       disableAddComponentButton: true,
-      componentOptions: [],
+      componentOptionBuilder: SelectionOptionBuilder.defaultBuilder(),
       selectedComponent: null,
-      phaseOptions: []
+      phaseOptionBuilder: SelectionOptionBuilder.defaultBuilder()
     });
   }
 
-  onComponentTypeChanged(option: Option<ModelDictionaryComponentType>) {
+  onComponentTypeChanged(selectedType: ModelDictionaryComponentType) {
     this.setState({
-      componentOptions: toOptions(
-        this.props.modelDictionaryComponentsWithConsolidatedPhases.filter(e => e.type === option.value),
+      componentOptionBuilder: new SelectionOptionBuilder(
+        this.props.modelDictionaryComponentsWithConsolidatedPhases.filter(e => e.type === selectedType),
         e => e.displayName
       ),
       selectedComponent: null,
-      phaseOptions: []
+      phaseOptionBuilder: SelectionOptionBuilder.defaultBuilder()
     });
-    this.state.currentPlotModel.componentType = option.value;
+    this.state.currentPlotModel.componentType = selectedType;
   }
 
   disableMagnitudeAndAngleCheckboxes() {
@@ -263,14 +274,14 @@ export class PlotModelCreator extends React.Component<Props, State> {
       disableAddComponentButton: true,
       selectedComponent: null,
       createdPlotModelComponentsWithPhase: [],
-      phaseOptions: []
+      phaseOptionBuilder: SelectionOptionBuilder.defaultBuilder()
     });
   }
 
-  onComponentChanged(option: Option<ModelDictionaryComponent>) {
+  onComponentChanged(selectedComponent: ModelDictionaryComponent) {
     this.setState({
-      selectedComponent: option.value,
-      phaseOptions: toOptions(option.value.phases, e => e)
+      selectedComponent,
+      phaseOptionBuilder: new SelectionOptionBuilder(selectedComponent.phases)
     });
   }
 
@@ -281,13 +292,12 @@ export class PlotModelCreator extends React.Component<Props, State> {
     });
   }
 
-  onComponentPhasesSelected(selectedPhaseOptions: Option<string>[]) {
+  onComponentPhasesSelected(selectedPhases: string[]) {
     const currentPlotModel = this.state.currentPlotModel;
     const selectedComponent = this.state.selectedComponent;
     const createdPlotModelComponentsWithPhase = [];
-    for (let i = 0; i < selectedPhaseOptions.length; i++) {
-      const selectedPhaseOption = selectedPhaseOptions[i];
-      const selectedPhase = selectedPhaseOption.value;
+    for (let i = 0; i < selectedPhases.length; i++) {
+      const selectedPhase = selectedPhases[i];
       const plotModelComponentDisplayName = `${selectedComponent.name} (${selectedPhase})`;
       if (currentPlotModel.components.find(e => e.displayName === plotModelComponentDisplayName) === undefined) {
         const plotModelComponentAtSelectedPhase: PlotModelComponent = {
@@ -305,16 +315,20 @@ export class PlotModelCreator extends React.Component<Props, State> {
   }
 
   onRemovePlotModel(plotModel: PlotModel) {
-    this.setState(state => ({
-      createdPlotModels: state.createdPlotModels.filter(existing => existing !== plotModel),
-      allPlotModelOptions: state.allPlotModelOptions.filter(existing => existing.value !== plotModel)
-    }));
+    const newCreatedPlotModels = this.state.createdPlotModels.filter(existing => existing !== plotModel);
+    this.setState({
+      createdPlotModels: newCreatedPlotModels,
+      allPlotModelOptionBuilder: new SelectionOptionBuilder(
+        newCreatedPlotModels,
+        model => model.name
+      )
+    });
     if (this.state.currentPlotModel === plotModel) {
       this.setState({
         currentPlotModel: this._createDefaultPlotModel(),
-        componentOptions: [],
+        componentOptionBuilder: SelectionOptionBuilder.defaultBuilder(),
         selectedComponent: null,
-        phaseOptions: []
+        phaseOptionBuilder: SelectionOptionBuilder.defaultBuilder()
       });
     }
   }
@@ -325,14 +339,14 @@ export class PlotModelCreator extends React.Component<Props, State> {
       return model !== updatedPlotModel ? model : newPlotModel;
     });
     this.setState({
-      allPlotModelOptions: toOptions(updatedPlotModels, model => model.name),
+      allPlotModelOptionBuilder: new SelectionOptionBuilder(updatedPlotModels, model => model.name),
       createdPlotModels: updatedPlotModels
     });
     if (updatedPlotModel === this.state.currentPlotModel)
       this.setState({
         currentPlotModel: newPlotModel,
         selectedComponent: null,
-        phaseOptions: [],
+        phaseOptionBuilder: SelectionOptionBuilder.defaultBuilder(),
         disableAddComponentButton: true
       });
   }
@@ -347,11 +361,14 @@ export class PlotModelCreator extends React.Component<Props, State> {
       : [...this.state.createdPlotModels, this.state.currentPlotModel];
     this.setState({
       createdPlotModels: updatedPlotModels,
-      allPlotModelOptions: toOptions(updatedPlotModels, plotModel => plotModel.name),
+      allPlotModelOptionBuilder: new SelectionOptionBuilder(
+        updatedPlotModels,
+        plotModel => plotModel.name
+      ),
       selectedComponent: null,
       disableAddComponentButton: true,
       createdPlotModelComponentsWithPhase: [],
-      phaseOptions: []
+      phaseOptionBuilder: SelectionOptionBuilder.defaultBuilder()
     });
     this.componentSelect.reset();
   }
