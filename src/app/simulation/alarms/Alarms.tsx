@@ -36,8 +36,8 @@ export class Alarms extends React.Component<Props, State> {
         <table>
           <thead>
             <tr>
-              <th></th>
-              <th></th>
+              <th>No.</th>
+              <th>Action</th>
               <th>Equipment MRID</th>
               <th>Equipment Name</th>
               <th>Created By</th>
@@ -61,6 +61,7 @@ export class Alarms extends React.Component<Props, State> {
 
     return (
       <tr key={index}>
+        <td>{index + 1}</td>
         <td>
           <Tooltip content='Acknowledge'>
             <IconButton
@@ -69,7 +70,6 @@ export class Alarms extends React.Component<Props, State> {
               onClick={() => this.props.onAcknowledgeAlarm(alarm)} />
           </Tooltip>
         </td>
-        <td>{index + 1}</td>
         <Ripple>
           <td onClick={() => copyToClipboard(alarm.equipment_mrid)}>
             {alarm.equipment_mrid}
