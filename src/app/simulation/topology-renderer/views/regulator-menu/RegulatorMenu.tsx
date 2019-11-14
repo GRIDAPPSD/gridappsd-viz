@@ -1,7 +1,7 @@
 import * as React from 'react';
 
 import { Dialog, DialogContent, DialogActions } from '@shared/dialog';
-import { Select, Input, Option } from '@shared/form';
+import { Select, Input, SelectionOptionBuilder } from '@shared/form';
 import { BasicButton } from '@shared/buttons';
 import { RegulatorControlMode } from '@shared/topology/RegulatorControlMode';
 import { Regulator } from '@shared/topology';
@@ -20,7 +20,7 @@ interface Props {
 interface State {
   show: boolean;
   controlMode: RegulatorControlMode;
-  options: Option<RegulatorControlMode>[];
+  controlModelOptionBuilder: SelectionOptionBuilder<RegulatorControlMode>;
 }
 
 export class RegulatorMenu extends React.Component<Props, State> {
@@ -33,10 +33,13 @@ export class RegulatorMenu extends React.Component<Props, State> {
     this.state = {
       show: true,
       controlMode: props.regulator.controlMode,
-      options: [
-        new Option('Manual', RegulatorControlMode.MANUAL),
-        new Option('Line drop compensation', RegulatorControlMode.LINE_DROP_COMPENSATION)
-      ]
+      controlModelOptionBuilder: new SelectionOptionBuilder(
+        [
+          RegulatorControlMode.MANUAL,
+          RegulatorControlMode.LINE_DROP_COMPENSATION
+        ],
+        mode => mode === RegulatorControlMode.MANUAL ? 'Manual' : 'Line drop compensation'
+      )
     };
 
     this.regulator = {
@@ -64,16 +67,14 @@ export class RegulatorMenu extends React.Component<Props, State> {
         <DialogContent styles={{ overflow: 'hidden' }}>
           <form className='regulator-menu__form'>
             <Select
-              multiple={false}
               label='Control mode'
-              options={this.state.options}
-              selectedOptionFinder={option => option.value === this.state.controlMode}
-              onChange={selectedOption => {
-                const selectedControlModel = selectedOption.value;
-                this.regulator.controlMode = selectedControlModel;
-                this.regulator.manual = selectedControlModel === RegulatorControlMode.MANUAL;
+              selectionOptionBuilder={this.state.controlModelOptionBuilder}
+              selectedOptionFinder={mode => mode === this.state.controlMode}
+              onChange={selectedControlMode => {
+                this.regulator.controlMode = selectedControlMode;
+                this.regulator.manual = selectedControlMode === RegulatorControlMode.MANUAL;
                 this.setState({
-                  controlMode: selectedControlModel
+                  controlMode: selectedControlMode
                 });
               }} />
             {this.showFormFieldsBasedOnControlMode()}

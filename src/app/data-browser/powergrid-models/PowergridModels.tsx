@@ -5,7 +5,7 @@ import { Response } from '../Response';
 import {
   QueryPowerGridModelsRequestType, QueryPowerGridModelsRequestBody, QueryPowerGridModelsResultFormat
 } from './models/QueryPowerGridModelsRequest';
-import { TextArea, Select, Option } from '@shared/form';
+import { TextArea, Select, SelectionOptionBuilder } from '@shared/form';
 import { BasicButton } from '@shared/buttons';
 import { Wait } from '@shared/wait';
 import { FeederModelLine } from '@shared/topology';
@@ -23,9 +23,9 @@ interface Props {
 interface State {
   response: any;
   requestBody: QueryPowerGridModelsRequestBody;
-  lineOptions: Option<string>[];
-  requestTypeOptions: Option<QueryPowerGridModelsRequestType>[];
-  resultFormatOptions: Option<QueryPowerGridModelsResultFormat>[];
+  lineOptionBuilder: SelectionOptionBuilder<FeederModelLine>;
+  requestTypeOptionBuilder: SelectionOptionBuilder<QueryPowerGridModelsRequestType>;
+  resultFormatOptionBuilder: SelectionOptionBuilder<QueryPowerGridModelsResultFormat>;
 }
 
 export class PowerGridModels extends React.Component<Props, State> {
@@ -40,18 +40,25 @@ export class PowerGridModels extends React.Component<Props, State> {
         queryString: `SELECT ?feeder ?fid  WHERE {?s r:type c:Feeder.?s c:IdentifiedObject.name ?feeder.?s c:IdentifiedObject.mRID ?fid.?s c:Feeder.NormalEnergizingSubstation ?sub.?sub c:IdentifiedObject.name ?station.?sub c:IdentifiedObject.mRID ?sid.?sub c:Substation.Region ?sgr.?sgr c:IdentifiedObject.name ?subregion.?sgr c:IdentifiedObject.mRID ?sgrid.?sgr c:SubGeographicalRegion.Region ?rgn.?rgn c:IdentifiedObject.name ?region.?rgn c:IdentifiedObject.mRID ?rgnid.}  ORDER by ?station ?feeder`,
         filter: `?s cim:IdentifiedObject.name \u0027q14733\u0027","objectType":"http://iec.ch/TC57/2012/CIM-schema-cim17#ConnectivityNode`
       } as QueryPowerGridModelsRequestBody,
-      lineOptions: props.feederModelLines.map(line => new Option(line.name, line.id)),
-      requestTypeOptions: [
-        new Option(QueryPowerGridModelsRequestType.QUERY, QueryPowerGridModelsRequestType.QUERY),
-        new Option(QueryPowerGridModelsRequestType.QUERY_MODEL, QueryPowerGridModelsRequestType.QUERY_MODEL),
-        new Option(QueryPowerGridModelsRequestType.QUERY_MODEL_NAMES, QueryPowerGridModelsRequestType.QUERY_MODEL_NAMES),
-        new Option(QueryPowerGridModelsRequestType.QUERY_OBJECT, QueryPowerGridModelsRequestType.QUERY_OBJECT),
-        new Option(QueryPowerGridModelsRequestType.QUERY_OBJECT_TYPES, QueryPowerGridModelsRequestType.QUERY_OBJECT_TYPES),
-      ],
-      resultFormatOptions: [
-        new Option(QueryPowerGridModelsResultFormat.JSON, QueryPowerGridModelsResultFormat.JSON),
-        new Option(QueryPowerGridModelsResultFormat.CSV, QueryPowerGridModelsResultFormat.CSV),
-      ]
+      lineOptionBuilder: new SelectionOptionBuilder(
+        props.feederModelLines,
+        line => line.name
+      ),
+      requestTypeOptionBuilder: new SelectionOptionBuilder(
+        [
+          QueryPowerGridModelsRequestType.QUERY,
+          QueryPowerGridModelsRequestType.QUERY_MODEL,
+          QueryPowerGridModelsRequestType.QUERY_MODEL_NAMES,
+          QueryPowerGridModelsRequestType.QUERY_OBJECT,
+          QueryPowerGridModelsRequestType.QUERY_OBJECT_TYPES
+        ]
+      ),
+      resultFormatOptionBuilder: new SelectionOptionBuilder(
+        [
+          QueryPowerGridModelsResultFormat.JSON,
+          QueryPowerGridModelsResultFormat.CSV
+        ]
+      )
     };
 
     this.componentToShowForQueryType = {
@@ -63,28 +70,25 @@ export class PowerGridModels extends React.Component<Props, State> {
       ),
       [QueryPowerGridModelsRequestType.QUERY_OBJECT]: (
         <Select
-          multiple={false}
           label='Object ID'
-          options={this.state.lineOptions}
-          onChange={selectedOption => this.updateRequestBody('objectId', selectedOption.value)}
-          selectedOptionFinder={option => option.label === 'ieee8500'} />
+          selectionOptionBuilder={this.state.lineOptionBuilder}
+          onChange={selectedValue => this.updateRequestBody('objectId', selectedValue.id)}
+          selectedOptionFinder={objectId => objectId.name === 'ieee8500'} />
       ),
       [QueryPowerGridModelsRequestType.QUERY_OBJECT_TYPES]: (
         <Select
-          multiple={false}
           label='Model ID'
-          options={this.state.lineOptions}
-          onChange={selectedOption => this.updateRequestBody('modelId', selectedOption.value)}
-          selectedOptionFinder={option => option.label === 'ieee8500'} />
+          selectionOptionBuilder={this.state.lineOptionBuilder}
+          onChange={selectedValue => this.updateRequestBody('modelId', selectedValue.id)}
+          selectedOptionFinder={modelId => modelId.name === 'ieee8500'} />
       ),
       [QueryPowerGridModelsRequestType.QUERY_MODEL]: (
         <>
           <Select
-            multiple={false}
             label='Model ID'
-            options={this.state.lineOptions}
-            onChange={selectedOption => this.updateRequestBody('modelId', selectedOption.value)}
-            selectedOptionFinder={option => option.label === 'ieee8500'} />
+            selectionOptionBuilder={this.state.lineOptionBuilder}
+            onChange={selectedValue => this.updateRequestBody('modelId', selectedValue.id)}
+            selectedOptionFinder={modelId => modelId.name === 'ieee8500'} />
           <TextArea
             label='Filter'
             value={`?s cim:IdentifiedObject.name \u0027q14733\u0027","objectType":"http://iec.ch/TC57/2012/CIM-schema-cim17#ConnectivityNode`}
@@ -111,21 +115,19 @@ export class PowerGridModels extends React.Component<Props, State> {
           <RequestEditor styles={requestContainerStyles}>
             <form className='query-powergrid-models-form'>
               <Select
-                multiple={false}
                 label='Request type'
-                options={this.state.requestTypeOptions}
-                onChange={selectedOption => {
+                selectionOptionBuilder={this.state.requestTypeOptionBuilder}
+                onChange={selectedValue => {
                   this.setState({
                     response: null
                   });
-                  this.updateRequestBody('requestType', selectedOption.value);
+                  this.updateRequestBody('requestType', selectedValue);
                 }} />
               <Select
-                multiple={false}
                 label='Result format'
-                onChange={selectedOption => this.updateRequestBody('resultFormat', selectedOption.value)}
-                options={this.state.resultFormatOptions}
-                selectedOptionFinder={option => option.value === QueryPowerGridModelsResultFormat.JSON} />
+                onChange={selectedValue => this.updateRequestBody('resultFormat', selectedValue)}
+                selectionOptionBuilder={this.state.resultFormatOptionBuilder}
+                selectedOptionFinder={format => format === QueryPowerGridModelsResultFormat.JSON} />
               {
                 this.componentToShowForQueryType[this.state.requestBody.requestType]
               }

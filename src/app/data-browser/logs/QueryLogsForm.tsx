@@ -1,8 +1,7 @@
 import * as React from 'react';
 
 import { RequestEditor } from '../RequestEditor';
-import { Input, Select, Option } from '@shared/form';
-import { toOptions } from '@shared/form/select/utils';
+import { Input, Select, SelectionOptionBuilder } from '@shared/form';
 import { BasicButton } from '@shared/buttons';
 import { QueryLogsRequestBody } from './models/QueryLogsRequestBody';
 import { SimulationId } from './models/SimulationId';
@@ -19,9 +18,9 @@ interface Props {
 
 interface State {
   selectedSimulationId: SimulationId;
-  simulationIdOptions: Option<SimulationId>[];
-  logLevelOptions: Option<string>[];
-  processStatusOptions: Option<string>[];
+  simulationIdOptionBuilder: SelectionOptionBuilder<SimulationId>;
+  logLevelOptionBuilder: SelectionOptionBuilder<string>;
+  processStatusOptionBuilder: SelectionOptionBuilder<string>;
 }
 
 export class QueryLogsForm extends React.Component<Props, State> {
@@ -39,11 +38,15 @@ export class QueryLogsForm extends React.Component<Props, State> {
     super(props);
     this.state = {
       selectedSimulationId: null,
-      simulationIdOptions: toOptions(props.simulationIds, simulationId => simulationId.process_id),
-      logLevelOptions: toOptions(['ALL', 'TRACE', 'DEBUG', 'INFO', 'WARN', 'ERROR', 'FATAL'], level => level),
-      processStatusOptions: toOptions(
-        ['ALL', 'STARTING', 'STARTED', 'RUNNING', 'ERROR', 'CLOSED', 'COMPLETE'],
-        processStatus => processStatus
+      simulationIdOptionBuilder: new SelectionOptionBuilder(
+        props.simulationIds,
+        simulationId => simulationId.process_id
+      ),
+      logLevelOptionBuilder: new SelectionOptionBuilder(
+        ['ALL', 'TRACE', 'DEBUG', 'INFO', 'WARN', 'ERROR', 'FATAL']
+      ),
+      processStatusOptionBuilder: new SelectionOptionBuilder(
+        ['ALL', 'STARTING', 'STARTED', 'RUNNING', 'ERROR', 'CLOSED', 'COMPLETE']
       )
     };
 
@@ -53,7 +56,10 @@ export class QueryLogsForm extends React.Component<Props, State> {
   componentDidUpdate(prevProps: Props) {
     if (this.props.simulationIds !== prevProps.simulationIds)
       this.setState({
-        simulationIdOptions: toOptions(this.props.simulationIds, simulationId => simulationId.process_id)
+        simulationIdOptionBuilder: new SelectionOptionBuilder(
+          this.props.simulationIds,
+          simulationId => simulationId.process_id
+        )
       });
   }
 
@@ -69,9 +75,8 @@ export class QueryLogsForm extends React.Component<Props, State> {
                 value={this.state.selectedSimulationId ? this.state.selectedSimulationId.timestamp : ''}
                 onChange={value => this.formValue.startTime = value} />
               <Select
-                multiple={false}
                 label='Simulation ID'
-                options={this.state.simulationIdOptions}
+                selectionOptionBuilder={this.state.simulationIdOptionBuilder}
                 onChange={this.onSimulationIdSelected} />
               <Input
                 label='Username'
@@ -81,23 +86,20 @@ export class QueryLogsForm extends React.Component<Props, State> {
             </div>
             <div className='query-logs-form__right'>
               <Select
-                multiple={false}
                 label='Source'
-                options={this.props.sources.map(source => new Option(source, source))}
+                selectionOptionBuilder={new SelectionOptionBuilder(this.props.sources)}
                 selectedOptionFinder={(_, index) => index === 0}
-                onChange={selectedOption => this.formValue.source = selectedOption.value} />
+                onChange={selectedValue => this.formValue.source = selectedValue} />
               <Select
-                multiple={false}
                 label='Log level'
-                options={this.state.logLevelOptions}
-                selectedOptionFinder={option => option.label === 'ALL'}
-                onChange={selectedOption => this.formValue.logLevel = selectedOption.value} />
+                selectionOptionBuilder={this.state.logLevelOptionBuilder}
+                selectedOptionFinder={level => level === 'ALL'}
+                onChange={selectedValue => this.formValue.logLevel = selectedValue} />
               <Select
-                multiple={false}
                 label='Process status'
-                options={this.state.processStatusOptions}
-                selectedOptionFinder={option => option.label === 'ALL'}
-                onChange={selectedOption => this.formValue.processStatus = selectedOption.value} />
+                selectionOptionBuilder={this.state.processStatusOptionBuilder}
+                selectedOptionFinder={status => status === 'ALL'}
+                onChange={selectedValue => this.formValue.processStatus = selectedValue} />
             </div>
           </form>
         </RequestEditor>
@@ -109,17 +111,17 @@ export class QueryLogsForm extends React.Component<Props, State> {
             event.stopPropagation();
             this.props.onSubmit(this.formValue);
           }} />
-
       </>
     );
   }
 
-  onSimulationIdSelected(selectedOption: Option<SimulationId>) {
-    const simulationId = selectedOption.value;
-    this.setState({ selectedSimulationId: simulationId });
-    this.props.onSimulationIdSelected(simulationId);
-    this.formValue.processId = simulationId.process_id;
-    this.formValue.startTime = simulationId.timestamp;
+  onSimulationIdSelected(selectedSimulationId: SimulationId) {
+    this.setState({
+      selectedSimulationId
+    });
+    this.props.onSimulationIdSelected(selectedSimulationId);
+    this.formValue.processId = selectedSimulationId.process_id;
+    this.formValue.startTime = selectedSimulationId.timestamp;
   }
 
 }

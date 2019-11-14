@@ -1,7 +1,7 @@
 import * as React from 'react';
 
 import { Dialog, DialogContent, DialogActions } from '@shared/dialog';
-import { Select, Input, Option } from '@shared/form';
+import { Select, Input, SelectionOptionBuilder } from '@shared/form';
 import { BasicButton } from '@shared/buttons';
 import { CapacitorControlMode } from '@shared/topology/CapacitorControlMode';
 import { Capacitor } from '@shared/topology';
@@ -20,7 +20,7 @@ interface Props {
 interface State {
   show: boolean;
   controlMode: CapacitorControlMode;
-  options: Option<CapacitorControlMode>[];
+  controlModelOptionBuilder: SelectionOptionBuilder<CapacitorControlMode>;
 }
 
 export class CapacitorMenu extends React.Component<Props, State> {
@@ -32,11 +32,25 @@ export class CapacitorMenu extends React.Component<Props, State> {
     this.state = {
       show: true,
       controlMode: props.capacitor.controlMode,
-      options: [
-        new Option('Manual', CapacitorControlMode.MANUAL),
-        new Option('Var', CapacitorControlMode.VAR),
-        new Option('Volt', CapacitorControlMode.VOLT)
-      ]
+      controlModelOptionBuilder: new SelectionOptionBuilder(
+        [
+          CapacitorControlMode.MANUAL,
+          CapacitorControlMode.VAR,
+          CapacitorControlMode.VOLT,
+        ],
+        controlMode => {
+          switch (controlMode) {
+            case CapacitorControlMode.MANUAL:
+              return 'Manual';
+            case CapacitorControlMode.VAR:
+              return 'Var';
+            case CapacitorControlMode.VOLT:
+              return 'Volt';
+            default:
+              return '';
+          }
+        }
+      )
     };
 
     this.capacitor = { ...props.capacitor };
@@ -55,12 +69,10 @@ export class CapacitorMenu extends React.Component<Props, State> {
         <DialogContent styles={{ overflow: 'hidden' }}>
           <form className='capacitor-menu__form'>
             <Select
-              multiple={false}
               label='Control mode'
-              options={this.state.options}
-              selectedOptionFinder={option => option.value === this.state.controlMode}
-              onChange={selectedOption => {
-                const selectedControlMode = selectedOption.value;
+              selectionOptionBuilder={this.state.controlModelOptionBuilder}
+              selectedOptionFinder={mode => mode === this.state.controlMode}
+              onChange={selectedControlMode => {
                 this.capacitor.controlMode = selectedControlMode;
                 this.capacitor.manual = selectedControlMode === CapacitorControlMode.MANUAL;
                 this.setState({
@@ -89,14 +101,11 @@ export class CapacitorMenu extends React.Component<Props, State> {
       case CapacitorControlMode.MANUAL:
         return (
           <Select
-            multiple={false}
             label='Action'
-            options={[
-              new Option('Open', true),
-              new Option('Close', false),
-            ]}
-            selectedOptionFinder={option => option.value === this.capacitor.open}
-            onChange={selectedOption => this.capacitor.open = selectedOption.value} />
+            selectionOptionBuilder={
+              new SelectionOptionBuilder([true, false], open => open ? 'Open' : 'Close')}
+            selectedOptionFinder={action => action === this.capacitor.open}
+            onChange={selectedAction => this.capacitor.open = selectedAction} />
         );
       case CapacitorControlMode.VAR:
         if (this.props.capacitor.var)

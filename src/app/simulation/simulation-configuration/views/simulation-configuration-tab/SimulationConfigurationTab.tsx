@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { FormGroup, Input, Select, CheckBox, TextArea, Option } from '@shared/form';
+import { FormGroup, Input, Select, CheckBox, TextArea, SelectionOptionBuilder } from '@shared/form';
 import { Tooltip } from '@shared/tooltip';
 import { IconButton } from '@shared/buttons';
 import { SimulationConfigurationTabModel } from '../../models/SimulationConfigurationTabModel';
@@ -17,7 +17,7 @@ interface Props {
 }
 
 interface State {
-  simulatorOptions: Option<string>[];
+  simulatorOptionBuilder: SelectionOptionBuilder<string>;
 }
 
 export class SimulationConfigurationTab extends React.Component<Props, State> {
@@ -28,9 +28,7 @@ export class SimulationConfigurationTab extends React.Component<Props, State> {
   constructor(props: Props) {
     super(props);
     this.state = {
-      simulatorOptions: [
-        new Option('GridLAB-D', 'GridLAB-D')
-      ]
+      simulatorOptionBuilder: new SelectionOptionBuilder(['GridLAB-D'])
     };
 
     this.formValue = {
@@ -85,10 +83,10 @@ export class SimulationConfigurationTab extends React.Component<Props, State> {
           onChange={this.onDurationChanged} />
         <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
           <Select
-            multiple={false}
             label='Simulator'
-            options={this.state.simulatorOptions}
-            selectedOptionFinder={option => option.value === 'GridLAB-D'}
+            optional={false}
+            selectionOptionBuilder={this.state.simulatorOptionBuilder}
+            selectedOptionFinder={simulator => simulator === 'GridLAB-D'}
             onClear={this.onSimulatorSelectionCleared}
             onChange={this.onSimulatorChanged} />
           <div className='accompanying-text'>
@@ -161,14 +159,14 @@ export class SimulationConfigurationTab extends React.Component<Props, State> {
     this.props.onChange(this.formValue);
   }
 
-  onSimulatorSelectionCleared(formControlLabel: string) {
+  onSimulatorSelectionCleared() {
     this.formValue.simulator = '';
-    this.updateInvalidFormControlsMap(false, formControlLabel);
+    this.updateInvalidFormControlsMap(false, 'Simulator');
   }
 
-  onSimulatorChanged(selectedOption: Option<string>, formControlLabel: string) {
-    this.formValue.simulator = selectedOption.value;
-    this.updateInvalidFormControlsMap(true, formControlLabel);
+  onSimulatorChanged(selectedValue: string) {
+    this.formValue.simulator = selectedValue;
+    this.updateInvalidFormControlsMap(true, 'Simulator');
     this.props.onChange(this.formValue);
   }
 

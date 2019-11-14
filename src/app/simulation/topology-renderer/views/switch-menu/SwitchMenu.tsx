@@ -1,7 +1,7 @@
 import * as React from 'react';
 
 import { Dialog, DialogContent, DialogActions } from '@shared/dialog';
-import { Select, Option } from '@shared/form';
+import { Select, SelectionOptionBuilder } from '@shared/form';
 import { BasicButton } from '@shared/buttons';
 
 import './SwitchMenu.light.scss';
@@ -18,7 +18,7 @@ interface Props {
 interface State {
   show: boolean;
   switchOpen: boolean;
-  options: Option<boolean>[];
+  switchStateOptionBuilder: SelectionOptionBuilder<boolean>;
 }
 
 export class SwitchMenu extends React.Component<Props, State> {
@@ -29,10 +29,10 @@ export class SwitchMenu extends React.Component<Props, State> {
     this.state = {
       show: true,
       switchOpen: props.open,
-      options: [
-        new Option('Open', true),
-        new Option('Close', false),
-      ]
+      switchStateOptionBuilder: new SelectionOptionBuilder(
+        [true, false],
+        open => open ? 'Open' : 'Close'
+      )
     };
 
     this.onCancel = this.onCancel.bind(this);
@@ -49,11 +49,10 @@ export class SwitchMenu extends React.Component<Props, State> {
         <DialogContent styles={{ overflow: 'hidden' }}>
           <form className='switch-menu__form'>
             <Select
-              multiple={false}
               label='Action'
-              options={this.state.options}
-              selectedOptionFinder={option => option.value === this.props.open}
-              onChange={selectedOption => this.setState({ switchOpen: selectedOption.value })} />
+              selectionOptionBuilder={this.state.switchStateOptionBuilder}
+              selectedOptionFinder={action => action === this.props.open}
+              onChange={selectedAction => this.setState({ switchOpen: selectedAction })} />
           </form>
         </DialogContent>
         <DialogActions>

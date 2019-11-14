@@ -176,3 +176,11 @@ export function waitUntil(predicate: () => boolean, waitDelay = 500): Promise<vo
 export function generateUniqueId() {
   return btoa(String(Math.random())).toLowerCase().substr(10, 10);
 }
+
+export function unique<T>(iterable: Iterable<T>): T[] {
+  const uniqueItems = [] as T[];
+  for (const element of iterable)
+    if (!uniqueItems.includes(element))
+      uniqueItems.push(element);
+  return uniqueItems;
+}

@@ -2,31 +2,35 @@ import * as React from 'react';
 
 import { BasicButton, IconButton } from '@shared/buttons';
 import { ModelDictionary, ModelDictionaryMeasurement } from '@shared/topology/model-dictionary';
-import { FormGroup, CheckBox, Select, Option, Input } from '@shared/form';
+import { FormGroup, CheckBox, Select, Input, SelectionOptionBuilder } from '@shared/form';
 import { COMPONENT_ATTRIBUTES } from '../../../models/component-attributes';
 import { Tooltip } from '@shared/tooltip';
 import { CommOutageEvent, Phase, CommOutageEventInputListItem, CommOutageEventOutputListItem } from '@shared/test-manager';
 import { Validators } from '@shared/form/validation';
 import { DateTimeService } from '@shared/DateTimeService';
+import { unique } from '@shared/misc';
 
 import './CommOutageEventForm.light.scss';
 import './CommOutageEventForm.dark.scss';
 
-let outputEquipmentTypeOptions: Option<string>[];
+let outputEquipmentTypeOptionBuilder: SelectionOptionBuilder<string>;
 let previousModelDictionary: ModelDictionary;
-const inputEquipmentTypeOptions = [
-  new Option('Battery', 'batteries'),
-  new Option('Breaker', 'breakers'),
-  new Option('Capacitor', 'capacitors'),
-  new Option('Disconnector', 'disconnectors'),
-  new Option('Fuse', 'fuses'),
-  new Option('Recloser', 'reclosers'),
-  new Option('Regulator', 'regulators'),
-  new Option('Sectionaliser', 'sectionalisers'),
-  new Option('Solar Panel', 'solarpanels'),
-  new Option('Switch', 'switches'),
-  new Option('Synchronous Machine', 'synchronousmachines')
-];
+const inputEquipmentTypeOptionBuilder = new SelectionOptionBuilder(
+  [
+    { id: 'batteries', label: 'Battery' },
+    { id: 'breakers', label: 'Breaker' },
+    { id: 'capacitors', label: 'Capacitor' },
+    { id: 'disconnectors', label: 'Disconnector' },
+    { id: 'fuses', label: 'Fuse' },
+    { id: 'reclosers', label: 'Recloser' },
+    { id: 'regulators', label: 'Regulator' },
+    { id: 'sectionalisers', label: 'Sectionaliser' },
+    { id: 'solarpanels', label: 'Solar Panel' },
+    { id: 'switches', label: 'Switch' },
+    { id: 'synchronousmachines', label: 'Synchronous Machine' }
+  ],
+  type => type.label
+);
 
 interface Props {
   onEventAdded: (event: CommOutageEvent) => void;
@@ -35,14 +39,14 @@ interface Props {
 }
 
 interface State {
-  inputEquipmentTypeOptions: Option<string>[];
-  inputComponentOptions: Option<any>[];
-  inputPhaseOptions: Option<Phase>[];
-  inputAttributeOptions: Option<string>[];
-  outputEquipmentTypeOptions: Option<string>[];
-  outputComponentOptions: Option<ModelDictionaryMeasurement>[];
-  outputPhaseOptions: Option<string>[];
-  outputMeasurementTypeOptions: Option<any>[];
+  inputEquipmentTypeOptionBuilder: SelectionOptionBuilder<{ id: string; label: string }>;
+  inputComponentOptionBuilder: SelectionOptionBuilder<any>;
+  inputPhaseOptionBuilder: SelectionOptionBuilder<Phase>;
+  inputAttributeBuilder: SelectionOptionBuilder<string>;
+  outputEquipmentTypeOptionBuilder: SelectionOptionBuilder<string>;
+  outputComponentOptionBuilder: SelectionOptionBuilder<ModelDictionaryMeasurement>;
+  outputPhaseOptionBuilder: SelectionOptionBuilder<string>;
+  outputMeasurementTypeOptionBuilder: SelectionOptionBuilder<any>;
   inputList: CommOutageEventInputListItem[];
   outputList: CommOutageEventOutputListItem[];
   addInputItemButtonDisabled: boolean;
@@ -58,28 +62,28 @@ export class CommOutageEventForm extends React.Component<Props, State> {
   formValue: CommOutageEvent;
   currentInputListItem: CommOutageEventInputListItem;
   currentOutputListItem: CommOutageEventOutputListItem;
-  inputComponentTypeSelect: Select<string, boolean>;
+  inputComponentTypeSelect: Select<any, any>;
   outputComponentTypeSelect: Select<string, boolean>;
 
   constructor(props: Props) {
     super(props);
 
     if (previousModelDictionary !== props.modelDictionary) {
-      outputEquipmentTypeOptions = this._generateUniqueOptions(
-        props.modelDictionary.measurements.map(e => e.ConductingEquipment_type)
+      outputEquipmentTypeOptionBuilder = new SelectionOptionBuilder(
+        unique(props.modelDictionary.measurements.map(e => e.ConductingEquipment_type))
       );
       previousModelDictionary = props.modelDictionary;
     }
 
     this.state = {
-      inputEquipmentTypeOptions,
-      inputComponentOptions: [],
-      inputPhaseOptions: [],
-      inputAttributeOptions: [],
-      outputEquipmentTypeOptions,
-      outputComponentOptions: [],
-      outputPhaseOptions: [],
-      outputMeasurementTypeOptions: [],
+      inputEquipmentTypeOptionBuilder: inputEquipmentTypeOptionBuilder,
+      inputComponentOptionBuilder: SelectionOptionBuilder.defaultBuilder(),
+      inputPhaseOptionBuilder: SelectionOptionBuilder.defaultBuilder(),
+      inputAttributeBuilder: SelectionOptionBuilder.defaultBuilder(),
+      outputEquipmentTypeOptionBuilder: outputEquipmentTypeOptionBuilder,
+      outputComponentOptionBuilder: SelectionOptionBuilder.defaultBuilder(),
+      outputPhaseOptionBuilder: SelectionOptionBuilder.defaultBuilder(),
+      outputMeasurementTypeOptionBuilder: SelectionOptionBuilder.defaultBuilder(),
       inputList: [],
       outputList: [],
       addInputItemButtonDisabled: true,
@@ -107,14 +111,6 @@ export class CommOutageEventForm extends React.Component<Props, State> {
     this.onStopDateTimeChanged = this.onStopDateTimeChanged.bind(this);
     this.addNewOutputItem = this.addNewOutputItem.bind(this);
     this.createNewEvent = this.createNewEvent.bind(this);
-  }
-
-  private _generateUniqueOptions(iterable: string[] | string): Option[] {
-    const result = [];
-    for (const element of iterable)
-      if (!result.includes(element))
-        result.push(element);
-    return result.map(e => new Option(e));
   }
 
   private _newInputListItem(): CommOutageEventInputListItem {
@@ -154,26 +150,23 @@ export class CommOutageEventForm extends React.Component<Props, State> {
             checked={this.state.allInputOutageChecked}
             onChange={this.onAllInputOutageCheckboxToggled} />
           <Select
-            multiple={false}
             ref={comp => this.inputComponentTypeSelect = comp}
             label='Equipment Type'
-            options={this.state.inputEquipmentTypeOptions}
+            selectionOptionBuilder={this.state.inputEquipmentTypeOptionBuilder}
             onChange={this.onInputEquipmentTypeChanged} />
           <Select
-            multiple={false}
             label='Name'
-            options={this.state.inputComponentOptions}
+            selectionOptionBuilder={this.state.inputComponentOptionBuilder}
             onChange={this.onInputComponentChanged} />
           <Select
             label='Phase'
             multiple
-            options={this.state.inputPhaseOptions}
-            selectedOptionFinder={() => this.state.inputPhaseOptions.length === 1}
+            selectionOptionBuilder={this.state.inputPhaseOptionBuilder}
+            selectedOptionFinder={() => this.state.inputPhaseOptionBuilder.numberOfOptions() === 1}
             onChange={this.onInputPhasesChanged} />
           <Select
-            multiple={false}
             label='Attribute'
-            options={this.state.inputAttributeOptions}
+            selectionOptionBuilder={this.state.inputAttributeBuilder}
             onChange={this.onInputAttributeChanged} />
           <Tooltip
             content='Add input item'
@@ -232,27 +225,25 @@ export class CommOutageEventForm extends React.Component<Props, State> {
             checked={this.state.allOutputOutageChecked}
             onChange={this.onAllOutputOutageCheckBoxToggled} />
           <Select
-            multiple={false}
             ref={comp => this.outputComponentTypeSelect = comp}
             label='Equipment Type'
-            options={this.state.outputEquipmentTypeOptions}
+            selectionOptionBuilder={this.state.outputEquipmentTypeOptionBuilder}
             onChange={this.onOuputEquipmentTypeChanged} />
           <Select
-            multiple={false}
             label='Equipment Name'
-            options={this.state.outputComponentOptions}
+            selectionOptionBuilder={this.state.outputComponentOptionBuilder}
             onChange={this.onOutputComponentChanged} />
           <Select
             label='Phase'
             multiple
-            options={this.state.outputPhaseOptions}
-            selectedOptionFinder={() => this.state.outputPhaseOptions.length === 1}
+            selectionOptionBuilder={this.state.outputPhaseOptionBuilder}
+            selectedOptionFinder={() => this.state.outputPhaseOptionBuilder.numberOfOptions() === 1}
             onChange={this.onOutputPhasesChanged} />
           <Select
             multiple
             label='Measurement Type'
-            options={this.state.outputMeasurementTypeOptions}
-            selectedOptionFinder={() => this.state.outputMeasurementTypeOptions.length === 1}
+            selectionOptionBuilder={this.state.outputMeasurementTypeOptionBuilder}
+            selectedOptionFinder={() => this.state.outputMeasurementTypeOptionBuilder.numberOfOptions() === 1}
             onChange={this.onOutputMeasurementTypesChanged} />
           <Input
             label='Start Date Time'
@@ -334,26 +325,30 @@ export class CommOutageEventForm extends React.Component<Props, State> {
     this.formValue.allInputOutage = state;
     if (state)
       this.setState({
-        inputEquipmentTypeOptions: [],
+        inputEquipmentTypeOptionBuilder: SelectionOptionBuilder.defaultBuilder(),
         inputList: [],
         allInputOutageChecked: true
       });
     else
       this.setState({
-        inputEquipmentTypeOptions,
+        inputEquipmentTypeOptionBuilder: inputEquipmentTypeOptionBuilder,
         allInputOutageChecked: false
       });
   }
 
-  onInputEquipmentTypeChanged(selectedOption: Option<string>) {
-    const selectedType = selectedOption.value;
+  onInputEquipmentTypeChanged(selectedType: { id: string; label: string }) {
     this.setState({
-      inputComponentOptions: (this.props.modelDictionary[selectedType] || []).map(e => new Option(e.name || e.bankName, e)),
-      inputAttributeOptions: (COMPONENT_ATTRIBUTES[selectedType] || []).map(e => new Option(e)),
-      inputPhaseOptions: []
+      inputComponentOptionBuilder: new SelectionOptionBuilder(
+        this.props.modelDictionary[selectedType.id] || [],
+        e => e.name || e.bankName
+      ),
+      inputAttributeBuilder: new SelectionOptionBuilder(
+        COMPONENT_ATTRIBUTES[selectedType.id] || []
+      ),
+      inputPhaseOptionBuilder: SelectionOptionBuilder.defaultBuilder()
     });
     this.currentInputListItem = this._newInputListItem();
-    this.currentInputListItem.type = selectedOption.label;
+    this.currentInputListItem.type = selectedType.label;
     this._enableOrDisableAddInputItemButton();
   }
 
@@ -373,42 +368,42 @@ export class CommOutageEventForm extends React.Component<Props, State> {
       });
   }
 
-  onInputComponentChanged(selectedOption: Option<any>) {
+  onInputComponentChanged(selectedComponent: any) {
     this.setState({
-      inputPhaseOptions: this._generateUniqueOptions(
-        this._normalizePhases(selectedOption.value.phases || selectedOption.value.bankPhases)
+      inputPhaseOptionBuilder: new SelectionOptionBuilder(
+        unique(this._normalizePhases(selectedComponent.phases || selectedComponent.bankPhases))
+          .sort((a, b) => a.localeCompare(b))
+          .map((phase, i) => ({ phaseLabel: phase, phaseIndex: i })),
+        phase => phase.phaseLabel
       )
-        .map((option, i) => new Option(option.label, { phaseLabel: option.label, phaseIndex: i }))
-        .sort((a, b) => a.label.localeCompare(b.label))
     });
-    this.currentInputListItem.name = selectedOption.label;
-    this.currentInputListItem.mRID = selectedOption.value.mRID;
+    this.currentInputListItem.name = selectedComponent.name || selectedComponent.bankName;
+    this.currentInputListItem.mRID = selectedComponent.mRID;
     this._enableOrDisableAddInputItemButton();
   }
 
   private _normalizePhases(phases: string) {
     // If phases is a string containing either A or B or C,
-    // then this string needs to be split up
+    // then return it as is
     return /^[abc]+$/i.test(phases) ? phases : [phases];
   }
 
-  onInputPhasesChanged(selectedOptions: Option<{ phaseLabel: string; phaseIndex: number }>[]) {
-    this.currentInputListItem.phases = selectedOptions.sort((a, b) => a.label.localeCompare(b.label))
-      .map(option => option.value);
+  onInputPhasesChanged(selectedPhases: Array<{ phaseLabel: string; phaseIndex: number }>) {
+    this.currentInputListItem.phases = selectedPhases.sort((a, b) => a.phaseLabel.localeCompare(b.phaseLabel));
     this._enableOrDisableAddInputItemButton();
   }
 
-  onInputAttributeChanged(selectedOption: Option<string>) {
-    this.currentInputListItem.attribute = selectedOption.value;
+  onInputAttributeChanged(selectedValue: string) {
+    this.currentInputListItem.attribute = selectedValue;
     this._enableOrDisableAddInputItemButton();
   }
 
   addNewInputItem() {
     this.setState({
       inputList: [...this.state.inputList, this.currentInputListItem],
-      inputComponentOptions: [],
-      inputPhaseOptions: [],
-      inputAttributeOptions: [],
+      inputComponentOptionBuilder: SelectionOptionBuilder.defaultBuilder(),
+      inputPhaseOptionBuilder: SelectionOptionBuilder.defaultBuilder(),
+      inputAttributeBuilder: SelectionOptionBuilder.defaultBuilder(),
       addInputItemButtonDisabled: true
     });
     const type = this.currentInputListItem.type;
@@ -421,60 +416,64 @@ export class CommOutageEventForm extends React.Component<Props, State> {
     this.formValue.allOutputOutage = state;
     if (state) {
       this.setState({
-        outputEquipmentTypeOptions: [],
+        outputEquipmentTypeOptionBuilder: SelectionOptionBuilder.defaultBuilder(),
         outputList: [],
         allOutputOutageChecked: true
       });
     }
     else
       this.setState({
-        outputEquipmentTypeOptions,
+        outputEquipmentTypeOptionBuilder: outputEquipmentTypeOptionBuilder,
         allOutputOutageChecked: false
       });
   }
 
-  onOuputEquipmentTypeChanged(selectedOption: Option<string>) {
-    const selectedType = selectedOption.value;
+  onOuputEquipmentTypeChanged(selectedType: string) {
     this.currentOutputListItem = this._newOutputListItem();
     this.currentOutputListItem.type = selectedType;
     this.setState({
-      outputComponentOptions: this.props.modelDictionary.measurements.filter(
-        e => e.ConductingEquipment_type === selectedType
-      )
-        .map(e => new Option(`${e.ConductingEquipment_name} (${e.phases})`, e)),
-      outputPhaseOptions: [],
-      outputMeasurementTypeOptions: []
+      outputComponentOptionBuilder: new SelectionOptionBuilder(
+        this.props.modelDictionary.measurements.filter(
+          e => e.ConductingEquipment_type === selectedType
+        ),
+        measurement => `${measurement.ConductingEquipment_name} (${measurement.phases})`
+      ),
+      outputPhaseOptionBuilder: SelectionOptionBuilder.defaultBuilder(),
+      outputMeasurementTypeOptionBuilder: SelectionOptionBuilder.defaultBuilder()
     });
     this._enableOrDisableAddOutputItemButton();
   }
 
-  onOutputComponentChanged(selectedOption: Option<ModelDictionaryMeasurement>) {
-    this.currentOutputListItem.name = selectedOption.value.ConductingEquipment_name;
+  onOutputComponentChanged(selectedValue: ModelDictionaryMeasurement) {
+    this.currentOutputListItem.name = selectedValue.ConductingEquipment_name;
     this.setState({
-      outputPhaseOptions: this._generateUniqueOptions(this._normalizePhases(selectedOption.value.phases))
-        .sort((a, b) => a.label.localeCompare(b.label)),
-      outputMeasurementTypeOptions: [new Option(selectedOption.value.measurementType)]
+      outputPhaseOptionBuilder: new SelectionOptionBuilder(
+        unique(this._normalizePhases(selectedValue.phases)).sort((a, b) => a.localeCompare(b)),
+      ),
+      outputMeasurementTypeOptionBuilder: new SelectionOptionBuilder(
+        [selectedValue.measurementType]
+      )
     });
-    this.currentOutputListItem.mRID = selectedOption.value.ConductingEquipment_mRID;
+    this.currentOutputListItem.mRID = selectedValue.ConductingEquipment_mRID;
     this._enableOrDisableAddOutputItemButton();
   }
 
-  onOutputPhasesChanged(selectedOptions: Option<string>[]) {
-    this.currentOutputListItem.phases = selectedOptions.map(option => option.value);
+  onOutputPhasesChanged(selectedPhases: string[]) {
+    this.currentOutputListItem.phases = selectedPhases;
     this._enableOrDisableAddOutputItemButton();
   }
 
-  onOutputMeasurementTypesChanged(selectedOptions: Option<string>[]) {
-    this.currentOutputListItem.measurementTypes = selectedOptions.map(option => option.value);
+  onOutputMeasurementTypesChanged(selectedTypes: string[]) {
+    this.currentOutputListItem.measurementTypes = selectedTypes;
     this._enableOrDisableAddOutputItemButton();
   }
 
   addNewOutputItem() {
     this.setState({
       outputList: [...this.state.outputList, this.currentOutputListItem],
-      outputComponentOptions: [],
-      outputPhaseOptions: [],
-      outputMeasurementTypeOptions: [],
+      outputComponentOptionBuilder: SelectionOptionBuilder.defaultBuilder(),
+      outputPhaseOptionBuilder: SelectionOptionBuilder.defaultBuilder(),
+      outputMeasurementTypeOptionBuilder: SelectionOptionBuilder.defaultBuilder(),
       addOutputItemButtonDisabled: true
     });
     const type = this.currentOutputListItem.type;
@@ -523,8 +522,8 @@ export class CommOutageEventForm extends React.Component<Props, State> {
     this.setState({
       inputList: [],
       outputList: [],
-      inputEquipmentTypeOptions,
-      outputEquipmentTypeOptions,
+      inputEquipmentTypeOptionBuilder: inputEquipmentTypeOptionBuilder,
+      outputEquipmentTypeOptionBuilder: outputEquipmentTypeOptionBuilder,
       addInputItemButtonDisabled: true,
       addOutputItemButtonDisabled: true,
       allInputOutageChecked: false,

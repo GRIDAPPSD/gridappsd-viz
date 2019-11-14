@@ -71,7 +71,7 @@ export class NodeSearcher extends React.Component<Props, State> {
         this._matchedNodes.clear();
         setTimeout(() => {
           this.nodeSearcherElement.querySelector('input').focus();
-        }, 1250);
+        }, 1000);
       }
     }
   }

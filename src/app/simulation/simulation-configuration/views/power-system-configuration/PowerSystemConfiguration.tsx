@@ -1,7 +1,7 @@
 import * as React from 'react';
 
-import { FormGroup, Select, Option } from '@shared/form';
-import { FeederModel, FeederModelRegion, FeederModelLine } from '@shared/topology';
+import { FormGroup, Select, SelectionOptionBuilder } from '@shared/form';
+import { FeederModel, FeederModelRegion, FeederModelLine, FeederModelSubregion } from '@shared/topology';
 import { PowerSystemConfigurationModel } from '../../models/PowerSystemConfigurationModel';
 import { SimulationConfiguration } from '@shared/simulation';
 
@@ -15,9 +15,9 @@ interface Props {
 }
 
 interface State {
-  regionOptions: Option<FeederModelRegion>[];
-  subregionOptions: Option<string>[];
-  lineOptions: Option<FeederModelLine>[];
+  regionOptionBuilder: SelectionOptionBuilder<FeederModelRegion>;
+  subregionOptionBuilder: SelectionOptionBuilder<FeederModelSubregion>;
+  lineOptionBuilder: SelectionOptionBuilder<FeederModelLine>;
 }
 
 export class PowerSystemConfiguration extends React.Component<Props, State> {
@@ -33,10 +33,12 @@ export class PowerSystemConfiguration extends React.Component<Props, State> {
   constructor(props: Props) {
     super(props);
     this.state = {
-      regionOptions: Object.keys(this.props.feederModel)
-        .map(regionId => new Option(this.props.feederModel[regionId].name, this.props.feederModel[regionId])),
-      subregionOptions: [],
-      lineOptions: []
+      regionOptionBuilder: new SelectionOptionBuilder(
+        Object.values(this.props.feederModel),
+        feederRegion => feederRegion.name
+      ),
+      subregionOptionBuilder: SelectionOptionBuilder.defaultBuilder(),
+      lineOptionBuilder: SelectionOptionBuilder.defaultBuilder()
     };
     this.onRegionSelectionCleared = this.onRegionSelectionCleared.bind(this);
     this.onRegionSelectionChanged = this.onRegionSelectionChanged.bind(this);
@@ -51,30 +53,27 @@ export class PowerSystemConfiguration extends React.Component<Props, State> {
       <FormGroup label=''>
         <Select
           label='Geographical region name'
-          multiple={false}
-          options={this.state.regionOptions}
+          selectionOptionBuilder={this.state.regionOptionBuilder}
           selectedOptionFinder={
-            option => option.value.id === this.props.powerSystemConfig.GeographicalRegion_name
+            region => region.id === this.props.powerSystemConfig.GeographicalRegion_name
           }
           onClear={this.onRegionSelectionCleared}
           onChange={this.onRegionSelectionChanged} />
 
         <Select
-          multiple={false}
           label='Sub-geographical region name'
-          options={this.state.subregionOptions}
+          selectionOptionBuilder={this.state.subregionOptionBuilder}
           selectedOptionFinder={
-            option => option.value === this.props.powerSystemConfig.SubGeographicalRegion_name
+            subregion => subregion.id === this.props.powerSystemConfig.SubGeographicalRegion_name
           }
           onClear={this.onSubregionSelectionCleared}
           onChange={this.onSubregionSelectionChanged} />
 
         <Select
-          multiple={false}
           label='Line name'
-          options={this.state.lineOptions}
+          selectionOptionBuilder={this.state.lineOptionBuilder}
           selectedOptionFinder={
-            option => option.value.id === this.props.powerSystemConfig.Line_name
+            line => line.id === this.props.powerSystemConfig.Line_name
           }
           onClear={this.onLineSelectionCleared}
           onChange={this.onLineSelectionChanged} />
@@ -89,20 +88,23 @@ export class PowerSystemConfiguration extends React.Component<Props, State> {
     this.formValue.isValid = false;
     this.props.onChange(this.formValue);
     this.setState({
-      lineOptions: [],
-      subregionOptions: []
+      lineOptionBuilder: SelectionOptionBuilder.defaultBuilder(),
+      subregionOptionBuilder: SelectionOptionBuilder.defaultBuilder()
     });
   }
 
-  onRegionSelectionChanged(selectedOption: Option<FeederModelRegion>) {
-    this.formValue.regionId = selectedOption.value.id;
+  onRegionSelectionChanged(selectedFeederModelRegion: FeederModelRegion) {
+    this.formValue.regionId = selectedFeederModelRegion.id;
     this.formValue.subregionId = '';
     this.formValue.lineId = '';
     this.formValue.isValid = false;
     this.props.onChange(this.formValue);
     this.setState({
-      subregionOptions: selectedOption.value.subregions.map(e => new Option(e.name, e.id)),
-      lineOptions: []
+      subregionOptionBuilder: new SelectionOptionBuilder(
+        selectedFeederModelRegion.subregions,
+        subregion => subregion.name
+      ),
+      lineOptionBuilder: SelectionOptionBuilder.defaultBuilder()
     });
   }
 
@@ -112,25 +114,26 @@ export class PowerSystemConfiguration extends React.Component<Props, State> {
     this.formValue.isValid = false;
     this.props.onChange(this.formValue);
     this.setState({
-      lineOptions: []
+      lineOptionBuilder: SelectionOptionBuilder.defaultBuilder()
     });
   }
 
-  onSubregionSelectionChanged(selectedOption: Option) {
-    this.formValue.subregionId = selectedOption.value;
+  onSubregionSelectionChanged(selectedSubregion: FeederModelSubregion) {
+    this.formValue.subregionId = selectedSubregion.id;
     this.formValue.lineId = '';
     this.formValue.isValid = false;
     this.props.onChange(this.formValue);
     this.setState({
-      lineOptions: this.props.feederModel[this.formValue.regionId].lines
-        .filter(line => line.subregionId === selectedOption.value)
-        .map(line => new Option(line.name, line))
+      lineOptionBuilder: new SelectionOptionBuilder(
+        this.props.feederModel[this.formValue.regionId].lines.filter(line => line.subregionId === selectedSubregion.id),
+        line => line.name
+      )
     });
   }
 
-  onLineSelectionChanged(selectedOption: Option<{ id: string; name: string; }>) {
-    this.formValue.lineId = selectedOption.value.id;
-    this.formValue.simulationName = selectedOption.value.name;
+  onLineSelectionChanged(selectedLine: FeederModelLine) {
+    this.formValue.lineId = selectedLine.id;
+    this.formValue.simulationName = selectedLine.name;
     this.formValue.isValid = true;
     this.props.onChange(this.formValue);
   }

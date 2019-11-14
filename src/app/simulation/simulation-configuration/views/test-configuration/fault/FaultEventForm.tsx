@@ -1,13 +1,13 @@
 import * as React from 'react';
 
 import { BasicButton } from '@shared/buttons';
-import { ModelDictionary } from '@shared/topology/model-dictionary';
-import { FormGroup, Select, Option, Input } from '@shared/form';
-import { toOptions, removeOptionsWithIdenticalLabel } from '@shared/form/select/utils';
+import { ModelDictionary, ModelDictionaryRegulator, ModelDictionaryCapacitor, ModelDictionarySwitch } from '@shared/topology/model-dictionary';
+import { FormGroup, Select, Input, SelectionOptionBuilder } from '@shared/form';
 import { FaultEvent, Phase, FaultKind, FaultImpedence } from '@shared/test-manager';
 import { Validators } from '@shared/form/validation';
 import { ModelDictionaryComponent } from '@shared/topology/model-dictionary/ModelDictionaryComponent';
 import { DateTimeService } from '@shared/DateTimeService';
+import { unique } from '@shared/misc';
 
 import './FaultEventForm.light.scss';
 import './FaultEventForm.dark.scss';
@@ -20,10 +20,10 @@ interface Props {
 }
 
 interface State {
-  equipmentTypeOptions: Option<string>[];
-  componentOptions: Option<any>[];
-  phaseOptions: Option<Phase>[];
-  faultKindOptions: Option<FaultKind>[];
+  equipmentTypeOptionBuilder: SelectionOptionBuilder<{ id: string; label: string; }>;
+  componentOptionBuilder: SelectionOptionBuilder<any>;
+  phaseOptionBuilder: SelectionOptionBuilder<Phase>;
+  faultKindOptionBuilder: SelectionOptionBuilder<FaultKind>;
   selectedFaultKind: FaultKind;
   formValue: FaultEvent;
   addEventButtonDisabled: boolean;
@@ -34,33 +34,38 @@ export class FaultEventForm extends React.Component<Props, State> {
   readonly dateTimeService = DateTimeService.getInstance();
 
   formValue: FaultEvent;
-  equipmentTypeSelect: Select<string, boolean>;
+  equipmentTypeSelect: Select<any, any>;
 
   constructor(props: Props) {
     super(props);
     this.state = {
-      equipmentTypeOptions: [
-        new Option('ACLineSegment', 'ACLineSegment'),
-        new Option('Battery', 'batteries'),
-        new Option('Breaker', 'breakers'),
-        new Option('Capacitor', 'capacitors'),
-        new Option('Disconnector', 'disconnectors'),
-        new Option('Fuse', 'fuses'),
-        new Option('PowerTransformer', 'PowerTransformer'),
-        new Option('Recloser', 'reclosers'),
-        new Option('Regulator', 'regulators'),
-        new Option('Sectionaliser', 'sectionalisers'),
-        new Option('Solar Panel', 'solarpanels'),
-        new Option('Switch', 'switches'),
-        new Option('Synchronous Machine', 'synchronousmachines')
-      ],
-      componentOptions: [],
-      phaseOptions: [],
-      faultKindOptions: [
-        new Option(FaultKind.LINE_TO_GROUND),
-        new Option(FaultKind.LINE_TO_LINE),
-        new Option(FaultKind.LINE_TO_LINE_TO_GROUND)
-      ],
+      equipmentTypeOptionBuilder: new SelectionOptionBuilder(
+        [
+          { label: 'ACLineSegment', id: 'ACLineSegment' },
+          { label: 'Battery', id: 'batteries' },
+          { label: 'Breaker', id: 'breakers' },
+          { label: 'Capacitor', id: 'capacitors' },
+          { label: 'Disconnector', id: 'disconnectors' },
+          { label: 'Fuse', id: 'fuses' },
+          { label: 'PowerTransformer', id: 'PowerTransformer' },
+          { label: 'Recloser', id: 'reclosers' },
+          { label: 'Regulator', id: 'regulators' },
+          { label: 'Sectionaliser', id: 'sectionalisers' },
+          { label: 'Solar Panel', id: 'solarpanels' },
+          { label: 'Switch', id: 'switches' },
+          { label: 'Synchronous Machine', id: 'synchronousmachines' }
+        ],
+        type => type.label
+      ),
+      componentOptionBuilder: SelectionOptionBuilder.defaultBuilder(),
+      phaseOptionBuilder: SelectionOptionBuilder.defaultBuilder(),
+      faultKindOptionBuilder: new SelectionOptionBuilder(
+        [
+          FaultKind.LINE_TO_GROUND,
+          FaultKind.LINE_TO_LINE,
+          FaultKind.LINE_TO_LINE_TO_GROUND
+        ]
+      ),
       selectedFaultKind: FaultKind.LINE_TO_GROUND,
       formValue: { ...props.initialFormValue },
       addEventButtonDisabled: true
@@ -88,27 +93,24 @@ export class FaultEventForm extends React.Component<Props, State> {
     return (
       <div className='fault-event'>
         <Select
-          multiple={false}
           ref={comp => this.equipmentTypeSelect = comp}
           label='Equipment Type'
-          options={this.state.equipmentTypeOptions}
+          selectionOptionBuilder={this.state.equipmentTypeOptionBuilder}
           onChange={this.onEquipmentTypeChanged} />
         <Select
-          multiple={false}
           label='Name'
-          options={this.state.componentOptions}
+          selectionOptionBuilder={this.state.componentOptionBuilder}
           onChange={this.onComponentChanged} />
         <Select
           label='Phase'
           multiple
-          selectedOptionFinder={() => this.state.phaseOptions.length === 1}
-          options={this.state.phaseOptions}
+          selectedOptionFinder={() => this.state.phaseOptionBuilder.numberOfOptions() === 1}
+          selectionOptionBuilder={this.state.phaseOptionBuilder}
           onChange={this.onPhaseChanged} />
         <Select
-          multiple={false}
           label='Phase Connected Fault Kind'
-          options={this.state.faultKindOptions}
-          selectedOptionFinder={option => option.value === this.formValue.faultKind}
+          selectionOptionBuilder={this.state.faultKindOptionBuilder}
+          selectedOptionFinder={faultKind => faultKind === this.formValue.faultKind}
           onChange={this.onFaultKindChanged} />
         <FormGroup
           label='Impedance'
@@ -157,27 +159,30 @@ export class FaultEventForm extends React.Component<Props, State> {
     );
   }
 
-  onEquipmentTypeChanged(option: Option<string>) {
-    switch (option.value) {
+  onEquipmentTypeChanged(selectedType: { id: string; label: string; }) {
+    switch (selectedType.id) {
       case 'ACLineSegment':
       case 'PowerTransformer':
         this.setState({
-          componentOptions: toOptions(
-            this.props.componentsWithConsolidatedPhases.filter(e => e.conductingEquipmentType === option.value),
+          componentOptionBuilder: new SelectionOptionBuilder(
+            this.props.componentsWithConsolidatedPhases.filter(e => e.conductingEquipmentType === selectedType.id),
             e => `${e.conductingEquipmentName} (${e.phases.join(', ')})`
           ),
-          phaseOptions: []
+          phaseOptionBuilder: SelectionOptionBuilder.defaultBuilder()
         });
         break;
       default:
-        const components = this.props.modelDictionary[option.value] || [];
+        const components = this.props.modelDictionary[selectedType.id] || [];
         this.setState({
-          componentOptions: components.map(e => new Option(`${e.name || e.bankName} (${e.phases || e.bankPhases})`, e)),
-          phaseOptions: []
+          componentOptionBuilder: new SelectionOptionBuilder(
+            components,
+            e => `${e.name || e.bankName} (${e.phases || e.bankPhases})`
+          ),
+          phaseOptionBuilder: SelectionOptionBuilder.defaultBuilder()
         });
         break;
     }
-    this.formValue.equipmentType = option.label;
+    this.formValue.equipmentType = selectedType.id;
     this._enableAddEventButtonIfFormIsValid();
   }
 
@@ -210,20 +215,20 @@ export class FaultEventForm extends React.Component<Props, State> {
       );
   }
 
-  onComponentChanged(selectedOption: Option<any>) {
+  onComponentChanged(selectedComponent: ModelDictionaryComponent & ModelDictionaryRegulator & ModelDictionaryCapacitor & ModelDictionarySwitch) {
     // component: ModelDictionaryComponent | ModelDictionaryRegulator | ModelDictionaryCapacitor | ModelDictionarySwitch
-    const component = selectedOption.value;
     this.setState({
-      phaseOptions: removeOptionsWithIdenticalLabel(
-        toOptions(
-          this._normalizePhases(component.phases || component.bankPhases),
-          e => e)
+      phaseOptionBuilder: new SelectionOptionBuilder(
+        unique(this._normalizePhases(selectedComponent.phases || selectedComponent.bankPhases))
+          .sort((a, b) => a.localeCompare(b))
+          .map((phase, i) => ({ phaseLabel: phase, phaseIndex: i })),
+        phase => phase.phaseLabel
       )
-        .map((option, i) => new Option(option.label, { phaseLabel: option.label, phaseIndex: i }))
-        .sort((a, b) => a.label.localeCompare(b.label))
     });
-    this.formValue.equipmentName = component.conductingEquipmentName || component.name || component.bankName;
-    this.formValue.mRID = component.conductingEquipmentMRIDs || component.mRID;
+    this.formValue.equipmentName = selectedComponent.conductingEquipmentName ||
+      selectedComponent.name ||
+      selectedComponent.bankName;
+    this.formValue.mRID = selectedComponent.conductingEquipmentMRIDs || selectedComponent.mRID;
     this._enableAddEventButtonIfFormIsValid();
   }
 
@@ -235,13 +240,13 @@ export class FaultEventForm extends React.Component<Props, State> {
     return /^[abc]+$/i.test(phases) ? [...new Set(phases)] : [phases];
   }
 
-  onPhaseChanged(selectedOptions: Option<Phase>[]) {
-    this.formValue.phases = selectedOptions.map(option => option.value);
+  onPhaseChanged(selectedPhases: Phase[]) {
+    this.formValue.phases = selectedPhases;
     this._enableAddEventButtonIfFormIsValid();
   }
 
-  onFaultKindChanged(selectedOption: Option<FaultKind>) {
-    this.formValue.faultKind = selectedOption.value;
+  onFaultKindChanged(selectedFaultKind: FaultKind) {
+    this.formValue.faultKind = selectedFaultKind;
     this.setState({
       selectedFaultKind: this.formValue.faultKind
     });
@@ -261,8 +266,8 @@ export class FaultEventForm extends React.Component<Props, State> {
     this.props.onEventAdded(this.formValue);
     this.equipmentTypeSelect.reset();
     this.setState({
-      componentOptions: [],
-      phaseOptions: [],
+      componentOptionBuilder: SelectionOptionBuilder.defaultBuilder(),
+      phaseOptionBuilder: SelectionOptionBuilder.defaultBuilder(),
       selectedFaultKind: FaultKind.LINE_TO_GROUND,
       addEventButtonDisabled: true
     });
