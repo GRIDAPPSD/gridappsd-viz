@@ -47,7 +47,7 @@
         content: '';
         position: absolute;
         display: inline-block;
-        transition: transform 0.5s 0s ease;
+        transition: transform 0.4s 0s ease;
     }
 
     &::before {
@@ -60,6 +60,28 @@
         width: 3px;
         height: 100%;
         transform: scale(0, 0);
+    }
+}
+
+.textarea__input-box[contenteditable=true]:focus {
+    &::before {
+        transform: scale(1, 1);
+    }
+
+    &::after {
+        transition-delay: 0.25s;
+        transform: scale(1, 1);
+    }
+
+    &~.textarea__input-box-focus-indicator {
+        &::before {
+            transform: scale(1, 1);
+        }
+
+        &::after {
+            transition-delay: 0.25s;
+            transform: scale(1, 1);
+        }
     }
 }
 
