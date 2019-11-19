@@ -174,7 +174,7 @@ export function waitUntil(predicate: () => boolean, waitDelay = 500): Promise<vo
 }
 
 export function generateUniqueId() {
-  return btoa(String(Math.random())).toLowerCase().substr(10, 10);
+  return btoa(String(Math.random() + Math.random())).toLowerCase().substr(10, 10);
 }
 
 export function unique<T>(iterable: Iterable<T>): T[] {

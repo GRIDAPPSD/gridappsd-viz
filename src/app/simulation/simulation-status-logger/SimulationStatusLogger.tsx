@@ -4,18 +4,19 @@ import { debounceTime, filter } from 'rxjs/operators';
 
 import { SimulationStatusLoggerMessage } from './SimulationStatusLoggerMessage';
 import { Wait } from '@shared/wait';
+import { LogMessage } from './models/LogMessage';
 
 import './SimulationStatusLogger.light.scss';
 import './SimulationStatusLogger.dark.scss';
 
 interface Props {
-  messages: string[];
+  messages: LogMessage[];
   isFetching: boolean;
 }
 
 interface State {
   dragHandlePosition: number;
-  visibleMessages: string[];
+  visibleMessages: LogMessage[];
 }
 
 const numberOfMessagesToLoadNext = 30;
@@ -126,7 +127,7 @@ export class SimulationStatusLogger extends React.Component<Props, State> {
           onScroll={this.loadMoreMessages}>
           {
             this.state.visibleMessages.map(message => (
-              <SimulationStatusLoggerMessage key={message} message={message} />
+              <SimulationStatusLoggerMessage key={message.id} message={message.content} />
             ))
           }
         </section>

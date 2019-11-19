@@ -291,7 +291,6 @@ export class AppContainer extends React.Component<Props, State> {
     }
   }
 
-  // Find components with the same name, and group their phases into one
   private _findAllPhasesForEachComponentThenGroupThem(modelDictionary: ModelDictionary) {
     const componentWithGroupedPhasesMap = new Map<string, ModelDictionaryComponent>();
     const measurementMRIDMap = new Map<string, Array<{ phase: string; mrid: string; }>>();
