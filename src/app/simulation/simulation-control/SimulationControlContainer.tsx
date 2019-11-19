@@ -24,7 +24,7 @@ interface State {
   simulationStatus: SimulationStatus;
   activeSimulationId: string;
   existingPlotModels: PlotModel[];
-  modelDictionaryComponentsWithConsolidatedPhases: ModelDictionaryComponent[];
+  modelDictionaryComponentsWithGroupedPhases: ModelDictionaryComponent[];
 }
 
 export class SimulationControlContainer extends React.Component<Props, State> {
@@ -42,7 +42,7 @@ export class SimulationControlContainer extends React.Component<Props, State> {
       simulationStatus: SimulationStatus.STOPPED,
       activeSimulationId: '',
       existingPlotModels: [],
-      modelDictionaryComponentsWithConsolidatedPhases: []
+      modelDictionaryComponentsWithGroupedPhases: []
     };
 
     this.startSimulation = this.startSimulation.bind(this);
@@ -105,10 +105,10 @@ export class SimulationControlContainer extends React.Component<Props, State> {
   }
 
   private _subscribeToComponentsWithConsolidatedPhasesStateChanges() {
-    this._stateStore.select('modelDictionaryComponentsWithConsolidatedPhases')
+    this._stateStore.select('modelDictionaryComponentsWithGroupedPhases')
       .pipe(takeUntil(this._unsubscriber))
       .subscribe({
-        next: components => this.setState({ modelDictionaryComponentsWithConsolidatedPhases: components })
+        next: components => this.setState({ modelDictionaryComponentsWithGroupedPhases: components })
       });
   }
 
@@ -123,7 +123,7 @@ export class SimulationControlContainer extends React.Component<Props, State> {
         simulationId={this.state.activeSimulationId}
         simulationStatus={this.state.simulationStatus}
         existingPlotModels={this.state.existingPlotModels}
-        modelDictionaryComponentsWithConsolidatedPhases={this.state.modelDictionaryComponentsWithConsolidatedPhases}
+        modelDictionaryComponentsWithConsolidatedPhases={this.state.modelDictionaryComponentsWithGroupedPhases}
         onStartSimulation={this.startSimulation}
         onStopSimulation={this.stopSimulation}
         onPauseSimulation={this.pauseSimulation}

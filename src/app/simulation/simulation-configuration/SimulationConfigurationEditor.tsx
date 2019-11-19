@@ -43,7 +43,7 @@ interface State {
   modelDictionary: ModelDictionary;
   disableSubmitButton: boolean;
   lineName: string;
-  componentsWithConsolidatedPhases: ModelDictionaryComponent[];
+  componentsWithGroupedPhases: ModelDictionaryComponent[];
   services: Service[];
 }
 
@@ -70,7 +70,7 @@ export class SimulationConfigurationEditor extends React.Component<Props, State>
       modelDictionary: null,
       disableSubmitButton: true,
       lineName: props.initialConfig.power_system_config.Line_name,
-      componentsWithConsolidatedPhases: [],
+      componentsWithGroupedPhases: [],
       services: []
     };
 
@@ -124,19 +124,11 @@ export class SimulationConfigurationEditor extends React.Component<Props, State>
         })
       });
 
-    this._stateStore.select('modelDictionaryComponentsWithConsolidatedPhases')
+    this._stateStore.select('modelDictionaryComponentsWithGroupedPhases')
       .pipe(takeUntil(this._unsubscriber))
       .subscribe({
         next: components => this.setState({
-          componentsWithConsolidatedPhases: components
-        })
-      });
-
-    this._stateStore.select('modelDictionaryComponentsWithConsolidatedPhases')
-      .pipe(takeUntil(this._unsubscriber))
-      .subscribe({
-        next: components => this.setState({
-          componentsWithConsolidatedPhases: components
+          componentsWithGroupedPhases: components
         })
       });
 
@@ -269,7 +261,7 @@ export class SimulationConfigurationEditor extends React.Component<Props, State>
         modelDictionary={this.state.modelDictionary}
         simulationStartTime={this.simulationStartDate}
         simulationStopTime={+this.currentConfig.simulation_config.duration + this.simulationStartDate}
-        componentWithConsolidatedPhases={this.state.componentsWithConsolidatedPhases}
+        componentWithConsolidatedPhases={this.state.componentsWithGroupedPhases}
         onEventsAdded={this.onTestConfigurationEventsAdded} />
     );
   }

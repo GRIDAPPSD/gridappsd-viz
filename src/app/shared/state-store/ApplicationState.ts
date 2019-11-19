@@ -13,6 +13,6 @@ export interface ApplicationState {
   applications: Application[];
   services: Service[];
   modelDictionary: ModelDictionary;
-  modelDictionaryComponentsWithConsolidatedPhases: ModelDictionaryComponent[];
+  modelDictionaryComponentsWithGroupedPhases: ModelDictionaryComponent[];
   plotModels: PlotModel[];
 }
