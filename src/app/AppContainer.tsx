@@ -222,6 +222,10 @@ export class AppContainer extends React.Component<Props, State> {
   }
 
   retrieveModelDictionary(mRID: string) {
+    this._stateStore.update({
+      modelDictionaryComponentsWithGroupedPhases: [],
+      plotModels: []
+    });
     if (!this._availableModelDictionaries.has(mRID)) {
       // Clear out the currently active model dictionary
       this._stateStore.update({
@@ -267,7 +271,7 @@ export class AppContainer extends React.Component<Props, State> {
       modelDictionaryMeasurementMap.set(measurement.mRID, measurement);
     this._collectMRIDsAndPhasesForComponents(modelDictionary);
     this._simulationOutputService.updateModelDictionaryMeasurementMap(modelDictionaryMeasurementMap);
-    this._consolidatePhasesForComponents(modelDictionary);
+    this._findAllPhasesForEachComponentThenGroupThem(modelDictionary);
     this._stateStore.update({
       modelDictionary
     });
@@ -288,7 +292,7 @@ export class AppContainer extends React.Component<Props, State> {
   }
 
   // Find components with the same name, and group their phases into one
-  private _consolidatePhasesForComponents(modelDictionary: ModelDictionary) {
+  private _findAllPhasesForEachComponentThenGroupThem(modelDictionary: ModelDictionary) {
     const componentWithGroupedPhasesMap = new Map<string, ModelDictionaryComponent>();
     const measurementMRIDMap = new Map<string, Array<{ phase: string; mrid: string; }>>();
     for (const measurement of modelDictionary.measurements) {
@@ -326,7 +330,7 @@ export class AppContainer extends React.Component<Props, State> {
       }
     }
     this._stateStore.update({
-      modelDictionaryComponentsWithConsolidatedPhases: [...componentWithGroupedPhasesMap.values()]
+      modelDictionaryComponentsWithGroupedPhases: [...componentWithGroupedPhasesMap.values()]
     });
   }
 
