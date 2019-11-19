@@ -10,6 +10,7 @@ import { TimeSeriesDataPoint } from './models/TimeSeriesDataPoint';
 import { StateStore } from '@shared/state-store';
 import { ModelDictionaryComponentType } from '@shared/topology';
 import { PlotModel, PlotModelComponent } from '@shared/plot-model';
+import { download, DownloadType } from '@shared/misc';
 
 interface Props {
 }
@@ -17,6 +18,8 @@ interface Props {
 interface State {
   measurementChartModels: MeasurementChartModel[];
 }
+
+let plots = null;
 
 export class MeasurementChartContainer extends React.Component<Props, State> {
 
@@ -39,6 +42,23 @@ export class MeasurementChartContainer extends React.Component<Props, State> {
     this._subscribeToPlotModelsStateStore();
     this._subscribeToSimulationOutputMeasurementsStream();
     this._resetMeasurementChartModelsWhenSimulationStarts();
+
+    this._simulationControlService.statusChanges()
+      .subscribe({
+        next: status => {
+          if (status === SimulationStatus.STARTED) {
+            plots = {};
+            for (const plotModel of this._plotModels) {
+              plots[plotModel.name] = {};
+              for (const component of plotModel.components)
+                plots[plotModel.name][component.displayName] = [];
+            }
+          } else if (status === SimulationStatus.STOPPED && plots !== null) {
+            download('plots.json', JSON.stringify(plots, null, 4), DownloadType.JSON);
+            plots = null;
+          }
+        }
+      });
   }
 
   private _subscribeToPlotModelsStateStore(): Subscription {
@@ -136,6 +156,10 @@ export class MeasurementChartContainer extends React.Component<Props, State> {
         unscaledX: new Date(this._simulationOutputService.getOutputTimestamp() * 1000),
         unscaledY: 0
       };
+      if (plots) {
+        plots[plotModel.name][component.displayName].push(measurement);
+      }
+
       switch (plotModel.componentType) {
         case ModelDictionaryComponentType.VOLTAGE:
         case ModelDictionaryComponentType.POWER:
