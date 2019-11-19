@@ -8,7 +8,7 @@
 }
 
 .select.form-control {
-    align-items: center;
+    align-items: flex-start;
 }
 
 
@@ -84,10 +84,17 @@
 }
 
 .select__button-group {
+    display: flex;
+    align-items: center;
     padding-top: 5px;
 
     button {
         margin-right: 5px;
         margin-left: 5px
+    }
+
+    .select__button-group__toggle-all-options {
+        margin: 0;
+        transform: translate(40px);
     }
 }

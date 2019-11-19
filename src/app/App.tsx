@@ -37,7 +37,7 @@ interface Props {
   componentPhases: Map<string, string[]>;
   connectionStatus: StompClientConnectionStatus;
   onLogout: () => void;
-  onMRIDChanged: (mRID: string, simulationName: string) => void;
+  onMRIDChanged: (mRID: string) => void;
   onSimulationConfigFormSubmitted: (simulationConfig: SimulationConfiguration) => void;
 }
 

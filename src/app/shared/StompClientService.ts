@@ -75,22 +75,14 @@ export class StompClientService {
       this._password,
       () => {
         subject.next(StompClientInitializationResult.OK);
-        subject.complete();
-        subject.unsubscribe();
-        this._connectionEstablished();
+        this._client.disconnect(this.reconnect);
 
         // need to reevaluate this
         sessionStorage.setItem('username', username);
         sessionStorage.setItem('password', password);
       },
-      () => {
-        subject.error(StompClientInitializationResult.AUTHENTICATION_FAILURE);
-        subject.unsubscribe();
-      },
-      () => {
-        subject.error(StompClientInitializationResult.CONNECTION_FAILURE);
-        subject.unsubscribe();
-      }
+      () => subject.error(StompClientInitializationResult.AUTHENTICATION_FAILURE),
+      () => subject.error(StompClientInitializationResult.CONNECTION_FAILURE)
     );
     return subject.pipe(take(1));
   }

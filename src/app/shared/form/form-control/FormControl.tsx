@@ -16,13 +16,17 @@ interface Props {
 export function FormControl(props: Props) {
   return (
     <div className={calculateClassNameFromProps(props)}>
-      <label
-        className='form-control__label'
-        htmlFor={props.htmlFor}>
-        {props.label}
-        &nbsp;
+      {
+        props.label
+        &&
+        <label
+          className='form-control__label'
+          htmlFor={props.htmlFor}>
+          {props.label}
+          &nbsp;
         <span className='form-control__label__hint'>{props.hint}</span>
-      </label>
+        </label>
+      }
       <div className='form-control__body'>
         {props.children}
       </div>

@@ -5,8 +5,8 @@ import { FeederModel, FeederModelRegion, FeederModelLine, FeederModelSubregion }
 import { PowerSystemConfigurationModel } from '../../models/PowerSystemConfigurationModel';
 import { SimulationConfiguration } from '@shared/simulation';
 
-import './PowerSystemConfiguration.light.scss';
-import './PowerSystemConfiguration.dark.scss';
+import './PowerSystemConfigurationTab.light.scss';
+import './PowerSystemConfigurationTab.dark.scss';
 
 interface Props {
   feederModel: FeederModel;
@@ -20,7 +20,7 @@ interface State {
   lineOptionBuilder: SelectionOptionBuilder<FeederModelLine>;
 }
 
-export class PowerSystemConfiguration extends React.Component<Props, State> {
+export class PowerSystemConfigurationTab extends React.Component<Props, State> {
 
   readonly formValue: PowerSystemConfigurationModel = {
     regionId: '',

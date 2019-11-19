@@ -1,5 +1,6 @@
 import * as React from 'react';
 
+import { DateTimeService } from '@shared/DateTimeService';
 import { CommandEvent, CommandEventDifference } from './CommandEvent';
 
 import './CommandEventTable.light.scss';
@@ -8,6 +9,8 @@ import './CommandEventTable.dark.scss';
 interface Props {
   events: CommandEvent[];
 }
+
+const dateTimeService = DateTimeService.getInstance();
 
 export function CommandEventTable(props: Props) {
   return (
@@ -25,17 +28,16 @@ export function CommandEventTable(props: Props) {
           props.events.map((event, i) => (
             <tr key={i}>
               <td className='command-event-table__cell-value'>
-                {event.occuredDateTime}
+                {dateTimeService.format(event.occuredDateTime)}
               </td>
               <td className='command-event-table__cell-value'>
-                {event.stopDateTime}
+                {dateTimeService.format(event.stopDateTime)}
               </td>
               <td className='command-event-table__cell-value'>
                 {renderDifferences(event.message.forward_differences)}
               </td>
               <td className='command-event-table__cell-value'>
                 {renderDifferences(event.message.reverse_differences)}
-
               </td>
             </tr>
           ))

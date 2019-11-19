@@ -5,8 +5,8 @@ import { SimulationConfiguration } from '@shared/simulation';
 import { Application } from '@shared/Application';
 import { ApplicationConfigurationModel } from '../../models/ApplicationConfigurationModel';
 
-import './ApplicationConfiguration.light.scss';
-import './ApplicationConfiguration.dark.scss';
+import './ApplicationConfigurationTab.light.scss';
+import './ApplicationConfigurationTab.dark.scss';
 
 interface Props {
   applicationConfig: SimulationConfiguration['application_config'];
@@ -19,7 +19,7 @@ interface State {
   disabledAppConfigStringInputBox: boolean;
 }
 
-export class ApplicationConfiguration extends React.Component<Props, State> {
+export class ApplicationConfigurationTab extends React.Component<Props, State> {
   readonly formValue: ApplicationConfigurationModel;
 
   constructor(props: Props) {

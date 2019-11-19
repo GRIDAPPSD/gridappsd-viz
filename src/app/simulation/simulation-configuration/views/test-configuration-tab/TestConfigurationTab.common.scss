@@ -1,21 +1,21 @@
-.test-configuration {
+.test-configuration-tab {
     position: relative;
     display: flex;
     height: 100%;
     overflow: hidden;
 
-    .test-configuration__form {
+    .test-configuration-tab__form {
         overflow: auto auto;
         width: 40%;
         box-sizing: border-box;
     }
 }
 
-.test-configuration__form__upload-file {
+.test-configuration-tab__form__upload-file {
     margin-left: 20px;
 }
 
-.test-configuration__event-summary {
+.test-configuration-tab__event-summary {
     margin-top: 10px;
     display: flex;
     flex-flow: column nowrap;
@@ -24,7 +24,7 @@
     box-sizing: border-box;
 }
 
-.test-configuration__save-events {
+.test-configuration-tab__save-events {
     position: absolute;
     left: 94.5%;
     top: 88%;
