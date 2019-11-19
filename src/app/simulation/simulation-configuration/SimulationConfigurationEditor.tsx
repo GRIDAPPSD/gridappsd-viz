@@ -8,10 +8,10 @@ import { Application } from '@shared/Application';
 import { Dialog, DialogContent, DialogActions } from '@shared/dialog';
 import { TabGroup, Tab } from '@shared/tabs';
 import { BasicButton } from '@shared/buttons';
-import { PowerSystemConfiguration } from './views/power-system-configuration';
+import { PowerSystemConfigurationTab } from './views/power-system-configuration-tab';
 import { SimulationConfigurationTab } from './views/simulation-configuration-tab';
-import { ApplicationConfiguration } from './views/application-configuration';
-import { TestConfiguration } from './views/test-configuration';
+import { ApplicationConfigurationTab } from './views/application-configuration-tab';
+import { TestConfigurationTab } from './views/test-configuration-tab';
 import { DateTimeService } from '@shared/DateTimeService';
 import { FaultEvent, FaultKind, CommOutageEvent, CommandEvent } from '@shared/test-manager';
 import { PowerSystemConfigurationModel } from './models/PowerSystemConfigurationModel';
@@ -20,7 +20,7 @@ import { ApplicationConfigurationModel } from './models/ApplicationConfiguration
 import { StateStore } from '@shared/state-store';
 import { ThreeDots } from '@shared/three-dots';
 import { NotificationBanner } from '@shared/notification-banner';
-import { ServiceConfiguration } from './views/service-configuration';
+import { ServiceConfigurationTab } from './views/service-configuration-tab';
 import { Service } from '@shared/Service';
 import { ServiceConfigurationEntryModel } from './models/ServiceConfigurationEntryModel';
 
@@ -29,7 +29,7 @@ import './SimulationConfigurationEditor.dark.scss';
 
 interface Props {
   onSubmit: (configObject: SimulationConfiguration) => void;
-  onMRIDChanged: (mRID: string, simulationName: string) => void;
+  onMRIDChanged: (mRID: string) => void;
   onClose: () => void;
   initialConfig: SimulationConfiguration;
   feederModel: FeederModel;
@@ -161,7 +161,7 @@ export class SimulationConfigurationEditor extends React.Component<Props, State>
           <form className='simulation-configuration-form'>
             <TabGroup>
               <Tab label='Power System Configuration'>
-                <PowerSystemConfiguration
+                <PowerSystemConfigurationTab
                   powerSystemConfig={this.currentConfig.power_system_config}
                   feederModel={this.props.feederModel}
                   onChange={this.onPowerSystemConfigurationChanged} />
@@ -173,7 +173,7 @@ export class SimulationConfigurationEditor extends React.Component<Props, State>
                   onChange={this.onSimulationConfigurationChanged} />
               </Tab>
               <Tab label='Application Configuration'>
-                <ApplicationConfiguration
+                <ApplicationConfigurationTab
                   applicationConfig={this.currentConfig.application_config}
                   availableApplications={this.props.availableApplications}
                   onChange={this.onApplicationConfigurationChanged} />
@@ -182,7 +182,7 @@ export class SimulationConfigurationEditor extends React.Component<Props, State>
                 {this.showCurrentComponentForTestConfigurationTab()}
               </Tab>
               <Tab label='Service Configuration'>
-                <ServiceConfiguration
+                <ServiceConfigurationTab
                   services={this.state.services}
                   onChange={this.onServiceConfigurationsChanged}
                   onValidationChange={this.onServiceConfigurationValidationChanged} />
@@ -216,7 +216,7 @@ export class SimulationConfigurationEditor extends React.Component<Props, State>
         simulationName: formValue.simulationName
       });
       if (formValue.lineId !== '')
-        this.props.onMRIDChanged(formValue.lineId, formValue.simulationName);
+        this.props.onMRIDChanged(formValue.lineId);
     }
     this.setState({
       lineName: formValue.lineId,
@@ -265,7 +265,7 @@ export class SimulationConfigurationEditor extends React.Component<Props, State>
         </NotificationBanner>
       );
     return (
-      <TestConfiguration
+      <TestConfigurationTab
         modelDictionary={this.state.modelDictionary}
         simulationStartTime={this.simulationStartDate}
         simulationStopTime={+this.currentConfig.simulation_config.duration + this.simulationStartDate}

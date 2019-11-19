@@ -44,8 +44,8 @@ export class AppContainer extends React.Component<Props, State> {
   readonly componentPhases = new Map<string, string[]>();
   readonly authenticationService = AuthenticationService.getInstance();
 
-  private _stateStore = StateStore.getInstance();
 
+  private readonly _stateStore = StateStore.getInstance();
   private readonly _stompClientService = StompClientService.getInstance();
   private readonly _simulationOutputService = SimulationOutputService.getInstance();
   private readonly _simulationQueue = SimulationQueue.getInstance();
@@ -221,8 +221,8 @@ export class AppContainer extends React.Component<Props, State> {
     );
   }
 
-  retrieveModelDictionary(mRID: string, simulationName: string) {
-    if (!this._availableModelDictionaries.has(simulationName)) {
+  retrieveModelDictionary(mRID: string) {
+    if (!this._availableModelDictionaries.has(mRID)) {
       // Clear out the currently active model dictionary
       this._stateStore.update({
         modelDictionary: null
@@ -230,7 +230,7 @@ export class AppContainer extends React.Component<Props, State> {
       this._fetchModelDictionary(mRID);
     }
     else
-      this._processNewModelDictionary(this._availableModelDictionaries.get(simulationName));
+      this._processNewModelDictionary(this._availableModelDictionaries.get(mRID));
   }
 
   private _fetchModelDictionary(mrid: string) {
@@ -252,6 +252,10 @@ export class AppContainer extends React.Component<Props, State> {
           if (typeof payload.data === 'string')
             payload.data = JSON.parse(payload.data);
           const modelDictionary = payload.data.feeders[0];
+          this._availableModelDictionaries.set(
+            getModelDictionaryRequest.requestBody.parameters.model_id,
+            modelDictionary
+          );
           this._processNewModelDictionary(modelDictionary);
         }
       });
@@ -285,7 +289,7 @@ export class AppContainer extends React.Component<Props, State> {
 
   // Find components with the same name, and group their phases into one
   private _consolidatePhasesForComponents(modelDictionary: ModelDictionary) {
-    const componentWithGroupPhasesMap = new Map<string, ModelDictionaryComponent>();
+    const componentWithGroupedPhasesMap = new Map<string, ModelDictionaryComponent>();
     const measurementMRIDMap = new Map<string, Array<{ phase: string; mrid: string; }>>();
     for (const measurement of modelDictionary.measurements) {
       const name = measurement.measurementType === ModelDictionaryComponentType.VOLTAGE
@@ -293,7 +297,7 @@ export class AppContainer extends React.Component<Props, State> {
         : measurement.ConductingEquipment_name;
       const phases = measurement.phases;
       const id = measurement.name;
-      let componentInMeasurement = componentWithGroupPhasesMap.get(id);
+      let componentInMeasurement = componentWithGroupedPhasesMap.get(id);
       if (!componentInMeasurement) {
         componentInMeasurement = {
           id,
@@ -307,7 +311,7 @@ export class AppContainer extends React.Component<Props, State> {
           measurementMRIDs: []
         };
         measurementMRIDMap.set(id, []);
-        componentWithGroupPhasesMap.set(id, componentInMeasurement);
+        componentWithGroupedPhasesMap.set(id, componentInMeasurement);
       }
       if (!componentInMeasurement.phases.includes(phases)) {
         const measurementMRIDAndPhaseArray = measurementMRIDMap.get(id);
@@ -322,7 +326,7 @@ export class AppContainer extends React.Component<Props, State> {
       }
     }
     this._stateStore.update({
-      modelDictionaryComponentsWithConsolidatedPhases: [...componentWithGroupPhasesMap.values()]
+      modelDictionaryComponentsWithConsolidatedPhases: [...componentWithGroupedPhasesMap.values()]
     });
   }
 

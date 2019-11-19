@@ -17,8 +17,8 @@ import { download, DownloadType, generateUniqueId } from '@shared/misc';
 import { CommandEventSummaryTable } from './command/CommandEventSummaryTable';
 import { DateTimeService } from '@shared/DateTimeService';
 
-import './TestConfiguration.light.scss';
-import './TestConfiguration.dark.scss';
+import './TestConfigurationTab.light.scss';
+import './TestConfigurationTab.dark.scss';
 
 interface Props {
   modelDictionary: ModelDictionary;
@@ -38,7 +38,7 @@ interface State {
   currentFaultEvent: FaultEvent;
 }
 
-export class TestConfiguration extends React.Component<Props, State> {
+export class TestConfigurationTab extends React.Component<Props, State> {
 
   tagForCurrentEvent = '';
 
@@ -100,9 +100,9 @@ export class TestConfiguration extends React.Component<Props, State> {
 
   render() {
     return (
-      <div className='test-configuration'>
+      <div className='test-configuration-tab'>
         <FormGroup
-          className='test-configuration__form'
+          className='test-configuration-tab__form'
           collapsible={false}>
           <Input
             label='Event Tag'
@@ -131,7 +131,7 @@ export class TestConfiguration extends React.Component<Props, State> {
             <IconButton
               icon='cloud_upload'
               style='accent'
-              className='test-configuration__form__upload-file'
+              className='test-configuration-tab__form__upload-file'
               onClick={this.showEventFilePicker} />
           </Tooltip>
           <FilePicker />
@@ -140,7 +140,7 @@ export class TestConfiguration extends React.Component<Props, State> {
         {
           (this.state.faultEvents.length > 0 || this.state.outageEvents.length > 0 || this.state.commandEvents.length > 0)
           &&
-          <div className='test-configuration__event-summary'>
+          <div className='test-configuration-tab__event-summary'>
             <RadioButtonGroup
               id='event-summary'
               label='Event Summary'
@@ -338,7 +338,7 @@ export class TestConfiguration extends React.Component<Props, State> {
           <IconButton
             size='large'
             icon='save'
-            className='test-configuration__save-events'
+            className='test-configuration-tab__save-events'
             onClick={this.saveEventsIntoFile} />
         </Tooltip>
       );

@@ -61,14 +61,14 @@ export class ServiceConfigurationEntry extends React.Component<Props, State> {
   render() {
     return (
       <FormGroup
-        className='service-configuration-entry'
+        className='service-configuration-tab-entry'
         label={this.props.service.id}>
         {
           Object.entries(this.props.service.user_input)
             .map(([label, userInputSpec]) => (
               <div
                 key={label}
-                className='service-configuration-entry__value'>
+                className='service-configuration-tab-entry__value'>
                 {this.showUserInputValueFormControl(label, userInputSpec)}
                 <Tooltip
                   content={
@@ -76,7 +76,7 @@ export class ServiceConfigurationEntry extends React.Component<Props, State> {
                   }
                   position='right'>
                   <IconButton
-                    className='service-configuration-entry__example'
+                    className='service-configuration-tab-entry__example'
                     icon='help_outline'
                     size='small'
                     style='accent'

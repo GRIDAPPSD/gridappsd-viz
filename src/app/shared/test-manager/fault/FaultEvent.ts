@@ -1,4 +1,4 @@
-import { Phase } from './Phase';
+import { Phase } from '../Phase';
 
 export interface FaultEvent {
   // snake case due to requirement

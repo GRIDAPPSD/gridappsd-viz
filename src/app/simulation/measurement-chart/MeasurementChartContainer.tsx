@@ -84,10 +84,12 @@ export class MeasurementChartContainer extends React.Component<Props, State> {
         takeUntil(this._unsubscriber),
         filter(() => this._plotModels.length > 0)
       )
-      .subscribe(measurements => {
-        const measurementChartModels = this._plotModels
-          .map(plotModel => this._buildMeasurementChartModel(plotModel, measurements));
-        this.setState({ measurementChartModels });
+      .subscribe({
+        next: measurements => {
+          const measurementChartModels = this._plotModels
+            .map(plotModel => this._buildMeasurementChartModel(plotModel, measurements));
+          this.setState({ measurementChartModels });
+        }
       });
   }
 

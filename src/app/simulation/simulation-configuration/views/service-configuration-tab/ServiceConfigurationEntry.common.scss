@@ -1,4 +1,4 @@
-.service-configuration-entry {
+.service-configuration-tab-entry {
     .form-control {
         flex-flow: column nowrap;
         align-items: flex-start;
@@ -17,14 +17,19 @@
         position: relative;
     }
 
-    .service-configuration-entry__value {
+    .service-configuration-tab-entry__value {
         display: flex;
         position: relative;
         flex-flow: column nowrap;
         margin-bottom: 20px;
+
+        .checkbox .form-control__body {
+            margin-top: -10px;
+            margin-bottom: -5px;
+        }
     }
 
-    .service-configuration-entry__example {
+    .service-configuration-tab-entry__example {
         transform: translate(20px, 3px);
         width: 20px;
         height: 20px;
