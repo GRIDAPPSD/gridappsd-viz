@@ -1,1 +1,1 @@
-export * from './AvailableApplicationsAndServices';
+export * from './AvailableApplicationsAndServicesContainer';

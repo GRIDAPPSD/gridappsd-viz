@@ -79,7 +79,7 @@ export class Navigation extends React.Component<Props, {}> {
             </DrawerItemGroup>
           }
           <DrawerItem>
-            <Link to='/applications'>
+            <Link to='/applications-and-services'>
               <DrawerItemIcon icon='storage' />
               <DrawerItemLabel value='Applications & Services' />
             </Link>

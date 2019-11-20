@@ -4,9 +4,9 @@ import { takeUntil } from 'rxjs/operators';
 
 import { CommOutageEvent, FaultEvent, CommandEvent } from '@shared/test-manager';
 import { StateStore } from '@shared/state-store';
-import { CommOutageEventSummary } from './CommOutageEventSummary';
-import { FaultEventSummary } from './FaultEventSummary';
-import { CommandEventSummary } from './CommandEventSummary';
+import { CommOutageEventSummary } from './comm-outage/CommOutageEventSummary';
+import { FaultEventSummary } from './fault/FaultEventSummary';
+import { CommandEventSummary } from './command/CommandEventSummary';
 
 import './EventSummary.light.scss';
 import './EventSummary.dark.scss';

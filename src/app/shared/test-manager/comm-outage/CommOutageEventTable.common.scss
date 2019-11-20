@@ -1,38 +1,15 @@
 .comm-outage-event-table {
-    border-collapse: collapse;
-    width: 100%;
-
-    th,
-    td,
-    div {
-        font-size: 0.9em;
-        text-align: center;
-        white-space: nowrap;
-    }
 
     th[rowspan='2'] {
         font-size: 0.8em;
-    }
-
-    th {
-        font-weight: 500;
-        padding: 10px 15px;
-        white-space: nowrap;
     }
 
     .comm-outage-event-table__secondary-heading {
         font-size: 0.8em;
     }
 
-    td {
-        padding: 0;
-
-        &>div {
-            padding: 5px;
-        }
-    }
 }
 
-    .comm-outage-event-table__row-actions .icon-button:first-of-type {
-        margin-right: 5px;
-    }
+.comm-outage-event-table__row-actions .icon-button:first-of-type {
+    margin-right: 5px;
+}

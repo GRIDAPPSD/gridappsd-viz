@@ -6,7 +6,5 @@ ignores
 
 fncs-output.ts
 node_modules/*
-!node_modules/react-json-viewer/
-!node_modules/react-json-viewer/dist
 
 .DS_Store

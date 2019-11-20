@@ -1,19 +1,20 @@
+@import '@constants.dark';
 @import 'CommandEventTable.common';
 
 
 .command-event-table__cell-value {
-    border: 2px solid #cecece;
+    border: 2px solid $table-border-color;
 }
 
 .command-event-table__difference-table thead {
     border: none;
-    border-bottom: 2px solid #cecece;
+    border-bottom: 2px solid $table-border-color;
 }
 
 .command-event-table__difference-table__header {
-    border-right: 2px solid #cecece;
+    border-right: 2px solid $table-border-color;
 }
 
 .command-event-table__difference-table__cell-value {
-    border-right: 2px solid #cecece;
+    border-right: 2px solid $table-border-color;
 }
