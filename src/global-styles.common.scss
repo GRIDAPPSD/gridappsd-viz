@@ -98,23 +98,56 @@ table {
 }
 
 th,
-td {
+td,
+td>div {
     font-size: 0.9em;
     text-align: center;
     white-space: nowrap;
 }
 
 th {
-    font-weight: 500;
+    font-weight: bold;
     padding: 10px 15px;
-    white-space: nowrap;
 }
 
 td {
     position: relative;
-    padding: 5px;
+    padding: 0;
 
     &>div {
-        padding: 10px;
+        padding: 5px;
+        white-space: pre;
     }
+}
+
+table table {
+    thead {
+        border: none;
+    }
+
+    th {
+        padding: 5px 10px;
+        border-top: none;
+        border-left: none;
+        white-space: initial;
+
+        &:last-of-type {
+            border-right: none;
+        }
+    }
+
+    td {
+        white-space: initial;
+        border-bottom: none;
+        border-left: none;
+
+        &:last-of-type {
+            border: none;
+        }
+
+        &>div {
+            border: none;
+        }
+    }
+
 }

@@ -2,7 +2,7 @@ import * as React from 'react';
 import { Route, Redirect } from 'react-router-dom';
 
 import { Application } from '@shared/Application';
-import { AvailableApplicationsAndServices } from './available-applications-and-services';
+import { AvailableApplicationsAndServicesContainer } from './available-applications-and-services';
 import { DataBrowser } from './data-browser';
 import { FeederModel } from '@shared/topology';
 import { SimulationLabelsContainer } from './simulation/simulation-labels';
@@ -107,8 +107,8 @@ export class App extends React.Component<Props, State> {
                 )} />
               <Route
                 exact
-                path='/applications'
-                component={AvailableApplicationsAndServices} />
+                path='/applications-and-services'
+                component={AvailableApplicationsAndServicesContainer} />
               <Route
                 exact
                 path='/stomp-client'

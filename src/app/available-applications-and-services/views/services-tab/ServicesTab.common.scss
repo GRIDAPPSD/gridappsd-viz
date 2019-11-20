@@ -1,0 +1,15 @@
+.services-tab-container {
+    padding: 5px;
+    height: 100%;
+    box-sizing: border-box;
+}
+
+.services-tab {
+    overflow: auto;
+    height: 100%;
+
+    td div span:nth-of-type(2) {
+        margin: 0 3px;
+    }
+
+}
