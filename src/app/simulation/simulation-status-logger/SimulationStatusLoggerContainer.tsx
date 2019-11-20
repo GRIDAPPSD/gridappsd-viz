@@ -8,13 +8,15 @@ import {
 } from '@shared/simulation';
 import { StompClientService, StompClientConnectionStatus } from '@shared/StompClientService';
 import { StateStore } from '@shared/state-store';
+import { generateUniqueId } from '@shared/misc';
+import { LogMessage } from './models/LogMessage';
 
 interface Props {
 
 }
 
 interface State {
-  logMessages: Array<string>;
+  logMessages: LogMessage[];
   isFetching: boolean;
 }
 
@@ -71,9 +73,9 @@ export class SimulationStatusLogContainer extends React.Component<Props, State> 
       );
   }
 
-  private _onSimulationStatusLogMessageReceived(logMessage: string) {
+  private _onSimulationStatusLogMessageReceived(logMessageContent: string) {
     this.setState({
-      logMessages: [logMessage].concat(this.state.logMessages),
+      logMessages: [{ id: generateUniqueId(), content: logMessageContent }].concat(this.state.logMessages),
       isFetching: false
     });
   }
