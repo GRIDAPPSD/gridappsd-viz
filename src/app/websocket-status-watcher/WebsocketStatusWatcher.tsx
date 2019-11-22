@@ -37,8 +37,7 @@ export class WebsocketStatusWatcher extends React.Component<Props, State> {
   }
 
   componentWillUnmount() {
-    if (this._websocketStatusStream)
-      this._websocketStatusStream.unsubscribe();
+    this._websocketStatusStream?.unsubscribe();
   }
 
   render() {

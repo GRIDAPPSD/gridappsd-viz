@@ -14,17 +14,59 @@ export interface GetAllFeederModelsRequestPayload {
     };
     results: {
       bindings: Array<{
-        name: { type: string, value: string },
-        mRID: { type: string, value: string },
-        substationName: { type: string, value: string },
-        substationID: { type: string, value: string },
-        subregionName: { type: string, value: string },
-        subregionID: { type: string, value: string },
-        regionName: { type: string, value: string },
+        name: { type: string, value: string };
+        mRID: { type: string, value: string };
+        substationName: { type: string, value: string };
+        substationID: { type: string, value: string };
+        subregionName: { type: string, value: string };
+        subregionID: { type: string, value: string };
+        regionName: { type: string, value: string };
         regionID: { type: string, value: string }
       }>;
     }
   };
   id: string;
   responseComplete: boolean;
+}
+
+
+export interface GetFeederModelsResponsePayload {
+  data: {
+    results: {
+      bindings: Array<{
+        name: {
+          type: 'literal';
+          value: string;
+        };
+        mRID: {
+          type: 'literal';
+          value: string;
+        };
+        substationName: {
+          type: 'literal';
+          value: string;
+        };
+        substationID: {
+          type: 'literal';
+          value: string;
+        };
+        subregionName: {
+          type: 'literal';
+          value: string;
+        };
+        subregionID: {
+          type: 'literal';
+          value: string
+        };
+        regionName: {
+          type: 'literal';
+          value: string
+        };
+        regionID: {
+          type: 'literal';
+          value: string;
+        };
+      }>
+    };
+  };
 }

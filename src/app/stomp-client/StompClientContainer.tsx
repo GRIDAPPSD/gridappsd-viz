@@ -44,8 +44,7 @@ export class StompClientContainer extends React.Component<Props, State> {
         next: status => {
           switch (status) {
             case StompClientConnectionStatus.CONNECTING:
-              if (this._responseSubscription)
-                this._responseSubscription.unsubscribe();
+              this._responseSubscription?.unsubscribe();
               break;
             case StompClientConnectionStatus.CONNECTED:
               this._responseSubscription = this._subscribeForResponse();
@@ -58,7 +57,7 @@ export class StompClientContainer extends React.Component<Props, State> {
   private _subscribeForResponse() {
     return this._stompClientService.readFrom('/stomp-client/response-queue')
       .pipe(
-        map(body => JSON.parse(body)),
+        map(JSON.parse as (body: string) => any),
         map(payload => JSON.stringify(payload, null, 4))
       )
       .subscribe({

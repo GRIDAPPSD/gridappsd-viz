@@ -152,8 +152,10 @@ export class ServiceConfigurationTab extends React.Component<Props,
   }
 
   onServiceConfigurationEntryValidationChanged(isValid: boolean, service: Service) {
-    if (isValid) this._invalidServiceConfigurationEntries.delete(service);
-    else this._invalidServiceConfigurationEntries.set(service, true);
+    if (isValid)
+      this._invalidServiceConfigurationEntries.delete(service);
+    else
+      this._invalidServiceConfigurationEntries.set(service, true);
     const isValidOverall = this._invalidServiceConfigurationEntries.size === 0;
 
     this.setState({

@@ -55,8 +55,7 @@ export class Input extends React.Component<Props, State> {
         validationErrors
       });
       const isValid = validationErrors.length === 0;
-      if (this.props.onValidate)
-        this.props.onValidate(isValid, this.props.label, value);
+      this.props.onValidate?.(isValid, this.props.label, value);
       if (isValid)
         this.props.onChange(value);
     }

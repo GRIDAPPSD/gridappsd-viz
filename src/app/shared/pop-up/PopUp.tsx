@@ -95,8 +95,7 @@ export class PopUp extends React.Component<Props, State> {
       if (document.body.contains(this.popupContainer)) {
         document.body.removeChild(this.popupContainer);
       }
-      if (this.props.onAfterClosed)
-        this.props.onAfterClosed();
+      this.props.onAfterClosed?.();
     }
   }
 

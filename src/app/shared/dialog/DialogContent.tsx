@@ -5,12 +5,12 @@ import './DialogContent.dark.scss';
 
 interface Props {
   children: any;
-  styles?: React.CSSProperties;
+  style?: React.CSSProperties;
 }
 
 export function DialogContent(props: Props) {
   return (
-    <div className='dialog-content' style={{ ...(props.styles || {}) }}>
+    <div className='dialog-content' style={{ ...(props.style || {}) }}>
       {props.children}
     </div>
   );

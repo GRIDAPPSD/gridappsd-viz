@@ -46,7 +46,7 @@ export class SwitchMenu extends React.Component<Props, State> {
         show={this.state.show}
         top={this.props.top}
         left={this.props.left}>
-        <DialogContent styles={{ overflow: 'hidden' }}>
+        <DialogContent style={{ overflow: 'hidden' }}>
           <form className='switch-menu__form'>
             <Select
               label='Action'

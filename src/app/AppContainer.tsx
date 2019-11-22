@@ -4,7 +4,7 @@ import { map, take, filter } from 'rxjs/operators';
 import { App } from './App';
 import { Application } from '@shared/Application';
 import { FeederModel } from '@shared/topology';
-import { GetAllFeederModelsRequest } from './models/message-requests/GetAllFeederModelsRequest';
+import { GetAllFeederModelsRequest, GetFeederModelsResponsePayload } from './models/message-requests/GetAllFeederModelsRequest';
 import {
   ModelDictionary,
   ModelDictionaryComponentType,
@@ -18,7 +18,7 @@ import {
   SimulationOutputService
 } from '@shared/simulation';
 import { StompClientService, StompClientConnectionStatus } from '@shared/StompClientService';
-import { GetModelDictionaryRequest } from './models/message-requests/GetModelDictionaryRequest';
+import { GetModelDictionaryRequest, GetModelDictionaryResponsePayload } from './models/message-requests/GetModelDictionaryRequest';
 import {
   GetAvailableApplicationsAndServicesRequest, GetAvailableApplicationsRequestPayload
 } from './models/message-requests/GetAvailableApplicationsAndServicesRequest';
@@ -95,7 +95,7 @@ export class AppContainer extends React.Component<Props, State> {
 
   private _subscribeToAvailableApplicationsTopic(destination: string) {
     this._stompClientService.readOnceFrom(destination)
-      .pipe(map(body => JSON.parse(body) as GetAvailableApplicationsRequestPayload))
+      .pipe(map(JSON.parse as (body: string) => GetAvailableApplicationsRequestPayload))
       .subscribe({
         next: payload => {
           this._stateStore.update({
@@ -121,49 +121,13 @@ export class AppContainer extends React.Component<Props, State> {
 
   private _subscribeToFeederModelsTopic(destination: string) {
     this._stompClientService.readOnceFrom(destination)
-      .pipe(map(body => JSON.parse(body)))
+      .pipe(map(JSON.parse as (body: string) => GetFeederModelsResponsePayload))
       .subscribe({
         next: payload => {
           const feederModel = {} as FeederModel;
           if (typeof payload.data === 'string')
             payload.data = JSON.parse(payload.data);
-          /*
-              payload.data.results.bindings is an array of
-                {
-                    "name": {
-                        "type": "literal",
-                        "value": string
-                    },
-                    "mRID": {
-                        "type": "literal",
-                        "value": string
-                    },
-                    "substationName": {
-                        "type": "literal",
-                        "value": string
-                    },
-                    "substationID": {
-                        "type": "literal",
-                        "value": string
-                    },
-                    "subregionName": {
-                        "type": "literal",
-                        "value": string
-                    },
-                    "subregionID": {
-                        "type": "literal",
-                        "value": string
-                    },
-                    "regionName": {
-                        "type": "literal",
-                        "value": string
-                    },
-                    "regionID": {
-                        "type": "literal",
-                        "value": string
-                    }
-                }
-          */
+
           for (const binding of payload.data.results.bindings) {
             const regionId = binding.regionID.value;
             if (!(regionId in feederModel))
@@ -173,38 +137,29 @@ export class AppContainer extends React.Component<Props, State> {
                 lines: [],
                 subregions: []
               };
-            // If a line with given name by binding.name.value already exists, then filter it out
-            // to push the new one on
-            this._pushIfNameDoesNotExist(
-              feederModel[regionId].lines,
-              binding.name.value,
-              {
+
+            const lines = feederModel[regionId].lines;
+            const subregions = feederModel[regionId].subregions;
+
+            if (lines.find(line => line.name === binding.name.value) === undefined) {
+              lines.push({
                 name: binding.name.value,
                 id: binding.mRID.value,
                 subregionId: binding.subregionID.value
-              }
-            );
-            // If a subregion with given name by binding.subregionName.value already exists, then filter it out
-            // to push the new one on
-            this._pushIfNameDoesNotExist(
-              feederModel[regionId].subregions,
-              binding.subregionName.value,
-              {
+              });
+            }
+            if (subregions.find(subregion => subregion.name === binding.subregionName.value) === undefined) {
+              subregions.push({
                 name: binding.subregionName.value,
                 id: binding.subregionID.value
-              }
-            );
+              });
+            }
           }
           this.setState({
             feederModel
           });
         }
       });
-  }
-
-  private _pushIfNameDoesNotExist(array: Array<{ name: string; id: string }>, nameValue: string, value: any) {
-    if (array.every(item => item.name !== nameValue))
-      array.push(value);
   }
 
   render() {
@@ -250,7 +205,7 @@ export class AppContainer extends React.Component<Props, State> {
 
   private _subscribeToModelDictionaryTopic(getModelDictionaryRequest: GetModelDictionaryRequest) {
     this._stompClientService.readOnceFrom(getModelDictionaryRequest.replyTo)
-      .pipe(map(body => JSON.parse(body)))
+      .pipe(map(JSON.parse as (body: string) => GetModelDictionaryResponsePayload))
       .subscribe({
         next: payload => {
           if (typeof payload.data === 'string')

@@ -47,8 +47,7 @@ export class PowergridModelsContainer extends React.Component<Props, State> {
         next: status => {
           switch (status) {
             case StompClientConnectionStatus.CONNECTING:
-              if (this._setupSubscription)
-                this._setupSubscription.unsubscribe();
+              this._setupSubscription?.unsubscribe();
               break;
             case StompClientConnectionStatus.CONNECTED:
               this._setupSubscription = this._subscribeToPowerGridModelsTopic();
@@ -61,11 +60,16 @@ export class PowergridModelsContainer extends React.Component<Props, State> {
   private _subscribeToPowerGridModelsTopic() {
     return this._stompClientService.readFrom(this._queryPowerGridModelsRequest.replyTo)
       .pipe(
-        map(body => JSON.parse(body)),
+        map(JSON.parse as (body: string) => any),
         map(payload => JSON.stringify(payload.data, null, 4) || payload.error.message)
       )
       .subscribe({
-        next: response => this.setState({ response }, () => this.setState({ isFetching: false }))
+        next: response => {
+          this.setState(
+            { response },
+            () => this.setState({ isFetching: false })
+          );
+        }
       });
   }
 
