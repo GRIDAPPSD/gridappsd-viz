@@ -10,7 +10,8 @@ interface Props {
 }
 
 interface State {
-  violationCounts: number;
+  totalVoltageViolations: number;
+  violationsAtZero: number;
 }
 
 export class VoltageViolationContainer extends React.Component<Props, State> {
@@ -24,7 +25,8 @@ export class VoltageViolationContainer extends React.Component<Props, State> {
     super(props);
 
     this.state = {
-      violationCounts: -1
+      totalVoltageViolations: -1,
+      violationsAtZero: 0
     };
   }
 
@@ -33,13 +35,14 @@ export class VoltageViolationContainer extends React.Component<Props, State> {
       .pipe(
         filter(simulationId => simulationId !== ''),
         switchMap(id => this._stompClientService.readFrom(`/topic/goss.gridappsd.simulation.voltage_violation.${id}.output`)),
-        map(JSON.parse as (payload: string) => any[])
+        map(JSON.parse as (payload: string) => { [mrid: string]: number })
       )
       .subscribe({
         next: payload => {
+          const violatingValues = Object.values(payload);
           this.setState({
-            // The number of objects indicates the number of voltage violations
-            violationCounts: Object.keys(payload).length
+            totalVoltageViolations: violatingValues.length,
+            violationsAtZero: violatingValues.filter(value => value === 0).length
           });
         }
       });
@@ -51,9 +54,17 @@ export class VoltageViolationContainer extends React.Component<Props, State> {
 
   render() {
     return (
-      this.state.violationCounts !== -1
+      this.state.totalVoltageViolations !== -1
       &&
-      <VoltageViolation violationCounts={this.state.violationCounts} />
+      <div className='voltage-violations'>
+        <VoltageViolation
+          label='Total voltage violations'
+          violationCounts={this.state.totalVoltageViolations} />
+
+        <VoltageViolation
+          label='Violations at 0'
+          violationCounts={this.state.violationsAtZero} />
+      </div>
     );
   }
 
