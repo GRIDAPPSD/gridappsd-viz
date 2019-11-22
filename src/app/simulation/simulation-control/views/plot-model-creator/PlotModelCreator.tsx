@@ -380,8 +380,8 @@ export class PlotModelCreator extends React.Component<Props, State> {
     const resultingPlotModels = [];
     for (const createdPlotModel of this.state.createdPlotModels) {
       if (createdPlotModel.useAngle && createdPlotModel.useMagnitude) {
-        const plotModelUsingMagnitude = this._createDefaultPlotModel(createdPlotModel.name + ' (1)');
-        const plotModelUsingAngle = this._createDefaultPlotModel(createdPlotModel.name + ' (2)');
+        const plotModelUsingMagnitude = this._createDefaultPlotModel(createdPlotModel.name + ' (Magnitude)');
+        const plotModelUsingAngle = this._createDefaultPlotModel(createdPlotModel.name + ' (Angle)');
         plotModelUsingMagnitude.componentType = createdPlotModel.componentType;
         plotModelUsingMagnitude.useMagnitude = true;
         plotModelUsingMagnitude.components = createdPlotModel.components;

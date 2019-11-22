@@ -48,7 +48,7 @@ const cache = new Map<string, RenderableTopology>();
 
 export class TopologyRendererContainer extends React.Component<Props, State> {
 
-  activeSimulationConfig: SimulationConfiguration;
+  activeSimulationConfig: SimulationConfiguration = DEFAULT_SIMULATION_CONFIGURATION;
 
   private readonly _stompClientService = StompClientService.getInstance();
   private readonly _simulationQueue = SimulationQueue.getInstance();
