@@ -203,9 +203,21 @@ export class CommOutageEventForm extends React.Component<Props, State> {
                             onClick={() => this.setState({ inputList: this.state.inputList.filter(item => item !== inputItem) })} />
                         </Tooltip>
                       </td>
-                      <td>{inputItem.type}</td>
-                      <td>{inputItem.name}</td>
-                      <td>{inputItem.phases.map((phase, i) => <div key={i}>{phase.phaseLabel}</div>)}</td>
+                      <td>
+                        <div>
+                          {inputItem.type}
+                        </div>
+                      </td>
+                      <td>
+                        <div>
+                          {inputItem.name}
+                        </div>
+                      </td>
+                      <td>
+                        <div>
+                          {inputItem.phases.map(phase => phase.phaseLabel).join(', ')}
+                        </div>
+                      </td>
                       <td>
                         <div>{inputItem.attribute}</div>
                       </td>
@@ -300,10 +312,26 @@ export class CommOutageEventForm extends React.Component<Props, State> {
                             onClick={() => this.setState({ outputList: this.state.outputList.filter(item => item !== outputItem) })} />
                         </Tooltip>
                       </td>
-                      <td>{outputItem.type}</td>
-                      <td>{outputItem.name}</td>
-                      <td>{outputItem.phases.map((e, i) => <div key={i}>{e}</div>)}</td>
-                      <td>{outputItem.measurementTypes.map((e, i) => <div key={i}>{e}</div>)}</td>
+                      <td>
+                        <div>
+                          {outputItem.type}
+                        </div>
+                      </td>
+                      <td>
+                        <div>
+                          {outputItem.name}
+                        </div>
+                      </td>
+                      <td>
+                        <div>
+                          {outputItem.phases.join(', ')}
+                        </div>
+                      </td>
+                      <td>
+                        <div>
+                          {outputItem.measurementTypes.map((e, i) => <div key={i}>{e}</div>)}
+                        </div>
+                      </td>
                     </tr>
                   ))
                 }
@@ -507,12 +535,7 @@ export class CommOutageEventForm extends React.Component<Props, State> {
   }
 
   disableAddEventButton(): boolean {
-    if (!this.state.allInputOutageChecked && this.state.inputList.length === 0)
-      return true;
-    if (!this.state.allOutputOutageChecked && this.state.outputList.length === 0)
-      return true;
-
-    return false;
+    return !this.state.allInputOutageChecked && this.state.inputList.length === 0;
   }
 
   createNewEvent() {
