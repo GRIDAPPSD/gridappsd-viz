@@ -48,7 +48,7 @@ const cache = new Map<string, RenderableTopology>();
 
 export class TopologyRendererContainer extends React.Component<Props, State> {
 
-  activeSimulationConfig: SimulationConfiguration = DEFAULT_SIMULATION_CONFIGURATION;
+  activeSimulationConfig: SimulationConfiguration;
 
   private readonly _stompClientService = StompClientService.getInstance();
   private readonly _simulationQueue = SimulationQueue.getInstance();
@@ -71,8 +71,7 @@ export class TopologyRendererContainer extends React.Component<Props, State> {
       isFetching: true
     };
 
-    if (this._simulationQueue.getActiveSimulation())
-      this.activeSimulationConfig = this._simulationQueue.getActiveSimulation().config;
+    this.activeSimulationConfig = this._simulationQueue.getActiveSimulation()?.config || DEFAULT_SIMULATION_CONFIGURATION;
 
     this.onToggleSwitchState = this.onToggleSwitchState.bind(this);
     this.onCapacitorMenuFormSubmitted = this.onCapacitorMenuFormSubmitted.bind(this);
@@ -90,8 +89,7 @@ export class TopologyRendererContainer extends React.Component<Props, State> {
                 swjtch.open = measurement.value === 0;
             });
             const switchSymbol = document.querySelector(`.topology-renderer__canvas__symbol.switch._${swjtch.name}_`);
-            if (switchSymbol)
-              switchSymbol.setAttribute('fill', swjtch.open ? swjtch.colorWhenOpen : swjtch.colorWhenClosed);
+            switchSymbol?.setAttribute('fill', swjtch.open ? swjtch.colorWhenOpen : swjtch.colorWhenClosed);
           }
         }
       });
@@ -133,7 +131,7 @@ export class TopologyRendererContainer extends React.Component<Props, State> {
     this._stompClientService.readOnceFrom(destination)
       .pipe(
         takeWhile(() => !this._activeSimulationStream.closed),
-        map(body => JSON.parse(body) as GetTopologyModelRequestPayload))
+        map(JSON.parse as (body: string) => GetTopologyModelRequestPayload))
       .subscribe({
         next: payload => this._processModelForRendering(payload)
       });

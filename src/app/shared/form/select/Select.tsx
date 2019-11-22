@@ -267,8 +267,7 @@ export class Select<T, E extends boolean = false> extends React.Component<Props<
   deselectOption(option: Option<T>) {
     const selectedOptions = this.state.selectedOptions.filter(e => e !== option);
     if (selectedOptions.length === 0) {
-      if (this.props.onClear)
-        this.props.onClear();
+      this.props.onClear?.();
       if (!this.props.optional) {
         this._showSelectionRequiredMessage();
       }

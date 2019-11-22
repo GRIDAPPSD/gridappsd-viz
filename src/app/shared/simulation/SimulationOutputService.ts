@@ -33,8 +33,7 @@ export class SimulationOutputService {
         next: status => {
           switch (status) {
             case StompClientConnectionStatus.CONNECTING:
-              if (this._simulationOutputSubscription)
-                this._simulationOutputSubscription.unsubscribe();
+              this._simulationOutputSubscription?.unsubscribe();
               break;
             case StompClientConnectionStatus.CONNECTED:
               this._simulationOutputSubscription = this._subscribeToSimulationOutputTopic();

@@ -47,9 +47,9 @@ export class LogsContainer extends React.Component<Props, State> {
 
   private _fetchLatestTenSimulationIds() {
     this._stompClientService.readOnceFrom('query-logs.process-id')
-      .pipe(map(body => JSON.parse(body).data as Array<SimulationId>))
+      .pipe(map(JSON.parse as (body: string) => { data: SimulationId[] }))
       .subscribe({
-        next: simulationIds => this.setState({ simulationIds })
+        next: payload => this.setState({ simulationIds: payload.data })
       });
     this._stompClientService.send(
       'goss.gridappsd.process.request.data.log',
@@ -64,10 +64,8 @@ export class LogsContainer extends React.Component<Props, State> {
         next: status => {
           switch (status) {
             case StompClientConnectionStatus.CONNECTING:
-              if (this._queryLogsResultSubscription)
-                this._queryLogsResultSubscription.unsubscribe();
-              if (this._sourcesSubscription)
-                this._sourcesSubscription.unsubscribe();
+              this._queryLogsResultSubscription?.unsubscribe();
+              this._sourcesSubscription?.unsubscribe();
               break;
             case StompClientConnectionStatus.CONNECTED:
               this._queryLogsResultSubscription = this._observeQueryLogsResult();
@@ -80,17 +78,17 @@ export class LogsContainer extends React.Component<Props, State> {
 
   private _observeQueryLogsResult() {
     return this._stompClientService.readFrom('query-logs.result')
-      .pipe(map(body => JSON.parse(body).data || []))
+      .pipe(map(JSON.parse as (body: string) => any))
       .subscribe({
-        next: queryResults => this.setState({ result: queryResults })
+        next: queryResults => this.setState({ result: queryResults.data || [] })
       });
   }
 
   private _observeSources() {
     return this._stompClientService.readFrom('query-logs.source')
       .pipe(
-        map(body => JSON.parse(body).data as Array<{ source: string }>),
-        map(sources => sources.map(source => source.source))
+        map(JSON.parse as (body: string) => { data: Array<{ source: string }> }),
+        map(payload => payload.data.map(source => source.source))
       )
       .subscribe({
         next: sources => this.setState({ sources: ['ALL', ...sources] })

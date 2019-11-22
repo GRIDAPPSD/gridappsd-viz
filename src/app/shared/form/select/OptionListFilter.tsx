@@ -41,7 +41,7 @@ export class OptionListFilter extends React.Component<Props, State> {
 
   componentDidUpdate(prevProps: Props) {
     if (this.filterInput && this.state.filterValue === '')
-      setTimeout(() => this.filterInput.focus(), 250);
+      setTimeout(() => this.filterInput?.focus(), 250);
     if (this.props.shouldReset && this.props.shouldReset !== prevProps.shouldReset && this.state.filterValue !== '')
       this.clearFilter();
   }

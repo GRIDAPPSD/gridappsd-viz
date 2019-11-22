@@ -573,10 +573,8 @@ export class TopologyRenderer extends React.Component<Props, State> {
   }
 
   hideTooltip() {
-    if (this._tooltip) {
-      this._tooltip.hide();
-      this._tooltip = null;
-    }
+    this._tooltip?.hide();
+    this._tooltip = null;
   }
 
   reset() {

@@ -66,7 +66,7 @@ export class CapacitorMenu extends React.Component<Props, State> {
         show={this.state.show}
         top={this.props.top}
         left={this.props.left}>
-        <DialogContent styles={{ overflow: 'hidden' }}>
+        <DialogContent style={{ overflow: 'hidden' }}>
           <form className='capacitor-menu__form'>
             <Select
               label='Control mode'

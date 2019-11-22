@@ -87,8 +87,7 @@ export class TextArea extends React.Component<Props, State> {
         validationErrors
       });
       const isValid = validationErrors.length === 0;
-      if (this.props.onValidate)
-        this.props.onValidate(isValid, this.props.label);
+      this.props.onValidate?.(isValid, this.props.label);
       if (isValid)
         this.props.onChange(value);
     }

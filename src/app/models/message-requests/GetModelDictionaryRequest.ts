@@ -1,4 +1,5 @@
 import { MessageRequest, RequestConfigurationType } from '@shared/MessageRequest';
+import { ModelDictionary } from '@shared/topology';
 
 export interface GetModelDictionaryRequestBody {
   configurationType: string;
@@ -30,4 +31,10 @@ export class GetModelDictionaryRequest implements MessageRequest {
     this._requestBody = value;
   }
 
+}
+
+export interface GetModelDictionaryResponsePayload {
+  data: {
+    feeders: ModelDictionary[];
+  };
 }
