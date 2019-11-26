@@ -13,9 +13,8 @@
     fill: #ffa500;
 }
 
-.topology-renderer__canvas__symbol.capacitor .topology-renderer__canvas__symbol__image {
-    background-image: url(./images/capacitor.dark.svg);
-    background-repeat: no-repeat;
+.topology-renderer__canvas__symbol.capacitor {
+    stroke: #ffa500;
 }
 
 .topology-renderer__canvas__symbol.regulator .topology-renderer__canvas__symbol__image {

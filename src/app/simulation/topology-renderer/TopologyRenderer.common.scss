@@ -42,3 +42,7 @@
 .topology-renderer__non-existing-searched-node {
     color: #ffa500;
 }
+
+.topology-renderer__canvas__symbol.capacitor {
+    fill: none;
+}

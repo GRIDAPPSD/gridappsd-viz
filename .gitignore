@@ -8,3 +8,5 @@ fncs-output.ts
 node_modules/*
 
 .DS_Store
+
+pull.sh
