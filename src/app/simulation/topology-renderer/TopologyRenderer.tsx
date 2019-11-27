@@ -6,7 +6,7 @@ import { select, event as currentEvent, Selection } from 'd3-selection';
 import { scaleLinear, ScaleLinear } from 'd3';
 
 import { MapTransformWatcherService } from '@shared/MapTransformWatcherService';
-import { Switch, Capacitor, Node, Edge, Regulator } from '@shared/topology';
+import { Switch, Capacitor, Node, Edge, Regulator, Transformer } from '@shared/topology';
 import { Tooltip } from '@shared/tooltip';
 import { OverlayService } from '@shared/overlay';
 import { SwitchMenu } from './views/switch-menu/SwitchMenu';
@@ -56,7 +56,7 @@ export class TopologyRenderer extends React.Component<Props, State> {
   private readonly _symbolDimensions = {
     capacitor: { width: 52, height: 20 },
     regulator: { width: 48 / 9, height: 103 / 9 },
-    transformer: { width: 31 / 9, height: 149 / 9 },
+    transformer: { width: 30, height: 25 },
     switch: { width: 10, height: 10 },
     swing_node: { width: this._symbolSize / 9, height: this._symbolSize / 9 }
   };
@@ -99,15 +99,6 @@ export class TopologyRenderer extends React.Component<Props, State> {
       this._toggleNodeSymbols(currentEvent.transform.k);
       this._transformWatcherService.notify();
     });
-
-    if (this._isModelLarge()) {
-      this._scalingFactorPerSymbolTable.capacitor = 7;
-    } else {
-      this._scalingFactorPerSymbolTable.capacitor = 5;
-    }
-
-    this._symbolDimensions.capacitor.width /= this._scalingFactorPerSymbolTable.capacitor;
-    this._symbolDimensions.capacitor.height /= this._scalingFactorPerSymbolTable.capacitor;
   }
 
   private _toggleNodeSymbols(currentTransformScaleDegree: number) {
@@ -134,20 +125,16 @@ export class TopologyRenderer extends React.Component<Props, State> {
   }
 
   private _showSymbols() {
-    this._container.select('.topology-renderer__canvas__symbol-container')
+    this._container.select('.topology-renderer__canvas__symbol-containers')
       .style('visibility', 'visible');
-    this._container.select('.topology-renderer__canvas__non-switch-node-container')
-      .style('visibility', 'hidden');
-    this._container.select('.topology-renderer__canvas__switch-node-container')
+    this._container.select('.topology-renderer__canvas__known-node-containers')
       .style('visibility', 'hidden');
   }
 
   private _hideSymbols() {
-    this._container.select('.topology-renderer__canvas__symbol-container')
+    this._container.select('.topology-renderer__canvas__symbol-containers')
       .style('visibility', 'hidden');
-    this._container.select('.topology-renderer__canvas__non-switch-node-container')
-      .style('visibility', 'visible');
-    this._container.select('.topology-renderer__canvas__switch-node-container')
+    this._container.select('.topology-renderer__canvas__known-node-containers')
       .style('visibility', 'visible');
   }
 
@@ -172,6 +159,8 @@ export class TopologyRenderer extends React.Component<Props, State> {
       extent(topology.nodes, (d: Node) => d.y1)
     );
 
+    this._resolveSymbolDimensions();
+
     if (topology.name.includes('9500') && !topology.inverted) {
       topology.inverted = true;
       this._invert9500Model(topology.nodes);
@@ -181,28 +170,112 @@ export class TopologyRenderer extends React.Component<Props, State> {
 
     this._container.selectAll('g')
       .remove();
+
     this._renderEdges(topology.edges);
-    if (!this._isModelLarge())
+
+    if (!this._isModelLarge()) {
+      const unknownNodeContainers = select(
+        this._createSvgElement(
+          'g',
+          {
+            class: 'topology-renderer__canvas__unknown-node-containers',
+            style: 'visibility: visible'
+          }
+        )
+      );
       this._renderNonSwitchNodes(
+        unknownNodeContainers,
+        'unknown-node-container',
         categories.unknownNodes,
-        'topology-renderer__canvas__unknown-node-container',
         nodeRadius
       );
+
+      this._container.node()
+        .appendChild(unknownNodeContainers.node());
+    }
+
+    const nodeContainers = select(
+      this._createSvgElement(
+        'g',
+        {
+          class: 'topology-renderer__canvas__known-node-containers',
+          style: 'visibility: visible'
+        }
+      )
+    );
     this._renderNonSwitchNodes(
-      categories.nonSwitchNodes,
-      'topology-renderer__canvas__non-switch-node-container',
+      nodeContainers,
+      'remaining-non-switch-node-container',
+      categories.remainingNonSwitchNodes,
       nodeRadius
     );
-    this._renderSwitchNodes(categories.switchNodes as Switch[], nodeRadius);
-    this._renderSymbolsForNodesWithKnownTypes(
-      nodeNameToEdgeMap,
-      categories.nonSwitchNodes,
-      categories.switchNodes as Switch[]
+    this._renderNonSwitchNodes(
+      nodeContainers,
+      'transformer-node-container',
+      categories.transformers,
+      nodeRadius
     );
+    this._renderNonSwitchNodes(
+      nodeContainers,
+      'capacitor-node-container',
+      categories.capacitors,
+      nodeRadius
+    );
+    this._renderSwitchNodes(
+      nodeContainers,
+      categories.switches,
+      nodeRadius
+    );
+
+    const symbolContainers = select(
+      this._createSvgElement(
+        'g',
+        {
+          class: 'topology-renderer__canvas__symbol-containers',
+          style: 'visibility: hidden'
+        }
+      )
+    );
+    this._renderCapacitorSymbols(
+      symbolContainers,
+      categories.capacitors,
+      nodeNameToEdgeMap
+    );
+    this._renderTransformerSymbols(
+      symbolContainers,
+      categories.transformers,
+      nodeNameToEdgeMap
+    );
+    this._renderRemainingNonSwitchSymbols(
+      symbolContainers,
+      categories.remainingNonSwitchNodes,
+      nodeNameToEdgeMap
+    );
+    this._renderSwitchSymbols(symbolContainers, categories.switches);
+
+    this._container.node()
+      .appendChild(nodeContainers.node());
+    this._container.node()
+      .appendChild(symbolContainers.node());
   }
 
   private _isModelLarge() {
     return this.props.topology.nodes.length >= 1000;
+  }
+
+  private _resolveSymbolDimensions() {
+    if (this._isModelLarge()) {
+      this._scalingFactorPerSymbolTable.capacitor = 7;
+      this._scalingFactorPerSymbolTable.transformer = 7;
+    } else {
+      this._scalingFactorPerSymbolTable.capacitor = 3.5;
+      this._scalingFactorPerSymbolTable.transformer = 3.5;
+    }
+
+    this._symbolDimensions.capacitor.width /= this._scalingFactorPerSymbolTable.capacitor;
+    this._symbolDimensions.capacitor.height /= this._scalingFactorPerSymbolTable.capacitor;
+    this._symbolDimensions.transformer.width /= this._scalingFactorPerSymbolTable.transformer;
+    this._symbolDimensions.transformer.height /= this._scalingFactorPerSymbolTable.transformer;
   }
 
   private _invert9500Model(nodes: Node[]) {
@@ -212,32 +285,42 @@ export class TopologyRenderer extends React.Component<Props, State> {
       if ('x2' in node)
         (node as any).y2 = minYCoordinate + (maxYCoordinate - (node as any).y2);
     }
-
   }
 
   private _categorizeNodes(nodes: Node[]) {
-    const categories: { nonSwitchNodes: Node[]; switchNodes: Node[]; unknownNodes: Node[] } = {
-      nonSwitchNodes: [],
-      switchNodes: [],
-      unknownNodes: []
+    const categories = {
+      remainingNonSwitchNodes: [] as Node[],
+      switches: [] as Switch[],
+      capacitors: [] as Capacitor[],
+      transformers: [] as Transformer[],
+      unknownNodes: [] as Node[]
     };
 
     for (const node of nodes) {
       node.screenX1 = this._xScale(node.x1);
       node.screenY1 = this._yScale(node.y1);
 
-      if (node.type === 'switch') {
-        (node as Switch).screenX2 = this._xScale((node as Switch).x2);
-        (node as Switch).screenY2 = this._yScale((node as Switch).y2);
-        (node as Switch).dx = (node as Switch).screenX2 - node.screenX1;
-        (node as Switch).dy = (node as Switch).screenY2 - node.screenY1;
+      switch (node.type) {
+        case 'switch':
+          (node as Switch).screenX2 = this._xScale((node as Switch).x2);
+          (node as Switch).screenY2 = this._yScale((node as Switch).y2);
+          (node as Switch).dx = (node as Switch).screenX2 - node.screenX1;
+          (node as Switch).dy = (node as Switch).screenY2 - node.screenY1;
+          categories.switches.push(node as Switch);
+          break;
+        case 'capacitor':
+          categories.capacitors.push(node as Capacitor);
+          break;
+        case 'transformer':
+          categories.transformers.push(node as Transformer);
+          break;
+        case 'unknown':
+          categories.unknownNodes.push(node);
+          break;
+        default:
+          categories.remainingNonSwitchNodes.push(node);
+          break;
       }
-      if (node.type === 'unknown')
-        categories.unknownNodes.push(node);
-      else if (node.type === 'switch')
-        categories.switchNodes.push(node);
-      else
-        categories.nonSwitchNodes.push(node);
     }
     return categories;
   }
@@ -268,26 +351,32 @@ export class TopologyRenderer extends React.Component<Props, State> {
     return element;
   }
 
-  private _renderNonSwitchNodes(nonSwitchNodes: Node[], containerClassName: string, nodeRadius: number) {
-    const nodeContainer = select(this._createSvgElement('g', { class: containerClassName }));
-    nodeContainer.selectAll('circle')
+  private _renderNonSwitchNodes(
+    container: Selection<SVGElement, any, SVGElement, any>,
+    groupId: string,
+    nonSwitchNodes: Node[],
+    nodeRadius: number
+  ) {
+    container.append('g')
+      .attr('class', groupId)
+      .selectAll('circle')
       .data(nonSwitchNodes)
       .enter()
       .append('circle')
-      .attr('class', node => `topology-renderer__canvas__node ${node.type} _${node.name}_`)
+      .attr('class', `topology-renderer__canvas__node ${nonSwitchNodes[0].type}`)
       .attr('cx', node => node.screenX1)
       .attr('cy', node => node.screenY1)
       .attr('r', nodeRadius);
-    this._container.node()
-      .appendChild(nodeContainer.node());
   }
 
-  private _renderSwitchNodes(switchNodes: Switch[], nodeRadius: number) {
-    const nodeContainer = select(
-      this._createSvgElement('g', { class: 'topology-renderer__canvas__switch-node-container' })
-    );
-
-    const switches = nodeContainer.selectAll('.topology-renderer__canvas__switch-node')
+  private _renderSwitchNodes(
+    container: Selection<SVGElement, any, SVGElement, any>,
+    switchNodes: Switch[],
+    nodeRadius: number
+  ) {
+    const switches = container.append('g')
+      .attr('class', 'switch-node-container')
+      .selectAll('.topology-renderer__canvas__switch-node')
       .data(switchNodes)
       .enter()
       .append('g')
@@ -307,46 +396,17 @@ export class TopologyRenderer extends React.Component<Props, State> {
       .attr('cy', node => (node.screenY1 + node.screenY2) / 2)
       .attr('r', nodeRadius)
       .attr('fill', '#000');
-
-    this._container.node()
-      .appendChild(nodeContainer.node());
   }
 
-  private _renderSymbolsForNodesWithKnownTypes(
-    nodeNameToEdgeMap: Map<string, Edge>,
-    nonSwitchNodes: Node[],
-    switchNodes: Switch[]
-  ) {
-    const symbolContainer = select(
-      this._createSvgElement(
-        'g',
-        {
-          class: 'topology-renderer__canvas__symbol-container',
-          style: 'visibility: hidden'
-        }
-      )
-    );
-    this._renderNonSwitchSymbols(symbolContainer, nonSwitchNodes, nodeNameToEdgeMap);
-    this._renderSwitchSymbols(symbolContainer, switchNodes);
-
-    this._container.node()
-      .appendChild(symbolContainer.node());
-  }
-
-  private _renderNonSwitchSymbols(
+  private _renderRemainingNonSwitchSymbols(
     container: Selection<SVGElement, any, SVGElement, any>,
-    nonSwitchNodes: Node[],
+    remainingNonSwitchNodes: Node[],
     nodeNameToEdgeMap: Map<string, Edge>
   ) {
-
-    this._renderCapacitorSymbols(
-      container,
-      nonSwitchNodes.filter(node => node.type === 'capacitor') as Capacitor[],
-      nodeNameToEdgeMap
-    );
-
-    container.selectAll('foreignObject.topology-renderer__canvas__symbol')
-      .data(nonSwitchNodes.filter(node => node.type !== 'capacitor'))
+    container.append('g')
+      .attr('class', 'remaining-non-switch-symbol-container')
+      .selectAll('foreignObject.topology-renderer__canvas__symbol')
+      .data(remainingNonSwitchNodes)
       .enter()
       .append('foreignObject')
       .attr('class', node => `topology-renderer__canvas__symbol${node.type ? ' ' + node.type : ''}`)
@@ -370,7 +430,9 @@ export class TopologyRenderer extends React.Component<Props, State> {
     const _10PercentWidth = width * 0.10;
     const _50PercentHeight = height * 0.5;
 
-    container.selectAll('.topology-renderer__canvas__symbol.capacitor')
+    container.append('g')
+      .attr('class', 'capacitor-symbol-container')
+      .selectAll('.topology-renderer__canvas__symbol.capacitor')
       .data(capacitors)
       .enter()
       .append('g')
@@ -379,7 +441,7 @@ export class TopologyRenderer extends React.Component<Props, State> {
       .attr('class', 'topology-renderer__canvas__symbol capacitor')
       .append('path')
       .attr('class', 'topology-renderer__canvas__symbol capacitor')
-      .attr('stroke-width', this._isModelLarge() ? 0.3 : 0.4)
+      .attr('stroke-width', this._isModelLarge() ? 0.3 : 0.6)
       .attr('class', 'topology-renderer__canvas__symbol capacitor')
       .attr('d', node => {
         return `
@@ -395,58 +457,79 @@ export class TopologyRenderer extends React.Component<Props, State> {
   }
 
   private _calculateSymbolTransformOrigin(node: Node) {
-    const transformOriginStringTemplate = '${horizontal}px ${vertical}px';
-    const symbolDimensions = this._symbolDimensions[node.type];
-    const verticalOffset = node.type === 'capacitor' ? -symbolDimensions.height / 2 : 0;
-    return transformOriginStringTemplate.replace(
-      '${horizontal}',
-      `${node.screenX1 + (symbolDimensions ? symbolDimensions.width : this._symbolSize) / 2}`
-    ).replace(
-      '${vertical}',
-      `${node.screenY1 + verticalOffset + (symbolDimensions ? symbolDimensions.height : this._symbolSize) / 2}`
-    );
+    const width = this._symbolDimensions[node.type]?.width || this._symbolSize;
+    const height = this._symbolDimensions[node.type]?.height || this._symbolSize;
+    const verticalOffset = node.type === 'capacitor' ? -height / 2 : 0;
+    return `${node.screenX1 + (width / 2)}px ${node.screenY1 + verticalOffset + (height / 2)}px`;
   }
 
-  private _calculateSymbolTransform(node: any, nodeNameToEdgeMap: Map<string, Edge>) {
+  private _calculateSymbolTransform(node: Node, nodeNameToEdgeMap: Map<string, Edge>) {
     const edge = nodeNameToEdgeMap.get((node as any).from) || nodeNameToEdgeMap.get((node as any).to);
-
-    if (!edge)
-      return 'rotate(0) translate(0, 0)';
-    const transformStringTemplate = 'translate(${horizontal}px, ${vertical}px) rotate(${angle}deg)';
-    const symbolDimensions = this._symbolDimensions[node.type];
-
-    return transformStringTemplate.replace(
-      '${horizontal}',
-      `${-(symbolDimensions ? symbolDimensions.width : this._symbolSize) / 2}`
-    ).replace(
-      '${vertical}',
-      `${-(symbolDimensions ? symbolDimensions.height : this._symbolSize) / 2}`
-    ).replace(
-      '${angle}',
-      `${this._calculateAngleBetweenLineAndXAxis(edge.from.x1, edge.from.y1, edge.to.x1, edge.to.y1)}`
-    );
+    if (!edge && node.type === 'capacitor') {
+      return 'translate(0, 0) rotate(0)';
+    }
+    const width = this._symbolDimensions[node.type]?.width || this._symbolSize;
+    const height = this._symbolDimensions[node.type]?.height || this._symbolSize;
+    const angle = !edge ? 0 : this._calculateAngleBetweenLineAndXAxis(edge.from.x1, edge.from.y1, edge.to.x1, edge.to.y1);
+    return `translate(-${width / 2}px, -${height / 2}px) rotate(${angle}deg)`;
   }
 
-  private _calculateAngleBetweenLineAndXAxis(x1: number, y1: number, x2: number, y2: number): number {
-    const horizontal = Math.abs(x2 - x1);
-    const vertical = Math.abs(y2 - y1);
-    const angle = Math.atan(vertical / horizontal) * 180 / Math.PI;
-    // First quadrant or third quadrant
-    if (x2 > x1 && y2 < y1 || x2 < x1 && y2 > y1)
-      return -angle;
-    // Second quadrant or fourth quadrant
-    if (x2 < x1 && y2 < y1 || x2 > x1 && y2 > y1)
-      return angle;
-    // No rotation
-    if (y1 === y2)
-      return 0;
-    // Perpendicular to x axis
-    if (x1 === x2)
-      return 90;
-    return angle;
+  private _calculateAngleBetweenLineAndXAxis(x1: number, y1: number, x2: number, y2: number) {
+    const horizontal = x2 - x1;
+    const vertical = y2 - y1;
+    return Math.atan(vertical / horizontal) * 180 / Math.PI;
   }
 
-  private _renderSwitchSymbols(container: Selection<SVGElement, any, SVGElement, any>, switchNodes: Node[]) {
+  private _renderTransformerSymbols(
+    container: Selection<SVGElement, any, SVGElement, any>,
+    transformers: Transformer[],
+    nodeNameToEdgeMap: Map<string, Edge>
+  ) {
+    const { width, height } = this._symbolDimensions.transformer;
+    const arcRadius = width * 0.1;
+    const arcEndpoint = `0,${height * 0.25}`;
+    const halfOf45PercentWidth = width * 0.45 * 0.50;
+    const _12Point5PercentHeight = height * 0.125;
+    const _80PercentWidth = width * 0.8;
+
+    container.append('g')
+      .attr('class', 'transformer-symbol-container')
+      .selectAll('.topology-renderer__canvas__symbol.transformer')
+      .data(transformers)
+      .enter()
+      .append('g')
+      .attr('class', 'topology-renderer__canvas__symbol transformer')
+      .style('transform-origin', transformer => this._calculateSymbolTransformOrigin(transformer))
+      .style('transform', transformer => this._calculateSymbolTransform(transformer, nodeNameToEdgeMap))
+      .append('path')
+      .attr('stroke-width', this._isModelLarge() ? 0.3 : 0.6)
+      .attr('class', 'topology-renderer__canvas__symbol transformer')
+      .attr('d', transformer => {
+        return `
+          M${transformer.screenX1},${transformer.screenY1}
+          h${halfOf45PercentWidth}
+          v${_12Point5PercentHeight}
+          a${arcRadius} ${arcRadius} 0 1 1 ${arcEndpoint}
+          a${arcRadius} ${arcRadius} 0 1 1 ${arcEndpoint}
+          a${arcRadius} ${arcRadius} 0 1 1 ${arcEndpoint}
+          v${_12Point5PercentHeight}
+          h${-halfOf45PercentWidth}
+
+          m${_80PercentWidth},${-height}
+          h${-halfOf45PercentWidth}
+          v${_12Point5PercentHeight}
+          a${arcRadius} ${arcRadius} 0 1 0 ${arcEndpoint}
+          a${arcRadius} ${arcRadius} 0 1 0 ${arcEndpoint}
+          a${arcRadius} ${arcRadius} 0 1 0 ${arcEndpoint}
+          v${_12Point5PercentHeight}
+          h${halfOf45PercentWidth}`;
+      });
+  }
+
+  private _renderSwitchSymbols(
+    container: Selection<SVGElement, any, SVGElement, any>,
+    switchNodes: Switch[]
+  ) {
     if (this._isModelLarge()) {
       this._symbolDimensions.switch.width = 3;
       this._symbolDimensions.switch.height = 3;
@@ -454,11 +537,13 @@ export class TopologyRenderer extends React.Component<Props, State> {
     const width = this._symbolDimensions.switch.width;
     const height = this._symbolDimensions.switch.height;
 
-    const switches = container.selectAll('.topology-renderer__canvas__switch-symbol')
-      .data(switchNodes as Switch[])
+    const switches = container.append('g')
+      .attr('class', 'switch-symbol-container')
+      .selectAll('.topology-renderer__canvas__symbol.switch')
+      .data(switchNodes)
       .enter()
       .append('g')
-      .attr('class', node => `topology-renderer__canvas__switch-symbol  _${node.name}_`)
+      .attr('class', 'topology-renderer__canvas__symbol switch')
       .attr('transform', node => `translate(${node.screenX1},${node.screenY1})`);
 
     switches.append('line')
@@ -471,7 +556,7 @@ export class TopologyRenderer extends React.Component<Props, State> {
       .attr('stroke', '#000');
 
     switches.append('rect')
-      .attr('class', node => `topology-renderer__canvas__symbol switch _${node.name}_`)
+      .attr('class', 'topology-renderer__canvas__symbol switch')
       .attr('x', node => (node.dx - width) / 2)
       .attr('y', node => (node.dy - height) / 2)
       .attr('width', width)

@@ -9,7 +9,8 @@
     stroke: #000;
 }
 
-.topology-renderer__canvas__symbol.capacitor {
+.topology-renderer__canvas__symbol.capacitor,
+.topology-renderer__canvas__symbol.transformer {
     stroke: #000;
 }
 
@@ -20,10 +21,5 @@
 
 .topology-renderer__canvas__symbol.substation .topology-renderer__canvas__symbol__image {
     background-image: url(./images/substation.light.svg);
-    background-repeat: no-repeat;
-}
-
-.topology-renderer__canvas__symbol.transformer .topology-renderer__canvas__symbol__image {
-    background-image: url(./images/transformer.light.svg);
     background-repeat: no-repeat;
 }
