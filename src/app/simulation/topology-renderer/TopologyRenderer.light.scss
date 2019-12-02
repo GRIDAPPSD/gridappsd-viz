@@ -5,18 +5,19 @@
     background-color: rgb(233, 204, 204);
 }
 
+.topology-renderer__canvas__arrow {
+    stroke: #000;
+    fill: #000;
+}
+
 .topology-renderer__canvas__edge {
     stroke: #000;
 }
 
 .topology-renderer__canvas__symbol.capacitor,
-.topology-renderer__canvas__symbol.transformer {
+.topology-renderer__canvas__symbol.transformer,
+.topology-renderer__canvas__symbol.regulator {
     stroke: #000;
-}
-
-.topology-renderer__canvas__symbol.regulator .topology-renderer__canvas__symbol__image {
-    background-image: url(./images/regulator.light.svg);
-    background-repeat: no-repeat;
 }
 
 .topology-renderer__canvas__symbol.substation .topology-renderer__canvas__symbol__image {

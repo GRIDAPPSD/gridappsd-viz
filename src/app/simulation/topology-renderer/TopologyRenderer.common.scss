@@ -44,6 +44,7 @@
 }
 
 .topology-renderer__canvas__symbol.capacitor,
-.topology-renderer__canvas__symbol.transformer {
-    fill: none;
+.topology-renderer__canvas__symbol.transformer,
+.topology-renderer__canvas__symbol.regulator {
+    fill: transparent;
 }
