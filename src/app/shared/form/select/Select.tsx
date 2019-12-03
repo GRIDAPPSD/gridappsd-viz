@@ -186,7 +186,7 @@ export class Select<T, E extends boolean = false> extends React.Component<Props<
         <button
           ref={ref => this.optionListOpener = ref}
           type='button'
-          className='select__option-list__opener'
+          className={`select__option-list__opener${this.state.opened ? ' opened' : ''}`}
           title={this.state.currentLabel}
           onClick={this.onOpen}>
           <span className='text'>{this.state.currentLabel}</span>

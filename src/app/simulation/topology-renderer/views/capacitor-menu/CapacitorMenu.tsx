@@ -103,7 +103,8 @@ export class CapacitorMenu extends React.Component<Props, State> {
           <Select
             label='Action'
             selectionOptionBuilder={
-              new SelectionOptionBuilder([true, false], open => open ? 'Open' : 'Close')}
+              new SelectionOptionBuilder([true, false], open => open ? 'Open' : 'Close')
+            }
             selectedOptionFinder={action => action === this.capacitor.open}
             onChange={selectedAction => this.capacitor.open = selectedAction} />
         );
