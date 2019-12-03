@@ -475,25 +475,41 @@ export class TopologyRenderer extends React.Component<Props, State> {
     nodeNameToEdgeMap: Map<string, Edge>
   ) {
     const { width, height } = this._symbolDimensions.substation;
+    const _50PercentHeight = height / 2;
 
-    container.append('g')
-      .attr('class', 'substation-symbol-container')
-      .selectAll('.topology-renderer__canvas__symbol.substation')
-      .data(substations)
+    this._renderNonSwitchSymbols(
+      container,
+      substations,
+      nodeNameToEdgeMap,
+      `M\${startingPoint}
+       a${_50PercentHeight} ${_50PercentHeight} 0 1 1 ${width} 0
+       a${_50PercentHeight} ${_50PercentHeight} 0 1 1 -${width} 0`
+    )
+      .attr('stroke-width', this._isModelLarge() ? 0.2 : 0.4);
+  }
+
+  private _renderNonSwitchSymbols(
+    container: Selection<SVGElement, any, SVGElement, any>,
+    nodes: Node[],
+    nodeNameToEdgeMap: Map<string, Edge>,
+    shapeTemplate: string
+  ) {
+    if (!shapeTemplate.includes('${startingPoint}'))
+      throw new Error(`Symbol's path template must contain \${startingPoint} place holder`);
+
+    const nodeType = nodes[0]?.type;
+    return container.append('g')
+      .attr('class', `${nodeType}-symbol-container`)
+      .selectAll(`.topology-renderer__canvas__symbol.${nodeType}`)
+      .data(nodes)
       .enter()
       .append('g')
-      .attr('class', 'topology-renderer__canvas__symbol substation')
+      .attr('class', `topology-renderer__canvas__symbol ${nodeType}`)
       .style('transform-origin', this._calculateSymbolTransformOrigin)
-      .style('transform', substation => this._calculateSymbolTransform(substation, nodeNameToEdgeMap))
+      .style('transform', node => this._calculateSymbolTransform(node, nodeNameToEdgeMap))
       .append('path')
-      .attr('stroke-width', this._isModelLarge() ? 0.2 : 0.4)
-      .attr('class', 'topology-renderer__canvas__symbol substation')
-      .attr('d', substation => {
-        return `
-          M${substation.screenX1},${substation.screenY1}
-          a${height / 2} ${height / 2} 0 1 1 ${width} 0
-          a${height / 2} ${height / 2} 0 1 1 -${width} 0`;
-      });
+      .attr('class', `topology-renderer__canvas__symbol ${nodeType}`)
+      .attr('d', node => shapeTemplate.replace('${startingPoint}', `${node.screenX1},${node.screenY1}`));
   }
 
   private _renderRegulatorSymbols(
@@ -502,33 +518,31 @@ export class TopologyRenderer extends React.Component<Props, State> {
     nodeNameToEdgeMap: Map<string, Edge>
   ) {
     const { width, height } = this._symbolDimensions.regulator;
+    const _25PercentWidth = width * 0.25;
+    const _30PercentWidth = width * 0.30;
+    const _50PercentWidth = width / 2;
+    const _50PercentHeight = height / 2;
+    const _170PercentHeight = height * 1.70; // Not sure why, but this number makes this symbol looks good
 
-    container.append('g')
-      .attr('class', 'regulator-symbol-container')
-      .selectAll('.topology-renderer__canvas__symbol.regulator')
-      .data(regulators)
-      .enter()
-      .append('g')
-      .attr('class', 'topology-renderer__canvas__symbol regulator')
-      .style('transform-origin', this._calculateSymbolTransformOrigin)
-      .style('transform', regulator => this._calculateSymbolTransform(regulator, nodeNameToEdgeMap))
-      .append('path')
-      .attr('stroke-width', this._isModelLarge() ? 0.2 : 0.4)
-      .attr('class', 'topology-renderer__canvas__symbol regulator')
+    this._renderNonSwitchSymbols(
+      container,
+      regulators,
+      nodeNameToEdgeMap,
+      `
+        M\${startingPoint}
+        h${_25PercentWidth}
+        a${_50PercentHeight} ${_50PercentHeight} 0 1 1 ${_30PercentWidth} 0
+        a${_50PercentHeight} ${_50PercentHeight} 0 1 1 -${_30PercentWidth} 0
+        m${_50PercentWidth},0
+        a${_50PercentHeight} ${_50PercentHeight} 0 1 0 -${_30PercentWidth} 0
+        a${_50PercentHeight} ${_50PercentHeight} 0 1 0 ${_30PercentWidth} 0
+        h${_25PercentWidth}
+        m-${_50PercentWidth},-${_170PercentHeight}
+        l${_25PercentWidth},${2 * (_170PercentHeight)}
+      `
+    )
       .attr('marker-end', 'url(#arrow)')
-      .attr('d', regulator => {
-        return `
-          M${regulator.screenX1},${regulator.screenY1}
-          h${width * 0.25}
-          a${height / 2} ${height / 2} 0 1 1 ${width * 0.30} 0
-          a${height / 2} ${height / 2} 0 1 1 -${width * 0.30} 0
-          m${width * 0.50},0
-          a${height / 2} ${height / 2} 0 1 0 -${width * 0.30} 0
-          a${height / 2} ${height / 2} 0 1 0 ${width * 0.30} 0
-          h${width * 0.25}
-          m-${width * 0.5},-${height + height * 0.7}
-          l${width * 0.25},${2 * (height + height * 0.7)}`;
-      });
+      .attr('stroke-width', this._isModelLarge() ? 0.2 : 0.4);
   }
 
   private _renderCapacitorSymbols(
@@ -541,30 +555,22 @@ export class TopologyRenderer extends React.Component<Props, State> {
     const _10PercentWidth = width * 0.10;
     const _50PercentHeight = height * 0.5;
 
-    container.append('g')
-      .attr('class', 'capacitor-symbol-container')
-      .selectAll('.topology-renderer__canvas__symbol.capacitor')
-      .data(capacitors)
-      .enter()
-      .append('g')
-      .style('transform-origin', node => this._calculateSymbolTransformOrigin(node))
-      .style('transform', node => this._calculateSymbolTransform(node, nodeNameToEdgeMap))
-      .attr('class', 'topology-renderer__canvas__symbol capacitor')
-      .append('path')
-      .attr('class', 'topology-renderer__canvas__symbol capacitor')
-      .attr('stroke-width', this._isModelLarge() ? 0.3 : 0.6)
-      .attr('class', 'topology-renderer__canvas__symbol capacitor')
-      .attr('d', node => {
-        return `
-          M${node.screenX1},${node.screenY1}
-          h${_45PercentWidth}
-          m0,${-_50PercentHeight}
-          v${height}
-          m${_10PercentWidth},0
-          v${-height}
-          m0,${_50PercentHeight}
-          h${_45PercentWidth}`;
-      });
+    this._renderNonSwitchSymbols(
+      container,
+      capacitors,
+      nodeNameToEdgeMap,
+      `
+        M\${startingPoint}
+        h${_45PercentWidth}
+        m0,${-_50PercentHeight}
+        v${height}
+        m${_10PercentWidth},0
+        v${-height}
+        m0,${_50PercentHeight}
+        h${_45PercentWidth}
+      `
+    )
+      .attr('stroke-width', this._isModelLarge() ? 0.3 : 0.6);
   }
 
   private _renderTransformerSymbols(
@@ -579,38 +585,31 @@ export class TopologyRenderer extends React.Component<Props, State> {
     const _12Point5PercentHeight = height * 0.125;
     const _80PercentWidth = width * 0.8;
 
-    container.append('g')
-      .attr('class', 'transformer-symbol-container')
-      .selectAll('.topology-renderer__canvas__symbol.transformer')
-      .data(transformers)
-      .enter()
-      .append('g')
-      .attr('class', 'topology-renderer__canvas__symbol transformer')
-      .style('transform-origin', transformer => this._calculateSymbolTransformOrigin(transformer))
-      .style('transform', transformer => this._calculateSymbolTransform(transformer, nodeNameToEdgeMap))
-      .append('path')
-      .attr('stroke-width', this._isModelLarge() ? 0.3 : 0.6)
-      .attr('class', 'topology-renderer__canvas__symbol transformer')
-      .attr('d', transformer => {
-        return `
-          M${transformer.screenX1},${transformer.screenY1}
-          h${halfOf45PercentWidth}
-          v${_12Point5PercentHeight}
-          a${arcRadius} ${arcRadius} 0 1 1 ${arcEndpoint}
-          a${arcRadius} ${arcRadius} 0 1 1 ${arcEndpoint}
-          a${arcRadius} ${arcRadius} 0 1 1 ${arcEndpoint}
-          v${_12Point5PercentHeight}
-          h${-halfOf45PercentWidth}
+    this._renderNonSwitchSymbols(
+      container,
+      transformers,
+      nodeNameToEdgeMap,
+      `
+        M\${startingPoint}
+        h${halfOf45PercentWidth}
+        v${_12Point5PercentHeight}
+        a${arcRadius} ${arcRadius} 0 1 1 ${arcEndpoint}
+        a${arcRadius} ${arcRadius} 0 1 1 ${arcEndpoint}
+        a${arcRadius} ${arcRadius} 0 1 1 ${arcEndpoint}
+        v${_12Point5PercentHeight}
+        h${-halfOf45PercentWidth}
 
-          m${_80PercentWidth},${-height}
-          h${-halfOf45PercentWidth}
-          v${_12Point5PercentHeight}
-          a${arcRadius} ${arcRadius} 0 1 0 ${arcEndpoint}
-          a${arcRadius} ${arcRadius} 0 1 0 ${arcEndpoint}
-          a${arcRadius} ${arcRadius} 0 1 0 ${arcEndpoint}
-          v${_12Point5PercentHeight}
-          h${halfOf45PercentWidth}`;
-      });
+        m${_80PercentWidth},${-height}
+        h${-halfOf45PercentWidth}
+        v${_12Point5PercentHeight}
+        a${arcRadius} ${arcRadius} 0 1 0 ${arcEndpoint}
+        a${arcRadius} ${arcRadius} 0 1 0 ${arcEndpoint}
+        a${arcRadius} ${arcRadius} 0 1 0 ${arcEndpoint}
+        v${_12Point5PercentHeight}
+        h${halfOf45PercentWidth}
+      `
+    )
+      .attr('stroke-width', this._isModelLarge() ? 0.3 : 0.6);
   }
 
   private _renderSwitchSymbols(
