@@ -7,6 +7,7 @@ type NodeType = (
   | 'capacitor'
   | 'regulator'
   | 'unknown'
+  | 'substation'
 );
 
 export interface Node {

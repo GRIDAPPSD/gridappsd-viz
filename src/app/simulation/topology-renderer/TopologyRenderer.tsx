@@ -53,14 +53,14 @@ export class TopologyRenderer extends React.Component<Props, State> {
     regulator: 1,
     transformer: 1,
     switch: 1,
-    swing_node: 1
+    substation: 1
   };
   private readonly _symbolDimensions = {
     capacitor: { width: 52, height: 20 },
     regulator: { width: 45, height: 5 },
     transformer: { width: 30, height: 25 },
     switch: { width: 10, height: 10 },
-    swing_node: { width: symbolSize / 9, height: symbolSize / 9 }
+    substation: { width: 15, height: 15 }
   };
   private readonly _xScale: ScaleLinear<number, number> = scaleLinear();
   private readonly _yScale: ScaleLinear<number, number> = scaleLinear();
@@ -213,6 +213,12 @@ export class TopologyRenderer extends React.Component<Props, State> {
     );
     this._renderNonSwitchNodes(
       nodeContainers,
+      'substation-node-container',
+      categories.substations,
+      nodeRadius
+    );
+    this._renderNonSwitchNodes(
+      nodeContainers,
       'transformer-node-container',
       categories.transformers,
       nodeRadius
@@ -242,6 +248,11 @@ export class TopologyRenderer extends React.Component<Props, State> {
       categories.regulators,
       nodeNameToEdgeMap
     );
+    this._renderSubstationSymbols(
+      symbolContainers,
+      categories.substations,
+      nodeNameToEdgeMap
+    );
     this._renderCapacitorSymbols(
       symbolContainers,
       categories.capacitors,
@@ -269,10 +280,12 @@ export class TopologyRenderer extends React.Component<Props, State> {
       this._scalingFactorPerSymbolTable.capacitor = 7;
       this._scalingFactorPerSymbolTable.transformer = 7;
       this._scalingFactorPerSymbolTable.regulator = 7;
+      this._scalingFactorPerSymbolTable.substation = 7;
     } else {
       this._scalingFactorPerSymbolTable.capacitor = 3.5;
       this._scalingFactorPerSymbolTable.transformer = 3.5;
       this._scalingFactorPerSymbolTable.regulator = 3.5;
+      this._scalingFactorPerSymbolTable.substation = 3.5;
     }
 
     for (const [type, scalingFactor] of Object.entries(this._scalingFactorPerSymbolTable)) {
@@ -297,7 +310,8 @@ export class TopologyRenderer extends React.Component<Props, State> {
       capacitors: [] as Capacitor[],
       transformers: [] as Transformer[],
       unknownNodes: [] as Node[],
-      regulators: [] as Regulator[]
+      regulators: [] as Regulator[],
+      substations: [] as Node[]
     };
 
     for (const node of nodes) {
@@ -323,6 +337,9 @@ export class TopologyRenderer extends React.Component<Props, State> {
           break;
         case 'unknown':
           categories.unknownNodes.push(node);
+          break;
+        case 'substation':
+          categories.substations.push(node);
           break;
         default:
           categories.remainingNonSwitchNodes.push(node);
@@ -436,16 +453,47 @@ export class TopologyRenderer extends React.Component<Props, State> {
     const width = this._symbolDimensions[node.type]?.width || symbolSize;
     const height = this._symbolDimensions[node.type]?.height || symbolSize;
     const angle = !edge ? 0 : this._calculateAngleBetweenLineAndXAxis(edge.from.x1, edge.from.y1, edge.to.x1, edge.to.y1);
-    if (node.type === 'regulator' || node.type === 'capacitor') {
-      return `translate(-${width / 2}px, 0px) rotate(${angle}deg)`;
+    switch (node.type) {
+      case 'regulator':
+      case 'capacitor':
+      case 'substation':
+        return `translate(-${width / 2}px, 0px) rotate(${angle}deg)`;
+      default:
+        return `translate(-${width / 2}px, -${height / 2}px) rotate(${angle}deg)`;
     }
-    return `translate(-${width / 2}px, -${height / 2}px) rotate(${angle}deg)`;
   }
 
   private _calculateAngleBetweenLineAndXAxis(x1: number, y1: number, x2: number, y2: number) {
     const horizontal = x2 - x1;
     const vertical = y2 - y1;
     return (Math.atan(vertical / horizontal) * 180 / Math.PI) || 0;
+  }
+
+  private _renderSubstationSymbols(
+    container: Selection<SVGElement, any, SVGElement, any>,
+    substations: Node[],
+    nodeNameToEdgeMap: Map<string, Edge>
+  ) {
+    const { width, height } = this._symbolDimensions.substation;
+
+    container.append('g')
+      .attr('class', 'substation-symbol-container')
+      .selectAll('.topology-renderer__canvas__symbol.substation')
+      .data(substations)
+      .enter()
+      .append('g')
+      .attr('class', 'topology-renderer__canvas__symbol substation')
+      .style('transform-origin', this._calculateSymbolTransformOrigin)
+      .style('transform', substation => this._calculateSymbolTransform(substation, nodeNameToEdgeMap))
+      .append('path')
+      .attr('stroke-width', this._isModelLarge() ? 0.2 : 0.4)
+      .attr('class', 'topology-renderer__canvas__symbol substation')
+      .attr('d', substation => {
+        return `
+          M${substation.screenX1},${substation.screenY1}
+          a${height / 2} ${height / 2} 0 1 1 ${width} 0
+          a${height / 2} ${height / 2} 0 1 1 -${width} 0`;
+      });
   }
 
   private _renderRegulatorSymbols(
