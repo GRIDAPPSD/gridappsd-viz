@@ -55,7 +55,7 @@
         outline: none;
     }
 
-    &:focus i {
+    &.opened i {
         transform: rotate(180deg);
         font-weight: bold;
     }
