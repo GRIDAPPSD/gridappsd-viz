@@ -5,6 +5,12 @@
     background-color: rgb(233, 204, 204);
 }
 
+
+.topology-renderer__canvas__arrow {
+    stroke: #ffa500;
+    fill: #ffa500;
+}
+
 .topology-renderer__canvas__edge {
     stroke: #ffa500;
 }
@@ -13,22 +19,9 @@
     fill: #ffa500;
 }
 
-.topology-renderer__canvas__symbol.capacitor .topology-renderer__canvas__symbol__image {
-    background-image: url(./images/capacitor.dark.svg);
-    background-repeat: no-repeat;
-}
-
-.topology-renderer__canvas__symbol.regulator .topology-renderer__canvas__symbol__image {
-    background-image: url(./images/regulator.dark.svg);
-    background-repeat: no-repeat;
-}
-
-.topology-renderer__canvas__symbol.substation .topology-renderer__canvas__symbol__image {
-    background-image: url(./images/substation.dark.svg);
-    background-repeat: no-repeat;
-}
-
-.topology-renderer__canvas__symbol.transformer .topology-renderer__canvas__symbol__image {
-    background-image: url(./images/transformer.dark.svg);
-    background-repeat: no-repeat;
+.topology-renderer__canvas__symbol.capacitor,
+.topology-renderer__canvas__symbol.transformer,
+.topology-renderer__canvas__symbol.regulator,
+.topology-renderer__canvas__symbol.substation {
+    stroke: #ffa500;
 }
