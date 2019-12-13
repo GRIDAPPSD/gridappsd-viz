@@ -106,22 +106,10 @@ export class MeasurementChart extends React.Component<Props, State> {
       .attr('transform', 'rotate(-35)');
   }
 
-  private _renderYAxis(updatedYAxisExtent: [number, number]) {
-    const currentExtent = this._yScale.domain();
-    let shouldUpdate = false;
-    if (updatedYAxisExtent[0] < currentExtent[0]) {
-      currentExtent[0] = updatedYAxisExtent[0];
-      shouldUpdate = true;
-    }
-    if (updatedYAxisExtent[1] > currentExtent[1]) {
-      currentExtent[1] = updatedYAxisExtent[1];
-      shouldUpdate = true;
-    }
-    if (shouldUpdate) {
-      this._yScale.domain(currentExtent);
-      this._yAxisGenerator.scale(this._yScale);
-      this._yAxis.call(this._yAxisGenerator);
-    }
+  private _renderYAxis(yAxisExtent: [number, number]) {
+    this._yScale.domain(yAxisExtent);
+    this._yAxisGenerator.scale(this._yScale);
+    this._yAxis.call(this._yAxisGenerator);
   }
 
   private _renderTimeSeriesLineCharts() {
