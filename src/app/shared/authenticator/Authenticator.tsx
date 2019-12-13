@@ -5,9 +5,6 @@ import { LoginScreen } from './views/login-screen/LoginScreen';
 import { AuthenticationStatusCode } from './models/AuthenticationStatusCode';
 import { AuthenticationResult } from './models/AuthenticationResult';
 
-import './Authentication.light.scss';
-import './Authentication.dark.scss';
-
 interface Props {
   authenticationResult: AuthenticationResult;
   tryLogin: (username: string, password: string) => void;
@@ -17,7 +14,7 @@ interface State {
   showFailedLoginNofitification: boolean;
 }
 
-export class Authentication extends React.Component<Props, State> {
+export class Authenticator extends React.Component<Props, State> {
 
   private _failedLoginNotificationBannerAnimation: any;
 

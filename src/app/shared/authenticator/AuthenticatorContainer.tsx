@@ -1,8 +1,8 @@
 import * as React from 'react';
 import { Subscription } from 'rxjs';
 
-import { Authentication } from './Authentication';
-import { AuthenticationService } from './services/AuthenticationService';
+import { Authenticator } from './Authenticator';
+import { AuthenticatorService } from './services/AuthenticatorService';
 import { AuthenticationResult } from './models/AuthenticationResult';
 import { AuthenticationStatusCode } from './models/AuthenticationStatusCode';
 
@@ -13,9 +13,9 @@ interface State {
   authenticationResult: AuthenticationResult;
 }
 
-export class AuthenticationContainer extends React.Component<Props, State> {
+export class AuthenticatorContainer extends React.Component<Props, State> {
 
-  private readonly _authenticationService = AuthenticationService.getInstance();
+  private readonly _authenticatorService = AuthenticatorService.getInstance();
 
   private _sessionSubscription: Subscription;
 
@@ -30,7 +30,7 @@ export class AuthenticationContainer extends React.Component<Props, State> {
   }
 
   private _login() {
-    if (this._authenticationService.isAuthenticated())
+    if (this._authenticatorService.isAuthenticated())
       return {
         statusCode: AuthenticationStatusCode.OK
       };
@@ -40,7 +40,7 @@ export class AuthenticationContainer extends React.Component<Props, State> {
   }
 
   componentDidMount() {
-    this._sessionSubscription = this._authenticationService.sessionEnded()
+    this._sessionSubscription = this._authenticatorService.sessionEnded()
       .subscribe({
         next: () => {
           this._logout();
@@ -62,16 +62,16 @@ export class AuthenticationContainer extends React.Component<Props, State> {
 
   render() {
     return (
-      <Authentication
+      <Authenticator
         authenticationResult={this.state.authenticationResult}
         tryLogin={this.tryLogin}>
         {this.props.children}
-      </Authentication>
+      </Authenticator>
     );
   }
 
   tryLogin(username: string, password: string) {
-    this._authenticationService.authenticate(username, password)
+    this._authenticatorService.authenticate(username, password)
       .subscribe({
         next: authenticationResult => {
           this.setState({
