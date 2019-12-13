@@ -9,6 +9,7 @@ import { PlotModelCreator } from './views/plot-model-creator/PlotModelCreator';
 import { ModelDictionaryComponent } from '@shared/topology';
 import { OverlayService } from '@shared/overlay';
 import { copyToClipboard } from '@shared/misc';
+import { Restricted } from '@shared/authenticator';
 
 import './SimulationControl.light.scss';
 import './SimulationControl.dark.scss';
@@ -73,34 +74,19 @@ export class SimulationControl extends React.Component<Props, State> {
             </Ripple>
           </div>
         }
-        {
-          this.state.showStartSimulationButton
-          &&
-          (
-            this.props.simulationStatus === SimulationStatus.STARTED || this.props.simulationStatus === SimulationStatus.RESUMED
-              ?
-              <>
-                <Tooltip position='bottom' content='Pause simulation'>
-                  <IconButton
-                    icon='pause'
-                    className='simulation-control__action'
-                    onClick={this.props.onPauseSimulation} />
-                </Tooltip>
-                <Tooltip position='bottom' content='Stop simulation'>
-                  <IconButton
-                    icon='stop'
-                    className='simulation-control__action'
-                    onClick={this.props.onStopSimulation} />
-                </Tooltip>
-              </>
-              : this.props.simulationStatus === SimulationStatus.PAUSED
+        <Restricted roles={['testmanager']}>
+          {
+            this.state.showStartSimulationButton
+            &&
+            (
+              this.props.simulationStatus === SimulationStatus.STARTED || this.props.simulationStatus === SimulationStatus.RESUMED
                 ?
                 <>
-                  <Tooltip position='bottom' content='Resume simulation'>
+                  <Tooltip position='bottom' content='Pause simulation'>
                     <IconButton
-                      icon='play_arrow'
-                      className='simulation-control__action resume'
-                      onClick={this.props.onResumeSimulation} />
+                      icon='pause'
+                      className='simulation-control__action'
+                      onClick={this.props.onPauseSimulation} />
                   </Tooltip>
                   <Tooltip position='bottom' content='Stop simulation'>
                     <IconButton
@@ -109,25 +95,42 @@ export class SimulationControl extends React.Component<Props, State> {
                       onClick={this.props.onStopSimulation} />
                   </Tooltip>
                 </>
-                :
-                <Tooltip position='bottom' content='Start simulation'>
-                  <IconButton
-                    icon='play_arrow'
-                    disabled={this.props.modelDictionaryComponentsWithConsolidatedPhases.length === 0}
-                    className='simulation-control__action start'
-                    onClick={this.props.onStartSimulation} />
-                </Tooltip>
-          )
-        }
-        <Tooltip
-          position='bottom'
-          content='Edit plots'>
-          <IconButton
-            icon='show_chart'
-            className='simulation-control__action add-component-to-plot'
-            disabled={this.props.modelDictionaryComponentsWithConsolidatedPhases.length === 0}
-            onClick={this.showPlotModelCreator} />
-        </Tooltip>
+                : this.props.simulationStatus === SimulationStatus.PAUSED
+                  ?
+                  <>
+                    <Tooltip position='bottom' content='Resume simulation'>
+                      <IconButton
+                        icon='play_arrow'
+                        className='simulation-control__action resume'
+                        onClick={this.props.onResumeSimulation} />
+                    </Tooltip>
+                    <Tooltip position='bottom' content='Stop simulation'>
+                      <IconButton
+                        icon='stop'
+                        className='simulation-control__action'
+                        onClick={this.props.onStopSimulation} />
+                    </Tooltip>
+                  </>
+                  :
+                  <Tooltip position='bottom' content='Start simulation'>
+                    <IconButton
+                      icon='play_arrow'
+                      disabled={this.props.modelDictionaryComponentsWithConsolidatedPhases.length === 0}
+                      className='simulation-control__action start'
+                      onClick={this.props.onStartSimulation} />
+                  </Tooltip>
+            )
+          }
+          <Tooltip
+            position='bottom'
+            content='Edit plots'>
+            <IconButton
+              icon='show_chart'
+              className='simulation-control__action add-component-to-plot'
+              disabled={this.props.modelDictionaryComponentsWithConsolidatedPhases.length === 0}
+              onClick={this.showPlotModelCreator} />
+          </Tooltip>
+        </Restricted>
       </div>
     );
   }

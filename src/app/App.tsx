@@ -19,7 +19,7 @@ import { EventSummary } from './simulation/event-summary/EventSummary';
 import { AvailableApplicationList } from './simulation/applications/AvailableApplicationList';
 import { VoltageViolationContainer } from './simulation/voltage-violation/VoltageViolationContainer';
 import { NavigationContainer } from './navigation';
-import { AuthenticationContainer } from './authentication/AuthenticationContainer';
+import { Authenticator } from '@shared/authenticator';
 import { AlarmsContainer } from './simulation/alarms';
 import { Settings } from './settings';
 import { NotificationBanner } from '@shared/notification-banner';
@@ -65,7 +65,7 @@ export class App extends React.Component<Props, State> {
         this.shouldRedirect
           ? this.redirect()
           : (
-            <AuthenticationContainer>
+            <Authenticator>
               <NavigationContainer
                 onShowSimulationConfigForm={
                   (config: SimulationConfiguration) => this.showSimulationConfigForm(config, props.history)
@@ -126,7 +126,7 @@ export class App extends React.Component<Props, State> {
                   Initializing<ThreeDots />
                 </NotificationBanner>
               }
-            </AuthenticationContainer>
+            </Authenticator>
           )
       } />
     );

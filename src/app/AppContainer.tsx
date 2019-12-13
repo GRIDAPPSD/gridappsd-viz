@@ -24,7 +24,7 @@ import {
 } from './models/message-requests/GetAvailableApplicationsAndServicesRequest';
 import { StateStore } from '@shared/state-store';
 import { DEFAULT_APPLICATION_STATE } from './models/default-application-state';
-import { AuthenticationService } from './authentication/services/AuthenticationService';
+import { AuthenticatorService } from '@shared/authenticator';
 
 import './App.light.scss';
 import './App.dark.scss';
@@ -42,7 +42,7 @@ export class AppContainer extends React.Component<Props, State> {
 
   readonly componentMRIDs = new Map<string, string & string[]>();
   readonly componentPhases = new Map<string, string[]>();
-  readonly authenticationService = AuthenticationService.getInstance();
+  readonly authenticatorService = AuthenticatorService.getInstance();
 
 
   private readonly _stateStore = StateStore.getInstance();
@@ -170,7 +170,7 @@ export class AppContainer extends React.Component<Props, State> {
         availableApplications={this.state.availableApplications}
         componentMRIDs={this.componentMRIDs}
         componentPhases={this.componentPhases}
-        onLogout={this.authenticationService.logout}
+        onLogout={this.authenticatorService.logout}
         onMRIDChanged={this.retrieveModelDictionary}
         onSimulationConfigFormSubmitted={this.onSimulationConfigFormSubmitted} />
     );
