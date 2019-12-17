@@ -3,7 +3,8 @@
         "exclude": [
             "*.js",
             "dist",
-            "runConfig.ts"
+            "runConfig.ts",
+            "frontend/webpack.config.js"
         ]
     },
     "rules": {

@@ -1,0 +1,27 @@
+{
+    "name": "gridappsd-viz-backend",
+    "version": "1.0.0",
+    "main": "dist/index.js",
+    "scripts": {
+        "build": "rm -rf dist && tsc && cp -rf ../frontend/dist/** dist/backend/src",
+        "tsc": "tsc --watch",
+        "start": "node dist/backend/src/index.js",
+        "nodemon": "nodemon dist/backend/src/index.js",
+        "debug": "node --inspect dist/backend/src/index.js"
+    },
+    "author": "Nhuy Van",
+    "license": "ISC",
+    "dependencies": {
+        "body-parser": "^1.19.0",
+        "express": "^4.17.1",
+        "rxjs": "^6.5.3",
+        "socket.io": "^2.3.0"
+    },
+    "devDependencies": {
+        "@types/express": "^4.17.2",
+        "@types/node": "^10.16.1",
+        "@types/socket.io": "^2.1.4",
+        "nodemon": "^2.0.2",
+        "typescript": "^3.7.3"
+    }
+}

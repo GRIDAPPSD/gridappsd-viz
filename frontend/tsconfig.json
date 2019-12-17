@@ -1,0 +1,45 @@
+{
+    "compilerOptions": {
+        "outDir": "./dist",
+        "module": "esnext",
+        "target": "es2017",
+        "baseUrl": "../",
+        "rootDir": "../",
+        "paths": {
+            "@shared/*": [
+                "frontend/src/app/shared/*"
+            ],
+            "@commons/*": [
+                "commons/*"
+            ]
+        },
+        "lib": [
+            "es2017",
+            "dom"
+        ],
+        "sourceMap": true,
+        "allowJs": true,
+        "jsx": "react",
+        "moduleResolution": "node",
+        "forceConsistentCasingInFileNames": true,
+        "noImplicitReturns": true,
+        "noImplicitThis": true,
+        "noImplicitAny": false,
+        "noUnusedLocals": true,
+        "noUnusedParameters": true,
+        "strictNullChecks": false,
+        "suppressImplicitAnyIndexErrors": true
+    },
+    "exclude": [
+        "node_modules",
+        "build",
+        "dist",
+        "scripts",
+        "acceptance-tests",
+        "webpack",
+        "jest",
+        "src/setupTests.ts",
+        "exclude",
+        "backend"
+    ]
+}
