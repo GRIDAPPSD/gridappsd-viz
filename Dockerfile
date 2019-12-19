@@ -1,4 +1,4 @@
-FROM node:boron
+FROM node:10.17.0-buster-slim
 
 ARG TIMESTAMP
 ARG VERSION
