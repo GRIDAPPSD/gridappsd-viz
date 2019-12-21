@@ -1,6 +1,6 @@
 import { Socket } from 'socket.io';
 import { Subject } from 'rxjs';
-import { take, finalize } from 'rxjs/operators';
+import { take, finalize, takeUntil } from 'rxjs/operators';
 
 import { SimulationStatus } from '@commons/SimulationStatus';
 import { SimulationSynchronizationEvents } from '@commons/SimulationSynchronizationEvents';
@@ -15,8 +15,8 @@ export class SimulationParticipant {
 
   constructor(private readonly _socket: Socket) {
     _socket.on('disconnect', () => {
+      this._disconnectNotifier.next();
       this._disconnectNotifier.complete();
-      this._simulationStatusChangeNotifier.complete();
       this._socket.removeAllListeners();
     });
 
@@ -32,10 +32,11 @@ export class SimulationParticipant {
   listenFor<T = any>(event: SimulationSynchronizationEvents) {
     const notifier = new Subject<T>();
     this._socket.on(event, (payload?: T) => notifier.next(payload));
-    this.watchForDisconnection()
-      .then(() => notifier.complete());
     return notifier.asObservable()
-      .pipe(finalize(() => this._socket.removeAllListeners(event)));
+      .pipe(
+        finalize(() => this._socket.removeAllListeners(event)),
+        takeUntil(this._disconnectNotifier)
+      );
   }
 
   listenOnceFor<T>(event: SimulationSynchronizationEvents) {
@@ -52,7 +53,8 @@ export class SimulationParticipant {
   }
 
   simulationStatusChanges() {
-    return this._simulationStatusChangeNotifier.asObservable();
+    return this._simulationStatusChangeNotifier.asObservable()
+      .pipe(takeUntil(this._disconnectNotifier));
   }
 
   requestToJoinSimulationChannel() {

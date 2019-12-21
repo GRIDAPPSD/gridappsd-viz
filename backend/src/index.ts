@@ -25,7 +25,7 @@ SOCKET_SERVER.on('connection', socket => {
       next: payload => {
         switch (payload.status) {
           case SimulationStatus.STARTED:
-            SIMULATION_COORDINATOR.startSimulation(payload.simulationId, participant);
+            SIMULATION_COORDINATOR.startSimulationChannel(payload.simulationId, participant);
             break;
           case SimulationStatus.STOPPED:
             SIMULATION_COORDINATOR.deactivateSimulationChannel(payload.simulationId, participant);
