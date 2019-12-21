@@ -10,12 +10,9 @@ export class SimulationChannel {
   private readonly _members = new Set<SimulationParticipant>();
 
   private _simulationStatus = SimulationStatus.STOPPED;
-  private _host: SimulationParticipant = null;
   private _simulationSnapshotWatchSubscription: Subscription;
 
-  constructor() {
-
-    this.deactivate = this.deactivate.bind(this);
+  constructor(private readonly _host: SimulationParticipant) {
   }
 
   currentStatus() {
@@ -42,13 +39,10 @@ export class SimulationChannel {
     this._members.delete(member);
   }
 
-  activate(host: SimulationParticipant, hostStatus: SimulationStatus) {
+  activate() {
     if (this._simulationStatus === SimulationStatus.STOPPED) {
-      this._host = host;
       this._simulationSnapshotWatchSubscription = this._beginSendingSimulationSnapshotsToAllMembers();
-      this._host.watchForDisconnection()
-        .then(this.deactivate);
-      this._simulationStatus = hostStatus;
+      this._simulationStatus = SimulationStatus.STARTED;
     }
   }
 
@@ -71,13 +65,10 @@ export class SimulationChannel {
   }
 
   deactivate() {
-    if (this._host) {
-      this._simulationStatus = SimulationStatus.STOPPED;
-      this._notifyAllMembers(SimulationSynchronizationEvents.SIMULATION_STATUS, this._simulationStatus);
-      this._members.clear();
-      this._host = null;
-      this._simulationSnapshotWatchSubscription.unsubscribe();
-    }
+    this._simulationStatus = SimulationStatus.STOPPED;
+    this._notifyAllMembers(SimulationSynchronizationEvents.SIMULATION_STATUS, this._simulationStatus);
+    this._members.clear();
+    this._simulationSnapshotWatchSubscription.unsubscribe();
   }
 
   resume() {

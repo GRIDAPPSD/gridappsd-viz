@@ -1,5 +1,5 @@
-import { Subject, Observable, Subscription, BehaviorSubject } from 'rxjs';
-import { filter, map, pluck } from 'rxjs/operators';
+import { Subject, Observable, Subscription, BehaviorSubject, timer } from 'rxjs';
+import { filter, map, pluck, debounce, takeWhile } from 'rxjs/operators';
 import * as socketIo from 'socket.io-client';
 
 import { SimulationConfiguration } from './SimulationConfiguration';
@@ -49,7 +49,7 @@ export class SimulationControlService {
   private _currentSimulationStatus = SimulationStatus.STOPPED;
   private _didUserStartActiveSimulation = false;
   private _isUserInActiveSimulation = false;
-  private _modelDictionaryMeasurementMap: Map<string, ModelDictionaryMeasurement>;
+  private _modelDictionaryMeasurementMap: Map<string, ModelDictionaryMeasurement> = null;
   private _outputTimestamp: number;
   private _simulationOutputMeasurementsStream = new Subject<Map<string, SimulationOutputMeasurement>>();
   private _simulationOutputSubscription: Subscription;
@@ -137,7 +137,10 @@ export class SimulationControlService {
 
   private _onSimulationOutputSnapshotStateReceived() {
     this.selectSimulationSnapshotState('simulationOutput')
-      .pipe(filter(value => value !== null))
+      .pipe(
+        filter(value => value !== null),
+        debounce(() => timer(0, 16).pipe(takeWhile(() => this._modelDictionaryMeasurementMap === null)))
+      )
       .subscribe({
         next: (simulationOutput: SimulationOutputPayload) => this._broadcastSimulationOutputMeasurements(simulationOutput)
       });
