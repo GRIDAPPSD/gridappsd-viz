@@ -27,7 +27,9 @@ export function CommOutageEventTable(props: Props) {
           }
           <th rowSpan={2}>Event Tag</th>
           <th colSpan={4}>Input List</th>
-          <th colSpan={6}>Output List</th>
+          <th colSpan={4}>Output List</th>
+          <th rowSpan={2}>Start Date Time</th>
+          <th rowSpan={2}>Stop Date Time</th>
         </tr>
         <tr>
           {/* Input List*/}
@@ -40,8 +42,6 @@ export function CommOutageEventTable(props: Props) {
           <th className='comm-outage-event-table__secondary-heading'>Name</th>
           <th className='comm-outage-event-table__secondary-heading'>Phases</th>
           <th className='comm-outage-event-table__secondary-heading'>Measurement Type</th>
-          <th className='comm-outage-event-table__secondary-heading'>Start Date Time</th>
-          <th className='comm-outage-event-table__secondary-heading'>Stop Date Time</th>
         </tr>
       </thead>
       <tbody>

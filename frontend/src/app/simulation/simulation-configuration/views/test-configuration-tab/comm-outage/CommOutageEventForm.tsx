@@ -141,6 +141,26 @@ export class CommOutageEventForm extends React.Component<Props, State> {
   render() {
     return (
       <div className='comm-outage-event'>
+        <Input
+          label='Start Date Time'
+          name='startDateTime'
+          hint='YYYY-MM-DD HH:MM:SS'
+          value={this.dateTimeService.format(this.formValue.startDateTime)}
+          validators={[
+            Validators.checkNotEmpty('Start date time is empty'),
+            Validators.checkValidDateTime('Invalid format, YYYY-MM-DD HH:MM:SS expected')
+          ]}
+          onChange={this.onStartDateTimeChanged} />
+        <Input
+          label='Stop Date Time'
+          name='stopDateTime'
+          hint='YYYY-MM-DD HH:MM:SS'
+          value={this.dateTimeService.format(this.formValue.stopDateTime)}
+          validators={[
+            Validators.checkNotEmpty('Stop date time is empty'),
+            Validators.checkValidDateTime('Invalid format, YYYY-MM-DD HH:MM:SS expected')
+          ]}
+          onChange={this.onStopDateTimeChanged} />
         <FormGroup
           label='Input Outage List'
           collapsible={false}>
@@ -257,26 +277,6 @@ export class CommOutageEventForm extends React.Component<Props, State> {
             selectionOptionBuilder={this.state.outputMeasurementTypeOptionBuilder}
             selectedOptionFinder={() => this.state.outputMeasurementTypeOptionBuilder.numberOfOptions() === 1}
             onChange={this.onOutputMeasurementTypesChanged} />
-          <Input
-            label='Start Date Time'
-            name='startDateTime'
-            hint='YYYY-MM-DD HH:MM:SS'
-            value={this.dateTimeService.format(this.formValue.startDateTime)}
-            validators={[
-              Validators.checkNotEmpty('Start date time is empty'),
-              Validators.checkValidDateTime('Invalid format, YYYY-MM-DD HH:MM:SS expected')
-            ]}
-            onChange={this.onStartDateTimeChanged} />
-          <Input
-            label='Stop Date Time'
-            name='stopDateTime'
-            hint='YYYY-MM-DD HH:MM:SS'
-            value={this.dateTimeService.format(this.formValue.stopDateTime)}
-            validators={[
-              Validators.checkNotEmpty('Stop date time is empty'),
-              Validators.checkValidDateTime('Invalid format, YYYY-MM-DD HH:MM:SS expected')
-            ]}
-            onChange={this.onStopDateTimeChanged} />
           <Tooltip
             content='Add output item'
             position='right'>
@@ -347,6 +347,14 @@ export class CommOutageEventForm extends React.Component<Props, State> {
           onClick={this.createNewEvent} />
       </div>
     );
+  }
+
+  onStartDateTimeChanged(value: string) {
+    this.formValue.startDateTime = this.dateTimeService.parse(value);
+  }
+
+  onStopDateTimeChanged(value: string) {
+    this.formValue.stopDateTime = this.dateTimeService.parse(value);
   }
 
   onAllInputOutageCheckboxToggled(state: boolean) {
@@ -524,14 +532,6 @@ export class CommOutageEventForm extends React.Component<Props, State> {
       this.setState({
         addOutputItemButtonDisabled: true
       });
-  }
-
-  onStartDateTimeChanged(value: string) {
-    this.formValue.startDateTime = this.dateTimeService.parse(value);
-  }
-
-  onStopDateTimeChanged(value: string) {
-    this.formValue.stopDateTime = this.dateTimeService.parse(value);
   }
 
   disableAddEventButton(): boolean {
