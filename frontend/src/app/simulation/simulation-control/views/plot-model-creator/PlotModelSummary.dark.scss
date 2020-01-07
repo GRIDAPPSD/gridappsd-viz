@@ -1,0 +1,30 @@
+@import '@constants.dark';
+@import 'PlotModelSummary.common';
+
+.plot-model-summary {
+    border: 2px solid #868686;
+}
+
+.plot-model-summary__header,
+.plot-model-summary__component {
+    border-bottom: 2px solid #868686;
+    color: $primary-text-color;
+}
+
+.plot-model-summary__header:before {
+    background-color: #9e8b8b;
+    color: #fff;
+}
+
+.plot-model-summary__header__plot-name {
+    color: $active-item-color;
+
+    &:focus {
+        border: 1px dashed #868686;
+    }
+}
+
+.plot-model-summary__value-types {
+    border-bottom: 2px solid #868686;
+    color: $primary-text-color;
+}

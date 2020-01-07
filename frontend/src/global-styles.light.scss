@@ -1,0 +1,42 @@
+@import '@constants.light';
+@import 'global-styles.common';
+
+body {
+    background-color: $theme-color;
+}
+
+thead {
+    background-color: #ff879c;
+    color: #000;
+    border: 2px solid $table-border-color;
+}
+
+th {
+    border: 2px solid $table-border-color;
+}
+
+td {
+    border: 2px solid $table-border-color;
+
+    &>div:not(:last-of-type) {
+        border-bottom: 2px solid $table-border-color;
+    }
+}
+
+table {
+    tbody tr:nth-of-type(even) {
+        background-color: #ffc0cb;
+    }
+
+    tbody tr:nth-of-type(odd) {
+        background-color: $theme-color;
+    }
+
+    table thead tr {
+        background-color: #ff879c !important;
+    }
+
+    table tr:not(:last-of-type) {
+        border-bottom: 2px solid $table-border-color;
+    }
+}

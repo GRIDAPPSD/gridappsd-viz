@@ -1,0 +1,27 @@
+.log-data-browser {
+    position: relative;
+    display: flex;
+    flex-flow: column nowrap;
+    height: 100%;
+
+    .request-editor {
+        overflow: auto;
+        border-radius: initial;
+        box-shadow: initial;
+        height: initial
+    }
+
+    .response {
+        box-shadow: initial;
+        border-radius: 0;
+        height: 50%;
+        max-height: initial;
+        overflow: hidden;
+        min-height: 10%;
+        flex: auto;
+    }
+
+    .notification-banner {
+        margin-top: 5px;
+    }
+}

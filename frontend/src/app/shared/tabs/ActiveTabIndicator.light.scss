@@ -1,0 +1,9 @@
+@import 'ActiveTabIndicator.common';
+
+.tabgroup__active-tab-indicator {
+    border: 2px solid rgba(64, 81, 181, 0.502);
+
+    &::after {
+        background-color: #fff;
+    }
+}

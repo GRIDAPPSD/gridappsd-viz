@@ -1,0 +1,5 @@
+@import 'ApplicationsTab.common';
+
+.applications-tab tbody tr:nth-of-type(even) {
+    background-color: #f3e461;
+}

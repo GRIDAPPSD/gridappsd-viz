@@ -1,0 +1,36 @@
+.comm-outage-event-form__add-event {
+    transform: translate(1em, 2em);
+    margin-bottom: 3em;
+}
+
+.comm-outage-event-form__add-input,
+.comm-outage-event-form__add-output {
+    margin-left: 20px;
+    margin-bottom: 10px;
+}
+
+.comm-outage-event-form__input-output-list {
+    border-collapse: collapse;
+    margin-left: 20px;
+
+    td,
+    th {
+        font-size: 0.8em;
+    }
+
+    th {
+        padding: 5px;
+    }
+
+    th:first-of-type {
+        padding: 0;
+    }
+
+    .rounded-icon-button {
+        transform: scale(0.8, 0.8);
+    }
+
+    td>div {
+        padding: 3px 0;
+    }
+}

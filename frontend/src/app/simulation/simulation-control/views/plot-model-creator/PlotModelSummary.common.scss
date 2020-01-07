@@ -1,0 +1,61 @@
+.plot-model-summary {
+    border-radius: 3px;
+    margin: 10px 5px 15px 5px;
+
+    &:not(:last-of-type) {
+        margin-bottom: 0;
+    }
+}
+
+.plot-model-summary__header,
+.plot-model-summary__component {
+    display: flex;
+    align-items: center;
+}
+
+.plot-model-summary__header {
+    align-items: center;
+
+    .icon-button {
+        margin: 3px;
+        margin-left: 0;
+    }
+}
+
+.plot-model-summary__header__plot-name {
+    font-weight: bold;
+    width: 100%;
+    margin-left: 10px;
+    margin-right: 10px;
+    cursor: text;
+    outline: none;
+}
+
+.plot-model-summary__value-types:empty {
+    display: none;
+}
+
+.plot-model-summary__value-type {
+    text-align: left;
+    padding: 2px 5px;
+    font-size: 0.8em;
+
+    &::before {
+        content: '✓';
+        display: inline-block;
+        margin-right: 5px;
+    }
+}
+
+.plot-model-summary__component {
+    display: flex;
+    padding: 3px 5px;
+
+    &:last-of-type {
+        border: none;
+    }
+}
+
+.plot-model-summary__component__name {
+    margin-left: 10px;
+}

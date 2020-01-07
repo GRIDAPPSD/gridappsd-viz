@@ -1,0 +1,60 @@
+.simulation-status-logger {
+    position: absolute;
+    background-color: transparent;
+    bottom: 0;
+    top: 100%;
+    width: 100%;
+    z-index: 1;
+    height: auto;
+}
+
+.simulation-status-logger__header {
+    display: inline-flex;
+    align-items: center;
+    position: absolute;
+    top: -29px;
+    width: 100%;
+    pointer-events: none;
+}
+
+.simulation-status-logger__header__label {
+    pointer-events: all;
+    cursor: move;
+    -moz-user-select: none;
+    user-select: none;
+    display: inline-block;
+    padding: 7px 15px;
+    font-size: 13px;
+}
+
+.simulation-status-logger__header__legends {
+    display: flex;
+    box-sizing: border-box;
+    padding: 5px;
+    margin-left: auto;
+}
+
+.simulation-status-logger__header__legends__level {
+    display: flex;
+    align-items: center;
+    padding: 0 10px;
+}
+
+.simulation-status-logger__header__legends__level__color {
+    width: 15px;
+    height: 15px;
+    display: inline-block;
+    border-radius: 100%;
+    margin-right: 10px;
+}
+
+.simulation-status-logger__header__legends__level__label {
+    display: inline-block;
+}
+
+.simulation-status-logger__body {
+    max-height: 100%;
+    height: 100%;
+    overflow: hidden auto;
+    white-space: pre;
+}

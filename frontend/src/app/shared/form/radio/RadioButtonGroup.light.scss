@@ -1,0 +1,19 @@
+@import '@constants.light';
+@import 'RadioButtonGroup.common';
+
+.radio-button-group__radio-buttons {
+    background-color: $theme-color;
+}
+
+.radio-button-group.style-switches {
+    .radio-button-group__radio-buttons {
+        border: 2px solid $primary-color;
+        box-shadow: 0 0 1px $primary-color;
+    }
+
+    .form-control__label {
+        background-color: $primary-color;
+        color: $primary-text-color;
+        box-shadow: 0 0 2px #999;
+    }
+}

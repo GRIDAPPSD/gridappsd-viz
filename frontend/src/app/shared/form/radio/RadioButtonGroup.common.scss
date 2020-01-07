@@ -1,0 +1,26 @@
+.radio-button-group__radio-buttons {
+    display: flex;
+    align-items: center;
+}
+
+.radio-button-group.style-switches {
+    justify-content: center;
+    align-items: center;
+
+    flex-flow: column nowrap;
+    margin: 0;
+
+    .radio-button-group__radio-buttons {
+        justify-content: center;
+        border-radius: 5px;
+    }
+
+    .form-control__label {
+        padding: 5px 15px;
+        font-size: 0.7em;
+        border-top-left-radius: 5px;
+        border-top-right-radius: 5px;
+        text-align: center;
+        width: initial;
+    }
+}

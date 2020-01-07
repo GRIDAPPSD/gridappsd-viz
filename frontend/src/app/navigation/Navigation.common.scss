@@ -1,0 +1,43 @@
+.drawer-opener .material-icons {
+    font-size: 300%;
+}
+
+.navigation__app-title {
+    padding: 15px 15px;
+    font-size: 1.5rem;
+}
+
+.drawer-item a {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    height: 100%;
+
+    &:hover {
+        text-decoration: none;
+    }
+}
+
+.right-aligned {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    height: 100%;
+}
+
+.websocket-status-indicator {
+    display: flex;
+    flex-flow: column nowrap;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+}
+
+.websocket-status-indicator__icon {
+    font-size: 2em;
+    font-weight: bold;
+}
+
+.websocket-status-indicator__status-text {
+    font-size: 0.8em;
+}

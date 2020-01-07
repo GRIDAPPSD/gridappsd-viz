@@ -1,0 +1,20 @@
+@import '@constants.dark';
+@import 'Navigation.common';
+
+
+.drawer-opener .material-icons {
+    color: $active-item-color;
+}
+
+.navigation__app-title {
+    color: $active-item-color;
+}
+
+.navigation__app-version {
+    color: scale-color($accent-color, $lightness: +50%);
+}
+
+
+.websocket-status-indicator {
+    color: #FFEB3B;
+}

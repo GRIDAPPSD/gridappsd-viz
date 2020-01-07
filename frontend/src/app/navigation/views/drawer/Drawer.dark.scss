@@ -1,0 +1,7 @@
+@import '@constants.dark';
+@import 'Drawer.common';
+
+.drawer-items {
+    background-color: $theme-color;
+    box-shadow: $hovering-shadow;
+}

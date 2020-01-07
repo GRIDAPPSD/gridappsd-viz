@@ -1,0 +1,37 @@
+.drawer {
+    position: fixed;
+    z-index: 24;
+    top: 0;
+    min-width: 350px;
+
+    .backdrop {
+        width: 100vw;
+        height: 100vh;
+        position: fixed;
+    }
+}
+
+.drawer.closed {
+    pointer-events: none;
+}
+
+.drawer-items {
+    transition: transform 600ms cubic-bezier(0, 0.61, 0.2, 1.01);
+    z-index: 24;
+    position: relative;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    margin: 0;
+    padding: 0;
+    padding-top: 40px;
+    overflow: hidden auto;
+}
+
+.drawer.closed>.drawer-items {
+    transform: translate(-105%, 0);
+}
+
+.drawer.opened>.drawer-items {
+    transform: translate(0, 0);
+}

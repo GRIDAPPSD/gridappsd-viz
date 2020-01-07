@@ -1,0 +1,49 @@
+@import 'NodeSearcher.common';
+
+.node-searcher {
+    .backdrop {
+        background-color: rgba(0, 0, 0, 0.8);
+    }
+
+    &__close__line {
+        stroke: #fff;
+    }
+
+    &__body {
+        &__search {
+            label {
+                color: #ffa500;
+            }
+
+            input {
+                color: #fff;
+
+                &:focus+.input-field__ripple-bar {
+                    background-color: #ffa500;
+                }
+            }
+
+            .input-field__ripple-bar {
+                background-color: #ffa500;
+            }
+        }
+
+        &__search-result {
+            color: #ddd;
+            background-color: #c3aa7c;
+            color: #000;
+
+            &:hover {
+                background-color: #a38e68;
+            }
+
+            &__match {
+                background-color: #ffa500;
+            }
+        }
+    }
+
+    .paginator {
+        color: #fff;
+    }
+}

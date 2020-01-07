@@ -1,9 +1,26 @@
 Make sure that NodeJS is installed ([https://nodejs.org/en/](https://nodejs.org/en/))
 
-`cd` into `viz` folder
+# For development
+## Bootstrapping the front-end
+- `cd frontend`
+- `npm install`
+- `npm run dev`
+- Go to http://localhost:4000
 
-Execute `npm install` to install the dependencies
+## Bootstrapping the back-end
+- `cd backend`
+- `npm install`
+- `npm run nodemon` to start an HTTP server with hot-loading
+- Then in a different terminal, `npm run tsc` to start the compilation in watch mode
 
-For local development, execute `npm run launch` to start the development server on [localhost:4000](http://localhost:4000)
+# For deployment
+## Building the front-end code
+- `cd frontend`
+- `npm install`
+- `npm run build`
 
-To build the code, execute `npm run build`, then `npm start` to start the server on [localhost:8082](http://localhost:8082)
+## Building the back-end code
+- `cd backend`
+- `npm install`
+- `npm run build`
+- `npm start`

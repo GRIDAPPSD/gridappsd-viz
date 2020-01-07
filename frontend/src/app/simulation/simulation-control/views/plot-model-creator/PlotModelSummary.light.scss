@@ -1,0 +1,23 @@
+@import 'PlotModelSummary.common';
+
+.plot-model-summary {
+    border: 2px solid #555;
+}
+
+.plot-model-summary__header,
+.plot-model-summary__component {
+    border-bottom: 2px solid #555;
+}
+
+.plot-model-summary__header:before {
+    background-color: #777;
+    color: #fff;
+}
+
+.plot-model-summary__header__plot-name:focus {
+    border: 1px dashed #000;
+}
+
+.plot-model-summary__value-types {
+    border-bottom: 2px solid #555;
+}

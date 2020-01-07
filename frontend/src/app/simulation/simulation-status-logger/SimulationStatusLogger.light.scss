@@ -1,0 +1,35 @@
+@import '@constants.light';
+@import 'SimulationStatusLogger.common';
+
+.simulation-status-logger__header__label {
+    background-color: $primary-color;
+    color: $primary-text-color;
+    border-top-right-radius: 3px;
+}
+
+.simulation-status-logger__header__legends {
+    background-color: #a29494;
+    box-shadow: 0px -0.5px 2px #555;
+}
+
+$logLevels: FATAL ERROR WARN INFO DEBUG TRACE;
+$logLevelColors: #B71C1C #D32F2F #FFFF00 #F0F4C3 #E1F5FE #C0CA33;
+
+@for $index from 1 through length($logLevels) {
+    .simulation-status-logger__header__legends__level__color.#{nth($logLevels, $index)} {
+        background-color: #{nth($logLevelColors, $index)};
+    }
+}
+
+.simulation-status-logger__header__legends__level:not(:last-of-type) {
+    border-right: 1px solid #fff;
+}
+
+.simulation-status-logger__header__legends__level__label {
+    color: #fff;
+}
+
+.simulation-status-logger__body {
+    background-color: scale-color($theme-color, $lightness: -5%);
+    box-shadow: 0 -1px 5px #ccc;
+}

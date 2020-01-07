@@ -1,0 +1,74 @@
+.icon-button {
+    position: relative;
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 2px;
+    box-sizing: border-box;
+    cursor: pointer;
+
+    .material-icons,
+    .icon-button__label {
+        pointer-events: none;
+    }
+}
+
+.icon-button.has-background {
+    transition: box-shadow 0.2s ease;
+}
+
+.icon-button.no-background {
+    background-color: transparent;
+}
+
+.icon-button--primary.has-background:disabled,
+.icon-button--accent.has-background:disabled{
+    box-shadow: none;
+}
+
+.icon-button--has-label {
+    width: auto;
+    height: auto;
+    padding: 5px 10px;
+
+    .icon-button__icon {
+        margin-right: 10px;
+        font-size: 25px;
+    }
+}
+
+.rounded-icon-button {
+    border-radius: 100%;
+    transform-origin: 50% 50%;
+}
+
+.rounded-icon-button--large {
+    width: 4vw;
+    height: 4vw;
+
+    .material-icons {
+        font-size: 2vw;
+    }
+}
+
+.rounded-icon-button--normal {
+    width: 40px;
+    height: 40px;
+
+    .material-icons {
+        font-size: 2em;
+    }
+}
+
+.rounded-icon-button--small {
+    width: 30px;
+    height: 30px;
+
+    .material-icons {
+        font-size: 1.5em;
+    }
+}
+
+.icon-button__label {
+    font-family: Roboto;
+}

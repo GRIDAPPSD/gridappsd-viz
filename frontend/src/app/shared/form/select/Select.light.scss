@@ -1,0 +1,36 @@
+@import 'Select.common';
+
+.form-control.invalid .select__option-list__opener {
+    color: red;
+}
+
+
+.select__option-list__opener {
+    box-shadow: 1px 1px 10px -1px rgba(0, 0, 0, 0.2), 1px 2px 3px rgba(0, 0, 0, 0.1);
+    color: #555;
+
+    &:hover,
+    &:focus,
+    &:link {
+        color: #555;
+    }
+
+    &:focus {
+        box-shadow: 0px 0px 1px 2px #999 inset;
+    }
+}
+
+.select__option-list-wrapper {
+    box-shadow: 2px 5px 20px -10px rgba(0, 0, 0, 0.2), 2px 5px 40px rgba(0, 0, 0, 0.25);
+    background-color: #fff;
+}
+
+
+.select.disabled .select__option-list__opener {
+    background-color: rgba(0, 0, 0, 0.1);
+    color: rgba(0, 0, 0, 0.3);
+}
+
+.select__button-group {
+    box-shadow: 0 -1px 5px #eee;
+}

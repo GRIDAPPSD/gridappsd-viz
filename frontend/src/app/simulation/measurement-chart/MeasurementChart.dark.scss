@@ -1,0 +1,52 @@
+@import '@constants.dark';
+@import 'MeasurementChart.common';
+
+$time-series-colors: #fff #ff0 lightblue #f0f4c3 orange #00ff5f magenta brown lightcoral;
+
+.measurement-chart {
+    border: 2px solid rgba(255, 255, 255, 0.35);
+    background-color: $theme-color;
+}
+
+@for $index from 1 through length($time-series-colors) {
+    .measurement-chart__canvas__time-series-line:nth-of-type(#{$index}) {
+        stroke: #{nth($time-series-colors, $index)};
+    }
+
+    .measurement-chart__legend:nth-child(#{$index}) .measurement-chart__legend__color {
+        background-color: #{nth($time-series-colors, $index)};
+    }
+}
+
+.measurement-chart__name {
+    color: $active-item-color;
+}
+
+.measurement-chart__legend {
+    background-color: $theme-color;
+    box-shadow: 0 0 2px #ddd;
+}
+
+.measurement-chart__legend__label {
+    color: rgba($primary-text-color, 0.7);
+}
+
+.measurement-chart__canvas {
+    .domain {
+        stroke: #edb3b3
+    }
+
+    .tick {
+        line {
+            stroke: #edb3b3;
+        }
+
+        text {
+            fill: #edb3b3;
+        }
+    }
+}
+
+.measurement-chart__canvas__axis-label {
+    fill: #edb3b3;
+}

@@ -1,0 +1,66 @@
+.selected-option-list-container {
+    position: relative;
+    display: flex;
+    flex-flow: column;
+    align-items: center;
+    margin-top: 18px;
+    margin-bottom: 15px;
+
+    .show-selected-option-list {
+        position: absolute;
+        top: -14px;
+
+        .material-icons {
+            transition: transform 0.25s ease;
+            transform-origin: 50% 50%;
+            font-size: 2em;
+        }
+    }
+}
+
+.selected-option-list-container.open {
+
+    .show-selected-option-list .material-icons {
+        transform: rotate(180deg);
+    }
+
+    .selected-option-list {
+        height: 100%;
+        padding-top: 15px;
+    }
+}
+
+.selected-option-list-container.closed .selected-option-list {
+    height: 0;
+    padding-top: 0;
+    overflow: hidden;
+}
+
+.selected-option-list {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    overflow-x: hidden;
+    overflow-y: auto;
+    max-height: 60vh;
+
+    .selected-option-list__option__deselect {
+        transform: scale(0.7, 0.7);
+    }
+
+    &:empty {
+        visibility: hidden;
+    }
+}
+
+.selected-option-list:not(:empty) {
+    padding-top: 15px;
+}
+
+.selected-option-list__option {
+    display: flex;
+    list-style: none;
+    align-items: center;
+    font-size: 0.85em;
+    padding: 0 10px;
+}

@@ -1,0 +1,12 @@
+@import '@constants.dark';
+@import 'SelectedOptionList.common';
+
+.selected-option-list {
+    border-bottom: 2px solid rgba(125, 125, 125, 0.5);
+    border-top: 2px solid rgba(125, 125, 125, 0.5);
+    background-color: scale-color($theme-color, $lightness: +5%);
+}
+
+.selected-option-list__option {
+    color: $primary-text-color;
+}

@@ -1,0 +1,19 @@
+@import '@constants.dark';
+@import 'Paginator.common';
+
+.paginator {
+    border-top: 2px solid rgba(0, 0, 0, 0.05);
+}
+
+.paginator__page-indicator {
+    color: $primary-text-color;
+}
+
+.paginator__page-indicator__current-page-input {
+    color: #fff;
+    border: 2px solid rgba(255, 255, 255, 0.5);
+
+    &:focus {
+        border-color: #fff;
+    }
+}

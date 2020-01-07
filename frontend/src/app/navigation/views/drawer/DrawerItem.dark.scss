@@ -1,0 +1,23 @@
+@import '@constants.dark';
+@import 'DrawerItem.common';
+
+.drawer-item {
+    border-bottom: 2px solid #BDBDBD;
+    color: rgba($primary-text-color, 0.9);
+
+    &:hover {
+        background-color: rgba(122, 92, 98, 0.5);
+    }
+
+    .ripple-effect {
+        background-color: rgba(#fff, 0.15);
+    }
+}
+
+.drawer-item-icon {
+    color: $label-color;
+}
+
+.drawer-item-label {
+    color: $primary-text-color;
+}

@@ -1,0 +1,49 @@
+@import 'TextArea.common';
+
+.textarea__input-box {
+    border: 2px solid #ccc;
+
+    &[contenteditable=true]:focus {
+        &::before {
+            background-color: #639;
+        }
+
+        &::after {
+            background-color: #639;
+        }
+
+        &~.textarea__input-box-focus-indicator {
+            &::before {
+                background-color: #639;
+            }
+
+            &::after {
+                background-color: #639;
+            }
+        }
+    }
+}
+
+.textarea__input-box,
+.textarea__input-box-focus-indicator {
+
+    &::before,
+    &::after {
+        background-color: #639;
+    }
+}
+
+.textarea__input-box-resize-handle {
+    border-right: 3px solid #999;
+    border-bottom: 3px solid #999;
+}
+
+.form-control.invalid .textarea__input-box {
+    border-color: red;
+}
+
+.form-control.disabled .textarea__input-box {
+    border: 2px solid #eee;
+    background-color: #f9f9f9;
+    color: #ddd;
+}

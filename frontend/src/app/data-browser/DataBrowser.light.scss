@@ -1,0 +1,24 @@
+@import '@constants.light';
+@import 'DataBrowser.common';
+
+.data-browser__selection__item {
+    box-shadow: 0 0 2px #888;
+    color: $primary-color;
+}
+
+.data-browser__selection__item.selected {
+    &:before {
+        background-color: $theme-color;
+    }
+
+    &:after {
+        border-top: 2px solid #eee;
+        border-bottom: 2px solid #eee;
+        background-color: $theme-color;
+    }
+}
+
+.request-editor,
+.response {
+    box-shadow: 0 0 2px #888;
+}

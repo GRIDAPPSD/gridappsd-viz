@@ -1,0 +1,53 @@
+{
+    "name": "gridappsd-viz-frontend",
+    "version": "1.0.0",
+    "description": "",
+    "main": "index.js",
+    "scripts": {
+        "dev": "webpack-dev-server --progress --inline",
+        "build": "rm -rf dist && webpack --env=production --env.BUILD_VERSION"
+    },
+    "husky": {
+        "hooks": {
+            "pre-commit": "tslint --project ."
+        }
+    },
+    "author": "Nhuy Van",
+    "license": "ISC",
+    "dependencies": {
+        "@stomp/stompjs": "^4.0.2",
+        "@types/socket.io-client": "^1.4.32",
+        "d3": "^5.12.0",
+        "react": "^16.4.2",
+        "react-dom": "^16.4.2",
+        "react-router-dom": "^4.3.1",
+        "react-table": "^6.8.6",
+        "rxjs": "^6.2.2",
+        "socket.io-client": "^2.3.0"
+    },
+    "devDependencies": {
+        "@types/d3": "5.7.2",
+        "@types/node": "^12.12.7",
+        "@types/react": "^16.4.10",
+        "@types/react-dom": "^16.0.7",
+        "@types/react-router-dom": "^5.1.3",
+        "@types/react-table": "^6.7.21",
+        "@types/stompjs": "^2.3.2",
+        "awesome-typescript-loader": "3.4.1",
+        "copy-webpack-plugin": "^1.1.0",
+        "css-loader": "0.28.11",
+        "extract-text-webpack-plugin": "^3.0.2",
+        "file-loader": "1.1.11",
+        "html-webpack-exclude-assets-plugin": "0.0.7",
+        "html-webpack-plugin": "^3.2.0",
+        "husky": "^3.0.1",
+        "node-sass": "^4.12.0",
+        "sass-loader": "^7.1.0",
+        "source-map-loader": "0.1.5",
+        "tslint": "^5.18.0",
+        "typescript": "^3.7.2",
+        "url-loader": "^2.2.0",
+        "webpack": "3.10.0",
+        "webpack-dev-server": "^2.9.7"
+    }
+}

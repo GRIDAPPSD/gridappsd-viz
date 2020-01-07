@@ -1,0 +1,11 @@
+@import '@constants.dark';
+@import 'OptionListFilter.common';
+
+.option-list-filter {
+    border: 2px solid $accent-color;
+}
+
+
+.option-list-filter__input {
+    color: $primary-text-color;
+}
