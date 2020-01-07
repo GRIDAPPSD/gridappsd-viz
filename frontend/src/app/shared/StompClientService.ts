@@ -74,9 +74,10 @@ export class StompClientService {
       this._username,
       this._password,
       () => {
-        this._client.disconnect(this.reconnect);
-        subject.next(StompClientInitializationResult.OK);
-
+        this._client.disconnect(() => {
+          this.reconnect();
+          subject.next(StompClientInitializationResult.OK);
+        });
         // need to reevaluate this
         sessionStorage.setItem('username', username);
         sessionStorage.setItem('password', password);
