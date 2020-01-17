@@ -185,55 +185,54 @@ export class TopologyRenderer extends React.Component<Props, State> {
     this._renderEdges(topology.edges);
 
     if (!this._isModelLarge()) {
-      const unknownNodeContainers = create('svg:g')
-        .attr('class', 'topology-renderer__canvas__unknown-node-containers')
-        .attr('style', 'visibility: visible') as Selection<SVGElement, any, SVGElement, any>;
+      const container = create('svg:g') as Selection<SVGElement, any, SVGElement, any>;
       this._renderNonSwitchNodes(
-        unknownNodeContainers,
-        'unknown-node-container',
+        container,
+        'topology-renderer__canvas__unknown-node-container',
         categories.unknownNodes,
         nodeRadius
       );
-
+      const unknownNodeContainer = container.select(':first-child')
+        .attr('style', 'visibility: visible') as Selection<SVGElement, any, SVGElement, any>;
       this._container.node()
-        .appendChild(unknownNodeContainers.node());
+        .appendChild(unknownNodeContainer.node());
     }
 
-    const nodeContainers = create('svg:g')
+    const knownNodeContainers = create('svg:g')
       .attr('class', 'topology-renderer__canvas__known-node-containers')
       .attr('style', 'visibility: visible') as Selection<SVGElement, any, SVGElement, any>;
     this._renderNonSwitchNodes(
-      nodeContainers,
+      knownNodeContainers,
       'remaining-non-switch-node-container',
       categories.remainingNonSwitchNodes,
       nodeRadius
     );
     this._renderNonSwitchNodes(
-      nodeContainers,
+      knownNodeContainers,
       'regulator-node-container',
       categories.regulators,
       nodeRadius
     );
     this._renderNonSwitchNodes(
-      nodeContainers,
+      knownNodeContainers,
       'substation-node-container',
       categories.substations,
       nodeRadius
     );
     this._renderNonSwitchNodes(
-      nodeContainers,
+      knownNodeContainers,
       'transformer-node-container',
       categories.transformers,
       nodeRadius
     );
     this._renderNonSwitchNodes(
-      nodeContainers,
+      knownNodeContainers,
       'capacitor-node-container',
       categories.capacitors,
       nodeRadius
     );
     this._renderSwitchNodes(
-      nodeContainers,
+      knownNodeContainers,
       categories.switches,
       nodeRadius
     );
@@ -269,7 +268,7 @@ export class TopologyRenderer extends React.Component<Props, State> {
     this._renderSwitchSymbols(symbolContainers, categories.switches);
 
     this._container.node()
-      .appendChild(nodeContainers.node());
+      .appendChild(knownNodeContainers.node());
     this._container.node()
       .appendChild(symbolContainers.node());
   }
@@ -325,8 +324,8 @@ export class TopologyRenderer extends React.Component<Props, State> {
         case 'switch':
           (node as Switch).screenX2 = this._xScale((node as Switch).x2);
           (node as Switch).screenY2 = this._yScale((node as Switch).y2);
-          (node as Switch).dx = (node as Switch).screenX2 - node.screenX1;
-          (node as Switch).dy = (node as Switch).screenY2 - node.screenY1;
+          (node as Switch).midpointX = (node.screenX1 + (node as Switch).screenX2) / 2;
+          (node as Switch).midpointY = (node.screenY1 + (node as Switch).screenY2) / 2;
           categories.switches.push(node as Switch);
           break;
         case 'capacitor':
@@ -408,8 +407,8 @@ export class TopologyRenderer extends React.Component<Props, State> {
 
     switches.append('circle')
       .attr('class', node => `topology-renderer__canvas__node switch _${node.name}_`)
-      .attr('cx', node => (node.screenX1 + node.screenX2) / 2)
-      .attr('cy', node => (node.screenY1 + node.screenY2) / 2)
+      .attr('cx', node => node.midpointX)
+      .attr('cy', node => node.midpointY)
       .attr('r', nodeRadius)
       .attr('fill', '#000');
   }
@@ -625,6 +624,8 @@ export class TopologyRenderer extends React.Component<Props, State> {
     }
     const width = this._symbolDimensions.switch.width;
     const height = this._symbolDimensions.switch.height;
+    const halfWidth = width / 2;
+    const halfHeight = height / 2;
 
     const switches = container.append('g')
       .attr('class', 'switch-symbol-container')
@@ -632,22 +633,21 @@ export class TopologyRenderer extends React.Component<Props, State> {
       .data(switchNodes)
       .enter()
       .append('g')
-      .attr('class', 'topology-renderer__canvas__symbol switch')
-      .attr('transform', node => `translate(${node.screenX1},${node.screenY1})`);
+      .attr('class', 'topology-renderer__canvas__symbol switch');
 
     switches.append('line')
       .attr('class', 'topology-renderer__canvas__edge')
-      .attr('x1', 0)
-      .attr('y1', 0)
-      .attr('x2', node => node.dx)
-      .attr('y2', node => node.dy)
+      .attr('x1', node => node.screenX1)
+      .attr('y1', node => node.screenY1)
+      .attr('x2', node => node.screenX2)
+      .attr('y2', node => node.screenY2)
       .attr('stroke-width', '0.2')
       .attr('stroke', '#000');
 
     switches.append('rect')
       .attr('class', node => `topology-renderer__canvas__symbol switch _${node.name}_`)
-      .attr('x', node => (node.dx - width) / 2)
-      .attr('y', node => (node.dy - height) / 2)
+      .attr('x', node => node.midpointX - halfWidth)
+      .attr('y', node => node.midpointY - halfHeight)
       .attr('width', width)
       .attr('height', height)
       .attr('fill', node => node.open ? node.colorWhenOpen : node.colorWhenClosed)
@@ -660,9 +660,7 @@ export class TopologyRenderer extends React.Component<Props, State> {
           node.screenX2,
           node.screenY2
         );
-        const transformOriginX = (node.dx - width) / 2 + width / 2;
-        const transformOriginY = (node.dy - height) / 2 + height / 2;
-        return `rotate(${-angle},${transformOriginX},${transformOriginY})`;
+        return `rotate(${angle},${node.midpointX},${node.midpointY})`;
       });
   }
 

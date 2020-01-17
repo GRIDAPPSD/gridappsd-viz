@@ -229,23 +229,11 @@ export class TopologyRendererContainer extends React.Component<Props, State> {
           );
           break;
         case 'switches':
-          if (node.x1 > node.x2) {
-            const temp = node.x1;
-            node.x1 = node.x2;
-            node.x2 = temp;
-          }
-          if (node.y1 > node.y2) {
-            const temp = node.y1;
-            node.y1 = node.y2;
-            node.y2 = temp;
-          }
           const swjtch = this._createNewNode({
             ...node,
             name: node.name,
             type: 'switch',
             open: node.open === 'open',
-            x1: Math.trunc(node.x1 !== 0 ? node.x1 : node.x2),
-            y1: Math.trunc(node.y1 !== 0 ? node.y1 : node.y2),
             screenX2: 0,
             screenY2: 0,
             colorWhenOpen: '#4aff4a',
@@ -330,6 +318,7 @@ export class TopologyRendererContainer extends React.Component<Props, State> {
           break;
       }
     }
+    this._resolveCoordinatesInSwitches(allNodeMap);
     return renderableTopology;
   }
 
@@ -367,6 +356,25 @@ export class TopologyRendererContainer extends React.Component<Props, State> {
       type: 'unknown',
       ...properties
     } as Node;
+  }
+
+  private _resolveCoordinatesInSwitches(allNodeMap: Map<string, Node>) {
+    for (const swjtch of this._switches) {
+      const fromNode = allNodeMap.get(swjtch.from);
+      swjtch.x1 = Math.trunc(swjtch.x1);
+      swjtch.y1 = Math.trunc(swjtch.y1);
+      swjtch.x2 = Math.trunc(swjtch.x2);
+      swjtch.y2 = Math.trunc(swjtch.y2);
+      if (fromNode) {
+        swjtch.x1 = fromNode.x1;
+        swjtch.y1 = fromNode.y1;
+      }
+      const toNode = allNodeMap.get(swjtch.to);
+      if (toNode) {
+        swjtch.x2 = toNode.x1;
+        swjtch.y2 = toNode.y1;
+      }
+    }
   }
 
   private _toggleSwitchesOnOutputMeasurementsReceived() {
