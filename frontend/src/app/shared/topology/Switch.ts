@@ -9,8 +9,8 @@ export interface Switch extends Node {
   y2: number;
   screenX2: number;
   screenY2: number;
-  dx: number;
-  dy: number;
+  midpointX: number;
+  midpointY: number;
   colorWhenOpen: '#4aff4a';
   colorWhenClosed: '#f00';
 }
