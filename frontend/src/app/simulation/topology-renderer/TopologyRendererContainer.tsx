@@ -43,7 +43,6 @@ interface State {
   isFetching: boolean;
 }
 
-const renderableTopologyCache = new Map<string, RenderableTopology>();
 const topologyModelCache = new Map<string, TopologyModel>();
 
 export class TopologyRendererContainer extends React.Component<Props, State> {
@@ -94,12 +93,14 @@ export class TopologyRendererContainer extends React.Component<Props, State> {
           // If the user received a new simulation config object
           // and currently not in a simulation, they were the one that created
           // it. Otherwise, they received it by joining an active simulation,
-          // in this case, we don't want to render the topology
+          // in that case, we don't want to do anything here
           if (!this._simulationControlService.isUserInActiveSimulation()) {
             const lineName = simulation.config.power_system_config.Line_name;
-            if (this._useRenderableTopologyFromCache(lineName)) {
+            if (topologyModelCache.has(lineName)) {
+              const topologyModel = topologyModelCache.get(lineName);
+              this._processModelForRendering(topologyModel);
               this._simulationControlService.syncSimulationSnapshotState({
-                topologyModel: topologyModelCache.get(lineName)
+                topologyModel
               });
             } else {
               this._fetchTopologyModel(lineName);
@@ -107,19 +108,6 @@ export class TopologyRendererContainer extends React.Component<Props, State> {
           }
         }
       });
-  }
-
-  private _useRenderableTopologyFromCache(lineName: string) {
-    const topology = renderableTopologyCache.get(lineName);
-    if (!topology) {
-      return false;
-    }
-
-    this.setState({
-      topology,
-      isFetching: false
-    });
-    return true;
   }
 
   private _fetchTopologyModel(lineName: string) {
@@ -145,6 +133,7 @@ export class TopologyRendererContainer extends React.Component<Props, State> {
           this._simulationControlService.syncSimulationSnapshotState({
             topologyModel
           });
+          topologyModelCache.set(this.activeSimulationConfig.power_system_config.Line_name, topologyModel);
         }
       });
   }
@@ -152,13 +141,10 @@ export class TopologyRendererContainer extends React.Component<Props, State> {
   private _processModelForRendering(topologyModel: TopologyModel) {
     waitUntil(() => this.props.mRIDs.size > 0)
       .then(() => {
-        const renderableTopology = this._transformModelForRendering(topologyModel);
         this.setState({
-          topology: renderableTopology,
+          topology: this._transformModelForRendering(topologyModel),
           isFetching: false
         });
-        renderableTopologyCache.set(this.activeSimulationConfig.power_system_config.Line_name, renderableTopology);
-        topologyModelCache.set(this.activeSimulationConfig.power_system_config.Line_name, topologyModel);
       });
   }
 
@@ -397,24 +383,14 @@ export class TopologyRendererContainer extends React.Component<Props, State> {
     return this._simulationControlService.selectSimulationSnapshotState('topologyModel')
       .subscribe({
         next: (topologyModel: TopologyModel) => {
-          const modelMRID = topologyModel.feeders[0].mRID;
-          if (!renderableTopologyCache.has(modelMRID)) {
-            waitUntil(() => this.props.mRIDs.size > 0)
-              .then(() => {
-                const renderableTopology = this._transformModelForRendering(topologyModel);
-                this.setState({
-                  topology: renderableTopology,
-                  isFetching: false
-                });
-                renderableTopologyCache.set(modelMRID, renderableTopology);
-                topologyModelCache.set(modelMRID, topologyModel);
+          waitUntil(() => this.props.mRIDs.size > 0)
+            .then(() => {
+              this.setState({
+                topology: this._transformModelForRendering(topologyModel),
+                isFetching: false
               });
-          } else {
-            this.setState({
-              topology: renderableTopologyCache.get(modelMRID),
-              isFetching: false
+              topologyModelCache.set(topologyModel.feeders[0].mRID, topologyModel);
             });
-          }
         }
       });
   }

@@ -99,21 +99,21 @@ export class SimulationLabelsContainer extends React.Component<Props, State> {
           for (const [nodeName, phases] of Object.entries(nodeNames)) {
             let content = [];
             // getting values for taps
-            const measurementsAtPhases = [];
+            const tapMeasurementsAtPhases = [];
             measurements.forEach(measurement => {
               if (
                 measurement.conductingEquipmentName.includes(nodeName) &&
                 measurement.type === 'Pos' &&
                 phases.includes(measurement.phases) &&
                 // Discard measurements with duplicate phases
-                measurementsAtPhases.find(e => e.phases === measurement.phases) === undefined
+                tapMeasurementsAtPhases.find(e => e.phases === measurement.phases) === undefined
               ) {
-                measurementsAtPhases.push(measurement);
+                tapMeasurementsAtPhases.push(measurement);
               }
             });
 
             if (nodeName.includes('capbank') || nodeName.includes('c83')) {
-              content = measurementsAtPhases.map(node => (
+              content = tapMeasurementsAtPhases.map(node => (
                 <tr key={node.phases}>
                   <td>Switch {node.phases}</td>
                   <td>{node.value === 0 ? 'CLOSED' : 'OPEN'}</td>
@@ -122,33 +122,33 @@ export class SimulationLabelsContainer extends React.Component<Props, State> {
             }
             else {
               // get measurements for voltages
-              const voltagesAtPhases = [];
+              const voltageMeasurementsAtPhases = [];
               measurements.forEach(measurement => {
                 if (
-                  measurementsAtPhases[0].connectivityNode === measurement.connectivityNode &&
+                  tapMeasurementsAtPhases[0].connectivityNode === measurement.connectivityNode &&
                   measurement.type === 'PNV' &&
                   phases.includes(measurement.phases) &&
                   // Discard measurements with duplicate phases
-                  voltagesAtPhases.find(e => e.phases === measurement.phases) === undefined
+                  voltageMeasurementsAtPhases.find(e => e.phases === measurement.phases) === undefined
                 ) {
-                  voltagesAtPhases.push(measurement);
+                  voltageMeasurementsAtPhases.push(measurement);
                 }
               });
-              voltagesAtPhases.sort((a, b) => a.phases.localeCompare(b.phases));
+              voltageMeasurementsAtPhases.sort((a, b) => a.phases.localeCompare(b.phases));
 
-              const powersAtPhases = [];
+              const powerMeasurementsAtPhases = [];
               measurements.forEach(measurement => {
                 if (
                   measurement.conductingEquipmentName === 'hvmv_sub' &&
                   measurement.type === 'VA' &&
                   phases.includes(measurement.phases) &&
                   // Discard measurements with duplicate phases
-                  powersAtPhases.find(e => e.phases === measurement.phases) === undefined
+                  powerMeasurementsAtPhases.find(e => e.phases === measurement.phases) === undefined
                 ) {
-                  powersAtPhases.push(measurement);
+                  powerMeasurementsAtPhases.push(measurement);
                 }
               });
-              powersAtPhases.sort((a, b) => a.phases.localeCompare(b.phases));
+              powerMeasurementsAtPhases.sort((a, b) => a.phases.localeCompare(b.phases));
 
               content.push(
                 <tr key='header'>
@@ -158,34 +158,37 @@ export class SimulationLabelsContainer extends React.Component<Props, State> {
                   {nodeName === 'FEEDER_REG' && <th>Power in</th>}
                 </tr>
               );
-              const length = Math.max(measurementsAtPhases.length, voltagesAtPhases.length, powersAtPhases.length);
+              const length = Math.max(tapMeasurementsAtPhases.length, voltageMeasurementsAtPhases.length, powerMeasurementsAtPhases.length);
               for (let i = 0; i < length; i++) {
                 content.push(
                   <tr key={i}>
-                    <td>{measurementsAtPhases[i] && measurementsAtPhases[i].phases}</td>
+                    <td>{tapMeasurementsAtPhases[i] && tapMeasurementsAtPhases[i].phases}</td>
                     <td>
-                      {voltagesAtPhases[i] &&
+                      {
+                        voltageMeasurementsAtPhases[i]
+                        &&
                         <>
-                          {voltagesAtPhases[i].magnitude}
+                          {voltageMeasurementsAtPhases[i].magnitude}
                           <span>&ang;</span>
-                          {(voltagesAtPhases[i].angle > 0 ? '+' + voltagesAtPhases[i].angle : voltagesAtPhases[i].angle) + '  V'}
+                          {(voltageMeasurementsAtPhases[i].angle > 0 ? '+' + voltageMeasurementsAtPhases[i].angle : voltageMeasurementsAtPhases[i].angle) + '  V'}
                         </>
                       }
                     </td>
-                    <td>{measurementsAtPhases[i] && measurementsAtPhases[i].value}</td>
+                    <td>{tapMeasurementsAtPhases[i] && tapMeasurementsAtPhases[i].value}</td>
                     {
-                      nodeName === 'FEEDER_REG' &&
+                      nodeName === 'FEEDER_REG'
+                      &&
                       <td>
-                        {powersAtPhases[i] &&
+                        {powerMeasurementsAtPhases[i] &&
                           <>
-                            {powersAtPhases[i].magnitude}
+                            {powerMeasurementsAtPhases[i].magnitude}
                             <span>&ang;</span>
                           </>
                         }
-                        {voltagesAtPhases[i] &&
-                          (voltagesAtPhases[i].angle > 0
-                            ? '+' + voltagesAtPhases[i].angle
-                            : voltagesAtPhases[i].angle)
+                        {voltageMeasurementsAtPhases[i] &&
+                          (voltageMeasurementsAtPhases[i].angle > 0
+                            ? '+' + voltageMeasurementsAtPhases[i].angle
+                            : voltageMeasurementsAtPhases[i].angle)
                           + '  VA'
                         }
                       </td>
