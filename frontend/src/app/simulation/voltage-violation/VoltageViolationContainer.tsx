@@ -1,11 +1,12 @@
 import * as React from 'react';
-import { Subscription, zip } from 'rxjs';
-import { switchMap, map, filter, tap, takeWhile } from 'rxjs/operators';
+import { zip, Subject } from 'rxjs';
+import { switchMap, map, filter, takeWhile, takeUntil } from 'rxjs/operators';
 
 import { VoltageViolation } from './VoltageViolation';
 import { StompClientService } from '@shared/StompClientService';
 import { StateStore } from '@shared/state-store';
 import { SimulationControlService } from '@shared/simulation';
+import { SimulationStatus } from '@commons/SimulationStatus';
 
 interface Props {
 }
@@ -20,9 +21,7 @@ export class VoltageViolationContainer extends React.Component<Props, State> {
   private readonly _stompClientService = StompClientService.getInstance();
   private readonly _simulationControlService = SimulationControlService.getInstance();
   private readonly _stateStore = StateStore.getInstance();
-
-  private _voltageViolationSubscription: Subscription;
-  private _simulationSnapshotSubscription: Subscription;
+  private readonly _unsubscriber = new Subject<void>();
 
   constructor(props: Props) {
     super(props);
@@ -34,19 +33,14 @@ export class VoltageViolationContainer extends React.Component<Props, State> {
   }
 
   componentDidMount() {
-    this._voltageViolationSubscription = this._observeVoltageViolationChanges();
-    this._simulationSnapshotSubscription = this._readViolationsOnSimulationSnapshotReceived();
+    this._observeVoltageViolationChanges();
+    this._readViolationsOnSimulationSnapshotReceived();
+    this._clearAllViolationCountsWhenSimulationStarts();
   }
 
   private _observeVoltageViolationChanges() {
     return this._stateStore.select('simulationId')
       .pipe(
-        tap(() => {
-          this.setState({
-            totalVoltageViolations: -1,
-            violationsAtZero: -1
-          });
-        }),
         filter(id => id !== '' && this._simulationControlService.didUserStartActiveSimulation()),
         switchMap(id => this._stompClientService.readFrom(`/topic/goss.gridappsd.simulation.voltage_violation.${id}.output`)),
         takeWhile(this._simulationControlService.isUserInActiveSimulation),
@@ -84,9 +78,27 @@ export class VoltageViolationContainer extends React.Component<Props, State> {
       });
   }
 
+  private _clearAllViolationCountsWhenSimulationStarts() {
+    this._simulationControlService.statusChanges()
+      .pipe(
+        takeUntil(this._unsubscriber),
+        filter(status => status === SimulationStatus.STARTED && this._simulationControlService.didUserStartActiveSimulation())
+      )
+      .subscribe({
+        next: () => {
+          const newStates = {
+            totalVoltageViolations: -1,
+            violationsAtZero: -1
+          };
+          this.setState(newStates);
+          this._simulationControlService.syncSimulationSnapshotState(newStates);
+        }
+      });
+  }
+
   componentWillUnmount() {
-    this._voltageViolationSubscription.unsubscribe();
-    this._simulationSnapshotSubscription.unsubscribe();
+    this._unsubscriber.next();
+    this._unsubscriber.complete();
   }
 
   render() {

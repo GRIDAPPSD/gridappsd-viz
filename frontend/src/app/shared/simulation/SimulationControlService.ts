@@ -115,12 +115,10 @@ export class SimulationControlService {
       .pipe(filter(status => status === StompClientConnectionStatus.CONNECTING))
       .subscribe({
         next: () => {
-          this._simulationOutputSubscription?.unsubscribe();
-          this._simulationOutputSubscription = null;
-          this._stateStore.update({
-            simulationId: ''
-          });
-          this._currentSimulationId = '';
+          if (this._simulationOutputSubscription) {
+            this._simulationOutputSubscription.unsubscribe();
+            this._simulationOutputSubscription = null;
+          }
           if (this._currentSimulationStatus === SimulationStatus.STARTED)
             this.stopSimulation();
         }
@@ -218,14 +216,10 @@ export class SimulationControlService {
       }
       this._subscribeToStartSimulationTopic();
 
-      // Reset these states
+      // Reset this state
       this.syncSimulationSnapshotState({
-        totalVoltageViolations: -1,
-        violationsAtZero: -1,
-        measurementChartModels: [],
-        alarms: [],
         simulationOutput: null
-      } as SimulationSnapshot);
+      });
 
       // Let's wait for all the subscriptions in other components to this topic to complete
       // before sending the message
@@ -319,7 +313,6 @@ export class SimulationControlService {
       this._sendSimulationControlCommand('stop');
       this._didUserStartActiveSimulation = false;
       this._isUserInActiveSimulation = false;
-      this._currentSimulationId = '';
       this._syncingEnabled = false;
     }
   }

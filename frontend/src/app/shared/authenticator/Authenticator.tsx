@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { Observable } from 'rxjs';
 
 import { NotificationBanner } from '@shared/notification-banner';
 import { LoginScreen } from './views/login-screen/LoginScreen';
@@ -7,7 +8,7 @@ import { AuthenticationResult } from './models/AuthenticationResult';
 
 interface Props {
   authenticationResult: AuthenticationResult;
-  tryLogin: (username: string, password: string) => void;
+  tryLogin: (username: string, password: string) => Observable<AuthenticationResult>;
 }
 
 interface State {
@@ -77,8 +78,8 @@ export class Authenticator extends React.Component<Props, State> {
   }
 
   tryLogin(username: string, password: string) {
-    this.props.tryLogin(username, password);
     this._abortAnimatingFailedLoginNotificationBanner();
+    return this.props.tryLogin(username, password);
   }
 
   private _abortAnimatingFailedLoginNotificationBanner() {

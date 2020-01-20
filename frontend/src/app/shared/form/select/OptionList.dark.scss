@@ -1,6 +1,15 @@
 @import '@constants.dark';
 @import 'OptionList.common';
 
+.option-list::-webkit-scrollbar {
+    background: $theme-color;
+    box-shadow: 0 0 3px #808080 inset;
+}
+
+ul.option-list::-webkit-scrollbar-thumb {
+    background-color: $primary-color;
+}
+
 .option-list__option {
     color: $primary-text-color;
 
