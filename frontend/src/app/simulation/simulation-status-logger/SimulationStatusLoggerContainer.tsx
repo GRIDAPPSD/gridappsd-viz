@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Subscription } from 'rxjs';
+import { Subject } from 'rxjs';
 import { filter, switchMap, tap, takeWhile, finalize, takeUntil } from 'rxjs/operators';
 
 import { SimulationStatusLogger } from './SimulationStatusLogger';
@@ -24,7 +24,7 @@ export class SimulationStatusLogContainer extends React.Component<Props, State> 
   private readonly _stompClientService = StompClientService.getInstance();
   private readonly _simulationControlService = SimulationControlService.getInstance();
   private readonly _stateStore = StateStore.getInstance();
-  private _statusLogMessageStreamSubscription: Subscription;
+  private readonly _unsubscriber = new Subject<void>();
 
   constructor(props: Props) {
     super(props);
@@ -38,17 +38,19 @@ export class SimulationStatusLogContainer extends React.Component<Props, State> 
   }
 
   componentDidMount() {
-    this._statusLogMessageStreamSubscription = this._subscribeToSimulationStatusLogMessageStream();
+    this._subscribeToSimulationStatusLogMessageStream();
+    this._clearAllLogMessagesWhenSimulationStarts();
   }
 
   private _subscribeToSimulationStatusLogMessageStream() {
-    return this._stompClientService.statusChanges()
+    this._stompClientService.statusChanges()
       .pipe(
         tap(() => {
           this.setState({
             isFetching: false
           });
         }),
+        takeUntil(this._unsubscriber),
         filter(status => status === StompClientConnectionStatus.CONNECTED),
         switchMap(() => this._stateStore.select('simulationId')),
         filter(simulationId => simulationId !== ''),
@@ -61,7 +63,6 @@ export class SimulationStatusLogContainer extends React.Component<Props, State> 
 
   private _newObservableForLogMessages(simulationId: string) {
     this.setState({
-      logMessages: [],
       isFetching: true
     });
     return this._stompClientService.readFrom(`${SIMULATION_STATUS_LOG_TOPIC}.${simulationId}`)
@@ -71,6 +72,7 @@ export class SimulationStatusLogContainer extends React.Component<Props, State> 
           this._simulationControlService.statusChanges()
             .pipe(filter(status => status === SimulationStatus.STOPPED))
         ),
+        takeUntil(this._unsubscriber),
         finalize(() => {
           this.setState({
             isFetching: false
@@ -86,8 +88,24 @@ export class SimulationStatusLogContainer extends React.Component<Props, State> 
     });
   }
 
+  private _clearAllLogMessagesWhenSimulationStarts() {
+    this._simulationControlService.statusChanges()
+      .pipe(
+        filter(status => status === SimulationStatus.STARTED && this._simulationControlService.didUserStartActiveSimulation())
+      )
+      .subscribe({
+        next: () => {
+          this.setState({
+            logMessages: [],
+            isFetching: true
+          });
+        }
+      });
+  }
+
   componentWillUnmount() {
-    this._statusLogMessageStreamSubscription.unsubscribe();
+    this._unsubscriber.next();
+    this._unsubscriber.complete();
   }
 
   render() {

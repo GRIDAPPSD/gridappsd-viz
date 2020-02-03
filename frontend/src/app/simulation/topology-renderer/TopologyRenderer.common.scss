@@ -43,6 +43,10 @@
     color: #ffa500;
 }
 
+foreignObject.topology-renderer__canvas__symbol {
+    pointer-events: none;
+}
+
 .topology-renderer__canvas__symbol.capacitor,
 .topology-renderer__canvas__symbol.transformer,
 .topology-renderer__canvas__symbol.regulator,

@@ -149,7 +149,7 @@ function updateVersion() {
 function writeVersionNumber(versionNumber) {
   const configFilePath = path.resolve(__dirname, '..', 'config.json')
   const config = JSON.parse(fs.readFileSync(configFilePath).toString());
-  config.version = versionNumber;
+  config.version = versionNumber.trim();
   fs.writeFileSync(configFilePath, JSON.stringify(config, null, 4));
 }
 

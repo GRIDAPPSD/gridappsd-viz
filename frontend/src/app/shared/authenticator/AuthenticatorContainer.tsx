@@ -1,10 +1,11 @@
 import * as React from 'react';
 import { Subscription } from 'rxjs';
+import { tap } from 'rxjs/operators';
 
 import { Authenticator } from './Authenticator';
 import { AuthenticatorService } from './services/AuthenticatorService';
-import { AuthenticationResult } from './models/AuthenticationResult';
 import { AuthenticationStatusCode } from './models/AuthenticationStatusCode';
+import { AuthenticationResult } from './models/AuthenticationResult';
 
 interface Props {
 }
@@ -23,37 +24,27 @@ export class AuthenticatorContainer extends React.Component<Props, State> {
     super(props);
 
     this.state = {
-      authenticationResult: this._login()
+      authenticationResult: {
+        statusCode: this._authenticatorService.isAuthenticated()
+          ? AuthenticationStatusCode.OK
+          : AuthenticationStatusCode.UKNOWN
+      }
     };
 
     this.tryLogin = this.tryLogin.bind(this);
-  }
-
-  private _login() {
-    if (this._authenticatorService.isAuthenticated())
-      return {
-        statusCode: AuthenticationStatusCode.OK
-      };
-    return {
-      statusCode: AuthenticationStatusCode.UKNOWN
-    };
   }
 
   componentDidMount() {
     this._sessionSubscription = this._authenticatorService.sessionEnded()
       .subscribe({
         next: () => {
-          this._logout();
+          this.setState({
+            authenticationResult: {
+              statusCode: AuthenticationStatusCode.UKNOWN
+            }
+          });
         }
       });
-  }
-
-  private _logout() {
-    this.setState({
-      authenticationResult: {
-        statusCode: AuthenticationStatusCode.UKNOWN
-      }
-    });
   }
 
   componentWillUnmount() {
@@ -71,19 +62,14 @@ export class AuthenticatorContainer extends React.Component<Props, State> {
   }
 
   tryLogin(username: string, password: string) {
-    this._authenticatorService.authenticate(username, password)
-      .subscribe({
-        next: authenticationResult => {
+    return this._authenticatorService.authenticate(username, password)
+      .pipe(
+        tap(authenticationResult => {
           this.setState({
             authenticationResult
           });
-        },
-        error: authenticationResult => {
-          this.setState({
-            authenticationResult
-          });
-        }
-      });
+        })
+      );
   }
 
 }

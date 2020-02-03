@@ -99,6 +99,11 @@ export class MeasurementChartContainer extends React.Component<Props, State> {
       this.setState({
         measurementChartModels
       });
+      if (this._simulationControlService.didUserStartActiveSimulation()) {
+        this._simulationControlService.syncSimulationSnapshotState({
+          measurementChartModels
+        });
+      }
     }
   }
 
@@ -195,7 +200,7 @@ export class MeasurementChartContainer extends React.Component<Props, State> {
     this._simulationControlService.statusChanges()
       .pipe(
         takeUntil(this._unsubscriber),
-        filter(status => status === SimulationStatus.STARTED && this._simulationControlService.isUserInActiveSimulation())
+        filter(status => status === SimulationStatus.STARTED && this._simulationControlService.didUserStartActiveSimulation())
       )
       .subscribe({
         next: () => this._updateMeasurementChartModels(true)
