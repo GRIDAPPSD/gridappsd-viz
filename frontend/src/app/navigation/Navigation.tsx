@@ -10,6 +10,7 @@ import { WebSocketConnectedIndicator } from './views/websocket-connected-indicat
 import { SimulationConfiguration, Simulation } from '@shared/simulation';
 import { StompClientConnectionStatus } from '@shared/StompClientService';
 import { IconButton } from '@shared/buttons';
+import { Restricted } from '@shared/authenticator';
 
 import './Navigation.light.scss';
 import './Navigation.dark.scss';
@@ -72,10 +73,12 @@ export class Navigation extends React.Component<Props, {}> {
               }
             </DrawerItemGroup>
           }
+          <Restricted roles={['testmanager']}>
           <DrawerItem onClick={() => this.props.onShowSimulationConfigForm(null)}>
             <DrawerItemIcon icon='assignment' />
             <DrawerItemLabel value='Configure New Simulation' />
           </DrawerItem>
+          </Restricted>
           {
             this.props.previousSimulations.length > 0
             &&
