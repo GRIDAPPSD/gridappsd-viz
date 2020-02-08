@@ -12,6 +12,7 @@ import { SimulationStatus } from '@commons/SimulationStatus';
 
 interface Props {
   onNewAlarmsConfirmed: () => void;
+  onLocateNodeForAlarm: (alarm: Alarm) => void;
 }
 
 interface State {
@@ -115,6 +116,7 @@ export class AlarmsContainer extends React.Component<Props, State> {
       <>
         <Alarms
           alarms={this.state.alarms}
+          onLocateNodeForAlarm={this.props.onLocateNodeForAlarm}
           onAcknowledgeAlarm={this.acknowledgeAlarm} />
         <NewAlarmNotification
           newAlarmCounts={this.state.newAlarmCounts}

@@ -45,7 +45,7 @@ export class NavigationContainer extends React.Component<Props, State> {
 
   componentDidMount() {
     this._subscribeToActiveSimulationIdsStateStoreChange();
-    this._subscribeToAllSimulationsQueueSteam();
+    this._subscribeToAllSimulationQueueStream();
     this._subscribeToStompClientStatusChanges();
     this._subscribeToConfigurationChanges();
   }
@@ -58,7 +58,7 @@ export class NavigationContainer extends React.Component<Props, State> {
       });
   }
 
-  private _subscribeToAllSimulationsQueueSteam(): Subscription {
+  private _subscribeToAllSimulationQueueStream(): Subscription {
     return this._simulationQueue.queueChanges()
       .pipe(
         takeUntil(this._unsubscriber),

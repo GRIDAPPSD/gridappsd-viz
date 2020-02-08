@@ -5,14 +5,15 @@ import { IconButton } from '@shared/buttons';
 import { Tooltip } from '@shared/tooltip';
 import { Ripple } from '@shared/ripple';
 import { copyToClipboard } from '@shared/misc';
+import { DateTimeService } from '@shared/DateTimeService';
 
 import './Alarms.light.scss';
 import './Alarms.dark.scss';
-import { DateTimeService } from '@shared/DateTimeService';
 
 interface Props {
-  onAcknowledgeAlarm: (alarm: Alarm) => void;
   alarms: Alarm[];
+  onAcknowledgeAlarm: (alarm: Alarm) => void;
+  onLocateNodeForAlarm: (alarm: Alarm) => void;
 }
 
 interface State {
@@ -65,27 +66,39 @@ export class Alarms extends React.Component<Props, State> {
     return (
       <tr key={index}>
         <td>{index + 1}</td>
-        <td className='alarm-action'>
+        <td>
           <Tooltip content='Acknowledge'>
             <IconButton
+              className='alarms__action'
               icon='check'
               size='small'
               onClick={() => this.props.onAcknowledgeAlarm(alarm)} />
+          </Tooltip>
+          <Tooltip content='Locate node'>
+            <IconButton
+              className='alarms__action'
+              icon='search'
+              size='small'
+              onClick={() => this.props.onLocateNodeForAlarm(alarm)} />
           </Tooltip>
         </td>
         <td>
           {this.dateTimeFormatter.format(alarm.timestamp)}
         </td>
-        <Ripple>
-          <td onClick={() => copyToClipboard(alarm.equipment_mrid)}>
-            {alarm.equipment_mrid}
-          </td>
-        </Ripple>
-        <Ripple>
-          <td onClick={() => copyToClipboard(alarm.equipment_name)}>
-            {alarm.equipment_name}
-          </td>
-        </Ripple>
+        <Tooltip content='Copy MRID to clipboard'>
+          <Ripple>
+            <td onClick={() => copyToClipboard(alarm.equipment_mrid)}>
+              {alarm.equipment_mrid}
+            </td>
+          </Ripple>
+        </Tooltip>
+        <Tooltip content='Copy equipment name to clipboard'>
+          <Ripple>
+            <td onClick={() => copyToClipboard(alarm.equipment_name)}>
+              {alarm.equipment_name}
+            </td>
+          </Ripple>
+        </Tooltip>
         <td className={`alarms__created-by color-${createdByIndex}`}>{alarm.created_by}</td>
         <td>{alarm.value}</td>
       </tr>

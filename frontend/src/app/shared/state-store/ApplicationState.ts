@@ -16,4 +16,5 @@ export interface ApplicationState {
   modelDictionaryComponentsWithGroupedPhases: ModelDictionaryComponent[];
   plotModels: PlotModel[];
   activeSimulationIds: string[];
+  nodeNameToLocate: string;
 }

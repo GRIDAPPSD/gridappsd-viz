@@ -74,10 +74,10 @@ export class Navigation extends React.Component<Props, {}> {
             </DrawerItemGroup>
           }
           <Restricted roles={['testmanager']}>
-          <DrawerItem onClick={() => this.props.onShowSimulationConfigForm(null)}>
-            <DrawerItemIcon icon='assignment' />
-            <DrawerItemLabel value='Configure New Simulation' />
-          </DrawerItem>
+            <DrawerItem onClick={() => this.props.onShowSimulationConfigForm(null)}>
+              <DrawerItemIcon icon='assignment' />
+              <DrawerItemLabel value='Configure New Simulation' />
+            </DrawerItem>
           </Restricted>
           {
             this.props.previousSimulations.length > 0
