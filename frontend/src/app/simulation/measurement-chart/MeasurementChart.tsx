@@ -5,6 +5,7 @@ import { axisBottom, axisLeft, Axis } from 'd3-axis';
 import { line, Line } from 'd3-shape';
 import { extent } from 'd3-array';
 import { timeFormat } from 'd3-time-format';
+import { format as numberFormat } from 'd3-format';
 
 import { MeasurementChartModel } from './models/MeasurementChartModel';
 import { TimeSeriesDataPoint } from './models/TimeSeriesDataPoint';
@@ -29,7 +30,6 @@ export class MeasurementChart extends React.Component<Props, State> {
     left: 70,
     right: 10
   };
-  readonly lineGenerator: Line<TimeSeriesDataPoint>;
 
   canvas: SVGSVGElement = null;
 
@@ -37,6 +37,7 @@ export class MeasurementChart extends React.Component<Props, State> {
   private readonly _yScale: ScaleLinear<number, number>;
   private readonly _xAxisGenerator: Axis<Date>;
   private readonly _yAxisGenerator: Axis<number>;
+  private readonly _lineGenerator: Line<TimeSeriesDataPoint>;
 
   private _container: Selection<SVGElement, any, SVGElement, any>;
   private _xAxis: Selection<SVGElement, any, SVGElement, any>;
@@ -52,14 +53,15 @@ export class MeasurementChart extends React.Component<Props, State> {
       .domain([Infinity, -Infinity])
       .range([this.height - this.margin.bottom, this.margin.top]);
 
-    this.lineGenerator = line<TimeSeriesDataPoint>()
+    this._lineGenerator = line<TimeSeriesDataPoint>()
       .x(dataPoint => this._xScale(dataPoint.timestamp))
       .y(dataPoint => this._yScale(dataPoint.measurement));
 
     this._xAxisGenerator = axisBottom<Date>(this._xScale)
       .tickFormat(timeFormat('%H:%M:%S'));
 
-    this._yAxisGenerator = axisLeft<number>(this._yScale);
+    this._yAxisGenerator = axisLeft<number>(this._yScale)
+      .tickFormat(numberFormat(',.7'));
   }
 
   componentDidMount() {
@@ -115,15 +117,14 @@ export class MeasurementChart extends React.Component<Props, State> {
   private _renderTimeSeriesLineCharts() {
     this._container.selectAll('.measurement-chart__canvas__time-series-line')
       .data(this.props.measurementChartModel.timeSeries)
-      .join(
-        enter => enter.append('path').attr('class', 'measurement-chart__canvas__time-series-line')
-      )
-      .attr('d', timeSeries => this.lineGenerator(timeSeries.points));
+      .join(enter => enter.append('path').attr('class', 'measurement-chart__canvas__time-series-line'))
+      .attr('d', timeSeries => this._lineGenerator(timeSeries.points));
   }
 
   componentDidUpdate(prevProps: Props) {
-    if (prevProps.measurementChartModel !== this.props.measurementChartModel)
+    if (prevProps.measurementChartModel !== this.props.measurementChartModel) {
       this._render();
+    }
   }
 
   render() {
