@@ -1,11 +1,12 @@
 import * as React from 'react';
 import { extent } from 'd3-array';
 import { line } from 'd3-shape';
-import { zoom, zoomIdentity, zoomTransform } from 'd3-zoom';
-import { select, event as currentEvent, Selection, create } from 'd3-selection';
+import { select, Selection, create } from 'd3-selection';
 import { scaleLinear, ScaleLinear } from 'd3';
+import { Subject } from 'rxjs';
+import { takeUntil, filter } from 'rxjs/operators';
 
-import { MapTransformWatcherService } from '@shared/MapTransformWatcherService';
+import { CanvasTransformService } from '@shared/CanvasTransformService';
 import { Switch, Capacitor, Node, Edge, Regulator, Transformer } from '@shared/topology';
 import { Tooltip } from '@shared/tooltip';
 import { OverlayService } from '@shared/overlay';
@@ -17,6 +18,7 @@ import { IconButton } from '@shared/buttons';
 import { NodeSearcher } from './views/node-searcher/NodeSearcher';
 import { MatchedNodeLocator } from './views/matched-node-locator/MatchedNodeLocator';
 import { NotificationBanner } from '@shared/notification-banner';
+import { StateStore } from '@shared/state-store';
 
 import './TopologyRenderer.light.scss';
 import './TopologyRenderer.dark.scss';
@@ -40,11 +42,10 @@ const symbolSize = 35;
 export class TopologyRenderer extends React.Component<Props, State> {
 
   readonly overlay = OverlayService.getInstance();
+  readonly canvasTransformService = CanvasTransformService.getInstance();
 
   svg: SVGSVGElement = null;
 
-  private readonly _transformWatcherService = MapTransformWatcherService.getInstance();
-  private readonly _zoomer = zoom<SVGElement, any>();
   private readonly _edgeGenerator = line<Node>()
     .x(node => node.screenX1)
     .y(node => node.screenY1);
@@ -64,11 +65,14 @@ export class TopologyRenderer extends React.Component<Props, State> {
   };
   private readonly _xScale: ScaleLinear<number, number> = scaleLinear();
   private readonly _yScale: ScaleLinear<number, number> = scaleLinear();
+  private readonly _stateStore = StateStore.getInstance();
+  private readonly _unsubscriber = new Subject<void>();
 
-  private _canvas: Selection<SVGSVGElement, any, any, any> = null;
-  private _container: Selection<SVGGElement, any, any, any> = null;
+  private _svgSelection: Selection<SVGElement, any, any, any> = null;
+  private _containerSelection: Selection<SVGElement, any, any, any> = null;
   private _showNodeSymbols = false;
   private _tooltip: Tooltip;
+  private _timer: any;
 
   constructor(props: Props) {
     super(props);
@@ -82,7 +86,6 @@ export class TopologyRenderer extends React.Component<Props, State> {
     this.showMenuOnComponentClicked = this.showMenuOnComponentClicked.bind(this);
     this.showTooltip = this.showTooltip.bind(this);
     this.hideTooltip = this.hideTooltip.bind(this);
-    this.reset = this.reset.bind(this);
     this.showNodeSearcher = this.showNodeSearcher.bind(this);
     this.onNodeSearcherClosed = this.onNodeSearcherClosed.bind(this);
     this.locateNode = this.locateNode.bind(this);
@@ -92,6 +95,8 @@ export class TopologyRenderer extends React.Component<Props, State> {
 
   componentWillUnmount() {
     this.hideTooltip();
+    this._unsubscriber.next();
+    this._unsubscriber.complete();
   }
 
   componentDidMount() {
@@ -102,14 +107,27 @@ export class TopologyRenderer extends React.Component<Props, State> {
     this.svg.setAttribute('viewBox', `0 0 ${canvasBoundingBox.width} ${canvasBoundingBox.height}`);
     this._xScale.range([spacing, canvasBoundingBox.width - spacing]);
     this._yScale.range([spacing, canvasBoundingBox.height - spacing]);
-    this._canvas = select<SVGSVGElement, any>(this.svg)
-      .call(this._zoomer);
-    this._container = this._canvas.select<SVGGElement>('.topology-renderer__canvas__container');
-    this._zoomer.on('zoom', () => {
-      this._container.attr('transform', currentEvent.transform);
-      this._toggleNodeSymbols(currentEvent.transform.k);
-      this._transformWatcherService.notify();
-    });
+    this._svgSelection = this.canvasTransformService.bindToSvgCanvas(this.svg);
+    this._containerSelection = this._svgSelection.select<SVGGElement>('.topology-renderer__canvas__container');
+    this.canvasTransformService.onTransformed()
+      .pipe(takeUntil(this._unsubscriber))
+      .subscribe({
+        next: () => {
+          const currentTransform = this.canvasTransformService.getCurrentTransform();
+          this._containerSelection.attr('transform', currentTransform.toString());
+          this._toggleNodeSymbols(currentTransform.k);
+        }
+      });
+    this._stateStore.select('nodeNameToLocate')
+      .pipe(
+        takeUntil(this._unsubscriber),
+        filter(nodeName => nodeName !== '')
+      )
+      .subscribe({
+        next: nodeName => {
+          this.locateNode(this.props.topology.nodes.find(node => node.name === nodeName));
+        }
+      });
   }
 
   private _toggleNodeSymbols(currentTransformScaleDegree: number) {
@@ -136,16 +154,16 @@ export class TopologyRenderer extends React.Component<Props, State> {
   }
 
   private _showSymbols() {
-    this._container.select('.topology-renderer__canvas__symbol-containers')
+    this._containerSelection.select('.topology-renderer__canvas__symbol-containers')
       .style('visibility', 'visible');
-    this._container.select('.topology-renderer__canvas__known-node-containers')
+    this._containerSelection.select('.topology-renderer__canvas__known-node-containers')
       .style('visibility', 'hidden');
   }
 
   private _hideSymbols() {
-    this._container.select('.topology-renderer__canvas__symbol-containers')
+    this._containerSelection.select('.topology-renderer__canvas__symbol-containers')
       .style('visibility', 'hidden');
-    this._container.select('.topology-renderer__canvas__known-node-containers')
+    this._containerSelection.select('.topology-renderer__canvas__known-node-containers')
       .style('visibility', 'visible');
   }
 
@@ -179,7 +197,7 @@ export class TopologyRenderer extends React.Component<Props, State> {
 
     const categories = this._categorizeNodes(topology.nodes);
 
-    this._container.selectAll('g')
+    this._containerSelection.selectAll('g')
       .remove();
 
     this._renderEdges(topology.edges);
@@ -194,7 +212,7 @@ export class TopologyRenderer extends React.Component<Props, State> {
       );
       const unknownNodeContainer = container.select(':first-child')
         .attr('style', 'visibility: visible') as Selection<SVGElement, any, SVGElement, any>;
-      this._container.node()
+      this._containerSelection.node()
         .appendChild(unknownNodeContainer.node());
     }
 
@@ -267,9 +285,9 @@ export class TopologyRenderer extends React.Component<Props, State> {
     );
     this._renderSwitchSymbols(symbolContainers, categories.switches);
 
-    this._container.node()
+    this._containerSelection.node()
       .appendChild(knownNodeContainers.node());
-    this._container.node()
+    this._containerSelection.node()
       .appendChild(symbolContainers.node());
   }
 
@@ -360,7 +378,7 @@ export class TopologyRenderer extends React.Component<Props, State> {
       documentFragment.appendChild(edge.node());
     }
 
-    this._container.append('g')
+    this._containerSelection.append('g')
       .attr('class', 'topology-renderer__canvas__edge-container')
       .node()
       .appendChild(documentFragment);
@@ -700,7 +718,7 @@ export class TopologyRenderer extends React.Component<Props, State> {
                 icon='refresh'
                 size='small'
                 style='accent'
-                onClick={this.reset} />
+                onClick={this.canvasTransformService.reset} />
             </Tooltip>
           </div>
           <div className='topology-renderer__toolbox'>
@@ -805,23 +823,32 @@ export class TopologyRenderer extends React.Component<Props, State> {
 
   showTooltip(event: React.SyntheticEvent) {
     const target = select(event.target as SVGElement);
-    if (target.classed('topology-renderer__canvas__node') || target.classed('topology-renderer__canvas__symbol')) {
-      let content = '';
-      const node = target.datum() as Node;
-      switch (node.type) {
-        case 'capacitor':
-          content = 'Capacitor: ' + node.name;
-          break;
-        case 'regulator':
-          content = 'Regulator: ' + node.name;
-          break;
-        default:
-          content = `${this._capitalize(node.type)}: ${node.name} (${node.x1}, ${node.y1})`;
-          break;
-      }
-      this._tooltip = new Tooltip({ position: 'bottom', content });
-      this._tooltip.showAt(target.node() as any);
-    }
+    this._timeout(250)
+      .then(() => {
+        if (target.classed('topology-renderer__canvas__node') || target.classed('topology-renderer__canvas__symbol')) {
+          let content = '';
+          const node = target.datum() as Node;
+          switch (node.type) {
+            case 'capacitor':
+              content = 'Capacitor: ' + node.name;
+              break;
+            case 'regulator':
+              content = 'Regulator: ' + node.name;
+              break;
+            default:
+              content = `${this._capitalize(node.type)}: ${node.name} (${node.x1}, ${node.y1})`;
+              break;
+          }
+          this._tooltip = new Tooltip({ position: 'bottom', content });
+          this._tooltip.showAt(target.node() as any);
+        }
+      });
+  }
+
+  private _timeout(duration: number) {
+    return new Promise(resolve => {
+      this._timer = setTimeout(resolve, duration);
+    });
   }
 
   private _capitalize(value: string) {
@@ -829,12 +856,9 @@ export class TopologyRenderer extends React.Component<Props, State> {
   }
 
   hideTooltip() {
+    clearTimeout(this._timer);
     this._tooltip?.hide();
     this._tooltip = null;
-  }
-
-  reset() {
-    this._zoomer.transform(this._canvas.transition(), zoomIdentity);
   }
 
   showNodeSearcher() {
@@ -850,36 +874,18 @@ export class TopologyRenderer extends React.Component<Props, State> {
   }
 
   locateNode(node: Node) {
-    let currentTransform = zoomTransform(this._canvas.node());
-    let currentZoom = 1;
-    if (currentTransform.k < 3) {
-      // Zoom in 3 degrees
-      currentZoom = this._isModelLarge() ? 6 : 3;
-      currentTransform = currentTransform.scale((1 / currentTransform.k) * currentZoom);
-    } else {
-      currentZoom = currentTransform.k;
-    }
-    this._zoomer.transform(this._canvas, currentTransform);
-
-    // Reset the zoom level to 1
-    currentTransform = currentTransform.scale(1 / currentZoom);
-
-    const canvasBoundingBox = this.svg.getBoundingClientRect();
-    const elementForNode = this.svg.querySelector(`.topology-renderer__canvas__node.${node.type}._${node.name}_`) as SVGCircleElement;
-    if (elementForNode) {
-      const nodeBoundingBox = elementForNode.getBoundingClientRect();
-      const centerX = (canvasBoundingBox.left + (this.svg.clientWidth / 2)) - nodeBoundingBox.left;
-      const centerY = (canvasBoundingBox.top + (this.svg.clientHeight / 2)) - nodeBoundingBox.top;
-
-      currentTransform = currentTransform.translate(centerX, centerY);
-      currentTransform = currentTransform.scale(currentZoom);
-      const transformTransition = this._canvas.transition()
-        .on('end', () => {
+    const locatedElement = this.svg.querySelector(`.topology-renderer__canvas__node.${node.type}._${node.name}_`) as SVGCircleElement;
+    if (locatedElement) {
+      if (this.canvasTransformService.getCurrentZoomLevel() < 3) {
+        this.canvasTransformService.setZoomLevel(this._isModelLarge() ? 6 : 3);
+      }
+      const nodeBoundingBox = locatedElement.getBoundingClientRect();
+      this.canvasTransformService.zoomToPosition(nodeBoundingBox.left, nodeBoundingBox.top)
+        .then(() => {
           this.setState({
-            nodeToLocate: elementForNode
+            nodeToLocate: locatedElement
           });
         });
-      this._zoomer.transform(transformTransition, currentTransform);
       return true;
     } else {
       this.setState({
@@ -887,7 +893,6 @@ export class TopologyRenderer extends React.Component<Props, State> {
       });
       return false;
     }
-
   }
 
 }

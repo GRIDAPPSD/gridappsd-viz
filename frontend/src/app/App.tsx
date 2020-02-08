@@ -20,12 +20,14 @@ import { AvailableApplicationList } from './simulation/applications/AvailableApp
 import { VoltageViolationContainer } from './simulation/voltage-violation/VoltageViolationContainer';
 import { NavigationContainer } from './navigation';
 import { Authenticator } from '@shared/authenticator';
-import { AlarmsContainer } from './simulation/alarms';
+import { AlarmsContainer, Alarm } from './simulation/alarms';
 import { Settings } from './settings';
 import { NotificationBanner } from '@shared/notification-banner';
 import { ThreeDots } from '@shared/three-dots';
 import { OverlayService } from '@shared/overlay';
 import { StompClientConnectionStatus } from '@shared/StompClientService';
+import { StateStore } from '@shared/state-store';
+import { waitUntil } from '@shared/misc';
 
 import './App.light.scss';
 import './App.dark.scss';
@@ -50,6 +52,8 @@ export const App = (withRouter as any)(class extends React.Component<Props, Stat
 
   readonly overlayService = OverlayService.getInstance();
 
+  private readonly _stateStore = StateStore.getInstance();
+
   shouldRedirect = false;
   tabGroup: TabGroup;
 
@@ -58,6 +62,7 @@ export const App = (withRouter as any)(class extends React.Component<Props, Stat
 
     this.showSimulationConfigForm = this.showSimulationConfigForm.bind(this);
     this.onJoinActiveSimulation = this.onJoinActiveSimulation.bind(this);
+    this.onLocateNodeForAlarm = this.onLocateNodeForAlarm.bind(this);
   }
 
   componentDidCatch() {
@@ -100,7 +105,9 @@ export const App = (withRouter as any)(class extends React.Component<Props, Stat
                           <AvailableApplicationList />
                         </Tab>
                         <Tab label='Alarms'>
-                          <AlarmsContainer onNewAlarmsConfirmed={() => this.tabGroup.setSelectedTabIndex(3)} />
+                          <AlarmsContainer
+                            onNewAlarmsConfirmed={() => this.tabGroup.setSelectedTabIndex(3)}
+                            onLocateNodeForAlarm={this.onLocateNodeForAlarm} />
                         </Tab>
                       </TabGroup>
                     </div>
@@ -160,6 +167,16 @@ export const App = (withRouter as any)(class extends React.Component<Props, Stat
   onJoinActiveSimulation(simulationId: string) {
     this.props.history.push('/simulation');
     this.props.onJoinActiveSimulation(simulationId);
+  }
+
+  onLocateNodeForAlarm(alarm: Alarm) {
+    this.tabGroup.setSelectedTabIndex(0);
+    waitUntil(() => this.tabGroup.isTabVisible(0))
+      .then(() => {
+        this._stateStore.update({
+          nodeNameToLocate: alarm.equipment_name
+        });
+      });
   }
 
 });

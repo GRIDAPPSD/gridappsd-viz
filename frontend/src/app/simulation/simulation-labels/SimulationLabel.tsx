@@ -1,11 +1,11 @@
 import * as React from 'react';
 import { Subscription } from 'rxjs';
 
-import { MapTransformWatcherService } from '@shared/MapTransformWatcherService';
+import { CanvasTransformService } from '@shared/CanvasTransformService';
+import { waitUntil } from '@shared/misc';
 
 import './SimulationLabel.light.scss';
 import './SimulationLabel.dark.scss';
-import { waitUntil } from '@shared/misc';
 
 interface Props {
   nodeNameToAttachTo: string;
@@ -20,7 +20,7 @@ export class SimulationLabel extends React.Component<Props, State> {
 
   simulationLabel: HTMLDivElement;
 
-  private readonly _transformWatcherService = MapTransformWatcherService.getInstance();
+  private readonly _canvasTransformService = CanvasTransformService.getInstance();
   private _anchorNodeTransformWatcher: Subscription;
 
   constructor(props: Props) {
@@ -65,7 +65,7 @@ export class SimulationLabel extends React.Component<Props, State> {
   }
 
   private _repositionLabelWhenMapIsTransformed() {
-    this._anchorNodeTransformWatcher = this._transformWatcherService.observe()
+    this._anchorNodeTransformWatcher = this._canvasTransformService.onTransformed()
       .subscribe(() => {
         this.setState(this._calculateAnchorPosition());
       });
