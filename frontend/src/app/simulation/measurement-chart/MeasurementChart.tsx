@@ -9,6 +9,7 @@ import { format as numberFormat } from 'd3-format';
 
 import { MeasurementChartModel } from './models/MeasurementChartModel';
 import { TimeSeriesDataPoint } from './models/TimeSeriesDataPoint';
+import { TimeSeries } from './models/TimeSeries';
 
 import './MeasurementChart.light.scss';
 import './MeasurementChart.dark.scss';
@@ -18,6 +19,7 @@ interface Props {
 }
 
 interface State {
+  overlappingTimeSeries: TimeSeries[];
 }
 
 export class MeasurementChart extends React.Component<Props, State> {
@@ -46,6 +48,10 @@ export class MeasurementChart extends React.Component<Props, State> {
   constructor(props: Props) {
     super(props);
 
+    this.state = {
+      overlappingTimeSeries: []
+    };
+
     this._xScale = scaleTime()
       .range([this.margin.left, this.width - this.margin.right]);
 
@@ -73,13 +79,38 @@ export class MeasurementChart extends React.Component<Props, State> {
   }
 
   private _render() {
+    this.setState({
+      overlappingTimeSeries: this._findOverlappingTimeSeries()
+    });
+
     const axisExtents = this._calculateXYAxisExtents();
-    if (axisExtents.y[0] === axisExtents.y[1])
+    if (axisExtents.y[0] === axisExtents.y[1]) {
       axisExtents.y[0] = 0;
+    }
 
     this._renderXAxis(axisExtents.x);
     this._renderYAxis(axisExtents.y);
     this._renderTimeSeriesLineCharts();
+  }
+
+  private _findOverlappingTimeSeries() {
+    const overlappingTimeSeries = [];
+    for (const series of this.props.measurementChartModel.timeSeries) {
+      if (
+        series.points.length >= 2
+        &&
+        // Only checking for the first and last datapoints
+        // to determine if the lines overlap which is good enough
+        this.props.measurementChartModel.timeSeries.some(
+          e => e !== series &&
+            e.points[0].measurement === series.points[0].measurement &&
+            e.points[e.points.length - 1].measurement === series.points[series.points.length - 1].measurement
+        )
+      ) {
+        overlappingTimeSeries.push(series);
+      }
+    }
+    return overlappingTimeSeries;
   }
 
   private _calculateXYAxisExtents(): { x: [Date, Date], y: [number, number] } {
@@ -174,9 +205,28 @@ export class MeasurementChart extends React.Component<Props, State> {
                 {this.props.measurementChartModel.yAxisLabel}
               </text>
             }
+            {this.showLabelsForOverlappingTimeSeries()}
           </g>
         </svg>
       </div>
+    );
+  }
+
+  showLabelsForOverlappingTimeSeries() {
+    if (this.state.overlappingTimeSeries.length === 0) {
+      return null;
+    }
+    const paddingLeft = 5;
+    const x = this.margin.left + paddingLeft;
+    const paddingBottom = 5;
+    const y = this._yScale(this.state.overlappingTimeSeries[0].points[0].measurement) - paddingBottom;
+    return (
+      <text
+        x={x}
+        y={y}
+        className='measurement-chart__canvas__overlapped-lines'>
+        {this.state.overlappingTimeSeries.map(e => e.name).join(', ')}
+      </text>
     );
   }
 
