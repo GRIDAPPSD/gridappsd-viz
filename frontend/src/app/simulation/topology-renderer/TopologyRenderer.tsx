@@ -17,7 +17,7 @@ import { RenderableTopology } from './models/RenderableTopology';
 import { IconButton } from '@shared/buttons';
 import { NodeSearcher } from './views/node-searcher/NodeSearcher';
 import { MatchedNodeLocator } from './views/matched-node-locator/MatchedNodeLocator';
-import { NotificationBanner } from '@shared/notification-banner';
+import { showNotification } from '@shared/notification';
 import { StateStore } from '@shared/state-store';
 
 import './TopologyRenderer.light.scss';
@@ -34,7 +34,6 @@ interface Props {
 interface State {
   showNodeSearcher: boolean;
   nodeToLocate: SVGCircleElement;
-  nonExistingSearchedNode: Node;
 }
 
 const symbolSize = 35;
@@ -79,8 +78,7 @@ export class TopologyRenderer extends React.Component<Props, State> {
 
     this.state = {
       showNodeSearcher: false,
-      nodeToLocate: null,
-      nonExistingSearchedNode: null
+      nodeToLocate: null
     };
 
     this.showMenuOnComponentClicked = this.showMenuOnComponentClicked.bind(this);
@@ -97,6 +95,9 @@ export class TopologyRenderer extends React.Component<Props, State> {
     this.hideTooltip();
     this._unsubscriber.next();
     this._unsubscriber.complete();
+    this._stateStore.update({
+      nodeNameToLocate: ''
+    });
   }
 
   componentDidMount() {
@@ -112,8 +113,7 @@ export class TopologyRenderer extends React.Component<Props, State> {
     this.canvasTransformService.onTransformed()
       .pipe(takeUntil(this._unsubscriber))
       .subscribe({
-        next: () => {
-          const currentTransform = this.canvasTransformService.getCurrentTransform();
+        next: currentTransform => {
           this._containerSelection.attr('transform', currentTransform.toString());
           this._toggleNodeSymbols(currentTransform.k);
         }
@@ -125,7 +125,20 @@ export class TopologyRenderer extends React.Component<Props, State> {
       )
       .subscribe({
         next: nodeName => {
-          this.locateNode(this.props.topology.nodes.find(node => node.name === nodeName));
+          const foundNode = this.props.topology.nodes.find(node => node.name === nodeName);
+          if (foundNode) {
+            this.locateNode(foundNode);
+          } else {
+            showNotification(
+              <>
+                Unable to locate node &nbsp;
+                <span className='topology-renderer__non-existing-searched-node'>
+                  {nodeName}
+                </span>
+                &nbsp; in the model
+              </>
+            );
+          }
         }
       });
   }
@@ -743,14 +756,6 @@ export class TopologyRenderer extends React.Component<Props, State> {
             node={this.state.nodeToLocate}
             onDimissed={() => this.setState({ nodeToLocate: null })} />
         }
-        {
-          this.state.nonExistingSearchedNode
-          &&
-          <NotificationBanner onHide={() => this.setState({ nonExistingSearchedNode: null })}>
-            Unable to locate node&nbsp;
-            <span className='topology-renderer__non-existing-searched-node'>{this.state.nonExistingSearchedNode.name}</span>
-          </NotificationBanner>
-        }
       </div>
     );
   }
@@ -888,9 +893,15 @@ export class TopologyRenderer extends React.Component<Props, State> {
         });
       return true;
     } else {
-      this.setState({
-        nonExistingSearchedNode: node
-      });
+      showNotification(
+        <>
+          Unable to locate node &nbsp;
+          <span className='topology-renderer__non-existing-searched-node'>
+            {node.name}
+          </span>
+          &nbsp; in the model
+        </>
+      );
       return false;
     }
   }

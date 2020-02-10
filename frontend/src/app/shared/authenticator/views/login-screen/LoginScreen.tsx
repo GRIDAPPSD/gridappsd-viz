@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Observable } from 'rxjs';
+import { Observable, Subscription } from 'rxjs';
 
 import { Input } from '@shared/form';
 import { BasicButton, IconButton } from '@shared/buttons';
@@ -25,6 +25,8 @@ export class LoginScreen extends React.Component<Props, State> {
   username = 'system';
   password = 'manager';
 
+  private _subscription: Subscription;
+
   constructor(props: Props) {
     super(props);
 
@@ -40,6 +42,10 @@ export class LoginScreen extends React.Component<Props, State> {
     this.onPasswordInputValidated = this.onPasswordInputValidated.bind(this);
     this.login = this.login.bind(this);
     this.togglePasswordVisibility = this.togglePasswordVisibility.bind(this);
+  }
+
+  componentWillUnmount() {
+    this._subscription?.unsubscribe();
   }
 
   render() {
@@ -130,7 +136,7 @@ export class LoginScreen extends React.Component<Props, State> {
     this.setState({
       showSpinner: true
     });
-    this.props.onLogin(this.username, this.password)
+    this._subscription = this.props.onLogin(this.username, this.password)
       .subscribe({
         complete: () => {
           this.setState({

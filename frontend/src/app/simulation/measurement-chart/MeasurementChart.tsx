@@ -10,6 +10,7 @@ import { format as numberFormat } from 'd3-format';
 import { MeasurementChartModel } from './models/MeasurementChartModel';
 import { TimeSeriesDataPoint } from './models/TimeSeriesDataPoint';
 import { TimeSeries } from './models/TimeSeries';
+import { StateStore } from '@shared/state-store';
 
 import './MeasurementChart.light.scss';
 import './MeasurementChart.dark.scss';
@@ -40,6 +41,7 @@ export class MeasurementChart extends React.Component<Props, State> {
   private readonly _xAxisGenerator: Axis<Date>;
   private readonly _yAxisGenerator: Axis<number>;
   private readonly _lineGenerator: Line<TimeSeriesDataPoint>;
+  private readonly _stateStore = StateStore.getInstance();
 
   private _container: Selection<SVGElement, any, SVGElement, any>;
   private _xAxis: Selection<SVGElement, any, SVGElement, any>;
@@ -164,12 +166,13 @@ export class MeasurementChart extends React.Component<Props, State> {
         <header className='measurement-chart__name'>
           {this.props.measurementChartModel.name}
         </header>
-        <div className='measurement-chart__legends'>
+        <div className='measurement-chart__legend-container'>
           {
             this.props.measurementChartModel.timeSeries.map(timeSeries => (
               <div
                 key={timeSeries.name}
-                className='measurement-chart__legend'>
+                className='measurement-chart__legend'
+                onClick={() => this.locateNodeForTimeSeriesLine(timeSeries.name)}>
                 <div className='measurement-chart__legend__color' />
                 <div className='measurement-chart__legend__label'>
                   {timeSeries.name}
@@ -210,6 +213,12 @@ export class MeasurementChart extends React.Component<Props, State> {
         </svg>
       </div>
     );
+  }
+
+  locateNodeForTimeSeriesLine(timeSeriesName: string) {
+    this._stateStore.update({
+      nodeNameToLocate: timeSeriesName.replace(/\s*\([\s\S]+\)\s*/g, '')
+    });
   }
 
   showLabelsForOverlappingTimeSeries() {

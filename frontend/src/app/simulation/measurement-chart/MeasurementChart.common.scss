@@ -24,7 +24,7 @@
     stroke-width: 2px;
 }
 
-.measurement-chart__legends {
+.measurement-chart__legend-container {
     display: flex;
     padding: 5px;
     flex-flow: row wrap;
@@ -39,6 +39,7 @@
     margin-bottom: 5px;
     border-radius: 3px;
     box-sizing: border-box;
+    cursor: pointer;
 }
 
 .measurement-chart__legend__color {

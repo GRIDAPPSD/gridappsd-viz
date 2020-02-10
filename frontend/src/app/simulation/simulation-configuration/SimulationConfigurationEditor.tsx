@@ -20,7 +20,7 @@ import { SimulationConfigurationTabModel } from './models/SimulationConfiguratio
 import { ApplicationConfigurationModel } from './models/ApplicationConfigurationModel';
 import { StateStore } from '@shared/state-store';
 import { ThreeDots } from '@shared/three-dots';
-import { NotificationBanner } from '@shared/notification-banner';
+import { MessageBanner } from '@shared/message-banner';
 import { ServiceConfigurationTab } from './views/service-configuration-tab';
 import { Service } from '@shared/Service';
 import { ServiceConfigurationEntryModel } from './models/ServiceConfigurationEntryModel';
@@ -238,25 +238,27 @@ export class SimulationConfigurationEditor extends React.Component<Props, State>
       selectedApplication.name = formValue.applicationId;
       selectedApplication.config_string = formValue.configString;
       this.currentConfig.application_config.applications.push(selectedApplication);
-    }
-    else
+    } else {
       this.currentConfig.application_config.applications.pop();
+    }
   }
 
   showCurrentComponentForTestConfigurationTab() {
-    if (this.state.lineName === '')
+    if (this.state.lineName === '') {
       return (
-        <NotificationBanner persistent={true}>
+        <MessageBanner>
           Please select a line name
-        </NotificationBanner>
+        </MessageBanner>
       );
-    if (!this.state.modelDictionary)
+    }
+    if (!this.state.modelDictionary) {
       return (
-        <NotificationBanner persistent={true}>
+        <MessageBanner>
           Fetching model dictionary
           <ThreeDots />
-        </NotificationBanner>
+        </MessageBanner>
       );
+    }
     return (
       <TestConfigurationTab
         modelDictionary={this.state.modelDictionary}

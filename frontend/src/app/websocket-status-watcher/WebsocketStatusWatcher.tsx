@@ -3,7 +3,7 @@ import { Subscription } from 'rxjs';
 
 import { IconButton } from '@shared/buttons';
 import { StompClientConnectionStatus, StompClientService } from '@shared/StompClientService';
-import { NotificationBanner } from '@shared/notification-banner';
+import { MessageBanner } from '@shared/message-banner';
 import { ThreeDots } from '@shared/three-dots';
 
 import './WebsocketStatusWatcher.light.scss';
@@ -44,9 +44,9 @@ export class WebsocketStatusWatcher extends React.Component<Props, State> {
     if (this.state.websocketStatus === StompClientConnectionStatus.CONNECTED || this.state.websocketStatus === StompClientConnectionStatus.UNINITIALIZED)
       return null;
     return (
-      <NotificationBanner persistent={true}>
+      <MessageBanner>
         {this._showComponentForCurrentStatus()}
-      </NotificationBanner>
+      </MessageBanner>
     );
   }
 

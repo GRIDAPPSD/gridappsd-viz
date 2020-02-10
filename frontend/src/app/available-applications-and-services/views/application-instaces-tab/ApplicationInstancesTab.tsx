@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { NotificationBanner } from '@shared/notification-banner';
+import { MessageBanner } from '@shared/message-banner';
 
 import './ApplicationInstancesTab.light.scss';
 import './ApplicationInstancesTab.dark.scss';
@@ -12,9 +12,9 @@ interface Props {
 export function ApplicationInstancesTab(props: Props) {
   if (!props.instances || props.instances.length === 0)
     return (
-      <NotificationBanner persistent>
+      <MessageBanner>
         No data available
-      </NotificationBanner>
+      </MessageBanner>
     );
   return (
     <div className='application-instances-tab-container'>
