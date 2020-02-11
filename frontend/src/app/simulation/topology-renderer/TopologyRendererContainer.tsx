@@ -43,7 +43,6 @@ interface State {
   isFetching: boolean;
 }
 
-const renderableTopologyCache = new Map<string, RenderableTopology>();
 const topologyModelCache = new Map<string, TopologyModel>();
 
 export class TopologyRendererContainer extends React.Component<Props, State> {
@@ -94,12 +93,14 @@ export class TopologyRendererContainer extends React.Component<Props, State> {
           // If the user received a new simulation config object
           // and currently not in a simulation, they were the one that created
           // it. Otherwise, they received it by joining an active simulation,
-          // in this case, we don't want to render the topology
+          // in that case, we don't want to do anything here
           if (!this._simulationControlService.isUserInActiveSimulation()) {
             const lineName = simulation.config.power_system_config.Line_name;
-            if (this._useRenderableTopologyFromCache(lineName)) {
+            if (topologyModelCache.has(lineName)) {
+              const topologyModel = topologyModelCache.get(lineName);
+              this._processModelForRendering(topologyModel);
               this._simulationControlService.syncSimulationSnapshotState({
-                topologyModel: topologyModelCache.get(lineName)
+                topologyModel
               });
             } else {
               this._fetchTopologyModel(lineName);
@@ -107,19 +108,6 @@ export class TopologyRendererContainer extends React.Component<Props, State> {
           }
         }
       });
-  }
-
-  private _useRenderableTopologyFromCache(lineName: string) {
-    const topology = renderableTopologyCache.get(lineName);
-    if (!topology) {
-      return false;
-    }
-
-    this.setState({
-      topology,
-      isFetching: false
-    });
-    return true;
   }
 
   private _fetchTopologyModel(lineName: string) {
@@ -145,6 +133,7 @@ export class TopologyRendererContainer extends React.Component<Props, State> {
           this._simulationControlService.syncSimulationSnapshotState({
             topologyModel
           });
+          topologyModelCache.set(this.activeSimulationConfig.power_system_config.Line_name, topologyModel);
         }
       });
   }
@@ -152,13 +141,10 @@ export class TopologyRendererContainer extends React.Component<Props, State> {
   private _processModelForRendering(topologyModel: TopologyModel) {
     waitUntil(() => this.props.mRIDs.size > 0)
       .then(() => {
-        const renderableTopology = this._transformModelForRendering(topologyModel);
         this.setState({
-          topology: renderableTopology,
+          topology: this._transformModelForRendering(topologyModel),
           isFetching: false
         });
-        renderableTopologyCache.set(this.activeSimulationConfig.power_system_config.Line_name, renderableTopology);
-        topologyModelCache.set(this.activeSimulationConfig.power_system_config.Line_name, topologyModel);
       });
   }
 
@@ -229,23 +215,11 @@ export class TopologyRendererContainer extends React.Component<Props, State> {
           );
           break;
         case 'switches':
-          if (node.x1 > node.x2) {
-            const temp = node.x1;
-            node.x1 = node.x2;
-            node.x2 = temp;
-          }
-          if (node.y1 > node.y2) {
-            const temp = node.y1;
-            node.y1 = node.y2;
-            node.y2 = temp;
-          }
           const swjtch = this._createNewNode({
             ...node,
             name: node.name,
             type: 'switch',
             open: node.open === 'open',
-            x1: Math.trunc(node.x1 !== 0 ? node.x1 : node.x2),
-            y1: Math.trunc(node.y1 !== 0 ? node.y1 : node.y2),
             screenX2: 0,
             screenY2: 0,
             colorWhenOpen: '#4aff4a',
@@ -330,6 +304,7 @@ export class TopologyRendererContainer extends React.Component<Props, State> {
           break;
       }
     }
+    this._resolveCoordinatesInSwitches(allNodeMap);
     return renderableTopology;
   }
 
@@ -369,6 +344,25 @@ export class TopologyRendererContainer extends React.Component<Props, State> {
     } as Node;
   }
 
+  private _resolveCoordinatesInSwitches(allNodeMap: Map<string, Node>) {
+    for (const swjtch of this._switches) {
+      const fromNode = allNodeMap.get(swjtch.from);
+      swjtch.x1 = Math.trunc(swjtch.x1);
+      swjtch.y1 = Math.trunc(swjtch.y1);
+      swjtch.x2 = Math.trunc(swjtch.x2);
+      swjtch.y2 = Math.trunc(swjtch.y2);
+      if (fromNode) {
+        swjtch.x1 = fromNode.x1;
+        swjtch.y1 = fromNode.y1;
+      }
+      const toNode = allNodeMap.get(swjtch.to);
+      if (toNode) {
+        swjtch.x2 = toNode.x1;
+        swjtch.y2 = toNode.y1;
+      }
+    }
+  }
+
   private _toggleSwitchesOnOutputMeasurementsReceived() {
     return this._simulationControlService.simulationOutputMeasurementsReceived()
       .subscribe({
@@ -389,24 +383,14 @@ export class TopologyRendererContainer extends React.Component<Props, State> {
     return this._simulationControlService.selectSimulationSnapshotState('topologyModel')
       .subscribe({
         next: (topologyModel: TopologyModel) => {
-          const modelMRID = topologyModel.feeders[0].mRID;
-          if (!renderableTopologyCache.has(modelMRID)) {
-            waitUntil(() => this.props.mRIDs.size > 0)
-              .then(() => {
-                const renderableTopology = this._transformModelForRendering(topologyModel);
-                this.setState({
-                  topology: renderableTopology,
-                  isFetching: false
-                });
-                renderableTopologyCache.set(modelMRID, renderableTopology);
-                topologyModelCache.set(modelMRID, topologyModel);
+          waitUntil(() => this.props.mRIDs.size > 0)
+            .then(() => {
+              this.setState({
+                topology: this._transformModelForRendering(topologyModel),
+                isFetching: false
               });
-          } else {
-            this.setState({
-              topology: renderableTopologyCache.get(modelMRID),
-              isFetching: false
+              topologyModelCache.set(topologyModel.feeders[0].mRID, topologyModel);
             });
-          }
         }
       });
   }

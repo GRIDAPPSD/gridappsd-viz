@@ -1,7 +1,7 @@
 import * as React from 'react';
 
 import { Service, ServiceConfigUserInputSpec } from '@shared/Service';
-import { NotificationBanner } from '@shared/notification-banner';
+import { MessageBanner } from '@shared/message-banner';
 
 import './ServicesTab.light.scss';
 import './ServicesTab.dark.scss';
@@ -13,9 +13,9 @@ interface Props {
 export function ServicesTab(props: Props) {
   if (!props.services || props.services.length === 0)
     return (
-      <NotificationBanner persistent>
+      <MessageBanner>
         No data available
-      </NotificationBanner>
+      </MessageBanner>
     );
   return (
     <div className='services-tab-container'>

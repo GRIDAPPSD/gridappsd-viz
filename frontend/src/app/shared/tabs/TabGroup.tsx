@@ -114,4 +114,8 @@ export class TabGroup extends React.Component<Props, State> {
     });
   }
 
+  isTabVisible(tabIndex: number) {
+    return this.nativeElement.querySelector(`.tab-label-${tabIndex}`).classList.contains('active');
+  }
+
 }

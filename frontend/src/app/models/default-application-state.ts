@@ -11,5 +11,6 @@ export const DEFAULT_APPLICATION_STATE: ApplicationState = {
   modelDictionary: null,
   modelDictionaryComponentsWithGroupedPhases: [],
   plotModels: [],
-  activeSimulationIds: []
+  activeSimulationIds: [],
+  nodeNameToLocate: ''
 };

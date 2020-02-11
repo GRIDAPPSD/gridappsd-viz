@@ -1,13 +1,14 @@
 import * as React from 'react';
+import { Observable } from 'rxjs';
 
-import { NotificationBanner } from '@shared/notification-banner';
 import { LoginScreen } from './views/login-screen/LoginScreen';
 import { AuthenticationStatusCode } from './models/AuthenticationStatusCode';
 import { AuthenticationResult } from './models/AuthenticationResult';
+import { Notification } from '@shared/notification';
 
 interface Props {
   authenticationResult: AuthenticationResult;
-  tryLogin: (username: string, password: string) => void;
+  tryLogin: (username: string, password: string) => Observable<AuthenticationResult>;
 }
 
 interface State {
@@ -53,9 +54,9 @@ export class Authenticator extends React.Component<Props, State> {
         return (
           <>
             <LoginScreen onLogin={this.tryLogin} />
-            <NotificationBanner show={this.state.showFailedLoginNofitification}>
+            <Notification show={this.state.showFailedLoginNofitification}>
               Incorrect username or password
-            </NotificationBanner>
+            </Notification>
           </>
         );
 
@@ -63,9 +64,9 @@ export class Authenticator extends React.Component<Props, State> {
         return (
           <>
             <LoginScreen onLogin={this.tryLogin} />
-            <NotificationBanner show={this.state.showFailedLoginNofitification}>
+            <Notification show={this.state.showFailedLoginNofitification}>
               There was a problem contacting the server
-            </NotificationBanner>
+            </Notification>
           </>
         );
 
@@ -77,8 +78,8 @@ export class Authenticator extends React.Component<Props, State> {
   }
 
   tryLogin(username: string, password: string) {
-    this.props.tryLogin(username, password);
     this._abortAnimatingFailedLoginNotificationBanner();
+    return this.props.tryLogin(username, password);
   }
 
   private _abortAnimatingFailedLoginNotificationBanner() {

@@ -160,45 +160,50 @@ export class NodeSearcher extends React.Component<Props, State> {
     const matches: Match[] = [];
     const searcher = fuzzySearch(searchTerm, true);
 
-    if (searchTerm.length < this._previousSearchTerm.length || this._matchedNodes.size === 0)
+    if (searchTerm.length < this._previousSearchTerm.length || this._matchedNodes.size === 0) {
       this._matchedNodes = new Set(this.props.nodes);
+    }
 
     this._previousSearchTerm = searchTerm;
 
     for (const node of this._matchedNodes) {
       const result = searcher(node.name);
-      if (result)
+      if (result) {
         matches.push({
           node,
           result
         });
+      }
       else if ('mRIDs' in node) {
         const matchedMRIDs = [];
         for (const mRID of node.mRIDs) {
           const searchResult = searcher(mRID);
-          if (searchResult)
+          if (searchResult) {
             matchedMRIDs.push({
               node,
               result: searchResult
             });
+          }
         }
-        if (matchedMRIDs.length > 0)
+        if (matchedMRIDs.length > 0) {
           matches.push(...matchedMRIDs);
-        else
+        } else {
           this._matchedNodes.delete(node);
+        }
       } else {
         this._matchedNodes.delete(node);
       }
     }
     this.setState({
       matches: matches.sort((a, b) => {
-        if (a.result.inaccuracy === b.result.inaccuracy)
+        if (a.result.inaccuracy === b.result.inaccuracy) {
           // If both matches have the same inaccuracy
           // we want to sort them by their inputs' length,
           // the one with shorter input should come first,
           // if their input lengths are the same,
           // then we want to sort them by their start of the first matched boundary
           return a.result.input.length - b.result.input.length || a.result.boundaries[1].start - b.result.boundaries[1].start;
+        }
         return a.result.inaccuracy - b.result.inaccuracy;
       })
     });
@@ -215,7 +220,7 @@ export class NodeSearcher extends React.Component<Props, State> {
 
   renderMatchedNode(matchedNode: Match) {
     const common = matchedNode.result.boundaries.map((boundary, i) => {
-      if (boundary.highlight)
+      if (boundary.highlight) {
         return (
           <strong
             key={i}
@@ -223,6 +228,7 @@ export class NodeSearcher extends React.Component<Props, State> {
             {matchedNode.result.input.substring(boundary.start, boundary.end)}
           </strong>
         );
+      }
       return (
         <React.Fragment key={i}>
           {matchedNode.result.input.substring(boundary.start, boundary.end)}
@@ -230,8 +236,9 @@ export class NodeSearcher extends React.Component<Props, State> {
       );
     });
     // The match was for node name
-    if (matchedNode.result.input === matchedNode.node.name)
+    if (matchedNode.result.input === matchedNode.node.name) {
       return common;
+    }
     // The match was for MRID
     return (
       <>

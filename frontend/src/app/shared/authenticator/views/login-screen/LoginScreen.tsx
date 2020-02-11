@@ -1,20 +1,23 @@
 import * as React from 'react';
+import { Observable, Subscription } from 'rxjs';
 
 import { Input } from '@shared/form';
 import { BasicButton, IconButton } from '@shared/buttons';
 import { Validators } from '@shared/form/validation';
 import { Tooltip } from '@shared/tooltip';
+import { Wait } from '@shared/wait';
 
 import './LoginScreen.light.scss';
 import './LoginScreen.dark.scss';
 
 interface Props {
-  onLogin: (username: string, password: string) => void;
+  onLogin: (username: string, password: string) => Observable<any>;
 }
 
 interface State {
   disableLoginButton: boolean;
   passwordVisible: boolean;
+  showSpinner: boolean;
 }
 
 export class LoginScreen extends React.Component<Props, State> {
@@ -22,12 +25,15 @@ export class LoginScreen extends React.Component<Props, State> {
   username = 'system';
   password = 'manager';
 
+  private _subscription: Subscription;
+
   constructor(props: Props) {
     super(props);
 
     this.state = {
       disableLoginButton: false,
-      passwordVisible: false
+      passwordVisible: false,
+      showSpinner: false
     };
 
     this.onUsernameEntered = this.onUsernameEntered.bind(this);
@@ -36,6 +42,10 @@ export class LoginScreen extends React.Component<Props, State> {
     this.onPasswordInputValidated = this.onPasswordInputValidated.bind(this);
     this.login = this.login.bind(this);
     this.togglePasswordVisibility = this.togglePasswordVisibility.bind(this);
+  }
+
+  componentWillUnmount() {
+    this._subscription?.unsubscribe();
   }
 
   render() {
@@ -79,6 +89,7 @@ export class LoginScreen extends React.Component<Props, State> {
             disabled={this.state.disableLoginButton}
             onClick={this.login} />
         </div>
+        <Wait show={this.state.showSpinner} />
       </div>
     );
   }
@@ -122,7 +133,17 @@ export class LoginScreen extends React.Component<Props, State> {
   }
 
   login() {
-    this.props.onLogin(this.username, this.password);
+    this.setState({
+      showSpinner: true
+    });
+    this._subscription = this.props.onLogin(this.username, this.password)
+      .subscribe({
+        complete: () => {
+          this.setState({
+            showSpinner: false
+          });
+        }
+      });
   }
 
 }

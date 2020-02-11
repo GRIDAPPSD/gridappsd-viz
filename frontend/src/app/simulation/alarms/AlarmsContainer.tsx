@@ -1,6 +1,6 @@
 import * as React from 'react';
-import { Subscription } from 'rxjs';
-import { filter, map, switchMap, tap } from 'rxjs/operators';
+import { Subject } from 'rxjs';
+import { filter, map, switchMap, takeUntil } from 'rxjs/operators';
 
 import { Alarms } from './Alarms';
 import { StateStore } from '@shared/state-store';
@@ -8,9 +8,11 @@ import { StompClientService } from '@shared/StompClientService';
 import { Alarm } from './models/Alarm';
 import { NewAlarmNotification } from './views/new-alarm-notification/NewAlarmNotification';
 import { SimulationControlService } from '@shared/simulation';
+import { SimulationStatus } from '@commons/SimulationStatus';
 
 interface Props {
   onNewAlarmsConfirmed: () => void;
+  onLocateNodeForAlarm: (alarm: Alarm) => void;
 }
 
 interface State {
@@ -23,9 +25,7 @@ export class AlarmsContainer extends React.Component<Props, State> {
   private readonly _stateStore = StateStore.getInstance();
   private readonly _stompClientService = StompClientService.getInstance();
   private readonly _simulationControlService = SimulationControlService.getInstance();
-
-  private _newAlarmsSubscription: Subscription;
-  private _simulationTimeStepReceivedSubscription: Subscription;
+  private readonly _unsubscriber = new Subject<void>();
 
   constructor(props: Props) {
     super(props);
@@ -40,27 +40,19 @@ export class AlarmsContainer extends React.Component<Props, State> {
   }
 
   componentDidMount() {
-    this._newAlarmsSubscription = this._subscribeToNewAlarmsTopic();
-    this._simulationTimeStepReceivedSubscription = this._pickAlarmsFromSimulationSnapshotStream();
+    this._subscribeToNewAlarmsTopic();
+    this._pickAlarmsFromSimulationSnapshotStream();
+    this._clearAllAlarmsWhenSimulationStarts();
   }
 
   private _subscribeToNewAlarmsTopic() {
-    return this._stateStore.select('simulationId')
+    this._stateStore.select('simulationId')
       .pipe(
         filter(simulationId => simulationId !== '' && this._simulationControlService.didUserStartActiveSimulation()),
-        // We got a new simulation ID which means
-        // a new simulation was started
-        // so reset the list of alarms to empty
-        // as well as the number of current alarms
-        tap(() => {
-          this.setState({
-            alarms: [],
-            newAlarmCounts: 0
-          });
-        }),
         map(id => `/topic/goss.gridappsd.simulation.gridappsd-alarms.${id}.output`),
         switchMap(this._stompClientService.readFrom),
-        map(JSON.parse as (str: string) => Alarm[])
+        map(JSON.parse as (str: string) => Alarm[]),
+        takeUntil(this._unsubscriber)
       )
       .subscribe({
         next: alarms => {
@@ -81,7 +73,8 @@ export class AlarmsContainer extends React.Component<Props, State> {
   }
 
   private _pickAlarmsFromSimulationSnapshotStream() {
-    return this._simulationControlService.selectSimulationSnapshotState('alarms')
+    this._simulationControlService.selectSimulationSnapshotState('alarms')
+      .pipe(takeUntil(this._unsubscriber))
       .subscribe({
         next: (alarms: Alarm[]) => {
           this.setState({
@@ -92,9 +85,28 @@ export class AlarmsContainer extends React.Component<Props, State> {
       });
   }
 
+  private _clearAllAlarmsWhenSimulationStarts() {
+    this._simulationControlService.statusChanges()
+      .pipe(
+        takeUntil(this._unsubscriber),
+        filter(status => status === SimulationStatus.STARTED && this._simulationControlService.didUserStartActiveSimulation())
+      )
+      .subscribe({
+        next: () => {
+          this.setState({
+            alarms: [],
+            newAlarmCounts: 0
+          });
+          this._simulationControlService.syncSimulationSnapshotState({
+            alarms: []
+          });
+        }
+      });
+  }
+
   componentWillUnmount() {
-    this._newAlarmsSubscription.unsubscribe();
-    this._simulationTimeStepReceivedSubscription.unsubscribe();
+    this._unsubscriber.next();
+    this._unsubscriber.complete();
   }
 
   render() {
@@ -104,6 +116,7 @@ export class AlarmsContainer extends React.Component<Props, State> {
       <>
         <Alarms
           alarms={this.state.alarms}
+          onLocateNodeForAlarm={this.props.onLocateNodeForAlarm}
           onAcknowledgeAlarm={this.acknowledgeAlarm} />
         <NewAlarmNotification
           newAlarmCounts={this.state.newAlarmCounts}

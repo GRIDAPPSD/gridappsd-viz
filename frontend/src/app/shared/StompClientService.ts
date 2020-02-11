@@ -88,11 +88,6 @@ export class StompClientService {
     return subject.pipe(take(1));
   }
 
-  private _connectionEstablished() {
-    this._status = StompClientConnectionStatus.CONNECTED;
-    this._statusChanges.next(this._status);
-  }
-
   reconnect() {
     timer(0, 5000)
       .pipe(
@@ -123,6 +118,11 @@ export class StompClientService {
       );
     }
     return {};
+  }
+
+  private _connectionEstablished() {
+    this._status = StompClientConnectionStatus.CONNECTED;
+    this._statusChanges.next(this._status);
   }
 
   private _connectionClosed() {

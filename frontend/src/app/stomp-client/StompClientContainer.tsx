@@ -5,7 +5,7 @@ import { map } from 'rxjs/operators';
 import { StompClientService, StompClientConnectionStatus } from '@shared/StompClientService';
 import { StompClient } from './StompClient';
 import { download, DownloadType } from '@shared/misc';
-import { NotificationBanner } from '@shared/notification-banner';
+import { MessageBanner } from '@shared/message-banner';
 
 interface Props {
 }
@@ -81,9 +81,9 @@ export class StompClientContainer extends React.Component<Props, State> {
         {
           this.state.showExportCsvFailureNotification
           &&
-          <NotificationBanner>
+          <MessageBanner>
             There was a problem exporting the response to CSV
-          </NotificationBanner>
+          </MessageBanner>
         }
       </>
     );

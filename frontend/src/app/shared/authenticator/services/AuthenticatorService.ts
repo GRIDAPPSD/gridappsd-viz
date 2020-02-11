@@ -88,6 +88,7 @@ export class AuthenticatorService {
     this._isAuthenticated = false;
     sessionStorage.clear();
     this._userSessionSubject.next();
+    location.reload();
   }
 
   sessionEnded() {

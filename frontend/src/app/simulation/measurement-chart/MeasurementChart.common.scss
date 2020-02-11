@@ -13,6 +13,10 @@
         width: 100%;
         height: 100%;
     }
+
+    .tick {
+        transition: transform 0.25s ease;
+    }
 }
 
 .measurement-chart__canvas__time-series-line {
@@ -20,7 +24,7 @@
     stroke-width: 2px;
 }
 
-.measurement-chart__legends {
+.measurement-chart__legend-container {
     display: flex;
     padding: 5px;
     flex-flow: row wrap;
@@ -35,6 +39,7 @@
     margin-bottom: 5px;
     border-radius: 3px;
     box-sizing: border-box;
+    cursor: pointer;
 }
 
 .measurement-chart__legend__color {
@@ -50,4 +55,8 @@
     font-size: 0.7em;
     display: inline-block;
     margin-left: 5px;
+}
+
+.measurement-chart__canvas__overlapped-lines {
+    font-size: 0.5em;
 }
