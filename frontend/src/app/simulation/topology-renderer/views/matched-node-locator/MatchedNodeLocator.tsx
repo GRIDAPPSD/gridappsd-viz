@@ -14,8 +14,9 @@ interface Props {
 
 export function MatchedNodeLocator(props: Props) {
   const matchedNodeBoundingBox = props.node.getBoundingClientRect();
-  const rippleSize = 40;
-
+  const rippleRadius = 20;
+  const x = matchedNodeBoundingBox.left + matchedNodeBoundingBox.width / 2;
+  const y = matchedNodeBoundingBox.top + matchedNodeBoundingBox.height / 2;
   return (
     <PortalRenderer>
       <Fade in={true}>
@@ -23,14 +24,17 @@ export function MatchedNodeLocator(props: Props) {
           className='matched-node-locator'
           onClick={props.onDimissed}>
           <Backdrop visible={true} />
-          <div
-            className='matched-node-locator__ripple'
-            style={{
-              left: matchedNodeBoundingBox.left - rippleSize / 4,
-              top: matchedNodeBoundingBox.top - rippleSize / 4,
-              width: rippleSize,
-              height: rippleSize
-            }} />
+          <svg>
+            <circle
+              className='matched-node-locator__ripple'
+              cx={x}
+              cy={y}
+              r={matchedNodeBoundingBox.width < rippleRadius * 2 ? rippleRadius : matchedNodeBoundingBox.width / 2}
+              style={{
+                transformOrigin: `${x}px ${y}px`
+              }}
+            />
+          </svg>
         </div>
       </Fade>
     </PortalRenderer>

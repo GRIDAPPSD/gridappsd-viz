@@ -6,7 +6,7 @@ export class CanvasTransformService {
 
   private static readonly _INSTANCE_ = new CanvasTransformService();
 
-  private readonly _notifier = new Subject<void>();
+  private readonly _notifier = new Subject<ZoomTransform>();
   private readonly _zoomer = zoom<SVGElement, any>();
 
   private _svgSelection: Selection<SVGElement, any, any, any>;
@@ -26,12 +26,12 @@ export class CanvasTransformService {
     this._currentTransform = zoomTransform(svg);
     this._zoomer.on('zoom', () => {
       this._currentTransform = currentEvent.transform;
-      this._notifier.next();
+      this._notifier.next(this._currentTransform);
     });
     return this._svgSelection;
   }
 
-  onTransformed(): Observable<void> {
+  onTransformed(): Observable<ZoomTransform> {
     return this._notifier.asObservable();
   }
 
@@ -73,4 +73,5 @@ export class CanvasTransformService {
   getCurrentZoomLevel() {
     return this._currentTransform.k;
   }
+
 }

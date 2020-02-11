@@ -8,7 +8,7 @@ import { SimulationId } from './models/SimulationId';
 import { QueryLogsForm } from './QueryLogsForm';
 import { QueryLogsResultTable } from './QueryLogsResultTable';
 import { Response } from '../Response';
-import { NotificationBanner } from '@shared/notification-banner';
+import { MessageBanner } from '@shared/message-banner';
 
 import './Logs.light.scss';
 import './Logs.dark.scss';
@@ -115,9 +115,9 @@ export class LogsContainer extends React.Component<Props, State> {
               ?
               <QueryLogsResultTable rows={this.state.result} />
               :
-              <NotificationBanner persistent>
+              <MessageBanner>
                 No result
-              </NotificationBanner>
+              </MessageBanner>
           }
         </Response>
       </div>

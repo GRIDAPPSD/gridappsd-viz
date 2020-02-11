@@ -22,7 +22,7 @@ import { NavigationContainer } from './navigation';
 import { Authenticator } from '@shared/authenticator';
 import { AlarmsContainer, Alarm } from './simulation/alarms';
 import { Settings } from './settings';
-import { NotificationBanner } from '@shared/notification-banner';
+import { MessageBanner } from '@shared/message-banner';
 import { ThreeDots } from '@shared/three-dots';
 import { OverlayService } from '@shared/overlay';
 import { StompClientConnectionStatus } from '@shared/StompClientService';
@@ -133,9 +133,9 @@ export const App = (withRouter as any)(class extends React.Component<Props, Stat
                 &&
                 (this.props.availableApplications === null || this.props.feederModel === null)
                 &&
-                <NotificationBanner persistent>
+                <MessageBanner>
                   Initializing<ThreeDots />
-                </NotificationBanner>
+                </MessageBanner>
               }
             </Authenticator>
           )
