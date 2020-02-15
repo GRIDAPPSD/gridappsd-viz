@@ -54,8 +54,9 @@ export class SelectedOptionList<T> extends React.Component<Props<T>, State> {
                   onClick={() => {
                     this.props.onDeselectOption(option);
                     // Now is empty, close it
-                    if (this.props.options.length === 1)
+                    if (this.props.options.length === 1) {
                       this.toggleOptionList();
+                    }
                   }} />
                 <div className='selected-option-list__option__label'>
                   {option.label}

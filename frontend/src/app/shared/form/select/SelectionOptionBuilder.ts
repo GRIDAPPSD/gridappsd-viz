@@ -20,10 +20,4 @@ export class SelectionOptionBuilder<T> {
     return this._options.length;
   }
 
-  clone() {
-    const clone = new SelectionOptionBuilder([]);
-    clone.getOptions()
-      .push(...this._options);
-    return clone;
-  }
 }

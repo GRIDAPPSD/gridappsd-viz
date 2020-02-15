@@ -89,7 +89,10 @@ export class PowergridModelsContainer extends React.Component<Props, State> {
   }
 
   fetchPowerGridModels(requestBody: QueryPowerGridModelsRequestBody) {
-    this.setState({ isFetching: true, response: '' });
+    this.setState({
+      isFetching: true,
+      response: ''
+    });
     this._queryPowerGridModelsRequest.requestBody = {
       requestType: requestBody.requestType,
       resultFormat: requestBody.resultFormat
@@ -112,11 +115,11 @@ export class PowergridModelsContainer extends React.Component<Props, State> {
         this._queryPowerGridModelsRequest.requestBody.modelId = requestBody.modelId;
         break;
     }
-    this._stompClientService.send(
-      this._queryPowerGridModelsRequest.url,
-      { 'reply-to': this._queryPowerGridModelsRequest.replyTo },
-      JSON.stringify(this._queryPowerGridModelsRequest.requestBody)
-    );
+    this._stompClientService.send({
+      destination: this._queryPowerGridModelsRequest.url,
+      replyTo: this._queryPowerGridModelsRequest.replyTo,
+      body: JSON.stringify(this._queryPowerGridModelsRequest.requestBody)
+    });
   }
 
 }

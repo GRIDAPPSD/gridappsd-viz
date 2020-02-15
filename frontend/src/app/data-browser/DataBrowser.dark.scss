@@ -3,10 +3,12 @@
 
 .data-browser__selection__item {
     box-shadow: 0 0 2px #fff;
-    color: $active-item-color;
+    color: #ffa500;
 }
 
 .data-browser__selection__item.selected {
+    color: $active-item-color;
+
     &:before {
         background-color: $theme-color;
     }
@@ -22,4 +24,15 @@
 .response {
     box-shadow: 0 0 2px #fff;
     color: $primary-text-color;
+}
+
+.response {
+    &::-webkit-scrollbar {
+        background: $theme-color;
+        box-shadow: 0 0 3px #808080 inset;
+    }
+
+    &::-webkit-scrollbar-thumb {
+        background-color: $primary-color;
+    }
 }

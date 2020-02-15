@@ -119,8 +119,9 @@ export class SimulationControlService {
             this._simulationOutputSubscription.unsubscribe();
             this._simulationOutputSubscription = null;
           }
-          if (this._currentSimulationStatus === SimulationStatus.STARTED)
+          if (this._currentSimulationStatus === SimulationStatus.STARTED) {
             this.stopSimulation();
+          }
         }
       });
   }
@@ -181,8 +182,9 @@ export class SimulationControlService {
     for (const entry of Object.entries(state)) {
       this._simulationSnapshot[entry[0]] = entry[1];
     }
-    if (this._syncingEnabled)
+    if (this._syncingEnabled) {
       this._socket.emit(SimulationSynchronizationEvents.SIMULATION_SNAPSHOT_RECEIVE, state);
+    }
   }
 
   statusChanges(): Observable<SimulationStatus> {
@@ -224,11 +226,11 @@ export class SimulationControlService {
       // Let's wait for all the subscriptions in other components to this topic to complete
       // before sending the message
       setTimeout(() => {
-        this._stompClientService.send(
-          START_SIMULATION_TOPIC,
-          { 'reply-to': START_SIMULATION_TOPIC },
-          JSON.stringify(config)
-        );
+        this._stompClientService.send({
+          destination: START_SIMULATION_TOPIC,
+          replyTo: START_SIMULATION_TOPIC,
+          body: JSON.stringify(config)
+        });
       }, 1000);
     }
   }
@@ -345,7 +347,10 @@ export class SimulationControlService {
 
   private _sendSimulationControlCommand(command: 'stop' | 'pause' | 'resume') {
     const simulationId = this._simulationQueue.getActiveSimulation().id;
-    this._stompClientService.send(`${CONTROL_SIMULATION_TOPIC}.${simulationId}`, {}, `{"command":"${command}"}`);
+    this._stompClientService.send({
+      destination: `${CONTROL_SIMULATION_TOPIC}.${simulationId}`,
+      body: `{"command":"${command}"}`
+    });
   }
 
 }

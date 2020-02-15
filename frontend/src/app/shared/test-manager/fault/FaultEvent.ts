@@ -1,23 +1,35 @@
 import { Phase } from '../Phase';
+import { ModelDictionaryComponent, ModelDictionaryRegulator, ModelDictionaryCapacitor, ModelDictionarySwitch } from '@shared/topology';
 
 export interface FaultEvent {
-  // snake case due to requirement
-  event_type: 'Fault';
+  eventType: 'Fault';
   tag: string;
   equipmentType: string;
   equipmentName: string;
   phases: Phase[];
   faultKind: FaultKind;
-  mRID: any;
-  FaultImpedance: {
-    rGround: string;
-    xGround: string;
-    rLinetoLine: string;
-    xLineToLine: string;
-  };
+  mRID: string | string[];
+  faultImpedance: FaultImpedance['LineToGround'] | FaultImpedance['LineToLine'] | FaultImpedance['LineToLineToGround'];
   // Epoch time with second precision
   startDateTime: number;
   stopDateTime: number;
+}
+
+export interface FaultImpedance {
+  LineToGround: {
+    rGround: string;
+    xGround: string;
+  };
+  LineToLine: {
+    rLineToLine: string;
+    xLineToLine: string;
+  };
+  LineToLineToGround: {
+    rGround: string;
+    xGround: string;
+    rLineToLine: string;
+    xLineToLine: string;
+  };
 }
 
 export const enum FaultKind {
@@ -26,8 +38,8 @@ export const enum FaultKind {
   LINE_TO_LINE_TO_GROUND = 'lineToLineToGround'
 }
 
-export const FaultImpedence = Object.freeze({
+export const FaultImpedanceType = Object.freeze({
   lineToGround: ['rGround', 'xGround'],
-  lineToLine: ['rLinetoLine', 'xLineToLine'],
-  lineToLineToGround: ['rGround', 'xGround', 'rLinetoLine', 'xLineToLine']
+  lineToLine: ['rLineToLine', 'xLineToLine'],
+  lineToLineToGround: ['rGround', 'xGround', 'rLineToLine', 'xLineToLine']
 });

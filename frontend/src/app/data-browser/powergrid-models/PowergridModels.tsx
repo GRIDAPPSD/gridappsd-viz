@@ -5,7 +5,7 @@ import { Response } from '../Response';
 import {
   QueryPowerGridModelsRequestType, QueryPowerGridModelsRequestBody, QueryPowerGridModelsResultFormat
 } from './models/QueryPowerGridModelsRequest';
-import { TextArea, Select, SelectionOptionBuilder } from '@shared/form';
+import { TextArea, Select, SelectionOptionBuilder, FormGroupModel, FormControlModel, Form } from '@shared/form';
 import { BasicButton } from '@shared/buttons';
 import { Wait } from '@shared/wait';
 import { FeederModelLine } from '@shared/topology';
@@ -15,31 +15,36 @@ import './PowergridModels.dark.scss';
 
 interface Props {
   feederModelLines: FeederModelLine[];
-  onSubmit: (requestBody: QueryPowerGridModelsRequestBody) => void;
   response: string;
   isResponseReady: boolean;
+  onSubmit: (requestBody: QueryPowerGridModelsRequestBody) => void;
 }
 
 interface State {
   response: any;
-  requestBody: QueryPowerGridModelsRequestBody;
   lineOptionBuilder: SelectionOptionBuilder<FeederModelLine>;
   requestTypeOptionBuilder: SelectionOptionBuilder<QueryPowerGridModelsRequestType>;
   resultFormatOptionBuilder: SelectionOptionBuilder<QueryPowerGridModelsResultFormat>;
+  selectedRequestType: QueryPowerGridModelsRequestType;
+  disableSubmitButton: boolean;
 }
 
 export class PowerGridModels extends React.Component<Props, State> {
 
-  readonly componentToShowForQueryType = null;
+  readonly formGroupModel = new FormGroupModel({
+    requestType: new FormControlModel<QueryPowerGridModelsRequestType>(null),
+    queryString: new FormControlModel(`SELECT ?feeder ?fid  WHERE {?s r:type c:Feeder.?s c:IdentifiedObject.name ?feeder.?s c:IdentifiedObject.mRID ?fid.?s c:Feeder.NormalEnergizingSubstation ?sub.?sub c:IdentifiedObject.name ?station.?sub c:IdentifiedObject.mRID ?sid.?sub c:Substation.Region ?sgr.?sgr c:IdentifiedObject.name ?subregion.?sgr c:IdentifiedObject.mRID ?sgrid.?sgr c:SubGeographicalRegion.Region ?rgn.?rgn c:IdentifiedObject.name ?region.?rgn c:IdentifiedObject.mRID ?rgnid.}  ORDER by ?station ?feeder`),
+    objectId: new FormControlModel(this.props.feederModelLines.find(line => line.name === 'ieee8500')),
+    modelId: new FormControlModel(this.props.feederModelLines.find(line => line.name === 'ieee8500')),
+    filter: new FormControlModel(`?s cim:IdentifiedObject.name \u0027q14733\u0027","objectType":"http://iec.ch/TC57/2012/CIM-schema-cim17#ConnectivityNode`),
+    resultFormat: new FormControlModel(QueryPowerGridModelsResultFormat.JSON)
+  });
 
   constructor(props: Props) {
     super(props);
+
     this.state = {
       response: props.response,
-      requestBody: {
-        queryString: `SELECT ?feeder ?fid  WHERE {?s r:type c:Feeder.?s c:IdentifiedObject.name ?feeder.?s c:IdentifiedObject.mRID ?fid.?s c:Feeder.NormalEnergizingSubstation ?sub.?sub c:IdentifiedObject.name ?station.?sub c:IdentifiedObject.mRID ?sid.?sub c:Substation.Region ?sgr.?sgr c:IdentifiedObject.name ?subregion.?sgr c:IdentifiedObject.mRID ?sgrid.?sgr c:SubGeographicalRegion.Region ?rgn.?rgn c:IdentifiedObject.name ?region.?rgn c:IdentifiedObject.mRID ?rgnid.}  ORDER by ?station ?feeder`,
-        filter: `?s cim:IdentifiedObject.name \u0027q14733\u0027","objectType":"http://iec.ch/TC57/2012/CIM-schema-cim17#ConnectivityNode`
-      } as QueryPowerGridModelsRequestBody,
       lineOptionBuilder: new SelectionOptionBuilder(
         props.feederModelLines,
         line => line.name
@@ -58,53 +63,46 @@ export class PowerGridModels extends React.Component<Props, State> {
           QueryPowerGridModelsResultFormat.JSON,
           QueryPowerGridModelsResultFormat.CSV
         ]
-      )
+      ),
+      selectedRequestType: null,
+      disableSubmitButton: true
     };
 
-    this.componentToShowForQueryType = {
-      [QueryPowerGridModelsRequestType.QUERY]: (
-        <TextArea
-          label='Query string'
-          value='SELECT ?feeder ?fid  WHERE {?s r:type c:Feeder.?s c:IdentifiedObject.name ?feeder.?s c:IdentifiedObject.mRID ?fid.?s c:Feeder.NormalEnergizingSubstation ?sub.?sub c:IdentifiedObject.name ?station.?sub c:IdentifiedObject.mRID ?sid.?sub c:Substation.Region ?sgr.?sgr c:IdentifiedObject.name ?subregion.?sgr c:IdentifiedObject.mRID ?sgrid.?sgr c:SubGeographicalRegion.Region ?rgn.?rgn c:IdentifiedObject.name ?region.?rgn c:IdentifiedObject.mRID ?rgnid.}  ORDER by ?station ?feeder'
-          onChange={value => this.updateRequestBody('queryString', value)} />
-      ),
-      [QueryPowerGridModelsRequestType.QUERY_OBJECT]: (
-        <Select
-          label='Object ID'
-          selectionOptionBuilder={this.state.lineOptionBuilder}
-          onChange={selectedValue => this.updateRequestBody('objectId', selectedValue.id)}
-          selectedOptionFinder={objectId => objectId.name === 'ieee8500'} />
-      ),
-      [QueryPowerGridModelsRequestType.QUERY_OBJECT_TYPES]: (
-        <Select
-          label='Model ID'
-          selectionOptionBuilder={this.state.lineOptionBuilder}
-          onChange={selectedValue => this.updateRequestBody('modelId', selectedValue.id)}
-          selectedOptionFinder={modelId => modelId.name === 'ieee8500'} />
-      ),
-      [QueryPowerGridModelsRequestType.QUERY_MODEL]: (
-        <>
-          <Select
-            label='Model ID'
-            selectionOptionBuilder={this.state.lineOptionBuilder}
-            onChange={selectedValue => this.updateRequestBody('modelId', selectedValue.id)}
-            selectedOptionFinder={modelId => modelId.name === 'ieee8500'} />
-          <TextArea
-            label='Filter'
-            value={`?s cim:IdentifiedObject.name \u0027q14733\u0027","objectType":"http://iec.ch/TC57/2012/CIM-schema-cim17#ConnectivityNode`}
-            onChange={value => this.updateRequestBody('filter', value)} />
-        </>
-      )
-    };
+    this.onSubmitForm = this.onSubmitForm.bind(this);
+  }
 
-    this.updateRequestBody = this.updateRequestBody.bind(this);
+  componentDidMount() {
+    this.formGroupModel.validityChanges()
+      .subscribe({
+        next: isValid => {
+          this.setState({
+            disableSubmitButton: !isValid
+          });
+        }
+      });
+
+    this.formGroupModel.findControl('requestType')
+      .valueChanges()
+      .subscribe({
+        next: requestType => {
+          this.setState({
+            response: null,
+            selectedRequestType: requestType
+          });
+        }
+      });
+  }
+
+  componentWillUnmount() {
+    this.formGroupModel.cleanup();
   }
 
   componentDidUpdate(prevProps: Props) {
-    if (prevProps !== this.props)
+    if (prevProps !== this.props) {
       this.setState({
         response: this.props.response
       });
+    }
   }
 
   render() {
@@ -113,30 +111,27 @@ export class PowerGridModels extends React.Component<Props, State> {
       return (
         <>
           <RequestEditor styles={requestContainerStyles}>
-            <form className='query-powergrid-models-form'>
+            <Form
+              className='query-powergrid-models-form'
+              formGroupModel={this.formGroupModel}>
               <Select
                 label='Request type'
-                selectionOptionBuilder={this.state.requestTypeOptionBuilder}
-                onChange={selectedValue => {
-                  this.setState({
-                    response: null
-                  });
-                  this.updateRequestBody('requestType', selectedValue);
-                }} />
+                formControlModel={this.formGroupModel.findControl('requestType')}
+                selectionOptionBuilder={this.state.requestTypeOptionBuilder} />
               <Select
                 label='Result format'
-                onChange={selectedValue => this.updateRequestBody('resultFormat', selectedValue)}
+                formControlModel={this.formGroupModel.findControl('resultFormat')}
                 selectionOptionBuilder={this.state.resultFormatOptionBuilder}
                 selectedOptionFinder={format => format === QueryPowerGridModelsResultFormat.JSON} />
               {
-                this.componentToShowForQueryType[this.state.requestBody.requestType]
+                this.showComponentForQueryType()
               }
               <BasicButton
                 label='Submit'
                 type='positive'
-                disabled={!this.state.requestBody.requestType}
-                onClick={() => this.props.onSubmit(this.state.requestBody)} />
-            </form>
+                disabled={this.state.disableSubmitButton}
+                onClick={this.onSubmitForm} />
+            </Form>
           </RequestEditor>
           {
             this.state.response &&
@@ -151,12 +146,53 @@ export class PowerGridModels extends React.Component<Props, State> {
     return null;
   }
 
-  updateRequestBody(property: string, value: string) {
-    this.setState({
-      requestBody: {
-        ...this.state.requestBody,
-        [property]: value
-      }
+  showComponentForQueryType() {
+    switch (this.state.selectedRequestType) {
+      case QueryPowerGridModelsRequestType.QUERY:
+        return (
+          <TextArea
+            label='Query string'
+            formControlModel={this.formGroupModel.findControl('queryString')} />
+        );
+      case QueryPowerGridModelsRequestType.QUERY_OBJECT:
+        return (
+          <Select
+            label='Object ID'
+            formControlModel={this.formGroupModel.findControl('objectId')}
+            selectionOptionBuilder={this.state.lineOptionBuilder}
+            selectedOptionFinder={objectId => objectId.name === 'ieee8500'} />
+        );
+      case QueryPowerGridModelsRequestType.QUERY_OBJECT_TYPES:
+        return (
+          <Select
+            label='Model ID'
+            formControlModel={this.formGroupModel.findControl('modelId')}
+            selectionOptionBuilder={this.state.lineOptionBuilder}
+            selectedOptionFinder={modelId => modelId.name === 'ieee8500'} />
+        );
+      case QueryPowerGridModelsRequestType.QUERY_MODEL:
+        return (
+          <>
+            <Select
+              label='Model ID'
+              formControlModel={this.formGroupModel.findControl('modelId')}
+              selectionOptionBuilder={this.state.lineOptionBuilder}
+              selectedOptionFinder={modelId => modelId.name === 'ieee8500'} />
+            <TextArea
+              label='Filter'
+              formControlModel={this.formGroupModel.findControl('filter')} />
+          </>
+        );
+    }
+    return null;
+  }
+
+  onSubmitForm() {
+    const formValue = this.formGroupModel.getValue();
+    this.props.onSubmit({
+      ...formValue,
+      objectId: formValue.objectId.id,
+      modelId: formValue.modelId.id
     });
   }
 

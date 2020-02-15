@@ -14,7 +14,7 @@ import { SimulationConfigurationTab } from './views/simulation-configuration-tab
 import { ApplicationConfigurationTab } from './views/application-configuration-tab';
 import { TestConfigurationTab } from './views/test-configuration-tab';
 import { DateTimeService } from '@shared/DateTimeService';
-import { FaultEvent, FaultKind, CommOutageEvent, CommandEvent } from '@shared/test-manager';
+import { FaultEvent, CommOutageEvent, CommandEvent } from '@shared/test-manager';
 import { PowerSystemConfigurationModel } from './models/PowerSystemConfigurationModel';
 import { SimulationConfigurationTabModel } from './models/SimulationConfigurationTabModel';
 import { ApplicationConfigurationModel } from './models/ApplicationConfigurationModel';
@@ -23,7 +23,9 @@ import { ThreeDots } from '@shared/three-dots';
 import { MessageBanner } from '@shared/message-banner';
 import { ServiceConfigurationTab } from './views/service-configuration-tab';
 import { Service } from '@shared/Service';
-import { ServiceConfigurationEntryModel } from './models/ServiceConfigurationEntryModel';
+import { ServiceConfigurationModel } from './models/ServiceConfigurationModel';
+import { FormGroupModel, Form, FormArrayModel } from '@shared/form';
+import { TestConfigurationModel } from './models/TestConfigurationModel';
 
 import './SimulationConfigurationEditor.light.scss';
 import './SimulationConfigurationEditor.dark.scss';
@@ -39,8 +41,6 @@ interface Props {
 
 interface State {
   show: boolean;
-  applicationConfigStr: string;
-  simulationName: string;
   modelDictionary: ModelDictionary;
   disableSubmitButton: boolean;
   lineName: string;
@@ -53,6 +53,17 @@ export class SimulationConfigurationEditor extends React.Component<Props, State>
   readonly currentConfig: SimulationConfiguration;
   readonly simulationStartDate = Date.now() / 1000;
   readonly dateTimeService = DateTimeService.getInstance();
+  readonly formGroupModel = new FormGroupModel({
+    powerSystemConfig: new FormGroupModel<PowerSystemConfigurationModel>(),
+    simulationConfig: new FormGroupModel<SimulationConfigurationTabModel>(),
+    applicationConfig: new FormGroupModel<ApplicationConfigurationModel>(),
+    testConfig: new FormGroupModel<TestConfigurationModel>({
+      outageEvents: new FormArrayModel<CommOutageEvent>(),
+      faultEvents: new FormArrayModel<FaultEvent>(),
+      commandEvents: new FormArrayModel<CommandEvent>()
+    }),
+    serviceConfig: new FormArrayModel<ServiceConfigurationModel>([])
+  });
 
   outageEvents: CommOutageEvent[] = [];
   faultEvents: FaultEvent[] = [];
@@ -66,8 +77,6 @@ export class SimulationConfigurationEditor extends React.Component<Props, State>
     super(props);
     this.state = {
       show: true,
-      applicationConfigStr: '',
-      simulationName: props.initialConfig.simulation_config.simulation_name,
       modelDictionary: null,
       disableSubmitButton: true,
       lineName: props.initialConfig.power_system_config.Line_name,
@@ -77,14 +86,8 @@ export class SimulationConfigurationEditor extends React.Component<Props, State>
 
     this.currentConfig = this._cloneConfigObject(props.initialConfig);
 
-    this.onPowerSystemConfigurationChanged = this.onPowerSystemConfigurationChanged.bind(this);
-    this.onSimulationConfigurationChanged = this.onSimulationConfigurationChanged.bind(this);
-    this.onApplicationConfigurationChanged = this.onApplicationConfigurationChanged.bind(this);
-    this.onTestConfigurationEventsAdded = this.onTestConfigurationEventsAdded.bind(this);
-    this.onServiceConfigurationsChanged = this.onServiceConfigurationsChanged.bind(this);
-    this.onServiceConfigurationValidationChanged = this.onServiceConfigurationValidationChanged.bind(this);
     this.closeForm = this.closeForm.bind(this);
-    this.submitForm = this.submitForm.bind(this);
+    this.onSubmitForm = this.onSubmitForm.bind(this);
   }
 
   private _cloneConfigObject(original: SimulationConfiguration): SimulationConfiguration {
@@ -140,48 +143,84 @@ export class SimulationConfigurationEditor extends React.Component<Props, State>
           services
         })
       });
+
+    this.formGroupModel.validityChanges()
+      .subscribe({
+        next: isValid => {
+          this.setState({
+            disableSubmitButton: !isValid
+          });
+        }
+      });
+
+    this._processPowerSystemConfigChanges();
+  }
+
+  private _processPowerSystemConfigChanges() {
+    this.formGroupModel.findControl('powerSystemConfig')
+      .valueChanges()
+      .subscribe({
+        next: formValue => {
+          if ('line' in formValue) {
+            if (formValue.line) {
+              this.props.onMRIDChanged(formValue.line.id);
+              this.setState({
+                lineName: formValue.line.id
+              });
+              this.formGroupModel.findControl('simulationConfig.simulation_name' as any)
+                .setValue(formValue.line.name);
+            } else {
+              this.setState({
+                lineName: ''
+              });
+              this.formGroupModel.findControl('simulationConfig.simulation_name' as any).setValue('');
+            }
+          }
+        }
+      });
   }
 
   componentWillUnmount() {
     this._unsubscriber.next();
     this._unsubscriber.complete();
+    this.formGroupModel.cleanup();
   }
 
   render() {
     return (
       <Dialog show={this.state.show}>
         <DialogContent>
-          <form className='simulation-configuration-form'>
+          <Form
+            className='simulation-configuration-form'
+            formGroupModel={this.formGroupModel}>
             <TabGroup>
               <Tab label='Power System Configuration'>
                 <PowerSystemConfigurationTab
+                  parentFormGroupModel={this.formGroupModel.findControl('powerSystemConfig')}
                   powerSystemConfig={this.currentConfig.power_system_config}
-                  feederModel={this.props.feederModel}
-                  onChange={this.onPowerSystemConfigurationChanged} />
+                  feederModel={this.props.feederModel} />
               </Tab>
               <Tab label='Simulation Configuration'>
                 <SimulationConfigurationTab
-                  simulationConfig={this.currentConfig.simulation_config}
-                  simulationName={this.state.simulationName}
-                  onChange={this.onSimulationConfigurationChanged} />
+                  parentFormGroupModel={this.formGroupModel.findControl('simulationConfig')}
+                  simulationConfig={this.currentConfig.simulation_config} />
               </Tab>
               <Tab label='Application Configuration'>
                 <ApplicationConfigurationTab
+                  parentFormGroupModel={this.formGroupModel.findControl('applicationConfig')}
                   applicationConfig={this.currentConfig.application_config}
-                  availableApplications={this.props.availableApplications}
-                  onChange={this.onApplicationConfigurationChanged} />
+                  availableApplications={this.props.availableApplications} />
               </Tab>
               <Tab label='Test Configuration'>
                 {this.showCurrentComponentForTestConfigurationTab()}
               </Tab>
               <Tab label='Service Configuration'>
                 <ServiceConfigurationTab
-                  services={this.state.services}
-                  onChange={this.onServiceConfigurationsChanged}
-                  onValidationChange={this.onServiceConfigurationValidationChanged} />
+                  parentFormArrayModel={this.formGroupModel.findControl('serviceConfig')}
+                  services={this.state.services} />
               </Tab>
             </TabGroup>
-          </form>
+          </Form>
         </DialogContent>
         <DialogActions>
           <BasicButton
@@ -192,55 +231,10 @@ export class SimulationConfigurationEditor extends React.Component<Props, State>
             label='Submit'
             type='positive'
             disabled={this.state.disableSubmitButton}
-            onClick={this.submitForm} />
+            onClick={this.onSubmitForm} />
         </DialogActions>
       </Dialog>
     );
-  }
-
-  onPowerSystemConfigurationChanged(formValue: PowerSystemConfigurationModel) {
-    if (formValue.isValid) {
-      const currentPowerSystemConfig = this.currentConfig.power_system_config;
-      currentPowerSystemConfig.GeographicalRegion_name = formValue.regionId;
-      currentPowerSystemConfig.SubGeographicalRegion_name = formValue.subregionId;
-      currentPowerSystemConfig.Line_name = formValue.lineId;
-      this.currentConfig.simulation_config.simulation_name = formValue.simulationName;
-      this.setState({
-        simulationName: formValue.simulationName
-      });
-      if (formValue.lineId !== '')
-        this.props.onMRIDChanged(formValue.lineId);
-    }
-    this.setState({
-      lineName: formValue.lineId,
-      disableSubmitButton: formValue.lineId === '' || !formValue.isValid
-    });
-  }
-
-  onSimulationConfigurationChanged(formValue: SimulationConfigurationTabModel) {
-    if (formValue.isValid) {
-      this.currentConfig.simulation_config.start_time = formValue.startDateTime;
-      this.currentConfig.simulation_config.duration = formValue.duration;
-      this.currentConfig.simulation_config.simulator = formValue.simulator;
-      this.currentConfig.simulation_config.run_realtime = formValue.runInRealtime;
-      if (formValue.simulationName.includes('[NEW]'))
-        this.currentConfig.simulation_config.simulation_name = formValue.simulationName.replace('[NEW]', '');
-      this.currentConfig.simulation_config.model_creation_config = formValue.modelCreationConfig;
-    }
-    this.setState(prevState => ({
-      disableSubmitButton: prevState.lineName === '' || !formValue.isValid
-    }));
-  }
-
-  onApplicationConfigurationChanged(formValue: ApplicationConfigurationModel) {
-    if (formValue.applicationId !== '') {
-      const selectedApplication = this.currentConfig.application_config.applications.pop() || { name: '', config_string: '' };
-      selectedApplication.name = formValue.applicationId;
-      selectedApplication.config_string = formValue.configString;
-      this.currentConfig.application_config.applications.push(selectedApplication);
-    } else {
-      this.currentConfig.application_config.applications.pop();
-    }
   }
 
   showCurrentComponentForTestConfigurationTab() {
@@ -261,31 +255,12 @@ export class SimulationConfigurationEditor extends React.Component<Props, State>
     }
     return (
       <TestConfigurationTab
+        parentFormGroupModel={this.formGroupModel.findControl('testConfig')}
         modelDictionary={this.state.modelDictionary}
-        simulationStartTime={this.simulationStartDate}
-        simulationStopTime={+this.currentConfig.simulation_config.duration + this.simulationStartDate}
-        componentWithConsolidatedPhases={this.state.componentsWithGroupedPhases}
-        onEventsAdded={this.onTestConfigurationEventsAdded} />
+        simulationStartDateTime={this.simulationStartDate}
+        simulationStopDateTime={+this.currentConfig.simulation_config.duration + this.simulationStartDate}
+        componentWithConsolidatedPhases={this.state.componentsWithGroupedPhases} />
     );
-  }
-
-  onTestConfigurationEventsAdded(payload: { outageEvents: CommOutageEvent[]; faultEvents: FaultEvent[]; commandEvents: CommandEvent[]; }) {
-    this.outageEvents = payload.outageEvents;
-    this.faultEvents = payload.faultEvents;
-    this.commandEvents = payload.commandEvents;
-  }
-
-  onServiceConfigurationsChanged(serviceConfigurationEntryModels: ServiceConfigurationEntryModel[]) {
-    this.currentConfig.service_configs = serviceConfigurationEntryModels.map(model => ({
-      id: model.service.id,
-      user_options: model.values
-    }));
-  }
-
-  onServiceConfigurationValidationChanged(isValid: boolean) {
-    this.setState({
-      disableSubmitButton: this.state.lineName === '' || !isValid
-    });
   }
 
   closeForm(event: React.SyntheticEvent) {
@@ -296,25 +271,60 @@ export class SimulationConfigurationEditor extends React.Component<Props, State>
     });
   }
 
-  submitForm(event: React.SyntheticEvent) {
-    event.stopPropagation();
+  onSubmitForm() {
     this.setState({
       show: false
     });
-    const selectedApplication = this.currentConfig.application_config.applications[0];
-    this.currentConfig.test_config.appId = selectedApplication ? selectedApplication.name : '';
-    for (const outageEvent of this.outageEvents)
-      this.currentConfig.test_config.events.push(this._transformOutageEventForSubmission(outageEvent));
-    for (const faultEvent of this.faultEvents)
-      this.currentConfig.test_config.events.push(this._transformFaultEventForSubmission(faultEvent));
-    for (const commandEvent of this.commandEvents)
-      this.currentConfig.test_config.events.push(commandEvent);
-    this._stateStore.update({
-      faultEvents: this.faultEvents,
-      outageEvents: this.outageEvents,
-      commandEvents: this.commandEvents
-    });
+    this._populatePowerSystemConfigSection();
+    this._populateSimulationConfigSection();
+    this._populateApplicationConfigSection();
+    this._populateTestConfigSection();
+    this._populateServiceConfigSection();
     this.props.onSubmit(this.currentConfig);
+  }
+
+  private _populatePowerSystemConfigSection() {
+    const powerSystemConfigFormValue = this.formGroupModel.findControl('powerSystemConfig').getValue();
+    this.currentConfig.power_system_config.GeographicalRegion_name = powerSystemConfigFormValue.region.id;
+    this.currentConfig.power_system_config.SubGeographicalRegion_name = powerSystemConfigFormValue.subregion.id;
+    this.currentConfig.power_system_config.Line_name = powerSystemConfigFormValue.line.id;
+  }
+
+  private _populateSimulationConfigSection() {
+    this.currentConfig.simulation_config = {
+      ...this.currentConfig.simulation_config,
+      ...this.formGroupModel.findControl('simulationConfig').getValue()
+    };
+  }
+
+  private _populateApplicationConfigSection() {
+    this.currentConfig.application_config = this.formGroupModel.findControl('applicationConfig').getValue();
+    // if "name" is an empty string, no app was selected, so we only
+    // want to send an empty array in that case in the config
+    if (this.currentConfig.application_config.applications[0].name === '') {
+      this.currentConfig.application_config.applications = [];
+    }
+  }
+
+  private _populateTestConfigSection() {
+    const selectedApplication = this.currentConfig.application_config.applications[0];
+    const testConfigFormValue = this.formGroupModel.findControl('testConfig').getValue();
+
+    this.currentConfig.test_config.appId = selectedApplication?.name || '';
+    for (const outageEvent of testConfigFormValue.outageEvents) {
+      this.currentConfig.test_config.events.push(this._transformOutageEventForSubmission(outageEvent));
+    }
+    for (const faultEvent of testConfigFormValue.faultEvents) {
+      this.currentConfig.test_config.events.push(this._transformFaultEventForSubmission(faultEvent));
+    }
+    for (const commandEvent of testConfigFormValue.commandEvents) {
+      this.currentConfig.test_config.events.push(commandEvent);
+    }
+    this._stateStore.update({
+      faultEvents: testConfigFormValue.faultEvents,
+      outageEvents: testConfigFormValue.outageEvents,
+      commandEvents: testConfigFormValue.commandEvents
+    });
   }
 
   private _transformOutageEventForSubmission(outageEvent: CommOutageEvent) {
@@ -322,65 +332,53 @@ export class SimulationConfigurationEditor extends React.Component<Props, State>
       allInputOutage: outageEvent.allInputOutage,
       allOutputOutage: outageEvent.allOutputOutage,
       inputOutageList: this._flattenArray(outageEvent.inputList.map(inputItem => {
-        if (Array.isArray(inputItem.mRID))
+        if (Array.isArray(inputItem.mRID)) {
           return inputItem.phases.map(phase => ({
             objectMRID: inputItem.mRID[phase.phaseIndex],
             attribute: inputItem.attribute
-          }));
+          })).filter(e => e.objectMRID !== undefined);
+        }
         return {
           objectMRID: inputItem.mRID,
           attribute: inputItem.attribute
         };
       })),
       outputOutageList: outageEvent.outputList.map(outputItem => outputItem.mRID),
-      event_type: outageEvent.event_type,
+      event_type: outageEvent.eventType,
       occuredDateTime: outageEvent.startDateTime,
       stopDateTime: outageEvent.stopDateTime
-    };
-  }
-
-  private _transformFaultEventForSubmission(faultEvent: FaultEvent) {
-    return {
-      PhaseConnectedFaultKind: faultEvent.faultKind,
-      FaultImpedance: this._getImpedance(faultEvent),
-      ObjectMRID: Array.isArray(faultEvent.mRID)
-        ? [...new Set(faultEvent.phases.map(phase => faultEvent.mRID[phase.phaseIndex]))]
-        : [faultEvent.mRID],
-      phases: faultEvent.phases.map(phase => phase.phaseLabel).join(''),
-      event_type: faultEvent.event_type,
-      occuredDateTime: faultEvent.startDateTime,
-      stopDateTime: faultEvent.stopDateTime
-    };
-  }
-
-  private _getImpedance(faultEvent: FaultEvent) {
-    if (faultEvent.faultKind === FaultKind.LINE_TO_GROUND)
-      return {
-        xGround: faultEvent.FaultImpedance.xGround,
-        rGround: faultEvent.FaultImpedance.rGround
-      };
-    if (faultEvent.faultKind === FaultKind.LINE_TO_LINE)
-      return {
-        xLineToLine: faultEvent.FaultImpedance.xLineToLine,
-        rLineToLine: faultEvent.FaultImpedance.rLinetoLine
-      };
-    return {
-      xGround: faultEvent.FaultImpedance.xGround,
-      rGround: faultEvent.FaultImpedance.rGround,
-      xLineToLine: faultEvent.FaultImpedance.xLineToLine,
-      rLineToLine: faultEvent.FaultImpedance.rLinetoLine
     };
   }
 
   private _flattenArray(array: any[]) {
     const result = [];
     for (const element of array) {
-      if (Array.isArray(element))
+      if (Array.isArray(element)) {
         result.push(...element);
-      else
+      } else {
         result.push(element);
+      }
     }
     return result;
+  }
+
+  private _transformFaultEventForSubmission(faultEvent: FaultEvent) {
+    return {
+      PhaseConnectedFaultKind: faultEvent.faultKind,
+      FaultImpedance: faultEvent.faultImpedance,
+      ObjectMRID: Array.isArray(faultEvent.mRID)
+        ? [...new Set(faultEvent.phases.map(phase => faultEvent.mRID[phase.phaseIndex]).filter(e => e !== undefined))]
+        : [faultEvent.mRID],
+      phases: faultEvent.phases.map(phase => phase.phaseLabel).join(''),
+      event_type: faultEvent.eventType,
+      occuredDateTime: faultEvent.startDateTime,
+      stopDateTime: faultEvent.stopDateTime
+    };
+  }
+
+  private _populateServiceConfigSection() {
+    this.currentConfig.service_configs = this.formGroupModel.findControl('serviceConfig')
+      .getValue();
   }
 
 }

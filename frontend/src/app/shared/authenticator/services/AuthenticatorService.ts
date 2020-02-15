@@ -41,10 +41,11 @@ export class AuthenticatorService {
           };
         }),
         catchError(code => {
-          if (code === StompClientInitializationResult.AUTHENTICATION_FAILURE)
+          if (code === StompClientInitializationResult.AUTHENTICATION_FAILURE) {
             return of({
               statusCode: AuthenticationStatusCode.INCORRECT_CREDENTIALS
             });
+          }
           return of({
             statusCode: AuthenticationStatusCode.SERVER_FAILURE
           });
@@ -66,13 +67,11 @@ export class AuthenticatorService {
               sessionStorage.setItem('userRoles', JSON.stringify(userRoles));
             }
           });
-        this._stompClientService.send(
-          'goss.gridappsd.process.request.roles',
-          {
-            'reply-to': '/user/roles'
-          },
-          '{}'
-        );
+        this._stompClientService.send({
+          destination: 'goss.gridappsd.process.request.roles',
+          replyTo: '/user/roles',
+          body: '{}'
+        });
       });
   }
 

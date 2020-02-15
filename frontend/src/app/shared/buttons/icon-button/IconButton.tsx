@@ -36,11 +36,12 @@ export class IconButton extends React.Component<Props, {}> {
   buttonRef: HTMLButtonElement;
 
   componentDidUpdate(prevProps: Props) {
-    if (this.props.disabled !== prevProps.disabled && this.props.disabled)
+    if (this.props.disabled !== prevProps.disabled && this.props.disabled) {
       // When the button is disabled
       // Chrome does not fire a mouseout event at all
       // so we fire it manually
       this.buttonRef.dispatchEvent(new CustomEvent('mouseout'));
+    }
   }
 
   render() {
@@ -74,14 +75,17 @@ export class IconButton extends React.Component<Props, {}> {
       `icon-button--${this.props.style}`,
       this.props.noBackground ? 'no-background' : 'has-background',
     ];
-    if (this.props.label)
+    if (this.props.label) {
       classNames.push('icon-button--has-label');
-    if (this.props.className)
+    }
+    if (this.props.className) {
       classNames.push(this.props.className);
+    }
     if (this.props.rounded && !this.props.label) {
       classNames.push(`rounded-icon-button rounded-icon-button--${this.props.size}`);
-      if (!this.props.noBackground)
+      if (!this.props.noBackground) {
         classNames.push('has-background');
+      }
     }
     return classNames.join(' ');
   }

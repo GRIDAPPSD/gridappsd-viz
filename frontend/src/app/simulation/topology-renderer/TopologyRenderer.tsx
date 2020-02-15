@@ -10,9 +10,9 @@ import { CanvasTransformService } from '@shared/CanvasTransformService';
 import { Switch, Capacitor, Node, Edge, Regulator, Transformer } from '@shared/topology';
 import { Tooltip } from '@shared/tooltip';
 import { OverlayService } from '@shared/overlay';
-import { SwitchMenu } from './views/switch-menu/SwitchMenu';
-import { CapacitorMenu } from './views/capacitor-menu/CapacitorMenu';
-import { RegulatorMenu } from './views/regulator-menu/RegulatorMenu';
+import { SwitchControlMenu } from './views/switch-control-menu/SwitchControlMenu';
+import { CapacitorControlMenu } from './views/capacitor-control-menu/CapacitorControlMenu';
+import { RegulatorControlMenu } from './views/regulator-control-menu/RegulatorControlMenu';
 import { RenderableTopology } from './models/RenderableTopology';
 import { IconButton } from '@shared/buttons';
 import { NodeSearcher } from './views/node-searcher/NodeSearcher';
@@ -27,7 +27,7 @@ interface Props {
   topology: RenderableTopology;
   showWait: boolean;
   onToggleSwitch: (swjtch: Switch, open: boolean) => void;
-  onCapacitorMenuFormSubmitted: (currentCapacitor: Capacitor, newCapacitor: Capacitor) => void;
+  onCapacitorControlMenuFormSubmitted: (currentCapacitor: Capacitor, updatedCapacitor: Capacitor) => void;
   onRegulatorMenuFormSubmitted: (currentRegulator: Regulator, newRegulator: Regulator) => void;
 }
 
@@ -148,18 +148,15 @@ export class TopologyRenderer extends React.Component<Props, State> {
       if (currentTransformScaleDegree > 1.5 && !this._showNodeSymbols) {
         this._showNodeSymbols = true;
         this._showSymbols();
-      }
-      else if (currentTransformScaleDegree < 1.5 && this._showNodeSymbols) {
+      } else if (currentTransformScaleDegree < 1.5 && this._showNodeSymbols) {
         this._showNodeSymbols = false;
         this._hideSymbols();
       }
-    }
-    else if (this.props.topology.nodes.length > 200) {
+    } else if (this.props.topology.nodes.length > 200) {
       if (currentTransformScaleDegree > 2.5 && !this._showNodeSymbols) {
         this._showNodeSymbols = true;
         this._showSymbols();
-      }
-      else if (currentTransformScaleDegree < 2.5 && this._showNodeSymbols) {
+      } else if (currentTransformScaleDegree < 2.5 && this._showNodeSymbols) {
         this._showNodeSymbols = false;
         this._hideSymbols();
       }
@@ -181,8 +178,9 @@ export class TopologyRenderer extends React.Component<Props, State> {
   }
 
   componentDidUpdate(prevProps: Props) {
-    if (this.props.topology !== prevProps.topology)
+    if (this.props.topology !== prevProps.topology) {
       this._render();
+    }
   }
 
   private _render() {
@@ -331,8 +329,9 @@ export class TopologyRenderer extends React.Component<Props, State> {
     const [minYCoordinate, maxYCoordinate] = this._yScale.domain();
     for (const node of nodes) {
       node.y1 = minYCoordinate + (maxYCoordinate - node.y1);
-      if ('y2' in node)
+      if ('y2' in node) {
         (node as any).y2 = minYCoordinate + (maxYCoordinate - (node as any).y2);
+      }
     }
   }
 
@@ -473,8 +472,9 @@ export class TopologyRenderer extends React.Component<Props, State> {
   private _calculateSymbolTransformOrigin(node: Node) {
     const width = this._symbolDimensions[node.type]?.width || symbolSize;
     const height = this._symbolDimensions[node.type]?.height || symbolSize;
-    if (node.type === 'capacitor' || node.type === 'regulator')
+    if (node.type === 'capacitor' || node.type === 'regulator') {
       return `${node.screenX1 + (width / 2)}px ${node.screenY1}px`;
+    }
     return `${node.screenX1 + (width / 2)}px ${node.screenY1 + (height / 2)}px`;
   }
 
@@ -527,8 +527,9 @@ export class TopologyRenderer extends React.Component<Props, State> {
     nodeNameToEdgeMap: Map<string, Edge>,
     shapeTemplate: string
   ) {
-    if (!shapeTemplate.includes('${startingPoint}'))
+    if (!shapeTemplate.includes('${startingPoint}')) {
       throw new Error(`Symbol's path template must contain \${startingPoint} place holder`);
+    }
 
     const nodeType = nodes[0]?.type;
     return container.append('g')
@@ -683,8 +684,9 @@ export class TopologyRenderer extends React.Component<Props, State> {
       .attr('height', height)
       .attr('fill', node => node.open ? node.colorWhenOpen : node.colorWhenClosed)
       .attr('transform', node => {
-        if (!node.from || !node.to)
+        if (!node.from || !node.to) {
           return 'rotate(0) translate(0, 0)';
+        }
         const angle = this._calculateAngleBetweenLineAndXAxis(
           node.screenX1,
           node.screenY1,
@@ -760,25 +762,24 @@ export class TopologyRenderer extends React.Component<Props, State> {
     );
   }
 
-  showMenuOnComponentClicked(event: React.SyntheticEvent) {
+  showMenuOnComponentClicked(event: React.MouseEvent) {
     const target = select(event.target as SVGElement);
-    if (target.classed('switch'))
-      this._onSwitchClicked(target);
-    else if (target.classed('capacitor'))
-      this._onCapacitorClicked(target);
-    else if (target.classed('regulator'))
-      this._onRegulatorClicked(target);
+    if (target.classed('switch')) {
+      this._onSwitchClicked(target, event.clientX, event.clientY);
+    } else if (target.classed('capacitor')) {
+      this._onCapacitorClicked(target, event.clientX, event.clientY);
+    } else if (target.classed('regulator')) {
+      this._onRegulatorClicked(target, event.clientX, event.clientY);
+    }
   }
 
-  private _onSwitchClicked(clickedElement: Selection<SVGElement, any, SVGElement, any>) {
-    const clickedElementRect = clickedElement.node()
-      .getBoundingClientRect();
+  private _onSwitchClicked(clickedElement: Selection<SVGElement, any, SVGElement, any>, clickX: number, clickY: number) {
     const swjtch = clickedElement.datum() as Switch;
     this.overlay.show(
-      <SwitchMenu
-        left={clickedElementRect.left}
-        top={clickedElementRect.top}
-        open={swjtch.open}
+      <SwitchControlMenu
+        left={clickX}
+        top={clickY}
+        switch={swjtch}
         onCancel={this.overlay.hide}
         onConfirm={open => {
           this.overlay.hide();
@@ -788,40 +789,37 @@ export class TopologyRenderer extends React.Component<Props, State> {
   }
 
   private _toggleSwitch(open: boolean, swjtch: Switch) {
-    if (swjtch.open !== open)
+    if (swjtch.open !== open) {
       this.props.onToggleSwitch(swjtch, open);
+    }
   }
 
-  private _onCapacitorClicked(clickedElement: Selection<SVGElement, any, SVGElement, any>) {
-    const clickedElementRect = clickedElement.node()
-      .getBoundingClientRect();
+  private _onCapacitorClicked(clickedElement: Selection<SVGElement, any, SVGElement, any>, clickX: number, clickY: number) {
     const capacitor = clickedElement.datum() as Capacitor;
     this.overlay.show(
-      <CapacitorMenu
-        left={clickedElementRect.left}
-        top={clickedElementRect.top}
+      <CapacitorControlMenu
+        left={clickX}
+        top={clickY}
         capacitor={capacitor}
         onCancel={this.overlay.hide}
-        onConfirm={newCapacitor => {
+        onConfirm={updatedCapacitor => {
           this.overlay.hide();
-          this.props.onCapacitorMenuFormSubmitted(capacitor, newCapacitor);
+          this.props.onCapacitorControlMenuFormSubmitted(capacitor, updatedCapacitor);
         }} />
     );
   }
 
-  private _onRegulatorClicked(clickedElement: Selection<SVGElement, any, SVGElement, any>) {
-    const clickedElementRect = clickedElement.node()
-      .getBoundingClientRect();
+  private _onRegulatorClicked(clickedElement: Selection<SVGElement, any, SVGElement, any>, clickX: number, clickY: number) {
     const regulator = clickedElement.datum() as Regulator;
     this.overlay.show(
-      <RegulatorMenu
-        left={clickedElementRect.left}
-        top={clickedElementRect.top}
+      <RegulatorControlMenu
+        left={clickX}
+        top={clickY}
         regulator={regulator}
         onCancel={this.overlay.hide}
-        onConfirm={newRegulator => {
+        onConfirm={updatedRegulator => {
           this.overlay.hide();
-          this.props.onRegulatorMenuFormSubmitted(regulator, newRegulator);
+          this.props.onRegulatorMenuFormSubmitted(regulator, updatedRegulator);
         }} />
     );
   }

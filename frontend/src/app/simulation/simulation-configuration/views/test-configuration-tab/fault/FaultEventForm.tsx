@@ -2,21 +2,21 @@ import * as React from 'react';
 
 import { BasicButton } from '@shared/buttons';
 import { ModelDictionary, ModelDictionaryRegulator, ModelDictionaryCapacitor, ModelDictionarySwitch } from '@shared/topology/model-dictionary';
-import { FormGroup, Select, Input, SelectionOptionBuilder } from '@shared/form';
-import { FaultEvent, Phase, FaultKind, FaultImpedence } from '@shared/test-manager';
+import { FormGroup, Select, Input, SelectionOptionBuilder, FormGroupModel, FormControlModel } from '@shared/form';
+import { FaultEvent, Phase, FaultKind, FaultImpedanceType, FaultImpedance } from '@shared/test-manager';
 import { Validators } from '@shared/form/validation';
 import { ModelDictionaryComponent } from '@shared/topology/model-dictionary/ModelDictionaryComponent';
-import { DateTimeService } from '@shared/DateTimeService';
 import { unique } from '@shared/misc';
 
 import './FaultEventForm.light.scss';
 import './FaultEventForm.dark.scss';
 
 interface Props {
-  onEventAdded: (event: FaultEvent) => void;
-  initialFormValue: FaultEvent;
+  startDateTime: number;
+  stopDateTime: number;
   modelDictionary: ModelDictionary;
   componentsWithConsolidatedPhases: ModelDictionaryComponent[];
+  onAddEvent: (event: FaultEvent) => void;
 }
 
 interface State {
@@ -25,16 +25,15 @@ interface State {
   phaseOptionBuilder: SelectionOptionBuilder<Phase>;
   faultKindOptionBuilder: SelectionOptionBuilder<FaultKind>;
   selectedFaultKind: FaultKind;
-  formValue: FaultEvent;
-  addEventButtonDisabled: boolean;
 }
 
 export class FaultEventForm extends React.Component<Props, State> {
 
-  readonly dateTimeService = DateTimeService.getInstance();
+  readonly equipmentTypeFormControl: FormControlModel<{ id: string; label: string; }>;
+  readonly componentFormControl: FormControlModel<ModelDictionaryComponent | ModelDictionaryRegulator | ModelDictionaryCapacitor | ModelDictionarySwitch>;
+  readonly eventFormGroupModel: FormGroupModel<FaultEvent>;
 
-  formValue: FaultEvent;
-  equipmentTypeSelect: Select<any, any>;
+  faultImpedanceFormGroup: FormGroupModel<FaultImpedance['LineToGround']> | FormGroupModel<FaultImpedance['LineToLine']> | FormGroupModel<FaultImpedance['LineToLineToGround']>;
 
   constructor(props: Props) {
     super(props);
@@ -66,92 +65,251 @@ export class FaultEventForm extends React.Component<Props, State> {
           FaultKind.LINE_TO_LINE_TO_GROUND
         ]
       ),
-      selectedFaultKind: FaultKind.LINE_TO_GROUND,
-      formValue: { ...props.initialFormValue },
-      addEventButtonDisabled: true
+      selectedFaultKind: FaultKind.LINE_TO_GROUND
     };
-    this.formValue = this.state.formValue;
 
-    this.onEquipmentTypeChanged = this.onEquipmentTypeChanged.bind(this);
-    this.onComponentChanged = this.onComponentChanged.bind(this);
-    this.onPhaseChanged = this.onPhaseChanged.bind(this);
-    this.onFaultKindChanged = this.onFaultKindChanged.bind(this);
-    this.onStartDateTimeChanged = this.onStartDateTimeChanged.bind(this);
-    this.onStopDateTimeChanged = this.onStopDateTimeChanged.bind(this);
+    this.equipmentTypeFormControl = new FormControlModel(null);
+    this.componentFormControl = new FormControlModel(null);
+    this.faultImpedanceFormGroup = this._createFaultImpedanceFormGroupModel(FaultKind.LINE_TO_GROUND);
+    this.eventFormGroupModel = this._createFormGroupModelForFaultEvent();
+
+    this.componentFormControl.dependsOn(this.equipmentTypeFormControl);
+    this.eventFormGroupModel.findControl('phases').dependsOn(this.componentFormControl);
+
     this.createNewEvent = this.createNewEvent.bind(this);
   }
 
-  componentDidUpdate(previousProps: Props) {
-    if (previousProps.initialFormValue !== this.props.initialFormValue) {
-      const formValue = { ...this.props.initialFormValue };
-      this.setState({ formValue });
-      this.formValue = formValue;
+  private _createFaultImpedanceFormGroupModel(faultKind: FaultKind) {
+    switch (faultKind) {
+      case FaultKind.LINE_TO_GROUND:
+        return new FormGroupModel<FaultImpedance['LineToGround']>({
+          rGround: new FormControlModel('', createValidators('rGround')),
+          xGround: new FormControlModel('', createValidators('xGround'))
+        });
+      case FaultKind.LINE_TO_LINE:
+        return new FormGroupModel<FaultImpedance['LineToLine']>({
+          rLineToLine: new FormControlModel('', createValidators('rLineToLine')),
+          xLineToLine: new FormControlModel('', createValidators('xLineToLine'))
+        });
+      case FaultKind.LINE_TO_LINE_TO_GROUND:
+        return new FormGroupModel<FaultImpedance['LineToLineToGround']>({
+          rGround: new FormControlModel('', createValidators('rGround')),
+          xGround: new FormControlModel('', createValidators('xGround')),
+          rLineToLine: new FormControlModel('', createValidators('rLineToLine')),
+          xLineToLine: new FormControlModel('', createValidators('xLineToLine')),
+        });
     }
+
+    function createValidators(fieldName: string) {
+      return [
+        Validators.checkNotEmpty(fieldName),
+        Validators.checkValidNumber(fieldName),
+      ];
+    }
+  }
+
+  private _createFormGroupModelForFaultEvent() {
+    return new FormGroupModel<FaultEvent>({
+      eventType: 'Fault',
+      tag: '',
+      equipmentType: '',
+      equipmentName: '',
+      mRID: null,
+      phases: new FormControlModel([]),
+      faultKind: new FormControlModel(FaultKind.LINE_TO_GROUND),
+      faultImpedance: null,
+      startDateTime: new FormControlModel(
+        this.props.startDateTime,
+        [Validators.checkNotEmpty('Start date time'), Validators.checkValidDateTime('Start date time')]
+      ),
+      stopDateTime: new FormControlModel(
+        this.props.stopDateTime,
+        [Validators.checkNotEmpty('Stop date time'), Validators.checkValidDateTime('Stop date time')]
+      )
+    });
+  }
+
+  componentDidMount() {
+    this.eventFormGroupModel.validityChanges()
+      .subscribe({
+        next: () => this.forceUpdate()
+      });
+    this.faultImpedanceFormGroup.validityChanges()
+      .subscribe({
+        next: () => {
+          this.forceUpdate();
+        }
+      });
+    this._onEquipmentTypeChange();
+    this._onComponentSelectionChange();
+    this._onFaultKindChange();
+  }
+
+  private _onEquipmentTypeChange() {
+    this.equipmentTypeFormControl.valueChanges()
+      .subscribe({
+        next: selectedType => {
+          if (selectedType) {
+            switch (selectedType.id) {
+              case 'ACLineSegment':
+              case 'PowerTransformer':
+                this.setState({
+                  componentOptionBuilder: new SelectionOptionBuilder(
+                    this.props.componentsWithConsolidatedPhases.filter(e => e.conductingEquipmentType === selectedType.id),
+                    e => `${e.conductingEquipmentName} (${e.phases.join(', ')})`
+                  ),
+                  phaseOptionBuilder: SelectionOptionBuilder.defaultBuilder()
+                });
+                break;
+              default:
+                const components = this.props.modelDictionary[selectedType.id] || [];
+                this.setState({
+                  componentOptionBuilder: new SelectionOptionBuilder(
+                    components,
+                    e => `${e.name || e.bankName} (${e.phases || e.bankPhases})`
+                  ),
+                  phaseOptionBuilder: SelectionOptionBuilder.defaultBuilder()
+                });
+                break;
+            }
+            this.eventFormGroupModel.setValue({
+              equipmentType: selectedType.label
+            });
+          } else {
+            this.setState({
+              componentOptionBuilder: SelectionOptionBuilder.defaultBuilder(),
+              phaseOptionBuilder: SelectionOptionBuilder.defaultBuilder()
+            });
+            this.eventFormGroupModel.setValue({
+              equipmentType: ''
+            });
+          }
+        }
+      });
+  }
+
+  private _onComponentSelectionChange() {
+    this.componentFormControl.valueChanges()
+      .subscribe({
+        next: selectedComponent => {
+          if (selectedComponent) {
+            this.setState({
+              phaseOptionBuilder: new SelectionOptionBuilder(
+                unique(this._normalizePhases('phases' in selectedComponent ? selectedComponent.phases : selectedComponent.bankPhases))
+                  .sort((a, b) => a.localeCompare(b))
+                  .map((phase, i) => ({ phaseLabel: phase, phaseIndex: i })),
+                phase => phase.phaseLabel
+              )
+            });
+            this.eventFormGroupModel.setValue({
+              equipmentName: 'conductingEquipmentName' in selectedComponent
+                ? selectedComponent.conductingEquipmentName
+                : 'name' in selectedComponent
+                  ? selectedComponent.name
+                  : selectedComponent.bankName,
+              mRID: 'conductingEquipmentMRIDs' in selectedComponent
+                ? selectedComponent.conductingEquipmentMRIDs
+                : selectedComponent.mRID
+            });
+          } else {
+            this.setState({
+              phaseOptionBuilder: SelectionOptionBuilder.defaultBuilder()
+            });
+            this.eventFormGroupModel.setValue({
+              equipmentName: '',
+              mRID: null
+            });
+          }
+        }
+      });
+  }
+
+  private _normalizePhases(phases: string | string[]) {
+    if (Array.isArray(phases)) {
+      return phases;
+    }
+    // If phases is a string containing either A or B or C,
+    // then this string needs to be split up
+    return /^[abc]+$/i.test(phases) ? [...new Set(phases)] : [phases];
+  }
+
+  private _onFaultKindChange() {
+    this.eventFormGroupModel.findControl('faultKind')
+      .valueChanges()
+      .subscribe({
+        next: selectedFaultKind => {
+          if (selectedFaultKind) {
+            this.faultImpedanceFormGroup.cleanup();
+            this.faultImpedanceFormGroup = this._createFaultImpedanceFormGroupModel(selectedFaultKind);
+            this.faultImpedanceFormGroup.validityChanges()
+              .subscribe({
+                next: () => {
+                  this.forceUpdate();
+                }
+              });
+            this.setState({
+              selectedFaultKind: selectedFaultKind
+            });
+          }
+        }
+      });
+  }
+
+  componentWillUnmount() {
+    this.equipmentTypeFormControl.cleanup();
+    this.componentFormControl.cleanup();
+    this.eventFormGroupModel.cleanup();
+    this.faultImpedanceFormGroup.cleanup();
   }
 
   render() {
     return (
       <div className='fault-event'>
         <Select
-          ref={comp => this.equipmentTypeSelect = comp}
           label='Equipment Type'
           selectionOptionBuilder={this.state.equipmentTypeOptionBuilder}
-          onChange={this.onEquipmentTypeChanged} />
+          formControlModel={this.equipmentTypeFormControl} />
         <Select
           label='Name'
           selectionOptionBuilder={this.state.componentOptionBuilder}
-          onChange={this.onComponentChanged} />
+          formControlModel={this.componentFormControl} />
         <Select
-          label='Phase'
+          label='Phases'
           multiple
-          selectedOptionFinder={() => this.state.phaseOptionBuilder.numberOfOptions() === 1}
           selectionOptionBuilder={this.state.phaseOptionBuilder}
-          onChange={this.onPhaseChanged} />
+          formControlModel={this.eventFormGroupModel.findControl('phases')} />
         <Select
           label='Phase Connected Fault Kind'
           selectionOptionBuilder={this.state.faultKindOptionBuilder}
-          selectedOptionFinder={faultKind => faultKind === this.formValue.faultKind}
-          onChange={this.onFaultKindChanged} />
+          selectedOptionFinder={
+            faultKind => faultKind === this.eventFormGroupModel.findControl('faultKind').getValue()
+          }
+          formControlModel={this.eventFormGroupModel.findControl('faultKind')} />
+        <Input
+          label='Start Date Time'
+          formControlModel={this.eventFormGroupModel.findControl('startDateTime')}
+          hint='YYYY-MM-DD HH:MM:SS'
+          type='datetime' />
+        <Input
+          label='Stop Date Time'
+          hint='YYYY-MM-DD HH:MM:SS'
+          formControlModel={this.eventFormGroupModel.findControl('stopDateTime')}
+          type='datetime' />
         <FormGroup
           label='Impedance'
           collapsible={false}>
           {
-            FaultImpedence[this.state.selectedFaultKind].map(kind => (
+            FaultImpedanceType[this.state.selectedFaultKind].map(kind => (
               <Input
                 key={kind}
                 label={kind}
-                name={kind}
-                value={this.state.formValue.FaultImpedance[kind]}
-                onChange={value => {
-                  this.formValue.FaultImpedance[kind] = value;
-                  this._enableAddEventButtonIfFormIsValid();
-                }} />
+                formControlModel={(this.faultImpedanceFormGroup as any).findControl(kind)} />
             ))
           }
-          <Input
-            label='Start Date Time'
-            name='startDateTime'
-            hint='YYYY-MM-DD HH:MM:SS'
-            value={this.dateTimeService.format(this.state.formValue.startDateTime)}
-            validators={[
-              Validators.checkNotEmpty('Start date time is empty'),
-              Validators.checkValidDateTime('Invalid format, YYYY-MM-DD HH:MM:SS expected')
-            ]}
-            onChange={this.onStartDateTimeChanged} />
-          <Input
-            label='Stop Date Time'
-            hint='YYYY-MM-DD HH:MM:SS'
-            name='stopDateTime'
-            value={this.dateTimeService.format(this.state.formValue.stopDateTime)}
-            validators={[
-              Validators.checkNotEmpty('Stop date time is empty'),
-              Validators.checkValidDateTime('Invalid format, YYYY-MM-DD HH:MM:SS expected')
-            ]}
-            onChange={this.onStopDateTimeChanged} />
         </FormGroup>
         <BasicButton
           className='fault-event-form__add-event'
-          disabled={this.state.addEventButtonDisabled}
+          disabled={this.eventFormGroupModel.isInvalid() || this.faultImpedanceFormGroup.isInvalid()}
           type='positive'
           label='Add event'
           onClick={this.createNewEvent} />
@@ -159,117 +317,17 @@ export class FaultEventForm extends React.Component<Props, State> {
     );
   }
 
-  onEquipmentTypeChanged(selectedType: { id: string; label: string; }) {
-    switch (selectedType.id) {
-      case 'ACLineSegment':
-      case 'PowerTransformer':
-        this.setState({
-          componentOptionBuilder: new SelectionOptionBuilder(
-            this.props.componentsWithConsolidatedPhases.filter(e => e.conductingEquipmentType === selectedType.id),
-            e => `${e.conductingEquipmentName} (${e.phases.join(', ')})`
-          ),
-          phaseOptionBuilder: SelectionOptionBuilder.defaultBuilder()
-        });
-        break;
-      default:
-        const components = this.props.modelDictionary[selectedType.id] || [];
-        this.setState({
-          componentOptionBuilder: new SelectionOptionBuilder(
-            components,
-            e => `${e.name || e.bankName} (${e.phases || e.bankPhases})`
-          ),
-          phaseOptionBuilder: SelectionOptionBuilder.defaultBuilder()
-        });
-        break;
-    }
-    this.formValue.equipmentType = selectedType.id;
-    this._enableAddEventButtonIfFormIsValid();
-  }
-
-  private _enableAddEventButtonIfFormIsValid() {
-    if (this._isFormValueValid())
-      this.setState({
-        addEventButtonDisabled: false
-      });
-    else
-      this.setState({
-        addEventButtonDisabled: true
-      });
-  }
-
-  private _isFormValueValid(): boolean {
-    return this.formValue.equipmentName !== ''
-      && this.formValue.equipmentType !== ''
-      && this.formValue.tag !== ''
-      && this.formValue.mRID.length !== 0
-      && this.formValue.phases.length !== 0
-      && this.formValue.startDateTime !== null
-      && this.formValue.stopDateTime !== null
-      && (
-        this.formValue.faultKind === FaultKind.LINE_TO_GROUND
-          ? this.formValue.FaultImpedance.rGround !== '' && this.formValue.FaultImpedance.xGround !== ''
-          : this.formValue.faultKind === FaultKind.LINE_TO_LINE
-            ? this.formValue.FaultImpedance.rLinetoLine !== '' && this.formValue.FaultImpedance.xLineToLine !== ''
-            : this.formValue.FaultImpedance.rGround !== '' && this.formValue.FaultImpedance.xGround !== ''
-            && this.formValue.FaultImpedance.rLinetoLine !== '' && this.formValue.FaultImpedance.xLineToLine !== ''
-      );
-  }
-
-  onComponentChanged(selectedComponent: ModelDictionaryComponent & ModelDictionaryRegulator & ModelDictionaryCapacitor & ModelDictionarySwitch) {
-    // component: ModelDictionaryComponent | ModelDictionaryRegulator | ModelDictionaryCapacitor | ModelDictionarySwitch
-    this.setState({
-      phaseOptionBuilder: new SelectionOptionBuilder(
-        unique(this._normalizePhases(selectedComponent.phases || selectedComponent.bankPhases))
-          .sort((a, b) => a.localeCompare(b))
-          .map((phase, i) => ({ phaseLabel: phase, phaseIndex: i })),
-        phase => phase.phaseLabel
-      )
-    });
-    this.formValue.equipmentName = selectedComponent.conductingEquipmentName ||
-      selectedComponent.name ||
-      selectedComponent.bankName;
-    this.formValue.mRID = selectedComponent.conductingEquipmentMRIDs || selectedComponent.mRID;
-    this._enableAddEventButtonIfFormIsValid();
-  }
-
-  private _normalizePhases(phases: string | string[]) {
-    if (Array.isArray(phases))
-      return phases;
-    // If phases is a string containing either A or B or C,
-    // then this string needs to be split up
-    return /^[abc]+$/i.test(phases) ? [...new Set(phases)] : [phases];
-  }
-
-  onPhaseChanged(selectedPhases: Phase[]) {
-    this.formValue.phases = selectedPhases;
-    this._enableAddEventButtonIfFormIsValid();
-  }
-
-  onFaultKindChanged(selectedFaultKind: FaultKind) {
-    this.formValue.faultKind = selectedFaultKind;
-    this.setState({
-      selectedFaultKind: this.formValue.faultKind
-    });
-  }
-
-  onStartDateTimeChanged(value: string) {
-    this.formValue.startDateTime = this.dateTimeService.parse(value);
-    this._enableAddEventButtonIfFormIsValid();
-  }
-
-  onStopDateTimeChanged(value: string) {
-    this.formValue.stopDateTime = this.dateTimeService.parse(value);
-    this._enableAddEventButtonIfFormIsValid();
-  }
-
   createNewEvent() {
-    this.props.onEventAdded(this.formValue);
-    this.equipmentTypeSelect.reset();
+    const formValue = this.eventFormGroupModel.getValue();
+    formValue.faultImpedance = this.faultImpedanceFormGroup.getValue();
+    this.props.onAddEvent(formValue);
+    this.eventFormGroupModel.reset();
+    this.equipmentTypeFormControl.reset();
+    this.faultImpedanceFormGroup.reset();
     this.setState({
       componentOptionBuilder: SelectionOptionBuilder.defaultBuilder(),
       phaseOptionBuilder: SelectionOptionBuilder.defaultBuilder(),
-      selectedFaultKind: FaultKind.LINE_TO_GROUND,
-      addEventButtonDisabled: true
+      selectedFaultKind: FaultKind.LINE_TO_GROUND
     });
   }
 

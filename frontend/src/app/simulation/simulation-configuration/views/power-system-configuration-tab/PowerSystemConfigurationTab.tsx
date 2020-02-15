@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { FormGroup, Select, SelectionOptionBuilder } from '@shared/form';
+import { FormGroup, Select, SelectionOptionBuilder, FormGroupModel, FormControlModel } from '@shared/form';
 import { FeederModel, FeederModelRegion, FeederModelLine, FeederModelSubregion } from '@shared/topology';
 import { PowerSystemConfigurationModel } from '../../models/PowerSystemConfigurationModel';
 import { SimulationConfiguration } from '@shared/simulation';
@@ -9,9 +9,9 @@ import './PowerSystemConfigurationTab.light.scss';
 import './PowerSystemConfigurationTab.dark.scss';
 
 interface Props {
+  parentFormGroupModel: FormGroupModel<PowerSystemConfigurationModel>;
   feederModel: FeederModel;
   powerSystemConfig: SimulationConfiguration['power_system_config'];
-  onChange: (value: PowerSystemConfigurationModel) => void;
 }
 
 interface State {
@@ -22,16 +22,13 @@ interface State {
 
 export class PowerSystemConfigurationTab extends React.Component<Props, State> {
 
-  readonly formValue: PowerSystemConfigurationModel = {
-    regionId: '',
-    subregionId: '',
-    lineId: '',
-    simulationName: '',
-    isValid: false
-  };
+  readonly regionFormControlModel = new FormControlModel<FeederModelRegion>(null);
+  readonly subregionFormControlModel = new FormControlModel<FeederModelSubregion>(null);
+  readonly lineNameFormControlModel = new FormControlModel<FeederModelLine>(null);
 
   constructor(props: Props) {
     super(props);
+
     this.state = {
       regionOptionBuilder: new SelectionOptionBuilder(
         Object.values(this.props.feederModel),
@@ -40,108 +37,93 @@ export class PowerSystemConfigurationTab extends React.Component<Props, State> {
       subregionOptionBuilder: SelectionOptionBuilder.defaultBuilder(),
       lineOptionBuilder: SelectionOptionBuilder.defaultBuilder()
     };
-    this.onRegionSelectionCleared = this.onRegionSelectionCleared.bind(this);
-    this.onRegionSelectionChanged = this.onRegionSelectionChanged.bind(this);
-    this.onSubregionSelectionCleared = this.onSubregionSelectionCleared.bind(this);
-    this.onSubregionSelectionChanged = this.onSubregionSelectionChanged.bind(this);
-    this.onLineSelectionCleared = this.onLineSelectionCleared.bind(this);
-    this.onLineSelectionChanged = this.onLineSelectionChanged.bind(this);
+
+    this._setupPowerSystemConfigurationTabFormGroupModel();
+
+  }
+
+  private _setupPowerSystemConfigurationTabFormGroupModel() {
+    this.props.parentFormGroupModel.setControl('region', this.regionFormControlModel);
+    this.props.parentFormGroupModel.setControl('subregion', this.subregionFormControlModel);
+    this.props.parentFormGroupModel.setControl('line', this.lineNameFormControlModel);
+    this.subregionFormControlModel.dependsOn(this.regionFormControlModel);
+    this.lineNameFormControlModel.dependsOn(this.subregionFormControlModel);
+  }
+
+  componentDidMount() {
+    this._populateSubregionDropdownOnRegionSelectionChanges();
+    this._populateLineNameDropdownOnSubregionSelectionChanges();
+  }
+
+  private _populateSubregionDropdownOnRegionSelectionChanges() {
+    this.regionFormControlModel.valueChanges()
+      .subscribe({
+        next: selectedRegion => {
+          if (selectedRegion) {
+            this.setState({
+              subregionOptionBuilder: new SelectionOptionBuilder(
+                selectedRegion.subregions,
+                subregion => subregion.name
+              ),
+              lineOptionBuilder: SelectionOptionBuilder.defaultBuilder()
+            });
+          } else {
+            this.setState({
+              subregionOptionBuilder: SelectionOptionBuilder.defaultBuilder(),
+              lineOptionBuilder: SelectionOptionBuilder.defaultBuilder()
+            });
+          }
+        }
+      });
+  }
+
+  private _populateLineNameDropdownOnSubregionSelectionChanges() {
+    this.subregionFormControlModel.valueChanges()
+      .subscribe({
+        next: selectedSubregion => {
+          if (selectedSubregion) {
+            this.setState({
+              lineOptionBuilder: new SelectionOptionBuilder(
+                this.props.feederModel[this.regionFormControlModel.getValue().id].lines.filter(line => line.subregionId === selectedSubregion.id),
+                line => line.name
+              )
+            });
+          } else {
+            this.setState({
+              lineOptionBuilder: SelectionOptionBuilder.defaultBuilder()
+            });
+          }
+        }
+      });
   }
 
   render() {
     return (
-      <FormGroup label=''>
+      <FormGroup
+        label=''>
         <Select
           label='Geographical region name'
+          formControlModel={this.regionFormControlModel}
           selectionOptionBuilder={this.state.regionOptionBuilder}
           selectedOptionFinder={
             region => region.id === this.props.powerSystemConfig.GeographicalRegion_name
-          }
-          onClear={this.onRegionSelectionCleared}
-          onChange={this.onRegionSelectionChanged} />
+          } />
 
         <Select
           label='Sub-geographical region name'
+          formControlModel={this.subregionFormControlModel}
           selectionOptionBuilder={this.state.subregionOptionBuilder}
           selectedOptionFinder={
             subregion => subregion.id === this.props.powerSystemConfig.SubGeographicalRegion_name
-          }
-          onClear={this.onSubregionSelectionCleared}
-          onChange={this.onSubregionSelectionChanged} />
+          } />
 
         <Select
           label='Line name'
+          formControlModel={this.lineNameFormControlModel}
           selectionOptionBuilder={this.state.lineOptionBuilder}
-          selectedOptionFinder={
-            line => line.id === this.props.powerSystemConfig.Line_name
-          }
-          onClear={this.onLineSelectionCleared}
-          onChange={this.onLineSelectionChanged} />
+          selectedOptionFinder={line => line.id === this.props.powerSystemConfig.Line_name} />
       </FormGroup>
     );
-  }
-
-  onRegionSelectionCleared() {
-    this.formValue.regionId = '';
-    this.formValue.subregionId = '';
-    this.formValue.lineId = '';
-    this.formValue.isValid = false;
-    this.props.onChange(this.formValue);
-    this.setState({
-      lineOptionBuilder: SelectionOptionBuilder.defaultBuilder(),
-      subregionOptionBuilder: SelectionOptionBuilder.defaultBuilder()
-    });
-  }
-
-  onRegionSelectionChanged(selectedFeederModelRegion: FeederModelRegion) {
-    this.formValue.regionId = selectedFeederModelRegion.id;
-    this.formValue.subregionId = '';
-    this.formValue.lineId = '';
-    this.formValue.isValid = false;
-    this.props.onChange(this.formValue);
-    this.setState({
-      subregionOptionBuilder: new SelectionOptionBuilder(
-        selectedFeederModelRegion.subregions,
-        subregion => subregion.name
-      ),
-      lineOptionBuilder: SelectionOptionBuilder.defaultBuilder()
-    });
-  }
-
-  onSubregionSelectionCleared() {
-    this.formValue.subregionId = '';
-    this.formValue.lineId = '';
-    this.formValue.isValid = false;
-    this.props.onChange(this.formValue);
-    this.setState({
-      lineOptionBuilder: SelectionOptionBuilder.defaultBuilder()
-    });
-  }
-
-  onSubregionSelectionChanged(selectedSubregion: FeederModelSubregion) {
-    this.formValue.subregionId = selectedSubregion.id;
-    this.formValue.lineId = '';
-    this.formValue.isValid = false;
-    this.props.onChange(this.formValue);
-    this.setState({
-      lineOptionBuilder: new SelectionOptionBuilder(
-        this.props.feederModel[this.formValue.regionId].lines.filter(line => line.subregionId === selectedSubregion.id),
-        line => line.name
-      )
-    });
-  }
-
-  onLineSelectionChanged(selectedLine: FeederModelLine) {
-    this.formValue.lineId = selectedLine.id;
-    this.formValue.simulationName = selectedLine.name;
-    this.formValue.isValid = true;
-    this.props.onChange(this.formValue);
-  }
-
-  onLineSelectionCleared() {
-    this.formValue.lineId = '';
-    this.formValue.isValid = false;
-    this.props.onChange(this.formValue);
   }
 
 }

@@ -3,7 +3,7 @@ import * as React from 'react';
 import { Backdrop } from '@shared/backdrop';
 import { PortalRenderer } from '@shared/portal-renderer';
 import { Fade } from '@shared/fade';
-import { Input } from '@shared/form';
+import { Input, FormControlModel } from '@shared/form';
 import { IconButton } from '@shared/buttons';
 import { Tooltip } from '@shared/tooltip';
 import { Node } from '@shared/topology';
@@ -23,7 +23,6 @@ interface Props {
 
 interface State {
   show: boolean;
-  searchTerm: string;
   matches: Match[];
   visibleMatches: Match[];
 }
@@ -35,6 +34,8 @@ interface Match {
 
 export class NodeSearcher extends React.Component<Props, State> {
 
+  readonly searchTermFormControlModel = new FormControlModel('');
+
   nodeSearcherElement: HTMLElement;
 
   private _matchedNodes: Set<Node>;
@@ -45,7 +46,6 @@ export class NodeSearcher extends React.Component<Props, State> {
 
     this.state = {
       show: undefined,
-      searchTerm: '',
       matches: [],
       visibleMatches: []
     };
@@ -53,7 +53,6 @@ export class NodeSearcher extends React.Component<Props, State> {
     this._matchedNodes = new Set(props.nodes);
 
     this.close = this.close.bind(this);
-    this.onSearchTermChanged = this.onSearchTermChanged.bind(this);
     this.clear = this.clear.bind(this);
   }
 
@@ -76,9 +75,74 @@ export class NodeSearcher extends React.Component<Props, State> {
     }
   }
 
+  componentDidMount() {
+    this.searchTermFormControlModel.valueChanges()
+      .subscribe({
+        next: searchTerm => this._onSearchTermChange(searchTerm)
+      });
+  }
+
+  private _onSearchTermChange(searchTerm: string) {
+    const matches: Match[] = [];
+    const searcher = fuzzySearch(searchTerm, true);
+
+    if (searchTerm.length < this._previousSearchTerm.length || this._matchedNodes.size === 0) {
+      this._matchedNodes = new Set(this.props.nodes);
+    }
+
+    this._previousSearchTerm = searchTerm;
+
+    for (const node of this._matchedNodes) {
+      const result = searcher(node.name);
+      if (result) {
+        matches.push({
+          node,
+          result
+        });
+      } else if ('mRIDs' in node) {
+        const matchedMRIDs = [];
+        for (const mRID of node.mRIDs) {
+          const searchResult = searcher(mRID);
+          if (searchResult) {
+            matchedMRIDs.push({
+              node,
+              result: searchResult
+            });
+          }
+        }
+        if (matchedMRIDs.length > 0) {
+          matches.push(...matchedMRIDs);
+        } else {
+          this._matchedNodes.delete(node);
+        }
+      } else {
+        this._matchedNodes.delete(node);
+      }
+    }
+    this.setState({
+      matches: matches.sort((a, b) => {
+        if (a.result.inaccuracy === b.result.inaccuracy) {
+          // If both matches have the same inaccuracy
+          // we want to sort them by their inputs' length,
+          // the one with shorter input should come first,
+          // if their input lengths are the same,
+          // then we want to sort them by their start of the first matched boundary
+          return a.result.input.length - b.result.input.length || a.result.boundaries[1].start - b.result.boundaries[1].start;
+        }
+        return a.result.inaccuracy - b.result.inaccuracy;
+      })
+    });
+  }
+
+
+  componentWillUnmount() {
+    this.searchTermFormControlModel.cleanup();
+  }
+
   render() {
-    if (this.state.show === undefined)
+    if (this.state.show === undefined) {
       return null;
+    }
     return (
       <PortalRenderer>
         <Fade in={this.state.show}>
@@ -108,9 +172,7 @@ export class NodeSearcher extends React.Component<Props, State> {
               <div className='node-searcher__body__search'>
                 <Input
                   label='Node name or MRID'
-                  name='search-term'
-                  value={this.state.searchTerm}
-                  onChange={this.onSearchTermChanged} />
+                  formControlModel={this.searchTermFormControlModel} />
                 <Tooltip content='Clear'>
                   <IconButton
                     icon='close'
@@ -126,8 +188,9 @@ export class NodeSearcher extends React.Component<Props, State> {
                       <li
                         className='node-searcher__body__search-result'
                         onClick={() => {
-                          if (this.props.onNodeSelected(matchedNode.node))
+                          if (this.props.onNodeSelected(matchedNode.node)) {
                             this.close();
+                          }
                         }}>
                         {this.renderMatchedNode(matchedNode)}
                       </li>
@@ -153,10 +216,6 @@ export class NodeSearcher extends React.Component<Props, State> {
   }
 
   onSearchTermChanged(searchTerm: string) {
-    this.setState({
-      searchTerm
-    });
-
     const matches: Match[] = [];
     const searcher = fuzzySearch(searchTerm, true);
 
@@ -173,8 +232,7 @@ export class NodeSearcher extends React.Component<Props, State> {
           node,
           result
         });
-      }
-      else if ('mRIDs' in node) {
+      } else if ('mRIDs' in node) {
         const matchedMRIDs = [];
         for (const mRID of node.mRIDs) {
           const searchResult = searcher(mRID);
@@ -210,8 +268,8 @@ export class NodeSearcher extends React.Component<Props, State> {
   }
 
   clear() {
+    this.searchTermFormControlModel.setValue('');
     this.setState({
-      searchTerm: '',
       matches: []
     });
     this._previousSearchTerm = '';

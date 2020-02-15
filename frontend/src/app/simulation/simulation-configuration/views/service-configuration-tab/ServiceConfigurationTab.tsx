@@ -1,43 +1,39 @@
 import * as React from 'react';
 
 import { Service, ServiceConfigUserInputSpec } from '@shared/Service';
-import { ServiceConfigurationEntry } from './ServiceConfigurationEntry';
-import { ServiceConfigurationEntryModel } from '../../models/ServiceConfigurationEntryModel';
+import { ServiceConfigurationModel } from '../../models/ServiceConfigurationModel';
 import { BasicButton } from '@shared/buttons';
 import { MessageBanner } from '@shared/message-banner';
-import { Notification } from '@shared/notification';
+import { showNotification } from '@shared/notification';
+import { FormArrayModel } from '@shared/form';
+import { ServiceConfiguration } from './ServiceConfiguration';
+import { waitUntil } from '@shared/misc';
 
 import './ServiceConfigurationTab.light.scss';
 import './ServiceConfigurationTab.dark.scss';
 
 interface Props {
+  parentFormArrayModel: FormArrayModel<ServiceConfigurationModel>;
   services: Service[];
-  onValidationChange: (isValid: boolean) => void;
-  onChange: (serviceConfigurationEntryModel: ServiceConfigurationEntryModel[]) => void;
 }
 
 interface State {
   disableApplyButton: boolean;
   servicesWithUserInput: Service[];
-  showChangesAppliedSuccessfullyMessage: boolean;
 }
 
 export class ServiceConfigurationTab extends React.Component<Props, State> {
 
-  private readonly _serviceConfigurationEntries = new Map<Service, ServiceConfigurationEntryModel>();
-  private readonly _invalidServiceConfigurationEntries = new Map<Service, true>();
+  readonly formArrayModel = new FormArrayModel<ServiceConfigurationModel>();
 
   constructor(props: Props) {
     super(props);
 
     this.state = {
-      disableApplyButton: false,
-      servicesWithUserInput: this._findServicesWithUserInput(),
-      showChangesAppliedSuccessfullyMessage: false
+      disableApplyButton: true,
+      servicesWithUserInput: this._findServicesWithUserInput()
     };
 
-    this.onServiceConfigurationEntryChanged = this.onServiceConfigurationEntryChanged.bind(this);
-    this.onServiceConfigurationEntryValidationChanged = this.onServiceConfigurationEntryValidationChanged.bind(this);
     this.saveChanges = this.saveChanges.bind(this);
   }
 
@@ -56,9 +52,7 @@ export class ServiceConfigurationTab extends React.Component<Props, State> {
       case 'object':
         return JSON.stringify(userInputSpec.help_example, null, 4);
       case 'bool':
-        return `
-        ${userInputSpec.help_example}
-        (${userInputSpec.help_example ? 'Checked' : 'Unchecked'})`;
+        return `${userInputSpec.help_example} (${userInputSpec.help_example ? 'Checked' : 'Unchecked'})`;
       default:
         return String(userInputSpec.help_example);
     }
@@ -70,6 +64,25 @@ export class ServiceConfigurationTab extends React.Component<Props, State> {
         servicesWithUserInput: this._findServicesWithUserInput()
       });
     }
+  }
+
+  componentDidMount() {
+    this.formArrayModel.valueChanges()
+      .subscribe({
+        next: () => {
+          this.setState({
+            disableApplyButton: this.formArrayModel.isPristine() || this.formArrayModel.isInvalid()
+          });
+        }
+      });
+    waitUntil(() => this.formArrayModel.isValid())
+      .then(() => {
+        this.props.parentFormArrayModel.setValue(this.formArrayModel.getValue());
+      });
+  }
+
+  componentWillUnmount() {
+    this.formArrayModel.cleanup();
   }
 
   render() {
@@ -91,59 +104,32 @@ export class ServiceConfigurationTab extends React.Component<Props, State> {
       <div className='service-configuration-tab'>
         {
           this.state.servicesWithUserInput.map(service => (
-            <ServiceConfigurationEntry
+            <ServiceConfiguration
               key={service.id}
               service={service}
-              onChange={this.onServiceConfigurationEntryChanged}
-              onValidate={this.onServiceConfigurationEntryValidationChanged} />
+              parentFormArrayModel={this.formArrayModel} />
           ))
         }
-        <BasicButton className='service-configuration-tab__apply'
+        <BasicButton
+          className='service-configuration-tab__apply'
           label='Apply'
           type='positive'
           disabled={this.state.disableApplyButton}
           onClick={this.saveChanges} />
-        <Notification
-          show={this.state.showChangesAppliedSuccessfullyMessage}
-          onHide={() => {
-            this.setState({
-              showChangesAppliedSuccessfullyMessage: false
-            });
-          }}>
-          Changes applied successfully
-        </Notification>
       </div>
     );
   }
 
-  onServiceConfigurationEntryChanged(serviceConfigurationEntry: ServiceConfigurationEntryModel) {
-    this._serviceConfigurationEntries.set(serviceConfigurationEntry.service, serviceConfigurationEntry);
-    this.setState({
-      disableApplyButton: false,
-      showChangesAppliedSuccessfullyMessage: false
-    });
-  }
-
-  onServiceConfigurationEntryValidationChanged(isValid: boolean, service: Service) {
-    if (isValid) {
-      this._invalidServiceConfigurationEntries.delete(service);
-    } else {
-      this._invalidServiceConfigurationEntries.set(service, true);
-    }
-    const isValidOverall = this._invalidServiceConfigurationEntries.size === 0;
-    this.setState({
-      disableApplyButton: !isValidOverall,
-      showChangesAppliedSuccessfullyMessage: false
-    });
-    this.props.onValidationChange(isValidOverall);
-  }
-
   saveChanges() {
-    this.setState({
-      showChangesAppliedSuccessfullyMessage: true,
-      disableApplyButton: true
-    });
-    this.props.onChange([...this._serviceConfigurationEntries.values()]);
+    try {
+      this.props.parentFormArrayModel.setValue(this.formArrayModel.getValue());
+      showNotification('Changes saved successfully');
+      this.setState({
+        disableApplyButton: true
+      });
+    } catch {
+      showNotification('Failed to save changes');
+    }
   }
 
 }

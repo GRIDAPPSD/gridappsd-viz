@@ -1,0 +1,14 @@
+@import '@constants.light';
+@import 'Checkbox.common';
+
+.checkbox.disabled .checkbox__icon {
+    color: #ccc;
+}
+
+.checkbox__icon {
+    color: $primary-color;
+}
+
+.checkbox__hint {
+    color: #666;
+}

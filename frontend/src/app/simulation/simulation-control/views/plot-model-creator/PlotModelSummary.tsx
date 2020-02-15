@@ -70,30 +70,33 @@ export class PlotModelSummary extends React.Component<Props, State> {
           }
         </div>
         <div className='plot-model-summary__components'>
-          {this.state.components.map((component, index) => (
-            <div
-              key={index}
-              className='plot-model-summary__component'>
-              <IconButton
-                icon='close'
-                style='accent'
-                size='small'
-                onClick={() => {
-                  const existingComponents = this.props.plotModel.components.filter(existing => existing !== component);
-                  this.props.plotModel.components = existingComponents;
-                  this.setState({
-                    components: existingComponents
-                  });
-                  if (existingComponents.length > 0)
-                    this.props.onUpdate(this.props.plotModel);
-                  else
-                    this.props.onRemove(this.props.plotModel);
-                }} />
-              <div className='plot-model-summary__component__name'>
-                {component.displayName}
+          {
+            this.state.components.map((component, index) => (
+              <div
+                key={index}
+                className='plot-model-summary__component'>
+                <IconButton
+                  icon='close'
+                  style='accent'
+                  size='small'
+                  onClick={() => {
+                    const existingComponents = this.props.plotModel.components.filter(existing => existing !== component);
+                    this.props.plotModel.components = existingComponents;
+                    this.setState({
+                      components: existingComponents
+                    });
+                    if (existingComponents.length > 0) {
+                      this.props.onUpdate(this.props.plotModel);
+                    } else {
+                      this.props.onRemove(this.props.plotModel);
+                    }
+                  }} />
+                <div className='plot-model-summary__component__name'>
+                  {component.displayName}
+                </div>
               </div>
-            </div>
-          ))}
+            ))
+          }
         </div>
       </div>
     );

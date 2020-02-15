@@ -2,7 +2,7 @@ import * as React from 'react';
 
 import { IconButton } from '@shared/buttons';
 import { Tooltip } from '@shared/tooltip';
-import { SlideToggle } from '@shared/form';
+import { SlideToggle, FormControlModel } from '@shared/form';
 import { Fade } from '@shared/fade';
 import { PopUp } from '@shared/pop-up';
 
@@ -22,6 +22,8 @@ interface State {
 const menuWidth = 270;
 
 export class Settings extends React.Component<Props, State> {
+
+  readonly isDarkThemeSelectedFormControl = new FormControlModel(true);
 
   settingsMenuAnchor: HTMLElement;
 
@@ -50,19 +52,28 @@ export class Settings extends React.Component<Props, State> {
       left: boundingBox.left - menuWidth,
       top: boundingBox.top
     });
-    if (this.state.themeSelectedPreviously !== 'dark')
+    if (this.state.themeSelectedPreviously !== 'dark') {
       setTimeout(() => {
-        this.toggleTheme(this.state.themeSelectedPreviously === 'dark');
+        this._toggleTheme(this.state.themeSelectedPreviously === 'dark');
       }, 16);
+    }
+    this.isDarkThemeSelectedFormControl.valueChanges()
+      .subscribe({
+        next: this._toggleTheme
+      });
   }
 
-  toggleTheme(isDarkThemeSelected: boolean) {
+  private _toggleTheme(isDarkThemeSelected: boolean) {
     // These variables are injected by webpack
     // They are declared in src/webpack-injections.d.ts
     const styleFilename = isDarkThemeSelected ? __DARK_THEME_STYLE_FILENAME__ : __LIGHT_THEME_STYLE_FILENAME__;
     const link = document.head.querySelector('link[rel=stylesheet]') as HTMLLinkElement;
     link.href = styleFilename;
     localStorage.setItem('theme', isDarkThemeSelected ? 'dark' : 'light');
+  }
+
+  componentWillUnmount() {
+    this.isDarkThemeSelectedFormControl.cleanup();
   }
 
   render() {
@@ -102,7 +113,7 @@ export class Settings extends React.Component<Props, State> {
                     onText='Dark'
                     offText='Light'
                     isOn={this.state.themeSelectedPreviously === 'dark'}
-                    onChange={this.toggleTheme} />
+                    formControlModel={this.isDarkThemeSelectedFormControl} />
                 </div>
               </li>
             </ul>

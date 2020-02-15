@@ -1,8 +1,7 @@
 import { Phase } from '../Phase';
 
 export interface CommOutageEvent {
-  // snake case due to requirement
-  event_type: 'CommOutage';
+  eventType: 'CommOutage';
   tag: string;
   allInputOutage: boolean;
   inputList: CommOutageEventInputListItem[];
@@ -17,7 +16,7 @@ export interface CommOutageEvent {
 export interface CommOutageEventInputListItem {
   type: string;
   name: string;
-  mRID: any;
+  mRID: string | string[];
   phases: Phase[];
   attribute: string;
 }

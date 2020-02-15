@@ -31,11 +31,11 @@ export class AvailableApplicationsAndServicesContainer extends React.Component<P
   private _fetchAvailableApplicationsAndServices() {
     const getApplicationsAndServices = new GetAvailableApplicationsAndServices();
     this._subscribeForApplicationAndServicesResponse(getApplicationsAndServices.replyTo);
-    this._stompClientService.send(
-      getApplicationsAndServices.url,
-      { 'reply-to': getApplicationsAndServices.replyTo },
-      JSON.stringify(getApplicationsAndServices.requestBody)
-    );
+    this._stompClientService.send({
+      destination: getApplicationsAndServices.url,
+      replyTo: getApplicationsAndServices.replyTo,
+      body: JSON.stringify(getApplicationsAndServices.requestBody)
+    });
   }
 
   private _subscribeForApplicationAndServicesResponse(destination: string) {
@@ -51,10 +51,11 @@ export class AvailableApplicationsAndServicesContainer extends React.Component<P
   }
 
   render() {
-    if (!this.state.payload)
+    if (!this.state.payload) {
       return (
         <Wait show />
       );
+    }
     return (
       <AvailableApplicationsAndServices payload={this.state.payload} />
     );

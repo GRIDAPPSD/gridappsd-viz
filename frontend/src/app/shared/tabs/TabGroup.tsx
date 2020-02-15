@@ -36,11 +36,12 @@ export class TabGroup extends React.Component<Props, State> {
   }
 
   componentDidUpdate(prevProps: Props) {
-    if (this.props.selectedTabIndex !== prevProps.selectedTabIndex)
+    if (this.props.selectedTabIndex !== prevProps.selectedTabIndex) {
       this.setState(prevState => ({
         previousTabIndex: prevState.activeTabIndex,
         activeTabIndex: this.props.selectedTabIndex
       }));
+    }
   }
 
   componentDidMount() {
@@ -104,12 +105,13 @@ export class TabGroup extends React.Component<Props, State> {
   setSelectedTabIndex(index: number) {
     this.nativeElement.querySelector('.tabgroup__body__wrapper').scrollTop = 0;
     this.setState(prevState => {
-      if (prevState.activeTabIndex !== index)
+      if (prevState.activeTabIndex !== index) {
         return {
           activeTabIndex: index,
           previousTabIndex: prevState.activeTabIndex,
           activeTab: this.tabLabels[index]
         };
+      }
       return null;
     });
   }

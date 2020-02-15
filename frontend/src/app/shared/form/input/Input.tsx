@@ -3,103 +3,106 @@ import { Subject } from 'rxjs';
 import { debounceTime } from 'rxjs/operators';
 
 import { FormControl } from '../form-control/FormControl';
-import { ValidationErrorMessages, Validator, ValidationResult } from '../validation';
+import { FormControlModel } from '../models/FormControlModel';
+import { DateTimeService } from '@shared/DateTimeService';
 
 import './Input.light.scss';
 import './Input.dark.scss';
 
-interface Props {
+interface Props<T extends 'text' | 'number' | 'datetime' | 'password' = 'text'> {
   label: string;
-  name: string;
-  value: string;
-  onChange: (value: string) => void;
   hint?: string;
   className?: string;
-  validators?: Validator[];
-  onValidate?: (isValid: boolean, formControlLabel: string, currentValue: string) => void;
-  disabled?: boolean;
-  type?: string;
+  type?: T;
+  formControlModel: T extends 'number' ? FormControlModel<number> : T extends 'datetime' ? FormControlModel<number> : FormControlModel<string>;
 }
 
 interface State {
   value: string;
-  validationErrors: ValidationResult[];
 }
 
-export class Input extends React.Component<Props, State> {
+export class Input<T extends 'text' | 'number' | 'datetime' | 'password' = 'text'> extends React.Component<Props<T>, State> {
 
   private readonly _valueChanges = new Subject<string>();
+  private readonly _dateTimeService = DateTimeService.getInstance();
 
-  constructor(props: Props) {
+  constructor(props: Props<T>) {
     super(props);
+
     this.state = {
-      value: this.props.value,
-      validationErrors: []
+      value: String(props.formControlModel.getValue())
     };
+
     this.handleChange = this.handleChange.bind(this);
-    this._onInputValueChanged = this._onInputValueChanged.bind(this);
   }
 
   componentDidMount() {
     this._valueChanges.pipe(debounceTime(250))
       .subscribe({
-        next: this._onInputValueChanged
+        next: value => {
+          (this.props.formControlModel as FormControlModel<string | number>).setValue(value);
+        }
       });
-  }
-
-  private _onInputValueChanged(value: string) {
-    if (this.props.validators) {
-      const validationErrors = this.props.validators.map(validator => validator(value))
-        .filter(result => !result.isValid);
-      this.setState({
-        validationErrors
+    // In case FormControlModel.setValue was called somewhere else,
+    // we want to update the state to reflect the new value in UI
+    (this.props.formControlModel as FormControlModel<string | number>).valueChanges()
+      .subscribe({
+        next: value => {
+          // This is true when this.props.formControlModel.setValue()
+          // was called from outside of this component, in that case
+          // we want to update this component to reflect the new value
+          if (this.state.value !== value && this.props.formControlModel.isValid()) {
+            if (this.props.type === 'datetime') {
+              if (typeof value === 'string') {
+                this.setState({
+                  value: this._dateTimeService.format(new Date(value))
+                });
+              } else if (typeof value === 'number') {
+                this.setState({
+                  value: this._dateTimeService.format(value)
+                });
+              }
+            } else {
+              this.setState({
+                value: String(value)
+              });
+            }
+          }
+        }
       });
-      const isValid = validationErrors.length === 0;
-      this.props.onValidate?.(isValid, this.props.label, value);
-      if (isValid)
-        this.props.onChange(value);
-    }
-    else
-      this.props.onChange(value);
   }
 
   componentWillUnmount() {
     this._valueChanges.complete();
-  }
-
-  componentDidUpdate(prevProps: Props) {
-    if (prevProps.value !== this.props.value)
-      this.setState({
-        value: this.props.value,
-        validationErrors: this.props.value !== '' ? [] : this.state.validationErrors
-      });
+    this.props.formControlModel.cleanup();
   }
 
   render() {
     return (
       <FormControl
         className={`input-field${this.props.className ? ' ' + this.props.className : ''}`}
+        formControlModel={this.props.formControlModel}
         label={this.props.label}
-        hint={this.props.hint}
-        isInvalid={this.state.validationErrors.length !== 0}
-        disabled={this.props.disabled}>
+        hint={this.props.type === 'datetime' ? 'YYY-MM-DD HH:MM:SS' : this.props.hint}>
         <div className='input-field-wrapper'>
           <input
-            type={this.props.type || 'text'}
-            name={this.props.name}
+            // Only if this.props.type is "password", then we want to set the input element's type
+            // to "password", otherwise, for "datetime", "number", or "text", we want to use "text" instead
+            type={this.props.type === 'password' ? 'password' : 'text'}
             className='input-field__input'
             onChange={this.handleChange}
             value={this.state.value} />
           <span className='input-field__ripple-bar' />
         </div>
-        <ValidationErrorMessages messages={this.state.validationErrors.map(result => result.errorMessage)} />
       </FormControl>
     );
   }
 
   handleChange(event: React.FocusEvent<HTMLInputElement>) {
     const value = (event.target as HTMLInputElement).value;
-    this.setState({ value });
+    this.setState({
+      value
+    });
     this._valueChanges.next(value);
   }
 

@@ -1,26 +1,31 @@
 import * as React from 'react';
 
-import { FormGroup, Select, TextArea, SelectionOptionBuilder } from '@shared/form';
+import { FormGroup, Select, TextArea, SelectionOptionBuilder, FormGroupModel, FormControlModel, FormArrayModel } from '@shared/form';
 import { SimulationConfiguration } from '@shared/simulation';
 import { Application } from '@shared/Application';
+import { Validators } from '@shared/form/validation';
 import { ApplicationConfigurationModel } from '../../models/ApplicationConfigurationModel';
 
 import './ApplicationConfigurationTab.light.scss';
 import './ApplicationConfigurationTab.dark.scss';
 
 interface Props {
+  parentFormGroupModel: FormGroupModel<ApplicationConfigurationModel>;
   applicationConfig: SimulationConfiguration['application_config'];
-  onChange: (value: ApplicationConfigurationModel) => void;
   availableApplications: Application[];
 }
 
 interface State {
   availableApplicationOptionBuilder: SelectionOptionBuilder<string>;
-  disabledAppConfigStringInputBox: boolean;
 }
 
 export class ApplicationConfigurationTab extends React.Component<Props, State> {
-  readonly formValue: ApplicationConfigurationModel;
+
+  readonly nameFormControlModel = new FormControlModel('');
+  readonly configStringFormControlModel = new FormControlModel(
+    '',
+    [Validators.checkValidJSON()]
+  );
 
   constructor(props: Props) {
     super(props);
@@ -28,62 +33,57 @@ export class ApplicationConfigurationTab extends React.Component<Props, State> {
     this.state = {
       availableApplicationOptionBuilder: new SelectionOptionBuilder(
         (props.availableApplications || []).map(app => app.id)
-      ),
-      disabledAppConfigStringInputBox: true
+      )
     };
 
-    const previousSelectedApplication = this.props.applicationConfig.applications[0];
-    if (previousSelectedApplication)
-      this.formValue = {
-        applicationId: previousSelectedApplication.name,
-        configString: previousSelectedApplication.config_string
-      };
-    else
-      this.formValue = {
-        applicationId: '',
-        configString: ''
-      };
+    this._setupFormModel();
 
-    this.onApplicationDeselected = this.onApplicationDeselected.bind(this);
-    this.onSelectedApplicationChanged = this.onSelectedApplicationChanged.bind(this);
+  }
+
+  private _setupFormModel() {
+    const previousSelectedApplication = this.props.applicationConfig.applications[0];
+    if (previousSelectedApplication) {
+      this.nameFormControlModel.setValue(previousSelectedApplication.name);
+      this.configStringFormControlModel.setValue(previousSelectedApplication.config_string);
+    }
+    this.props.parentFormGroupModel.setControl(
+      'applications',
+      new FormArrayModel([
+        new FormGroupModel({
+          name: this.nameFormControlModel,
+          config_string: this.configStringFormControlModel
+        })
+      ])
+    );
+  }
+
+  componentDidMount() {
+    this.nameFormControlModel.valueChanges()
+      .subscribe({
+        next: name => {
+          if (!name) {
+            this.configStringFormControlModel.disable();
+          } else {
+            this.configStringFormControlModel.enable();
+          }
+        }
+      });
   }
 
   render() {
     return (
       <FormGroup label=''>
         <Select
+          optional
           label='Application name'
+          formControlModel={this.nameFormControlModel}
           selectionOptionBuilder={this.state.availableApplicationOptionBuilder}
-          selectedOptionFinder={appId => appId === this.formValue.applicationId}
-          optional={true}
-          onClear={this.onApplicationDeselected}
-          onChange={this.onSelectedApplicationChanged} />
+          selectedOptionFinder={appId => appId === this.nameFormControlModel.getValue()} />
         <TextArea
           label='Application configuration'
-          value={this.formValue.configString}
-          disabled={this.state.disabledAppConfigStringInputBox}
-          onChange={value => {
-            this.formValue.configString = value;
-            this.props.onChange(this.formValue);
-          }} />
+          formControlModel={this.configStringFormControlModel} />
       </FormGroup>
     );
-  }
-
-  onApplicationDeselected() {
-    this.formValue.applicationId = '';
-    this.props.onChange(this.formValue);
-    this.setState({
-      disabledAppConfigStringInputBox: true
-    });
-  }
-
-  onSelectedApplicationChanged(selectedAppId: string) {
-    this.formValue.applicationId = selectedAppId;
-    this.props.onChange(this.formValue);
-    this.setState({
-      disabledAppConfigStringInputBox: false
-    });
   }
 
 }

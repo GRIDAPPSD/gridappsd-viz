@@ -9,7 +9,7 @@ import './FaultEventTable.dark.scss';
 interface Props {
   events: FaultEvent[];
   faultMRIDs?: string[];
-  actions: (event: FaultEvent) => React.ReactNode;
+  actions: (event: FaultEvent, index: number) => React.ReactNode;
 }
 
 const dateTimeService = DateTimeService.getInstance();
@@ -41,7 +41,7 @@ export function FaultEventTable(props: Props) {
             <tr key={i}>
               <td>
                 <div className='fault-event-table__row-actions'>
-                  {props.actions(event)}
+                  {props.actions(event, i)}
                 </div>
               </td>
               {
@@ -68,7 +68,9 @@ export function FaultEventTable(props: Props) {
               </td>
               <td>
                 {
-                  Object.entries(event.FaultImpedance)
+                  event.faultImpedance
+                  &&
+                  Object.entries(event.faultImpedance)
                     .filter(entry => entry[1] !== '')
                     .map(entry => <div key={entry[0]}>{`${entry[0]}: ${entry[1]}`}</div>)
                 }

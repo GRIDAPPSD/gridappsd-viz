@@ -38,7 +38,7 @@ export class Wait extends React.Component<Props, State> {
   }
 
   render() {
-    if (this.props.show)
+    if (this.props.show) {
       return (
         <div
           ref={element => this.waitElement = element}
@@ -60,6 +60,7 @@ export class Wait extends React.Component<Props, State> {
           </div>
         </div>
       );
+    }
     return null;
   }
 

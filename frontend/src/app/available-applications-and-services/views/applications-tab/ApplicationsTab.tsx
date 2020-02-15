@@ -11,12 +11,13 @@ interface Props {
 }
 
 export function ApplicationsTab(props: Props) {
-  if (!props.applications || props.applications.length === 0)
+  if (!props.applications || props.applications.length === 0) {
     return (
       <MessageBanner>
         No data available
       </MessageBanner>
     );
+  }
   return (
     <div className='applications-tab-container'>
       <div className='applications-tab'>

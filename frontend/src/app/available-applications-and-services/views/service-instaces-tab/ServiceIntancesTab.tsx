@@ -10,12 +10,13 @@ interface Props {
 }
 
 export function ServiceIntancesTab(props: Props) {
-  if (!props.instances || props.instances.length === 0)
+  if (!props.instances || props.instances.length === 0) {
     return (
       <MessageBanner>
         No data available
       </MessageBanner>
     );
+  }
   return (
     <div className='service-instances-tab-container'>
       <div className='service-instances-tab'>

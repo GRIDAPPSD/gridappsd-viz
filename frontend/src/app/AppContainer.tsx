@@ -99,11 +99,11 @@ export class AppContainer extends React.Component<Props, State> {
   private _fetchAvailableApplicationsAndServices() {
     const request = new GetAvailableApplicationsAndServicesRequest();
     this._subscribeToAvailableApplicationsTopic(request.replyTo);
-    this._stompClientService.send(
-      request.url,
-      { 'reply-to': request.replyTo },
-      JSON.stringify(request.requestBody)
-    );
+    this._stompClientService.send({
+      destination: request.url,
+      replyTo: request.replyTo,
+      body: JSON.stringify(request.requestBody)
+    });
   }
 
   private _subscribeToAvailableApplicationsTopic(destination: string) {
@@ -125,11 +125,11 @@ export class AppContainer extends React.Component<Props, State> {
   private _fetchFeederModels() {
     const getAllFeederModelsRequest = new GetAllFeederModelsRequest();
     this._subscribeToFeederModelsTopic(getAllFeederModelsRequest.replyTo);
-    this._stompClientService.send(
-      getAllFeederModelsRequest.url,
-      { 'reply-to': getAllFeederModelsRequest.replyTo },
-      getAllFeederModelsRequest.requestBody
-    );
+    this._stompClientService.send({
+      destination: getAllFeederModelsRequest.url,
+      replyTo: getAllFeederModelsRequest.replyTo,
+      body: getAllFeederModelsRequest.requestBody
+    });
   }
 
   private _subscribeToFeederModelsTopic(destination: string) {
@@ -138,18 +138,20 @@ export class AppContainer extends React.Component<Props, State> {
       .subscribe({
         next: payload => {
           const feederModel = {} as FeederModel;
-          if (typeof payload.data === 'string')
+          if (typeof payload.data === 'string') {
             payload.data = JSON.parse(payload.data);
+          }
 
           for (const binding of payload.data.results.bindings) {
             const regionId = binding.regionID.value;
-            if (!(regionId in feederModel))
+            if (!(regionId in feederModel)) {
               feederModel[regionId] = {
                 id: regionId,
                 name: binding.regionName.value,
                 lines: [],
                 subregions: []
               };
+            }
 
             const lines = feederModel[regionId].lines;
             const subregions = feederModel[regionId].subregions;
@@ -201,20 +203,20 @@ export class AppContainer extends React.Component<Props, State> {
         modelDictionary: null
       });
       this._fetchModelDictionary(mRID);
-    }
-    else
+    } else {
       this._processModelDictionary(this._availableModelDictionaries.get(mRID));
+    }
   }
 
   private _fetchModelDictionary(mrid: string) {
     const getModelDictionaryRequest = new GetModelDictionaryRequest();
     getModelDictionaryRequest.requestBody.parameters.model_id = mrid;
     this._subscribeToModelDictionaryTopic(getModelDictionaryRequest);
-    this._stompClientService.send(
-      getModelDictionaryRequest.url,
-      { 'reply-to': getModelDictionaryRequest.replyTo },
-      JSON.stringify(getModelDictionaryRequest.requestBody)
-    );
+    this._stompClientService.send({
+      destination: getModelDictionaryRequest.url,
+      replyTo: getModelDictionaryRequest.replyTo,
+      body: JSON.stringify(getModelDictionaryRequest.requestBody)
+    });
   }
 
   private _subscribeToModelDictionaryTopic(getModelDictionaryRequest: GetModelDictionaryRequest) {
@@ -222,8 +224,9 @@ export class AppContainer extends React.Component<Props, State> {
       .pipe(map(JSON.parse as (body: string) => GetModelDictionaryResponsePayload))
       .subscribe({
         next: payload => {
-          if (typeof payload.data === 'string')
+          if (typeof payload.data === 'string') {
             payload.data = JSON.parse(payload.data);
+          }
           const modelDictionary = payload.data.feeders[0];
           this._availableModelDictionaries.set(
             getModelDictionaryRequest.requestBody.parameters.model_id,
@@ -236,8 +239,9 @@ export class AppContainer extends React.Component<Props, State> {
 
   private _processModelDictionary(modelDictionary: ModelDictionary) {
     const modelDictionaryMeasurementMap = new Map<string, ModelDictionaryMeasurement>();
-    for (const measurement of modelDictionary.measurements)
+    for (const measurement of modelDictionary.measurements) {
       modelDictionaryMeasurementMap.set(measurement.mRID, measurement);
+    }
     this._collectMRIDsAndPhasesForComponents(modelDictionary);
     this.simulationControlService.updateModelDictionaryMeasurementMap(modelDictionaryMeasurementMap);
     this._findAllPhasesForEachComponentThenGroupThem(modelDictionary);
@@ -249,10 +253,12 @@ export class AppContainer extends React.Component<Props, State> {
   private _collectMRIDsAndPhasesForComponents(modelDictionary: any) {
     this.componentMRIDs.clear();
     this.componentPhases.clear();
-    for (const swjtch of modelDictionary.switches)
+    for (const swjtch of modelDictionary.switches) {
       this.componentMRIDs.set(swjtch.name, swjtch.mRID);
-    for (const capacitor of modelDictionary.capacitors)
+    }
+    for (const capacitor of modelDictionary.capacitors) {
       this.componentMRIDs.set(capacitor.name, capacitor.mRID);
+    }
     for (const regulator of modelDictionary.regulators) {
       this.componentMRIDs.set(regulator.bankName, regulator.mRID);
       // Only interested in regulators' phases for now, need phases for regulator menus
