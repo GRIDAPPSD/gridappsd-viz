@@ -28,10 +28,11 @@ export class ThreeDots extends React.Component<Props, State> {
       .subscribe({
         next: () => {
           this.setState(state => {
-            if (state.dots === 3)
+            if (state.dots === 3) {
               this._direction = -1;
-            else if (state.dots === 0)
+            } else if (state.dots === 0) {
               this._direction = 1;
+            }
             return {
               dots: state.dots + this._direction
             };

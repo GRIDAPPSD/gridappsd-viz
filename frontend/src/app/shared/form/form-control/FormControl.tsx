@@ -1,41 +1,67 @@
 import * as React from 'react';
 
+import { FormControlModel } from '../models/FormControlModel';
+import { ValidationErrorMessages } from '../validation';
+
 import './FormControl.light.scss';
 import './FormControl.dark.scss';
 
-interface Props {
+interface Props<T = any> {
   label: string;
   className: string;
-  children: React.ReactNode;
   hint?: string;
-  disabled?: boolean;
-  isInvalid?: boolean;
   htmlFor?: string;
+  formControlModel: FormControlModel<T>;
 }
 
-export function FormControl(props: Props) {
-  return (
-    <div className={calculateClassNameFromProps(props)}>
-      {
-        props.label
-        &&
-        <label
-          className='form-control__label'
-          htmlFor={props.htmlFor}>
-          {props.label}
-          &nbsp;
-        <span className='form-control__label__hint'>{props.hint}</span>
-        </label>
-      }
-      <div className='form-control__body'>
-        {props.children}
+interface State {
+
+}
+
+export class FormControl extends React.Component<Props<any>, State> {
+
+  componentDidMount() {
+    this.props.formControlModel.validityChanges()
+      .subscribe({
+        next: () => this.forceUpdate()
+      });
+    this.props.formControlModel.onDisableToggled()
+      .subscribe({
+        next: () => this.forceUpdate()
+      });
+  }
+
+  render() {
+    return (
+      <div className={this.calculateClassNameFromProps()}>
+        {
+          this.props.label
+          &&
+          <label
+            className='form-control__label'
+            htmlFor={this.props.htmlFor}>
+            {this.props.label}
+            &nbsp;
+        <span className='form-control__label__hint'>{this.props.hint}</span>
+          </label>
+        }
+        <div className='form-control__body'>
+          {this.props.children}
+          {
+            !this.props.formControlModel.isPristine()
+            &&
+            <ValidationErrorMessages messages={this.props.formControlModel.errors} />
+          }
+        </div>
       </div>
-    </div>
-  );
-}
+    );
+  }
 
-function calculateClassNameFromProps(props: Props) {
-  return `form-control ${props.className}`
-    + (props.disabled ? ' disabled' : '')
-    + (props.isInvalid ? ' invalid' : '');
+  calculateClassNameFromProps() {
+    return `form-control ${this.props.className}`
+      + (this.props.formControlModel.isDisabled() ? ' disabled' : '')
+      + (this.props.formControlModel.isInvalid() && !this.props.formControlModel.isPristine() ? ' invalid' : '');
+
+  }
+
 }

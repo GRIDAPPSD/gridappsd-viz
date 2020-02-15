@@ -74,7 +74,7 @@ export class TopologyRendererContainer extends React.Component<Props, State> {
     this.activeSimulationConfig = this._simulationQueue.getActiveSimulation()?.config || DEFAULT_SIMULATION_CONFIGURATION;
 
     this.onToggleSwitchState = this.onToggleSwitchState.bind(this);
-    this.onCapacitorMenuFormSubmitted = this.onCapacitorMenuFormSubmitted.bind(this);
+    this.onCapacitorControlMenuFormSubmitted = this.onCapacitorControlMenuFormSubmitted.bind(this);
     this.onRegulatorMenuFormSubmitted = this.onRegulatorMenuFormSubmitted.bind(this);
   }
 
@@ -149,8 +149,9 @@ export class TopologyRendererContainer extends React.Component<Props, State> {
   }
 
   private _transformModelForRendering(model: TopologyModel): RenderableTopology {
-    if (!model || model.feeders.length === 0)
+    if (!model || model.feeders.length === 0) {
       return null;
+    }
     const feeder = model.feeders[0];
     const renderableTopology: RenderableTopology = {
       name: feeder.name,
@@ -310,7 +311,7 @@ export class TopologyRendererContainer extends React.Component<Props, State> {
 
   private _convertLatLongToXYIfNeeded(nodes: any[]) {
     const minMax = extent(nodes, node => node.x1);
-    if (minMax[1] - minMax[0] <= 1)
+    if (minMax[1] - minMax[0] <= 1) {
       for (const node of nodes) {
         if ('x1' in node) {
           const { x, y } = this._latLongToXY(node.x1, node.y1);
@@ -323,6 +324,7 @@ export class TopologyRendererContainer extends React.Component<Props, State> {
           node.y2 = y;
         }
       }
+    }
   }
 
   private _latLongToXY(longitude: number, lat: number): { x: number; y: number } {
@@ -369,8 +371,9 @@ export class TopologyRendererContainer extends React.Component<Props, State> {
         next: measurements => {
           for (const swjtch of this._switches) {
             measurements.forEach(measurement => {
-              if (measurement.conductingEquipmentMRID === swjtch.mRIDs[0] && measurement.type === 'Pos')
+              if (measurement.conductingEquipmentMRID === swjtch.mRIDs[0] && measurement.type === 'Pos') {
                 swjtch.open = measurement.value === 0;
+              }
             });
             const switchSymbol = document.querySelector(`.topology-renderer__canvas__symbol.switch._${swjtch.name}_`);
             switchSymbol?.setAttribute('fill', swjtch.open ? swjtch.colorWhenOpen : swjtch.colorWhenClosed);
@@ -408,7 +411,7 @@ export class TopologyRendererContainer extends React.Component<Props, State> {
           topology={this.state.topology}
           showWait={this.state.isFetching}
           onToggleSwitch={this.onToggleSwitchState}
-          onCapacitorMenuFormSubmitted={this.onCapacitorMenuFormSubmitted}
+          onCapacitorControlMenuFormSubmitted={this.onCapacitorControlMenuFormSubmitted}
           onRegulatorMenuFormSubmitted={this.onRegulatorMenuFormSubmitted} />
         <Wait show={this.state.isFetching} />
       </>
@@ -429,16 +432,16 @@ export class TopologyRendererContainer extends React.Component<Props, State> {
     );
   }
 
-  onCapacitorMenuFormSubmitted(currentCapacitor: Capacitor, newCapacitor: Capacitor) {
-    switch (newCapacitor.controlMode) {
+  onCapacitorControlMenuFormSubmitted(currentCapacitor: Capacitor, updatedCapacitor: Capacitor) {
+    switch (updatedCapacitor.controlMode) {
       case CapacitorControlMode.MANUAL:
-        if (currentCapacitor.controlMode !== newCapacitor.controlMode) {
+        if (currentCapacitor.controlMode !== updatedCapacitor.controlMode) {
           currentCapacitor.manual = true;
-          this._toggleCapacitorManualMode(newCapacitor);
+          this._toggleCapacitorManualMode(updatedCapacitor);
         }
-        if (currentCapacitor.open !== newCapacitor.open) {
-          currentCapacitor.open = newCapacitor.open;
-          this._openOrCloseCapacitor(newCapacitor);
+        if (currentCapacitor.open !== updatedCapacitor.open) {
+          currentCapacitor.open = updatedCapacitor.open;
+          this._openOrCloseCapacitor(updatedCapacitor);
         }
         break;
       case CapacitorControlMode.VAR:
@@ -447,7 +450,7 @@ export class TopologyRendererContainer extends React.Component<Props, State> {
           currentCapacitor.manual = false;
           this._toggleCapacitorManualMode(currentCapacitor);
         }
-        currentCapacitor.var = newCapacitor.var;
+        currentCapacitor.var = updatedCapacitor.var;
         this._sendCapacitorVarUpdateRequest(currentCapacitor);
         break;
       case CapacitorControlMode.VOLT:
@@ -456,11 +459,11 @@ export class TopologyRendererContainer extends React.Component<Props, State> {
           currentCapacitor.manual = false;
           this._toggleCapacitorManualMode(currentCapacitor);
         }
-        currentCapacitor.volt = newCapacitor.volt;
+        currentCapacitor.volt = updatedCapacitor.volt;
         this._sendCapacitorVoltUpdateRequest(currentCapacitor);
         break;
     }
-    currentCapacitor.controlMode = newCapacitor.controlMode;
+    currentCapacitor.controlMode = updatedCapacitor.controlMode;
   }
 
   private _toggleCapacitorManualMode(capacitor: Capacitor) {
@@ -521,20 +524,22 @@ export class TopologyRendererContainer extends React.Component<Props, State> {
     );
   }
 
-  onRegulatorMenuFormSubmitted(currentRegulator: Regulator, newRegulator: Regulator) {
-    if (currentRegulator.controlMode !== newRegulator.controlMode)
-      this._toggleRegulatorManualMode(newRegulator);
-    switch (newRegulator.controlMode) {
+  onRegulatorMenuFormSubmitted(currentRegulator: Regulator, updatedRegulator: Regulator) {
+    if (currentRegulator.controlMode !== updatedRegulator.controlMode) {
+      this._toggleRegulatorManualMode(updatedRegulator);
+    }
+    switch (updatedRegulator.controlMode) {
       case RegulatorControlMode.MANUAL:
         currentRegulator.manual = true;
-        this._sendRegulatorTapChangerRequestForAllPhases(newRegulator);
+        this._sendRegulatorTapChangerRequestForAllPhases(updatedRegulator);
         break;
       case RegulatorControlMode.LINE_DROP_COMPENSATION:
         currentRegulator.manual = false;
-        this._sendRegulatorLineDropComponensationRequestForAllPhases(newRegulator);
+        this._sendRegulatorLineDropComponensationRequestForAllPhases(updatedRegulator);
         break;
     }
-    currentRegulator.controlMode = newRegulator.controlMode;
+    currentRegulator.controlMode = updatedRegulator.controlMode;
+    currentRegulator.phaseValues = updatedRegulator.phaseValues;
   }
 
   private _toggleRegulatorManualMode(regulator: Regulator) {

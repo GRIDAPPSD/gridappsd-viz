@@ -59,8 +59,9 @@ export class StompClientService {
           this._username = sessionStorage.getItem('username');
           this._password = sessionStorage.getItem('password');
 
-          if (this._username && this._password)
+          if (this._username && this._password) {
             this.reconnect();
+          }
         }
       });
   }
@@ -78,7 +79,7 @@ export class StompClientService {
           this.reconnect();
           subject.next(StompClientInitializationResult.OK);
         });
-        // need to reevaluate this
+        // need to reevaluate this strategy
         sessionStorage.setItem('username', username);
         sessionStorage.setItem('password', password);
       },

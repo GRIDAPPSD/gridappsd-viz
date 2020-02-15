@@ -1,38 +1,50 @@
 import * as React from 'react';
 
 import { RequestEditor } from '../RequestEditor';
-import { Input, Select, SelectionOptionBuilder } from '@shared/form';
+import { Input, Select, SelectionOptionBuilder, Form, FormGroupModel, FormControlModel } from '@shared/form';
 import { BasicButton } from '@shared/buttons';
 import { QueryLogsRequestBody } from './models/QueryLogsRequestBody';
 import { SimulationId } from './models/SimulationId';
+import { Validators } from '@shared/form/validation';
+import { DateTimeService } from '@shared/DateTimeService';
 
 import './QueryLogsForm.light.scss';
 import './QueryLogsForm.dark.scss';
 
 interface Props {
-  onSubmit: (body: QueryLogsRequestBody) => void;
-  onSimulationIdSelected: (simulationId: SimulationId) => void;
   simulationIds: SimulationId[];
   sources: string[];
+  onSubmit: (body: QueryLogsRequestBody) => void;
+  onSimulationIdSelected: (simulationId: SimulationId) => void;
 }
 
 interface State {
   selectedSimulationId: SimulationId;
   simulationIdOptionBuilder: SelectionOptionBuilder<SimulationId>;
+  sourceOptionBuilder: SelectionOptionBuilder<string>;
   logLevelOptionBuilder: SelectionOptionBuilder<string>;
   processStatusOptionBuilder: SelectionOptionBuilder<string>;
+  disableSubmitButton: boolean;
 }
 
 export class QueryLogsForm extends React.Component<Props, State> {
 
-  readonly formValue: QueryLogsRequestBody = {
-    startTime: '',
-    processId: '',
-    username: 'system',
-    source: 'ALL',
-    processStatus: 'ALL',
-    logLevel: 'ALL'
-  };
+  readonly formGroupModel = new FormGroupModel({
+    startTime: new FormControlModel(
+      Date.now() / 1000,
+      [
+        Validators.checkNotEmpty('Start time'),
+        Validators.checkValidDateTime('Start time')
+      ]
+    ),
+    simulationId: new FormControlModel<SimulationId>(null),
+    username: new FormControlModel('system', [Validators.checkNotEmpty('Username')]),
+    source: new FormControlModel('ALL'),
+    logLevel: new FormControlModel('ALL'),
+    processStatus: new FormControlModel('ALL')
+  });
+
+  private readonly _dateTimeService = DateTimeService.getInstance();
 
   constructor(props: Props) {
     super(props);
@@ -42,86 +54,113 @@ export class QueryLogsForm extends React.Component<Props, State> {
         props.simulationIds,
         simulationId => simulationId.process_id
       ),
+      sourceOptionBuilder: new SelectionOptionBuilder(props.sources),
       logLevelOptionBuilder: new SelectionOptionBuilder(
         ['ALL', 'TRACE', 'DEBUG', 'INFO', 'WARN', 'ERROR', 'FATAL']
       ),
       processStatusOptionBuilder: new SelectionOptionBuilder(
         ['ALL', 'STARTING', 'STARTED', 'RUNNING', 'ERROR', 'CLOSED', 'COMPLETE']
-      )
+      ),
+      disableSubmitButton: true
     };
 
-    this.onSimulationIdSelected = this.onSimulationIdSelected.bind(this);
+    this.onSubmitForm = this.onSubmitForm.bind(this);
+  }
+
+  componentDidMount() {
+    this.formGroupModel.validityChanges()
+      .subscribe({
+        next: isValid => {
+          this.setState({
+            disableSubmitButton: !isValid
+          });
+        }
+      });
+    const simulationIdFormControl = this.formGroupModel.findControl('simulationId');
+    simulationIdFormControl.valueChanges()
+      .subscribe({
+        next: (simulationId: SimulationId) => {
+          if (simulationIdFormControl.isValid()) {
+            this.props.onSimulationIdSelected(simulationId);
+            this.formGroupModel.findControl('startTime').setValue(this._dateTimeService.parse(simulationId.timestamp));
+          }
+        }
+      });
+  }
+
+  componentWillUnmount() {
+    this.formGroupModel.cleanup();
   }
 
   componentDidUpdate(prevProps: Props) {
-    if (this.props.simulationIds !== prevProps.simulationIds)
+    if (this.props.simulationIds !== prevProps.simulationIds) {
       this.setState({
         simulationIdOptionBuilder: new SelectionOptionBuilder(
           this.props.simulationIds,
           simulationId => simulationId.process_id
         )
       });
+    }
   }
 
   render() {
     return (
       <>
         <RequestEditor>
-          <form className='query-logs-form'>
+          <Form className='query-logs-form'>
             <div className='query-logs-form__left'>
               <Input
                 label='Start time'
-                name='startTime'
-                value={this.state.selectedSimulationId ? this.state.selectedSimulationId.timestamp : ''}
-                onChange={value => this.formValue.startTime = value} />
+                type='datetime'
+                formControlModel={this.formGroupModel.findControl('startTime')} />
               <Select
                 label='Simulation ID'
-                selectionOptionBuilder={this.state.simulationIdOptionBuilder}
-                onChange={this.onSimulationIdSelected} />
+                formControlModel={this.formGroupModel.findControl('simulationId')}
+                selectionOptionBuilder={this.state.simulationIdOptionBuilder} />
               <Input
                 label='Username'
-                name='username'
-                value='system'
-                onChange={value => this.formValue.username = value} />
+                formControlModel={this.formGroupModel.findControl('username')} />
             </div>
             <div className='query-logs-form__right'>
               <Select
                 label='Source'
-                selectionOptionBuilder={new SelectionOptionBuilder(this.props.sources)}
-                selectedOptionFinder={(_, index) => index === 0}
-                onChange={selectedValue => this.formValue.source = selectedValue} />
+                formControlModel={this.formGroupModel.findControl('source')}
+                selectionOptionBuilder={this.state.sourceOptionBuilder}
+                selectedOptionFinder={source => source === 'ALL'} />
               <Select
                 label='Log level'
+                formControlModel={this.formGroupModel.findControl('logLevel')}
                 selectionOptionBuilder={this.state.logLevelOptionBuilder}
-                selectedOptionFinder={level => level === 'ALL'}
-                onChange={selectedValue => this.formValue.logLevel = selectedValue} />
+                selectedOptionFinder={level => level === 'ALL'} />
               <Select
                 label='Process status'
+                formControlModel={this.formGroupModel.findControl('processStatus')}
                 selectionOptionBuilder={this.state.processStatusOptionBuilder}
-                selectedOptionFinder={status => status === 'ALL'}
-                onChange={selectedValue => this.formValue.processStatus = selectedValue} />
+                selectedOptionFinder={status => status === 'ALL'} />
             </div>
-          </form>
+          </Form>
         </RequestEditor>
         <BasicButton
           className='query-logs-form__submit'
           label='Submit'
           type='positive'
-          onClick={event => {
-            event.stopPropagation();
-            this.props.onSubmit(this.formValue);
-          }} />
+          disabled={this.state.disableSubmitButton}
+          onClick={this.onSubmitForm} />
       </>
     );
   }
 
-  onSimulationIdSelected(selectedSimulationId: SimulationId) {
-    this.setState({
-      selectedSimulationId
-    });
-    this.props.onSimulationIdSelected(selectedSimulationId);
-    this.formValue.processId = selectedSimulationId.process_id;
-    this.formValue.startTime = selectedSimulationId.timestamp;
+  onSubmitForm() {
+    const formValue = this.formGroupModel.getValue();
+    const requestBody: QueryLogsRequestBody = {
+      startTime: this._dateTimeService.format(formValue.startTime),
+      processId: formValue.simulationId.process_id,
+      username: formValue.username,
+      source: formValue.source,
+      processStatus: formValue.processStatus,
+      logLevel: formValue.logLevel
+    };
+    this.props.onSubmit(requestBody);
   }
 
 }

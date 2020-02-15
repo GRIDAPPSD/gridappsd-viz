@@ -30,8 +30,7 @@ export class OverlayService {
         ReactDOM.unmountComponentAtNode(this._currentOverlay);
         this._currentOverlay.parentElement.removeChild(this._currentOverlay);
       }, 1000);
-    }
-    else {
+    } else {
       ReactDOM.unmountComponentAtNode(this._currentOverlay);
       this._currentOverlay.parentElement.removeChild(this._currentOverlay);
     }

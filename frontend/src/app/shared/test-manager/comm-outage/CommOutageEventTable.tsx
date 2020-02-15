@@ -9,7 +9,7 @@ import './CommOutageEventTable.dark.scss';
 interface Props {
   events: CommOutageEvent[];
   faultMRIDs?: string[];
-  actions: (event: CommOutageEvent) => React.ReactNode;
+  actions: (event: CommOutageEvent, index: number) => React.ReactNode;
 }
 
 const dateTimeService = DateTimeService.getInstance();
@@ -26,18 +26,20 @@ export function CommOutageEventTable(props: Props) {
             <th rowSpan={2}>Fault MRID</th>
           }
           <th rowSpan={2}>Event Tag</th>
-          <th colSpan={4}>Input List</th>
-          <th colSpan={4}>Output List</th>
+          <th colSpan={5}>Input List</th>
+          <th colSpan={5}>Output List</th>
           <th rowSpan={2}>Start Date Time</th>
           <th rowSpan={2}>Stop Date Time</th>
         </tr>
         <tr>
           {/* Input List*/}
+          <th className='comm-outage-event-table__secondary-heading'>All Input Outage</th>
           <th className='comm-outage-event-table__secondary-heading'>Equipment Type</th>
           <th className='comm-outage-event-table__secondary-heading'>Equipment Name</th>
           <th className='comm-outage-event-table__secondary-heading'>Phase</th>
           <th className='comm-outage-event-table__secondary-heading'>Attribute</th>
           {/* Output List*/}
+          <th className='comm-outage-event-table__secondary-heading'>All Output Outage</th>
           <th className='comm-outage-event-table__secondary-heading'>Equipment Type</th>
           <th className='comm-outage-event-table__secondary-heading'>Name</th>
           <th className='comm-outage-event-table__secondary-heading'>Phases</th>
@@ -50,7 +52,7 @@ export function CommOutageEventTable(props: Props) {
             <tr key={event.tag}>
               <td>
                 <div className='comm-outage-event-table__row-actions'>
-                  {props.actions(event)}
+                  {props.actions(event, index)}
                 </div>
               </td>
               {
@@ -64,6 +66,9 @@ export function CommOutageEventTable(props: Props) {
               </td>
               {/* Input List */}
               <td>
+                <div>{event.allInputOutage ? '✓' : ''}</div>
+              </td>
+              <td>
                 {event.inputList.map((e, i) => <div key={i}>{e.type}</div>)}
               </td>
               <td>
@@ -76,6 +81,9 @@ export function CommOutageEventTable(props: Props) {
                 {event.inputList.map((e, i) => <div key={i}>{e.attribute}</div>)}
               </td>
               {/* Output List */}
+              <td>
+                <div>{event.allOutputOutage ? '✓' : ''}</div>
+              </td>
               <td>
                 {event.outputList.map((e, i) => <div key={i}>{e.type}</div>)}
               </td>

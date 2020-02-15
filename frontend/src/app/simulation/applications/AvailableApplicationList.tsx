@@ -88,7 +88,7 @@ export class AvailableApplicationList extends React.Component<Props, State> {
   }
 
   showActionButton() {
-    if (this.state.action === 'enable')
+    if (this.state.action === 'enable') {
       return (
         <Tooltip content='Enable'>
           <IconButton
@@ -97,6 +97,7 @@ export class AvailableApplicationList extends React.Component<Props, State> {
             onClick={this.enableApplication} />
         </Tooltip>
       );
+    }
 
     return (
       <Tooltip content='Disable'>

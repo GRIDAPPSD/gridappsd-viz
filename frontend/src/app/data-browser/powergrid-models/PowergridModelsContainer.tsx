@@ -89,7 +89,10 @@ export class PowergridModelsContainer extends React.Component<Props, State> {
   }
 
   fetchPowerGridModels(requestBody: QueryPowerGridModelsRequestBody) {
-    this.setState({ isFetching: true, response: '' });
+    this.setState({
+      isFetching: true,
+      response: ''
+    });
     this._queryPowerGridModelsRequest.requestBody = {
       requestType: requestBody.requestType,
       resultFormat: requestBody.resultFormat

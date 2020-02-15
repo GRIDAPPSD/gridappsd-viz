@@ -1,7 +1,8 @@
+import { FeederModelRegion, FeederModelSubregion, FeederModelLine } from '@shared/topology';
+
 export interface PowerSystemConfigurationModel {
-  regionId: string;
-  subregionId: string;
+  region: FeederModelRegion;
+  subregion: FeederModelSubregion;
   simulationName: string;
-  lineId: string;
-  isValid: boolean;
+  line: FeederModelLine;
 }

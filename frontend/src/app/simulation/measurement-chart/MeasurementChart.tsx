@@ -11,6 +11,7 @@ import { MeasurementChartModel } from './models/MeasurementChartModel';
 import { TimeSeriesDataPoint } from './models/TimeSeriesDataPoint';
 import { TimeSeries } from './models/TimeSeries';
 import { StateStore } from '@shared/state-store';
+import { Ripple } from '@shared/ripple';
 
 import './MeasurementChart.light.scss';
 import './MeasurementChart.dark.scss';
@@ -105,8 +106,8 @@ export class MeasurementChart extends React.Component<Props, State> {
         // to determine if the lines overlap which is good enough
         this.props.measurementChartModel.timeSeries.some(
           e => e !== series &&
-            e.points[0].measurement === series.points[0].measurement &&
-            e.points[e.points.length - 1].measurement === series.points[series.points.length - 1].measurement
+            Math.abs(e.points[0].measurement - series.points[0].measurement) <= 5 &&
+            Math.abs(e.points[e.points.length - 1].measurement - series.points[series.points.length - 1].measurement) <= 5
         )
       ) {
         overlappingTimeSeries.push(series);
@@ -169,15 +170,17 @@ export class MeasurementChart extends React.Component<Props, State> {
         <div className='measurement-chart__legend-container'>
           {
             this.props.measurementChartModel.timeSeries.map(timeSeries => (
-              <div
-                key={timeSeries.name}
-                className='measurement-chart__legend'
-                onClick={() => this.locateNodeForTimeSeriesLine(timeSeries.name)}>
-                <div className='measurement-chart__legend__color' />
-                <div className='measurement-chart__legend__label'>
-                  {timeSeries.name}
+              <Ripple>
+                <div
+                  key={timeSeries.name}
+                  className='measurement-chart__legend'
+                  onClick={() => this.locateNodeForTimeSeriesLine(timeSeries.name)}>
+                  <div className='measurement-chart__legend__color' />
+                  <div className='measurement-chart__legend__label'>
+                    {timeSeries.name}
+                  </div>
                 </div>
-              </div>
+              </Ripple>
             ))
           }
         </div>
@@ -222,7 +225,7 @@ export class MeasurementChart extends React.Component<Props, State> {
   }
 
   showLabelsForOverlappingTimeSeries() {
-    if (this.state.overlappingTimeSeries.length === 0) {
+    if (this.state.overlappingTimeSeries.length === 0 || this.state.overlappingTimeSeries[0].points[0] === undefined) {
       return null;
     }
     const paddingLeft = 5;

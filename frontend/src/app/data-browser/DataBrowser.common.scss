@@ -11,8 +11,10 @@ $app-bar-height: 60px;
         list-style-type: none;
     }
 
-    .wait .dots {
-        transform: translateX(-70px);
+    .vertical-divider {
+        width: 1px;
+        box-shadow: 0 0 2px #888;
+        height: 100%;
     }
 }
 
@@ -85,7 +87,8 @@ $app-bar-height: 60px;
 .request-response {
     width: 100%;
     position: relative;
-    overflow-y: auto;
+    overflow-x: hidden;
+    overflow-y: hidden;
     display: flex;
     flex-flow: column nowrap;
     padding: 5px;
@@ -108,4 +111,20 @@ $app-bar-height: 60px;
 .response {
     white-space: pre-wrap;
     margin-top: 5px;
+
+    &::-webkit-scrollbar {
+        border-radius: 10px;
+    }
+
+    &::-webkit-scrollbar:horizontal {
+        height: 10px;
+    }
+
+    &::-webkit-scrollbar:vertical {
+        width: 10px;
+    }
+
+    &::-webkit-scrollbar-thumb {
+        border-radius: 10px;
+    }
 }

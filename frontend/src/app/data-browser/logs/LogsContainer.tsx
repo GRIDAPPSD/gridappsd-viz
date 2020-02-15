@@ -9,6 +9,7 @@ import { QueryLogsForm } from './QueryLogsForm';
 import { QueryLogsResultTable } from './QueryLogsResultTable';
 import { Response } from '../Response';
 import { MessageBanner } from '@shared/message-banner';
+import { Wait } from '@shared/wait';
 
 import './Logs.light.scss';
 import './Logs.dark.scss';
@@ -20,6 +21,7 @@ interface State {
   result: any[];
   simulationIds: SimulationId[];
   sources: string[];
+  showSpinner: boolean;
 }
 
 export class LogsContainer extends React.Component<Props, State> {
@@ -34,7 +36,8 @@ export class LogsContainer extends React.Component<Props, State> {
     this.state = {
       result: [],
       simulationIds: [],
-      sources: ['ALL']
+      sources: ['ALL'],
+      showSpinner: false
     };
     this.getSource = this.getSource.bind(this);
     this.getLogs = this.getLogs.bind(this);
@@ -46,10 +49,18 @@ export class LogsContainer extends React.Component<Props, State> {
   }
 
   private _fetchLatestTenSimulationIds() {
+    this.setState({
+      showSpinner: true
+    });
     this._stompClientService.readOnceFrom('query-logs.process-id')
       .pipe(map(JSON.parse as (body: string) => { data: SimulationId[] }))
       .subscribe({
-        next: payload => this.setState({ simulationIds: payload.data })
+        next: payload => {
+          this.setState({
+            simulationIds: payload.data,
+            showSpinner: false
+          });
+        }
       });
     this._stompClientService.send(
       'goss.gridappsd.process.request.data.log',
@@ -80,7 +91,12 @@ export class LogsContainer extends React.Component<Props, State> {
     return this._stompClientService.readFrom('query-logs.result')
       .pipe(map(JSON.parse as (body: string) => any))
       .subscribe({
-        next: queryResults => this.setState({ result: queryResults.data || [] })
+        next: queryResults => {
+          this.setState({
+            result: queryResults.data || [],
+            showSpinner: false
+          });
+        }
       });
   }
 
@@ -120,6 +136,7 @@ export class LogsContainer extends React.Component<Props, State> {
               </MessageBanner>
           }
         </Response>
+        <Wait show={this.state.showSpinner} />
       </div>
     );
   }
@@ -133,8 +150,12 @@ export class LogsContainer extends React.Component<Props, State> {
   }
 
   getLogs(requestBody: QueryLogsRequestBody) {
-    if (requestBody.source === 'ALL')
+    this.setState({
+      showSpinner: true
+    });
+    if (requestBody.source === 'ALL') {
       delete requestBody.source;
+    }
     this._stompClientService.send(
       'goss.gridappsd.process.request.data.log',
       { 'reply-to': 'query-logs.result' },

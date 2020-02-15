@@ -41,10 +41,11 @@ export class AuthenticatorService {
           };
         }),
         catchError(code => {
-          if (code === StompClientInitializationResult.AUTHENTICATION_FAILURE)
+          if (code === StompClientInitializationResult.AUTHENTICATION_FAILURE) {
             return of({
               statusCode: AuthenticationStatusCode.INCORRECT_CREDENTIALS
             });
+          }
           return of({
             statusCode: AuthenticationStatusCode.SERVER_FAILURE
           });

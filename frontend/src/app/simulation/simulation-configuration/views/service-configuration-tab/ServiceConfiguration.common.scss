@@ -1,4 +1,4 @@
-.service-configuration-tab-entry {
+.service-configuration {
     .form-control {
         flex-flow: column nowrap;
         align-items: flex-start;
@@ -17,7 +17,7 @@
         position: relative;
     }
 
-    .service-configuration-tab-entry__value {
+    .service-configuration__user-option {
         display: flex;
         position: relative;
         flex-flow: column nowrap;
@@ -29,7 +29,7 @@
         }
     }
 
-    .service-configuration-tab-entry__example {
+    .service-configuration__user-option__example {
         transform: translate(20px, 3px);
         width: 20px;
         height: 20px;

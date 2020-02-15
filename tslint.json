@@ -15,7 +15,7 @@
             true,
             "check-space"
         ],
-        "curly": false,
+        "curly": true,
         "deprecation": {
             "severity": "warn"
         },
@@ -84,7 +84,9 @@
             true,
             "check-open-brace",
             "check-catch",
-            "check-whitespace"
+            "check-whitespace",
+            "check-finally",
+            "check-else"
         ],
         "prefer-const": true,
         "quotemark": [

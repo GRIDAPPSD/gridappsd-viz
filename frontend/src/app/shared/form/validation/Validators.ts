@@ -1,65 +1,77 @@
 import { ValidationResult } from './ValidationResult';
+import { AbstractControlModel } from '../models/AbstractControlModel';
+import { DateTimeService } from '@shared/DateTimeService';
+import { FormControlModel } from '../models/FormControlModel';
 
-export type Validator = (value: string) => ValidationResult;
+export type Validator = (control: AbstractControlModel<any>) => ValidationResult;
 
 const numberRegex = /^(?:-?\d+\.?\d*)?$/;
 
 // YYYY-MM-DD HH:MM:SS
-const dateTimePattern = /^(?:\d{4}-\d{2}-\d{2}\s\d{2}:\d{2}:\d{2})?$/;
+const dateTimePattern = /^(?:\d{4}-\d{2}-\d{2}\s\d{2}:\d{2}:\d{2}(?:\.\d{1,3})?)?$/;
+
+const dateTimeService = DateTimeService.getInstance();
 
 export class Validators {
 
-  static checkNotEmpty(errorMessage: string): Validator {
-    return (value: string) => ({
-      isValid: value && value.trim() !== '',
-      errorMessage
-    });
+  static checkNotEmpty(subjectDisplayName: string): Validator {
+    return control => {
+      const value = control.getValue();
+      return {
+        isValid: value !== null && value !== undefined && String(value).trim() !== '',
+        errorMessage: `${subjectDisplayName} must not be empty`
+      };
+    };
   }
 
-  static checkValidJSON(errorMessage?: string): Validator {
-    return (value: string) => {
+  static checkValidJSON(): Validator {
+    return control => {
       try {
-        if (value !== '')
-          JSON.parse(value);
+        if (control.getValue() !== '') {
+          JSON.parse(control.getValue());
+        }
         return {
           isValid: true,
           errorMessage: ''
         };
       } catch (e) {
         return {
-          errorMessage: errorMessage || `Invalid JSON: ${e.message.replace('JSON.parse: ', '')}`,
+          errorMessage: `Invalid JSON: ${e.message.replace('JSON.parse: ', '')}`,
           isValid: false
         };
       }
     };
   }
 
-  static checkValidNumber(errorMessage: string): Validator {
-    return Validators.checkPattern(errorMessage, numberRegex);
+  static checkValidNumber(subjectDisplayName: string): Validator {
+    return Validators._checkPattern(`${subjectDisplayName} must be a number`, numberRegex);
   }
 
-  static checkValidDateTime(errorMessage: string): Validator {
-    return Validators.checkPattern(errorMessage, dateTimePattern);
-  }
-
-  static checkPattern(errorMessage: string, pattern: RegExp): Validator {
-    return (value: string) => ({
-      isValid: pattern.test(value),
+  private static _checkPattern(errorMessage: string, pattern: RegExp): Validator {
+    return control => ({
+      isValid: pattern.test(String(control.getValue())),
       errorMessage
     });
   }
 
-  static checkMin(errorMessage: string, min: number): Validator {
-    return (value: string) => ({
-      isValid: +value >= min,
-      errorMessage
+  static checkValidDateTime(subjectDisplayName: string): Validator {
+    return (control: FormControlModel<number> | FormControlModel<string> | FormControlModel<Date>) => ({
+      isValid: dateTimePattern.test(dateTimeService.format((control.getValue()))),
+      errorMessage: `${subjectDisplayName} must have format YYYY-MM-DD HH:MM:SS`
     });
   }
 
-  static checkMax(errorMessage: string, max: number): Validator {
-    return (value: string) => ({
-      isValid: +value <= max,
-      errorMessage
+  static checkMin(subjectDisplayName: string, min: number): Validator {
+    return control => ({
+      isValid: control.getValue() >= min,
+      errorMessage: `${subjectDisplayName} must be greater than or equal to ${min}`
+    });
+  }
+
+  static checkMax(subjectDisplayName: string, max: number): Validator {
+    return control => ({
+      isValid: control.getValue() <= max,
+      errorMessage: `${subjectDisplayName} must be less than or equal to ${max}`
     });
   }
 

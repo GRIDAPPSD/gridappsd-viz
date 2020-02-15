@@ -102,8 +102,12 @@ export class Notification extends React.Component<Props, State> {
 
 }
 
+const container = document.createElement('div');
 export function showNotification(content: React.ReactChild) {
-  const container = document.createElement('div');
+  if (document.body.contains(container)) {
+    unmountComponentAtNode(container);
+    document.body.appendChild(container);
+  }
   document.body.appendChild(container);
   render(
     <Notification onHide={() => {

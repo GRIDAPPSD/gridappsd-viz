@@ -44,20 +44,22 @@ export class SimulationStatusLogger extends React.Component<Props, State> {
 
   componentDidUpdate(prevProps: Props) {
     if (prevProps !== this.props) {
-      if (this.props.isFetching)
+      if (this.props.isFetching) {
         this.setState({
           dragHandlePosition: 430
         });
+      }
       if (this.props.messages !== prevProps.messages) {
         const currentNumberOfVisibleMessages = this.state.visibleMessages.length;
-        if (currentNumberOfVisibleMessages <= numberOfMessagesToLoadNext)
+        if (currentNumberOfVisibleMessages <= numberOfMessagesToLoadNext) {
           this.setState({
             visibleMessages: this.props.messages.slice(0, numberOfMessagesToLoadNext)
           });
-        else
+        } else {
           this.setState({
             visibleMessages: this.props.messages.slice(0, currentNumberOfVisibleMessages)
           });
+        }
       }
     }
   }

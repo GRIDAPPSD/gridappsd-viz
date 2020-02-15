@@ -53,13 +53,15 @@ export class Tooltip extends React.Component<Props, State> {
   }
 
   componentDidUpdate(prevProps: Props) {
-    if (prevProps.content !== this.props.content)
+    if (prevProps.content !== this.props.content) {
       this._updateTooltipContent();
+    }
   }
 
   private _updateTooltipContent() {
-    if (this.tooltip)
+    if (this.tooltip) {
       this.tooltip.querySelector('.td-tooltip__content').textContent = String(this.props.content);
+    }
   }
 
   render() {
@@ -145,8 +147,9 @@ export class Tooltip extends React.Component<Props, State> {
         this.tooltip.classList.add('bottom');
         top = top + originRect.height + this._tooltipRect.height + 25;
       }
-      if (!this._shiftTooltipIntoViewFromRight(left))
+      if (!this._shiftTooltipIntoViewFromRight(left)) {
         this._shiftTooltipIntoViewFromLeft(left);
+      }
       this.tooltip.style.left = left + 'px';
       this.tooltip.style.top = top + 'px';
     }, 0);
@@ -188,8 +191,9 @@ export class Tooltip extends React.Component<Props, State> {
         this.tooltip.classList.add('top');
         top = top - originRect.height - this._tooltipRect.height - 30;
       }
-      if (!this._shiftTooltipIntoViewFromRight(left))
+      if (!this._shiftTooltipIntoViewFromRight(left)) {
         this._shiftTooltipIntoViewFromLeft(left);
+      }
       this.tooltip.style.left = left + 'px';
       this.tooltip.style.top = top + 'px';
     }, 0);
@@ -204,8 +208,9 @@ export class Tooltip extends React.Component<Props, State> {
         this.tooltip.classList.add('left');
         left = left - originRect.width - this._tooltipRect.width - 30;
       }
-      if (!this._shiftTooltipIntoViewFromBottom(top))
+      if (!this._shiftTooltipIntoViewFromBottom(top)) {
         this._shiftTooltipIntoViewFromTop(top);
+      }
       this.tooltip.style.left = left + 'px';
       this.tooltip.style.top = top + 'px';
     }, 0);
@@ -252,8 +257,9 @@ export class Tooltip extends React.Component<Props, State> {
         this.tooltip.classList.add('right');
         left = left + originRect.width + this._tooltipRect.width + 30;
       }
-      if (!this._shiftTooltipIntoViewFromBottom(top))
+      if (!this._shiftTooltipIntoViewFromBottom(top)) {
         this._shiftTooltipIntoViewFromTop(top);
+      }
       this.tooltip.style.left = left + 'px';
       this.tooltip.style.top = top + 'px';
     }, 0);

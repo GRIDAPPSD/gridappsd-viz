@@ -119,8 +119,9 @@ export class SimulationControlService {
             this._simulationOutputSubscription.unsubscribe();
             this._simulationOutputSubscription = null;
           }
-          if (this._currentSimulationStatus === SimulationStatus.STARTED)
+          if (this._currentSimulationStatus === SimulationStatus.STARTED) {
             this.stopSimulation();
+          }
         }
       });
   }
@@ -181,8 +182,9 @@ export class SimulationControlService {
     for (const entry of Object.entries(state)) {
       this._simulationSnapshot[entry[0]] = entry[1];
     }
-    if (this._syncingEnabled)
+    if (this._syncingEnabled) {
       this._socket.emit(SimulationSynchronizationEvents.SIMULATION_SNAPSHOT_RECEIVE, state);
+    }
   }
 
   statusChanges(): Observable<SimulationStatus> {

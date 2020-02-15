@@ -146,8 +146,9 @@ export class MeasurementChartContainer extends React.Component<Props, State> {
     const nextTimeStepDataPoint = this._getDataPointForTimeSeries(plotModel, component, measurements);
 
     if (nextTimeStepDataPoint) {
-      if (timeSeries.points.length === 20)
+      if (timeSeries.points.length === 20) {
         timeSeries.points.shift();
+      }
       timeSeries.points.push(nextTimeStepDataPoint);
     }
     return timeSeries;
@@ -156,8 +157,9 @@ export class MeasurementChartContainer extends React.Component<Props, State> {
   private _findOrCreateTimeSeries(plotModel: PlotModel, component: PlotModelComponent): TimeSeries {
     const timeSeriesName = component.displayName;
     const timeSeriesId = `${plotModel.name}_${timeSeriesName}`;
-    if (!this._timeSeries.has(timeSeriesId))
+    if (!this._timeSeries.has(timeSeriesId)) {
       this._timeSeries.set(timeSeriesId, { name: timeSeriesName, points: [] });
+    }
     return this._timeSeries.get(timeSeriesId);
   }
 

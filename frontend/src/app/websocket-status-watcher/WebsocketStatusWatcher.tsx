@@ -41,8 +41,9 @@ export class WebsocketStatusWatcher extends React.Component<Props, State> {
   }
 
   render() {
-    if (this.state.websocketStatus === StompClientConnectionStatus.CONNECTED || this.state.websocketStatus === StompClientConnectionStatus.UNINITIALIZED)
+    if (this.state.websocketStatus === StompClientConnectionStatus.CONNECTED || this.state.websocketStatus === StompClientConnectionStatus.UNINITIALIZED) {
       return null;
+    }
     return (
       <MessageBanner>
         {this._showComponentForCurrentStatus()}
@@ -51,14 +52,14 @@ export class WebsocketStatusWatcher extends React.Component<Props, State> {
   }
 
   private _showComponentForCurrentStatus() {
-    if (this.state.websocketStatus === StompClientConnectionStatus.CONNECTING)
+    if (this.state.websocketStatus === StompClientConnectionStatus.CONNECTING) {
       return (
         <span>
           <span>Trying to connect</span>
           <ThreeDots />
         </span>
       );
-    else if (this.state.websocketStatus !== StompClientConnectionStatus.CONNECTED)
+    } else if (this.state.websocketStatus !== StompClientConnectionStatus.CONNECTED) {
       return (
         <>
           <span>
@@ -75,6 +76,7 @@ export class WebsocketStatusWatcher extends React.Component<Props, State> {
             label='Click to reconnect' />
         </>
       );
+    }
     return null;
   }
 

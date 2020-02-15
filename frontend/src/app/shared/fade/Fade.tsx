@@ -20,8 +20,9 @@ export class Fade extends React.Component<Props, State> {
 
   componentDidMount() {
     this._element = ReactDOM.findDOMNode(this) as HTMLElement;
-    if (this.props.in)
+    if (this.props.in) {
       this._element.classList.add('fade-in');
+    }
   }
 
   componentDidUpdate(prevProps: Props) {
@@ -29,8 +30,7 @@ export class Fade extends React.Component<Props, State> {
       if (this.props.in) {
         this._element.classList.remove('fade-out');
         this._element.classList.add('fade-in');
-      }
-      else {
+      } else {
         this._element.classList.remove('fade-in');
         this._element.classList.add('fade-out');
       }

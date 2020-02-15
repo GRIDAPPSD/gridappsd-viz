@@ -59,12 +59,13 @@ export class DrawerItemGroup extends React.Component<Props, State> {
       this.setState(state => ({
         isExpanded: !state.isExpanded
       }));
-    }
-    // if child DrawerItems are clicked, then let the event propagate
-    // then collapse the nested item group list
-    else
+    } else {
+      // if child DrawerItems are clicked, then let the event propagate
+      // then collapse the nested item group list
+
       this.setState({
         isExpanded: false
       });
+    }
   }
 }

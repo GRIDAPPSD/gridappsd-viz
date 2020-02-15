@@ -64,11 +64,13 @@ export interface FuzzySearchResult {
  * @param hightlightMatches Whether or not the matched boundaries should be highlighted
  */
 export function fuzzySearch(needle: string, hightlightMatches = false): (haystack?: string) => null | FuzzySearchResult {
-  if (needle === '' || needle === undefined)
+  if (needle === '' || needle === undefined) {
     return () => null;
+  }
 
-  if (!hightlightMatches)
+  if (!hightlightMatches) {
     return _fuzzySearchWithNoHighlighting(needle);
+  }
 
   return _fuzzySearchWithHighlighting(needle);
 }
@@ -80,8 +82,9 @@ function _fuzzySearchWithNoHighlighting(needle: string) {
   const pattern = new RegExp(tokens.join('[\\s\\S]*'), 'i');
   return (haystack: string) => {
     const matches = pattern.test(haystack);
-    if (!matches)
+    if (!matches) {
       return null;
+    }
     return {
       inaccuracy: Infinity,
       input: haystack,
@@ -98,8 +101,9 @@ function _fuzzySearchWithNoHighlighting(needle: string) {
 
 function _fuzzySearchWithHighlighting(needle: string) {
   return (haystack: string) => {
-    if (!haystack)
+    if (!haystack) {
       return null;
+    }
     const originalHaystack = haystack;
     const boundaries: FuzzySearchBoundary[] = [];
     let startOfCurrentMatch = haystack.indexOf(needle[0]);
@@ -111,8 +115,9 @@ function _fuzzySearchWithHighlighting(needle: string) {
     for (const piece of needle) {
       const endOfLastMatch = boundaries.length > 0 ? boundaries[boundaries.length - 1].end : 0;
       startOfCurrentMatch = haystack.indexOf(piece, endOfLastMatch);
-      if (startOfCurrentMatch === -1)
+      if (startOfCurrentMatch === -1) {
         return null;
+      }
       // If the haystack is an exact match to the needle
       // we want it to have the smallest possible inaccuracy
       // which is negative infinity
@@ -160,9 +165,9 @@ function _fuzzySearchWithHighlighting(needle: string) {
  */
 export function waitUntil(predicate: () => boolean, waitDelay = 500): Promise<void> {
   return new Promise(resolve => {
-    if (predicate())
+    if (predicate()) {
       resolve();
-    else {
+    } else {
       let retries = 0;
       const repeater = setInterval(() => {
         if (predicate()) {
@@ -170,8 +175,9 @@ export function waitUntil(predicate: () => boolean, waitDelay = 500): Promise<vo
           clearInterval(repeater);
         }
         retries++;
-        if (retries === 3)
+        if (retries === 3) {
           clearInterval(repeater);
+        }
       }, waitDelay);
     }
   });
@@ -183,8 +189,10 @@ export function generateUniqueId() {
 
 export function unique<T>(iterable: Iterable<T>): T[] {
   const uniqueItems = [] as T[];
-  for (const element of iterable)
-    if (!uniqueItems.includes(element))
+  for (const element of iterable) {
+    if (!uniqueItems.includes(element)) {
       uniqueItems.push(element);
+    }
+  }
   return uniqueItems;
 }

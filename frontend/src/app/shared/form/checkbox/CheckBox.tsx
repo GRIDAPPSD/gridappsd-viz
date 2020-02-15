@@ -2,55 +2,75 @@ import * as React from 'react';
 
 import { Ripple } from '@shared/ripple';
 import { FormControl } from '../form-control/FormControl';
+import { FormControlModel } from '../models/FormControlModel';
 
-import './CheckBox.light.scss';
-import './CheckBox.dark.scss';
+import './Checkbox.light.scss';
+import './Checkbox.dark.scss';
 
-interface Props<T> {
+interface Props {
   label: string;
   name: string;
-  onChange: (togglingState: boolean, value: T) => void;
-  disabled?: boolean;
-  checked?: boolean;
+  formControlModel: FormControlModel<boolean>;
   labelPosition?: 'left' | 'right';
   className?: string;
   hint?: string;
-  value?: T;
+
 }
 
 interface State {
-
+  checked: boolean;
 }
-export class CheckBox<T> extends React.Component<Props<T>, State> {
 
-  constructor(props: Props<T>) {
+export class Checkbox extends React.Component<Props, State> {
+
+  constructor(props: Props) {
     super(props);
 
+    this.state = {
+      checked: props.formControlModel.getValue()
+    };
+
     this.onCheckBoxToggled = this.onCheckBoxToggled.bind(this);
+  }
+
+  componentDidMount() {
+    this.props.formControlModel.valueChanges()
+      .subscribe({
+        next: isChecked => {
+          this.setState({
+            checked: isChecked
+          });
+        }
+      });
+  }
+
+  componentWillUnmount() {
+    this.props.formControlModel.cleanup();
   }
 
   render() {
     return (
       <FormControl
         className={this.resolveClassNames()}
-        disabled={this.props.disabled}
         label={this.props.label}
         htmlFor={this.props.label}
-        hint={this.props.hint}>
+        hint={this.props.hint}
+        formControlModel={this.props.formControlModel}>
         <Ripple
           fixed
           duration={1500}>
           <div className='checkbox-wrapper'>
             <input
-              className={'checkbox__input'}
+              className='checkbox__input'
               id={this.props.label}
               ref={checkbox => {
-                if (checkbox)
-                  checkbox.checked = this.props.checked;
+                if (checkbox) {
+                  checkbox.checked = this.state.checked;
+                }
               }}
               type='checkbox'
               name={this.props.name}
-              disabled={this.props.disabled}
+              disabled={this.props.formControlModel.isDisabled()}
               onChange={this.onCheckBoxToggled} />
             <i className='material-icons checkbox__icon checkbox__icon__unchecked'>
               check_box_outline_blank
@@ -73,7 +93,7 @@ export class CheckBox<T> extends React.Component<Props<T>, State> {
   }
 
   onCheckBoxToggled(event: any) {
-    this.props.onChange(event.currentTarget.checked, this.props.value);
+    this.props.formControlModel.setValue(event.currentTarget.checked);
   }
 
 }

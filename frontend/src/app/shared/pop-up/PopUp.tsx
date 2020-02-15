@@ -31,11 +31,13 @@ export class PopUp extends React.Component<Props, State> {
 
   componentDidMount() {
     this.popupContainer.className = 'pop-up-container';
-    if (this.props.top === undefined || this.props.left === undefined)
+    if (this.props.top === undefined || this.props.left === undefined) {
       this.popupContainer.className += ' centered';
+    }
     this.popupContainer.onclick = (event: MouseEvent) => {
-      if (event.target === this.popupContainer && this.props.onBackdropClicked)
+      if (event.target === this.popupContainer && this.props.onBackdropClicked) {
         this.props.onBackdropClicked(event);
+      }
     };
     if (this.props.in) {
       document.body.appendChild(this.popupContainer);
@@ -45,10 +47,12 @@ export class PopUp extends React.Component<Props, State> {
 
   componentDidUpdate(prevProps: Props) {
     if (this.props.in) {
-      if (!document.body.contains(this.popupContainer))
+      if (!document.body.contains(this.popupContainer)) {
         document.body.appendChild(this.popupContainer);
-      if (this.props.children !== (prevProps as any).children)
+      }
+      if (this.props.children !== (prevProps as any).children) {
         this.popupElement.style.top = `${this.props.top}px`;
+      }
       this._shiftIntoViewIfOverflowScreen();
     }
   }
@@ -62,8 +66,9 @@ export class PopUp extends React.Component<Props, State> {
   }
 
   componentWillUnmount() {
-    if (document.body.contains(this.popupContainer))
+    if (document.body.contains(this.popupContainer)) {
       document.body.removeChild(this.popupContainer);
+    }
     this.popupContainer.onclick = null;
   }
 

@@ -70,10 +70,11 @@ export class SimulationControlContainer extends React.Component<Props, State> {
       .pipe(
         takeUntil(this._unsubscriber),
         tap(status => {
-          if (this.simulationControlService.isUserInActiveSimulation())
+          if (this.simulationControlService.isUserInActiveSimulation()) {
             this.setState({
               simulationStatus: status
             });
+          }
         }),
         filter(status => status === SimulationStatus.STARTED),
         switchMap(() => this._stateStore.select('simulationId')),

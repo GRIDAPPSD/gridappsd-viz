@@ -25,6 +25,15 @@
             }
         }
     }
+
+    &::-webkit-scrollbar {
+        background: $theme-color;
+        box-shadow: 0 0 3px #808080 inset;
+    }
+
+    &::-webkit-scrollbar-thumb {
+        background-color: $primary-color;
+    }
 }
 
 .textarea__input-box,

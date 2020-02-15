@@ -51,10 +51,11 @@ export class AvailableApplicationsAndServicesContainer extends React.Component<P
   }
 
   render() {
-    if (!this.state.payload)
+    if (!this.state.payload) {
       return (
         <Wait show />
       );
+    }
     return (
       <AvailableApplicationsAndServices payload={this.state.payload} />
     );

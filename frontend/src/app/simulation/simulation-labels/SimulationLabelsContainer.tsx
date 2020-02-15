@@ -119,8 +119,7 @@ export class SimulationLabelsContainer extends React.Component<Props, State> {
                   <td>{node.value === 0 ? 'CLOSED' : 'OPEN'}</td>
                 </tr>
               ));
-            }
-            else {
+            } else {
               // get measurements for voltages
               const voltageMeasurementsAtPhases = [];
               measurements.forEach(measurement => {

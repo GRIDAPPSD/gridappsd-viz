@@ -1,4 +1,6 @@
 export interface ApplicationConfigurationModel {
-  applicationId: string;
-  configString: string;
+  applications: Array<{
+    name: string;
+    config_string: string;
+  }>;
 }
