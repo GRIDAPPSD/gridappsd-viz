@@ -170,9 +170,8 @@ export class MeasurementChart extends React.Component<Props, State> {
         <div className='measurement-chart__legend-container'>
           {
             this.props.measurementChartModel.timeSeries.map(timeSeries => (
-              <Ripple>
+              <Ripple key={timeSeries.name}>
                 <div
-                  key={timeSeries.name}
                   className='measurement-chart__legend'
                   onClick={() => this.locateNodeForTimeSeriesLine(timeSeries.name)}>
                   <div className='measurement-chart__legend__color' />

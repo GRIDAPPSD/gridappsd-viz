@@ -24,7 +24,7 @@
     }
 }
 
-.regulator-control-menu__form__section ul {
+.regulator-control-menu__form__section ul:not(.validation-error-message-display) {
     padding: 0;
     padding-left: 10px;
     list-style: none;

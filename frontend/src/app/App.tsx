@@ -24,10 +24,10 @@ import { AlarmsContainer, Alarm } from './simulation/alarms';
 import { Settings } from './settings';
 import { MessageBanner } from '@shared/message-banner';
 import { ThreeDots } from '@shared/three-dots';
-import { OverlayService } from '@shared/overlay';
 import { StompClientConnectionStatus } from '@shared/StompClientService';
 import { StateStore } from '@shared/state-store';
 import { waitUntil } from '@shared/misc';
+import { PortalRenderer } from '@shared/portal-renderer';
 
 import './App.light.scss';
 import './App.dark.scss';
@@ -49,8 +49,6 @@ interface State {
 }
 
 export const App = (withRouter as any)(class extends React.Component<Props, State> {
-
-  readonly overlayService = OverlayService.getInstance();
 
   private readonly _stateStore = StateStore.getInstance();
 
@@ -149,15 +147,15 @@ export const App = (withRouter as any)(class extends React.Component<Props, Stat
   }
 
   showSimulationConfigForm(config: SimulationConfiguration) {
-    this.overlayService.show(
+    const portalRenderer = new PortalRenderer();
+    portalRenderer.mount(
       <SimulationConfigurationEditor
         feederModel={this.props.feederModel}
         onSubmit={updatedConfig => {
           this.props.onSimulationConfigFormSubmitted(updatedConfig);
-          this.overlayService.hide();
           setTimeout(() => this.props.history.push('/simulation'), 500);
         }}
-        onClose={this.overlayService.hide}
+        onClose={portalRenderer.unmount}
         onMRIDChanged={this.props.onMRIDChanged}
         availableApplications={this.props.availableApplications}
         initialConfig={config || DEFAULT_SIMULATION_CONFIGURATION} />

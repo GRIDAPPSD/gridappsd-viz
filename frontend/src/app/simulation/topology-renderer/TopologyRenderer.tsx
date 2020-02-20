@@ -9,7 +9,6 @@ import { takeUntil, filter } from 'rxjs/operators';
 import { CanvasTransformService } from '@shared/CanvasTransformService';
 import { Switch, Capacitor, Node, Edge, Regulator, Transformer } from '@shared/topology';
 import { Tooltip } from '@shared/tooltip';
-import { OverlayService } from '@shared/overlay';
 import { SwitchControlMenu } from './views/switch-control-menu/SwitchControlMenu';
 import { CapacitorControlMenu } from './views/capacitor-control-menu/CapacitorControlMenu';
 import { RegulatorControlMenu } from './views/regulator-control-menu/RegulatorControlMenu';
@@ -19,6 +18,7 @@ import { NodeSearcher } from './views/node-searcher/NodeSearcher';
 import { MatchedNodeLocator } from './views/matched-node-locator/MatchedNodeLocator';
 import { showNotification } from '@shared/notification';
 import { StateStore } from '@shared/state-store';
+import { PortalRenderer } from '@shared/portal-renderer';
 
 import './TopologyRenderer.light.scss';
 import './TopologyRenderer.dark.scss';
@@ -40,7 +40,6 @@ const symbolSize = 35;
 
 export class TopologyRenderer extends React.Component<Props, State> {
 
-  readonly overlay = OverlayService.getInstance();
   readonly canvasTransformService = CanvasTransformService.getInstance();
 
   svg: SVGSVGElement = null;
@@ -775,20 +774,18 @@ export class TopologyRenderer extends React.Component<Props, State> {
 
   private _onSwitchClicked(clickedElement: Selection<SVGElement, any, SVGElement, any>, clickX: number, clickY: number) {
     const swjtch = clickedElement.datum() as Switch;
-    this.overlay.show(
+    const portalRenderer = new PortalRenderer();
+    portalRenderer.mount(
       <SwitchControlMenu
         left={clickX}
         top={clickY}
         switch={swjtch}
-        onCancel={this.overlay.hide}
-        onConfirm={open => {
-          this.overlay.hide();
-          this._toggleSwitch(open, swjtch);
-        }} />
+        onAfterClosed={portalRenderer.unmount}
+        onSubmit={open => this.toggleSwitch(open, swjtch)} />
     );
   }
 
-  private _toggleSwitch(open: boolean, swjtch: Switch) {
+  toggleSwitch(open: boolean, swjtch: Switch) {
     if (swjtch.open !== open) {
       this.props.onToggleSwitch(swjtch, open);
     }
@@ -796,14 +793,14 @@ export class TopologyRenderer extends React.Component<Props, State> {
 
   private _onCapacitorClicked(clickedElement: Selection<SVGElement, any, SVGElement, any>, clickX: number, clickY: number) {
     const capacitor = clickedElement.datum() as Capacitor;
-    this.overlay.show(
+    const portalRenderer = new PortalRenderer();
+    portalRenderer.mount(
       <CapacitorControlMenu
         left={clickX}
         top={clickY}
         capacitor={capacitor}
-        onCancel={this.overlay.hide}
-        onConfirm={updatedCapacitor => {
-          this.overlay.hide();
+        onAfterClosed={portalRenderer.unmount}
+        onSubmit={updatedCapacitor => {
           this.props.onCapacitorControlMenuFormSubmitted(capacitor, updatedCapacitor);
         }} />
     );
@@ -811,14 +808,14 @@ export class TopologyRenderer extends React.Component<Props, State> {
 
   private _onRegulatorClicked(clickedElement: Selection<SVGElement, any, SVGElement, any>, clickX: number, clickY: number) {
     const regulator = clickedElement.datum() as Regulator;
-    this.overlay.show(
+    const portalRenderer = new PortalRenderer();
+    portalRenderer.mount(
       <RegulatorControlMenu
         left={clickX}
         top={clickY}
         regulator={regulator}
-        onCancel={this.overlay.hide}
-        onConfirm={updatedRegulator => {
-          this.overlay.hide();
+        onAfterClosed={portalRenderer.unmount}
+        onSubmit={updatedRegulator => {
           this.props.onRegulatorMenuFormSubmitted(regulator, updatedRegulator);
         }} />
     );

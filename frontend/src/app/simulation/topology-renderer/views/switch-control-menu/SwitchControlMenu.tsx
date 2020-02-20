@@ -9,11 +9,11 @@ import './SwitchControlMenu.light.scss';
 import './SwitchControlMenu.dark.scss';
 
 interface Props {
-  onConfirm: (open: boolean) => void;
-  onCancel: () => void;
   left: number;
   top: number;
   switch: Switch;
+  onSubmit: (open: boolean) => void;
+  onAfterClosed: () => void;
 }
 
 interface State {
@@ -38,8 +38,8 @@ export class SwitchControlMenu extends React.Component<Props, State> {
       disableApplyButton: true
     };
 
-    this.onCancel = this.onCancel.bind(this);
-    this.onConfirm = this.onConfirm.bind(this);
+    this.onClose = this.onClose.bind(this);
+    this.onSubmit = this.onSubmit.bind(this);
   }
 
   componentDidMount() {
@@ -63,7 +63,8 @@ export class SwitchControlMenu extends React.Component<Props, State> {
         className='switch-control-menu'
         show={this.state.show}
         top={this.props.top}
-        left={this.props.left}>
+        left={this.props.left}
+        onAfterClosed={this.props.onAfterClosed}>
         <DialogContent style={{ overflow: 'hidden' }}>
           <form className='switch-control-menu__form'>
             <Select
@@ -77,25 +78,25 @@ export class SwitchControlMenu extends React.Component<Props, State> {
           <BasicButton
             type='negative'
             label='Cancel'
-            onClick={this.onCancel} />
+            onClick={this.onClose} />
           <BasicButton
             type='positive'
             label='Apply'
             disabled={this.state.disableApplyButton}
-            onClick={this.onConfirm} />
+            onClick={this.onSubmit} />
         </DialogActions>
       </Dialog>
     );
   }
 
-  onCancel() {
+  onClose() {
     this.setState({
       show: false
-    }, this.props.onCancel);
+    });
   }
 
-  onConfirm() {
-    this.props.onConfirm(this.openStateFormControlModel.getValue());
+  onSubmit() {
+    this.props.onSubmit(this.openStateFormControlModel.getValue());
     this.setState({
       show: false
     });
