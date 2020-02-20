@@ -33,7 +33,23 @@ export class PowerGridModels extends React.Component<Props, State> {
 
   readonly formGroupModel = new FormGroupModel({
     requestType: new FormControlModel<QueryPowerGridModelsRequestType>(null),
-    queryString: new FormControlModel(`SELECT ?feeder ?fid  WHERE {?s r:type c:Feeder.?s c:IdentifiedObject.name ?feeder.?s c:IdentifiedObject.mRID ?fid.?s c:Feeder.NormalEnergizingSubstation ?sub.?sub c:IdentifiedObject.name ?station.?sub c:IdentifiedObject.mRID ?sid.?sub c:Substation.Region ?sgr.?sgr c:IdentifiedObject.name ?subregion.?sgr c:IdentifiedObject.mRID ?sgrid.?sgr c:SubGeographicalRegion.Region ?rgn.?rgn c:IdentifiedObject.name ?region.?rgn c:IdentifiedObject.mRID ?rgnid.}  ORDER by ?station ?feeder`),
+    queryString: new FormControlModel(`
+      |SELECT ?feeder ?fid
+      |WHERE {
+      |   ?s r:type c:Feeder .
+      |   ?s c:IdentifiedObject.name ?feeder .
+      |   ?s c:IdentifiedObject.mRID ?fid .
+      |   ?s c:Feeder.NormalEnergizingSubstation ?sub .
+      |   ?sub c:IdentifiedObject.name ?station .
+      |   ?sub c:IdentifiedObject.mRID ?sid .
+      |   ?sub c:Substation.Region ?sgr .
+      |   ?sgr c:IdentifiedObject.name ?subregion .
+      |   ?sgr c:IdentifiedObject.mRID ?sgrid .
+      |   ?sgr c:SubGeographicalRegion.Region ?rgn .
+      |   ?rgn c:IdentifiedObject.name ?region .
+      |   ?rgn c:IdentifiedObject.mRID ?rgnid .
+      |}
+      |ORDER by ?station ?feeder`.replace(/(?:\s+\|)/g, '\n').trim()),
     objectId: new FormControlModel(this.props.feederModelLines.find(line => line.name === 'ieee8500')),
     modelId: new FormControlModel(this.props.feederModelLines.find(line => line.name === 'ieee8500')),
     filter: new FormControlModel(`?s cim:IdentifiedObject.name \u0027q14733\u0027","objectType":"http://iec.ch/TC57/2012/CIM-schema-cim17#ConnectivityNode`),

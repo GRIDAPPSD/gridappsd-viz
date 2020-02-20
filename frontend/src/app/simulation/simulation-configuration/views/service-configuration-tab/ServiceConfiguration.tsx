@@ -59,28 +59,25 @@ export class ServiceConfiguration extends React.Component<Props, State> {
   }
 
   private _resolveValidatorsForUserInputSpec(label: string, userInputSpec: ServiceConfigUserInputSpec) {
-    const validators = [] as Validator[];
+    const validators = [Validators.checkNotEmpty(label)] as Validator[];
     switch (userInputSpec.type) {
       case 'float':
       case 'int':
-        validators.push(
-          Validators.checkNotEmpty(label),
-          Validators.checkValidNumber(label)
-        );
+        validators.push(Validators.checkValidNumber(label));
         const min = userInputSpec.min_value;
         const max = userInputSpec.max_value;
         if (typeof min === 'number') {
-          validators.push(Validators.checkMin(label, min));
-        }
-        if (typeof max === 'number') {
+          if (typeof max === 'number') {
+            validators.push(Validators.checkBetween(label, min, max));
+          } else {
+            validators.push(Validators.checkMin(label, min));
+          }
+        } else if (typeof max === 'number') {
           validators.push(Validators.checkMax(label, max));
         }
         break;
       case 'object':
-        validators.push(
-          Validators.checkNotEmpty(label),
-          Validators.checkValidJSON()
-        );
+        validators.push(Validators.checkValidJSON(label));
         break;
     }
     return validators;

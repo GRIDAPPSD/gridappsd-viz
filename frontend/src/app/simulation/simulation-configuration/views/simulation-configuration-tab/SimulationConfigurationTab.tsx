@@ -45,7 +45,7 @@ export class SimulationConfigurationTab extends React.Component<Props, State> {
       JSON.stringify(this.props.simulationConfig.model_creation_config, null, 4),
       [
         Validators.checkNotEmpty('Model creation config'),
-        Validators.checkValidJSON()
+        Validators.checkValidJSON('Model creation configuration')
       ]
     );
   }
