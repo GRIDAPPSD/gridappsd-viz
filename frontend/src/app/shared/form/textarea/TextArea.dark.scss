@@ -1,12 +1,38 @@
 @import '@constants.dark';
 @import 'TextArea.common';
 
+.textarea {
+    .CodeMirror {
+        background-color: transparent;
+        background-color: #363636;
+
+        pre.CodeMirror-line {
+            color: $primary-text-color;
+        }
+    }
+
+    .CodeMirror-cursor {
+        border-color: #fff;
+    }
+
+    .CodeMirror-selected {
+        background: #756b6b;
+    }
+
+    .CodeMirror-gutters {
+        background-color: rgba($primary-text-color, 0.5);
+        border-right-color: #b15373;
+    }
+
+    .CodeMirror-linenumber {
+        color: #fff;
+    }
+}
+
 .textarea__input-box {
     border: 2px solid rgba($primary-text-color, 0.5);
-    color: $primary-text-color;
-    background-color: #363636;
 
-    &[contenteditable=true]:focus {
+    &.focused {
         &::before {
             background-color: $primary-text-color;
         }
@@ -24,15 +50,6 @@
                 background-color: $primary-text-color;
             }
         }
-    }
-
-    &::-webkit-scrollbar {
-        background: $theme-color;
-        box-shadow: 0 0 3px #808080 inset;
-    }
-
-    &::-webkit-scrollbar-thumb {
-        background-color: $primary-color;
     }
 }
 
@@ -64,5 +81,18 @@
 
     .textarea__input-box-resize-handle {
         opacity: 0.2;
+    }
+
+    .CodeMirror pre.CodeMirror-line {
+        color: #6c6c6c;
+    }
+
+    .CodeMirror-gutters {
+        background-color: rgba(97, 97, 97, 0.5);
+        border-right-color: #4c4a4b;
+    }
+
+    .CodeMirror-linenumber {
+        color: #6c6c6c;
     }
 }

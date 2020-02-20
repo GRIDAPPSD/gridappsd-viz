@@ -1,5 +1,17 @@
 .textarea {
     align-items: flex-start;
+
+    .CodeMirror {
+        height: 100%;
+    }
+
+    .CodeMirror-line {
+        pointer-events: none;
+    }
+
+    .CodeMirror-gutters {
+        z-index: 0;
+    }
 }
 
 .textarea__input-box-container {
@@ -19,7 +31,6 @@
     box-sizing: border-box;
     border-radius: 3px;
     overflow-y: auto;
-    padding: 5px;
     white-space: pre;
     vertical-align: top;
     transition: border-color 0.25s ease;
@@ -36,22 +47,6 @@
         right: 0;
         top: 0;
         transform-origin: 50% 0%;
-    }
-
-    &::-webkit-scrollbar {
-        border-radius: 10px;
-    }
-
-    &::-webkit-scrollbar:horizontal {
-        height: 10px;
-    }
-
-    &::-webkit-scrollbar:vertical {
-        width: 10px;
-    }
-
-    &::-webkit-scrollbar-thumb {
-        border-radius: 10px;
     }
 }
 
@@ -79,7 +74,7 @@
     }
 }
 
-.textarea__input-box[contenteditable=true]:focus {
+.textarea__input-box.focused {
     &::before {
         transform: scale(1, 1);
     }
@@ -131,6 +126,6 @@
     cursor: nwse-resize;
 }
 
-.form-control.disabled .textarea__input-box {
+.form-control.disabled .textarea__input-box-container {
     pointer-events: none;
 }
