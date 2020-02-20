@@ -20,6 +20,7 @@ interface Props {
 
 interface State {
   disableCsvExport: boolean;
+  disableSubmitButton: boolean;
 }
 
 export class StompClient extends React.Component<Props, State> {
@@ -44,7 +45,8 @@ export class StompClient extends React.Component<Props, State> {
     super(props);
 
     this.state = {
-      disableCsvExport: true
+      disableCsvExport: true,
+      disableSubmitButton: false
     };
 
     this.onSubmit = this.onSubmit.bind(this);
@@ -59,6 +61,15 @@ export class StompClient extends React.Component<Props, State> {
         next: () => {
           this.setState({
             disableCsvExport: true
+          });
+        }
+      });
+
+    this.formGroupModel.validityChanges()
+      .subscribe({
+        next: isValid => {
+          this.setState({
+            disableSubmitButton: !isValid
           });
         }
       });
@@ -95,7 +106,7 @@ export class StompClient extends React.Component<Props, State> {
             label='Send request'
             type='positive'
             className='stomp-client__send-request'
-            disabled={this.formGroupModel.isInvalid()}
+            disabled={this.state.disableSubmitButton}
             onClick={this.onSubmit} />
           <div className='stomp-client__download-types'>
             <Tooltip content='Download response as CSV'>

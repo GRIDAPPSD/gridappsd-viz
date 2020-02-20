@@ -44,13 +44,18 @@ export class ServiceConfiguration extends React.Component<Props, State> {
       this.userInputOptionsFormGroupModel.setControl(
         optionLabel,
         new FormControlModel(
-          typeof userInputSpec.default_value === 'object'
-            ? JSON.stringify(userInputSpec.default_value, null, 4)
-            : userInputSpec.default_value,
+          this._formatDefaultValue(userInputSpec),
           this._resolveValidatorsForUserInputSpec(optionLabel, userInputSpec)
         )
       );
     }
+  }
+
+  private _formatDefaultValue(userInputSpec: ServiceConfigUserInputSpec) {
+    if (userInputSpec.type === 'object') {
+      return JSON.stringify(userInputSpec.default_value, null, 4);
+    }
+    return userInputSpec.default_value;
   }
 
   private _resolveValidatorsForUserInputSpec(label: string, userInputSpec: ServiceConfigUserInputSpec) {
