@@ -7,9 +7,9 @@ import { Ripple } from '@shared/ripple';
 import { PlotModel } from '@shared/plot-model/PlotModel';
 import { PlotModelCreator } from './views/plot-model-creator/PlotModelCreator';
 import { ModelDictionaryComponent } from '@shared/topology';
-import { OverlayService } from '@shared/overlay';
 import { copyToClipboard } from '@shared/misc';
 import { Restricted } from '@shared/authenticator';
+import { PortalRenderer } from '@shared/portal-renderer';
 
 import './SimulationControl.light.scss';
 import './SimulationControl.dark.scss';
@@ -33,8 +33,6 @@ interface State {
 
 export class SimulationControl extends React.Component<Props, State> {
 
-  readonly overlayService = OverlayService.getInstance();
-
   constructor(props: Props) {
     super(props);
     this.state = {
@@ -44,7 +42,6 @@ export class SimulationControl extends React.Component<Props, State> {
 
     this.saveSimulationIdToClipboard = this.saveSimulationIdToClipboard.bind(this);
     this.showPlotModelCreator = this.showPlotModelCreator.bind(this);
-    this.onPlotModelsCreated = this.onPlotModelsCreated.bind(this);
   }
 
   render() {
@@ -144,18 +141,14 @@ export class SimulationControl extends React.Component<Props, State> {
   }
 
   showPlotModelCreator() {
-    this.overlayService.show(
+    const portalRenderer = new PortalRenderer();
+    portalRenderer.mount(
       <PlotModelCreator
         modelDictionaryComponentsWithConsolidatedPhases={this.props.modelDictionaryComponentsWithConsolidatedPhases}
         existingPlotModels={this.props.existingPlotModels}
-        onSubmit={this.onPlotModelsCreated}
-        onClose={this.overlayService.hide} />
+        onSubmit={this.props.onPlotModelCreationDone}
+        onClose={portalRenderer.unmount} />
     );
-  }
-
-  onPlotModelsCreated(plotModels: PlotModel[]) {
-    this.props.onPlotModelCreationDone(plotModels);
-    this.overlayService.hide();
   }
 
 }

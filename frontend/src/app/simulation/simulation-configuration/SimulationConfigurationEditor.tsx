@@ -188,7 +188,9 @@ export class SimulationConfigurationEditor extends React.Component<Props, State>
 
   render() {
     return (
-      <Dialog show={this.state.show}>
+      <Dialog
+        show={this.state.show}
+        onAfterClosed={this.props.onClose}>
         <DialogContent>
           <Form
             className='simulation-configuration-form'
@@ -265,7 +267,6 @@ export class SimulationConfigurationEditor extends React.Component<Props, State>
 
   closeForm(event: React.SyntheticEvent) {
     event.stopPropagation();
-    this.props.onClose();
     this.setState({
       show: false
     });

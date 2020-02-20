@@ -24,11 +24,13 @@ export class PortalRenderer extends React.Component<Props, State> {
 
   readonly container = document.createElement('div');
 
-  constructor(props: Props) {
+  constructor(props: Props = PortalRenderer.defaultProps) {
     super(props);
 
     this.container.className = props.containerClassName;
     props.portal.appendChild(this.container);
+
+    this.unmount = this.unmount.bind(this);
   }
 
   render() {

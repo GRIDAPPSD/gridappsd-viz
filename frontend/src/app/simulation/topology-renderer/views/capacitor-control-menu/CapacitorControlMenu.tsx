@@ -5,17 +5,17 @@ import { Select, Input, SelectionOptionBuilder, FormGroupModel, FormControlModel
 import { BasicButton } from '@shared/buttons';
 import { CapacitorControlMode } from '@shared/topology/CapacitorControlMode';
 import { Capacitor } from '@shared/topology';
+import { Validators } from '@shared/form/validation';
 
 import './CapacitorControlMenu.light.scss';
 import './CapacitorControlMenu.dark.scss';
-import { Validators } from '@shared/form/validation';
 
 interface Props {
   capacitor: Capacitor;
   left: number;
   top: number;
-  onConfirm: (formValue: Capacitor) => void;
-  onCancel: () => void;
+  onSubmit: (capacitor: Capacitor) => void;
+  onAfterClosed: () => void;
 }
 
 interface State {
@@ -60,8 +60,8 @@ export class CapacitorControlMenu extends React.Component<Props, State> {
 
     this.capacitorControlFormGroupModel = this._setupCapacitorControlMenuFormGroupModel();
 
-    this.onCancel = this.onCancel.bind(this);
-    this.onConfirm = this.onConfirm.bind(this);
+    this.onClose = this.onClose.bind(this);
+    this.onSubmit = this.onSubmit.bind(this);
   }
 
   private _setupCapacitorControlMenuFormGroupModel() {
@@ -151,7 +151,8 @@ export class CapacitorControlMenu extends React.Component<Props, State> {
         className='capacitor-control-menu'
         show={this.state.show}
         top={this.props.top}
-        left={this.props.left}>
+        left={this.props.left}
+        onAfterClosed={this.props.onAfterClosed}>
         <DialogContent style={{ overflow: 'hidden' }}>
           <form className='capacitor-control-menu__form'>
             <Select
@@ -166,12 +167,12 @@ export class CapacitorControlMenu extends React.Component<Props, State> {
           <BasicButton
             type='negative'
             label='Cancel'
-            onClick={this.onCancel} />
+            onClick={this.onClose} />
           <BasicButton
             type='positive'
             label='Apply'
             disabled={this.state.disableSubmitButton}
-            onClick={this.onConfirm} />
+            onClick={this.onSubmit} />
         </DialogActions>
       </Dialog>
     );
@@ -221,14 +222,14 @@ export class CapacitorControlMenu extends React.Component<Props, State> {
     return null;
   }
 
-  onCancel() {
+  onClose() {
     this.setState({
       show: false
-    }, this.props.onCancel);
+    });
   }
 
-  onConfirm() {
-    this.props.onConfirm(this.capacitorControlFormGroupModel.getValue());
+  onSubmit() {
+    this.props.onSubmit(this.capacitorControlFormGroupModel.getValue());
     this.setState({
       show: false
     });

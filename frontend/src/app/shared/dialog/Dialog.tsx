@@ -12,6 +12,7 @@ interface Props {
   left?: number;
   className?: string;
   showBackdrop?: boolean;
+  onAfterClosed?: () => void;
 }
 
 export function Dialog(props: Props) {
@@ -20,7 +21,8 @@ export function Dialog(props: Props) {
       top={props.top}
       left={props.left}
       in={props.show}
-      showBackdrop={props.showBackdrop === undefined ? true : props.showBackdrop}>
+      showBackdrop={props.showBackdrop === undefined ? true : props.showBackdrop}
+      onAfterClosed={props.onAfterClosed}>
       <div className={'dialog' + (props.className ? ' ' + props.className : '')}>
         {props.children}
       </div>

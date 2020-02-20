@@ -13,11 +13,11 @@ import './RegulatorControlMenu.dark.scss';
 export type RegulatorControlMenuFormGroupModel = Pick<Regulator, 'controlMode' | 'manual'>;
 
 interface Props {
-  onConfirm: (updatedRegulator: Regulator) => void;
-  onCancel: () => void;
   left: number;
   top: number;
   regulator: Regulator;
+  onSubmit: (updatedRegulator: Regulator) => void;
+  onAfterClosed: () => void;
 }
 
 interface State {
@@ -49,8 +49,8 @@ export class RegulatorControlMenu extends React.Component<Props, State> {
 
     this.regulatorControlMenuFormGroupModel = this._setupRegulatorControlMenuFormGroupModel();
 
-    this.onCancel = this.onCancel.bind(this);
-    this.onConfirm = this.onConfirm.bind(this);
+    this.onClose = this.onClose.bind(this);
+    this.onSubmit = this.onSubmit.bind(this);
   }
 
   private _setupRegulatorControlMenuFormGroupModel() {
@@ -153,7 +153,8 @@ export class RegulatorControlMenu extends React.Component<Props, State> {
         className='regulator-control-menu'
         show={this.state.show}
         top={this.props.top}
-        left={this.props.left}>
+        left={this.props.left}
+        onAfterClosed={this.props.onAfterClosed}>
         <DialogContent style={{ overflow: 'hidden' }}>
           <form className='regulator-control-menu__form'>
             <Select
@@ -168,12 +169,12 @@ export class RegulatorControlMenu extends React.Component<Props, State> {
           <BasicButton
             type='negative'
             label='Cancel'
-            onClick={this.onCancel} />
+            onClick={this.onClose} />
           <BasicButton
             type='positive'
             label='Apply'
             disabled={this.state.disableApplyButton}
-            onClick={this.onConfirm} />
+            onClick={this.onSubmit} />
         </DialogActions>
       </Dialog>
     );
@@ -236,14 +237,14 @@ export class RegulatorControlMenu extends React.Component<Props, State> {
     return null;
   }
 
-  onCancel() {
+  onClose() {
     this.setState({
       show: false
-    }, this.props.onCancel);
+    });
   }
 
-  onConfirm() {
-    this.props.onConfirm(this.regulatorControlMenuFormGroupModel.getValue());
+  onSubmit() {
+    this.props.onSubmit(this.regulatorControlMenuFormGroupModel.getValue());
     this.setState({
       show: false
     });

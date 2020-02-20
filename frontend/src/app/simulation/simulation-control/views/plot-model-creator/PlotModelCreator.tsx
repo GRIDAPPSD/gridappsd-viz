@@ -227,7 +227,8 @@ export class PlotModelCreator extends React.Component<Props, State> {
       <Dialog
         showBackdrop
         show={this.state.show}
-        className='plot-model-creator'>
+        className='plot-model-creator'
+        onAfterClosed={this.props.onClose}>
         <DialogContent>
           <div className='plot-model-creator__body'>
             <Form
@@ -421,7 +422,7 @@ export class PlotModelCreator extends React.Component<Props, State> {
   onClose() {
     this.setState({
       show: false
-    }, this.props.onClose);
+    });
   }
 
 }
