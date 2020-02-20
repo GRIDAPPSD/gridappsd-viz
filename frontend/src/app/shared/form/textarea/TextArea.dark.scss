@@ -27,6 +27,10 @@
     .CodeMirror-linenumber {
         color: #fff;
     }
+
+    .errored-line {
+        text-decoration-color: #f00;
+    }
 }
 
 .textarea__input-box {
@@ -94,5 +98,9 @@
 
     .CodeMirror-linenumber {
         color: #6c6c6c;
+    }
+
+    .errored-line {
+        text-decoration-color: #6c6c6c;
     }
 }

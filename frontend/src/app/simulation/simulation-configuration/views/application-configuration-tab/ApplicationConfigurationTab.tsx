@@ -24,7 +24,7 @@ export class ApplicationConfigurationTab extends React.Component<Props, State> {
   readonly nameFormControlModel = new FormControlModel('');
   readonly configStringFormControlModel = new FormControlModel(
     '',
-    [Validators.checkValidJSON()]
+    [Validators.checkValidJSON('Application configuration')]
   );
 
   constructor(props: Props) {

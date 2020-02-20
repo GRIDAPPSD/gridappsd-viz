@@ -67,6 +67,27 @@ export class TextArea extends React.Component<Props, State> {
         }
       });
 
+    this.props.formControlModel.validityChanges()
+      .subscribe({
+        next: isValid => {
+          if (this._codeMirror) {
+            if (!isValid) {
+              const currentCursor = this._codeMirror.getCursor();
+              const startCursor = {
+                line: currentCursor.line,
+                ch: 0
+              };
+              this._codeMirror.markText(startCursor, currentCursor).clear();
+              this._codeMirror.markText(startCursor, currentCursor, { className: 'errored-line' });
+            } else {
+              for (const mark of this._codeMirror.getAllMarks()) {
+                mark.clear();
+              }
+            }
+          }
+        }
+      });
+
     this._valueChanges.pipe(debounceTime(250))
       .subscribe({
         next: value => {
@@ -105,6 +126,13 @@ export class TextArea extends React.Component<Props, State> {
       mode: {
         name: 'javascript',
         json: true
+      },
+      indentUnit: 4
+    });
+    this._codeMirror.setOption('extraKeys', {
+      Tab: codeMirror => {
+        const spaces = ' '.repeat(codeMirror.getOption('indentUnit'));
+        codeMirror.replaceSelection(spaces);
       }
     });
     this._codeMirror.on('change', this._onValueChange);
@@ -150,9 +178,11 @@ export class TextArea extends React.Component<Props, State> {
     this.props.formControlModel.cleanup();
     window.removeEventListener('mousemove', this.resize, false);
     window.removeEventListener('mouseup', this.stopResize, false);
-    this._codeMirror.off('change', this._onValueChange);
-    this._codeMirror.off('focus', this._onCodeMirrorEditorFocused);
-    this._codeMirror.off('blur', this._onCodeMirrorEditorFocusLost);
+    if (this._codeMirror) {
+      this._codeMirror.off('change', this._onValueChange);
+      this._codeMirror.off('focus', this._onCodeMirrorEditorFocused);
+      this._codeMirror.off('blur', this._onCodeMirrorEditorFocusLost);
+    }
   }
 
   render() {

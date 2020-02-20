@@ -26,19 +26,20 @@ export class Validators {
     };
   }
 
-  static checkValidJSON(): Validator {
-    return control => {
+  static checkValidJSON(subjectDisplayName: string): Validator {
+    return (control: FormControlModel<string>) => {
+      const value = control.getValue();
       try {
-        if (control.getValue() !== '') {
-          JSON.parse(control.getValue());
+        if (value !== '') {
+          JSON.parse(value);
         }
         return {
           isValid: true,
           errorMessage: ''
         };
-      } catch (e) {
+      } catch {
         return {
-          errorMessage: `Invalid JSON: ${e.message.replace('JSON.parse: ', '')}`,
+          errorMessage: `${subjectDisplayName} is not a valid JSON`,
           isValid: false
         };
       }
@@ -50,7 +51,7 @@ export class Validators {
   }
 
   private static _checkPattern(errorMessage: string, pattern: RegExp): Validator {
-    return control => ({
+    return (control: FormControlModel<number> | FormControlModel<string>) => ({
       isValid: pattern.test(String(control.getValue())),
       errorMessage
     });
@@ -63,15 +64,25 @@ export class Validators {
     });
   }
 
+  static checkBetween(subjectDisplayName: string, min: number, max: number): Validator {
+    return (control: FormControlModel<number>) => {
+      const value = control.getValue();
+      return {
+        isValid: min <= value && value <= max,
+        errorMessage: `${subjectDisplayName} must be between ${min} and ${max}`
+      };
+    };
+  }
+
   static checkMin(subjectDisplayName: string, min: number): Validator {
-    return control => ({
+    return (control: FormControlModel<number>) => ({
       isValid: control.getValue() >= min,
       errorMessage: `${subjectDisplayName} must be greater than or equal to ${min}`
     });
   }
 
   static checkMax(subjectDisplayName: string, max: number): Validator {
-    return control => ({
+    return (control: FormControlModel<number>) => ({
       isValid: control.getValue() <= max,
       errorMessage: `${subjectDisplayName} must be less than or equal to ${max}`
     });

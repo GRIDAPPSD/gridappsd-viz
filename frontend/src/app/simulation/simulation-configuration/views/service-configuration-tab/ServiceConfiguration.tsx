@@ -70,16 +70,19 @@ export class ServiceConfiguration extends React.Component<Props, State> {
         const min = userInputSpec.min_value;
         const max = userInputSpec.max_value;
         if (typeof min === 'number') {
-          validators.push(Validators.checkMin(label, min));
-        }
-        if (typeof max === 'number') {
+          if (typeof max === 'number') {
+            validators.push(Validators.checkBetween(label, min, max));
+          } else {
+            validators.push(Validators.checkMin(label, min));
+          }
+        } else if (typeof max === 'number') {
           validators.push(Validators.checkMax(label, max));
         }
         break;
       case 'object':
         validators.push(
           Validators.checkNotEmpty(label),
-          Validators.checkValidJSON()
+          Validators.checkValidJSON(label)
         );
         break;
     }

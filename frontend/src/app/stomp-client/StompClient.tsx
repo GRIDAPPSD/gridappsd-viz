@@ -34,7 +34,7 @@ export class StompClient extends React.Component<Props, State> {
       '{}',
       [
         Validators.checkNotEmpty('Request Body'),
-        Validators.checkValidJSON()
+        Validators.checkValidJSON('Request body')
       ]
     )
   });

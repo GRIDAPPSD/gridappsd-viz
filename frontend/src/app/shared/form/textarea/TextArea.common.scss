@@ -12,6 +12,12 @@
     .CodeMirror-gutters {
         z-index: 0;
     }
+
+    .errored-line {
+        display: inline-block;
+        text-decoration-style: wavy;
+        text-decoration-line: underline;
+    }
 }
 
 .textarea__input-box-container {
