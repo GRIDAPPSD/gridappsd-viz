@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { Dialog, DialogContent, DialogActions } from '@shared/dialog';
+import { Dialog, DialogContent, DialogActionGroup } from '@shared/dialog';
 import { BasicButton } from '@shared/buttons';
 import {
   Input,
@@ -225,7 +225,6 @@ export class PlotModelCreator extends React.Component<Props, State> {
   render() {
     return (
       <Dialog
-        showBackdrop
         show={this.state.show}
         className='plot-model-creator'
         onAfterClosed={this.props.onClose}>
@@ -285,7 +284,7 @@ export class PlotModelCreator extends React.Component<Props, State> {
             </div>
           </div>
         </DialogContent>
-        <DialogActions>
+        <DialogActionGroup>
           <BasicButton
             type='negative'
             label='Close'
@@ -295,7 +294,7 @@ export class PlotModelCreator extends React.Component<Props, State> {
             label='Done'
             disabled={this.state.disableSubmitButton}
             onClick={this.onSubmit} />
-        </DialogActions>
+        </DialogActionGroup>
       </Dialog>
     );
   }

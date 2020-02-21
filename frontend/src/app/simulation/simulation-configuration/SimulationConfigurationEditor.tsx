@@ -6,7 +6,7 @@ import { SimulationConfiguration, SimulationControlService } from '@shared/simul
 import { SimulationStatus } from '@commons/SimulationStatus';
 import { FeederModel, ModelDictionary, ModelDictionaryComponent } from '@shared/topology';
 import { Application } from '@shared/Application';
-import { Dialog, DialogContent, DialogActions } from '@shared/dialog';
+import { Dialog, DialogContent, DialogActionGroup } from '@shared/dialog';
 import { TabGroup, Tab } from '@shared/tabs';
 import { BasicButton } from '@shared/buttons';
 import { PowerSystemConfigurationTab } from './views/power-system-configuration-tab';
@@ -224,7 +224,7 @@ export class SimulationConfigurationEditor extends React.Component<Props, State>
             </TabGroup>
           </Form>
         </DialogContent>
-        <DialogActions>
+        <DialogActionGroup>
           <BasicButton
             label='Close'
             type='negative'
@@ -234,7 +234,7 @@ export class SimulationConfigurationEditor extends React.Component<Props, State>
             type='positive'
             disabled={this.state.disableSubmitButton}
             onClick={this.onSubmitForm} />
-        </DialogActions>
+        </DialogActionGroup>
       </Dialog>
     );
   }

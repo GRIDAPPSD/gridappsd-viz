@@ -35,8 +35,7 @@ interface Match {
 export class NodeSearcher extends React.Component<Props, State> {
 
   readonly searchTermFormControlModel = new FormControlModel('');
-
-  nodeSearcherElement: HTMLElement;
+  readonly nodeSearcherElementRef = React.createRef<HTMLDivElement>();
 
   private _matchedNodes: Set<Node>;
   private _previousSearchTerm = '';
@@ -69,7 +68,7 @@ export class NodeSearcher extends React.Component<Props, State> {
         // this cache
         this._matchedNodes.clear();
         setTimeout(() => {
-          this.nodeSearcherElement.querySelector('input').focus();
+          this.nodeSearcherElementRef.current.querySelector('input').focus();
         }, 1000);
       }
     }
@@ -147,9 +146,9 @@ export class NodeSearcher extends React.Component<Props, State> {
       <PortalRenderer>
         <Fade in={this.state.show}>
           <div
-            ref={ref => this.nodeSearcherElement = ref}
+            ref={this.nodeSearcherElementRef}
             className={'node-searcher ' + (this.state.show ? 'show' : 'hide')}>
-            <Backdrop visible={true} />
+            <Backdrop visible={this.state.show} />
             <svg
               className='node-searcher__close'
               width='40'

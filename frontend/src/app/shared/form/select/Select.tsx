@@ -1,7 +1,6 @@
 import * as React from 'react';
 
 import { Option } from './Option';
-import { PopUp } from '@shared/pop-up';
 import { FormControl } from '../form-control/FormControl';
 import { OptionList } from './OptionList';
 import { OptionListFilter } from './OptionListFilter';
@@ -11,6 +10,7 @@ import { Paginator } from '@shared/paginator';
 import { fuzzySearch } from '@shared/misc';
 import { SelectionOptionBuilder } from './SelectionOptionBuilder';
 import { FormControlModel } from '../models/FormControlModel';
+import { Dialog } from '@shared/dialog';
 
 import './Select.light.scss';
 import './Select.dark.scss';
@@ -37,7 +37,7 @@ interface State<T> {
 
 export class Select<T, E extends boolean> extends React.Component<Props<T, E>, State<T>> {
 
-  optionListOpener: HTMLButtonElement;
+  readonly optionListOpenerRef = React.createRef<HTMLButtonElement>();
 
   private readonly _defaultLabel: string;
 
@@ -163,7 +163,7 @@ export class Select<T, E extends boolean> extends React.Component<Props<T, E>, S
         formControlModel={this.props.formControlModel}
         label={this.props.label}>
         <button
-          ref={ref => this.optionListOpener = ref}
+          ref={this.optionListOpenerRef}
           type='button'
           className={`select__option-list__opener${this.state.opened ? ' opened' : ''}`}
           title={this.state.currentLabel}
@@ -171,12 +171,12 @@ export class Select<T, E extends boolean> extends React.Component<Props<T, E>, S
           <span className='text'>{this.state.currentLabel}</span>
           <i className='material-icons'>keyboard_arrow_down</i>
         </button>
-        <PopUp
+        <Dialog
+          transparentBackdrop
+          show={this.state.opened}
           top={this.state.top}
           left={this.state.left}
-          in={this.state.opened}
-          onBackdropClicked={this.closeOptionList}
-          onAfterClosed={this.closeOptionList}>
+          onBackdropClicked={this.closeOptionList}>
           <div className='select__option-list-wrapper'>
             <OptionListFilter
               shouldReset={this.state.opened}
@@ -206,13 +206,13 @@ export class Select<T, E extends boolean> extends React.Component<Props<T, E>, S
               </footer>
             }
           </div>
-        </PopUp>
+        </Dialog>
       </FormControl>
     );
   }
 
   onOpen() {
-    const rect = this.optionListOpener.getBoundingClientRect();
+    const rect = this.optionListOpenerRef.current.getBoundingClientRect();
     this.setState({
       opened: true,
       left: rect.left,

@@ -63,14 +63,10 @@ export class Checkbox extends React.Component<Props, State> {
             <input
               className='checkbox__input'
               id={this.props.label}
-              ref={checkbox => {
-                if (checkbox) {
-                  checkbox.checked = this.state.checked;
-                }
-              }}
               type='checkbox'
               name={this.props.name}
               disabled={this.props.formControlModel.isDisabled()}
+              checked={this.state.checked}
               onChange={this.onCheckBoxToggled} />
             <i className='material-icons checkbox__icon checkbox__icon__unchecked'>
               check_box_outline_blank

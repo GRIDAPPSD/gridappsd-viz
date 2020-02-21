@@ -20,7 +20,7 @@ interface State {
 
 export class PlotModelSummary extends React.Component<Props, State> {
 
-  plotName: HTMLElement;
+  readonly plotNameElementRef = React.createRef<HTMLDivElement>();
 
   constructor(props: Props) {
     super(props);
@@ -38,7 +38,7 @@ export class PlotModelSummary extends React.Component<Props, State> {
       <div className='plot-model-summary'>
         <div className='plot-model-summary__header'>
           <div
-            ref={ref => this.plotName = ref}
+            ref={this.plotNameElementRef}
             className='plot-model-summary__header__plot-name'
             contentEditable
             suppressContentEditableWarning
@@ -111,8 +111,8 @@ export class PlotModelSummary extends React.Component<Props, State> {
   }
 
   beginEditingPlotName() {
-    this.plotName.click();
-    this.plotName.focus();
+    this.plotNameElementRef.current.click();
+    this.plotNameElementRef.current.focus();
   }
 
   removePlotModel() {

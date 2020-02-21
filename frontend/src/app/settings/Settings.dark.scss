@@ -9,11 +9,6 @@
     }
 }
 
-.settings__menu {
-    box-shadow: $hovering-shadow;
-    background-color: $theme-color;
-
-    &__item__name {
-        color: $label-color;
-    }
+.settings__menu__item__name {
+    color: $label-color;
 }

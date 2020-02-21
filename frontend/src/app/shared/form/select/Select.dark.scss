@@ -22,12 +22,6 @@
     }
 }
 
-.select__option-list-wrapper {
-    box-shadow: $hovering-shadow;
-    background-color: $theme-color;
-}
-
-
 .select.disabled .select__option-list__opener {
     background-color: #72455550;
     color: rgba($primary-text-color, 0.1);

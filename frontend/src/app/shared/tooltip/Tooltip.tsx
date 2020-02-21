@@ -19,7 +19,7 @@ export class Tooltip extends React.Component<Props, State> {
     position: 'bottom'
   };
 
-  tooltip: HTMLElement;
+  readonly tooltipRef = React.createRef<HTMLDivElement>();
 
   private _tooltipContainer: HTMLElement;
   private _tooltipRect: ClientRect;
@@ -59,8 +59,8 @@ export class Tooltip extends React.Component<Props, State> {
   }
 
   private _updateTooltipContent() {
-    if (this.tooltip) {
-      this.tooltip.querySelector('.td-tooltip__content').textContent = String(this.props.content);
+    if (this.tooltipRef.current) {
+      this.tooltipRef.current.querySelector('.td-tooltip__content').textContent = String(this.props.content);
     }
   }
 
@@ -69,14 +69,14 @@ export class Tooltip extends React.Component<Props, State> {
   }
 
   hide() {
-    if (this.tooltip) {
-      this.tooltip.classList.add('fade-out');
-      this.tooltip.addEventListener('animationend', this._cleanup, false);
+    if (this.tooltipRef.current) {
+      this.tooltipRef.current.classList.add('fade-out');
+      this.tooltipRef.current.addEventListener('animationend', this._cleanup, false);
     }
   }
 
   private _cleanup() {
-    this.tooltip.removeEventListener('animationend', this._cleanup, false);
+    this.tooltipRef.current.removeEventListener('animationend', this._cleanup, false);
     this._tooltipContainer.parentElement.removeChild(this._tooltipContainer);
     ReactDOM.unmountComponentAtNode(this._tooltipContainer);
     this._tooltipContainer = null;
@@ -107,7 +107,7 @@ export class Tooltip extends React.Component<Props, State> {
     ReactDOM.render(
       <div
         className={`td-tooltip ${this.props.position}`}
-        ref={elem => this.tooltip = elem}>
+        ref={this.tooltipRef}>
         <div className='td-tooltip__arrow' />
         <div className='td-tooltip__content'>{this.props.content}</div>
       </div>,
@@ -119,8 +119,8 @@ export class Tooltip extends React.Component<Props, State> {
     // Wrap in a setTimeout because React might not have set this._tooltip to
     // the DOM element yet
     setTimeout(() => {
-      this.tooltip.classList.add('fade-in');
-      this._tooltipRect = this.tooltip.getBoundingClientRect();
+      this.tooltipRef.current.classList.add('fade-in');
+      this._tooltipRect = this.tooltipRef.current.getBoundingClientRect();
       switch (this.props.position) {
         case 'top':
           this._showTop(this._anchor.getBoundingClientRect());
@@ -143,15 +143,15 @@ export class Tooltip extends React.Component<Props, State> {
       const left = originRect.left + (originRect.width - this._tooltipRect.width) / 2;
       let top = originRect.top - originRect.height;
       if (top < 0) {
-        this.tooltip.classList.remove('top');
-        this.tooltip.classList.add('bottom');
+        this.tooltipRef.current.classList.remove('top');
+        this.tooltipRef.current.classList.add('bottom');
         top = top + originRect.height + this._tooltipRect.height + 25;
       }
       if (!this._shiftTooltipIntoViewFromRight(left)) {
         this._shiftTooltipIntoViewFromLeft(left);
       }
-      this.tooltip.style.left = left + 'px';
-      this.tooltip.style.top = top + 'px';
+      this.tooltipRef.current.style.left = left + 'px';
+      this.tooltipRef.current.style.top = top + 'px';
     }, 0);
   }
 
@@ -161,8 +161,8 @@ export class Tooltip extends React.Component<Props, State> {
   private _shiftTooltipIntoViewFromRight(left: number) {
     const difference = left + this._tooltipRect.width - document.body.clientWidth + 5;
     if (difference > 5) {
-      this.tooltip.style.transform = `translateX(-${difference}px)`;
-      (this.tooltip.querySelector('.td-tooltip__arrow') as HTMLElement).style.left = `calc(50% + ${difference}px)`;
+      this.tooltipRef.current.style.transform = `translateX(-${difference}px)`;
+      (this.tooltipRef.current.querySelector('.td-tooltip__arrow') as HTMLElement).style.left = `calc(50% + ${difference}px)`;
       return true;
     }
     return false;
@@ -175,8 +175,8 @@ export class Tooltip extends React.Component<Props, State> {
   private _shiftTooltipIntoViewFromLeft(left: number) {
     if (left < 0) {
       left = Math.abs(left) + 5;
-      this.tooltip.style.transform = `translateX(${left}px)`;
-      (this.tooltip.querySelector('.td-tooltip__arrow') as HTMLElement).style.left = `calc(50% - ${left}px)`;
+      this.tooltipRef.current.style.transform = `translateX(${left}px)`;
+      (this.tooltipRef.current.querySelector('.td-tooltip__arrow') as HTMLElement).style.left = `calc(50% - ${left}px)`;
       return true;
     }
     return false;
@@ -187,15 +187,15 @@ export class Tooltip extends React.Component<Props, State> {
       const left = originRect.left + (originRect.width - this._tooltipRect.width) / 2;
       let top = originRect.top + originRect.height + 15;
       if (top + this._tooltipRect.height + 10 > document.body.clientHeight) {
-        this.tooltip.classList.remove('bottom');
-        this.tooltip.classList.add('top');
+        this.tooltipRef.current.classList.remove('bottom');
+        this.tooltipRef.current.classList.add('top');
         top = top - originRect.height - this._tooltipRect.height - 30;
       }
       if (!this._shiftTooltipIntoViewFromRight(left)) {
         this._shiftTooltipIntoViewFromLeft(left);
       }
-      this.tooltip.style.left = left + 'px';
-      this.tooltip.style.top = top + 'px';
+      this.tooltipRef.current.style.left = left + 'px';
+      this.tooltipRef.current.style.top = top + 'px';
     }, 0);
   }
 
@@ -204,15 +204,15 @@ export class Tooltip extends React.Component<Props, State> {
       let left = originRect.left + originRect.width + 15;
       const top = originRect.top + (originRect.height - this._tooltipRect.height) / 2;
       if (left + this._tooltipRect.width > document.body.clientWidth) {
-        this.tooltip.classList.remove('right');
-        this.tooltip.classList.add('left');
+        this.tooltipRef.current.classList.remove('right');
+        this.tooltipRef.current.classList.add('left');
         left = left - originRect.width - this._tooltipRect.width - 30;
       }
       if (!this._shiftTooltipIntoViewFromBottom(top)) {
         this._shiftTooltipIntoViewFromTop(top);
       }
-      this.tooltip.style.left = left + 'px';
-      this.tooltip.style.top = top + 'px';
+      this.tooltipRef.current.style.left = left + 'px';
+      this.tooltipRef.current.style.top = top + 'px';
     }, 0);
   }
 
@@ -223,8 +223,8 @@ export class Tooltip extends React.Component<Props, State> {
   private _shiftTooltipIntoViewFromBottom(top: number) {
     const difference = top + this._tooltipRect.height - document.body.clientHeight + 5;
     if (difference > 5) {
-      this.tooltip.style.transform = `translateY(-${difference}px)`;
-      (this.tooltip.querySelector('.td-tooltip__arrow') as HTMLElement).style.top = `calc(50% + ${difference}px)`;
+      this.tooltipRef.current.style.transform = `translateY(-${difference}px)`;
+      (this.tooltipRef.current.querySelector('.td-tooltip__arrow') as HTMLElement).style.top = `calc(50% + ${difference}px)`;
       return true;
     }
     return false;
@@ -237,8 +237,8 @@ export class Tooltip extends React.Component<Props, State> {
   private _shiftTooltipIntoViewFromTop(top: number) {
     if (top < 0) {
       top = Math.abs(top) + 5;
-      this.tooltip.style.transform = `translateY(${top}px)`;
-      (this.tooltip.querySelector('.td-tooltip__arrow') as HTMLElement).style.top = `calc(50% - ${top}px)`;
+      this.tooltipRef.current.style.transform = `translateY(${top}px)`;
+      (this.tooltipRef.current.querySelector('.td-tooltip__arrow') as HTMLElement).style.top = `calc(50% - ${top}px)`;
       return true;
     }
     return false;
@@ -253,15 +253,15 @@ export class Tooltip extends React.Component<Props, State> {
       let left = originRect.left - this._tooltipRect.width - 15;
       const top = originRect.top + (originRect.height - this._tooltipRect.height) / 2;
       if (left < 0) {
-        this.tooltip.classList.remove('left');
-        this.tooltip.classList.add('right');
+        this.tooltipRef.current.classList.remove('left');
+        this.tooltipRef.current.classList.add('right');
         left = left + originRect.width + this._tooltipRect.width + 30;
       }
       if (!this._shiftTooltipIntoViewFromBottom(top)) {
         this._shiftTooltipIntoViewFromTop(top);
       }
-      this.tooltip.style.left = left + 'px';
-      this.tooltip.style.top = top + 'px';
+      this.tooltipRef.current.style.left = left + 'px';
+      this.tooltipRef.current.style.top = top + 'px';
     }, 0);
   }
 

@@ -18,7 +18,7 @@ interface State {
 
 export class SimulationLabel extends React.Component<Props, State> {
 
-  simulationLabel: HTMLDivElement;
+  readonly simulationLabelRef = React.createRef<HTMLDivElement>();
 
   private readonly _canvasTransformService = CanvasTransformService.getInstance();
   private _anchorNodeTransformWatcher: Subscription;
@@ -49,8 +49,8 @@ export class SimulationLabel extends React.Component<Props, State> {
       const anchor = document.querySelector(`.topology-renderer ._${this.props.nodeNameToAttachTo}${phase}_`);
       if (anchor) {
         const anchorRect = anchor.getBoundingClientRect();
-        const offsetTopOfOffsetParent = this.simulationLabel.offsetParent
-          ? this.simulationLabel.offsetParent.getBoundingClientRect().top
+        const offsetTopOfOffsetParent = this.simulationLabelRef.current.offsetParent
+          ? this.simulationLabelRef.current.offsetParent.getBoundingClientRect().top
           : 0;
         return {
           left: anchorRect.left + anchorRect.width / 2,
@@ -78,7 +78,7 @@ export class SimulationLabel extends React.Component<Props, State> {
   render() {
     return (
       <div
-        ref={ref => this.simulationLabel = ref}
+        ref={this.simulationLabelRef}
         className='simulation-label'
         style={{
           left: this.state.left,

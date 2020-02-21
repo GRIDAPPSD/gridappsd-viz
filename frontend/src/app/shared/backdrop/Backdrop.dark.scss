@@ -1,5 +1,5 @@
 @import 'Backdrop.common';
 
-.backdrop {
+.backdrop:not(.transparent) {
     background-color: rgba(80, 54, 54, 0.6);
 }

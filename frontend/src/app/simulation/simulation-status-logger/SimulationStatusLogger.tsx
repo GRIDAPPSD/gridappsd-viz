@@ -24,7 +24,7 @@ const logLevels = ['FATAL', 'ERROR', 'WARN', 'INFO', 'DEBUG', 'TRACE'];
 
 export class SimulationStatusLogger extends React.Component<Props, State> {
 
-  simulationStatusLoggerBody: HTMLElement = null;
+  readonly simulationStatusLoggerBodyRef = React.createRef<HTMLElement>();
 
   private readonly _dragHandleMinPosition = 30;
   private readonly _dragHandleMaxPosition = document.body.clientHeight - 110;
@@ -68,7 +68,7 @@ export class SimulationStatusLogger extends React.Component<Props, State> {
     this._loggerBodyScrollNotifier.pipe(
       debounceTime(250),
       filter(
-        scrollTop => scrollTop === this.simulationStatusLoggerBody.scrollHeight - this.simulationStatusLoggerBody.clientHeight
+        scrollTop => scrollTop === this.simulationStatusLoggerBodyRef.current.scrollHeight - this.simulationStatusLoggerBodyRef.current.clientHeight
       )
     )
       .subscribe({
@@ -81,7 +81,7 @@ export class SimulationStatusLogger extends React.Component<Props, State> {
             });
             // Move the scroll bar up to the previous scroll top position so that it does not just keep
             // sticking to the bottom and causes the messages to keep getting appended
-            this.simulationStatusLoggerBody.scrollTop = scrollTop;
+            this.simulationStatusLoggerBodyRef.current.scrollTop = scrollTop;
           }
         }
       });
@@ -125,7 +125,7 @@ export class SimulationStatusLogger extends React.Component<Props, State> {
         </header>
         <section
           className='simulation-status-logger__body'
-          ref={elem => this.simulationStatusLoggerBody = elem}
+          ref={this.simulationStatusLoggerBodyRef}
           onScroll={this.loadMoreMessages}>
           {
             this.state.visibleMessages.map(message => (
@@ -139,13 +139,13 @@ export class SimulationStatusLogger extends React.Component<Props, State> {
   }
 
   mouseDown() {
-    this.simulationStatusLoggerBody.style.userSelect = 'none';
+    this.simulationStatusLoggerBodyRef.current.style.userSelect = 'none';
     document.documentElement.addEventListener('mousemove', this._resize, false);
     document.documentElement.addEventListener('mouseup', this._mouseUp, false);
   }
 
   private _mouseUp() {
-    this.simulationStatusLoggerBody.style.userSelect = 'initial';
+    this.simulationStatusLoggerBodyRef.current.style.userSelect = 'initial';
     window.getSelection().empty();
     document.documentElement.removeEventListener('mousemove', this._resize, false);
     document.documentElement.removeEventListener('mouseup', this._mouseUp, false);
@@ -159,7 +159,7 @@ export class SimulationStatusLogger extends React.Component<Props, State> {
   }
 
   loadMoreMessages() {
-    this._loggerBodyScrollNotifier.next(this.simulationStatusLoggerBody.scrollTop);
+    this._loggerBodyScrollNotifier.next(this.simulationStatusLoggerBodyRef.current.scrollTop);
   }
 
 }

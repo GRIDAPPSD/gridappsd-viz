@@ -1,14 +1,14 @@
 @import '@constants.dark';
 @import 'TabGroup.common';
 
-.tabgroup__header__label {
+.tab-group__header__label {
     color: rgba($primary-text-color, 0.25);
 }
 
-.tabgroup__header__label.active {
+.tab-group__header__label.active {
     color: $active-item-color;
 }
 
-.tabgroup__body {
+.tab-group__body {
     border: 2px solid rgb(149, 151, 160);
 }
