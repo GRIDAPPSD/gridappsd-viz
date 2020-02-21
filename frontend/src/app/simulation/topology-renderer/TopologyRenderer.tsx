@@ -41,8 +41,7 @@ const symbolSize = 35;
 export class TopologyRenderer extends React.Component<Props, State> {
 
   readonly canvasTransformService = CanvasTransformService.getInstance();
-
-  svg: SVGSVGElement = null;
+  readonly svgRef = React.createRef<SVGSVGElement>();
 
   private readonly _edgeGenerator = line<Node>()
     .x(node => node.screenX1)
@@ -100,14 +99,14 @@ export class TopologyRenderer extends React.Component<Props, State> {
   }
 
   componentDidMount() {
-    const canvasBoundingBox = this.svg.getBoundingClientRect();
+    const canvasBoundingBox = this.svgRef.current.getBoundingClientRect();
     const spacing = 10;
-    this.svg.setAttribute('width', String(canvasBoundingBox.width));
-    this.svg.setAttribute('height', String(canvasBoundingBox.height));
-    this.svg.setAttribute('viewBox', `0 0 ${canvasBoundingBox.width} ${canvasBoundingBox.height}`);
+    this.svgRef.current.setAttribute('width', String(canvasBoundingBox.width));
+    this.svgRef.current.setAttribute('height', String(canvasBoundingBox.height));
+    this.svgRef.current.setAttribute('viewBox', `0 0 ${canvasBoundingBox.width} ${canvasBoundingBox.height}`);
     this._xScale.range([spacing, canvasBoundingBox.width - spacing]);
     this._yScale.range([spacing, canvasBoundingBox.height - spacing]);
-    this._svgSelection = this.canvasTransformService.bindToSvgCanvas(this.svg);
+    this._svgSelection = this.canvasTransformService.bindToSvgCanvas(this.svgRef.current);
     this._containerSelection = this._svgSelection.select<SVGGElement>('.topology-renderer__canvas__container');
     this.canvasTransformService.onTransformed()
       .pipe(takeUntil(this._unsubscriber))
@@ -700,7 +699,7 @@ export class TopologyRenderer extends React.Component<Props, State> {
     return (
       <div className='topology-renderer'>
         <svg
-          ref={elem => this.svg = elem}
+          ref={this.svgRef}
           width='10000'
           height='10000'
           preserveAspectRatio='xMidYMid'
@@ -874,7 +873,7 @@ export class TopologyRenderer extends React.Component<Props, State> {
   }
 
   locateNode(node: Node) {
-    const locatedElement = this.svg.querySelector(`.topology-renderer__canvas__node.${node.type}._${node.name}_`) as SVGCircleElement;
+    const locatedElement = this.svgRef.current.querySelector(`.topology-renderer__canvas__node.${node.type}._${node.name}_`) as SVGCircleElement;
     if (locatedElement) {
       if (this.canvasTransformService.getCurrentZoomLevel() < 3) {
         this.canvasTransformService.setZoomLevel(this._isModelLarge() ? 6 : 3);

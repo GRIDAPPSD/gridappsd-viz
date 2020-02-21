@@ -22,7 +22,8 @@ interface State {
 
 export class TextArea extends React.Component<Props, State> {
 
-  inputBoxContainer: HTMLElement;
+  readonly inputBoxContainerRef = React.createRef<HTMLDivElement>();
+
   currentValue: string;
 
   private readonly _valueChanges = new Subject<string>();
@@ -50,7 +51,7 @@ export class TextArea extends React.Component<Props, State> {
   }
 
   componentDidMount() {
-    this._inputBoxBoundingBox = this.inputBoxContainer.getBoundingClientRect();
+    this._inputBoxBoundingBox = this.inputBoxContainerRef.current.getBoundingClientRect();
     this._setupCodeMirrorEditor();
     this.props.formControlModel.valueChanges()
       .subscribe({
@@ -103,7 +104,7 @@ export class TextArea extends React.Component<Props, State> {
     if (this.props.readonly && this.currentValue === '') {
       return;
     }
-    const inputBox = this.inputBoxContainer.querySelector('.textarea__input-box') as HTMLDivElement;
+    const inputBox = this.inputBoxContainerRef.current.querySelector('.textarea__input-box') as HTMLDivElement;
     this._initializeCodeMirrorEditor(inputBox);
     // This is true when CodeMirror was successfully initialized, but for some
     // odd reason, the DOM doesn't get reflected with the layout changes created
@@ -146,11 +147,11 @@ export class TextArea extends React.Component<Props, State> {
   }
 
   private _onCodeMirrorEditorFocused() {
-    this.inputBoxContainer.querySelector('.textarea__input-box').classList.add('focused');
+    this.inputBoxContainerRef.current.querySelector('.textarea__input-box').classList.add('focused');
   }
 
   private _onCodeMirrorEditorFocusLost() {
-    this.inputBoxContainer.querySelector('.textarea__input-box').classList.remove('focused');
+    this.inputBoxContainerRef.current.querySelector('.textarea__input-box').classList.remove('focused');
   }
 
   resize(event: MouseEvent) {
@@ -164,7 +165,7 @@ export class TextArea extends React.Component<Props, State> {
       if (newHeight > 0 && newHeight + this._inputBoxBoundingBox.top < document.body.clientHeight) {
         styles.push(`height:${newHeight}px;max-height:${newHeight}px`);
       }
-      this.inputBoxContainer.setAttribute('style', styles.join(';'));
+      this.inputBoxContainerRef.current.setAttribute('style', styles.join(';'));
     }
   }
 
@@ -193,7 +194,7 @@ export class TextArea extends React.Component<Props, State> {
         label={this.props.label}
         hint={this.props.hint}>
         <div
-          ref={ref => this.inputBoxContainer = ref}
+          ref={this.inputBoxContainerRef}
           className='textarea__input-box-container'>
           <div className='textarea__input-box' />
           <div className='textarea__input-box-focus-indicator' />
@@ -210,7 +211,7 @@ export class TextArea extends React.Component<Props, State> {
     this._isResizing = true;
     this._initialClientX = event.clientX;
     this._initialClientY = event.clientY;
-    this._inputBoxBoundingBox = this.inputBoxContainer.getBoundingClientRect();
+    this._inputBoxBoundingBox = this.inputBoxContainerRef.current.getBoundingClientRect();
   }
 
 }

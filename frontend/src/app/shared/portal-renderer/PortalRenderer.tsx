@@ -18,7 +18,6 @@ interface State {
 export class PortalRenderer extends React.Component<Props, State> {
 
   static defaultProps = {
-    containerClassName: 'portal-renderer',
     portal: document.body
   } as Props;
 
@@ -27,7 +26,7 @@ export class PortalRenderer extends React.Component<Props, State> {
   constructor(props: Props = PortalRenderer.defaultProps) {
     super(props);
 
-    this.container.className = props.containerClassName;
+    this.container.className = this.props.containerClassName || 'portal-renderer';
     props.portal.appendChild(this.container);
 
     this.unmount = this.unmount.bind(this);
@@ -38,11 +37,12 @@ export class PortalRenderer extends React.Component<Props, State> {
   }
 
   componentWillUnmount() {
-    this.props.portal.removeChild(this.container);
+    if (this.props.portal.contains(this.container)) {
+      this.props.portal.removeChild(this.container);
+    }
   }
 
-  mount(component: React.ReactElement<HTMLElement>, containerClassName?: string) {
-    this.container.className = containerClassName || this.props.containerClassName;
+  mount(component: React.ReactElement<HTMLElement>) {
     render(component, this.container);
   }
 

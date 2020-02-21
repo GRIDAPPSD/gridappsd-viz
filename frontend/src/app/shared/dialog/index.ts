@@ -1,3 +1,3 @@
 export * from './Dialog';
-export * from './DialogActions';
+export * from './DialogActionGroup';
 export * from './DialogContent';

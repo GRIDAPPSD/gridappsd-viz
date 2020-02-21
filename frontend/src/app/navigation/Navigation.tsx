@@ -27,7 +27,7 @@ interface Props {
 
 export class Navigation extends React.Component<Props, {}> {
 
-  drawer: Drawer;
+  readonly drawerRef = React.createRef<Drawer>();
 
   constructor(props: Props) {
     super(props);
@@ -45,8 +45,8 @@ export class Navigation extends React.Component<Props, {}> {
             icon='menu'
             size='large'
             rippleDuration={550}
-            noBackground={true}
-            onClick={this.drawer ? this.drawer.open : null} />
+            hasBackground={false}
+            onClick={this.drawerRef.current?.open} />
           <AppBranding version={this.props.version} />
           <div className='right-aligned'>
             <WebSocketConnectedIndicator websocketStatus={this.props.stompClientConnectionStatus} />
@@ -55,7 +55,7 @@ export class Navigation extends React.Component<Props, {}> {
             }
           </div>
         </ToolBar>
-        <Drawer ref={ref => this.drawer = ref}>
+        <Drawer ref={this.drawerRef}>
           {
             this.props.activeSimulationIds.length > 0
             &&
@@ -128,7 +128,7 @@ export class Navigation extends React.Component<Props, {}> {
   }
 
   openDrawer() {
-    this.drawer.open();
+    this.drawerRef.current.open();
   }
 
 }

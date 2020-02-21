@@ -35,7 +35,7 @@ export class MeasurementChart extends React.Component<Props, State> {
     right: 10
   };
 
-  canvas: SVGSVGElement = null;
+  readonly svgRef = React.createRef<SVGSVGElement>();
 
   private readonly _xScale: ScaleTime<number, number>;
   private readonly _yScale: ScaleLinear<number, number>;
@@ -74,7 +74,7 @@ export class MeasurementChart extends React.Component<Props, State> {
   }
 
   componentDidMount() {
-    this._container = select(this.canvas.querySelector('.measurement-chart__canvas__container') as SVGElement);
+    this._container = select(this.svgRef.current.querySelector('.measurement-chart__canvas__container') as SVGElement);
     this._xAxis = this._container.select('.x-axis');
     this._yAxis = this._container.select('.y-axis');
 
@@ -185,7 +185,7 @@ export class MeasurementChart extends React.Component<Props, State> {
         </div>
         <svg
           className='measurement-chart__canvas'
-          ref={elem => this.canvas = elem}
+          ref={this.svgRef}
           width={this.width}
           height={this.height}
           viewBox={`0 0 ${this.width} ${this.height}`}

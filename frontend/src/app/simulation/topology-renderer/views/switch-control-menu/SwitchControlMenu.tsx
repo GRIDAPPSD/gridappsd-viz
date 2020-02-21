@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { Dialog, DialogContent, DialogActions } from '@shared/dialog';
+import { Dialog, DialogContent, DialogActionGroup } from '@shared/dialog';
 import { Select, SelectionOptionBuilder, FormControlModel } from '@shared/form';
 import { BasicButton } from '@shared/buttons';
 import { Switch } from '@shared/topology';
@@ -74,7 +74,7 @@ export class SwitchControlMenu extends React.Component<Props, State> {
               formControlModel={this.openStateFormControlModel} />
           </form>
         </DialogContent>
-        <DialogActions>
+        <DialogActionGroup>
           <BasicButton
             type='negative'
             label='Cancel'
@@ -84,7 +84,7 @@ export class SwitchControlMenu extends React.Component<Props, State> {
             label='Apply'
             disabled={this.state.disableApplyButton}
             onClick={this.onSubmit} />
-        </DialogActions>
+        </DialogActionGroup>
       </Dialog>
     );
   }

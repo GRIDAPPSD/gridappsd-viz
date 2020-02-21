@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { Dialog, DialogContent, DialogActions } from '@shared/dialog';
+import { Dialog, DialogContent, DialogActionGroup } from '@shared/dialog';
 import { Select, Input, SelectionOptionBuilder, FormGroupModel, FormControlModel } from '@shared/form';
 import { BasicButton } from '@shared/buttons';
 import { RegulatorControlMode } from '@shared/topology/RegulatorControlMode';
@@ -165,7 +165,7 @@ export class RegulatorControlMenu extends React.Component<Props, State> {
             {this.showFormFieldsBasedOnControlMode()}
           </form>
         </DialogContent>
-        <DialogActions>
+        <DialogActionGroup>
           <BasicButton
             type='negative'
             label='Cancel'
@@ -175,7 +175,7 @@ export class RegulatorControlMenu extends React.Component<Props, State> {
             label='Apply'
             disabled={this.state.disableApplyButton}
             onClick={this.onSubmit} />
-        </DialogActions>
+        </DialogActionGroup>
       </Dialog>
     );
   }

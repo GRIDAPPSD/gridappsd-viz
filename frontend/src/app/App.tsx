@@ -50,11 +50,11 @@ interface State {
 
 export const App = (withRouter as any)(class extends React.Component<Props, State> {
 
-  private readonly _stateStore = StateStore.getInstance();
+  readonly tabGroupRef = React.createRef<TabGroup>();
 
   shouldRedirect = false;
-  tabGroup: TabGroup;
 
+  private readonly _stateStore = StateStore.getInstance();
   constructor(props: Props) {
     super(props);
 
@@ -87,7 +87,7 @@ export const App = (withRouter as any)(class extends React.Component<Props, Stat
                   <div className='topology-renderer-simulation-status-logger-measurement-graphs'>
                     <div>
                       <SimulationControlContainer />
-                      <TabGroup ref={ref => this.tabGroup = ref}>
+                      <TabGroup ref={this.tabGroupRef}>
                         <Tab label='Simulation'>
                           <TopologyRendererContainer
                             mRIDs={this.props.componentMRIDs}
@@ -104,7 +104,7 @@ export const App = (withRouter as any)(class extends React.Component<Props, Stat
                         </Tab>
                         <Tab label='Alarms'>
                           <AlarmsContainer
-                            onNewAlarmsConfirmed={() => this.tabGroup.setSelectedTabIndex(3)}
+                            onNewAlarmsConfirmed={() => this.tabGroupRef.current.setSelectedTabIndex(3)}
                             onLocateNodeForAlarm={this.onLocateNodeForAlarm} />
                         </Tab>
                       </TabGroup>
@@ -168,8 +168,8 @@ export const App = (withRouter as any)(class extends React.Component<Props, Stat
   }
 
   onLocateNodeForAlarm(alarm: Alarm) {
-    this.tabGroup.setSelectedTabIndex(0);
-    waitUntil(() => this.tabGroup.isTabVisible(0))
+    this.tabGroupRef.current.setSelectedTabIndex(0);
+    waitUntil(() => this.tabGroupRef.current.isTabVisible(0))
       .then(() => {
         this._stateStore.update({
           nodeNameToLocate: alarm.equipment_name

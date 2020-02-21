@@ -15,7 +15,8 @@ interface State {
 }
 
 export class SimulationStatusLoggerMessage extends React.Component<Props, State> {
-  messageElement: HTMLElement = null;
+
+  readonly messageElementRef = React.createRef<HTMLDivElement>();
 
   constructor(props: Props) {
     super(props);
@@ -30,7 +31,7 @@ export class SimulationStatusLoggerMessage extends React.Component<Props, State>
     return (
       <div
         className={'simulation-status-logger-message ' + this.state.messageAsJson.logLevel}
-        ref={elem => this.messageElement = elem}>
+        ref={this.messageElementRef}>
         {
           this.state.showMessageAsJson
             ?
@@ -64,14 +65,14 @@ export class SimulationStatusLoggerMessage extends React.Component<Props, State>
     this.setState({
       showMessageAsJson: true
     });
-    this.messageElement.classList.add('highlight');
+    this.messageElementRef.current.classList.add('highlight');
   }
 
   showAsString() {
     this.setState({
       showMessageAsJson: false
     });
-    this.messageElement.classList.remove('highlight');
+    this.messageElementRef.current.classList.remove('highlight');
   }
 
 }

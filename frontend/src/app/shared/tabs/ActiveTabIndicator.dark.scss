@@ -1,7 +1,7 @@
 @import '@constants.dark';
 @import 'ActiveTabIndicator.common';
 
-.tabgroup__active-tab-indicator {
+.tab-group__active-tab-indicator {
     border: 2px solid rgb(149, 151, 160);
 
     &::after {

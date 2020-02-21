@@ -14,7 +14,8 @@ interface State {
 }
 
 export class Wait extends React.Component<Props, State> {
-  waitElement: HTMLDivElement;
+
+  readonly waitElementRef = React.createRef<HTMLDivElement>();
 
   constructor(props: any) {
     super(props);
@@ -24,10 +25,10 @@ export class Wait extends React.Component<Props, State> {
   }
 
   componentDidMount() {
-    if (this.waitElement) {
-      let height = this.waitElement.clientHeight;
+    if (this.waitElementRef.current) {
+      let height = this.waitElementRef.current.clientHeight;
       if (height === 0) {
-        let waitElementParent = this.waitElement.parentElement;
+        let waitElementParent = this.waitElementRef.current.parentElement;
         while (height === 0 && waitElementParent !== null) {
           height = waitElementParent.clientHeight;
           waitElementParent = waitElementParent.parentElement;
@@ -41,7 +42,7 @@ export class Wait extends React.Component<Props, State> {
     if (this.props.show) {
       return (
         <div
-          ref={element => this.waitElement = element}
+          ref={this.waitElementRef}
           className='wait'
           style={{
             height: this.state.height > 0 ? this.state.height + 'px' : '100%'

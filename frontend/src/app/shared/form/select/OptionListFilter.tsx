@@ -17,7 +17,7 @@ interface State {
 
 export class OptionListFilter extends React.Component<Props, State> {
 
-  filterInput: HTMLInputElement;
+  readonly inputRef = React.createRef<HTMLInputElement>();
 
   private readonly _valueChanger = new Subject<[string, string]>();
 
@@ -40,8 +40,8 @@ export class OptionListFilter extends React.Component<Props, State> {
   }
 
   componentDidUpdate(prevProps: Props) {
-    if (this.filterInput && this.state.filterValue === '') {
-      setTimeout(() => this.filterInput?.focus(), 250);
+    if (this.state.filterValue === '') {
+      setTimeout(() => this.inputRef.current?.focus(), 250);
     }
     if (this.props.shouldReset && this.props.shouldReset !== prevProps.shouldReset && this.state.filterValue !== '') {
       this.clearFilter();
@@ -56,7 +56,7 @@ export class OptionListFilter extends React.Component<Props, State> {
     return (
       <div className='option-list-filter'>
         <input
-          ref={ref => this.filterInput = ref}
+          ref={this.inputRef}
           type='text'
           className='option-list-filter__input'
           autoFocus={true}
