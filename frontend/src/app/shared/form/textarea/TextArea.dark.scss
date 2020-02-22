@@ -15,7 +15,8 @@
         border-color: #fff;
     }
 
-    .CodeMirror-selected {
+    .CodeMirror-selected,
+    .CodeMirror-focused .CodeMirror-selected {
         background: #756b6b;
     }
 

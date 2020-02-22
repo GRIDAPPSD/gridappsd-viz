@@ -33,7 +33,7 @@ export class StompClient extends React.Component<Props, State> {
     requestBody: new FormControlModel(
       '{}',
       [
-        Validators.checkNotEmpty('Request Body'),
+        Validators.checkNotEmpty('Request body'),
         Validators.checkValidJSON('Request body')
       ]
     )
@@ -99,6 +99,7 @@ export class StompClient extends React.Component<Props, State> {
             label='Topic'
             formControlModel={this.formGroupModel.findControl('topic')} />
           <TextArea
+            type='plaintext'
             className='stomp-client__request-body'
             label='Request'
             formControlModel={this.formGroupModel.findControl('requestBody')} />
@@ -127,6 +128,7 @@ export class StompClient extends React.Component<Props, State> {
             </Tooltip>
           </div>
           <TextArea
+            type='plaintext'
             className='stomp-client__response'
             readonly
             label='Response'

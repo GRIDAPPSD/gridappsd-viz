@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { Subject } from 'rxjs';
-import { debounceTime } from 'rxjs/operators';
+import { debounceTime, map } from 'rxjs/operators';
 
 import { FormControl } from '../form-control/FormControl';
 import { FormControlModel } from '../models/FormControlModel';
@@ -34,13 +34,19 @@ export class Input<T extends 'text' | 'number' | 'datetime' | 'password' = 'text
     };
 
     this.handleChange = this.handleChange.bind(this);
+
+    this._parseValue = this._parseValue.bind(this);
   }
 
   componentDidMount() {
     this._valueChanges.pipe(debounceTime(250))
+      .pipe(map(this._parseValue))
       .subscribe({
         next: value => {
-          (this.props.formControlModel as FormControlModel<string | number>).setValue(value);
+          // If value is null, then this._parseValue failed to parse value,
+          // in that case, we want to use the value currently in the input box instead
+          // of the parsed value
+          (this.props.formControlModel as FormControlModel<string | number>).setValue(value !== null ? value : this.state.value);
         }
       });
     // In case FormControlModel.setValue was called somewhere else,
@@ -53,15 +59,9 @@ export class Input<T extends 'text' | 'number' | 'datetime' | 'password' = 'text
           // we want to update this component to reflect the new value
           if (this.state.value !== value && this.props.formControlModel.isValid()) {
             if (this.props.type === 'datetime') {
-              if (typeof value === 'string') {
-                this.setState({
-                  value: this._dateTimeService.format(new Date(value))
-                });
-              } else if (typeof value === 'number') {
-                this.setState({
-                  value: this._dateTimeService.format(value)
-                });
-              }
+              this.setState({
+                value: this._dateTimeService.format(value)
+              });
             } else {
               this.setState({
                 value: String(value)
@@ -70,6 +70,16 @@ export class Input<T extends 'text' | 'number' | 'datetime' | 'password' = 'text
           }
         }
       });
+  }
+
+  private _parseValue(value: string) {
+    if (this.props.type === 'number') {
+      return +value;
+    }
+    if (this.props.type === 'datetime') {
+      return this._dateTimeService.parse(value);
+    }
+    return value;
   }
 
   componentWillUnmount() {

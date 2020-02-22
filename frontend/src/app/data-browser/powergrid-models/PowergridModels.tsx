@@ -9,6 +9,7 @@ import { TextArea, Select, SelectionOptionBuilder, FormGroupModel, FormControlMo
 import { BasicButton } from '@shared/buttons';
 import { Wait } from '@shared/wait';
 import { FeederModelLine } from '@shared/topology';
+import { Validators } from '@shared/form/validation';
 
 import './PowergridModels.light.scss';
 import './PowergridModels.dark.scss';
@@ -49,7 +50,9 @@ export class PowerGridModels extends React.Component<Props, State> {
       |   ?rgn c:IdentifiedObject.name ?region .
       |   ?rgn c:IdentifiedObject.mRID ?rgnid .
       |}
-      |ORDER by ?station ?feeder`.replace(/(?:\s+\|)/g, '\n').trim()),
+      |ORDER by ?station ?feeder`.replace(/(?:\s+\|)/g, '\n').trim(),
+      [Validators.checkNotEmpty('Query string')]
+    ),
     objectId: new FormControlModel(this.props.feederModelLines.find(line => line.name === 'ieee8500')),
     modelId: new FormControlModel(this.props.feederModelLines.find(line => line.name === 'ieee8500')),
     filter: new FormControlModel(`?s cim:IdentifiedObject.name \u0027q14733\u0027","objectType":"http://iec.ch/TC57/2012/CIM-schema-cim17#ConnectivityNode`),
@@ -167,6 +170,7 @@ export class PowerGridModels extends React.Component<Props, State> {
       case QueryPowerGridModelsRequestType.QUERY:
         return (
           <TextArea
+            type='plaintext'
             label='Query string'
             formControlModel={this.formGroupModel.findControl('queryString')} />
         );
@@ -195,6 +199,7 @@ export class PowerGridModels extends React.Component<Props, State> {
               selectionOptionBuilder={this.state.lineOptionBuilder}
               selectedOptionFinder={modelId => modelId.name === 'ieee8500'} />
             <TextArea
+              type='plaintext'
               label='Filter'
               formControlModel={this.formGroupModel.findControl('filter')} />
           </>
