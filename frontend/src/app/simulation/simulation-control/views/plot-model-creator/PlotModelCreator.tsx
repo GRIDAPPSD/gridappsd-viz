@@ -410,6 +410,11 @@ export class PlotModelCreator extends React.Component<Props, State> {
 
         resultingPlotModels.push(plotModelUsingMagnitude, plotModelUsingAngle);
       } else {
+        if (createdPlotModel.useAngle) {
+          createdPlotModel.name += ' (Angle)';
+        } else if (createdPlotModel.useMagnitude) {
+          createdPlotModel.name += ' (Magnitude)';
+        }
         resultingPlotModels.push(createdPlotModel);
       }
     }

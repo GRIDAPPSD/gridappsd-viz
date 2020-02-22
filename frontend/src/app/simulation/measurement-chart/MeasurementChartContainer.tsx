@@ -194,10 +194,22 @@ export class MeasurementChartContainer extends React.Component<Props, State> {
     return {
       name: plotModel.name,
       timeSeries: [],
-      yAxisLabel: plotModel.useAngle ? 'Angle' : plotModel.useMagnitude ? 'Magnitude' : 'Value'
+      yAxisLabel: this._deriveYAxisLabel(plotModel)
     };
   }
 
+  private _deriveYAxisLabel(plotModel: PlotModel) {
+    switch (plotModel.componentType) {
+      case ModelDictionaryComponentType.POWER:
+        return 'W';
+      case ModelDictionaryComponentType.VOLTAGE:
+        return 'V';
+      case ModelDictionaryComponentType.TAP:
+        return '';
+      default:
+        return '';
+    }
+  }
   private _resetMeasurementChartModelsWhenSimulationStarts() {
     this._simulationControlService.statusChanges()
       .pipe(

@@ -47,7 +47,10 @@ $time-series-colors: #fff #ff0 lightblue #f0f4c3 orange #00ff5f magenta brown li
     }
 }
 
-.measurement-chart__canvas__axis-label,
+.measurement-chart__canvas__axis-label {
+    fill: #ffa500;
+}
+
 .measurement-chart__canvas__overlapped-lines {
     fill: #edb3b3;
 }

@@ -24,6 +24,10 @@ $time-series-colors: red green blue #b729ae orange pink magenta brown lightcoral
     box-shadow: 0 0 1px #555;
 }
 
+.measurement-chart__canvas__axis-label {
+    fill: $primary-color;
+}
+
 .measurement-chart__legend__label {
     color: #000;
 }

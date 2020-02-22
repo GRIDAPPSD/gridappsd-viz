@@ -27,7 +27,7 @@ interface State {
 export class MeasurementChart extends React.Component<Props, State> {
 
   readonly width = 370;
-  readonly height = 270;
+  readonly height = 280;
   readonly margin = {
     top: 20,
     bottom: 35,
@@ -98,22 +98,31 @@ export class MeasurementChart extends React.Component<Props, State> {
 
   private _findOverlappingTimeSeries() {
     const overlappingTimeSeries = [];
-    for (const series of this.props.measurementChartModel.timeSeries) {
-      if (
-        series.points.length >= 2
-        &&
-        // Only checking for the first and last datapoints
-        // to determine if the lines overlap which is good enough
-        this.props.measurementChartModel.timeSeries.some(
-          e => e !== series &&
-            Math.abs(e.points[0].measurement - series.points[0].measurement) <= 5 &&
-            Math.abs(e.points[e.points.length - 1].measurement - series.points[series.points.length - 1].measurement) <= 5
-        )
-      ) {
-        overlappingTimeSeries.push(series);
+    for (const suspect of this.props.measurementChartModel.timeSeries) {
+      if (suspect.points.length >= 2 && this._suspectSeriesOverlapsOtherSeries(suspect)) {
+        overlappingTimeSeries.push(suspect);
       }
     }
     return overlappingTimeSeries;
+  }
+
+  private _suspectSeriesOverlapsOtherSeries(suspect: TimeSeries) {
+    for (const current of this.props.measurementChartModel.timeSeries) {
+      // Only checking for the first and last datapoints
+      // to determine if the provided series overlaps some other series which is good enough
+      if (
+        current !== suspect
+        && this._tooClose(current.points[0], suspect.points[0])
+        && this._tooClose(current.points[current.points.length - 1], suspect.points[suspect.points.length - 1])
+      ) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  private _tooClose(dataPoint1: TimeSeriesDataPoint, dataPoint2: TimeSeriesDataPoint) {
+    return Math.abs(this._yScale(dataPoint1.measurement) - this._yScale(dataPoint2.measurement)) <= 5;
   }
 
   private _calculateXYAxisExtents(): { x: [Date, Date], y: [number, number] } {
@@ -197,19 +206,14 @@ export class MeasurementChart extends React.Component<Props, State> {
             <g
               className='measurement-chart__canvas__axis y-axis'
               transform={`translate(${this.margin.left},0)`} />
-
-            {
-              this.props.measurementChartModel.yAxisLabel
-              &&
-              <text
-                className='measurement-chart__canvas__axis-label'
-                x={this.margin.left / 2}
-                y={this.margin.top / 2}
-                fontSize='0.8em'
-                fontWeight='bold'>
-                {this.props.measurementChartModel.yAxisLabel}
-              </text>
-            }
+            <text
+              className='measurement-chart__canvas__axis-label'
+              x={this.margin.left}
+              y={this.margin.top}
+              dy='-5'
+              textAnchor='middle'>
+              {this.props.measurementChartModel.yAxisLabel}
+            </text>
             {this.showLabelsForOverlappingTimeSeries()}
           </g>
         </svg>
