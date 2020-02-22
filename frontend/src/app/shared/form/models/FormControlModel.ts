@@ -7,7 +7,7 @@ export class FormControlModel<T> extends AbstractControlModel<T> {
 
   private _currentValue: T;
 
-  constructor(private readonly _initialValue: T, private _validators?: Validator[]) {
+  constructor(private readonly _initialValue: T, readonly validators: Validator[] = []) {
     super();
 
     this._currentValue = _initialValue;
@@ -27,18 +27,14 @@ export class FormControlModel<T> extends AbstractControlModel<T> {
   }
 
   private _validate(): boolean {
-    if (this._validators) {
-      const failedValidations = this._validators.map(validator => validator(this))
-        .filter(result => !result.isValid);
-      if (failedValidations.length > 0) {
-        this._errors = failedValidations.map(result => result.errorMessage);
-        return false;
-      } else {
-        this._errors = null;
-        return true;
-      }
+    const failedValidations = this.validators.map(validator => validator(this)).filter(result => !result.isValid);
+    if (failedValidations.length > 0) {
+      this._errors = failedValidations.map(result => result.errorMessage);
+      return false;
+    } else {
+      this._errors = null;
+      return true;
     }
-    return true;
   }
 
   getValue() {
@@ -50,10 +46,7 @@ export class FormControlModel<T> extends AbstractControlModel<T> {
   }
 
   addValidator(validator: Validator) {
-    if (!this._validators) {
-      this._validators = [];
-    }
-    this._validators.push(validator);
+    this.validators.push(validator);
     const validationResult = validator(this);
     this._isValid = validationResult.isValid;
     if (!this._isValid) {

@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { Subject } from 'rxjs';
-import { debounceTime } from 'rxjs/operators';
+import { debounceTime, filter } from 'rxjs/operators';
 import * as CodeMirror from 'codemirror';
 
 import { FormControl } from '../form-control/FormControl';
@@ -9,24 +9,27 @@ import { FormControlModel } from '../models/FormControlModel';
 import './TextArea.light.scss';
 import './TextArea.dark.scss';
 
-interface Props {
+interface Props<T extends 'plaintext' | 'json' = 'json'> {
   label: string;
-  formControlModel: FormControlModel<string>;
+  formControlModel: T extends 'json' ? FormControlModel<object> : FormControlModel<string>;
   className?: string;
   readonly?: boolean;
   hint?: string;
+  type?: T;
 }
 
 interface State {
 }
 
-export class TextArea extends React.Component<Props, State> {
+export class TextArea<T extends 'plaintext' | 'json' = 'json'> extends React.Component<Props<T>, State> {
 
   readonly inputBoxContainerRef = React.createRef<HTMLDivElement>();
+  readonly internalFormControl = new FormControlModel('', this.props.formControlModel.validators);
 
-  currentValue: string;
+  // Hold the text value currently in the text box
+  currentValueToDisplay: string;
 
-  private readonly _valueChanges = new Subject<string>();
+  private readonly _textBoxValueStream = new Subject<string>();
 
   private _isResizing = false;
   // The x coordinate of the mousedown event when the user begins the resize
@@ -35,42 +38,56 @@ export class TextArea extends React.Component<Props, State> {
   private _initialClientY = 0;
   private _inputBoxBoundingBox: ClientRect;
   private _codeMirror: CodeMirror.Editor = null;
+  // Hold an object or a string that is used to compare whether the form control model's value was
+  // changed from outside of this component, if it was, then we need to sync up this component
+  // with the new value
+  private _currentValueToCompare: string | object;
 
-  constructor(props: Props) {
+  constructor(props: Props<T>) {
     super(props);
 
-    this.currentValue = props.formControlModel.getValue();
+    this._currentValueToCompare = props.formControlModel.getValue();
+    this.currentValueToDisplay = this._stringifyValue(this._currentValueToCompare);
 
-    this.resize = this.resize.bind(this);
-    this.stopResize = this.stopResize.bind(this);
     this.beginResize = this.beginResize.bind(this);
 
+    this._resize = this._resize.bind(this);
+    this._stopResize = this._stopResize.bind(this);
     this._onValueChange = this._onValueChange.bind(this);
     this._onCodeMirrorEditorFocused = this._onCodeMirrorEditorFocused.bind(this);
     this._onCodeMirrorEditorFocusLost = this._onCodeMirrorEditorFocusLost.bind(this);
   }
 
+  private _stringifyValue(value: string | object) {
+    if (this.props.type === 'json') {
+      return JSON.stringify(value, null, 4);
+    }
+    return value as string;
+  }
+
   componentDidMount() {
+    const formControlProp = this.props.formControlModel as FormControlModel<any>;
     this._inputBoxBoundingBox = this.inputBoxContainerRef.current.getBoundingClientRect();
-    this._setupCodeMirrorEditor();
-    this.props.formControlModel.valueChanges()
+    this._textBoxValueStream.pipe(debounceTime(250))
       .subscribe({
         next: value => {
-          // This is true when this.props.formControlModel.setValue()
-          // was called from outside of this component
-          if (this.currentValue !== value) {
-            this.currentValue = value;
-            if (this._codeMirror === null) {
-              this._setupCodeMirrorEditor();
-            }
-            this._codeMirror.setValue(value);
+          this.internalFormControl.setValue(value);
+        }
+      });
+    this.internalFormControl.valueChanges()
+      .subscribe({
+        next: value => {
+          if (this.internalFormControl.isValid()) {
+            this._currentValueToCompare = this.props.type === 'json' ? JSON.parse(value) : value;
+            formControlProp.setValue(this._currentValueToCompare);
           }
         }
       });
-
-    this.props.formControlModel.validityChanges()
+    this.internalFormControl.validityChanges()
+      .pipe(filter(() => !this.internalFormControl.isPristine()))
       .subscribe({
         next: isValid => {
+          formControlProp.setValidity(isValid);
           if (this._codeMirror) {
             if (!isValid) {
               const currentCursor = this._codeMirror.getCursor();
@@ -89,19 +106,41 @@ export class TextArea extends React.Component<Props, State> {
         }
       });
 
-    this._valueChanges.pipe(debounceTime(250))
+    formControlProp.valueChanges()
       .subscribe({
         next: value => {
-          this.props.formControlModel.setValue(value);
+          // This is true when this.props.formControlModel.setValue()
+          // was called from outside of this component
+          if (this._currentValueToCompare !== value) {
+            this._currentValueToCompare = value;
+            this.currentValueToDisplay = this._stringifyValue(value);
+            if (this._codeMirror === null) {
+              this._setupCodeMirrorEditor();
+            } else {
+              this._codeMirror.setValue(this.currentValueToDisplay);
+            }
+          }
+        }
+      });
+    formControlProp.onDisableToggled()
+      .subscribe({
+        next: isDisabled => {
+          if (isDisabled) {
+            this.internalFormControl.disable();
+          } else {
+            this.internalFormControl.enable();
+          }
         }
       });
 
-    window.addEventListener('mousemove', this.resize, false);
-    window.addEventListener('mouseup', this.stopResize, false);
+    this._setupCodeMirrorEditor();
+
+    window.addEventListener('mousemove', this._resize, false);
+    window.addEventListener('mouseup', this._stopResize, false);
   }
 
   private _setupCodeMirrorEditor() {
-    if (this.props.readonly && this.currentValue === '') {
+    if (this.props.readonly && this.currentValueToDisplay === '') {
       return;
     }
     const inputBox = this.inputBoxContainerRef.current.querySelector('.textarea__input-box') as HTMLDivElement;
@@ -121,7 +160,7 @@ export class TextArea extends React.Component<Props, State> {
 
   private _initializeCodeMirrorEditor(insertionSlot: HTMLDivElement) {
     this._codeMirror = CodeMirror(insertionSlot, {
-      value: this.currentValue,
+      value: this.currentValueToDisplay,
       lineNumbers: true,
       readOnly: this.props.readonly,
       mode: {
@@ -142,8 +181,8 @@ export class TextArea extends React.Component<Props, State> {
   }
 
   private _onValueChange(codeMirror: CodeMirror.Editor, _: any) {
-    this.currentValue = codeMirror.getValue();
-    this._valueChanges.next(codeMirror.getValue());
+    this.currentValueToDisplay = codeMirror.getValue();
+    this._textBoxValueStream.next(codeMirror.getValue());
   }
 
   private _onCodeMirrorEditorFocused() {
@@ -154,7 +193,7 @@ export class TextArea extends React.Component<Props, State> {
     this.inputBoxContainerRef.current.querySelector('.textarea__input-box').classList.remove('focused');
   }
 
-  resize(event: MouseEvent) {
+  private _resize(event: MouseEvent) {
     if (this._isResizing) {
       const styles = [];
       const newWidth = this._inputBoxBoundingBox.width + event.clientX - this._initialClientX;
@@ -169,16 +208,17 @@ export class TextArea extends React.Component<Props, State> {
     }
   }
 
-  stopResize() {
+  private _stopResize() {
     this._isResizing = false;
     document.body.classList.remove('frozen');
   }
 
   componentWillUnmount() {
-    this._valueChanges.complete();
+    this._textBoxValueStream.complete();
     this.props.formControlModel.cleanup();
-    window.removeEventListener('mousemove', this.resize, false);
-    window.removeEventListener('mouseup', this.stopResize, false);
+    this.internalFormControl.cleanup();
+    window.removeEventListener('mousemove', this._resize, false);
+    window.removeEventListener('mouseup', this._stopResize, false);
     if (this._codeMirror) {
       this._codeMirror.off('change', this._onValueChange);
       this._codeMirror.off('focus', this._onCodeMirrorEditorFocused);
@@ -190,7 +230,7 @@ export class TextArea extends React.Component<Props, State> {
     return (
       <FormControl
         className={`textarea${this.props.className ? ' ' + this.props.className : ''}`}
-        formControlModel={this.props.formControlModel}
+        formControlModel={this.internalFormControl}
         label={this.props.label}
         hint={this.props.hint}>
         <div
@@ -215,3 +255,7 @@ export class TextArea extends React.Component<Props, State> {
   }
 
 }
+
+(TextArea as any).defaultProps = {
+  type: 'json'
+} as Props;

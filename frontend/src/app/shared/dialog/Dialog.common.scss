@@ -12,15 +12,11 @@
         justify-content: center;
         align-items: center;
     }
-
-    .backdrop {
-        position: fixed;
-    }
 }
 
 .dialog {
     transform-origin: 50% 50%;
-    position: fixed;
+    position: absolute;
     z-index: 24;
     top: auto;
     left: auto;

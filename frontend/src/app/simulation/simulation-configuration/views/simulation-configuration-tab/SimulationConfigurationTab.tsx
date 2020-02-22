@@ -30,8 +30,6 @@ interface State {
 
 export class SimulationConfigurationTab extends React.Component<Props, State> {
 
-  readonly modelConfigurationModelFormControlModel: FormControlModel<string>;
-
   constructor(props: Props) {
     super(props);
 
@@ -41,13 +39,6 @@ export class SimulationConfigurationTab extends React.Component<Props, State> {
 
     this._setupFormGroupModelForSimulationConfigurationTab();
 
-    this.modelConfigurationModelFormControlModel = new FormControlModel(
-      JSON.stringify(this.props.simulationConfig.model_creation_config, null, 4),
-      [
-        Validators.checkNotEmpty('Model creation config'),
-        Validators.checkValidJSON('Model creation configuration')
-      ]
-    );
   }
 
   private _setupFormGroupModelForSimulationConfigurationTab() {
@@ -80,32 +71,16 @@ export class SimulationConfigurationTab extends React.Component<Props, State> {
         [Validators.checkNotEmpty('Simulation name')]
       )
     );
-    this.props.parentFormGroupModel.setValue({
-      'model_creation_config': this.props.simulationConfig.model_creation_config
-    });
-  }
-
-  componentDidMount() {
-    this.modelConfigurationModelFormControlModel.valueChanges()
-      .subscribe({
-        next: value => {
-          if (this.modelConfigurationModelFormControlModel.isValid()) {
-            this.props.parentFormGroupModel.setValue({
-              'model_creation_config': JSON.parse(value)
-            });
-          }
-        }
-      });
-    this.modelConfigurationModelFormControlModel.validityChanges()
-      .subscribe({
-        next: isValid => {
-          this.props.parentFormGroupModel.setValidity(isValid);
-        }
-      });
-  }
-
-  componentWillUnmount() {
-    this.modelConfigurationModelFormControlModel.cleanup();
+    this.props.parentFormGroupModel.setControl(
+      'model_creation_config',
+      new FormControlModel(
+        this.props.simulationConfig.model_creation_config,
+        [
+          Validators.checkNotEmpty('Model creation config'),
+          Validators.checkValidJSON('Model creation config')
+        ]
+      )
+    );
   }
 
   render() {
@@ -158,7 +133,7 @@ export class SimulationConfigurationTab extends React.Component<Props, State> {
 
         <TextArea
           label='Model creation configuration'
-          formControlModel={this.modelConfigurationModelFormControlModel} />
+          formControlModel={this.props.parentFormGroupModel.findControl('model_creation_config')} />
       </FormGroup>
     );
   }

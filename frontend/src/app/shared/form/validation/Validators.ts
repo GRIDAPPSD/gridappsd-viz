@@ -27,12 +27,22 @@ export class Validators {
   }
 
   static checkValidJSON(subjectDisplayName: string): Validator {
-    return (control: FormControlModel<string>) => {
+    return (control: FormControlModel<string> | FormControlModel<object>) => {
       const value = control.getValue();
+      if (value === null || value === undefined) {
+        return {
+          errorMessage: `${subjectDisplayName} is not a valid JSON`,
+          isValid: false
+        };
+      }
+      if (typeof value === 'object' || value === '') {
+        return {
+          errorMessage: '',
+          isValid: true
+        };
+      }
       try {
-        if (value !== '') {
-          JSON.parse(value);
-        }
+        JSON.parse(value);
         return {
           isValid: true,
           errorMessage: ''

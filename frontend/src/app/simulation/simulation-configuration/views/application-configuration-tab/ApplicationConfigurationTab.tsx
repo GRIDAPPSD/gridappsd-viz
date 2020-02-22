@@ -80,6 +80,7 @@ export class ApplicationConfigurationTab extends React.Component<Props, State> {
           selectionOptionBuilder={this.state.availableApplicationOptionBuilder}
           selectedOptionFinder={appId => appId === this.nameFormControlModel.getValue()} />
         <TextArea
+          type='plaintext'
           label='Application configuration'
           formControlModel={this.configStringFormControlModel} />
       </FormGroup>
