@@ -5,7 +5,7 @@ import { Application } from '@shared/Application';
 import { AvailableApplicationsAndServicesContainer } from './available-applications-and-services';
 import { DataBrowser } from './data-browser';
 import { FeederModel } from '@shared/topology';
-import { SimulationLabelsContainer } from './simulation/simulation-labels';
+import { MeasurementValueTableContainer } from './simulation/measurement-value-table';
 import { MeasurementChartContainer } from './simulation/measurement-chart';
 import { SimulationConfiguration, DEFAULT_SIMULATION_CONFIGURATION } from '@shared/simulation';
 import { SimulationConfigurationEditor } from './simulation/simulation-configuration';
@@ -93,7 +93,7 @@ export const App = (withRouter as any)(class extends React.Component<Props, Stat
                             mRIDs={this.props.componentMRIDs}
                             phases={this.props.componentPhases} />
                           <SimulationStatusLogContainer />
-                          <SimulationLabelsContainer />
+                          <MeasurementValueTableContainer />
                           <VoltageViolationContainer />
                         </Tab>
                         <Tab label='Events'>
