@@ -7,7 +7,7 @@ import { Subject } from 'rxjs';
 import { takeUntil, filter } from 'rxjs/operators';
 
 import { CanvasTransformService } from '@shared/CanvasTransformService';
-import { Switch, Capacitor, Node, Edge, Regulator, Transformer } from '@shared/topology';
+import { Switch, Capacitor, Node, Edge, Regulator, Transformer, ConductingEquipmentType } from '@shared/topology';
 import { Tooltip } from '@shared/tooltip';
 import { SwitchControlMenu } from './views/switch-control-menu/SwitchControlMenu';
 import { CapacitorControlMenu } from './views/capacitor-control-menu/CapacitorControlMenu';
@@ -19,16 +19,17 @@ import { MatchedNodeLocator } from './views/matched-node-locator/MatchedNodeLoca
 import { showNotification } from '@shared/overlay/notification';
 import { StateStore } from '@shared/state-store';
 import { PortalRenderer } from '@shared/overlay/portal-renderer';
+import { SimulationOutputMeasurement } from '@shared/simulation';
 
 import './TopologyRenderer.light.scss';
 import './TopologyRenderer.dark.scss';
 
 interface Props {
   topology: RenderableTopology;
-  showWait: boolean;
+  simulationOutputMeasurements: SimulationOutputMeasurement[];
   onToggleSwitch: (swjtch: Switch, open: boolean) => void;
   onCapacitorControlMenuFormSubmitted: (currentCapacitor: Capacitor, updatedCapacitor: Capacitor) => void;
-  onRegulatorMenuFormSubmitted: (currentRegulator: Regulator, newRegulator: Regulator) => void;
+  onRegulatorControlMenuFormSubmitted: (currentRegulator: Regulator, newRegulator: Regulator) => void;
 }
 
 interface State {
@@ -70,6 +71,7 @@ export class TopologyRenderer extends React.Component<Props, State> {
   private _showNodeSymbols = false;
   private _tooltip: Tooltip;
   private _timer: any;
+  private _switches: Switch[];
 
   constructor(props: Props) {
     super(props);
@@ -96,6 +98,57 @@ export class TopologyRenderer extends React.Component<Props, State> {
     this._stateStore.update({
       nodeNameToLocate: ''
     });
+  }
+
+  shouldComponentUpdate(nextProps: Props) {
+    if (this.props.simulationOutputMeasurements !== nextProps.simulationOutputMeasurements) {
+      for (const measurement of nextProps.simulationOutputMeasurements) {
+        this._toggleSwitchesBasedOnSimulationOutputMeasurement(measurement);
+        this._toggleACLineSegmentsWithNoPower(measurement);
+      }
+      return false;
+    }
+    return true;
+  }
+
+  private _toggleSwitchesBasedOnSimulationOutputMeasurement(measurement: SimulationOutputMeasurement) {
+    for (const swjtch of this._switches) {
+      if (measurement.conductingEquipmentMRID === swjtch.mRIDs[0] && measurement.type === 'Pos') {
+        swjtch.open = measurement.value === 0;
+        const selections = this._svgSelection.selectAll(
+          `.topology-renderer__canvas__symbol.switch._${swjtch.name}_`
+          + ','
+          + `.topology-renderer__canvas__node.switch._${swjtch.name}_`
+        );
+        if (swjtch.open) {
+          selections.classed('closed', false);
+          selections.classed('open', true);
+        } else {
+          selections.classed('closed', true);
+          selections.classed('open', false);
+        }
+      }
+    }
+  }
+
+  private _toggleACLineSegmentsWithNoPower(measurement: SimulationOutputMeasurement) {
+    if (measurement.conductingEquipmentType === ConductingEquipmentType.ACLineSegment) {
+      const edge = this.props.topology.edges.find(e => e.name === measurement.conductingEquipmentName);
+      if (edge) {
+        const selections = this._containerSelection.selectAll(
+          `.topology-renderer__canvas__edge._${edge.name}_` + ','
+          + `.topology-renderer__canvas__node.${edge.from.type}._${edge.from.name}_` + ','
+          + `.topology-renderer__canvas__node.${edge.to.type}._${edge.to.name}_` + ','
+          + `.topology-renderer__canvas__symbol.${edge.from.type}._${edge.from.name}_` + ','
+          + `.topology-renderer__canvas__symbol.${edge.to.type}._${edge.to.name}_`
+        );
+        if (-0.3 <= measurement.magnitude && measurement.magnitude <= 0.3) {
+          selections.classed('no-power', true);
+        } else {
+          selections.classed('no-power', false);
+        }
+      }
+    }
   }
 
   componentDidMount() {
@@ -188,14 +241,10 @@ export class TopologyRenderer extends React.Component<Props, State> {
       map.set(edge.to.name, edge);
       return map;
     }, new Map<string, Edge>());
-    const nodeRadius = this._isModelLarge() ? 1 : 3;
+    const nodeRadius = this.isModelLarge() ? 1 : 3;
 
-    this._xScale.domain(
-      extent(topology.nodes, (d: Node) => d.x1)
-    );
-    this._yScale.domain(
-      extent(topology.nodes, (d: Node) => d.y1)
-    );
+    this._xScale.domain(extent(topology.nodes, (d: Node) => d.x1));
+    this._yScale.domain(extent(topology.nodes, (d: Node) => d.y1));
 
     this._resolveSymbolDimensions();
 
@@ -206,12 +255,11 @@ export class TopologyRenderer extends React.Component<Props, State> {
 
     const categories = this._categorizeNodes(topology.nodes);
 
-    this._containerSelection.selectAll('g')
-      .remove();
+    this._containerSelection.selectAll('g').remove();
 
     this._renderEdges(topology.edges);
 
-    if (!this._isModelLarge()) {
+    if (!this.isModelLarge()) {
       const container = create('svg:g') as Selection<SVGElement, any, SVGElement, any>;
       this._renderNonSwitchNodes(
         container,
@@ -300,12 +348,12 @@ export class TopologyRenderer extends React.Component<Props, State> {
       .appendChild(symbolContainers.node());
   }
 
-  private _isModelLarge() {
+  isModelLarge() {
     return this.props.topology.nodes.length >= 1000;
   }
 
   private _resolveSymbolDimensions() {
-    if (this._isModelLarge()) {
+    if (this.isModelLarge()) {
       this._scalingFactorPerSymbolTable.capacitor = 7;
       this._scalingFactorPerSymbolTable.transformer = 7;
       this._scalingFactorPerSymbolTable.regulator = 7;
@@ -376,15 +424,16 @@ export class TopologyRenderer extends React.Component<Props, State> {
           break;
       }
     }
+    this._switches = categories.switches;
     return categories;
   }
 
   private _renderEdges(edges: Edge[]) {
     const documentFragment = document.createDocumentFragment();
-    for (const edgeData of edges) {
+    for (const datum of edges) {
       const edge = create('svg:path')
-        .attr('class', 'topology-renderer__canvas__edge ' + edgeData.name)
-        .attr('d', this._edgeGenerator([edgeData.from, edgeData.to]));
+        .attr('class', `topology-renderer__canvas__edge _${datum.name}_`)
+        .attr('d', this._edgeGenerator([datum.from, datum.to]));
       documentFragment.appendChild(edge.node());
     }
 
@@ -430,15 +479,13 @@ export class TopologyRenderer extends React.Component<Props, State> {
       .attr('y1', node => node.screenY1)
       .attr('x2', node => node.screenX2)
       .attr('y2', node => node.screenY2)
-      .attr('class', 'topology-renderer__canvas__edge')
-      .attr('stroke-width', '0.2');
+      .attr('class', 'topology-renderer__canvas__edge');
 
     switches.append('circle')
       .attr('class', node => `topology-renderer__canvas__node switch _${node.name}_`)
       .attr('cx', node => node.midpointX)
       .attr('cy', node => node.midpointY)
-      .attr('r', nodeRadius)
-      .attr('fill', '#000');
+      .attr('r', nodeRadius);
   }
 
   private _renderRemainingNonSwitchSymbols(
@@ -515,8 +562,7 @@ export class TopologyRenderer extends React.Component<Props, State> {
       `M\${startingPoint}
        a${_50PercentHeight} ${_50PercentHeight} 0 1 1 ${width} 0
        a${_50PercentHeight} ${_50PercentHeight} 0 1 1 -${width} 0`
-    )
-      .attr('stroke-width', this._isModelLarge() ? 0.2 : 0.4);
+    );
   }
 
   private _renderNonSwitchSymbols(
@@ -525,23 +571,25 @@ export class TopologyRenderer extends React.Component<Props, State> {
     nodeNameToEdgeMap: Map<string, Edge>,
     shapeTemplate: string
   ) {
-    if (!shapeTemplate.includes('${startingPoint}')) {
-      throw new Error(`Symbol's path template must contain \${startingPoint} place holder`);
-    }
+    if (nodes.length > 0) {
+      if (!shapeTemplate.includes('${startingPoint}')) {
+        throw new Error(`Symbol's path template must contain \${startingPoint} place holder`);
+      }
 
-    const nodeType = nodes[0]?.type;
-    return container.append('g')
-      .attr('class', `${nodeType}-symbol-container`)
-      .selectAll(`.topology-renderer__canvas__symbol.${nodeType}`)
-      .data(nodes)
-      .enter()
-      .append('g')
-      .attr('class', `topology-renderer__canvas__symbol ${nodeType}`)
-      .style('transform-origin', this._calculateSymbolTransformOrigin)
-      .style('transform', node => this._calculateSymbolTransform(node, nodeNameToEdgeMap))
-      .append('path')
-      .attr('class', `topology-renderer__canvas__symbol ${nodeType}`)
-      .attr('d', node => shapeTemplate.replace('${startingPoint}', `${node.screenX1},${node.screenY1}`));
+      const nodeType = nodes[0].type;
+      container.append('g')
+        .attr('class', `${nodeType}-symbol-container`)
+        .selectAll(`.topology-renderer__canvas__symbol.${nodeType}`)
+        .data(nodes)
+        .enter()
+        .append('g')
+        .attr('class', `topology-renderer__canvas__symbol ${nodeType}`)
+        .style('transform-origin', this._calculateSymbolTransformOrigin)
+        .style('transform', node => this._calculateSymbolTransform(node, nodeNameToEdgeMap))
+        .append('path')
+        .attr('class', `topology-renderer__canvas__symbol ${nodeType}`)
+        .attr('d', node => shapeTemplate.replace('${startingPoint}', `${node.screenX1},${node.screenY1}`));
+    }
   }
 
   private _renderRegulatorSymbols(
@@ -572,9 +620,9 @@ export class TopologyRenderer extends React.Component<Props, State> {
         m-${_50PercentWidth},-${_170PercentHeight}
         l${_25PercentWidth},${2 * (_170PercentHeight)}
       `
-    )
-      .attr('marker-end', 'url(#arrow)')
-      .attr('stroke-width', this._isModelLarge() ? 0.2 : 0.4);
+    );
+    container.selectAll('.topology-renderer__canvas__symbol.regulator')
+      .attr('marker-end', 'url(#arrow)');
   }
 
   private _renderCapacitorSymbols(
@@ -601,8 +649,7 @@ export class TopologyRenderer extends React.Component<Props, State> {
         m0,${_50PercentHeight}
         h${_45PercentWidth}
       `
-    )
-      .attr('stroke-width', this._isModelLarge() ? 0.3 : 0.6);
+    );
   }
 
   private _renderTransformerSymbols(
@@ -640,15 +687,14 @@ export class TopologyRenderer extends React.Component<Props, State> {
         v${_12Point5PercentHeight}
         h${halfOf45PercentWidth}
       `
-    )
-      .attr('stroke-width', this._isModelLarge() ? 0.3 : 0.6);
+    );
   }
 
   private _renderSwitchSymbols(
     container: Selection<SVGElement, any, SVGElement, any>,
     switchNodes: Switch[]
   ) {
-    if (this._isModelLarge()) {
+    if (this.isModelLarge()) {
       this._symbolDimensions.switch.width = 3;
       this._symbolDimensions.switch.height = 3;
     }
@@ -675,12 +721,11 @@ export class TopologyRenderer extends React.Component<Props, State> {
       .attr('stroke', '#000');
 
     switches.append('rect')
-      .attr('class', node => `topology-renderer__canvas__symbol switch _${node.name}_`)
+      .attr('class', node => `topology-renderer__canvas__symbol switch _${node.name}_ ${node.open ? 'open' : 'closed'}`)
       .attr('x', node => node.midpointX - halfWidth)
       .attr('y', node => node.midpointY - halfHeight)
       .attr('width', width)
       .attr('height', height)
-      .attr('fill', node => node.open ? node.colorWhenOpen : node.colorWhenClosed)
       .attr('transform', node => {
         if (!node.from || !node.to) {
           return 'rotate(0) translate(0, 0)';
@@ -697,7 +742,7 @@ export class TopologyRenderer extends React.Component<Props, State> {
 
   render() {
     return (
-      <div className='topology-renderer'>
+      <div className={`topology-renderer ${this.isModelLarge() ? 'large' : 'small'}`}>
         <svg
           ref={this.svgRef}
           width='10000'
@@ -815,7 +860,7 @@ export class TopologyRenderer extends React.Component<Props, State> {
         regulator={regulator}
         onAfterClosed={portalRenderer.unmount}
         onSubmit={updatedRegulator => {
-          this.props.onRegulatorMenuFormSubmitted(regulator, updatedRegulator);
+          this.props.onRegulatorControlMenuFormSubmitted(regulator, updatedRegulator);
         }} />
     );
   }
@@ -876,7 +921,7 @@ export class TopologyRenderer extends React.Component<Props, State> {
     const locatedElement = this.svgRef.current.querySelector(`.topology-renderer__canvas__node.${node.type}._${node.name}_`) as SVGCircleElement;
     if (locatedElement) {
       if (this.canvasTransformService.getCurrentZoomLevel() < 3) {
-        this.canvasTransformService.setZoomLevel(this._isModelLarge() ? 6 : 3);
+        this.canvasTransformService.setZoomLevel(this.isModelLarge() ? 6 : 3);
       }
       const nodeBoundingBox = locatedElement.getBoundingClientRect();
       this.canvasTransformService.zoomToPosition(nodeBoundingBox.left, nodeBoundingBox.top)

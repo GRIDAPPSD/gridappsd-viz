@@ -12,7 +12,6 @@ export class FilePickerService {
     return FilePickerService._INSTANCE;
   }
 
-
   constructor() {
   }
 

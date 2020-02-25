@@ -26,6 +26,7 @@ import {
 import { StateStore, ApplicationState } from '@shared/state-store';
 import { DEFAULT_APPLICATION_STATE } from './models/default-application-state';
 import { AuthenticatorService } from '@shared/authenticator';
+import { ConductingEquipmentType } from '@shared/topology/model-dictionary';
 
 import './App.light.scss';
 import './App.dark.scss';
@@ -281,7 +282,7 @@ export class AppContainer extends React.Component<Props, State> {
           id,
           name,
           conductingEquipmentName: measurement.ConductingEquipment_name,
-          conductingEquipmentType: measurement.ConductingEquipment_type,
+          conductingEquipmentType: measurement.ConductingEquipment_type as ConductingEquipmentType,
           displayName: '',
           phases: [],
           conductingEquipmentMRIDs: [],

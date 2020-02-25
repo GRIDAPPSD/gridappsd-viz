@@ -7,6 +7,7 @@ import { StateStore } from '@shared/state-store';
 import { CommOutageEventSummary } from './comm-outage/CommOutageEventSummary';
 import { FaultEventSummary } from './fault/FaultEventSummary';
 import { CommandEventSummary } from './command/CommandEventSummary';
+import { MessageBanner } from '@shared/overlay/message-banner';
 
 import './EventSummary.light.scss';
 import './EventSummary.dark.scss';
@@ -68,6 +69,13 @@ export class EventSummary extends React.Component<Props, State> {
   }
 
   render() {
+    if (this.state.outageEvents.length === 0 && this.state.faultEvents.length === 0 && this.state.commandEvents.length === 0) {
+      return (
+        <MessageBanner>
+          No data available
+        </MessageBanner>
+      );
+    }
     return (
       <div className='event-summary'>
         {

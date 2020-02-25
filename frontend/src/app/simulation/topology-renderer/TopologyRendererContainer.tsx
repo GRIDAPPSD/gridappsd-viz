@@ -7,7 +7,8 @@ import { TopologyRenderer } from './TopologyRenderer';
 import {
   SimulationQueue,
   SimulationConfiguration,
-  DEFAULT_SIMULATION_CONFIGURATION
+  DEFAULT_SIMULATION_CONFIGURATION,
+  SimulationOutputMeasurement
 } from '@shared/simulation';
 import { StompClientService } from '@shared/StompClientService';
 import {
@@ -41,6 +42,7 @@ interface Props {
 interface State {
   topology: RenderableTopology;
   isFetching: boolean;
+  simulationOutputMeasurements: SimulationOutputMeasurement[];
 }
 
 const topologyModelCache = new Map<string, TopologyModel>();
@@ -68,19 +70,20 @@ export class TopologyRendererContainer extends React.Component<Props, State> {
         edges: [],
         inverted: false
       },
-      isFetching: true
+      isFetching: true,
+      simulationOutputMeasurements: []
     };
 
     this.activeSimulationConfig = this._simulationQueue.getActiveSimulation()?.config || DEFAULT_SIMULATION_CONFIGURATION;
 
     this.onToggleSwitchState = this.onToggleSwitchState.bind(this);
     this.onCapacitorControlMenuFormSubmitted = this.onCapacitorControlMenuFormSubmitted.bind(this);
-    this.onRegulatorMenuFormSubmitted = this.onRegulatorMenuFormSubmitted.bind(this);
+    this.onRegulatorControlMenuFormSubmitted = this.onRegulatorControlMenuFormSubmitted.bind(this);
   }
 
   componentDidMount() {
     this._activeSimulationStream = this._observeActiveSimulationChangeEvent();
-    this._simulationOutputStream = this._toggleSwitchesOnOutputMeasurementsReceived();
+    this._simulationOutputStream = this._subscribeToSimulationOutputMeasurementStream();
     this._simulationSnapshotStream = this._updateRenderableTopologyOnSimulationSnapshotReceived();
   }
 
@@ -223,8 +226,6 @@ export class TopologyRendererContainer extends React.Component<Props, State> {
             open: node.open === 'open',
             screenX2: 0,
             screenY2: 0,
-            colorWhenOpen: '#4aff4a',
-            colorWhenClosed: '#f00',
             mRIDs: resolvedMRIDs
           }) as Switch;
           renderableTopology.nodes.push(swjtch);
@@ -365,19 +366,13 @@ export class TopologyRendererContainer extends React.Component<Props, State> {
     }
   }
 
-  private _toggleSwitchesOnOutputMeasurementsReceived() {
+  private _subscribeToSimulationOutputMeasurementStream() {
     return this._simulationControlService.simulationOutputMeasurementsReceived()
       .subscribe({
         next: measurements => {
-          for (const swjtch of this._switches) {
-            measurements.forEach(measurement => {
-              if (measurement.conductingEquipmentMRID === swjtch.mRIDs[0] && measurement.type === 'Pos') {
-                swjtch.open = measurement.value === 0;
-              }
-            });
-            const switchSymbol = document.querySelector(`.topology-renderer__canvas__symbol.switch._${swjtch.name}_`);
-            switchSymbol?.setAttribute('fill', swjtch.open ? swjtch.colorWhenOpen : swjtch.colorWhenClosed);
-          }
+          this.setState({
+            simulationOutputMeasurements: [...measurements.values()]
+          });
         }
       });
   }
@@ -409,10 +404,10 @@ export class TopologyRendererContainer extends React.Component<Props, State> {
       <>
         <TopologyRenderer
           topology={this.state.topology}
-          showWait={this.state.isFetching}
+          simulationOutputMeasurements={this.state.simulationOutputMeasurements}
           onToggleSwitch={this.onToggleSwitchState}
           onCapacitorControlMenuFormSubmitted={this.onCapacitorControlMenuFormSubmitted}
-          onRegulatorMenuFormSubmitted={this.onRegulatorMenuFormSubmitted} />
+          onRegulatorControlMenuFormSubmitted={this.onRegulatorControlMenuFormSubmitted} />
         <ProgressIndicator show={this.state.isFetching} />
       </>
     );
@@ -524,7 +519,7 @@ export class TopologyRendererContainer extends React.Component<Props, State> {
     });
   }
 
-  onRegulatorMenuFormSubmitted(currentRegulator: Regulator, updatedRegulator: Regulator) {
+  onRegulatorControlMenuFormSubmitted(currentRegulator: Regulator, updatedRegulator: Regulator) {
     if (currentRegulator.controlMode !== updatedRegulator.controlMode) {
       this._toggleRegulatorManualMode(updatedRegulator);
     }

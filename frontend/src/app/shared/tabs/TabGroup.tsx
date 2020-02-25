@@ -86,7 +86,6 @@ export class TabGroup extends React.Component<Props, State> {
                 tabs.map((tab, index) => (
                   <div
                     key={index}
-                    id={`tab-content-${index}`}
                     className='tab-content'
                     style={{
                       opacity: activeTabIndex === index || previousTabIndex === index ? 1 : 0
