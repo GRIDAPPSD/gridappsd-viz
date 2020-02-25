@@ -32,8 +32,6 @@ export class Dialog extends React.Component<Props, State> {
   componentDidMount() {
     if (this.props.show) {
       this._shiftIntoViewIfOverflowScreen();
-    } else {
-      this.dialogRef.current.parentElement.style.display = 'none';
     }
   }
 
@@ -42,7 +40,7 @@ export class Dialog extends React.Component<Props, State> {
       if (this.props.children !== (prevProps as any).children) {
         this.dialogRef.current.style.top = `${this.props.top}px`;
       }
-      this.dialogRef.current.parentElement.style.display = '';
+      this.dialogRef.current.parentElement.classList.add('active');
       this._shiftIntoViewIfOverflowScreen();
     }
   }
@@ -86,7 +84,7 @@ export class Dialog extends React.Component<Props, State> {
     if (!this.props.show) {
       this.props.onAfterClosed?.();
       if (this.dialogRef.current) {
-        this.dialogRef.current.parentElement.style.display = 'none';
+        this.dialogRef.current.parentElement.classList.remove('active');
       }
     }
   }
