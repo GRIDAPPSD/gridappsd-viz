@@ -16,22 +16,27 @@
 }
 
 .drawer-items {
-    transition: transform 600ms cubic-bezier(0, 0.61, 0.2, 1.01);
+    transition-timing-function: cubic-bezier(0, 0.61, 0.2, 1.01);
+    transition-duration: 550ms;
+    transition-property: transform, visibility, box-shadow;
     z-index: 24;
     position: relative;
     top: 0;
-    left: -360px;
+    left: -105%;
     height: 100vh;
     margin: 0;
     padding: 0;
     padding-top: 40px;
     overflow: hidden auto;
+    visibility: hidden;
 }
 
 .drawer.closed>.drawer-items {
-    transform: translate(0, 0);
+    transform: translateX(0);
+    visibility: hidden;
 }
 
-.drawer.opened>.drawer-items {
-    transform: translate(100%, 0);
+.drawer.open>.drawer-items {
+    transform: translateX(105%);
+    visibility: visible;
 }

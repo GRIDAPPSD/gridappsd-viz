@@ -1,4 +1,4 @@
-export const enum ModelDictionaryComponentType {
+export const enum ModelDictionaryMeasurementType {
   TAP = 'Pos',
   VOLTAGE = 'PNV',
   POWER = 'VA',

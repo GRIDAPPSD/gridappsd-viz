@@ -3,6 +3,75 @@
     width: 100%;
     position: relative;
     overflow: hidden;
+
+    &.small {
+
+        .topology-renderer__canvas__edge.no-power {
+            stroke-width: 2px;
+        }
+
+        .topology-renderer__canvas__symbol.substation {
+            stroke-width: 0.4px;
+
+            &.no-power {
+                stroke-width: 1px;
+            }
+        }
+
+        .topology-renderer__canvas__symbol.regulator {
+            stroke-width: 0.4px;
+
+            &.no-power {
+                stroke-width: 0.8px;
+            }
+        }
+
+        .topology-renderer__canvas__symbol.capacitor,
+        .topology-renderer__canvas__symbol.transformer {
+            stroke-width: 0.6px;
+
+            &.no-power {
+                stroke-width: 1px;
+            }
+        }
+    }
+
+    &.large {
+
+        .topology-renderer__canvas__edge.no-power {
+            stroke-width: 1px;
+        }
+
+        .topology-renderer__canvas__symbol.substation,
+        .topology-renderer__canvas__symbol.regulator {
+            stroke-width: 0.2px;
+
+            &.no-power {
+                stroke-width: 0.4px;
+            }
+        }
+
+        .topology-renderer__canvas__symbol.capacitor,
+        .topology-renderer__canvas__symbol.transformer {
+            stroke-width: 0.3px;
+
+            &.no-power {
+                stroke-width: 0.6px;
+            }
+
+        }
+
+    }
+
+    .topology-renderer__canvas__symbol.regulator {
+        marker-end: url(#arrow);
+
+        &.no-power {
+            marker-end: url(#red-arrow);
+        }
+
+    }
+
 }
 
 .topology-renderer__canvas {
@@ -30,6 +99,7 @@
 .topology-renderer__canvas__edge {
     stroke-width: 0.2px;
     fill: none;
+    stroke-linecap: round;
 }
 
 .topology-renderer__canvas__symbol__image {

@@ -5,7 +5,7 @@ import { takeUntil, filter } from 'rxjs/operators';
 import { SimulationQueue, SimulationControlService, SimulationOutputMeasurement } from '@shared/simulation';
 import { SimulationStatus } from '@commons/SimulationStatus';
 import { MeasurementValueTable } from './MeasurementValueTable';
-import { ModelDictionaryComponentType } from '@shared/topology';
+import { ModelDictionaryMeasurementType } from '@shared/topology';
 
 interface Props {
 }
@@ -118,7 +118,7 @@ export class MeasurementValueTableContainer extends React.Component<Props, State
             // Getting values for taps
             simulationOutputMeasurements.forEach(measurement => {
               if (
-                measurement.type === ModelDictionaryComponentType.TAP &&
+                measurement.type === ModelDictionaryMeasurementType.TAP &&
                 measurement.conductingEquipmentName.includes(nodeName) &&
                 phases.includes(measurement.phases) &&
                 // Discard measurements with duplicate phases
@@ -132,7 +132,7 @@ export class MeasurementValueTableContainer extends React.Component<Props, State
               simulationOutputMeasurements.forEach(measurement => {
                 // Getting measurements for voltages
                 if (
-                  measurement.type === ModelDictionaryComponentType.VOLTAGE &&
+                  measurement.type === ModelDictionaryMeasurementType.VOLTAGE &&
                   measurements.taps[0]?.connectivityNode === measurement.connectivityNode &&
                   phases.includes(measurement.phases) &&
                   // Discard measurements with duplicate phases
@@ -143,7 +143,7 @@ export class MeasurementValueTableContainer extends React.Component<Props, State
 
                 // Getting measurements for powers
                 if (
-                  measurement.type === ModelDictionaryComponentType.POWER &&
+                  measurement.type === ModelDictionaryMeasurementType.POWER &&
                   measurement.conductingEquipmentName === 'hvmv_sub' &&
                   phases.includes(measurement.phases) &&
                   // Discard measurements with duplicate phases

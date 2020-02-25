@@ -15,3 +15,4 @@ export * from './FeederModel';
 export * from './RegulatorControlMode';
 export * from './CapacitorControlMode';
 export * from './model-dictionary';
+export * from './Substation';

@@ -9,14 +9,14 @@ interface Props {
 }
 
 interface State {
-  isOpened: boolean;
+  isOpen: boolean;
 }
 export class Drawer extends React.Component<Props, State> {
 
   constructor(props: any) {
     super(props);
     this.state = {
-      isOpened: false
+      isOpen: false
     };
 
     this.open = this.open.bind(this);
@@ -24,13 +24,13 @@ export class Drawer extends React.Component<Props, State> {
   }
 
   shouldComponentUpdate(_, nextState: State) {
-    return this.state.isOpened !== nextState.isOpened;
+    return this.state.isOpen !== nextState.isOpen;
   }
 
   render() {
     return (
-      <div className={'drawer' + (this.state.isOpened ? ' opened' : ' closed')}>
-        <Backdrop visible={this.state.isOpened} onClick={this.close} />
+      <div className={`drawer ${this.state.isOpen ? 'open' : 'closed'}`}>
+        <Backdrop visible={this.state.isOpen} onClick={this.close} />
         <ul className='drawer-items' onClick={this.close}>
           {this.props.children}
         </ul>
@@ -39,11 +39,15 @@ export class Drawer extends React.Component<Props, State> {
   }
 
   open() {
-    this.setState({ isOpened: true });
+    this.setState({
+      isOpen: true
+    });
   }
 
   close() {
-    this.setState({ isOpened: false });
+    this.setState({
+      isOpen: false
+    });
   }
 
 }

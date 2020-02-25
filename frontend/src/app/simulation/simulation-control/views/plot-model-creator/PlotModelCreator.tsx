@@ -11,7 +11,7 @@ import {
   FormControlModel,
   Form
 } from '@shared/form';
-import { ModelDictionaryComponentType, ModelDictionaryComponent } from '@shared/topology';
+import { ModelDictionaryMeasurementType, ModelDictionaryComponent } from '@shared/topology';
 import { PlotModelSummary } from './PlotModelSummary';
 import { PlotModel, PlotModelComponent } from '@shared/plot-model';
 import { Validators } from '@shared/form/validation';
@@ -30,7 +30,7 @@ interface State {
   show: boolean;
   createdPlotModels: PlotModel[];
   allPlotModelOptionBuilder: SelectionOptionBuilder<PlotModel>;
-  componentTypeOptionBuilder: SelectionOptionBuilder<ModelDictionaryComponentType>;
+  measurementTypeOptionBuilder: SelectionOptionBuilder<ModelDictionaryMeasurementType>;
   componentOptionBuilder: SelectionOptionBuilder<ModelDictionaryComponent>;
   phaseOptionBuilder: SelectionOptionBuilder<string>;
   disableAddComponentButton: boolean;
@@ -41,7 +41,7 @@ export class PlotModelCreator extends React.Component<Props, State> {
 
   // FormControlModel bound to the component selected in the "Created plots" dropdown
   readonly selectedPlotModelFormControl = new FormControlModel<PlotModel>(null);
-  readonly selectedComponentTypeFormControl = new FormControlModel(ModelDictionaryComponentType.NONE);
+  readonly selectedMeasurementTypeFormControl = new FormControlModel(ModelDictionaryMeasurementType.NONE);
   readonly useMagnitudeFormControl = new FormControlModel(false);
   readonly useAngleFormControl = new FormControlModel(false);
   readonly selectedComponentFormControl = new FormControlModel<ModelDictionaryComponent>(null);
@@ -56,19 +56,19 @@ export class PlotModelCreator extends React.Component<Props, State> {
         props.existingPlotModels,
         plotModel => plotModel.name
       ),
-      componentTypeOptionBuilder: new SelectionOptionBuilder(
+      measurementTypeOptionBuilder: new SelectionOptionBuilder(
         [
-          ModelDictionaryComponentType.POWER,
-          ModelDictionaryComponentType.TAP,
-          ModelDictionaryComponentType.VOLTAGE
+          ModelDictionaryMeasurementType.POWER,
+          ModelDictionaryMeasurementType.TAP,
+          ModelDictionaryMeasurementType.VOLTAGE
         ],
         type => {
           switch (type) {
-            case ModelDictionaryComponentType.POWER:
+            case ModelDictionaryMeasurementType.POWER:
               return 'Power';
-            case ModelDictionaryComponentType.TAP:
+            case ModelDictionaryMeasurementType.TAP:
               return 'Tap';
-            case ModelDictionaryComponentType.VOLTAGE:
+            case ModelDictionaryMeasurementType.VOLTAGE:
               return 'Voltage';
             default:
               return '';
@@ -92,16 +92,16 @@ export class PlotModelCreator extends React.Component<Props, State> {
     const selectedPhasesFormControl = new FormControlModel<string[]>([]);
     const formGroupModel = new FormGroupModel({
       name: new FormControlModel('', [Validators.checkNotEmpty('Plot name')]),
-      componentType: this.selectedComponentTypeFormControl,
+      componentType: this.selectedMeasurementTypeFormControl,
       useMagnitude: this.useMagnitudeFormControl,
       useAngle: this.useAngleFormControl,
       component: this.selectedComponentFormControl,
       phases: selectedPhasesFormControl
     });
-    this.selectedComponentTypeFormControl.dependsOn(formGroupModel.findControl('name'));
-    this.useMagnitudeFormControl.dependsOn(this.selectedComponentTypeFormControl);
-    this.useAngleFormControl.dependsOn(this.selectedComponentTypeFormControl);
-    this.selectedComponentFormControl.dependsOn(this.selectedComponentTypeFormControl);
+    this.selectedMeasurementTypeFormControl.dependsOn(formGroupModel.findControl('name'));
+    this.useMagnitudeFormControl.dependsOn(this.selectedMeasurementTypeFormControl);
+    this.useAngleFormControl.dependsOn(this.selectedMeasurementTypeFormControl);
+    this.selectedComponentFormControl.dependsOn(this.selectedMeasurementTypeFormControl);
     selectedPhasesFormControl.dependsOn(this.selectedComponentFormControl);
     return formGroupModel;
   }
@@ -127,8 +127,8 @@ export class PlotModelCreator extends React.Component<Props, State> {
         next: selectedPlotModel => {
           if (selectedPlotModel) {
             this.currentPlotModelFormGroup.findControl('name').setValue(selectedPlotModel.name);
-            this.selectedComponentTypeFormControl.setValue(selectedPlotModel.componentType);
-            this.selectedComponentTypeFormControl.disable();
+            this.selectedMeasurementTypeFormControl.setValue(selectedPlotModel.measurementType);
+            this.selectedMeasurementTypeFormControl.disable();
             this.useMagnitudeFormControl.setValue(selectedPlotModel.useMagnitude);
             this.useMagnitudeFormControl.disable();
             this.useAngleFormControl.setValue(selectedPlotModel.useAngle);
@@ -146,25 +146,25 @@ export class PlotModelCreator extends React.Component<Props, State> {
           if (plotNameFormControl.isValid()) {
             const existingPlotModel = this.state.createdPlotModels.find(e => e.name === newName);
             if (existingPlotModel !== undefined) {
-              this.selectedComponentTypeFormControl.setValue(existingPlotModel.componentType);
+              this.selectedMeasurementTypeFormControl.setValue(existingPlotModel.measurementType);
               this.setState({
                 componentOptionBuilder: new SelectionOptionBuilder(
-                  this.props.modelDictionaryComponentsWithConsolidatedPhases.filter(e => e.type === existingPlotModel.componentType),
+                  this.props.modelDictionaryComponentsWithConsolidatedPhases.filter(e => e.type === existingPlotModel.measurementType),
                   e => e.displayName
                 ),
                 phaseOptionBuilder: SelectionOptionBuilder.defaultBuilder()
               });
-              this.selectedComponentTypeFormControl.disable();
+              this.selectedMeasurementTypeFormControl.disable();
               this.selectedComponentFormControl.enable();
             } else {
-              this.selectedComponentTypeFormControl.reset();
+              this.selectedMeasurementTypeFormControl.reset();
               this.setState({
                 componentOptionBuilder: SelectionOptionBuilder.defaultBuilder(),
                 phaseOptionBuilder: SelectionOptionBuilder.defaultBuilder()
               });
             }
           } else {
-            this.selectedComponentTypeFormControl.reset();
+            this.selectedMeasurementTypeFormControl.reset();
             plotNameFormControl.disable();
           }
         }
@@ -172,13 +172,13 @@ export class PlotModelCreator extends React.Component<Props, State> {
   }
 
   private _onComponentTypeSelectionChange() {
-    this.selectedComponentTypeFormControl
+    this.selectedMeasurementTypeFormControl
       .valueChanges()
       .subscribe({
         next: selectedType => {
           this.useMagnitudeFormControl.reset();
           this.useAngleFormControl.reset();
-          if (this.selectedComponentTypeFormControl.isValid()) {
+          if (this.selectedMeasurementTypeFormControl.isValid()) {
             this.setState({
               componentOptionBuilder: new SelectionOptionBuilder(
                 this.props.modelDictionaryComponentsWithConsolidatedPhases.filter(e => e.type === selectedType),
@@ -186,7 +186,7 @@ export class PlotModelCreator extends React.Component<Props, State> {
               ),
               phaseOptionBuilder: SelectionOptionBuilder.defaultBuilder()
             });
-            if (selectedType === ModelDictionaryComponentType.TAP) {
+            if (selectedType === ModelDictionaryMeasurementType.TAP) {
               this.useMagnitudeFormControl.disable();
               this.useAngleFormControl.disable();
             } else {
@@ -244,7 +244,7 @@ export class PlotModelCreator extends React.Component<Props, State> {
               <Select
                 label='Component type'
                 selectedOptionFinder={type => type === this.currentPlotModelFormGroup.findControl('componentType').getValue()}
-                selectionOptionBuilder={this.state.componentTypeOptionBuilder}
+                selectionOptionBuilder={this.state.measurementTypeOptionBuilder}
                 formControlModel={this.currentPlotModelFormGroup.findControl('componentType')} />
               <Checkbox
                 label='Magnitude'
@@ -312,7 +312,7 @@ export class PlotModelCreator extends React.Component<Props, State> {
     if (this.currentPlotModelFormGroup.getValue().name === plotModelToRemove.name) {
       this.currentPlotModelFormGroup.reset();
       this.setState({
-        componentTypeOptionBuilder: SelectionOptionBuilder.defaultBuilder(),
+        measurementTypeOptionBuilder: SelectionOptionBuilder.defaultBuilder(),
         componentOptionBuilder: SelectionOptionBuilder.defaultBuilder(),
         phaseOptionBuilder: SelectionOptionBuilder.defaultBuilder()
       });
@@ -370,7 +370,7 @@ export class PlotModelCreator extends React.Component<Props, State> {
       phaseOptionBuilder: SelectionOptionBuilder.defaultBuilder(),
       disableSubmitButton: updatedPlotModels.length === 0
     });
-    this.selectedComponentTypeFormControl.disable();
+    this.selectedMeasurementTypeFormControl.disable();
     this.useMagnitudeFormControl.disable();
     this.useAngleFormControl.disable();
     this.selectedComponentFormControl.reset();
@@ -381,7 +381,7 @@ export class PlotModelCreator extends React.Component<Props, State> {
     return {
       name: formValue.name,
       components: [],
-      componentType: formValue.componentType,
+      measurementType: formValue.componentType,
       useMagnitude: formValue.useMagnitude,
       useAngle: formValue.useAngle
     };
@@ -398,12 +398,12 @@ export class PlotModelCreator extends React.Component<Props, State> {
         const plotModelUsingAngle = this._createNewPlotModel();
         plotModelUsingMagnitude.name = createdPlotModel.name + ' (Magnitude)';
         plotModelUsingMagnitude.components = createdPlotModel.components;
-        plotModelUsingMagnitude.componentType = createdPlotModel.componentType;
+        plotModelUsingMagnitude.measurementType = createdPlotModel.measurementType;
         plotModelUsingMagnitude.useMagnitude = true;
         plotModelUsingMagnitude.useAngle = false;
 
         plotModelUsingAngle.name = createdPlotModel.name + ' (Angle)';
-        plotModelUsingAngle.componentType = createdPlotModel.componentType;
+        plotModelUsingAngle.measurementType = createdPlotModel.measurementType;
         plotModelUsingAngle.useAngle = true;
         plotModelUsingAngle.useMagnitude = false;
         plotModelUsingAngle.components = createdPlotModel.components;
