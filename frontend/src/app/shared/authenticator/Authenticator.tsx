@@ -4,7 +4,7 @@ import { Observable } from 'rxjs';
 import { LoginScreen } from './views/login-screen/LoginScreen';
 import { AuthenticationStatusCode } from './models/AuthenticationStatusCode';
 import { AuthenticationResult } from './models/AuthenticationResult';
-import { Notification } from '@shared/notification';
+import { Notification } from '@shared/overlay/notification';
 
 interface Props {
   authenticationResult: AuthenticationResult;

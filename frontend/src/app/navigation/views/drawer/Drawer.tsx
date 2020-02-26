@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { Backdrop } from '@shared/backdrop';
+import { Backdrop } from '@shared/overlay/backdrop';
 
 import './Drawer.light.scss';
 import './Drawer.dark.scss';

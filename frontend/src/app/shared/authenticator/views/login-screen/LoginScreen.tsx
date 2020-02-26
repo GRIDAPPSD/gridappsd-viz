@@ -5,7 +5,7 @@ import { Input, Form, FormGroupModel, FormControlModel } from '@shared/form';
 import { BasicButton, IconButton } from '@shared/buttons';
 import { Validators } from '@shared/form/validation';
 import { Tooltip } from '@shared/tooltip';
-import { Wait } from '@shared/wait';
+import { ProgressIndicator } from '@shared/overlay/progress-indicator';
 
 import './LoginScreen.light.scss';
 import './LoginScreen.dark.scss';
@@ -84,7 +84,7 @@ export class LoginScreen extends React.Component<Props, State> {
             disabled={!this.formGroupModel.isValid()}
             onClick={this.login} />
         </Form>
-        <Wait show={this.state.showSpinner} />
+        <ProgressIndicator show={this.state.showSpinner} />
       </div>
     );
   }

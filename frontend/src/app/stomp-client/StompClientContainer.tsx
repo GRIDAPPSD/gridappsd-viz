@@ -5,8 +5,8 @@ import { map } from 'rxjs/operators';
 import { StompClientService, StompClientConnectionStatus } from '@shared/StompClientService';
 import { StompClient } from './StompClient';
 import { download, DownloadType } from '@shared/misc';
-import { MessageBanner } from '@shared/message-banner';
-import { showNotification } from '@shared/notification';
+import { MessageBanner } from '@shared/overlay/message-banner';
+import { showNotification } from '@shared/overlay/notification';
 
 interface Props {
 }

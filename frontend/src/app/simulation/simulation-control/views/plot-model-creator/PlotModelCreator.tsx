@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { Dialog, DialogContent, DialogActionGroup } from '@shared/dialog';
+import { Dialog, DialogContent, DialogActionGroup } from '@shared/overlay/dialog';
 import { BasicButton } from '@shared/buttons';
 import {
   Input,

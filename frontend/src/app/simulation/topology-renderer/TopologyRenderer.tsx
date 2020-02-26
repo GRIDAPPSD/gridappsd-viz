@@ -16,9 +16,9 @@ import { RenderableTopology } from './models/RenderableTopology';
 import { IconButton } from '@shared/buttons';
 import { NodeSearcher } from './views/node-searcher/NodeSearcher';
 import { MatchedNodeLocator } from './views/matched-node-locator/MatchedNodeLocator';
-import { showNotification } from '@shared/notification';
+import { showNotification } from '@shared/overlay/notification';
 import { StateStore } from '@shared/state-store';
-import { PortalRenderer } from '@shared/portal-renderer';
+import { PortalRenderer } from '@shared/overlay/portal-renderer';
 
 import './TopologyRenderer.light.scss';
 import './TopologyRenderer.dark.scss';

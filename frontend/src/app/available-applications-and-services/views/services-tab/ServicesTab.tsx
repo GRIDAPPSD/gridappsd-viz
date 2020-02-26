@@ -1,7 +1,7 @@
 import * as React from 'react';
 
 import { Service, ServiceConfigUserInputSpec } from '@shared/Service';
-import { MessageBanner } from '@shared/message-banner';
+import { MessageBanner } from '@shared/overlay/message-banner';
 
 import './ServicesTab.light.scss';
 import './ServicesTab.dark.scss';
