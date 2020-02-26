@@ -1,7 +1,7 @@
 import * as React from 'react';
 
-import { Backdrop } from '@shared/backdrop';
-import { PortalRenderer } from '@shared/portal-renderer';
+import { Backdrop } from '@shared/overlay/backdrop';
+import { PortalRenderer } from '@shared/overlay/portal-renderer';
 import { Fade } from '@shared/fade';
 import { Input, FormControlModel } from '@shared/form';
 import { IconButton } from '@shared/buttons';

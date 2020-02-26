@@ -9,7 +9,7 @@ import { PlotModelCreator } from './views/plot-model-creator/PlotModelCreator';
 import { ModelDictionaryComponent } from '@shared/topology';
 import { copyToClipboard } from '@shared/misc';
 import { Restricted } from '@shared/authenticator';
-import { PortalRenderer } from '@shared/portal-renderer';
+import { PortalRenderer } from '@shared/overlay/portal-renderer';
 
 import './SimulationControl.light.scss';
 import './SimulationControl.dark.scss';

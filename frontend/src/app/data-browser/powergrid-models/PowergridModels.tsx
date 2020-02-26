@@ -7,7 +7,7 @@ import {
 } from './models/QueryPowerGridModelsRequest';
 import { TextArea, Select, SelectionOptionBuilder, FormGroupModel, FormControlModel, Form } from '@shared/form';
 import { BasicButton } from '@shared/buttons';
-import { Wait } from '@shared/wait';
+import { ProgressIndicator } from '@shared/overlay/progress-indicator';
 import { FeederModelLine } from '@shared/topology';
 import { Validators } from '@shared/form/validation';
 
@@ -158,7 +158,7 @@ export class PowerGridModels extends React.Component<Props, State> {
               {this.state.response}
             </Response>
           }
-          <Wait show={!this.props.isResponseReady} />
+          <ProgressIndicator show={!this.props.isResponseReady} />
         </>
       );
     }

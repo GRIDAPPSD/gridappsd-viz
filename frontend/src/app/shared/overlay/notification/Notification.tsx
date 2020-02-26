@@ -1,7 +1,7 @@
 import * as React from 'react';
-import { createPortal, render, unmountComponentAtNode } from 'react-dom';
 
-import { IconButton } from '@shared/buttons';
+import { Backdrop } from '@shared/overlay/backdrop';
+import { PortalRenderer } from '@shared/overlay/portal-renderer';
 
 import './Notification.light.scss';
 import './Notification.dark.scss';
@@ -12,7 +12,7 @@ interface Props {
 }
 
 interface State {
-  slide: 'in' | 'out';
+  show: boolean;
 }
 
 export class Notification extends React.Component<Props, State> {
@@ -24,17 +24,13 @@ export class Notification extends React.Component<Props, State> {
   static readonly LIFE_TIME = 5_000;
   static readonly ANIMATION_DURATION = 500;
 
-  readonly notificationContainer = document.createElement('div');
-
   private _scheduler: any;
 
   constructor(props: Props) {
     super(props);
     this.state = {
-      slide: props.show ? 'in' : 'out'
+      show: props.show
     };
-
-    this.notificationContainer.className = 'notification-container';
 
     this.hideNotification = this.hideNotification.bind(this);
   }
@@ -46,11 +42,8 @@ export class Notification extends React.Component<Props, State> {
   }
 
   private _showNotification() {
-    if (!document.body.contains(this.notificationContainer)) {
-      document.body.appendChild(this.notificationContainer);
-    }
     this.setState({
-      slide: 'in'
+      show: true
     });
     this._scheduler = setTimeout(this.hideNotification, Notification.LIFE_TIME);
   }
@@ -71,51 +64,35 @@ export class Notification extends React.Component<Props, State> {
       setTimeout(this.props.onHide, Notification.ANIMATION_DURATION);
     }
     this.setState({
-      slide: 'out'
+      show: false
     });
   }
 
   componentWillUnmount() {
-    if (document.body.contains(this.notificationContainer)) {
-      document.body.removeChild(this.notificationContainer);
-    }
     clearTimeout(this._scheduler);
   }
 
   render() {
-    if (!document.body.contains(this.notificationContainer)) {
-      return null;
-    }
-    return createPortal(
-      <div className={'notification slide-' + this.state.slide}>
-        <IconButton
-          icon='close'
-          style='accent'
+    return (
+      <PortalRenderer containerClassName={`notification-container ${this.state.show ? 'visible' : 'hidden'}`}>
+        <Backdrop
+          visible={this.state.show}
           onClick={this.hideNotification} />
-        <div className='notification__content'>
+        <div className='notification'>
           {this.props.children}
         </div>
-      </div>,
-      this.notificationContainer
+      </PortalRenderer>
     );
   }
 
 }
 
-const container = document.createElement('div');
+const portalRenderer = new PortalRenderer();
 export function showNotification(content: React.ReactChild) {
-  if (document.body.contains(container)) {
-    unmountComponentAtNode(container);
-    document.body.appendChild(container);
-  }
-  document.body.appendChild(container);
-  render(
-    <Notification onHide={() => {
-      unmountComponentAtNode(container);
-      document.body.removeChild(container);
-    }}>
+  portalRenderer.unmount();
+  portalRenderer.mount(
+    <Notification onHide={portalRenderer.unmount}>
       {content}
-    </Notification>,
-    container
+    </Notification>
   );
 }

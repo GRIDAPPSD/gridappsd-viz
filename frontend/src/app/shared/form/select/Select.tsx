@@ -10,7 +10,7 @@ import { Paginator } from '@shared/paginator';
 import { fuzzySearch } from '@shared/misc';
 import { SelectionOptionBuilder } from './SelectionOptionBuilder';
 import { FormControlModel } from '../models/FormControlModel';
-import { Dialog } from '@shared/dialog';
+import { Dialog } from '@shared/overlay/dialog';
 
 import './Select.light.scss';
 import './Select.dark.scss';

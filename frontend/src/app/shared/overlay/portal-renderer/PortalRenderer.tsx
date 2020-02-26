@@ -32,6 +32,12 @@ export class PortalRenderer extends React.Component<Props, State> {
     this.unmount = this.unmount.bind(this);
   }
 
+  componentDidUpdate(prevProps: Props) {
+    if (this.props.containerClassName !== prevProps.containerClassName) {
+      this.container.className = this.props.containerClassName || 'portal-renderer';
+    }
+  }
+
   render() {
     return createPortal(this.props.children, this.container);
   }
@@ -47,7 +53,9 @@ export class PortalRenderer extends React.Component<Props, State> {
   }
 
   unmount() {
-    this.props.portal.removeChild(this.container);
+    if (this.props.portal.contains(this.container)) {
+      this.props.portal.removeChild(this.container);
+    }
     unmountComponentAtNode(this.container);
   }
 

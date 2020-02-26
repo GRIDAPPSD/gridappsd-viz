@@ -3,7 +3,7 @@ import { filter } from 'rxjs/operators';
 
 import { Input, TextArea, FormControlModel, Form, FormGroupModel } from '@shared/form';
 import { BasicButton, IconButton } from '@shared/buttons';
-import { Wait } from '@shared/wait';
+import { ProgressIndicator } from '@shared/overlay/progress-indicator';
 import { Tooltip } from '@shared/tooltip';
 import { DownloadType } from '@shared/misc';
 import { Validators } from '@shared/form/validation';
@@ -134,7 +134,7 @@ export class StompClient extends React.Component<Props, State> {
             label='Response'
             formControlModel={this.response} />
         </Form>
-        <Wait show={this.props.showLoadingIndicator} />
+        <ProgressIndicator show={this.props.showLoadingIndicator} />
       </>
     );
   }

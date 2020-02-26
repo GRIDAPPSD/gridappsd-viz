@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { Dialog, DialogContent, DialogActionGroup } from '@shared/dialog';
+import { Dialog, DialogContent, DialogActionGroup } from '@shared/overlay/dialog';
 import { Select, Input, SelectionOptionBuilder, FormGroupModel, FormControlModel } from '@shared/form';
 import { BasicButton } from '@shared/buttons';
 import { RegulatorControlMode } from '@shared/topology/RegulatorControlMode';

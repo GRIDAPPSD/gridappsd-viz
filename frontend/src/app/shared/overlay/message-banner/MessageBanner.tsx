@@ -1,7 +1,7 @@
 import * as React from 'react';
 
 import { Fade } from '@shared/fade';
-import { Backdrop } from '@shared/backdrop';
+import { Backdrop } from '@shared/overlay/backdrop';
 
 import './MessageBanner.light.scss';
 import './MessageBanner.dark.scss';

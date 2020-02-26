@@ -1,9 +1,9 @@
 import * as React from 'react';
 
-import { Backdrop } from '../backdrop/Backdrop';
+import { Backdrop } from '@shared/overlay/backdrop';
 
-import './Wait.light.scss';
-import './Wait.dark.scss';
+import './ProgressIndicator.light.scss';
+import './ProgressIndicator.dark.scss';
 
 interface Props {
   show: boolean;
@@ -13,7 +13,7 @@ interface State {
   height: number;
 }
 
-export class Wait extends React.Component<Props, State> {
+export class ProgressIndicator extends React.Component<Props, State> {
 
   readonly waitElementRef = React.createRef<HTMLDivElement>();
 
@@ -34,7 +34,9 @@ export class Wait extends React.Component<Props, State> {
           waitElementParent = waitElementParent.parentElement;
         }
       }
-      this.setState({ height });
+      this.setState({
+        height
+      });
     }
   }
 
@@ -43,21 +45,21 @@ export class Wait extends React.Component<Props, State> {
       return (
         <div
           ref={this.waitElementRef}
-          className='wait'
+          className='progress-indicator'
           style={{
             height: this.state.height > 0 ? this.state.height + 'px' : '100%'
           }}>
           <Backdrop visible />
-          <div className='dots'>
-            <span className='dot' />
-            <span className='dot' />
-            <span className='dot' />
-            <span className='dot' />
-            <span className='dot' />
-            <span className='dot' />
-            <span className='dot' />
-            <span className='dot' />
-            <span className='dot' />
+          <div className='progress-indicator__dot-container'>
+            <span className='progress-indicator__dot' />
+            <span className='progress-indicator__dot' />
+            <span className='progress-indicator__dot' />
+            <span className='progress-indicator__dot' />
+            <span className='progress-indicator__dot' />
+            <span className='progress-indicator__dot' />
+            <span className='progress-indicator__dot' />
+            <span className='progress-indicator__dot' />
+            <span className='progress-indicator__dot' />
           </div>
         </div>
       );

@@ -3,7 +3,7 @@ import { Subscription } from 'rxjs';
 
 import { IconButton } from '@shared/buttons';
 import { StompClientConnectionStatus, StompClientService } from '@shared/StompClientService';
-import { MessageBanner } from '@shared/message-banner';
+import { MessageBanner } from '@shared/overlay/message-banner';
 import { ThreeDots } from '@shared/three-dots';
 
 import './WebsocketStatusWatcher.light.scss';

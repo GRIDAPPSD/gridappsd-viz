@@ -6,7 +6,7 @@ import { SimulationConfiguration, SimulationControlService } from '@shared/simul
 import { SimulationStatus } from '@commons/SimulationStatus';
 import { FeederModel, ModelDictionary, ModelDictionaryComponent } from '@shared/topology';
 import { Application } from '@shared/Application';
-import { Dialog, DialogContent, DialogActionGroup } from '@shared/dialog';
+import { Dialog, DialogContent, DialogActionGroup } from '@shared/overlay/dialog';
 import { TabGroup, Tab } from '@shared/tabs';
 import { BasicButton } from '@shared/buttons';
 import { PowerSystemConfigurationTab } from './views/power-system-configuration-tab';
@@ -20,7 +20,7 @@ import { SimulationConfigurationTabModel } from './models/SimulationConfiguratio
 import { ApplicationConfigurationModel } from './models/ApplicationConfigurationModel';
 import { StateStore } from '@shared/state-store';
 import { ThreeDots } from '@shared/three-dots';
-import { MessageBanner } from '@shared/message-banner';
+import { MessageBanner } from '@shared/overlay/message-banner';
 import { ServiceConfigurationTab } from './views/service-configuration-tab';
 import { Service } from '@shared/Service';
 import { ServiceConfigurationModel } from './models/ServiceConfigurationModel';

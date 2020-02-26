@@ -30,7 +30,7 @@ import { RegulatorLineDropUpdateRequest } from './models/RegulatorLineDropUpdate
 import { RegulatorTapChangerRequest } from './models/RegulatorTapChangerRequest';
 import { RenderableTopology } from './models/RenderableTopology';
 import { waitUntil } from '@shared/misc';
-import { Wait } from '@shared/wait';
+import { ProgressIndicator } from '@shared/overlay/progress-indicator';
 import { SimulationControlService } from '@shared/simulation';
 
 interface Props {
@@ -413,7 +413,7 @@ export class TopologyRendererContainer extends React.Component<Props, State> {
           onToggleSwitch={this.onToggleSwitchState}
           onCapacitorControlMenuFormSubmitted={this.onCapacitorControlMenuFormSubmitted}
           onRegulatorMenuFormSubmitted={this.onRegulatorMenuFormSubmitted} />
-        <Wait show={this.state.isFetching} />
+        <ProgressIndicator show={this.state.isFetching} />
       </>
     );
   }

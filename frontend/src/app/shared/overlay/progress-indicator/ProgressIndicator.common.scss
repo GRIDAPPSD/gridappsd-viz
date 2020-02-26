@@ -1,4 +1,4 @@
-.wait {
+.progress-indicator {
     position: absolute;
     width: 100%;
     height: 100%;
@@ -13,24 +13,25 @@
     .backdrop {
         position: absolute;
     }
+}
 
-    .dots {
-        z-index: 1000;
-    }
+.progress-indicator__dot-container {
+    z-index: 1000;
+}
 
-    .dot {
-        margin: 10px;
-        width: 15px;
-        height: 15px;
-        display: inline-block;
-        border-radius: 100%;
-        position: relative;
-        animation: jump 500ms -1s ease infinite alternate-reverse;
-    }
+.progress-indicator__dot {
+    margin: 10px;
+    width: 15px;
+    height: 15px;
+    display: inline-block;
+    border-radius: 100%;
+    position: relative;
+    animation: jump 500ms -1s ease infinite alternate-reverse;
 
-    .dot:nth-child(even) {
+    &:nth-child(even) {
         animation-delay: 200ms;
     }
+
 }
 
 @keyframes jump {

@@ -8,8 +8,8 @@ import { SimulationId } from './models/SimulationId';
 import { QueryLogsForm } from './QueryLogsForm';
 import { QueryLogsResultTable } from './QueryLogsResultTable';
 import { Response } from '../Response';
-import { MessageBanner } from '@shared/message-banner';
-import { Wait } from '@shared/wait';
+import { MessageBanner } from '@shared/overlay/message-banner';
+import { ProgressIndicator } from '@shared/overlay/progress-indicator';
 
 import './Logs.light.scss';
 import './Logs.dark.scss';
@@ -136,7 +136,7 @@ export class LogsContainer extends React.Component<Props, State> {
               </MessageBanner>
           }
         </Response>
-        <Wait show={this.state.showSpinner} />
+        <ProgressIndicator show={this.state.showSpinner} />
       </div>
     );
   }

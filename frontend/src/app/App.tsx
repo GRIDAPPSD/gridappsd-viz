@@ -22,12 +22,12 @@ import { NavigationContainer } from './navigation';
 import { Authenticator } from '@shared/authenticator';
 import { AlarmsContainer, Alarm } from './simulation/alarms';
 import { Settings } from './settings';
-import { MessageBanner } from '@shared/message-banner';
+import { MessageBanner } from '@shared/overlay/message-banner';
 import { ThreeDots } from '@shared/three-dots';
 import { StompClientConnectionStatus } from '@shared/StompClientService';
 import { StateStore } from '@shared/state-store';
 import { waitUntil } from '@shared/misc';
-import { PortalRenderer } from '@shared/portal-renderer';
+import { PortalRenderer } from '@shared/overlay/portal-renderer';
 
 import './App.light.scss';
 import './App.dark.scss';

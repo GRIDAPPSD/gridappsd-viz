@@ -5,7 +5,7 @@ import { GetAvailableApplicationsAndServices } from './models/GetAvailableApplic
 import { StompClientService } from '@shared/StompClientService';
 import { Payload } from './models/Payload';
 import { AvailableApplicationsAndServices } from './AvailableApplicationsAndServices';
-import { Wait } from '@shared/wait';
+import { ProgressIndicator } from '@shared/overlay/progress-indicator';
 
 interface Props { }
 
@@ -53,7 +53,7 @@ export class AvailableApplicationsAndServicesContainer extends React.Component<P
   render() {
     if (!this.state.payload) {
       return (
-        <Wait show />
+        <ProgressIndicator show />
       );
     }
     return (

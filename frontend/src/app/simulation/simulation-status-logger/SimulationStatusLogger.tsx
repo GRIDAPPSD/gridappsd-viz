@@ -3,7 +3,7 @@ import { Subject } from 'rxjs';
 import { debounceTime, filter } from 'rxjs/operators';
 
 import { SimulationStatusLoggerMessage } from './SimulationStatusLoggerMessage';
-import { Wait } from '@shared/wait';
+import { ProgressIndicator } from '@shared/overlay/progress-indicator';
 import { LogMessage } from './models/LogMessage';
 
 import './SimulationStatusLogger.light.scss';
@@ -133,7 +133,7 @@ export class SimulationStatusLogger extends React.Component<Props, State> {
             ))
           }
         </section>
-        <Wait show={this.props.isFetching} />
+        <ProgressIndicator show={this.props.isFetching} />
       </div>
     );
   }

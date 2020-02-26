@@ -4,7 +4,7 @@ import { IconButton } from '@shared/buttons';
 import { Tooltip } from '@shared/tooltip';
 import { SlideToggle, FormControlModel } from '@shared/form';
 import { Fade } from '@shared/fade';
-import { Dialog } from '@shared/dialog';
+import { Dialog } from '@shared/overlay/dialog';
 
 import './Settings.light.scss';
 import './Settings.dark.scss';

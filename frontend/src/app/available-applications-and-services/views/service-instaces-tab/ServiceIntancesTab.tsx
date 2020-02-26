@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { MessageBanner } from '@shared/message-banner';
+import { MessageBanner } from '@shared/overlay/message-banner';
 
 import './ServiceIntancesTab.light.scss';
 import './ServiceIntancesTab.dark.scss';
