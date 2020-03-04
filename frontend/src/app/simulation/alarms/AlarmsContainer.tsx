@@ -110,8 +110,9 @@ export class AlarmsContainer extends React.Component<Props, State> {
   }
 
   render() {
-    if (this.state.alarms.length === 0)
+    if (this.state.alarms.length === 0) {
       return null;
+    }
     return (
       <>
         <Alarms

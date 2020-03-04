@@ -18,8 +18,9 @@ export class StateStore {
   }
 
   initialize(defaultState: ApplicationState) {
-    if (this._isInitialized)
+    if (this._isInitialized) {
       throw new Error('Store has been initialized');
+    }
     for (const [key, value] of Object.entries(defaultState)) {
       const notifier = new BehaviorSubject<any>(value);
       this._stateChangeNotifiers.set(key, notifier);
@@ -29,9 +30,9 @@ export class StateStore {
   }
 
   update<K extends keyof ApplicationState>(newState: Pick<ApplicationState, K>) {
-    for (const key in newState)
-      this._stateChangeNotifiers.get(key)
-        .next(newState[key]);
+    for (const [k, v] of Object.entries(newState)) {
+      this._stateChangeNotifiers.get(k).next(v);
+    }
   }
 
   select<K extends keyof ApplicationState>(key: K): Observable<ApplicationState[K]> {

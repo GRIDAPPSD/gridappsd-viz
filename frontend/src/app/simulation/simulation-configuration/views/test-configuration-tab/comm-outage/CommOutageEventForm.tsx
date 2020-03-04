@@ -1,13 +1,20 @@
 import * as React from 'react';
 
 import { BasicButton, IconButton } from '@shared/buttons';
-import { ModelDictionary, ModelDictionaryMeasurement } from '@shared/topology/model-dictionary';
-import { FormGroup, CheckBox, Select, Input, SelectionOptionBuilder } from '@shared/form';
+import { ModelDictionary, ModelDictionaryMeasurement, ModelDictionaryRegulator, ModelDictionaryCapacitor, ModelDictionarySwitch } from '@shared/topology/model-dictionary';
+import {
+  FormGroup,
+  Checkbox,
+  Select,
+  Input,
+  SelectionOptionBuilder,
+  FormGroupModel,
+  FormControlModel
+} from '@shared/form';
 import { COMPONENT_ATTRIBUTES } from '../../../models/component-attributes';
 import { Tooltip } from '@shared/tooltip';
 import { CommOutageEvent, Phase, CommOutageEventInputListItem, CommOutageEventOutputListItem } from '@shared/test-manager';
 import { Validators } from '@shared/form/validation';
-import { DateTimeService } from '@shared/DateTimeService';
 import { unique } from '@shared/misc';
 
 import './CommOutageEventForm.light.scss';
@@ -33,37 +40,35 @@ const inputEquipmentTypeOptionBuilder = new SelectionOptionBuilder(
 );
 
 interface Props {
-  onEventAdded: (event: CommOutageEvent) => void;
-  initialFormValue: CommOutageEvent;
   modelDictionary: ModelDictionary;
+  startDateTime: number;
+  stopDateTime: number;
+  onAddEvent: (event: CommOutageEvent) => void;
 }
 
 interface State {
   inputEquipmentTypeOptionBuilder: SelectionOptionBuilder<{ id: string; label: string }>;
   inputComponentOptionBuilder: SelectionOptionBuilder<any>;
   inputPhaseOptionBuilder: SelectionOptionBuilder<Phase>;
-  inputAttributeBuilder: SelectionOptionBuilder<string>;
+  inputAttributeOptionBuilder: SelectionOptionBuilder<string>;
   outputEquipmentTypeOptionBuilder: SelectionOptionBuilder<string>;
   outputComponentOptionBuilder: SelectionOptionBuilder<ModelDictionaryMeasurement>;
   outputPhaseOptionBuilder: SelectionOptionBuilder<string>;
   outputMeasurementTypeOptionBuilder: SelectionOptionBuilder<any>;
+  disableAddInputItemButton: boolean;
+  disableAddOutputItemButton: boolean;
   inputList: CommOutageEventInputListItem[];
   outputList: CommOutageEventOutputListItem[];
-  addInputItemButtonDisabled: boolean;
-  addOutputItemButtonDisabled: boolean;
-  allInputOutageChecked: boolean;
-  allOutputOutageChecked: boolean;
 }
 
 export class CommOutageEventForm extends React.Component<Props, State> {
 
-  readonly dateTimeService = DateTimeService.getInstance();
-
-  formValue: CommOutageEvent;
-  currentInputListItem: CommOutageEventInputListItem;
-  currentOutputListItem: CommOutageEventOutputListItem;
-  inputComponentTypeSelect: Select<any, any>;
-  outputComponentTypeSelect: Select<string, boolean>;
+  readonly selectedTypeForCurrentInputItemFormControl = new FormControlModel<{ id: string; label: string }>(null);
+  readonly selectedComponentForCurrentInputItemFormControl = new FormControlModel<ModelDictionaryCapacitor | ModelDictionaryRegulator | ModelDictionarySwitch>(null);
+  readonly selectedComponentForCurrentOutputItemFormControl = new FormControlModel<ModelDictionaryMeasurement>(null);
+  readonly currentEventFormGroup: FormGroupModel<CommOutageEvent>;
+  readonly currentInputItemFormGroup: FormGroupModel<CommOutageEventInputListItem>;
+  readonly currentOutputItemFormGroup: FormGroupModel<CommOutageEventOutputListItem>;
 
   constructor(props: Props) {
     super(props);
@@ -79,63 +84,286 @@ export class CommOutageEventForm extends React.Component<Props, State> {
       inputEquipmentTypeOptionBuilder: inputEquipmentTypeOptionBuilder,
       inputComponentOptionBuilder: SelectionOptionBuilder.defaultBuilder(),
       inputPhaseOptionBuilder: SelectionOptionBuilder.defaultBuilder(),
-      inputAttributeBuilder: SelectionOptionBuilder.defaultBuilder(),
+      inputAttributeOptionBuilder: SelectionOptionBuilder.defaultBuilder(),
       outputEquipmentTypeOptionBuilder: outputEquipmentTypeOptionBuilder,
       outputComponentOptionBuilder: SelectionOptionBuilder.defaultBuilder(),
       outputPhaseOptionBuilder: SelectionOptionBuilder.defaultBuilder(),
       outputMeasurementTypeOptionBuilder: SelectionOptionBuilder.defaultBuilder(),
+      disableAddInputItemButton: true,
+      disableAddOutputItemButton: true,
       inputList: [],
-      outputList: [],
-      addInputItemButtonDisabled: true,
-      addOutputItemButtonDisabled: true,
-      allInputOutageChecked: props.initialFormValue.allInputOutage,
-      allOutputOutageChecked: props.initialFormValue.allOutputOutage
+      outputList: []
     };
 
-    this.formValue = { ...props.initialFormValue };
-    this.currentInputListItem = this._newInputListItem();
-    this.currentOutputListItem = this._newOutputListItem();
+    this.currentInputItemFormGroup = this._createFormGroupModelForInputListItem();
+    this.currentOutputItemFormGroup = this._createFormGroupModelForOutputListItem();
+    this.currentEventFormGroup = this._createFormGroupModelForEvent();
 
-    this.onAllInputOutageCheckboxToggled = this.onAllInputOutageCheckboxToggled.bind(this);
-    this.onInputEquipmentTypeChanged = this.onInputEquipmentTypeChanged.bind(this);
-    this.onInputComponentChanged = this.onInputComponentChanged.bind(this);
-    this.onInputPhasesChanged = this.onInputPhasesChanged.bind(this);
-    this.onInputAttributeChanged = this.onInputAttributeChanged.bind(this);
     this.addNewInputItem = this.addNewInputItem.bind(this);
-    this.onAllOutputOutageCheckBoxToggled = this.onAllOutputOutageCheckBoxToggled.bind(this);
-    this.onOuputEquipmentTypeChanged = this.onOuputEquipmentTypeChanged.bind(this);
-    this.onOutputComponentChanged = this.onOutputComponentChanged.bind(this);
-    this.onOutputPhasesChanged = this.onOutputPhasesChanged.bind(this);
-    this.onOutputMeasurementTypesChanged = this.onOutputMeasurementTypesChanged.bind(this);
-    this.onStartDateTimeChanged = this.onStartDateTimeChanged.bind(this);
-    this.onStopDateTimeChanged = this.onStopDateTimeChanged.bind(this);
     this.addNewOutputItem = this.addNewOutputItem.bind(this);
     this.createNewEvent = this.createNewEvent.bind(this);
   }
 
-  private _newInputListItem(): CommOutageEventInputListItem {
-    return {
+  private _createFormGroupModelForEvent() {
+    return new FormGroupModel<CommOutageEvent>({
+      eventType: 'CommOutage',
+      tag: '',
+      startDateTime: new FormControlModel(
+        this.props.startDateTime,
+        [Validators.checkNotEmpty('Start date time'), Validators.checkValidDateTime('Start date time')]
+      ),
+      stopDateTime: new FormControlModel(
+        this.props.stopDateTime,
+        [Validators.checkNotEmpty('Stop date time'), Validators.checkValidDateTime('Stop date time')]
+      ),
+      allInputOutage: new FormControlModel(false),
+      inputList: [],
+      allOutputOutage: new FormControlModel(false),
+      outputList: []
+    });
+  }
+
+  private _createFormGroupModelForInputListItem() {
+    const formGroup = new FormGroupModel<CommOutageEventInputListItem>({
       name: '',
       type: '',
       mRID: '',
-      phases: [],
-      attribute: ''
-    };
+      phases: new FormControlModel([]),
+      attribute: new FormControlModel('')
+    });
+    this.selectedComponentForCurrentInputItemFormControl.dependsOn(this.selectedTypeForCurrentInputItemFormControl);
+    formGroup.findControl('phases').dependsOn(this.selectedComponentForCurrentInputItemFormControl);
+    formGroup.findControl('attribute').dependsOn(this.selectedTypeForCurrentInputItemFormControl);
+    return formGroup;
   }
 
-  private _newOutputListItem(): CommOutageEventOutputListItem {
-    return {
+  private _createFormGroupModelForOutputListItem() {
+    const formGroup = new FormGroupModel<CommOutageEventOutputListItem>({
       name: '',
-      type: '',
+      type: new FormControlModel(''),
       mRID: '',
-      phases: [],
-      measurementTypes: []
-    };
+      phases: new FormControlModel([]),
+      measurementTypes: new FormControlModel([])
+    });
+    this.selectedComponentForCurrentOutputItemFormControl.dependsOn(formGroup.findControl('type'));
+    formGroup.findControl('phases').dependsOn(this.selectedComponentForCurrentOutputItemFormControl);
+    formGroup.findControl('measurementTypes').dependsOn(this.selectedComponentForCurrentOutputItemFormControl);
+    return formGroup;
   }
 
-  componentDidUpdate(prevProps: Props) {
-    if (this.props.initialFormValue !== prevProps.initialFormValue)
-      this.formValue = { ...this.props.initialFormValue };
+  componentDidMount() {
+    this._updateUiOnFormControlValidityChanges();
+    this._toggleInputListEditabilityOnAllInputCheckboxChange();
+    this._populateInputComponentSelectionOnInputEquipmentTypeChange();
+    this._onInputComponentChange();
+    this._toggleOutputListEditabilityOnAllInputCheckBoxChange();
+    this._populateOutputComponentSelectionOnOutputEquipmentTypeChange();
+    this._onOutputComponentChange();
+  }
+
+  private _updateUiOnFormControlValidityChanges() {
+    this.currentInputItemFormGroup.validityChanges()
+      .subscribe({
+        next: isValid => {
+          this.setState({
+            disableAddInputItemButton: !isValid
+          });
+        }
+      });
+    this.currentOutputItemFormGroup.validityChanges()
+      .subscribe({
+        next: isValid => {
+          this.setState({
+            disableAddOutputItemButton: !isValid
+          });
+        }
+      });
+  }
+
+  shouldDisableAddEventButton(): boolean {
+    if (this.currentEventFormGroup.findControl('allInputOutage').getValue() === false) {
+      return (
+        this.state.inputList.length === 0
+        ||
+        this.currentInputItemFormGroup.isInvalid() && !this.currentInputItemFormGroup.isPristine()
+      );
+    }
+    if (!this.currentOutputItemFormGroup.isPristine() && this.currentOutputItemFormGroup.isInvalid()) {
+      return true;
+    }
+    if (this.state.outputList.length === 0 && this.currentOutputItemFormGroup.isValid()) {
+      return true;
+    }
+    return false;
+  }
+
+  private _toggleInputListEditabilityOnAllInputCheckboxChange() {
+    this.currentEventFormGroup.findControl('allInputOutage')
+      .valueChanges()
+      .subscribe({
+        next: isChecked => {
+          this.selectedTypeForCurrentInputItemFormControl.reset();
+          if (isChecked) {
+            this.selectedTypeForCurrentInputItemFormControl.disable();
+            this.setState({
+              disableAddInputItemButton: true,
+              inputList: []
+            });
+          } else {
+            this.selectedTypeForCurrentInputItemFormControl.enable();
+          }
+        }
+      });
+  }
+
+  private _populateInputComponentSelectionOnInputEquipmentTypeChange() {
+    this.selectedTypeForCurrentInputItemFormControl.valueChanges()
+      .subscribe({
+        next: selectedType => {
+          if (selectedType) {
+            this.setState({
+              inputComponentOptionBuilder: new SelectionOptionBuilder(
+                this.props.modelDictionary[selectedType.id] || [],
+                e => e.name || e.bankName
+              ),
+              inputAttributeOptionBuilder: new SelectionOptionBuilder(
+                COMPONENT_ATTRIBUTES[selectedType.id] || []
+              ),
+              inputPhaseOptionBuilder: SelectionOptionBuilder.defaultBuilder()
+            });
+            this.currentInputItemFormGroup.setValue({
+              type: selectedType.label
+            });
+          } else {
+            this.setState({
+              inputComponentOptionBuilder: SelectionOptionBuilder.defaultBuilder(),
+              inputAttributeOptionBuilder: SelectionOptionBuilder.defaultBuilder(),
+              inputPhaseOptionBuilder: SelectionOptionBuilder.defaultBuilder()
+            });
+          }
+        }
+      });
+  }
+
+  private _onInputComponentChange() {
+    this.selectedComponentForCurrentInputItemFormControl.valueChanges()
+      .subscribe({
+        next: selectedComponent => {
+          if (selectedComponent) {
+            this.setState({
+              inputPhaseOptionBuilder: new SelectionOptionBuilder(
+                unique(this._normalizePhases('phases' in selectedComponent ? selectedComponent.phases : selectedComponent.bankPhases))
+                  .sort((a, b) => a.localeCompare(b))
+                  .map((phase, i) => ({ phaseLabel: phase, phaseIndex: i })),
+                phase => phase.phaseLabel
+              )
+            });
+            this.currentInputItemFormGroup.setValue({
+              name: 'name' in selectedComponent ? selectedComponent.name : selectedComponent.bankName,
+              mRID: selectedComponent.mRID
+            });
+          } else {
+            this.setState({
+              inputPhaseOptionBuilder: SelectionOptionBuilder.defaultBuilder()
+            });
+            this.currentInputItemFormGroup.setValue({
+              name: '',
+              mRID: ''
+            });
+          }
+        }
+      });
+  }
+
+  private _normalizePhases(phases: string) {
+    // If phases is a string containing either A or B or C,
+    // then return it as is
+    return /^[abc]+$/i.test(phases) ? phases : [phases];
+  }
+
+  private _toggleOutputListEditabilityOnAllInputCheckBoxChange() {
+    this.currentEventFormGroup.findControl('allOutputOutage')
+      .valueChanges()
+      .subscribe({
+        next: isChecked => {
+          if (isChecked) {
+            this.currentOutputItemFormGroup.reset();
+            this.currentOutputItemFormGroup.disable();
+            this.setState({
+              disableAddOutputItemButton: true,
+              outputList: []
+            });
+          } else {
+            this.currentOutputItemFormGroup.findControl('type').enable();
+          }
+        }
+      });
+  }
+
+  private _populateOutputComponentSelectionOnOutputEquipmentTypeChange() {
+    this.currentOutputItemFormGroup.findControl('type')
+      .valueChanges()
+      .subscribe({
+        next: selectedType => {
+          if (selectedType) {
+            this.setState({
+              outputComponentOptionBuilder: new SelectionOptionBuilder(
+                this.props.modelDictionary.measurements.filter(
+                  e => e.ConductingEquipment_type === selectedType
+                ),
+                measurement => `${measurement.ConductingEquipment_name} (${measurement.phases})`
+              )
+            });
+          } else {
+            this.setState({
+              outputComponentOptionBuilder: SelectionOptionBuilder.defaultBuilder()
+            });
+          }
+          this.setState({
+            outputPhaseOptionBuilder: SelectionOptionBuilder.defaultBuilder(),
+            outputMeasurementTypeOptionBuilder: SelectionOptionBuilder.defaultBuilder()
+          });
+        }
+      });
+  }
+
+  private _onOutputComponentChange() {
+    this.selectedComponentForCurrentOutputItemFormControl.valueChanges()
+      .subscribe({
+        next: selectedComponent => {
+          if (selectedComponent) {
+            this.setState({
+              outputPhaseOptionBuilder: new SelectionOptionBuilder(
+                unique(this._normalizePhases(selectedComponent.phases)).sort((a, b) => a.localeCompare(b)),
+              ),
+              outputMeasurementTypeOptionBuilder: new SelectionOptionBuilder(
+                [selectedComponent.measurementType]
+              )
+            });
+            this.currentOutputItemFormGroup.setValue({
+              name: selectedComponent.ConductingEquipment_name,
+              mRID: selectedComponent.ConductingEquipment_mRID
+            });
+          } else {
+            this.setState({
+              outputPhaseOptionBuilder: SelectionOptionBuilder.defaultBuilder(),
+              outputMeasurementTypeOptionBuilder: SelectionOptionBuilder.defaultBuilder()
+            });
+            this.currentOutputItemFormGroup.setValue({
+              name: '',
+              mRID: ''
+            });
+          }
+        }
+      });
+  }
+
+  componentWillUnmount() {
+    this.selectedTypeForCurrentInputItemFormControl.cleanup();
+    this.selectedComponentForCurrentInputItemFormControl.cleanup();
+    this.selectedComponentForCurrentOutputItemFormControl.cleanup();
+    this.currentOutputItemFormGroup.cleanup();
+    this.currentEventFormGroup.cleanup();
   }
 
   render() {
@@ -143,56 +371,42 @@ export class CommOutageEventForm extends React.Component<Props, State> {
       <div className='comm-outage-event'>
         <Input
           label='Start Date Time'
-          name='startDateTime'
           hint='YYYY-MM-DD HH:MM:SS'
-          value={this.dateTimeService.format(this.formValue.startDateTime)}
-          validators={[
-            Validators.checkNotEmpty('Start date time is empty'),
-            Validators.checkValidDateTime('Invalid format, YYYY-MM-DD HH:MM:SS expected')
-          ]}
-          onChange={this.onStartDateTimeChanged} />
+          type='datetime'
+          formControlModel={this.currentEventFormGroup.findControl('startDateTime')} />
         <Input
           label='Stop Date Time'
-          name='stopDateTime'
-          hint='YYYY-MM-DD HH:MM:SS'
-          value={this.dateTimeService.format(this.formValue.stopDateTime)}
-          validators={[
-            Validators.checkNotEmpty('Stop date time is empty'),
-            Validators.checkValidDateTime('Invalid format, YYYY-MM-DD HH:MM:SS expected')
-          ]}
-          onChange={this.onStopDateTimeChanged} />
+          type='datetime'
+          formControlModel={this.currentEventFormGroup.findControl('stopDateTime')} />
         <FormGroup
           label='Input Outage List'
           collapsible={false}>
-          <CheckBox
+          <Checkbox
             label='All Input Outage'
             name='allInputOutage'
-            checked={this.state.allInputOutageChecked}
-            onChange={this.onAllInputOutageCheckboxToggled} />
+            formControlModel={this.currentEventFormGroup.findControl('allInputOutage')} />
           <Select
-            ref={comp => this.inputComponentTypeSelect = comp}
             label='Equipment Type'
-            selectionOptionBuilder={this.state.inputEquipmentTypeOptionBuilder}
-            onChange={this.onInputEquipmentTypeChanged} />
+            formControlModel={this.selectedTypeForCurrentInputItemFormControl}
+            selectionOptionBuilder={this.state.inputEquipmentTypeOptionBuilder} />
           <Select
             label='Name'
-            selectionOptionBuilder={this.state.inputComponentOptionBuilder}
-            onChange={this.onInputComponentChanged} />
+            formControlModel={this.selectedComponentForCurrentInputItemFormControl}
+            selectionOptionBuilder={this.state.inputComponentOptionBuilder} />
           <Select
-            label='Phase'
             multiple
-            selectionOptionBuilder={this.state.inputPhaseOptionBuilder}
-            selectedOptionFinder={() => this.state.inputPhaseOptionBuilder.numberOfOptions() === 1}
-            onChange={this.onInputPhasesChanged} />
+            label='Phases'
+            formControlModel={this.currentInputItemFormGroup.findControl('phases')}
+            selectionOptionBuilder={this.state.inputPhaseOptionBuilder} />
           <Select
             label='Attribute'
-            selectionOptionBuilder={this.state.inputAttributeBuilder}
-            onChange={this.onInputAttributeChanged} />
+            formControlModel={this.currentInputItemFormGroup.findControl('attribute')}
+            selectionOptionBuilder={this.state.inputAttributeOptionBuilder} />
           <Tooltip
             content='Add input item'
             position='right'>
             <IconButton
-              disabled={this.state.addInputItemButtonDisabled}
+              disabled={this.state.disableAddInputItemButton}
               className='comm-outage-event-form__add-input'
               icon='add'
               onClick={this.addNewInputItem} />
@@ -220,7 +434,11 @@ export class CommOutageEventForm extends React.Component<Props, State> {
                             style='accent'
                             size='small'
                             icon='delete'
-                            onClick={() => this.setState({ inputList: this.state.inputList.filter(item => item !== inputItem) })} />
+                            onClick={() => {
+                              this.setState({
+                                inputList: this.state.inputList.filter(item => item !== inputItem)
+                              });
+                            }} />
                         </Tooltip>
                       </td>
                       <td>
@@ -251,37 +469,33 @@ export class CommOutageEventForm extends React.Component<Props, State> {
         <FormGroup
           label='Output Outage List'
           collapsible={false}>
-          <CheckBox
+          <Checkbox
             label='All Ouput Outage'
             name='allOutputOutage'
-            checked={this.state.allOutputOutageChecked}
-            onChange={this.onAllOutputOutageCheckBoxToggled} />
+            formControlModel={this.currentEventFormGroup.findControl('allOutputOutage')} />
           <Select
-            ref={comp => this.outputComponentTypeSelect = comp}
             label='Equipment Type'
-            selectionOptionBuilder={this.state.outputEquipmentTypeOptionBuilder}
-            onChange={this.onOuputEquipmentTypeChanged} />
+            formControlModel={this.currentOutputItemFormGroup.findControl('type')}
+            selectionOptionBuilder={this.state.outputEquipmentTypeOptionBuilder} />
           <Select
             label='Equipment Name'
-            selectionOptionBuilder={this.state.outputComponentOptionBuilder}
-            onChange={this.onOutputComponentChanged} />
+            formControlModel={this.selectedComponentForCurrentOutputItemFormControl}
+            selectionOptionBuilder={this.state.outputComponentOptionBuilder} />
           <Select
-            label='Phase'
             multiple
-            selectionOptionBuilder={this.state.outputPhaseOptionBuilder}
-            selectedOptionFinder={() => this.state.outputPhaseOptionBuilder.numberOfOptions() === 1}
-            onChange={this.onOutputPhasesChanged} />
+            label='Phases'
+            formControlModel={this.currentOutputItemFormGroup.findControl('phases')}
+            selectionOptionBuilder={this.state.outputPhaseOptionBuilder} />
           <Select
             multiple
             label='Measurement Type'
-            selectionOptionBuilder={this.state.outputMeasurementTypeOptionBuilder}
-            selectedOptionFinder={() => this.state.outputMeasurementTypeOptionBuilder.numberOfOptions() === 1}
-            onChange={this.onOutputMeasurementTypesChanged} />
+            formControlModel={this.currentOutputItemFormGroup.findControl('measurementTypes')}
+            selectionOptionBuilder={this.state.outputMeasurementTypeOptionBuilder} />
           <Tooltip
             content='Add output item'
             position='right'>
             <IconButton
-              disabled={this.state.addOutputItemButtonDisabled}
+              disabled={this.state.disableAddOutputItemButton}
               className='comm-outage-event-form__add-output'
               icon='add'
               onClick={this.addNewOutputItem} />
@@ -309,7 +523,11 @@ export class CommOutageEventForm extends React.Component<Props, State> {
                             style='accent'
                             size='small'
                             icon='delete'
-                            onClick={() => this.setState({ outputList: this.state.outputList.filter(item => item !== outputItem) })} />
+                            onClick={() => {
+                              this.setState({
+                                outputList: this.state.outputList.filter(item => item !== outputItem)
+                              });
+                            }} />
                         </Tooltip>
                       </td>
                       <td>
@@ -340,7 +558,7 @@ export class CommOutageEventForm extends React.Component<Props, State> {
           }
         </FormGroup>
         <BasicButton
-          disabled={this.disableAddEventButton()}
+          disabled={this.shouldDisableAddEventButton()}
           className='comm-outage-event-form__add-event'
           type='positive'
           label='Add event'
@@ -349,211 +567,40 @@ export class CommOutageEventForm extends React.Component<Props, State> {
     );
   }
 
-  onStartDateTimeChanged(value: string) {
-    this.formValue.startDateTime = this.dateTimeService.parse(value);
-  }
-
-  onStopDateTimeChanged(value: string) {
-    this.formValue.stopDateTime = this.dateTimeService.parse(value);
-  }
-
-  onAllInputOutageCheckboxToggled(state: boolean) {
-    this.formValue.allInputOutage = state;
-    if (state)
-      this.setState({
-        inputEquipmentTypeOptionBuilder: SelectionOptionBuilder.defaultBuilder(),
-        inputList: [],
-        allInputOutageChecked: true
-      });
-    else
-      this.setState({
-        inputEquipmentTypeOptionBuilder: inputEquipmentTypeOptionBuilder,
-        allInputOutageChecked: false
-      });
-  }
-
-  onInputEquipmentTypeChanged(selectedType: { id: string; label: string }) {
-    this.setState({
-      inputComponentOptionBuilder: new SelectionOptionBuilder(
-        this.props.modelDictionary[selectedType.id] || [],
-        e => e.name || e.bankName
-      ),
-      inputAttributeBuilder: new SelectionOptionBuilder(
-        COMPONENT_ATTRIBUTES[selectedType.id] || []
-      ),
-      inputPhaseOptionBuilder: SelectionOptionBuilder.defaultBuilder()
-    });
-    this.currentInputListItem = this._newInputListItem();
-    this.currentInputListItem.type = selectedType.label;
-    this._enableOrDisableAddInputItemButton();
-  }
-
-  private _enableOrDisableAddInputItemButton() {
-    if (
-      this.currentInputListItem.name !== '' &&
-      this.currentInputListItem.type !== '' &&
-      this.currentInputListItem.phases.length > 0 &&
-      this.currentInputListItem.attribute.length > 0
-    )
-      this.setState({
-        addInputItemButtonDisabled: false
-      });
-    else
-      this.setState({
-        addInputItemButtonDisabled: true
-      });
-  }
-
-  onInputComponentChanged(selectedComponent: any) {
-    this.setState({
-      inputPhaseOptionBuilder: new SelectionOptionBuilder(
-        unique(this._normalizePhases(selectedComponent.phases || selectedComponent.bankPhases))
-          .sort((a, b) => a.localeCompare(b))
-          .map((phase, i) => ({ phaseLabel: phase, phaseIndex: i })),
-        phase => phase.phaseLabel
-      )
-    });
-    this.currentInputListItem.name = selectedComponent.name || selectedComponent.bankName;
-    this.currentInputListItem.mRID = selectedComponent.mRID;
-    this._enableOrDisableAddInputItemButton();
-  }
-
-  private _normalizePhases(phases: string) {
-    // If phases is a string containing either A or B or C,
-    // then return it as is
-    return /^[abc]+$/i.test(phases) ? phases : [phases];
-  }
-
-  onInputPhasesChanged(selectedPhases: Array<{ phaseLabel: string; phaseIndex: number }>) {
-    this.currentInputListItem.phases = selectedPhases.sort((a, b) => a.phaseLabel.localeCompare(b.phaseLabel));
-    this._enableOrDisableAddInputItemButton();
-  }
-
-  onInputAttributeChanged(selectedValue: string) {
-    this.currentInputListItem.attribute = selectedValue;
-    this._enableOrDisableAddInputItemButton();
-  }
-
   addNewInputItem() {
+    const inputItem = this.currentInputItemFormGroup.getValue();
+    inputItem.phases.sort((a, b) => a.phaseLabel.localeCompare(b.phaseLabel));
+    this.currentInputItemFormGroup.reset();
+    this.selectedTypeForCurrentInputItemFormControl.reset();
     this.setState({
-      inputList: [...this.state.inputList, this.currentInputListItem],
-      inputComponentOptionBuilder: SelectionOptionBuilder.defaultBuilder(),
-      inputPhaseOptionBuilder: SelectionOptionBuilder.defaultBuilder(),
-      inputAttributeBuilder: SelectionOptionBuilder.defaultBuilder(),
-      addInputItemButtonDisabled: true
+      inputList: [...this.state.inputList, inputItem]
     });
-    const type = this.currentInputListItem.type;
-    this.currentInputListItem = this._newInputListItem();
-    this.currentInputListItem.type = type;
-    this.inputComponentTypeSelect.reset();
-  }
-
-  onAllOutputOutageCheckBoxToggled(state: boolean) {
-    this.formValue.allOutputOutage = state;
-    if (state) {
-      this.setState({
-        outputEquipmentTypeOptionBuilder: SelectionOptionBuilder.defaultBuilder(),
-        outputList: [],
-        allOutputOutageChecked: true
-      });
-    }
-    else
-      this.setState({
-        outputEquipmentTypeOptionBuilder: outputEquipmentTypeOptionBuilder,
-        allOutputOutageChecked: false
-      });
-  }
-
-  onOuputEquipmentTypeChanged(selectedType: string) {
-    this.currentOutputListItem = this._newOutputListItem();
-    this.currentOutputListItem.type = selectedType;
-    this.setState({
-      outputComponentOptionBuilder: new SelectionOptionBuilder(
-        this.props.modelDictionary.measurements.filter(
-          e => e.ConductingEquipment_type === selectedType
-        ),
-        measurement => `${measurement.ConductingEquipment_name} (${measurement.phases})`
-      ),
-      outputPhaseOptionBuilder: SelectionOptionBuilder.defaultBuilder(),
-      outputMeasurementTypeOptionBuilder: SelectionOptionBuilder.defaultBuilder()
-    });
-    this._enableOrDisableAddOutputItemButton();
-  }
-
-  onOutputComponentChanged(selectedValue: ModelDictionaryMeasurement) {
-    this.currentOutputListItem.name = selectedValue.ConductingEquipment_name;
-    this.setState({
-      outputPhaseOptionBuilder: new SelectionOptionBuilder(
-        unique(this._normalizePhases(selectedValue.phases)).sort((a, b) => a.localeCompare(b)),
-      ),
-      outputMeasurementTypeOptionBuilder: new SelectionOptionBuilder(
-        [selectedValue.measurementType]
-      )
-    });
-    this.currentOutputListItem.mRID = selectedValue.ConductingEquipment_mRID;
-    this._enableOrDisableAddOutputItemButton();
-  }
-
-  onOutputPhasesChanged(selectedPhases: string[]) {
-    this.currentOutputListItem.phases = selectedPhases;
-    this._enableOrDisableAddOutputItemButton();
-  }
-
-  onOutputMeasurementTypesChanged(selectedTypes: string[]) {
-    this.currentOutputListItem.measurementTypes = selectedTypes;
-    this._enableOrDisableAddOutputItemButton();
   }
 
   addNewOutputItem() {
+    const outputItem = this.currentOutputItemFormGroup.getValue();
+    outputItem.phases.sort();
     this.setState({
-      outputList: [...this.state.outputList, this.currentOutputListItem],
-      outputComponentOptionBuilder: SelectionOptionBuilder.defaultBuilder(),
-      outputPhaseOptionBuilder: SelectionOptionBuilder.defaultBuilder(),
-      outputMeasurementTypeOptionBuilder: SelectionOptionBuilder.defaultBuilder(),
-      addOutputItemButtonDisabled: true
+      outputList: [...this.state.outputList, outputItem]
     });
-    const type = this.currentOutputListItem.type;
-    this.currentOutputListItem = this._newOutputListItem();
-    this.currentOutputListItem.type = type;
-    this.outputComponentTypeSelect.reset();
-  }
-
-  private _enableOrDisableAddOutputItemButton() {
-    if (
-      this.currentOutputListItem.name !== '' &&
-      this.currentOutputListItem.type !== '' &&
-      this.currentOutputListItem.phases.length > 0 &&
-      this.currentOutputListItem.measurementTypes.length > 0
-    )
-      this.setState({
-        addOutputItemButtonDisabled: false
-      });
-    else
-      this.setState({
-        addOutputItemButtonDisabled: true
-      });
-  }
-
-  disableAddEventButton(): boolean {
-    return !this.state.allInputOutageChecked && this.state.inputList.length === 0;
+    this.selectedComponentForCurrentOutputItemFormControl.reset();
+    this.currentOutputItemFormGroup.reset();
   }
 
   createNewEvent() {
-    this.formValue.inputList = this.state.inputList;
-    this.formValue.outputList = this.state.outputList;
-    this.props.onEventAdded(this.formValue);
+    const formValue = this.currentEventFormGroup.getValue();
+    formValue.inputList = this.state.inputList;
+    formValue.outputList = this.state.outputList;
+    this.props.onAddEvent(formValue);
+    this.currentEventFormGroup.reset();
+    this.selectedTypeForCurrentInputItemFormControl.reset();
+    this.currentOutputItemFormGroup.findControl('type').reset();
     this.setState({
+      disableAddInputItemButton: true,
+      disableAddOutputItemButton: true,
       inputList: [],
-      outputList: [],
-      inputEquipmentTypeOptionBuilder: inputEquipmentTypeOptionBuilder,
-      outputEquipmentTypeOptionBuilder: outputEquipmentTypeOptionBuilder,
-      addInputItemButtonDisabled: true,
-      addOutputItemButtonDisabled: true,
-      allInputOutageChecked: false,
-      allOutputOutageChecked: false
+      outputList: []
     });
-    this.currentInputListItem = this._newInputListItem();
-    this.currentOutputListItem = this._newOutputListItem();
   }
 
 }

@@ -11,6 +11,7 @@ import { MeasurementChartModel } from './models/MeasurementChartModel';
 import { TimeSeriesDataPoint } from './models/TimeSeriesDataPoint';
 import { TimeSeries } from './models/TimeSeries';
 import { StateStore } from '@shared/state-store';
+import { Ripple } from '@shared/ripple';
 
 import './MeasurementChart.light.scss';
 import './MeasurementChart.dark.scss';
@@ -26,7 +27,7 @@ interface State {
 export class MeasurementChart extends React.Component<Props, State> {
 
   readonly width = 370;
-  readonly height = 270;
+  readonly height = 280;
   readonly margin = {
     top: 20,
     bottom: 35,
@@ -34,7 +35,7 @@ export class MeasurementChart extends React.Component<Props, State> {
     right: 10
   };
 
-  canvas: SVGSVGElement = null;
+  readonly svgRef = React.createRef<SVGSVGElement>();
 
   private readonly _xScale: ScaleTime<number, number>;
   private readonly _yScale: ScaleLinear<number, number>;
@@ -73,7 +74,7 @@ export class MeasurementChart extends React.Component<Props, State> {
   }
 
   componentDidMount() {
-    this._container = select(this.canvas.querySelector('.measurement-chart__canvas__container') as SVGElement);
+    this._container = select(this.svgRef.current.querySelector('.measurement-chart__canvas__container') as SVGElement);
     this._xAxis = this._container.select('.x-axis');
     this._yAxis = this._container.select('.y-axis');
 
@@ -97,22 +98,31 @@ export class MeasurementChart extends React.Component<Props, State> {
 
   private _findOverlappingTimeSeries() {
     const overlappingTimeSeries = [];
-    for (const series of this.props.measurementChartModel.timeSeries) {
-      if (
-        series.points.length >= 2
-        &&
-        // Only checking for the first and last datapoints
-        // to determine if the lines overlap which is good enough
-        this.props.measurementChartModel.timeSeries.some(
-          e => e !== series &&
-            e.points[0].measurement === series.points[0].measurement &&
-            e.points[e.points.length - 1].measurement === series.points[series.points.length - 1].measurement
-        )
-      ) {
-        overlappingTimeSeries.push(series);
+    for (const suspect of this.props.measurementChartModel.timeSeries) {
+      if (suspect.points.length >= 2 && this._suspectSeriesOverlapsOtherSeries(suspect)) {
+        overlappingTimeSeries.push(suspect);
       }
     }
     return overlappingTimeSeries;
+  }
+
+  private _suspectSeriesOverlapsOtherSeries(suspect: TimeSeries) {
+    for (const current of this.props.measurementChartModel.timeSeries) {
+      // Only checking for the first and last datapoints
+      // to determine if the provided series overlaps some other series which is good enough
+      if (
+        current !== suspect
+        && this._tooClose(current.points[0], suspect.points[0])
+        && this._tooClose(current.points[current.points.length - 1], suspect.points[suspect.points.length - 1])
+      ) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  private _tooClose(dataPoint1: TimeSeriesDataPoint, dataPoint2: TimeSeriesDataPoint) {
+    return Math.abs(this._yScale(dataPoint1.measurement) - this._yScale(dataPoint2.measurement)) <= 5;
   }
 
   private _calculateXYAxisExtents(): { x: [Date, Date], y: [number, number] } {
@@ -169,21 +179,22 @@ export class MeasurementChart extends React.Component<Props, State> {
         <div className='measurement-chart__legend-container'>
           {
             this.props.measurementChartModel.timeSeries.map(timeSeries => (
-              <div
-                key={timeSeries.name}
-                className='measurement-chart__legend'
-                onClick={() => this.locateNodeForTimeSeriesLine(timeSeries.name)}>
-                <div className='measurement-chart__legend__color' />
-                <div className='measurement-chart__legend__label'>
-                  {timeSeries.name}
+              <Ripple key={timeSeries.name}>
+                <div
+                  className='measurement-chart__legend'
+                  onClick={() => this.locateNodeForTimeSeriesLine(timeSeries.name)}>
+                  <div className='measurement-chart__legend__color' />
+                  <div className='measurement-chart__legend__label'>
+                    {timeSeries.name}
+                  </div>
                 </div>
-              </div>
+              </Ripple>
             ))
           }
         </div>
         <svg
           className='measurement-chart__canvas'
-          ref={elem => this.canvas = elem}
+          ref={this.svgRef}
           width={this.width}
           height={this.height}
           viewBox={`0 0 ${this.width} ${this.height}`}
@@ -195,19 +206,14 @@ export class MeasurementChart extends React.Component<Props, State> {
             <g
               className='measurement-chart__canvas__axis y-axis'
               transform={`translate(${this.margin.left},0)`} />
-
-            {
-              this.props.measurementChartModel.yAxisLabel
-              &&
-              <text
-                className='measurement-chart__canvas__axis-label'
-                x={this.margin.left / 2}
-                y={this.margin.top / 2}
-                fontSize='0.8em'
-                fontWeight='bold'>
-                {this.props.measurementChartModel.yAxisLabel}
-              </text>
-            }
+            <text
+              className='measurement-chart__canvas__axis-label'
+              x={this.margin.left}
+              y={this.margin.top}
+              dy='-5'
+              textAnchor='middle'>
+              {this.props.measurementChartModel.yAxisLabel}
+            </text>
             {this.showLabelsForOverlappingTimeSeries()}
           </g>
         </svg>
@@ -222,7 +228,7 @@ export class MeasurementChart extends React.Component<Props, State> {
   }
 
   showLabelsForOverlappingTimeSeries() {
-    if (this.state.overlappingTimeSeries.length === 0) {
+    if (this.state.overlappingTimeSeries.length === 0 || this.state.overlappingTimeSeries[0].points[0] === undefined) {
       return null;
     }
     const paddingLeft = 5;

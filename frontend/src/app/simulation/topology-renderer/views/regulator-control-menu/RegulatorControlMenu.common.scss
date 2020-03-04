@@ -1,0 +1,31 @@
+.regulator-control-menu {
+    .form-control {
+        margin: 10px;
+    }
+
+    .select {
+        align-items: center;
+    }
+
+    .form-control__label {
+        width: 8em;
+    }
+
+    ul {
+        margin: 0;
+    }
+
+    .dialog-content {
+        padding: 0;
+    }
+
+    .dialog-actions {
+        padding: 5px;
+    }
+}
+
+.regulator-control-menu__form__section ul:not(.validation-error-message-display) {
+    padding: 0;
+    padding-left: 10px;
+    list-style: none;
+}

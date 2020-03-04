@@ -1,0 +1,45 @@
+.progress-indicator {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    z-index: 1000;
+    top: 0;
+
+    .backdrop {
+        position: absolute;
+    }
+}
+
+.progress-indicator__dot-container {
+    z-index: 1000;
+}
+
+.progress-indicator__dot {
+    margin: 10px;
+    width: 15px;
+    height: 15px;
+    display: inline-block;
+    border-radius: 100%;
+    position: relative;
+    animation: jump 500ms -1s ease infinite alternate-reverse;
+
+    &:nth-child(even) {
+        animation-delay: 200ms;
+    }
+
+}
+
+@keyframes jump {
+    from {
+        transform: translateY(-30px);
+    }
+
+    to {
+        transform: translateY(0);
+    }
+}

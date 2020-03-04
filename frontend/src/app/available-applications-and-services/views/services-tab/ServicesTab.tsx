@@ -1,7 +1,7 @@
 import * as React from 'react';
 
 import { Service, ServiceConfigUserInputSpec } from '@shared/Service';
-import { MessageBanner } from '@shared/message-banner';
+import { MessageBanner } from '@shared/overlay/message-banner';
 
 import './ServicesTab.light.scss';
 import './ServicesTab.dark.scss';
@@ -11,12 +11,13 @@ interface Props {
 }
 
 export function ServicesTab(props: Props) {
-  if (!props.services || props.services.length === 0)
+  if (!props.services || props.services.length === 0) {
     return (
       <MessageBanner>
         No data available
       </MessageBanner>
     );
+  }
   return (
     <div className='services-tab-container'>
       <div className='services-tab'>
@@ -214,12 +215,13 @@ export function ServicesTab(props: Props) {
 function formatValue(value: any, type: ServiceConfigUserInputSpec['type']) {
   if (type === 'object') {
     const formattedValue = JSON.stringify(value, null, 4);
-    if (formattedValue === '{}')
+    if (formattedValue === '{}') {
       return (
         <div>
           {formattedValue}
         </div>
       );
+    }
     return (
       <div style={{ textAlign: 'left' }}>
         {formattedValue}

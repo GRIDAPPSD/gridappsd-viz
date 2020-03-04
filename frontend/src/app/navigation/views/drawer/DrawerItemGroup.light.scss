@@ -3,6 +3,10 @@
 .drawer-item-group__nested-drawer-items:not(:empty) {
     background-color: #dedede;
     box-shadow: 0 3px 5px #888 inset;
+
+    .drawer-item {
+        border-bottom: 2px solid #cdcdcd;
+    }
 }
 
 .drawer-item-group.expanded {

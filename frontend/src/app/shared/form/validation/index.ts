@@ -1,3 +1,2 @@
-export * from './ValidationResult';
 export * from './Validators';
-export * from './validation-error-messages/ValidationErrorMessages';
+export * from './validation-error-message-display/ValidationErrorMessageDisplay';

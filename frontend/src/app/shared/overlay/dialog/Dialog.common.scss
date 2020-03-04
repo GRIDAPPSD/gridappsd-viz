@@ -1,0 +1,71 @@
+.dialog-container {
+    position: fixed;
+    width: 100vw;
+    height: 100vh;
+    left: 0;
+    top: 0;
+    z-index: 1000;
+    opacity: 0;
+    pointer-events: none;
+
+    &.centered {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    &.active {
+        opacity: 1;
+        pointer-events: all;
+    }
+}
+
+.dialog {
+    transform-origin: 50% 50%;
+    position: absolute;
+    z-index: 24;
+    top: auto;
+    left: auto;
+    animation-duration: 300ms;
+    animation-timing-function: ease;
+    animation-fill-mode: forwards;
+    max-width: 100vw;
+    max-height: 100vh;
+    border-radius: 5px;
+}
+
+.dialog--entering {
+    animation-name: dialog--entering;
+}
+
+.dialog--leaving {
+    animation-name: dialog--leaving;
+}
+
+@keyframes dialog--entering {
+    from {
+        visibility: hidden;
+        opacity: 0;
+        transform: translateY(25px) scale(0.9, 0.9);
+    }
+
+    to {
+        visibility: visible;
+        opacity: 1;
+        transform: translateY(0) scale(1, 1);
+    }
+}
+
+@keyframes dialog--leaving {
+    from {
+        visibility: visible;
+        opacity: 1;
+        transform: translateY(0) scale(1, 1);
+    }
+
+    to {
+        visibility: hidden;
+        opacity: 0;
+        transform: translateY(25px) scale(0.9, 0.9);
+    }
+}

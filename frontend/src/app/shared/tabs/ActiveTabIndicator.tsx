@@ -8,8 +8,9 @@ interface Props {
 }
 
 export function ActiveTabIndicator(props: Props) {
-  if (!props.activeTab)
+  if (!props.activeTab) {
     return null;
+  }
   const leftEdgeOfActiveTab = props.activeTab.offsetLeft;
   // The container for tab lables can overflow and scroll
   // So we need to know how much to the right it has scrolled,
@@ -17,7 +18,7 @@ export function ActiveTabIndicator(props: Props) {
   // active tab currently on screen to position the indicator correctly
   const offset = props.activeTab.parentElement ? props.activeTab.parentElement.scrollLeft : 0;
   return (
-    <div className='tabgroup__active-tab-indicator'
+    <div className='tab-group__active-tab-indicator'
       style={{
         // minus 2 because it has 2px border
         transform: `translateX(${leftEdgeOfActiveTab - offset - 2}px)`,

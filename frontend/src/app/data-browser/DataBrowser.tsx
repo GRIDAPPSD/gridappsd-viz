@@ -79,7 +79,7 @@ export class DataBrowser extends React.Component<Props, State> {
           <Route
             exact
             path={`${props.match.path}`}
-            render={() => <div className='vertical-divider' style={{ width: '1px', boxShadow: '0 0 2px #888', 'height': '100%' }} />} />
+            render={() => <div className='vertical-divider' />} />
           <Route
             path={`${props.match.path}/powergrid-models`}
             component={() => <PowergridModelsContainer feederModelLines={this.state.feederModelLines} />} />

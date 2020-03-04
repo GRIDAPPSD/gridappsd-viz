@@ -5,7 +5,8 @@ import { map } from 'rxjs/operators';
 import { StompClientService, StompClientConnectionStatus } from '@shared/StompClientService';
 import { StompClient } from './StompClient';
 import { download, DownloadType } from '@shared/misc';
-import { MessageBanner } from '@shared/message-banner';
+import { MessageBanner } from '@shared/overlay/message-banner';
+import { showNotification } from '@shared/overlay/notification';
 
 interface Props {
 }
@@ -13,7 +14,6 @@ interface Props {
 interface State {
   responseBody: string;
   isFetching: boolean;
-  showExportCsvFailureNotification: boolean;
 }
 
 
@@ -27,8 +27,7 @@ export class StompClientContainer extends React.Component<Props, State> {
     super(props);
     this.state = {
       isFetching: false,
-      responseBody: '',
-      showExportCsvFailureNotification: false
+      responseBody: ''
     };
     this.sendRequest = this.sendRequest.bind(this);
     this.downloadResponse = this.downloadResponse.bind(this);
@@ -78,13 +77,6 @@ export class StompClientContainer extends React.Component<Props, State> {
           response={this.state.responseBody}
           showLoadingIndicator={this.state.isFetching}
           onDownloadResponse={this.downloadResponse} />
-        {
-          this.state.showExportCsvFailureNotification
-          &&
-          <MessageBanner>
-            There was a problem exporting the response to CSV
-          </MessageBanner>
-        }
       </>
     );
   }
@@ -94,26 +86,21 @@ export class StompClientContainer extends React.Component<Props, State> {
       isFetching: true,
       responseBody: ''
     });
-    if (requestBody !== '')
-      requestBody = JSON.stringify(JSON.parse(requestBody));
-    this._stompClientService.send(topic, { 'reply-to': '/stomp-client/response-queue' }, requestBody);
+    this._stompClientService.send({
+      destination: topic,
+      replyTo: '/stomp-client/response-queue',
+      body: requestBody
+    });
   }
 
   downloadResponse(downloadType: DownloadType) {
-    if (downloadType === DownloadType.JSON)
+    if (downloadType === DownloadType.JSON) {
       download('response.json', this.state.responseBody, downloadType);
-    else {
+    } else {
       try {
         download('response.csv', this._convertResponseBodyToCsv(), downloadType);
       } catch {
-        this.setState({
-          showExportCsvFailureNotification: true
-        });
-        setTimeout(() => {
-          this.setState({
-            showExportCsvFailureNotification: false
-          });
-        }, 15_000);
+        showNotification('There was a problem exporting the response to CSV');
       }
     }
   }
@@ -121,15 +108,18 @@ export class StompClientContainer extends React.Component<Props, State> {
   private _convertResponseBodyToCsv() {
     const responseBody = JSON.parse(this.state.responseBody);
     const responseBodyKeys = Object.keys(responseBody);
-    if (responseBodyKeys.length === 0)
+    if (responseBodyKeys.length === 0) {
       return '';
+    }
     const data = responseBody[responseBodyKeys[0]];
-    if (!Array.isArray(data) || data.length === 0)
+    if (!Array.isArray(data) || data.length === 0) {
       return '';
+    }
     const columnNames = Object.keys(data[0]);
     const rows = [columnNames.join(',')];
-    for (let i = 1; i < data.length; i++)
+    for (let i = 1; i < data.length; i++) {
       rows.push(columnNames.map(columnName => data[i][columnName]).join(','));
+    }
     return rows.join('\n');
   }
 

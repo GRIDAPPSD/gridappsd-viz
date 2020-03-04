@@ -5,7 +5,7 @@ import { Application } from '@shared/Application';
 import { AvailableApplicationsAndServicesContainer } from './available-applications-and-services';
 import { DataBrowser } from './data-browser';
 import { FeederModel } from '@shared/topology';
-import { SimulationLabelsContainer } from './simulation/simulation-labels';
+import { MeasurementValueTableContainer } from './simulation/measurement-value-table';
 import { MeasurementChartContainer } from './simulation/measurement-chart';
 import { SimulationConfiguration, DEFAULT_SIMULATION_CONFIGURATION } from '@shared/simulation';
 import { SimulationConfigurationEditor } from './simulation/simulation-configuration';
@@ -22,12 +22,12 @@ import { NavigationContainer } from './navigation';
 import { Authenticator } from '@shared/authenticator';
 import { AlarmsContainer, Alarm } from './simulation/alarms';
 import { Settings } from './settings';
-import { MessageBanner } from '@shared/message-banner';
+import { MessageBanner } from '@shared/overlay/message-banner';
 import { ThreeDots } from '@shared/three-dots';
-import { OverlayService } from '@shared/overlay';
 import { StompClientConnectionStatus } from '@shared/StompClientService';
 import { StateStore } from '@shared/state-store';
 import { waitUntil } from '@shared/misc';
+import { PortalRenderer } from '@shared/overlay/portal-renderer';
 
 import './App.light.scss';
 import './App.dark.scss';
@@ -50,13 +50,11 @@ interface State {
 
 export const App = (withRouter as any)(class extends React.Component<Props, State> {
 
-  readonly overlayService = OverlayService.getInstance();
-
-  private readonly _stateStore = StateStore.getInstance();
+  readonly tabGroupRef = React.createRef<TabGroup>();
 
   shouldRedirect = false;
-  tabGroup: TabGroup;
 
+  private readonly _stateStore = StateStore.getInstance();
   constructor(props: Props) {
     super(props);
 
@@ -89,13 +87,13 @@ export const App = (withRouter as any)(class extends React.Component<Props, Stat
                   <div className='topology-renderer-simulation-status-logger-measurement-graphs'>
                     <div>
                       <SimulationControlContainer />
-                      <TabGroup ref={ref => this.tabGroup = ref}>
+                      <TabGroup ref={this.tabGroupRef}>
                         <Tab label='Simulation'>
                           <TopologyRendererContainer
                             mRIDs={this.props.componentMRIDs}
                             phases={this.props.componentPhases} />
                           <SimulationStatusLogContainer />
-                          <SimulationLabelsContainer />
+                          <MeasurementValueTableContainer />
                           <VoltageViolationContainer />
                         </Tab>
                         <Tab label='Events'>
@@ -106,7 +104,7 @@ export const App = (withRouter as any)(class extends React.Component<Props, Stat
                         </Tab>
                         <Tab label='Alarms'>
                           <AlarmsContainer
-                            onNewAlarmsConfirmed={() => this.tabGroup.setSelectedTabIndex(3)}
+                            onNewAlarmsConfirmed={() => this.tabGroupRef.current.setSelectedTabIndex(3)}
                             onLocateNodeForAlarm={this.onLocateNodeForAlarm} />
                         </Tab>
                       </TabGroup>
@@ -149,15 +147,15 @@ export const App = (withRouter as any)(class extends React.Component<Props, Stat
   }
 
   showSimulationConfigForm(config: SimulationConfiguration) {
-    this.overlayService.show(
+    const portalRenderer = new PortalRenderer();
+    portalRenderer.mount(
       <SimulationConfigurationEditor
         feederModel={this.props.feederModel}
         onSubmit={updatedConfig => {
           this.props.onSimulationConfigFormSubmitted(updatedConfig);
-          this.overlayService.hide();
           setTimeout(() => this.props.history.push('/simulation'), 500);
         }}
-        onClose={this.overlayService.hide}
+        onClose={portalRenderer.unmount}
         onMRIDChanged={this.props.onMRIDChanged}
         availableApplications={this.props.availableApplications}
         initialConfig={config || DEFAULT_SIMULATION_CONFIGURATION} />
@@ -170,8 +168,8 @@ export const App = (withRouter as any)(class extends React.Component<Props, Stat
   }
 
   onLocateNodeForAlarm(alarm: Alarm) {
-    this.tabGroup.setSelectedTabIndex(0);
-    waitUntil(() => this.tabGroup.isTabVisible(0))
+    this.tabGroupRef.current.setSelectedTabIndex(0);
+    waitUntil(() => this.tabGroupRef.current.isTabVisible(0))
       .then(() => {
         this._stateStore.update({
           nodeNameToLocate: alarm.equipment_name

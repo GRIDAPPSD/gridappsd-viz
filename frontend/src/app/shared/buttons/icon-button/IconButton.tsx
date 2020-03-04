@@ -20,27 +20,21 @@ interface Props {
   style?: 'primary' | 'accent';
   disabled?: boolean;
   onClick?: (event: React.MouseEvent) => void;
-  noBackground?: boolean;
+  hasBackground?: boolean;
   rippleDuration?: number;
 }
 
 export class IconButton extends React.Component<Props, {}> {
 
-
-  static defaultProps = {
-    size: 'normal',
-    rounded: true,
-    style: 'primary',
-  } as Props;
-
-  buttonRef: HTMLButtonElement;
+  readonly buttonRef = React.createRef<HTMLButtonElement>();
 
   componentDidUpdate(prevProps: Props) {
-    if (this.props.disabled !== prevProps.disabled && this.props.disabled)
+    if (this.props.disabled !== prevProps.disabled && this.props.disabled) {
       // When the button is disabled
       // Chrome does not fire a mouseout event at all
       // so we fire it manually
-      this.buttonRef.dispatchEvent(new CustomEvent('mouseout'));
+      this.buttonRef.current.dispatchEvent(new CustomEvent('mouseout'));
+    }
   }
 
   render() {
@@ -49,7 +43,7 @@ export class IconButton extends React.Component<Props, {}> {
         fixed={this.props.label ? false : this.props.rounded || this.props.rounded === undefined}
         duration={this.props.rippleDuration}>
         <button
-          ref={ref => this.buttonRef = ref}
+          ref={this.buttonRef}
           type='button'
           disabled={this.props.disabled}
           className={this.deriveClassName()}
@@ -72,18 +66,25 @@ export class IconButton extends React.Component<Props, {}> {
     const classNames = [
       'icon-button',
       `icon-button--${this.props.style}`,
-      this.props.noBackground ? 'no-background' : 'has-background',
+      this.props.hasBackground ? 'has-background' : 'no-background',
     ];
-    if (this.props.label)
+    if (this.props.label) {
       classNames.push('icon-button--has-label');
-    if (this.props.className)
+    }
+    if (this.props.className) {
       classNames.push(this.props.className);
+    }
     if (this.props.rounded && !this.props.label) {
       classNames.push(`rounded-icon-button rounded-icon-button--${this.props.size}`);
-      if (!this.props.noBackground)
-        classNames.push('has-background');
     }
     return classNames.join(' ');
   }
 
 }
+
+(IconButton as any).defaultProps = {
+  size: 'normal',
+  rounded: true,
+  style: 'primary',
+  hasBackground: true
+};

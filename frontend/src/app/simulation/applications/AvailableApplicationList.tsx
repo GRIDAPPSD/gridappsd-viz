@@ -88,7 +88,7 @@ export class AvailableApplicationList extends React.Component<Props, State> {
   }
 
   showActionButton() {
-    if (this.state.action === 'enable')
+    if (this.state.action === 'enable') {
       return (
         <Tooltip content='Enable'>
           <IconButton
@@ -97,6 +97,7 @@ export class AvailableApplicationList extends React.Component<Props, State> {
             onClick={this.enableApplication} />
         </Tooltip>
       );
+    }
 
     return (
       <Tooltip content='Disable'>
@@ -115,11 +116,13 @@ export class AvailableApplicationList extends React.Component<Props, State> {
     });
     const application = this.state.applications[0];
     const request = new EnableApplicationRequest(application, this._simulationId);
-    this._stompClientService.send(
-      request.url,
-      { 'reply-to': request.replyTo },
-      JSON.stringify(request.requestBody)
-    );
+
+    this._stompClientService.send({
+      destination: request.url,
+      replyTo: request.replyTo,
+      body: JSON.stringify(request.requestBody)
+    });
+
   }
 
   disableApplication() {
@@ -128,11 +131,11 @@ export class AvailableApplicationList extends React.Component<Props, State> {
     });
     const application = this.state.applications[0];
     const request = new DisableApplicationRequest(application, this._simulationId);
-    this._stompClientService.send(
-      request.url,
-      { 'reply-to': request.replyTo },
-      JSON.stringify(request.requestBody)
-    );
+    this._stompClientService.send({
+      destination: request.url,
+      replyTo: request.replyTo,
+      body: JSON.stringify(request.requestBody)
+    });
   }
 
 }

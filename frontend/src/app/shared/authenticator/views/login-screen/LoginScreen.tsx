@@ -1,11 +1,11 @@
 import * as React from 'react';
 import { Observable, Subscription } from 'rxjs';
 
-import { Input } from '@shared/form';
+import { Input, Form, FormGroupModel, FormControlModel } from '@shared/form';
 import { BasicButton, IconButton } from '@shared/buttons';
 import { Validators } from '@shared/form/validation';
 import { Tooltip } from '@shared/tooltip';
-import { Wait } from '@shared/wait';
+import { ProgressIndicator } from '@shared/overlay/progress-indicator';
 
 import './LoginScreen.light.scss';
 import './LoginScreen.dark.scss';
@@ -15,15 +15,16 @@ interface Props {
 }
 
 interface State {
-  disableLoginButton: boolean;
   passwordVisible: boolean;
   showSpinner: boolean;
 }
 
 export class LoginScreen extends React.Component<Props, State> {
 
-  username = 'system';
-  password = 'manager';
+  readonly formGroupModel = new FormGroupModel({
+    username: new FormControlModel('system', [Validators.checkNotEmpty('Username')]),
+    password: new FormControlModel('manager', [Validators.checkNotEmpty('Password')])
+  });
 
   private _subscription: Subscription;
 
@@ -31,49 +32,43 @@ export class LoginScreen extends React.Component<Props, State> {
     super(props);
 
     this.state = {
-      disableLoginButton: false,
       passwordVisible: false,
       showSpinner: false
     };
 
-    this.onUsernameEntered = this.onUsernameEntered.bind(this);
-    this.onUsernameInputValidated = this.onUsernameInputValidated.bind(this);
-    this.onPasswordEntered = this.onPasswordEntered.bind(this);
-    this.onPasswordInputValidated = this.onPasswordInputValidated.bind(this);
     this.login = this.login.bind(this);
     this.togglePasswordVisibility = this.togglePasswordVisibility.bind(this);
   }
 
+  componentDidMount() {
+    this.formGroupModel.validityChanges()
+      .subscribe({
+        next: () => this.forceUpdate()
+      });
+  }
+
   componentWillUnmount() {
+    this.formGroupModel.cleanup();
     this._subscription?.unsubscribe();
   }
 
   render() {
     return (
       <div className='login-screen-container'>
-        <div className='login-screen'>
+        <Form
+          className='login-screen-form'
+          formGroupModel={this.formGroupModel}
+          onSubmit={this.login}>
           <Input
-            className='login-screen__username'
+            className='login-screen-form__username'
             label='Username'
-            name='username'
-            value='system'
-            validators={[
-              Validators.checkNotEmpty('Username is required')
-            ]}
-            onChange={this.onUsernameEntered}
-            onValidate={this.onUsernameInputValidated} />
-          <div className='login-screen__password-container'>
+            formControlModel={this.formGroupModel.findControl('username')} />
+          <div className='login-screen-form__password-container'>
             <Input
-              className='login-screen__password'
+              className='login-screen-form__password'
               label='Password'
-              name='password'
-              type={this.state.passwordVisible ? 'text' : 'password'}
-              value='manager'
-              validators={[
-                Validators.checkNotEmpty('Password is required')
-              ]}
-              onChange={this.onPasswordEntered}
-              onValidate={this.onPasswordInputValidated} />
+              formControlModel={this.formGroupModel.findControl('password')}
+              type={this.state.passwordVisible ? 'text' : 'password'} />
             <Tooltip content={this.state.passwordVisible ? 'Hide password' : 'Show password'}>
               <IconButton
                 icon={this.state.passwordVisible ? 'visibility_off' : 'visibility'}
@@ -83,47 +78,15 @@ export class LoginScreen extends React.Component<Props, State> {
             </Tooltip>
           </div>
           <BasicButton
-            className='login-screen__login-button'
+            className='login-screen-form__login-button'
             type='positive'
             label='Log in'
-            disabled={this.state.disableLoginButton}
+            disabled={!this.formGroupModel.isValid()}
             onClick={this.login} />
-        </div>
-        <Wait show={this.state.showSpinner} />
+        </Form>
+        <ProgressIndicator show={this.state.showSpinner} />
       </div>
     );
-  }
-
-  onUsernameEntered(value: string) {
-    this.username = value;
-  }
-
-  onUsernameInputValidated(isValid: boolean) {
-    if (!isValid) {
-      this.setState({
-        disableLoginButton: true
-      });
-    }
-    else if (this.password !== '')
-      this.setState({
-        disableLoginButton: false
-      });
-  }
-
-  onPasswordEntered(value: string) {
-    this.password = value;
-  }
-
-  onPasswordInputValidated(isValid: boolean) {
-    if (!isValid) {
-      this.setState({
-        disableLoginButton: true
-      });
-    }
-    else if (this.username !== '')
-      this.setState({
-        disableLoginButton: false
-      });
   }
 
   togglePasswordVisibility() {
@@ -136,7 +99,8 @@ export class LoginScreen extends React.Component<Props, State> {
     this.setState({
       showSpinner: true
     });
-    this._subscription = this.props.onLogin(this.username, this.password)
+    const credentials = this.formGroupModel.getValue();
+    this._subscription = this.props.onLogin(credentials.username, credentials.password)
       .subscribe({
         complete: () => {
           this.setState({

@@ -1,13 +1,13 @@
 @import 'TabGroup.common';
 
-.tabgroup__header__label {
+.tab-group__header__label {
     color: rgba(0, 0, 0, 0.2);
 }
 
-.tabgroup__header__label.active {
+.tab-group__header__label.active {
     color: rgba(0, 0, 0, 1);
 }
 
-.tabgroup__body {
+.tab-group__body {
     border: 2px solid rgba(64, 81, 181, 0.502);
 }

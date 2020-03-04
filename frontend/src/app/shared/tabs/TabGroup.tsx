@@ -22,7 +22,8 @@ export class TabGroup extends React.Component<Props, State> {
     selectedTabIndex: 0
   };
 
-  nativeElement: HTMLElement;
+  readonly tabGroupRef = React.createRef<HTMLDivElement>();
+
   tabs: Tab[] = [];
   tabLabels: NodeListOf<HTMLElement>;
 
@@ -36,15 +37,16 @@ export class TabGroup extends React.Component<Props, State> {
   }
 
   componentDidUpdate(prevProps: Props) {
-    if (this.props.selectedTabIndex !== prevProps.selectedTabIndex)
+    if (this.props.selectedTabIndex !== prevProps.selectedTabIndex) {
       this.setState(prevState => ({
         previousTabIndex: prevState.activeTabIndex,
         activeTabIndex: this.props.selectedTabIndex
       }));
+    }
   }
 
   componentDidMount() {
-    this.tabLabels = this.nativeElement.querySelectorAll('.tabgroup__header__label');
+    this.tabLabels = this.tabGroupRef.current.querySelectorAll('.tab-group__header__label');
     this.setState({
       activeTab: this.tabLabels[this.state.activeTabIndex]
     });
@@ -57,14 +59,15 @@ export class TabGroup extends React.Component<Props, State> {
     const tabs = (Array.isArray(this.props.children) ? this.props.children : [this.props.children]) as Tab[];
     const { activeTabIndex, previousTabIndex, activeTab } = this.state;
     return (
-      <div ref={ref => this.nativeElement = ref}
-        className='tabgroup'>
+      <div
+        ref={this.tabGroupRef}
+        className='tab-group'>
         <header
-          className='tabgroup__header'>
+          className='tab-group__header'>
           {
             tabs.map((tab, index) => (
               <div key={index}
-                className={`tabgroup__header__label tab-label-${index}${activeTabIndex === index ? ' active' : ''}`}
+                className={`tab-group__header__label tab-label-${index}${activeTabIndex === index ? ' active' : ''}`}
                 onClick={() => this.setSelectedTabIndex(index)}>
                 {tab.props.label}
               </div>
@@ -72,10 +75,10 @@ export class TabGroup extends React.Component<Props, State> {
           }
           <ActiveTabIndicator activeTab={activeTab} />
         </header>
-        <div className='tabgroup__body'>
-          <div className='tabgroup__body__wrapper'>
+        <div className='tab-group__body'>
+          <div className='tab-group__body__wrapper'>
             <div
-              className='tabgroup__body__slider'
+              className='tab-group__body__slider'
               style={{
                 transform: `translateX(${-activeTabIndex * 100}%)`
               }}>
@@ -102,20 +105,21 @@ export class TabGroup extends React.Component<Props, State> {
   }
 
   setSelectedTabIndex(index: number) {
-    this.nativeElement.querySelector('.tabgroup__body__wrapper').scrollTop = 0;
+    this.tabGroupRef.current.querySelector('.tab-group__body__wrapper').scrollTop = 0;
     this.setState(prevState => {
-      if (prevState.activeTabIndex !== index)
+      if (prevState.activeTabIndex !== index) {
         return {
           activeTabIndex: index,
           previousTabIndex: prevState.activeTabIndex,
           activeTab: this.tabLabels[index]
         };
+      }
       return null;
     });
   }
 
   isTabVisible(tabIndex: number) {
-    return this.nativeElement.querySelector(`.tab-label-${tabIndex}`).classList.contains('active');
+    return this.tabGroupRef.current.querySelector(`.tab-label-${tabIndex}`).classList.contains('active');
   }
 
 }

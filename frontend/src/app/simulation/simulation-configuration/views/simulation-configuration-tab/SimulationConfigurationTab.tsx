@@ -1,6 +1,15 @@
 import * as React from 'react';
 
-import { FormGroup, Input, Select, CheckBox, TextArea, SelectionOptionBuilder } from '@shared/form';
+import {
+  FormGroup,
+  Input,
+  Select,
+  Checkbox,
+  TextArea,
+  SelectionOptionBuilder,
+  FormGroupModel,
+  FormControlModel
+} from '@shared/form';
 import { Tooltip } from '@shared/tooltip';
 import { IconButton } from '@shared/buttons';
 import { SimulationConfigurationTabModel } from '../../models/SimulationConfigurationTabModel';
@@ -11,9 +20,8 @@ import './SimulationConfigurationTab.light.scss';
 import './SimulationConfigurationTab.dark.scss';
 
 interface Props {
-  onChange: (formValue: SimulationConfigurationTabModel) => void;
+  parentFormGroupModel: FormGroupModel<SimulationConfigurationTabModel>;
   simulationConfig: SimulationConfiguration['simulation_config'];
-  simulationName: string;
 }
 
 interface State {
@@ -21,39 +29,58 @@ interface State {
 }
 
 export class SimulationConfigurationTab extends React.Component<Props, State> {
-  readonly formValue: SimulationConfigurationTabModel;
-
-  private _invalidFormControls = new Map<string, true>();
 
   constructor(props: Props) {
     super(props);
+
     this.state = {
-      simulatorOptionBuilder: new SelectionOptionBuilder(['GridLAB-D'])
+      simulatorOptionBuilder: new SelectionOptionBuilder([props.simulationConfig.simulator || 'GridLAB-D'])
     };
 
-    this.formValue = {
-      startDateTime: props.simulationConfig.start_time,
-      duration: props.simulationConfig.duration,
-      runInRealtime: props.simulationConfig.run_realtime,
-      simulationName: props.simulationConfig.simulation_name,
-      simulator: props.simulationConfig.simulator,
-      modelCreationConfig: props.simulationConfig.model_creation_config,
-      isValid: true
-    };
+    this._setupFormGroupModelForSimulationConfigurationTab();
 
-    this.updateInvalidFormControlsMap = this.updateInvalidFormControlsMap.bind(this);
-    this.onStartDateTimeChanged = this.onStartDateTimeChanged.bind(this);
-    this.onDurationChanged = this.onDurationChanged.bind(this);
-    this.onSimulatorSelectionCleared = this.onSimulatorSelectionCleared.bind(this);
-    this.onSimulatorChanged = this.onSimulatorChanged.bind(this);
-    this.onRunInRealtimeChanged = this.onRunInRealtimeChanged.bind(this);
-    this.onSimulationNameChanged = this.onSimulationNameChanged.bind(this);
-    this.onModelCreationConfigurationChanged = this.onModelCreationConfigurationChanged.bind(this);
   }
 
-  componentDidUpdate(prevProps: Props) {
-    if (prevProps.simulationName !== this.props.simulationName)
-      this.formValue.simulationName = this.props.simulationName;
+  private _setupFormGroupModelForSimulationConfigurationTab() {
+    this.props.parentFormGroupModel.setControl(
+      'start_time',
+      new FormControlModel(
+        this.props.simulationConfig.start_time,
+        [Validators.checkNotEmpty('Start time'), Validators.checkValidDateTime('Start time')]
+      )
+    );
+    this.props.parentFormGroupModel.setControl(
+      'duration',
+      new FormControlModel(
+        this.props.simulationConfig.duration,
+        [Validators.checkNotEmpty('Duration'), Validators.checkValidNumber('Duration')]
+      )
+    );
+    this.props.parentFormGroupModel.setControl(
+      'simulator',
+      new FormControlModel('')
+    );
+    this.props.parentFormGroupModel.setControl(
+      'run_realtime',
+      new FormControlModel(this.props.simulationConfig.run_realtime)
+    );
+    this.props.parentFormGroupModel.setControl(
+      'simulation_name',
+      new FormControlModel(
+        this.props.simulationConfig.simulation_name,
+        [Validators.checkNotEmpty('Simulation name')]
+      )
+    );
+    this.props.parentFormGroupModel.setControl(
+      'model_creation_config',
+      new FormControlModel(
+        this.props.simulationConfig.model_creation_config,
+        [
+          Validators.checkNotEmpty('Model creation config'),
+          Validators.checkValidJSON('Model creation config')
+        ]
+      )
+    );
   }
 
   render() {
@@ -61,45 +88,30 @@ export class SimulationConfigurationTab extends React.Component<Props, State> {
       <FormGroup label=''>
         <Input
           label='Start time'
-          hint='YYYY-MM-DD HH:MM:SS'
-          name='start_time'
-          value={this.formValue.startDateTime}
-          validators={[
-            Validators.checkNotEmpty('Start time is empty'),
-            Validators.checkValidDateTime('Start time must have format YYYY-MM-DD HH:MM:SS')
-          ]}
-          onValidate={this.updateInvalidFormControlsMap}
-          onChange={this.onStartDateTimeChanged} />
+          formControlModel={this.props.parentFormGroupModel.findControl('start_time')} />
+
         <Input
           label='Duration'
           hint='Seconds'
-          name='duration'
-          value={this.formValue.duration}
-          validators={[
-            Validators.checkNotEmpty('Duration is empty'),
-            Validators.checkValidNumber('Duration is not a number')
-          ]}
-          onValidate={this.updateInvalidFormControlsMap}
-          onChange={this.onDurationChanged} />
+          formControlModel={this.props.parentFormGroupModel.findControl('duration')} />
+
         <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
           <Select
             label='Simulator'
-            optional={false}
+            formControlModel={this.props.parentFormGroupModel.findControl('simulator')}
             selectionOptionBuilder={this.state.simulatorOptionBuilder}
-            selectedOptionFinder={simulator => simulator === 'GridLAB-D'}
-            onClear={this.onSimulatorSelectionCleared}
-            onChange={this.onSimulatorChanged} />
+            selectedOptionFinder={simulator => simulator === 'GridLAB-D'} />
           <div className='accompanying-text'>
             <div>Power flow solver method</div>
             <div>NR</div>
           </div>
         </div>
+
         <div className='realtime-checkbox-container'>
-          <CheckBox
+          <Checkbox
             label='Real time'
             name='realtime'
-            checked={this.formValue.runInRealtime}
-            onChange={this.onRunInRealtimeChanged} />
+            formControlModel={this.props.parentFormGroupModel.findControl('run_realtime')} />
           <Tooltip
             position='right'
             content={
@@ -117,72 +129,13 @@ export class SimulationConfigurationTab extends React.Component<Props, State> {
 
         <Input
           label='Simulation name'
-          name='simulation_name'
-          validators={[
-            Validators.checkNotEmpty('Simulation name is empty')
-          ]}
-          value={this.props.simulationName}
-          onValidate={this.updateInvalidFormControlsMap}
-          onChange={this.onSimulationNameChanged} />
+          formControlModel={this.props.parentFormGroupModel.findControl('simulation_name')} />
 
         <TextArea
           label='Model creation configuration'
-          value={JSON.stringify(this.formValue.modelCreationConfig, null, 4)}
-          validators={[
-            Validators.checkNotEmpty('Model creation configuration is empty'),
-            Validators.checkValidJSON()
-          ]}
-          onValidate={this.updateInvalidFormControlsMap}
-          onChange={this.onModelCreationConfigurationChanged} />
+          formControlModel={this.props.parentFormGroupModel.findControl('model_creation_config')} />
       </FormGroup>
     );
-  }
-
-  updateInvalidFormControlsMap(isValid: boolean, formControlLabel: string) {
-    if (isValid)
-      this._invalidFormControls.delete(formControlLabel);
-    else
-      this._invalidFormControls.set(formControlLabel, true);
-    this.formValue.isValid = this._invalidFormControls.size === 0;
-    // If validation was not valid, then notify the parent
-    if (!isValid)
-      this.props.onChange(this.formValue);
-  }
-
-  onStartDateTimeChanged(value: string) {
-    this.formValue.startDateTime = value;
-    this.props.onChange(this.formValue);
-  }
-
-  onDurationChanged(value: string) {
-    this.formValue.duration = value;
-    this.props.onChange(this.formValue);
-  }
-
-  onSimulatorSelectionCleared() {
-    this.formValue.simulator = '';
-    this.updateInvalidFormControlsMap(false, 'Simulator');
-  }
-
-  onSimulatorChanged(selectedValue: string) {
-    this.formValue.simulator = selectedValue;
-    this.updateInvalidFormControlsMap(true, 'Simulator');
-    this.props.onChange(this.formValue);
-  }
-
-  onRunInRealtimeChanged(state: boolean) {
-    this.formValue.runInRealtime = state;
-    this.props.onChange(this.formValue);
-  }
-
-  onSimulationNameChanged(value: string) {
-    this.formValue.simulationName = `[NEW]${value}`;
-    this.props.onChange(this.formValue);
-  }
-
-  onModelCreationConfigurationChanged(value: string) {
-    this.formValue.modelCreationConfig = JSON.parse(value);
-    this.props.onChange(this.formValue);
   }
 
 }

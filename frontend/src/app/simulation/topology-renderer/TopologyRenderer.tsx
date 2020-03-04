@@ -9,16 +9,16 @@ import { takeUntil, filter } from 'rxjs/operators';
 import { CanvasTransformService } from '@shared/CanvasTransformService';
 import { Switch, Capacitor, Node, Edge, Regulator, Transformer } from '@shared/topology';
 import { Tooltip } from '@shared/tooltip';
-import { OverlayService } from '@shared/overlay';
-import { SwitchMenu } from './views/switch-menu/SwitchMenu';
-import { CapacitorMenu } from './views/capacitor-menu/CapacitorMenu';
-import { RegulatorMenu } from './views/regulator-menu/RegulatorMenu';
+import { SwitchControlMenu } from './views/switch-control-menu/SwitchControlMenu';
+import { CapacitorControlMenu } from './views/capacitor-control-menu/CapacitorControlMenu';
+import { RegulatorControlMenu } from './views/regulator-control-menu/RegulatorControlMenu';
 import { RenderableTopology } from './models/RenderableTopology';
 import { IconButton } from '@shared/buttons';
 import { NodeSearcher } from './views/node-searcher/NodeSearcher';
 import { MatchedNodeLocator } from './views/matched-node-locator/MatchedNodeLocator';
-import { showNotification } from '@shared/notification';
+import { showNotification } from '@shared/overlay/notification';
 import { StateStore } from '@shared/state-store';
+import { PortalRenderer } from '@shared/overlay/portal-renderer';
 
 import './TopologyRenderer.light.scss';
 import './TopologyRenderer.dark.scss';
@@ -27,7 +27,7 @@ interface Props {
   topology: RenderableTopology;
   showWait: boolean;
   onToggleSwitch: (swjtch: Switch, open: boolean) => void;
-  onCapacitorMenuFormSubmitted: (currentCapacitor: Capacitor, newCapacitor: Capacitor) => void;
+  onCapacitorControlMenuFormSubmitted: (currentCapacitor: Capacitor, updatedCapacitor: Capacitor) => void;
   onRegulatorMenuFormSubmitted: (currentRegulator: Regulator, newRegulator: Regulator) => void;
 }
 
@@ -40,10 +40,8 @@ const symbolSize = 35;
 
 export class TopologyRenderer extends React.Component<Props, State> {
 
-  readonly overlay = OverlayService.getInstance();
   readonly canvasTransformService = CanvasTransformService.getInstance();
-
-  svg: SVGSVGElement = null;
+  readonly svgRef = React.createRef<SVGSVGElement>();
 
   private readonly _edgeGenerator = line<Node>()
     .x(node => node.screenX1)
@@ -101,14 +99,14 @@ export class TopologyRenderer extends React.Component<Props, State> {
   }
 
   componentDidMount() {
-    const canvasBoundingBox = this.svg.getBoundingClientRect();
+    const canvasBoundingBox = this.svgRef.current.getBoundingClientRect();
     const spacing = 10;
-    this.svg.setAttribute('width', String(canvasBoundingBox.width));
-    this.svg.setAttribute('height', String(canvasBoundingBox.height));
-    this.svg.setAttribute('viewBox', `0 0 ${canvasBoundingBox.width} ${canvasBoundingBox.height}`);
+    this.svgRef.current.setAttribute('width', String(canvasBoundingBox.width));
+    this.svgRef.current.setAttribute('height', String(canvasBoundingBox.height));
+    this.svgRef.current.setAttribute('viewBox', `0 0 ${canvasBoundingBox.width} ${canvasBoundingBox.height}`);
     this._xScale.range([spacing, canvasBoundingBox.width - spacing]);
     this._yScale.range([spacing, canvasBoundingBox.height - spacing]);
-    this._svgSelection = this.canvasTransformService.bindToSvgCanvas(this.svg);
+    this._svgSelection = this.canvasTransformService.bindToSvgCanvas(this.svgRef.current);
     this._containerSelection = this._svgSelection.select<SVGGElement>('.topology-renderer__canvas__container');
     this.canvasTransformService.onTransformed()
       .pipe(takeUntil(this._unsubscriber))
@@ -148,18 +146,15 @@ export class TopologyRenderer extends React.Component<Props, State> {
       if (currentTransformScaleDegree > 1.5 && !this._showNodeSymbols) {
         this._showNodeSymbols = true;
         this._showSymbols();
-      }
-      else if (currentTransformScaleDegree < 1.5 && this._showNodeSymbols) {
+      } else if (currentTransformScaleDegree < 1.5 && this._showNodeSymbols) {
         this._showNodeSymbols = false;
         this._hideSymbols();
       }
-    }
-    else if (this.props.topology.nodes.length > 200) {
+    } else if (this.props.topology.nodes.length > 200) {
       if (currentTransformScaleDegree > 2.5 && !this._showNodeSymbols) {
         this._showNodeSymbols = true;
         this._showSymbols();
-      }
-      else if (currentTransformScaleDegree < 2.5 && this._showNodeSymbols) {
+      } else if (currentTransformScaleDegree < 2.5 && this._showNodeSymbols) {
         this._showNodeSymbols = false;
         this._hideSymbols();
       }
@@ -181,8 +176,9 @@ export class TopologyRenderer extends React.Component<Props, State> {
   }
 
   componentDidUpdate(prevProps: Props) {
-    if (this.props.topology !== prevProps.topology)
+    if (this.props.topology !== prevProps.topology) {
       this._render();
+    }
   }
 
   private _render() {
@@ -331,8 +327,9 @@ export class TopologyRenderer extends React.Component<Props, State> {
     const [minYCoordinate, maxYCoordinate] = this._yScale.domain();
     for (const node of nodes) {
       node.y1 = minYCoordinate + (maxYCoordinate - node.y1);
-      if ('y2' in node)
+      if ('y2' in node) {
         (node as any).y2 = minYCoordinate + (maxYCoordinate - (node as any).y2);
+      }
     }
   }
 
@@ -473,8 +470,9 @@ export class TopologyRenderer extends React.Component<Props, State> {
   private _calculateSymbolTransformOrigin(node: Node) {
     const width = this._symbolDimensions[node.type]?.width || symbolSize;
     const height = this._symbolDimensions[node.type]?.height || symbolSize;
-    if (node.type === 'capacitor' || node.type === 'regulator')
+    if (node.type === 'capacitor' || node.type === 'regulator') {
       return `${node.screenX1 + (width / 2)}px ${node.screenY1}px`;
+    }
     return `${node.screenX1 + (width / 2)}px ${node.screenY1 + (height / 2)}px`;
   }
 
@@ -527,8 +525,9 @@ export class TopologyRenderer extends React.Component<Props, State> {
     nodeNameToEdgeMap: Map<string, Edge>,
     shapeTemplate: string
   ) {
-    if (!shapeTemplate.includes('${startingPoint}'))
+    if (!shapeTemplate.includes('${startingPoint}')) {
       throw new Error(`Symbol's path template must contain \${startingPoint} place holder`);
+    }
 
     const nodeType = nodes[0]?.type;
     return container.append('g')
@@ -683,8 +682,9 @@ export class TopologyRenderer extends React.Component<Props, State> {
       .attr('height', height)
       .attr('fill', node => node.open ? node.colorWhenOpen : node.colorWhenClosed)
       .attr('transform', node => {
-        if (!node.from || !node.to)
+        if (!node.from || !node.to) {
           return 'rotate(0) translate(0, 0)';
+        }
         const angle = this._calculateAngleBetweenLineAndXAxis(
           node.screenX1,
           node.screenY1,
@@ -699,7 +699,7 @@ export class TopologyRenderer extends React.Component<Props, State> {
     return (
       <div className='topology-renderer'>
         <svg
-          ref={elem => this.svg = elem}
+          ref={this.svgRef}
           width='10000'
           height='10000'
           preserveAspectRatio='xMidYMid'
@@ -760,68 +760,62 @@ export class TopologyRenderer extends React.Component<Props, State> {
     );
   }
 
-  showMenuOnComponentClicked(event: React.SyntheticEvent) {
+  showMenuOnComponentClicked(event: React.MouseEvent) {
     const target = select(event.target as SVGElement);
-    if (target.classed('switch'))
-      this._onSwitchClicked(target);
-    else if (target.classed('capacitor'))
-      this._onCapacitorClicked(target);
-    else if (target.classed('regulator'))
-      this._onRegulatorClicked(target);
+    if (target.classed('switch')) {
+      this._onSwitchClicked(target, event.clientX, event.clientY);
+    } else if (target.classed('capacitor')) {
+      this._onCapacitorClicked(target, event.clientX, event.clientY);
+    } else if (target.classed('regulator')) {
+      this._onRegulatorClicked(target, event.clientX, event.clientY);
+    }
   }
 
-  private _onSwitchClicked(clickedElement: Selection<SVGElement, any, SVGElement, any>) {
-    const clickedElementRect = clickedElement.node()
-      .getBoundingClientRect();
+  private _onSwitchClicked(clickedElement: Selection<SVGElement, any, SVGElement, any>, clickX: number, clickY: number) {
     const swjtch = clickedElement.datum() as Switch;
-    this.overlay.show(
-      <SwitchMenu
-        left={clickedElementRect.left}
-        top={clickedElementRect.top}
-        open={swjtch.open}
-        onCancel={this.overlay.hide}
-        onConfirm={open => {
-          this.overlay.hide();
-          this._toggleSwitch(open, swjtch);
-        }} />
+    const portalRenderer = new PortalRenderer();
+    portalRenderer.mount(
+      <SwitchControlMenu
+        left={clickX}
+        top={clickY}
+        switch={swjtch}
+        onAfterClosed={portalRenderer.unmount}
+        onSubmit={open => this.toggleSwitch(open, swjtch)} />
     );
   }
 
-  private _toggleSwitch(open: boolean, swjtch: Switch) {
-    if (swjtch.open !== open)
+  toggleSwitch(open: boolean, swjtch: Switch) {
+    if (swjtch.open !== open) {
       this.props.onToggleSwitch(swjtch, open);
+    }
   }
 
-  private _onCapacitorClicked(clickedElement: Selection<SVGElement, any, SVGElement, any>) {
-    const clickedElementRect = clickedElement.node()
-      .getBoundingClientRect();
+  private _onCapacitorClicked(clickedElement: Selection<SVGElement, any, SVGElement, any>, clickX: number, clickY: number) {
     const capacitor = clickedElement.datum() as Capacitor;
-    this.overlay.show(
-      <CapacitorMenu
-        left={clickedElementRect.left}
-        top={clickedElementRect.top}
+    const portalRenderer = new PortalRenderer();
+    portalRenderer.mount(
+      <CapacitorControlMenu
+        left={clickX}
+        top={clickY}
         capacitor={capacitor}
-        onCancel={this.overlay.hide}
-        onConfirm={newCapacitor => {
-          this.overlay.hide();
-          this.props.onCapacitorMenuFormSubmitted(capacitor, newCapacitor);
+        onAfterClosed={portalRenderer.unmount}
+        onSubmit={updatedCapacitor => {
+          this.props.onCapacitorControlMenuFormSubmitted(capacitor, updatedCapacitor);
         }} />
     );
   }
 
-  private _onRegulatorClicked(clickedElement: Selection<SVGElement, any, SVGElement, any>) {
-    const clickedElementRect = clickedElement.node()
-      .getBoundingClientRect();
+  private _onRegulatorClicked(clickedElement: Selection<SVGElement, any, SVGElement, any>, clickX: number, clickY: number) {
     const regulator = clickedElement.datum() as Regulator;
-    this.overlay.show(
-      <RegulatorMenu
-        left={clickedElementRect.left}
-        top={clickedElementRect.top}
+    const portalRenderer = new PortalRenderer();
+    portalRenderer.mount(
+      <RegulatorControlMenu
+        left={clickX}
+        top={clickY}
         regulator={regulator}
-        onCancel={this.overlay.hide}
-        onConfirm={newRegulator => {
-          this.overlay.hide();
-          this.props.onRegulatorMenuFormSubmitted(regulator, newRegulator);
+        onAfterClosed={portalRenderer.unmount}
+        onSubmit={updatedRegulator => {
+          this.props.onRegulatorMenuFormSubmitted(regulator, updatedRegulator);
         }} />
     );
   }
@@ -879,7 +873,7 @@ export class TopologyRenderer extends React.Component<Props, State> {
   }
 
   locateNode(node: Node) {
-    const locatedElement = this.svg.querySelector(`.topology-renderer__canvas__node.${node.type}._${node.name}_`) as SVGCircleElement;
+    const locatedElement = this.svgRef.current.querySelector(`.topology-renderer__canvas__node.${node.type}._${node.name}_`) as SVGCircleElement;
     if (locatedElement) {
       if (this.canvasTransformService.getCurrentZoomLevel() < 3) {
         this.canvasTransformService.setZoomLevel(this._isModelLarge() ? 6 : 3);

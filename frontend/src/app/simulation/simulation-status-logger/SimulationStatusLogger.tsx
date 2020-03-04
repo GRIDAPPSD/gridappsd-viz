@@ -3,7 +3,7 @@ import { Subject } from 'rxjs';
 import { debounceTime, filter } from 'rxjs/operators';
 
 import { SimulationStatusLoggerMessage } from './SimulationStatusLoggerMessage';
-import { Wait } from '@shared/wait';
+import { ProgressIndicator } from '@shared/overlay/progress-indicator';
 import { LogMessage } from './models/LogMessage';
 
 import './SimulationStatusLogger.light.scss';
@@ -24,7 +24,7 @@ const logLevels = ['FATAL', 'ERROR', 'WARN', 'INFO', 'DEBUG', 'TRACE'];
 
 export class SimulationStatusLogger extends React.Component<Props, State> {
 
-  simulationStatusLoggerBody: HTMLElement = null;
+  readonly simulationStatusLoggerBodyRef = React.createRef<HTMLElement>();
 
   private readonly _dragHandleMinPosition = 30;
   private readonly _dragHandleMaxPosition = document.body.clientHeight - 110;
@@ -44,20 +44,22 @@ export class SimulationStatusLogger extends React.Component<Props, State> {
 
   componentDidUpdate(prevProps: Props) {
     if (prevProps !== this.props) {
-      if (this.props.isFetching)
+      if (this.props.isFetching) {
         this.setState({
           dragHandlePosition: 430
         });
+      }
       if (this.props.messages !== prevProps.messages) {
         const currentNumberOfVisibleMessages = this.state.visibleMessages.length;
-        if (currentNumberOfVisibleMessages <= numberOfMessagesToLoadNext)
+        if (currentNumberOfVisibleMessages <= numberOfMessagesToLoadNext) {
           this.setState({
             visibleMessages: this.props.messages.slice(0, numberOfMessagesToLoadNext)
           });
-        else
+        } else {
           this.setState({
             visibleMessages: this.props.messages.slice(0, currentNumberOfVisibleMessages)
           });
+        }
       }
     }
   }
@@ -66,7 +68,7 @@ export class SimulationStatusLogger extends React.Component<Props, State> {
     this._loggerBodyScrollNotifier.pipe(
       debounceTime(250),
       filter(
-        scrollTop => scrollTop === this.simulationStatusLoggerBody.scrollHeight - this.simulationStatusLoggerBody.clientHeight
+        scrollTop => scrollTop === this.simulationStatusLoggerBodyRef.current.scrollHeight - this.simulationStatusLoggerBodyRef.current.clientHeight
       )
     )
       .subscribe({
@@ -79,7 +81,7 @@ export class SimulationStatusLogger extends React.Component<Props, State> {
             });
             // Move the scroll bar up to the previous scroll top position so that it does not just keep
             // sticking to the bottom and causes the messages to keep getting appended
-            this.simulationStatusLoggerBody.scrollTop = scrollTop;
+            this.simulationStatusLoggerBodyRef.current.scrollTop = scrollTop;
           }
         }
       });
@@ -123,7 +125,7 @@ export class SimulationStatusLogger extends React.Component<Props, State> {
         </header>
         <section
           className='simulation-status-logger__body'
-          ref={elem => this.simulationStatusLoggerBody = elem}
+          ref={this.simulationStatusLoggerBodyRef}
           onScroll={this.loadMoreMessages}>
           {
             this.state.visibleMessages.map(message => (
@@ -131,19 +133,19 @@ export class SimulationStatusLogger extends React.Component<Props, State> {
             ))
           }
         </section>
-        <Wait show={this.props.isFetching} />
+        <ProgressIndicator show={this.props.isFetching} />
       </div>
     );
   }
 
   mouseDown() {
-    this.simulationStatusLoggerBody.style.userSelect = 'none';
+    this.simulationStatusLoggerBodyRef.current.style.userSelect = 'none';
     document.documentElement.addEventListener('mousemove', this._resize, false);
     document.documentElement.addEventListener('mouseup', this._mouseUp, false);
   }
 
   private _mouseUp() {
-    this.simulationStatusLoggerBody.style.userSelect = 'initial';
+    this.simulationStatusLoggerBodyRef.current.style.userSelect = 'initial';
     window.getSelection().empty();
     document.documentElement.removeEventListener('mousemove', this._resize, false);
     document.documentElement.removeEventListener('mouseup', this._mouseUp, false);
@@ -157,7 +159,7 @@ export class SimulationStatusLogger extends React.Component<Props, State> {
   }
 
   loadMoreMessages() {
-    this._loggerBodyScrollNotifier.next(this.simulationStatusLoggerBody.scrollTop);
+    this._loggerBodyScrollNotifier.next(this.simulationStatusLoggerBodyRef.current.scrollTop);
   }
 
 }

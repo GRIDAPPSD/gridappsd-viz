@@ -20,7 +20,7 @@
     z-index: 24;
     position: relative;
     top: 0;
-    left: 0;
+    left: -360px;
     height: 100vh;
     margin: 0;
     padding: 0;
@@ -29,9 +29,9 @@
 }
 
 .drawer.closed>.drawer-items {
-    transform: translate(-105%, 0);
+    transform: translate(0, 0);
 }
 
 .drawer.opened>.drawer-items {
-    transform: translate(0, 0);
+    transform: translate(100%, 0);
 }

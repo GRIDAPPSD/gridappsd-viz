@@ -1,4 +1,5 @@
-export * from './checkbox/CheckBox';
+export * from './form/Form';
+export * from './checkbox/Checkbox';
 export * from './form-group/FormGroup';
 export * from './input/Input';
 export * from './radio';
@@ -6,3 +7,6 @@ export * from './select/Select';
 export * from './select/SelectionOptionBuilder';
 export * from './textarea/TextArea';
 export * from './slide-toggle/SlideToggle';
+export * from './models/FormControlModel';
+export * from './models/FormGroupModel';
+export * from './models/FormArrayModel';

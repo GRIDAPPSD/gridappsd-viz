@@ -51,7 +51,7 @@ export class Paginator<T> extends React.Component<Props<T>, State> {
   }
 
   render() {
-    if (this.props.items.length > this.props.pageSize)
+    if (this.props.items.length > this.props.pageSize) {
       return (
         <section className='paginator'>
           <IconButton
@@ -77,6 +77,7 @@ export class Paginator<T> extends React.Component<Props<T>, State> {
             onClick={this.navigateToNextPage} />
         </section>
       );
+    }
     return null;
   }
 
@@ -101,11 +102,11 @@ export class Paginator<T> extends React.Component<Props<T>, State> {
         currentPageNumber: newPageNumber,
       });
       this._goToPage(newPageNumber);
-    }
-    else if (enteredPageNumber === '')
+    } else if (enteredPageNumber === '') {
       this.setState({
         currentPageNumberDisplay: ''
       });
+    }
   }
 
   navigateToNextPage() {

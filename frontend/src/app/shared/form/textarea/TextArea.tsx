@@ -1,144 +1,249 @@
 import * as React from 'react';
 import { Subject } from 'rxjs';
-import { debounceTime } from 'rxjs/operators';
+import { debounceTime, filter } from 'rxjs/operators';
+import * as CodeMirror from 'codemirror';
 
 import { FormControl } from '../form-control/FormControl';
-import { ValidationErrorMessages, Validator, ValidationResult } from '../validation';
+import { FormControlModel } from '../models/FormControlModel';
 
 import './TextArea.light.scss';
 import './TextArea.dark.scss';
 
-interface Props {
+interface Props<T extends 'plaintext' | 'json' = 'json'> {
   label: string;
-  value: string;
-  onChange: (value: string) => void;
+  formControlModel: T extends 'json' ? FormControlModel<object> : FormControlModel<string>;
   className?: string;
-  validators?: Validator[];
-  disabled?: boolean;
   readonly?: boolean;
-  onValidate?: (isValid: boolean, formControlLabel: string) => void;
   hint?: string;
+  type?: T;
 }
 
 interface State {
-  validationErrors: ValidationResult[];
 }
 
-export class TextArea extends React.Component<Props, State> {
+export class TextArea<T extends 'plaintext' | 'json' = 'json'> extends React.Component<Props<T>, State> {
 
-  inputBox: HTMLElement;
+  readonly inputBoxContainerRef = React.createRef<HTMLDivElement>();
+  readonly internalFormControl = new FormControlModel('', this.props.formControlModel.validators);
 
-  private readonly _valueChanges = new Subject<string>();
+  // Hold the text value currently in the text box
+  currentValueToDisplay: string;
+
+  private readonly _textBoxValueStream = new Subject<string>();
+
   private _isResizing = false;
   // The x coordinate of the mousedown event when the user begins the resize
   private _initialClientX = 0;
   // The y coordinate of the mousedown event when the user begins the resize
   private _initialClientY = 0;
   private _inputBoxBoundingBox: ClientRect;
+  private _codeMirror: CodeMirror.Editor = null;
+  // Hold an object or a string that is used to compare whether the form control model's value was
+  // changed from outside of this component, if it was, then we need to sync up this component
+  // with the new value
+  private _currentValueToCompare: string | object;
 
-  constructor(props: Props) {
+  constructor(props: Props<T>) {
     super(props);
-    this.state = {
-      validationErrors: []
-    };
 
-    this.resize = this.resize.bind(this);
-    this.stopResize = this.stopResize.bind(this);
-    this._onInputValueChanged = this._onInputValueChanged.bind(this);
-    this.onKeyUp = this.onKeyUp.bind(this);
+    this._currentValueToCompare = props.formControlModel.getValue();
+    this.currentValueToDisplay = this._stringifyValue(this._currentValueToCompare);
+
     this.beginResize = this.beginResize.bind(this);
+
+    this._resize = this._resize.bind(this);
+    this._stopResize = this._stopResize.bind(this);
+    this._onValueChange = this._onValueChange.bind(this);
+    this._onCodeMirrorEditorFocused = this._onCodeMirrorEditorFocused.bind(this);
+    this._onCodeMirrorEditorFocusLost = this._onCodeMirrorEditorFocusLost.bind(this);
   }
 
+  private _stringifyValue(value: string | object) {
+    if (this.props.type === 'json') {
+      return JSON.stringify(value, null, 4);
+    }
+    return value as string;
+  }
 
   componentDidMount() {
-    this._inputBoxBoundingBox = this.inputBox.getBoundingClientRect();
-    this._valueChanges.pipe(debounceTime(250))
+    const formControlProp = this.props.formControlModel as FormControlModel<any>;
+    this._inputBoxBoundingBox = this.inputBoxContainerRef.current.getBoundingClientRect();
+    this._textBoxValueStream.pipe(debounceTime(250))
       .subscribe({
-        next: this._onInputValueChanged
+        next: value => {
+          this.internalFormControl.setValue(value);
+        }
+      });
+    this.internalFormControl.valueChanges()
+      .subscribe({
+        next: value => {
+          if (this.internalFormControl.isValid()) {
+            this._currentValueToCompare = this.props.type === 'json' ? JSON.parse(value) : value;
+            formControlProp.setValue(this._currentValueToCompare);
+          }
+        }
+      });
+    this.internalFormControl.validityChanges()
+      .pipe(filter(() => !this.internalFormControl.isPristine()))
+      .subscribe({
+        next: isValid => {
+          formControlProp.setValidity(isValid);
+          if (this._codeMirror) {
+            if (!isValid) {
+              const currentCursor = this._codeMirror.getCursor();
+              const startCursor = {
+                line: currentCursor.line,
+                ch: 0
+              };
+              this._codeMirror.markText(startCursor, currentCursor).clear();
+              this._codeMirror.markText(startCursor, currentCursor, { className: 'errored-line' });
+            } else {
+              for (const mark of this._codeMirror.getAllMarks()) {
+                mark.clear();
+              }
+            }
+          }
+        }
       });
 
-    window.addEventListener('mousemove', this.resize, false);
-    window.addEventListener('mouseup', this.stopResize, false);
+    formControlProp.valueChanges()
+      .subscribe({
+        next: value => {
+          // This is true when this.props.formControlModel.setValue()
+          // was called from outside of this component
+          if (this._currentValueToCompare !== value) {
+            this._currentValueToCompare = value;
+            this.currentValueToDisplay = this._stringifyValue(value);
+            if (this._codeMirror === null) {
+              this._setupCodeMirrorEditor();
+            } else {
+              this._codeMirror.setValue(this.currentValueToDisplay);
+            }
+          }
+        }
+      });
+    formControlProp.onDisableToggled()
+      .subscribe({
+        next: isDisabled => {
+          if (isDisabled) {
+            this.internalFormControl.disable();
+          } else {
+            this.internalFormControl.enable();
+          }
+        }
+      });
+
+    this._setupCodeMirrorEditor();
+
+    window.addEventListener('mousemove', this._resize, false);
+    window.addEventListener('mouseup', this._stopResize, false);
   }
 
-  resize(event: MouseEvent) {
-    if (this._isResizing) {
-      const styles = [];
-      const newWidth = this._inputBoxBoundingBox.width + event.clientX - this._initialClientX;
-      if (newWidth > 0 && newWidth + this._inputBoxBoundingBox.left < document.body.clientWidth)
-        styles.push(`width:${newWidth}px`);
-      const newHeight = this._inputBoxBoundingBox.height + event.clientY - this._initialClientY;
-      if (newHeight > 0 && newHeight + this._inputBoxBoundingBox.top < document.body.clientHeight)
-        styles.push(`height:${newHeight}px;max-height:${newHeight}px`);
-      this.inputBox.setAttribute('style', styles.join(';'));
+  private _setupCodeMirrorEditor() {
+    if (this.props.readonly && this.currentValueToDisplay === '') {
+      return;
+    }
+    const inputBox = this.inputBoxContainerRef.current.querySelector('.textarea__input-box') as HTMLDivElement;
+    this._initializeCodeMirrorEditor(inputBox);
+    // This is true when CodeMirror was successfully initialized, but for some
+    // odd reason, the DOM doesn't get reflected with the layout changes created
+    // by CodeMirror, so the height the CodeMirror wrapper element is 0, in this
+    // case, we need to re-initialize it after a timeout
+    if (this._codeMirror.getWrapperElement().clientHeight === 0) {
+      this._codeMirror.off('change', this._onValueChange);
+      this._codeMirror.off('focus', this._onCodeMirrorEditorFocused);
+      this._codeMirror.off('blur', this._onCodeMirrorEditorFocusLost);
+      inputBox.removeChild(this._codeMirror.getWrapperElement());
+      setTimeout(() => this._initializeCodeMirrorEditor(inputBox), 500);
     }
   }
 
-  stopResize() {
+  private _initializeCodeMirrorEditor(insertionSlot: HTMLDivElement) {
+    this._codeMirror = CodeMirror(insertionSlot, {
+      value: this.currentValueToDisplay,
+      lineNumbers: true,
+      readOnly: this.props.readonly,
+      mode: {
+        name: 'javascript',
+        json: true
+      },
+      indentUnit: 4
+    });
+    this._codeMirror.setOption('extraKeys', {
+      Tab: codeMirror => {
+        const spaces = ' '.repeat(codeMirror.getOption('indentUnit'));
+        codeMirror.replaceSelection(spaces);
+      }
+    });
+    this._codeMirror.on('change', this._onValueChange);
+    this._codeMirror.on('focus', this._onCodeMirrorEditorFocused);
+    this._codeMirror.on('blur', this._onCodeMirrorEditorFocusLost);
+  }
+
+  private _onValueChange(codeMirror: CodeMirror.Editor, _: any) {
+    this.currentValueToDisplay = codeMirror.getValue();
+    this._textBoxValueStream.next(codeMirror.getValue());
+  }
+
+  private _onCodeMirrorEditorFocused() {
+    this.inputBoxContainerRef.current.querySelector('.textarea__input-box').classList.add('focused');
+  }
+
+  private _onCodeMirrorEditorFocusLost() {
+    this.inputBoxContainerRef.current.querySelector('.textarea__input-box').classList.remove('focused');
+  }
+
+  private _resize(event: MouseEvent) {
+    if (this._isResizing) {
+      const styles = [];
+      const newWidth = this._inputBoxBoundingBox.width + event.clientX - this._initialClientX;
+      if (newWidth > 0 && newWidth + this._inputBoxBoundingBox.left < document.body.clientWidth) {
+        styles.push(`width:${newWidth}px`);
+      }
+      const newHeight = this._inputBoxBoundingBox.height + event.clientY - this._initialClientY;
+      if (newHeight > 0 && newHeight + this._inputBoxBoundingBox.top < document.body.clientHeight) {
+        styles.push(`height:${newHeight}px;max-height:${newHeight}px`);
+      }
+      this.inputBoxContainerRef.current.setAttribute('style', styles.join(';'));
+    }
+  }
+
+  private _stopResize() {
     this._isResizing = false;
     document.body.classList.remove('frozen');
   }
 
-  private _onInputValueChanged(value: string) {
-    if (this.props.validators) {
-      const validationErrors = this.props.validators.map(validator => validator(value))
-        .filter(result => !result.isValid);
-      this.setState({
-        validationErrors
-      });
-      const isValid = validationErrors.length === 0;
-      this.props.onValidate?.(isValid, this.props.label);
-      if (isValid)
-        this.props.onChange(value);
-    }
-    else
-      this.props.onChange(value);
-  }
-
-  componentDidUpdate(prevProps: Props) {
-    if (this.props.disabled !== prevProps.disabled)
-      this.setState({
-        validationErrors: []
-      });
-  }
-
   componentWillUnmount() {
-    this._valueChanges.complete();
-    window.removeEventListener('click', this.stopResize, false);
+    this._textBoxValueStream.complete();
+    this.props.formControlModel.cleanup();
+    this.internalFormControl.cleanup();
+    window.removeEventListener('mousemove', this._resize, false);
+    window.removeEventListener('mouseup', this._stopResize, false);
+    if (this._codeMirror) {
+      this._codeMirror.off('change', this._onValueChange);
+      this._codeMirror.off('focus', this._onCodeMirrorEditorFocused);
+      this._codeMirror.off('blur', this._onCodeMirrorEditorFocusLost);
+    }
   }
 
   render() {
     return (
       <FormControl
         className={`textarea${this.props.className ? ' ' + this.props.className : ''}`}
+        formControlModel={this.internalFormControl}
         label={this.props.label}
-        disabled={this.props.disabled}
-        isInvalid={this.state.validationErrors.length !== 0}
         hint={this.props.hint}>
         <div
-          ref={ref => this.inputBox = ref}
+          ref={this.inputBoxContainerRef}
           className='textarea__input-box-container'>
-          <div
-            className='textarea__input-box'
-            contentEditable={!this.props.readonly}
-            suppressContentEditableWarning
-            tabIndex={1}
-            onKeyUp={this.onKeyUp}>
-            {this.props.value}
-          </div>
+          <div className='textarea__input-box' />
           <div className='textarea__input-box-focus-indicator' />
           <div
             className='textarea__input-box-resize-handle'
             onMouseDown={this.beginResize} />
         </div>
-        <ValidationErrorMessages messages={this.state.validationErrors.map(error => error.errorMessage)} />
       </FormControl>
     );
-  }
-
-  onKeyUp(event: React.SyntheticEvent) {
-    const value = (event.target as HTMLDivElement).textContent;
-    this._valueChanges.next(value);
   }
 
   beginResize(event: React.MouseEvent) {
@@ -146,7 +251,11 @@ export class TextArea extends React.Component<Props, State> {
     this._isResizing = true;
     this._initialClientX = event.clientX;
     this._initialClientY = event.clientY;
-    this._inputBoxBoundingBox = this.inputBox.getBoundingClientRect();
+    this._inputBoxBoundingBox = this.inputBoxContainerRef.current.getBoundingClientRect();
   }
 
 }
+
+(TextArea as any).defaultProps = {
+  type: 'json'
+} as Props;

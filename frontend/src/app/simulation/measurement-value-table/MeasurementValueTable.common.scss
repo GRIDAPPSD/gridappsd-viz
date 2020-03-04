@@ -1,0 +1,32 @@
+.measurement-value-table {
+    position: absolute;
+    top: 0;
+    left: 0;
+    border-radius: 2px;
+    white-space: pre-wrap;
+    font-family: 'Roboto', sans-serif;
+    font-size: 0.7em;
+    max-width: 100vw;
+    pointer-events: none;
+    z-index: 0;
+
+    th,
+    td {
+        padding: 2px 5px;
+    }
+
+    thead,
+    tr {
+        background-color: transparent !important;
+    }
+
+}
+
+.measurement-value-table__heading {
+    font-weight: bold;
+    text-align: center;
+}
+
+.measurement-value-table__content {
+    padding: 2px;
+}

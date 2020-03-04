@@ -10,8 +10,9 @@ interface Props {
 }
 
 export function CommandEventSummaryTable(props: Props) {
-  if (props.events.length === 0)
+  if (props.events.length === 0) {
     return null;
+  }
   return (
     <div className='command-event-summary-table'>
       <CommandEventTable events={props.events} />

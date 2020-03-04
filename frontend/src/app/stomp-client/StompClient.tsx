@@ -1,73 +1,114 @@
 import * as React from 'react';
+import { filter } from 'rxjs/operators';
 
-import { Input, TextArea } from '@shared/form';
+import { Input, TextArea, FormControlModel, Form, FormGroupModel } from '@shared/form';
 import { BasicButton, IconButton } from '@shared/buttons';
-import { Wait } from '@shared/wait';
+import { ProgressIndicator } from '@shared/overlay/progress-indicator';
 import { Tooltip } from '@shared/tooltip';
 import { DownloadType } from '@shared/misc';
+import { Validators } from '@shared/form/validation';
 
 import './StompClient.light.scss';
 import './StompClient.dark.scss';
 
 interface Props {
-  response: any;
-  onRequestSubmitted: (topic: string, requestBody: string) => void;
+  response: string;
   showLoadingIndicator: boolean;
+  onRequestSubmitted: (topic: string, requestBody: string) => void;
   onDownloadResponse: (downloadType: DownloadType) => void;
 }
 
 interface State {
-  topic: string;
   disableCsvExport: boolean;
+  disableSubmitButton: boolean;
 }
 
 export class StompClient extends React.Component<Props, State> {
 
-  requestBody = '';
+  readonly formGroupModel = new FormGroupModel({
+    topic: new FormControlModel(
+      'goss.gridappsd.process.request.status.platform',
+      [Validators.checkNotEmpty('Topic')]
+    ),
+    requestBody: new FormControlModel(
+      '{}',
+      [
+        Validators.checkNotEmpty('Request body'),
+        Validators.checkValidJSON('Request body')
+      ]
+    )
+  });
+
+  readonly response = new FormControlModel(this.props.response);
 
   constructor(props: Props) {
     super(props);
+
     this.state = {
-      topic: 'goss.gridappsd.process.request.status.platform',
-      disableCsvExport: true
+      disableCsvExport: true,
+      disableSubmitButton: false
     };
+
+    this.onSubmit = this.onSubmit.bind(this);
+
+  }
+
+  componentDidMount() {
+    this.formGroupModel.findControl('topic')
+      .valueChanges()
+      .pipe(filter(topic => !topic.endsWith('timeseries')))
+      .subscribe({
+        next: () => {
+          this.setState({
+            disableCsvExport: true
+          });
+        }
+      });
+
+    this.formGroupModel.validityChanges()
+      .subscribe({
+        next: isValid => {
+          this.setState({
+            disableSubmitButton: !isValid
+          });
+        }
+      });
   }
 
   componentDidUpdate(prevProps: Props) {
-    if (this.props.response !== prevProps.response)
+    if (this.props.response !== prevProps.response) {
       this.setState({
-        disableCsvExport: !this.props.response || !this.state.topic.endsWith('timeseries')
+        disableCsvExport: !this.props.response || !this.formGroupModel.getValue().topic.endsWith('timeseries')
       });
+      this.response.setValue(this.props.response);
+    }
+  }
+
+  componentWillUnmount() {
+    this.formGroupModel.cleanup();
   }
 
   render() {
     return (
       <>
-        <form className='stomp-client'>
+        <Form
+          className='stomp-client'
+          formGroupModel={this.formGroupModel}>
           <Input
             className='stomp-client__topic'
             label='Topic'
-            name='topic'
-            value={this.state.topic}
-            onChange={value => {
-              if (!value.endsWith('timeseries'))
-                this.setState({
-                  disableCsvExport: true
-                });
-              this.setState({
-                topic: value
-              });
-            }} />
+            formControlModel={this.formGroupModel.findControl('topic')} />
           <TextArea
+            type='plaintext'
             className='stomp-client__request-body'
             label='Request'
-            value={this.requestBody}
-            onChange={value => this.requestBody = value} />
+            formControlModel={this.formGroupModel.findControl('requestBody')} />
           <BasicButton
             label='Send request'
             type='positive'
             className='stomp-client__send-request'
-            onClick={() => this.props.onRequestSubmitted(this.state.topic, this.requestBody)} />
+            disabled={this.state.disableSubmitButton}
+            onClick={this.onSubmit} />
           <div className='stomp-client__download-types'>
             <Tooltip content='Download response as CSV'>
               <IconButton
@@ -87,14 +128,20 @@ export class StompClient extends React.Component<Props, State> {
             </Tooltip>
           </div>
           <TextArea
+            type='plaintext'
             className='stomp-client__response'
             readonly
             label='Response'
-            value={this.props.response}
-            onChange={null} />
-        </form>
-        <Wait show={this.props.showLoadingIndicator} />
+            formControlModel={this.response} />
+        </Form>
+        <ProgressIndicator show={this.props.showLoadingIndicator} />
       </>
     );
   }
+
+  onSubmit() {
+    const formValue = this.formGroupModel.getValue();
+    this.props.onRequestSubmitted(formValue.topic, formValue.requestBody);
+  }
+
 }

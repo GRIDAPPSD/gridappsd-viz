@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { PortalRenderer } from '@shared/portal-renderer';
+import { PortalRenderer } from '@shared/overlay/portal-renderer';
 
 import './NewAlarmNotification.light.scss';
 import './NewAlarmNotification.dark.scss';
@@ -17,7 +17,7 @@ export function NewAlarmNotification(props: Props) {
     width: 0,
     height: 0,
   };
-  const alarmsTab = document.querySelector('.tabgroup__header__label.tab-label-3');
+  const alarmsTab = document.querySelector('.tab-group__header__label.tab-label-3');
   if (alarmsTab) {
     const boundingBox = alarmsTab.getBoundingClientRect();
     style.left = boundingBox.left;

@@ -8,7 +8,7 @@ import { START_SIMULATION_TOPIC, CONTROL_SIMULATION_TOPIC, SIMULATION_OUTPUT_TOP
 import { SimulationQueue } from './SimulationQueue';
 import { SimulationStatus } from '@commons/SimulationStatus';
 import { SimulationSnapshot, DEFAULT_SIMULATION_SNAPSHOT } from '@commons/SimulationSnapshot';
-import { SimulationSynchronizationEvents } from '@commons/SimulationSynchronizationEvents';
+import { SimulationSynchronizationEvent } from '@commons/SimulationSynchronizationEvent';
 import { ModelDictionaryMeasurement } from '@shared/topology';
 import { SimulationOutputMeasurement, SimulationOutputPayload } from '.';
 import { StateStore } from '@shared/state-store';
@@ -78,7 +78,7 @@ export class SimulationControlService {
   }
 
   private _onActiveSimulationIdsReceived() {
-    this._socket.on(SimulationSynchronizationEvents.SIMULATION_ACTIVE_CHANNELS, (activeSimulationIds: string[]) => {
+    this._socket.on(SimulationSynchronizationEvent.QUERY_ACTIVE_SIMULATION_CHANNELS, (activeSimulationIds: string[]) => {
       this._stateStore.update({
         activeSimulationIds: activeSimulationIds.filter(e => e !== this._currentSimulationId)
       });
@@ -86,7 +86,7 @@ export class SimulationControlService {
   }
 
   private _onSimulationStatusChangedUpstream() {
-    this._socket.on(SimulationSynchronizationEvents.SIMULATION_STATUS, (status: SimulationStatus) => {
+    this._socket.on(SimulationSynchronizationEvent.QUERY_SIMULATION_STATUS, (status: SimulationStatus) => {
       this._currentSimulationStatus = status;
       this._currentSimulationStatusNotifer.next(status);
       if (status === SimulationStatus.STOPPED) {
@@ -96,16 +96,16 @@ export class SimulationControlService {
   }
 
   private _onSendFirstSimulationSnapshot() {
-    this._socket.on(SimulationSynchronizationEvents.SIMULATION_SNAPSHOT_INIT, () => {
+    this._socket.on(SimulationSynchronizationEvent.INIT_SIMULATION_SNAPSHOT, () => {
       this._syncingEnabled = true;
       this._simulationSnapshot.stateStore = this._stateStore.toJson();
       this._simulationSnapshot.activeSimulation = this._simulationQueue.getActiveSimulation();
-      this._socket.emit(SimulationSynchronizationEvents.SIMULATION_SNAPSHOT_INIT, this._simulationSnapshot);
+      this._socket.emit(SimulationSynchronizationEvent.INIT_SIMULATION_SNAPSHOT, this._simulationSnapshot);
     });
   }
 
   private _onSimulationSnapshotReceived() {
-    this._socket.on(SimulationSynchronizationEvents.SIMULATION_SNAPSHOT_RECEIVE, (snapshot: SimulationSnapshot) => {
+    this._socket.on(SimulationSynchronizationEvent.RECEIVE_SIMULATION_SNAPSHOT, (snapshot: SimulationSnapshot) => {
       this._simulationSnapshotReceivedNotifier.next(snapshot);
     });
   }
@@ -119,8 +119,9 @@ export class SimulationControlService {
             this._simulationOutputSubscription.unsubscribe();
             this._simulationOutputSubscription = null;
           }
-          if (this._currentSimulationStatus === SimulationStatus.STARTED)
+          if (this._currentSimulationStatus === SimulationStatus.STARTED) {
             this.stopSimulation();
+          }
         }
       });
   }
@@ -154,7 +155,7 @@ export class SimulationControlService {
 
   requestToJoinActiveSimulation(simulationId: string) {
     this._isUserInActiveSimulation = true;
-    this._socket.emit(SimulationSynchronizationEvents.SIMULATION_JOIN, simulationId);
+    this._socket.emit(SimulationSynchronizationEvent.JOIN_SIMULATION, simulationId);
   }
 
   didUserStartActiveSimulation() {
@@ -181,8 +182,9 @@ export class SimulationControlService {
     for (const entry of Object.entries(state)) {
       this._simulationSnapshot[entry[0]] = entry[1];
     }
-    if (this._syncingEnabled)
-      this._socket.emit(SimulationSynchronizationEvents.SIMULATION_SNAPSHOT_RECEIVE, state);
+    if (this._syncingEnabled) {
+      this._socket.emit(SimulationSynchronizationEvent.RECEIVE_SIMULATION_SNAPSHOT, state);
+    }
   }
 
   statusChanges(): Observable<SimulationStatus> {
@@ -224,11 +226,11 @@ export class SimulationControlService {
       // Let's wait for all the subscriptions in other components to this topic to complete
       // before sending the message
       setTimeout(() => {
-        this._stompClientService.send(
-          START_SIMULATION_TOPIC,
-          { 'reply-to': START_SIMULATION_TOPIC },
-          JSON.stringify(config)
-        );
+        this._stompClientService.send({
+          destination: START_SIMULATION_TOPIC,
+          replyTo: START_SIMULATION_TOPIC,
+          body: JSON.stringify(config)
+        });
       }, 1000);
     }
   }
@@ -285,7 +287,7 @@ export class SimulationControlService {
           this._currentSimulationId = payload.simulationId;
           this._simulationQueue.updateIdOfActiveSimulation(payload.simulationId);
           this._socket.emit(
-            SimulationSynchronizationEvents.SIMULATION_STATUS,
+            SimulationSynchronizationEvent.QUERY_SIMULATION_STATUS,
             {
               status: SimulationStatus.STARTED,
               simulationId: payload.simulationId
@@ -304,7 +306,7 @@ export class SimulationControlService {
       this._currentSimulationStatus = SimulationStatus.STOPPED;
       this._currentSimulationStatusNotifer.next(SimulationStatus.STOPPED);
       this._socket.emit(
-        SimulationSynchronizationEvents.SIMULATION_STATUS,
+        SimulationSynchronizationEvent.QUERY_SIMULATION_STATUS,
         {
           status: SimulationStatus.STOPPED,
           simulationId: this._currentSimulationId
@@ -321,7 +323,7 @@ export class SimulationControlService {
     this._currentSimulationStatus = SimulationStatus.PAUSED;
     this._currentSimulationStatusNotifer.next(SimulationStatus.PAUSED);
     this._socket.emit(
-      SimulationSynchronizationEvents.SIMULATION_STATUS,
+      SimulationSynchronizationEvent.QUERY_SIMULATION_STATUS,
       {
         status: this._currentSimulationStatus,
         simulationId: this._currentSimulationId
@@ -334,7 +336,7 @@ export class SimulationControlService {
     this._currentSimulationStatus = SimulationStatus.RESUMED;
     this._currentSimulationStatusNotifer.next(SimulationStatus.RESUMED);
     this._socket.emit(
-      SimulationSynchronizationEvents.SIMULATION_STATUS,
+      SimulationSynchronizationEvent.QUERY_SIMULATION_STATUS,
       {
         status: this._currentSimulationStatus,
         simulationId: this._currentSimulationId
@@ -345,7 +347,10 @@ export class SimulationControlService {
 
   private _sendSimulationControlCommand(command: 'stop' | 'pause' | 'resume') {
     const simulationId = this._simulationQueue.getActiveSimulation().id;
-    this._stompClientService.send(`${CONTROL_SIMULATION_TOPIC}.${simulationId}`, {}, `{"command":"${command}"}`);
+    this._stompClientService.send({
+      destination: `${CONTROL_SIMULATION_TOPIC}.${simulationId}`,
+      body: `{"command":"${command}"}`
+    });
   }
 
 }

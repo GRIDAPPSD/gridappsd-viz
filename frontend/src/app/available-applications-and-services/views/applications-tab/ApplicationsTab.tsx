@@ -1,7 +1,7 @@
 import * as React from 'react';
 
 import { Application } from '@shared/Application';
-import { MessageBanner } from '@shared/message-banner';
+import { MessageBanner } from '@shared/overlay/message-banner';
 
 import './ApplicationsTab.light.scss';
 import './ApplicationsTab.dark.scss';
@@ -11,12 +11,13 @@ interface Props {
 }
 
 export function ApplicationsTab(props: Props) {
-  if (!props.applications || props.applications.length === 0)
+  if (!props.applications || props.applications.length === 0) {
     return (
       <MessageBanner>
         No data available
       </MessageBanner>
     );
+  }
   return (
     <div className='applications-tab-container'>
       <div className='applications-tab'>

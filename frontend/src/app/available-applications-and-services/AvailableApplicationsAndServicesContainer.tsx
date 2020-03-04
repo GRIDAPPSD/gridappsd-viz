@@ -5,7 +5,7 @@ import { GetAvailableApplicationsAndServices } from './models/GetAvailableApplic
 import { StompClientService } from '@shared/StompClientService';
 import { Payload } from './models/Payload';
 import { AvailableApplicationsAndServices } from './AvailableApplicationsAndServices';
-import { Wait } from '@shared/wait';
+import { ProgressIndicator } from '@shared/overlay/progress-indicator';
 
 interface Props { }
 
@@ -31,11 +31,11 @@ export class AvailableApplicationsAndServicesContainer extends React.Component<P
   private _fetchAvailableApplicationsAndServices() {
     const getApplicationsAndServices = new GetAvailableApplicationsAndServices();
     this._subscribeForApplicationAndServicesResponse(getApplicationsAndServices.replyTo);
-    this._stompClientService.send(
-      getApplicationsAndServices.url,
-      { 'reply-to': getApplicationsAndServices.replyTo },
-      JSON.stringify(getApplicationsAndServices.requestBody)
-    );
+    this._stompClientService.send({
+      destination: getApplicationsAndServices.url,
+      replyTo: getApplicationsAndServices.replyTo,
+      body: JSON.stringify(getApplicationsAndServices.requestBody)
+    });
   }
 
   private _subscribeForApplicationAndServicesResponse(destination: string) {
@@ -51,10 +51,11 @@ export class AvailableApplicationsAndServicesContainer extends React.Component<P
   }
 
   render() {
-    if (!this.state.payload)
+    if (!this.state.payload) {
       return (
-        <Wait show />
+        <ProgressIndicator show />
       );
+    }
     return (
       <AvailableApplicationsAndServices payload={this.state.payload} />
     );

@@ -15,7 +15,7 @@
             true,
             "check-space"
         ],
-        "curly": false,
+        "curly": true,
         "deprecation": {
             "severity": "warn"
         },
@@ -53,11 +53,7 @@
         "no-bitwise": false,
         "no-console": [
             true,
-            "debug",
-            "info",
-            "time",
-            "timeEnd",
-            "trace"
+            "no-console"
         ],
         "no-construct": true,
         "no-debugger": true,
@@ -84,7 +80,9 @@
             true,
             "check-open-brace",
             "check-catch",
-            "check-whitespace"
+            "check-whitespace",
+            "check-finally",
+            "check-else"
         ],
         "prefer-const": true,
         "quotemark": [

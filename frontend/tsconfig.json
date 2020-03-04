@@ -26,7 +26,7 @@
         "noImplicitThis": true,
         "noImplicitAny": false,
         "noUnusedLocals": false,
-        "noUnusedParameters": true,
+        "noUnusedParameters": false,
         "strictNullChecks": false,
         "suppressImplicitAnyIndexErrors": true
     },

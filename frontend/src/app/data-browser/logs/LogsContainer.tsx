@@ -8,7 +8,8 @@ import { SimulationId } from './models/SimulationId';
 import { QueryLogsForm } from './QueryLogsForm';
 import { QueryLogsResultTable } from './QueryLogsResultTable';
 import { Response } from '../Response';
-import { MessageBanner } from '@shared/message-banner';
+import { MessageBanner } from '@shared/overlay/message-banner';
+import { ProgressIndicator } from '@shared/overlay/progress-indicator';
 
 import './Logs.light.scss';
 import './Logs.dark.scss';
@@ -20,6 +21,7 @@ interface State {
   result: any[];
   simulationIds: SimulationId[];
   sources: string[];
+  showSpinner: boolean;
 }
 
 export class LogsContainer extends React.Component<Props, State> {
@@ -34,7 +36,8 @@ export class LogsContainer extends React.Component<Props, State> {
     this.state = {
       result: [],
       simulationIds: [],
-      sources: ['ALL']
+      sources: ['ALL'],
+      showSpinner: false
     };
     this.getSource = this.getSource.bind(this);
     this.getLogs = this.getLogs.bind(this);
@@ -46,16 +49,24 @@ export class LogsContainer extends React.Component<Props, State> {
   }
 
   private _fetchLatestTenSimulationIds() {
+    this.setState({
+      showSpinner: true
+    });
     this._stompClientService.readOnceFrom('query-logs.process-id')
       .pipe(map(JSON.parse as (body: string) => { data: SimulationId[] }))
       .subscribe({
-        next: payload => this.setState({ simulationIds: payload.data })
+        next: payload => {
+          this.setState({
+            simulationIds: payload.data,
+            showSpinner: false
+          });
+        }
       });
-    this._stompClientService.send(
-      'goss.gridappsd.process.request.data.log',
-      { 'reply-to': 'query-logs.process-id' },
-      `{"query": "select distinct(process_id), max(timestamp) as timestamp from log where process_id is not null and process_type='/queue/goss.gridappsd.process.request.simulation' group by process_id order by timestamp desc limit 10"}`
-    );
+    this._stompClientService.send({
+      destination: 'goss.gridappsd.process.request.data.log',
+      replyTo: 'query-logs.process-id',
+      body: `{"query": "select distinct(process_id), max(timestamp) as timestamp from log where process_id is not null and process_type='/queue/goss.gridappsd.process.request.simulation' group by process_id order by timestamp desc limit 10"}`
+    });
   }
 
   private _watchStompClientStatusChanges() {
@@ -80,7 +91,12 @@ export class LogsContainer extends React.Component<Props, State> {
     return this._stompClientService.readFrom('query-logs.result')
       .pipe(map(JSON.parse as (body: string) => any))
       .subscribe({
-        next: queryResults => this.setState({ result: queryResults.data || [] })
+        next: queryResults => {
+          this.setState({
+            result: queryResults.data || [],
+            showSpinner: false
+          });
+        }
       });
   }
 
@@ -120,26 +136,31 @@ export class LogsContainer extends React.Component<Props, State> {
               </MessageBanner>
           }
         </Response>
+        <ProgressIndicator show={this.state.showSpinner} />
       </div>
     );
   }
 
   getSource(simulationId: SimulationId) {
-    this._stompClientService.send(
-      'goss.gridappsd.process.request.data.log',
-      { 'reply-to': 'query-logs.source' },
-      `{"query": "select distinct(source) from log where process_id = ${simulationId.process_id}"}`
-    );
+    this._stompClientService.send({
+      destination: 'goss.gridappsd.process.request.data.log',
+      replyTo: 'query-logs.source',
+      body: `{"query": "select distinct(source) from log where process_id = ${simulationId.process_id}"}`
+    });
   }
 
   getLogs(requestBody: QueryLogsRequestBody) {
-    if (requestBody.source === 'ALL')
+    this.setState({
+      showSpinner: true
+    });
+    if (requestBody.source === 'ALL') {
       delete requestBody.source;
-    this._stompClientService.send(
-      'goss.gridappsd.process.request.data.log',
-      { 'reply-to': 'query-logs.result' },
-      JSON.stringify(requestBody)
-    );
+    }
+    this._stompClientService.send({
+      destination: 'goss.gridappsd.process.request.data.log',
+      replyTo: 'query-logs.result',
+      body: JSON.stringify(requestBody)
+    });
   }
 
 }

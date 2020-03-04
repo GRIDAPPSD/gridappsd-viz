@@ -2,9 +2,9 @@ import * as React from 'react';
 
 import { IconButton } from '@shared/buttons';
 import { Tooltip } from '@shared/tooltip';
-import { SlideToggle } from '@shared/form';
+import { SlideToggle, FormControlModel } from '@shared/form';
 import { Fade } from '@shared/fade';
-import { PopUp } from '@shared/pop-up';
+import { Dialog } from '@shared/overlay/dialog';
 
 import './Settings.light.scss';
 import './Settings.dark.scss';
@@ -19,11 +19,10 @@ interface State {
   themeSelectedPreviously: 'light' | 'dark';
 }
 
-const menuWidth = 270;
-
 export class Settings extends React.Component<Props, State> {
 
-  settingsMenuAnchor: HTMLElement;
+  readonly isDarkThemeSelectedFormControl = new FormControlModel(true);
+  readonly menuOpenerRef = React.createRef<HTMLElement>();
 
   constructor(props: Props) {
     super(props);
@@ -45,18 +44,23 @@ export class Settings extends React.Component<Props, State> {
   }
 
   componentDidMount() {
-    const boundingBox = this.settingsMenuAnchor.getBoundingClientRect();
+    const boundingBox = this.menuOpenerRef.current.getBoundingClientRect();
     this.setState({
-      left: boundingBox.left - menuWidth,
-      top: boundingBox.top
+      left: boundingBox.left - 200,
+      top: boundingBox.top + 15
     });
-    if (this.state.themeSelectedPreviously !== 'dark')
+    if (this.state.themeSelectedPreviously !== 'dark') {
       setTimeout(() => {
-        this.toggleTheme(this.state.themeSelectedPreviously === 'dark');
+        this._toggleTheme(this.state.themeSelectedPreviously === 'dark');
       }, 16);
+    }
+    this.isDarkThemeSelectedFormControl.valueChanges()
+      .subscribe({
+        next: this._toggleTheme
+      });
   }
 
-  toggleTheme(isDarkThemeSelected: boolean) {
+  private _toggleTheme(isDarkThemeSelected: boolean) {
     // These variables are injected by webpack
     // They are declared in src/webpack-injections.d.ts
     const styleFilename = isDarkThemeSelected ? __DARK_THEME_STYLE_FILENAME__ : __LIGHT_THEME_STYLE_FILENAME__;
@@ -65,32 +69,33 @@ export class Settings extends React.Component<Props, State> {
     localStorage.setItem('theme', isDarkThemeSelected ? 'dark' : 'light');
   }
 
+  componentWillUnmount() {
+    this.isDarkThemeSelectedFormControl.cleanup();
+  }
+
   render() {
     return (
       <section
-        ref={ref => this.settingsMenuAnchor = ref}
+        ref={this.menuOpenerRef}
         className='settings'>
         <Tooltip content='Settings'>
           <IconButton
+            rounded
+            hasBackground={false}
             className='settings__trigger'
             icon='more_vert'
-            noBackground={true}
             size='large'
-            rounded={true}
             rippleDuration={1250}
             onClick={this.showSettingsMenu} />
         </Tooltip>
-        <PopUp
-          in={this.state.showSettingsMenu}
+        <Dialog
+          transparentBackdrop
+          show={this.state.showSettingsMenu}
           top={this.state.top}
           left={this.state.left}
           onBackdropClicked={this.hideSettingsMenu}>
           <Fade in={this.state.showSettingsMenu}>
-            <ul
-              className='settings__menu'
-              style={{
-                width: menuWidth
-              }}>
+            <ul className='settings__menu'>
               <li className='settings__menu__item'>
                 <div className='settings__menu__item__name'>
                   Theme
@@ -102,12 +107,12 @@ export class Settings extends React.Component<Props, State> {
                     onText='Dark'
                     offText='Light'
                     isOn={this.state.themeSelectedPreviously === 'dark'}
-                    onChange={this.toggleTheme} />
+                    formControlModel={this.isDarkThemeSelectedFormControl} />
                 </div>
               </li>
             </ul>
           </Fade>
-        </PopUp>
+        </Dialog>
       </section>
     );
   }

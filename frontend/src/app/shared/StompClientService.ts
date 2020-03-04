@@ -17,6 +17,12 @@ export const enum StompClientInitializationResult {
   CONNECTION_FAILURE = 'CONNECTION_FAILURE'
 }
 
+export interface StompClientRequest {
+  destination: string;
+  replyTo?: string;
+  body: string;
+}
+
 export class StompClientService {
 
   private static readonly _INSTANCE = new StompClientService();
@@ -59,8 +65,9 @@ export class StompClientService {
           this._username = sessionStorage.getItem('username');
           this._password = sessionStorage.getItem('password');
 
-          if (this._username && this._password)
+          if (this._username && this._password) {
             this.reconnect();
+          }
         }
       });
   }
@@ -78,7 +85,7 @@ export class StompClientService {
           this.reconnect();
           subject.next(StompClientInitializationResult.OK);
         });
-        // need to reevaluate this
+        // need to reevaluate this strategy
         sessionStorage.setItem('username', username);
         sessionStorage.setItem('password', password);
       },
@@ -137,21 +144,23 @@ export class StompClientService {
     this._statusChanges.next(this._status);
   }
 
-  send(destination: string, headers: StompHeaders, body: string) {
+  // send(destination: string, headers: StompHeaders, body: string) {
+  send(request: StompClientRequest) {
     if (this._status !== StompClientConnectionStatus.DISCONNECTED) {
-      headers = {
-        ...headers,
-        GOSS_HAS_SUBJECT: true as any,
-        GOSS_SUBJECT: this._username
-      };
+      const headers = Object.assign(
+        {
+          GOSS_HAS_SUBJECT: true as any,
+          GOSS_SUBJECT: this._username
+        },
+        request.replyTo ? { 'reply-to': request.replyTo } : {}
+      );
       timer(0, 500)
         .pipe(
-          // In case the status is CONNECTING, then the connection failed
           takeWhile(() => this._status !== StompClientConnectionStatus.DISCONNECTED),
           filter(this.isActive),
           take(1),
         )
-        .subscribe(() => this._client.send(destination, headers, body));
+        .subscribe(() => this._client.send(request.destination, headers, request.body));
     }
   }
 

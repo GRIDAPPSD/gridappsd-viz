@@ -4,6 +4,10 @@
 .drawer-item-group__nested-drawer-items:not(:empty) {
     background-color: #2b2b2b;
     box-shadow: 0 3px 5px #000 inset;
+
+    .drawer-item {
+        border-bottom: 2px solid #5c5c5c;
+    }
 }
 
 .drawer-item-group.expanded {

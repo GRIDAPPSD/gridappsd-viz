@@ -59,8 +59,9 @@ export class Alarms extends React.Component<Props, State> {
   }
 
   renderAlarm(alarm: Alarm, index: number) {
-    if (!this.existingCreatedByMap.has(alarm.created_by))
+    if (!this.existingCreatedByMap.has(alarm.created_by)) {
       this.existingCreatedByMap.set(alarm.created_by, this.existingCreatedByMap.size + 1);
+    }
     const createdByIndex = this.existingCreatedByMap.get(alarm.created_by);
 
     return (

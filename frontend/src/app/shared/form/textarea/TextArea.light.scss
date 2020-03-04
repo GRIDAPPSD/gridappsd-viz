@@ -3,7 +3,7 @@
 .textarea__input-box {
     border: 2px solid #ccc;
 
-    &[contenteditable=true]:focus {
+    &.focused {
         &::before {
             background-color: #639;
         }
@@ -21,6 +21,10 @@
                 background-color: #639;
             }
         }
+    }
+
+    .errored-line {
+        text-decoration-color: #f00;
     }
 }
 
@@ -42,8 +46,33 @@
     border-color: red;
 }
 
-.form-control.disabled .textarea__input-box {
-    border: 2px solid #eee;
-    background-color: #f9f9f9;
-    color: #ddd;
+.form-control.disabled {
+
+    .textarea__input-box-resize-handle {
+        opacity: 0.2;
+    }
+
+    .textarea__input-box {
+        border: 2px solid #eee;
+        background-color: #f9f9f9;
+        color: #ddd;
+    }
+
+    .CodeMirror pre.CodeMirror-line {
+        color: #dfdfdf;
+    }
+
+    .CodeMirror-gutters {
+        background-color: #fff;
+        border-right-color: #ececec;
+    }
+
+    .CodeMirror-linenumber {
+        color: #dfdfdf;
+    }
+
+    .errored-line {
+        text-decoration-color: #dfdfdf;
+    }
+
 }

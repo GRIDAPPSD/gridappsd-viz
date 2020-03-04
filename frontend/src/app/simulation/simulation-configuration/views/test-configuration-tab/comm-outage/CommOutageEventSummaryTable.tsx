@@ -9,17 +9,18 @@ import './CommOutageEventSummaryTable.dark.scss';
 
 interface Props {
   events: CommOutageEvent[];
-  onDeleteEvent: (event: CommOutageEvent) => void;
+  onDeleteEvent: (index: number) => void;
 }
 
 export function CommOutageEventSummaryTable(props: Props) {
-  if (props.events.length === 0)
+  if (props.events.length === 0) {
     return null;
+  }
   return (
     <div className='comm-outage-event-table-wrapper'>
       <CommOutageEventTable
         events={props.events}
-        actions={event => {
+        actions={(_, index) => {
           return (
             <Tooltip content='Delete'>
               <IconButton
@@ -27,7 +28,7 @@ export function CommOutageEventSummaryTable(props: Props) {
                 icon='delete'
                 style='accent'
                 size='small'
-                onClick={() => props.onDeleteEvent(event)} />
+                onClick={() => props.onDeleteEvent(index)} />
             </Tooltip>
           );
         }} />

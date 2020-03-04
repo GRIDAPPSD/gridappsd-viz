@@ -1,12 +1,13 @@
 import * as React from 'react';
 
 import { Ripple } from '@shared/ripple';
+import { FormControlModel } from '../models/FormControlModel';
 
 import './SlideToggle.light.scss';
 import './SlideToggle.dark.scss';
 
 interface Props {
-  onChange: (state: boolean) => void;
+  formControlModel: FormControlModel<boolean>;
   className?: string;
   onText?: string;
   offText?: string;
@@ -19,13 +20,6 @@ interface State {
 }
 
 export class SlideToggle extends React.Component<Props, State> {
-
-  static defaultProps = {
-    direction: 'horizontal',
-    isOn: false,
-    onText: '',
-    offText: ''
-  } as Props;
 
   constructor(props: Props) {
     super(props);
@@ -77,7 +71,7 @@ export class SlideToggle extends React.Component<Props, State> {
   toggle() {
     this.setState(prevState => {
       const newState = !prevState.isOn;
-      this.props.onChange(newState);
+      this.props.formControlModel.setValue(newState);
       return {
         isOn: newState
       };
@@ -85,3 +79,10 @@ export class SlideToggle extends React.Component<Props, State> {
   }
 
 }
+
+(SlideToggle as any).defaultProps = {
+  direction: 'horizontal',
+  isOn: false,
+  onText: '',
+  offText: ''
+};

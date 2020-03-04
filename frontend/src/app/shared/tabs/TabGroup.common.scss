@@ -1,4 +1,4 @@
-.tabgroup {
+.tab-group {
     position: relative;
     width: 100%;
     height: 100%;
@@ -6,7 +6,7 @@
     box-sizing: border-box;
 }
 
-.tabgroup__header {
+.tab-group__header {
     position: relative;
     display: flex;
     height: 40px;
@@ -15,7 +15,7 @@
     margin-top: 5px;
 }
 
-.tabgroup__header__label {
+.tab-group__header__label {
     position: relative;
     font-size: 0.9em;
     padding: 0 20px;
@@ -27,7 +27,7 @@
     cursor: pointer;
 }
 
-.tabgroup__body {
+.tab-group__body {
     width: calc(100% - 2px);
     height: calc(100% - 46px);
     overflow: hidden;
@@ -36,14 +36,14 @@
     margin: 0 1px
 }
 
-.tabgroup__body__wrapper {
+.tab-group__body__wrapper {
     width: 100%;
     height: 100%;
     max-height: 100%;
     overflow: hidden auto;
 }
 
-.tabgroup__body__slider {
+.tab-group__body__slider {
     width: 100%;
     height: 100%;
     display: flex;

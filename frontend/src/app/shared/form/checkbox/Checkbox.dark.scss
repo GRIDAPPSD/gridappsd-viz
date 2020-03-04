@@ -1,0 +1,10 @@
+@import '@constants.dark';
+@import 'Checkbox.common';
+
+.checkbox.disabled .checkbox__icon {
+    color: rgba($disabled-item-color, 0.035);
+}
+
+.checkbox__icon {
+    color: $primary-color;
+}
