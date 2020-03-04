@@ -2,7 +2,7 @@ import { Socket } from 'socket.io';
 
 import { SimulationParticipant } from './SimulationParticipant';
 import { SimulationChannel } from './SimulationChannel';
-import { SimulationSynchronizationEvents } from '@commons/SimulationSynchronizationEvents';
+import { SimulationSynchronizationEvent } from '@commons/SimulationSynchronizationEvent';
 
 export class SimulationCoordinator {
 
@@ -12,7 +12,7 @@ export class SimulationCoordinator {
     const participant = new SimulationParticipant(socket);
     if (this._activeSimulationChannelMap.size > 0) {
       participant.notifySelf(
-        SimulationSynchronizationEvents.SIMULATION_ACTIVE_CHANNELS,
+        SimulationSynchronizationEvent.QUERY_ACTIVE_SIMULATION_CHANNELS,
         [...this._activeSimulationChannelMap.keys()].reverse()
       );
     }
@@ -23,7 +23,7 @@ export class SimulationCoordinator {
     const requestedChannel = this._activeSimulationChannelMap.get(simulationId);
     requestedChannel.addMember(participant);
     participant.notifySelf(
-      SimulationSynchronizationEvents.SIMULATION_STATUS,
+      SimulationSynchronizationEvent.QUERY_SIMULATION_STATUS,
       requestedChannel.currentStatus()
     );
   }
@@ -38,7 +38,7 @@ export class SimulationCoordinator {
       });
     // Notify all other clients that are connected to our server
     simulationInitiator.broadcast(
-      SimulationSynchronizationEvents.SIMULATION_ACTIVE_CHANNELS,
+      SimulationSynchronizationEvent.QUERY_ACTIVE_SIMULATION_CHANNELS,
       [...this._activeSimulationChannelMap.keys()].reverse()
     );
   }
@@ -49,7 +49,7 @@ export class SimulationCoordinator {
       requestedChannel.deactivate();
       this._activeSimulationChannelMap.delete(simulationId);
       channelHost.broadcast(
-        SimulationSynchronizationEvents.SIMULATION_ACTIVE_CHANNELS,
+        SimulationSynchronizationEvent.QUERY_ACTIVE_SIMULATION_CHANNELS,
         [...this._activeSimulationChannelMap.keys()].reverse()
       );
     }

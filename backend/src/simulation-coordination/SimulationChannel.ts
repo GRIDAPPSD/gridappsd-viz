@@ -3,7 +3,7 @@ import { Subscription } from 'rxjs';
 import { SimulationStatus } from '@commons/SimulationStatus';
 import { SimulationParticipant } from './SimulationParticipant';
 import { SimulationSnapshot } from '@commons/SimulationSnapshot';
-import { SimulationSynchronizationEvents } from '@commons/SimulationSynchronizationEvents';
+import { SimulationSynchronizationEvent } from '@commons/SimulationSynchronizationEvent';
 
 export class SimulationChannel {
 
@@ -28,11 +28,11 @@ export class SimulationChannel {
   }
 
   private _updateNewMemberWithLatestSimulationSnapshot(newMember: SimulationParticipant) {
-    this._host.listenOnceFor(SimulationSynchronizationEvents.SIMULATION_SNAPSHOT_INIT)
+    this._host.listenOnceFor(SimulationSynchronizationEvent.INIT_SIMULATION_SNAPSHOT)
       .subscribe({
-        next: snapshot => newMember.notifySelf(SimulationSynchronizationEvents.SIMULATION_SNAPSHOT_RECEIVE, snapshot)
+        next: snapshot => newMember.notifySelf(SimulationSynchronizationEvent.RECEIVE_SIMULATION_SNAPSHOT, snapshot)
       });
-    this._host.notifySelf(SimulationSynchronizationEvents.SIMULATION_SNAPSHOT_INIT);
+    this._host.notifySelf(SimulationSynchronizationEvent.INIT_SIMULATION_SNAPSHOT);
   }
 
   removeMember(member: SimulationParticipant) {
@@ -47,38 +47,39 @@ export class SimulationChannel {
   }
 
   private _beginSendingSimulationSnapshotsToAllMembers() {
-    return this._host.listenFor<SimulationSnapshot>(SimulationSynchronizationEvents.SIMULATION_SNAPSHOT_RECEIVE)
+    return this._host.listenFor<SimulationSnapshot>(SimulationSynchronizationEvent.RECEIVE_SIMULATION_SNAPSHOT)
       .subscribe({
         next: simulationSnapshot => {
-          this._notifyAllMembers(SimulationSynchronizationEvents.SIMULATION_SNAPSHOT_RECEIVE, simulationSnapshot);
+          this._notifyAllMembers(SimulationSynchronizationEvent.RECEIVE_SIMULATION_SNAPSHOT, simulationSnapshot);
         }
       });
   }
 
-  private _notifyAllMembers(event: SimulationSynchronizationEvents, payload?: any) {
+  private _notifyAllMembers(event: SimulationSynchronizationEvent, payload?: any) {
     for (const member of this._members) {
-      if (member.isConnected())
+      if (member.isConnected()) {
         member.notifySelf(event, payload);
-      else
+      } else {
         this._members.delete(member);
+      }
     }
   }
 
   deactivate() {
     this._simulationStatus = SimulationStatus.STOPPED;
-    this._notifyAllMembers(SimulationSynchronizationEvents.SIMULATION_STATUS, this._simulationStatus);
+    this._notifyAllMembers(SimulationSynchronizationEvent.QUERY_SIMULATION_STATUS, this._simulationStatus);
     this._members.clear();
     this._simulationSnapshotWatchSubscription.unsubscribe();
   }
 
   resume() {
     this._simulationStatus = SimulationStatus.RESUMED;
-    this._notifyAllMembers(SimulationSynchronizationEvents.SIMULATION_STATUS, this._simulationStatus);
+    this._notifyAllMembers(SimulationSynchronizationEvent.QUERY_SIMULATION_STATUS, this._simulationStatus);
   }
 
   sleep() {
     this._simulationStatus = SimulationStatus.PAUSED;
-    this._notifyAllMembers(SimulationSynchronizationEvents.SIMULATION_STATUS, this._simulationStatus);
+    this._notifyAllMembers(SimulationSynchronizationEvent.QUERY_SIMULATION_STATUS, this._simulationStatus);
   }
 
 }
