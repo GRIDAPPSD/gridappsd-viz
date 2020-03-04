@@ -3,7 +3,7 @@ import { Subject } from 'rxjs';
 import { take, finalize, takeUntil } from 'rxjs/operators';
 
 import { SimulationStatus } from '@commons/SimulationStatus';
-import { SimulationSynchronizationEvents } from '@commons/SimulationSynchronizationEvents';
+import { SimulationSynchronizationEvent } from '@commons/SimulationSynchronizationEvent';
 
 /**
  * A simulation participant is those clients that have joined a running simulation
@@ -20,7 +20,7 @@ export class SimulationParticipant {
       this._socket.removeAllListeners();
     });
 
-    _socket.on(SimulationSynchronizationEvents.SIMULATION_STATUS, (payload: { status: SimulationStatus; simulationId: string }) => {
+    _socket.on(SimulationSynchronizationEvent.QUERY_SIMULATION_STATUS, (payload: { status: SimulationStatus; simulationId: string }) => {
       this._simulationStatusChangeNotifier.next(payload);
     });
   }
@@ -29,7 +29,7 @@ export class SimulationParticipant {
     return this._socket.connected;
   }
 
-  listenFor<T = any>(event: SimulationSynchronizationEvents) {
+  listenFor<T = any>(event: SimulationSynchronizationEvent) {
     const notifier = new Subject<T>();
     this._socket.on(event, (payload?: T) => notifier.next(payload));
     return notifier.asObservable()
@@ -39,16 +39,16 @@ export class SimulationParticipant {
       );
   }
 
-  listenOnceFor<T>(event: SimulationSynchronizationEvents) {
+  listenOnceFor<T>(event: SimulationSynchronizationEvent) {
     return this.listenFor<T>(event)
       .pipe(take(1));
   }
 
-  notifySelf(event: SimulationSynchronizationEvents, payload?: any) {
+  notifySelf(event: SimulationSynchronizationEvent, payload?: any) {
     this._socket.emit(event, payload);
   }
 
-  broadcast(event: SimulationSynchronizationEvents, payload?: any) {
+  broadcast(event: SimulationSynchronizationEvent, payload?: any) {
     this._socket.broadcast.emit(event, payload);
   }
 
@@ -58,7 +58,7 @@ export class SimulationParticipant {
   }
 
   requestToJoinSimulationChannel() {
-    return this.listenFor<string>(SimulationSynchronizationEvents.SIMULATION_JOIN);
+    return this.listenFor<string>(SimulationSynchronizationEvent.JOIN_SIMULATION);
   }
 
   watchForDisconnection() {
