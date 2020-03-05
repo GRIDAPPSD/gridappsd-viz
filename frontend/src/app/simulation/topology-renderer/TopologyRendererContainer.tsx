@@ -7,7 +7,8 @@ import { TopologyRenderer } from './TopologyRenderer';
 import {
   SimulationQueue,
   SimulationConfiguration,
-  DEFAULT_SIMULATION_CONFIGURATION
+  DEFAULT_SIMULATION_CONFIGURATION,
+  SimulationOutputMeasurement
 } from '@shared/simulation';
 import { StompClientService } from '@shared/StompClientService';
 import {
@@ -41,6 +42,7 @@ interface Props {
 interface State {
   topology: RenderableTopology;
   isFetching: boolean;
+  simulationOutputMeasurements: SimulationOutputMeasurement[];
 }
 
 const topologyModelCache = new Map<string, TopologyModel>();
@@ -51,7 +53,6 @@ export class TopologyRendererContainer extends React.Component<Props, State> {
 
   private readonly _stompClientService = StompClientService.getInstance();
   private readonly _simulationQueue = SimulationQueue.getInstance();
-  private readonly _switches = new Set<Switch>();
   private readonly _simulationControlService = SimulationControlService.getInstance();
 
   private _activeSimulationStream: Subscription = null;
@@ -68,19 +69,20 @@ export class TopologyRendererContainer extends React.Component<Props, State> {
         edges: [],
         inverted: false
       },
-      isFetching: true
+      isFetching: true,
+      simulationOutputMeasurements: []
     };
 
     this.activeSimulationConfig = this._simulationQueue.getActiveSimulation()?.config || DEFAULT_SIMULATION_CONFIGURATION;
 
     this.onToggleSwitchState = this.onToggleSwitchState.bind(this);
     this.onCapacitorControlMenuFormSubmitted = this.onCapacitorControlMenuFormSubmitted.bind(this);
-    this.onRegulatorMenuFormSubmitted = this.onRegulatorMenuFormSubmitted.bind(this);
+    this.onRegulatorControlMenuFormSubmitted = this.onRegulatorControlMenuFormSubmitted.bind(this);
   }
 
   componentDidMount() {
     this._activeSimulationStream = this._observeActiveSimulationChangeEvent();
-    this._simulationOutputStream = this._toggleSwitchesOnOutputMeasurementsReceived();
+    this._simulationOutputStream = this._subscribeToSimulationOutputMeasurementStream();
     this._simulationSnapshotStream = this._updateRenderableTopologyOnSimulationSnapshotReceived();
   }
 
@@ -159,179 +161,115 @@ export class TopologyRendererContainer extends React.Component<Props, State> {
       edges: [],
       inverted: false
     };
-    const keysToLookAt = [
-      'batteries', 'switches', 'solarpanels', 'swing_nodes', 'transformers', 'overhead_lines', 'capacitors', 'regulators'
-    ];
-    type UnprocessedNode = (
-      Node &
-      {
-        groupName: string;
-        x2: number;
-        y2: number;
-        open: any;
-        manual: any;
-        from: string;
-        to: string
-      }
-    );
-    const allNodeMap = Object.keys(feeder)
-      .filter(key => keysToLookAt.includes(key))
-      .reduce((accumlator, group) => {
-        for (const node of feeder[group]) {
-          node.groupName = group;
-          accumlator.set(node.name, node);
-        }
-        return accumlator;
-      }, new Map<string, UnprocessedNode>());
-    const allNodeList = [...allNodeMap.values()];
-    this._convertLatLongToXYIfNeeded(allNodeList);
+    const nodeMap = new Map<string, Node>();
 
-    for (const node of allNodeList) {
-      const groupName = node.groupName;
-      const mRIDs = this.props.mRIDs.get(node.name) || [];
-      const resolvedMRIDs = Array.isArray(mRIDs) ? mRIDs : [mRIDs];
+    for (const group of ['batteries', 'switches', 'solarpanels', 'swing_nodes', 'transformers', 'capacitors', 'regulators']) {
+      for (const datum of feeder[group]) {
+        const mRIDs = this.props.mRIDs.get(datum.name) || [];
+        const resolvedMRIDs = Array.isArray(mRIDs) ? mRIDs : [mRIDs];
+        let node: Node;
 
-      delete node.groupName;
-      switch (groupName) {
-        case 'swing_nodes':
-          renderableTopology.nodes.push(
-            this._createNewNode({
-              ...node,
-              name: node.name,
+        switch (group) {
+          case 'swing_nodes':
+            node = this._createNewNode({
+              ...datum,
               type: 'swing_node',
-              x1: Math.trunc(node.x1),
-              y1: Math.trunc(node.y1),
               mRIDs: resolvedMRIDs
-            })
-          );
-          break;
-        case 'batteries':
-          renderableTopology.nodes.push(
-            this._createNewNode({
-              ...node,
-              name: node.name,
+            });
+            break;
+
+          case 'batteries':
+            node = this._createNewNode({
+              ...datum,
               type: 'battery',
               mRIDs: resolvedMRIDs
-            })
-          );
-          break;
-        case 'switches':
-          const swjtch = this._createNewNode({
-            ...node,
-            name: node.name,
-            type: 'switch',
-            open: node.open === 'open',
-            screenX2: 0,
-            screenY2: 0,
-            colorWhenOpen: '#4aff4a',
-            colorWhenClosed: '#f00',
-            mRIDs: resolvedMRIDs
-          }) as Switch;
-          renderableTopology.nodes.push(swjtch);
-          this._switches.add(swjtch);
-          break;
-        case 'solarpanels':
-          renderableTopology.nodes.push(
-            this._createNewNode({
-              ...node,
-              name: node.name,
+            });
+            break;
+
+          case 'switches':
+            node = this._createNewNode({
+              type: 'switch',
+              screenX2: 0,
+              screenY2: 0,
+              ...datum,
+              open: datum.open === 'open',
+              mRIDs: resolvedMRIDs
+            });
+            break;
+
+          case 'solarpanels':
+            node = this._createNewNode({
+              ...datum,
               type: 'solarpanel',
               mRIDs: resolvedMRIDs
-            })
-          );
-          break;
-        case 'transformers':
-          renderableTopology.nodes.push(
-            this._createNewNode({
-              ...node,
-              name: node.name,
+            });
+            break;
+
+          case 'transformers':
+            node = this._createNewNode({
+              ...datum,
               type: 'transformer',
-              x1: Math.trunc(node.x1 !== 0 ? node.x1 : node.x2),
-              y1: Math.trunc(node.y1 !== 0 ? node.y1 : node.y2),
+              x1: datum.x1 !== 0 ? datum.x1 : datum.x2,
+              y1: datum.y1 !== 0 ? datum.y1 : datum.y2,
               mRIDs: resolvedMRIDs
-            })
-          );
-          break;
-        case 'capacitors':
-          renderableTopology.nodes.push(
-            this._createNewNode({
-              ...node,
-              name: node.name,
+            });
+            break;
+
+          case 'capacitors':
+            node = this._createNewNode({
+              ...datum,
               type: 'capacitor',
-              open: node.open === 'open',
-              x1: Math.trunc(node.x1),
-              y1: Math.trunc(node.y1),
-              manual: node.manual === 'manual',
+              open: datum.open === 'open',
+              manual: datum.manual === 'manual',
               controlMode: CapacitorControlMode.UNSPECIFIED,
               volt: null,
               var: null,
               mRIDs: resolvedMRIDs
-            })
-          );
-          break;
-        case 'overhead_lines':
-          const fromNode: Node = allNodeMap.get(node.from) || this._createNewNode({ name: node.from });
-          const toNode: Node = allNodeMap.get(node.to) || this._createNewNode({ name: node.to });
-          fromNode.x1 = Math.trunc(node.x1);
-          fromNode.y1 = Math.trunc(node.y1);
-          toNode.x1 = Math.trunc(node.x2);
-          toNode.y1 = Math.trunc(node.y2);
-          renderableTopology.nodes.push(fromNode, toNode);
-          renderableTopology.edges.push({
-            ...node,
-            name: node.name,
-            from: fromNode,
-            to: toNode,
-          });
-          break;
-        case 'regulators':
-          renderableTopology.nodes.push(
-            this._createNewNode({
-              ...node,
-              name: node.name,
+            });
+            break;
+
+          case 'regulators':
+            node = this._createNewNode({
+              ...datum,
               type: 'regulator',
-              x1: Math.trunc(node.x2),
-              y1: Math.trunc(node.y2),
-              manual: node.manual === 'manual',
+              x1: datum.x2,
+              y1: datum.y2,
+              manual: datum.manual === 'manual',
               controlModel: RegulatorControlMode.UNSPECIFIED,
               phaseValues: {},
-              phases: this.props.phases.get(node.name),
+              phases: this.props.phases.get(datum.name),
               mRIDs: resolvedMRIDs
-            })
-          );
-          break;
-        default:
-          console.warn(`${node.groupName} is in the model, but there's no switch case for it. Skipping`);
-          break;
+            });
+            break;
+        }
+        nodeMap.set(node.name, node);
       }
     }
-    this._resolveCoordinatesInSwitches(allNodeMap);
+
+    for (const overheadLine of feeder.overhead_lines.filter(e => !e.name.startsWith('tpx'))) {
+      const fromNode = nodeMap.get(overheadLine.from) || this._createNewNode({ name: overheadLine.from });
+      const toNode = nodeMap.get(overheadLine.to) || this._createNewNode({ name: overheadLine.to });
+      if (!nodeMap.has(fromNode.name)) {
+        fromNode.x1 = overheadLine.x1;
+        fromNode.y1 = overheadLine.y1;
+        nodeMap.set(fromNode.name, fromNode);
+      }
+      if (!nodeMap.has(toNode.name)) {
+        toNode.x1 = overheadLine.x2;
+        toNode.y1 = overheadLine.y2;
+        nodeMap.set(toNode.name, toNode);
+      }
+      renderableTopology.edges.push({
+        name: overheadLine.name,
+        from: fromNode,
+        to: toNode,
+      });
+    }
+
+    this._resolveCoordinates(nodeMap);
+
+    renderableTopology.nodes = [...nodeMap.values()];
     return renderableTopology;
-  }
-
-  private _convertLatLongToXYIfNeeded(nodes: any[]) {
-    const minMax = extent(nodes, node => node.x1);
-    if (minMax[1] - minMax[0] <= 1) {
-      for (const node of nodes) {
-        if ('x1' in node) {
-          const { x, y } = this._latLongToXY(node.x1, node.y1);
-          node.x1 = x;
-          node.y1 = y;
-        }
-        if ('x2' in node) {
-          const { x, y } = this._latLongToXY(node.x2, node.y2);
-          node.x2 = x;
-          node.y2 = y;
-        }
-      }
-    }
-  }
-
-  private _latLongToXY(longitude: number, lat: number): { x: number; y: number } {
-    return {
-      x: Math.floor(136.0 * (longitude + 77.0292) / (-77.0075 + 77.0292)) / 10,
-      y: Math.floor(117.0 * (lat - 38.8762) / (38.8901 - 38.8762)) / 10
-    };
   }
 
   private _createNewNode(properties: { [key: string]: any }): Node {
@@ -346,38 +284,56 @@ export class TopologyRendererContainer extends React.Component<Props, State> {
     } as Node;
   }
 
-  private _resolveCoordinatesInSwitches(allNodeMap: Map<string, Node>) {
-    for (const swjtch of this._switches) {
-      const fromNode = allNodeMap.get(swjtch.from);
-      swjtch.x1 = Math.trunc(swjtch.x1);
-      swjtch.y1 = Math.trunc(swjtch.y1);
-      swjtch.x2 = Math.trunc(swjtch.x2);
-      swjtch.y2 = Math.trunc(swjtch.y2);
-      if (fromNode) {
-        swjtch.x1 = fromNode.x1;
-        swjtch.y1 = fromNode.y1;
+  private _resolveCoordinates(nodeMap: Map<string, Node>) {
+    const coordinatesInLatLong = this._areCoordinatesInLatLong(nodeMap);
+    nodeMap.forEach(node => {
+      if (coordinatesInLatLong) {
+        const { x, y } = this._latLongToXY(node.x1, node.y1);
+        node.x1 = x;
+        node.y1 = y;
       }
-      const toNode = allNodeMap.get(swjtch.to);
-      if (toNode) {
-        swjtch.x2 = toNode.x1;
-        swjtch.y2 = toNode.y1;
+      node.x1 = Math.trunc(node.x1);
+      node.y1 = Math.trunc(node.y1);
+      if (node.type === 'switch') {
+        if (coordinatesInLatLong) {
+          const { x, y } = this._latLongToXY((node as Switch).x2, (node as Switch).y2);
+          (node as Switch).x2 = x;
+          (node as Switch).y2 = y;
+        }
+        (node as Switch).x2 = Math.trunc((node as Switch).x2);
+        (node as Switch).y2 = Math.trunc((node as Switch).y2);
       }
-    }
+    });
   }
 
-  private _toggleSwitchesOnOutputMeasurementsReceived() {
+  private _areCoordinatesInLatLong(nodeMap: Map<string, Node>) {
+    let minX = Infinity;
+    let maxX = -Infinity;
+    nodeMap.forEach(node => {
+      if (node.x1 < minX) {
+        minX = node.x1;
+      }
+      if (node.x1 > maxX) {
+        maxX = node.x1;
+      }
+    });
+    return maxX - minX <= 1;
+  }
+
+  private _latLongToXY(longitude: number, lat: number): { x: number; y: number } {
+    return {
+      x: Math.floor(136.0 * (longitude + 77.0292) / (-77.0075 + 77.0292)) / 10,
+      y: Math.floor(117.0 * (lat - 38.8762) / (38.8901 - 38.8762)) / 10
+    };
+  }
+
+  private _subscribeToSimulationOutputMeasurementStream() {
     return this._simulationControlService.simulationOutputMeasurementsReceived()
       .subscribe({
         next: measurements => {
-          for (const swjtch of this._switches) {
-            measurements.forEach(measurement => {
-              if (measurement.conductingEquipmentMRID === swjtch.mRIDs[0] && measurement.type === 'Pos') {
-                swjtch.open = measurement.value === 0;
-              }
-            });
-            const switchSymbol = document.querySelector(`.topology-renderer__canvas__symbol.switch._${swjtch.name}_`);
-            switchSymbol?.setAttribute('fill', swjtch.open ? swjtch.colorWhenOpen : swjtch.colorWhenClosed);
-          }
+          this.setState({
+            simulationOutputMeasurements: [...measurements.values()]
+          });
         }
       });
   }
@@ -409,10 +365,10 @@ export class TopologyRendererContainer extends React.Component<Props, State> {
       <>
         <TopologyRenderer
           topology={this.state.topology}
-          showWait={this.state.isFetching}
+          simulationOutputMeasurements={this.state.simulationOutputMeasurements}
           onToggleSwitch={this.onToggleSwitchState}
           onCapacitorControlMenuFormSubmitted={this.onCapacitorControlMenuFormSubmitted}
-          onRegulatorMenuFormSubmitted={this.onRegulatorMenuFormSubmitted} />
+          onRegulatorControlMenuFormSubmitted={this.onRegulatorControlMenuFormSubmitted} />
         <ProgressIndicator show={this.state.isFetching} />
       </>
     );
@@ -524,7 +480,7 @@ export class TopologyRendererContainer extends React.Component<Props, State> {
     });
   }
 
-  onRegulatorMenuFormSubmitted(currentRegulator: Regulator, updatedRegulator: Regulator) {
+  onRegulatorControlMenuFormSubmitted(currentRegulator: Regulator, updatedRegulator: Regulator) {
     if (currentRegulator.controlMode !== updatedRegulator.controlMode) {
       this._toggleRegulatorManualMode(updatedRegulator);
     }

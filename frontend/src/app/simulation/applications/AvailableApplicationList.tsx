@@ -9,6 +9,7 @@ import { EnableApplicationRequest } from './models/EnableApplicationRequest';
 import { DisableApplicationRequest } from './models/DisableApplicationRequest';
 import { Tooltip } from '@shared/tooltip';
 import { IconButton } from '@shared/buttons';
+import { MessageBanner } from '@shared/overlay/message-banner';
 
 import './AvailableApplicationList.light.scss';
 import './AvailableApplicationList.dark.scss';
@@ -60,6 +61,13 @@ export class AvailableApplicationList extends React.Component<Props, State> {
   }
 
   render() {
+    if (this.state.applications.length === 0) {
+      return (
+        <MessageBanner>
+          No data available
+        </MessageBanner>
+      );
+    }
     return (
       <div className='available-application-list'>
         <div className='available-application-list__action'>

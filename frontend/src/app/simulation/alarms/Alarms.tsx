@@ -6,6 +6,7 @@ import { Tooltip } from '@shared/tooltip';
 import { Ripple } from '@shared/ripple';
 import { copyToClipboard } from '@shared/misc';
 import { DateTimeService } from '@shared/DateTimeService';
+import { MessageBanner } from '@shared/overlay/message-banner';
 
 import './Alarms.light.scss';
 import './Alarms.dark.scss';
@@ -34,6 +35,13 @@ export class Alarms extends React.Component<Props, State> {
   }
 
   render() {
+    if (this.props.alarms.length === 0) {
+      return (
+        <MessageBanner>
+          No data available
+        </MessageBanner>
+      );
+    }
     return (
       <section className='alarms'>
         <table>

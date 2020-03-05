@@ -13,6 +13,7 @@ import { ModelDictionaryMeasurement } from '@shared/topology';
 import { SimulationOutputMeasurement, SimulationOutputPayload } from '.';
 import { StateStore } from '@shared/state-store';
 import { Simulation } from './Simulation';
+import { ConductingEquipmentType } from '@shared/topology/model-dictionary';
 
 interface SimulationStartedEventResponse {
   simulationId: string;
@@ -267,6 +268,7 @@ export class SimulationControlService {
           mRID: rawSimulationOutputMeasurement.measurement_mrid,
           phases: measurementInModelDictionary.phases,
           conductingEquipmentName: measurementInModelDictionary.ConductingEquipment_name,
+          conductingEquipmentType: measurementInModelDictionary.ConductingEquipment_type as ConductingEquipmentType,
           connectivityNode: measurementInModelDictionary.ConnectivityNode,
           conductingEquipmentMRID: measurementInModelDictionary.ConductingEquipment_mRID
         };

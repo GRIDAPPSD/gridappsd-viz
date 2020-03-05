@@ -8,7 +8,7 @@ import { FeederModel, TopologyModel } from '@shared/topology';
 import { GetAllFeederModelsRequest, GetFeederModelsResponsePayload } from './models/message-requests/GetAllFeederModelsRequest';
 import {
   ModelDictionary,
-  ModelDictionaryComponentType,
+  ModelDictionaryMeasurementType,
   ModelDictionaryMeasurement,
   ModelDictionaryComponent
 } from '@shared/topology/model-dictionary';
@@ -26,6 +26,7 @@ import {
 import { StateStore, ApplicationState } from '@shared/state-store';
 import { DEFAULT_APPLICATION_STATE } from './models/default-application-state';
 import { AuthenticatorService } from '@shared/authenticator';
+import { ConductingEquipmentType } from '@shared/topology/model-dictionary';
 
 import './App.light.scss';
 import './App.dark.scss';
@@ -270,7 +271,7 @@ export class AppContainer extends React.Component<Props, State> {
     const componentWithGroupedPhasesMap = new Map<string, ModelDictionaryComponent>();
     const measurementMRIDMap = new Map<string, Array<{ phase: string; mrid: string; }>>();
     for (const measurement of modelDictionary.measurements) {
-      const name = measurement.measurementType === ModelDictionaryComponentType.VOLTAGE
+      const name = measurement.measurementType === ModelDictionaryMeasurementType.VOLTAGE
         ? measurement.ConnectivityNode
         : measurement.ConductingEquipment_name;
       const phases = measurement.phases;
@@ -281,11 +282,11 @@ export class AppContainer extends React.Component<Props, State> {
           id,
           name,
           conductingEquipmentName: measurement.ConductingEquipment_name,
-          conductingEquipmentType: measurement.ConductingEquipment_type,
+          conductingEquipmentType: measurement.ConductingEquipment_type as ConductingEquipmentType,
           displayName: '',
           phases: [],
           conductingEquipmentMRIDs: [],
-          type: measurement.measurementType as ModelDictionaryComponentType,
+          type: measurement.measurementType as ModelDictionaryMeasurementType,
           measurementMRIDs: []
         };
         measurementMRIDMap.set(id, []);

@@ -31,12 +31,12 @@ import './SimulationConfigurationEditor.light.scss';
 import './SimulationConfigurationEditor.dark.scss';
 
 interface Props {
-  onSubmit: (configObject: SimulationConfiguration) => void;
-  onMRIDChanged: (mRID: string) => void;
-  onClose: () => void;
   initialConfig: SimulationConfiguration;
   feederModel: FeederModel;
   availableApplications: Application[];
+  onSubmit: (configObject: SimulationConfiguration) => void;
+  onMRIDChanged: (mRID: string) => void;
+  onClose: () => void;
 }
 
 interface State {
@@ -273,15 +273,14 @@ export class SimulationConfigurationEditor extends React.Component<Props, State>
   }
 
   onSubmitForm() {
-    this.setState({
-      show: false
-    });
     this._populatePowerSystemConfigSection();
     this._populateSimulationConfigSection();
     this._populateApplicationConfigSection();
     this._populateTestConfigSection();
     this._populateServiceConfigSection();
-    this.props.onSubmit(this.currentConfig);
+    this.setState({
+      show: false
+    }, () => this.props.onSubmit(this.currentConfig));
   }
 
   private _populatePowerSystemConfigSection() {
