@@ -1,4 +1,4 @@
-import { ModelDictionaryMeasurementType } from '@shared/topology';
+import { MeasurementType } from '@shared/topology';
 import { PlotModelComponent } from './PlotModelComponent';
 
 /**
@@ -8,7 +8,7 @@ import { PlotModelComponent } from './PlotModelComponent';
  */
 export interface PlotModel {
   name: string;
-  measurementType: ModelDictionaryMeasurementType;
+  measurementType: MeasurementType;
   components: PlotModelComponent[];
   useMagnitude: boolean;
   useAngle: boolean;

@@ -1,4 +1,4 @@
-import { ModelDictionaryMeasurementType } from './ModelDictionaryComponentType';
+import { MeasurementType } from './MeasurementType';
 import { ConductingEquipmentType } from './ConductingEquipmentType';
 
 /**
@@ -19,7 +19,7 @@ export interface ModelDictionaryComponent {
   displayName: string;
   id: string;
   conductingEquipmentMRIDs: string[];
-  type: ModelDictionaryMeasurementType;
+  type: MeasurementType;
   name: string;
   measurementMRIDs: string[];
 }

@@ -9,7 +9,7 @@ import { SimulationStatus } from '@commons/SimulationStatus';
 import { TimeSeries } from './models/TimeSeries';
 import { TimeSeriesDataPoint } from './models/TimeSeriesDataPoint';
 import { StateStore } from '@shared/state-store';
-import { ModelDictionaryMeasurementType } from '@shared/topology';
+import { MeasurementType } from '@shared/topology';
 import { PlotModel, PlotModelComponent } from '@shared/plot-model';
 
 interface Props {
@@ -175,12 +175,12 @@ export class MeasurementChartContainer extends React.Component<Props, State> {
         measurement: 0
       };
       switch (plotModel.measurementType) {
-        case ModelDictionaryMeasurementType.VOLTAGE:
-        case ModelDictionaryMeasurementType.POWER:
+        case MeasurementType.VOLTAGE:
+        case MeasurementType.POWER:
           const valueType = plotModel.useMagnitude ? 'magnitude' : 'angle';
           dataPoint.measurement = measurement[valueType];
           return dataPoint;
-        case ModelDictionaryMeasurementType.TAP:
+        case MeasurementType.TAP:
           dataPoint.measurement = measurement.value;
           return dataPoint;
       }
@@ -200,11 +200,11 @@ export class MeasurementChartContainer extends React.Component<Props, State> {
 
   private _deriveYAxisLabel(plotModel: PlotModel) {
     switch (plotModel.measurementType) {
-      case ModelDictionaryMeasurementType.POWER:
+      case MeasurementType.POWER:
         return 'W';
-      case ModelDictionaryMeasurementType.VOLTAGE:
+      case MeasurementType.VOLTAGE:
         return 'V';
-      case ModelDictionaryMeasurementType.TAP:
+      case MeasurementType.TAP:
         return '';
       default:
         return '';

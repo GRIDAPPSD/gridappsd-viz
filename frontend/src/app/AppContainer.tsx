@@ -8,7 +8,7 @@ import { FeederModel, TopologyModel } from '@shared/topology';
 import { GetAllFeederModelsRequest, GetFeederModelsResponsePayload } from './models/message-requests/GetAllFeederModelsRequest';
 import {
   ModelDictionary,
-  ModelDictionaryMeasurementType,
+  MeasurementType,
   ModelDictionaryMeasurement,
   ModelDictionaryComponent
 } from '@shared/topology/model-dictionary';
@@ -271,7 +271,7 @@ export class AppContainer extends React.Component<Props, State> {
     const componentWithGroupedPhasesMap = new Map<string, ModelDictionaryComponent>();
     const measurementMRIDMap = new Map<string, Array<{ phase: string; mrid: string; }>>();
     for (const measurement of modelDictionary.measurements) {
-      const name = measurement.measurementType === ModelDictionaryMeasurementType.VOLTAGE
+      const name = measurement.measurementType === MeasurementType.VOLTAGE
         ? measurement.ConnectivityNode
         : measurement.ConductingEquipment_name;
       const phases = measurement.phases;
@@ -286,7 +286,7 @@ export class AppContainer extends React.Component<Props, State> {
           displayName: '',
           phases: [],
           conductingEquipmentMRIDs: [],
-          type: measurement.measurementType as ModelDictionaryMeasurementType,
+          type: measurement.measurementType as MeasurementType,
           measurementMRIDs: []
         };
         measurementMRIDMap.set(id, []);

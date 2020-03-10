@@ -11,7 +11,7 @@ import {
   FormControlModel,
   Form
 } from '@shared/form';
-import { ModelDictionaryMeasurementType, ModelDictionaryComponent } from '@shared/topology';
+import { MeasurementType, ModelDictionaryComponent } from '@shared/topology';
 import { PlotModelSummary } from './PlotModelSummary';
 import { PlotModel, PlotModelComponent } from '@shared/plot-model';
 import { Validators } from '@shared/form/validation';
@@ -30,7 +30,7 @@ interface State {
   show: boolean;
   createdPlotModels: PlotModel[];
   allPlotModelOptionBuilder: SelectionOptionBuilder<PlotModel>;
-  measurementTypeOptionBuilder: SelectionOptionBuilder<ModelDictionaryMeasurementType>;
+  measurementTypeOptionBuilder: SelectionOptionBuilder<MeasurementType>;
   componentOptionBuilder: SelectionOptionBuilder<ModelDictionaryComponent>;
   phaseOptionBuilder: SelectionOptionBuilder<string>;
   disableAddComponentButton: boolean;
@@ -41,7 +41,7 @@ export class PlotModelCreator extends React.Component<Props, State> {
 
   // FormControlModel bound to the component selected in the "Created plots" dropdown
   readonly selectedPlotModelFormControl = new FormControlModel<PlotModel>(null);
-  readonly selectedMeasurementTypeFormControl = new FormControlModel(ModelDictionaryMeasurementType.NONE);
+  readonly selectedMeasurementTypeFormControl = new FormControlModel(MeasurementType.NONE);
   readonly useMagnitudeFormControl = new FormControlModel(false);
   readonly useAngleFormControl = new FormControlModel(false);
   readonly selectedComponentFormControl = new FormControlModel<ModelDictionaryComponent>(null);
@@ -58,17 +58,17 @@ export class PlotModelCreator extends React.Component<Props, State> {
       ),
       measurementTypeOptionBuilder: new SelectionOptionBuilder(
         [
-          ModelDictionaryMeasurementType.POWER,
-          ModelDictionaryMeasurementType.TAP,
-          ModelDictionaryMeasurementType.VOLTAGE
+          MeasurementType.POWER,
+          MeasurementType.TAP,
+          MeasurementType.VOLTAGE
         ],
         type => {
           switch (type) {
-            case ModelDictionaryMeasurementType.POWER:
+            case MeasurementType.POWER:
               return 'Power';
-            case ModelDictionaryMeasurementType.TAP:
+            case MeasurementType.TAP:
               return 'Tap';
-            case ModelDictionaryMeasurementType.VOLTAGE:
+            case MeasurementType.VOLTAGE:
               return 'Voltage';
             default:
               return '';
@@ -186,7 +186,7 @@ export class PlotModelCreator extends React.Component<Props, State> {
               ),
               phaseOptionBuilder: SelectionOptionBuilder.defaultBuilder()
             });
-            if (selectedType === ModelDictionaryMeasurementType.TAP) {
+            if (selectedType === MeasurementType.TAP) {
               this.useMagnitudeFormControl.disable();
               this.useAngleFormControl.disable();
             } else {

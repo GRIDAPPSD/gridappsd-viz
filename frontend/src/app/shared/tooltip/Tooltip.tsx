@@ -23,7 +23,7 @@ export class Tooltip extends React.Component<Props, State> {
 
   private _tooltipContainer: HTMLElement;
   private _tooltipRect: ClientRect;
-  private _anchor: HTMLElement;
+  private _anchor: Element;
 
   constructor(props: Props) {
     super(props);
@@ -89,7 +89,7 @@ export class Tooltip extends React.Component<Props, State> {
     }
   }
 
-  showAt(anchor: HTMLElement, container?: HTMLElement) {
+  showAt(anchor: Element, container?: HTMLElement) {
     this._addTooltip(container || this._createDefaultTooltipContainer());
     this._anchor = anchor;
     this._show();

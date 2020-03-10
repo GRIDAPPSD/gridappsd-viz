@@ -1,4 +1,4 @@
-import { ConductingEquipmentType, ModelDictionaryMeasurementType } from '@shared/topology/model-dictionary';
+import { ConductingEquipmentType, MeasurementType } from '@shared/topology/model-dictionary';
 
 export interface SimulationOutputMeasurement {
   magnitude: number;
@@ -10,6 +10,6 @@ export interface SimulationOutputMeasurement {
   conductingEquipmentType: ConductingEquipmentType;
   connectivityNode: string;
   name: string;
-  type: ModelDictionaryMeasurementType;
+  type: MeasurementType;
   conductingEquipmentMRID: string;
 }
