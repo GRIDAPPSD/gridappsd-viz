@@ -18,7 +18,8 @@ import {
   MeasurementType,
   SolarPanel,
   NodeType,
-  Substation
+  Substation,
+  Battery
 } from '@shared/topology';
 import { Tooltip } from '@shared/tooltip';
 import { SwitchControlMenu } from './views/switch-control-menu/SwitchControlMenu';
@@ -56,14 +57,14 @@ export class TopologyRenderer extends React.Component<Props, State> {
   readonly canvasTransformService = CanvasTransformService.getInstance();
   readonly svgRef = React.createRef<SVGSVGElement>();
 
-
   private readonly _scalingFactorPerSymbolTable = {
     [NodeType.CAPACITOR]: 1,
     [NodeType.REGULATOR]: 1,
     [NodeType.TRANSFORMER]: 1,
     [NodeType.SWITCH]: 1,
     [NodeType.SUBSTATION]: 1,
-    [NodeType.SOLAR_PANEL]: 1
+    [NodeType.SOLAR_PANEL]: 1,
+    [NodeType.BATTERY]: 1
   };
   private readonly _symbolDimensions = {
     [NodeType.CAPACITOR]: { width: 52, height: 20 },
@@ -71,7 +72,8 @@ export class TopologyRenderer extends React.Component<Props, State> {
     [NodeType.TRANSFORMER]: { width: 30, height: 25 },
     [NodeType.SWITCH]: { width: 10, height: 10 },
     [NodeType.SUBSTATION]: { width: 15, height: 15 },
-    [NodeType.SOLAR_PANEL]: { width: 20, height: 10 }
+    [NodeType.SOLAR_PANEL]: { width: 20, height: 10 },
+    [NodeType.BATTERY]: { width: 35, height: 25 }
   };
   private readonly _xScale: ScaleLinear<number, number> = scaleLinear();
   private readonly _yScale: ScaleLinear<number, number> = scaleLinear();
@@ -384,10 +386,9 @@ export class TopologyRenderer extends React.Component<Props, State> {
       categories.transformers,
       nodeRadius
     );
-    this._renderNonSwitchNodes(
+    this._renderSwitchNodes(
       knownNodeContainers,
-      'solar-panel-node-container',
-      categories.solarPanels,
+      categories.switches,
       nodeRadius
     );
     this._renderNonSwitchNodes(
@@ -396,9 +397,16 @@ export class TopologyRenderer extends React.Component<Props, State> {
       categories.capacitors,
       nodeRadius
     );
-    this._renderSwitchNodes(
+    this._renderNonSwitchNodes(
       knownNodeContainers,
-      categories.switches,
+      'battery-node-container',
+      categories.batteries,
+      nodeRadius
+    );
+    this._renderNonSwitchNodes(
+      knownNodeContainers,
+      'solar-panel-node-container',
+      categories.solarPanels,
       nodeRadius
     );
 
@@ -415,14 +423,23 @@ export class TopologyRenderer extends React.Component<Props, State> {
       categories.substations,
       nodeNameToEdgeMap
     );
+    this._renderTransformerSymbols(
+      symbolContainers,
+      categories.transformers,
+      nodeNameToEdgeMap
+    );
+    this._renderSwitchSymbols(
+      symbolContainers,
+      categories.switches
+    );
     this._renderCapacitorSymbols(
       symbolContainers,
       categories.capacitors,
       nodeNameToEdgeMap
     );
-    this._renderTransformerSymbols(
+    this._renderBatterySymbols(
       symbolContainers,
-      categories.transformers,
+      categories.batteries,
       nodeNameToEdgeMap
     );
     this._renderSolarPanelSymbols(
@@ -430,7 +447,6 @@ export class TopologyRenderer extends React.Component<Props, State> {
       categories.solarPanels,
       nodeNameToEdgeMap
     );
-    this._renderSwitchSymbols(symbolContainers, categories.switches);
 
     this._containerSelection.node()
       .appendChild(knownNodeContainers.node());
@@ -449,12 +465,14 @@ export class TopologyRenderer extends React.Component<Props, State> {
       this._scalingFactorPerSymbolTable[NodeType.REGULATOR] = 7;
       this._scalingFactorPerSymbolTable[NodeType.SUBSTATION] = 7;
       this._scalingFactorPerSymbolTable[NodeType.SOLAR_PANEL] = 7;
+      this._scalingFactorPerSymbolTable[NodeType.BATTERY] = 7;
     } else {
       this._scalingFactorPerSymbolTable[NodeType.CAPACITOR] = 3.5;
       this._scalingFactorPerSymbolTable[NodeType.TRANSFORMER] = 3.5;
       this._scalingFactorPerSymbolTable[NodeType.REGULATOR] = 3.5;
       this._scalingFactorPerSymbolTable[NodeType.SUBSTATION] = 3.5;
       this._scalingFactorPerSymbolTable[NodeType.SOLAR_PANEL] = 3.5;
+      this._scalingFactorPerSymbolTable[NodeType.BATTERY] = 3.5;
     }
 
     for (const [type, scalingFactor] of Object.entries(this._scalingFactorPerSymbolTable)) {
@@ -485,6 +503,7 @@ export class TopologyRenderer extends React.Component<Props, State> {
       regulators: [] as Regulator[],
       substations: [] as Node[],
       solarPanels: [] as SolarPanel[],
+      batteries: [] as Battery[],
       unknownNodes: [] as Node[],
       otherNodes: [] as Node[],
     };
@@ -515,6 +534,9 @@ export class TopologyRenderer extends React.Component<Props, State> {
           break;
         case NodeType.SOLAR_PANEL:
           categories.solarPanels.push(node as SolarPanel);
+          break;
+        case NodeType.BATTERY:
+          categories.batteries.push(node as Battery);
           break;
         case NodeType.UNKNOWN:
           categories.unknownNodes.push(node);
@@ -674,6 +696,7 @@ export class TopologyRenderer extends React.Component<Props, State> {
       case NodeType.REGULATOR:
       case NodeType.CAPACITOR:
       case NodeType.SUBSTATION:
+      case NodeType.BATTERY:
         return `translate(-${width / 2}px, 0px) rotate(${angle}deg)`;
       default:
         return `translate(-${width / 2}px, -${height / 2}px) rotate(${angle}deg)`;
@@ -701,33 +724,6 @@ export class TopologyRenderer extends React.Component<Props, State> {
       `M\${startingPoint}
        a${_50PercentHeight} ${_50PercentHeight} 0 1 1 ${width} 0
        a${_50PercentHeight} ${_50PercentHeight} 0 1 1 -${width} 0`
-    );
-  }
-
-  private _renderCapacitorSymbols(
-    container: Selection<SVGElement, any, SVGElement, any>,
-    capacitors: Capacitor[],
-    nodeNameToEdgeMap: Map<string, Edge>
-  ) {
-    const { width, height } = this._symbolDimensions[NodeType.CAPACITOR];
-    const _45PercentWidth = width * 0.45;
-    const _10PercentWidth = width * 0.10;
-    const _50PercentHeight = height * 0.5;
-
-    this._renderNonSwitchSymbols(
-      container,
-      capacitors,
-      nodeNameToEdgeMap,
-      `
-        M\${startingPoint}
-        h${_45PercentWidth}
-        m0,${-_50PercentHeight}
-        v${height}
-        m${_10PercentWidth},0
-        v${-height}
-        m0,${_50PercentHeight}
-        h${_45PercentWidth}
-      `
     );
   }
 
@@ -769,28 +765,6 @@ export class TopologyRenderer extends React.Component<Props, State> {
     );
   }
 
-  private _renderSolarPanelSymbols(
-    container: Selection<SVGElement, any, SVGElement, any>,
-    solarPanels: SolarPanel[],
-    nodeNameToEdgeMap: Map<string, Edge>
-  ) {
-    const { width, height } = this._symbolDimensions[NodeType.SOLAR_PANEL];
-    const _33PercentWidth = width * 0.33;
-
-    this._renderNonSwitchSymbols(
-      container,
-      solarPanels,
-      nodeNameToEdgeMap,
-      `
-        M\${startingPoint}
-        h${width}
-        l${-_33PercentWidth},${height}
-        h${-width}
-        Z
-      `
-    );
-  }
-
   private _renderSwitchSymbols(
     container: Selection<SVGElement, any, SVGElement, any>,
     switchNodes: Switch[]
@@ -820,7 +794,6 @@ export class TopologyRenderer extends React.Component<Props, State> {
       lineSegment.setAttribute('y1', String(datum.screenY1));
       lineSegment.setAttribute('x2', String(datum.screenX2));
       lineSegment.setAttribute('y2', String(datum.screenY2));
-      lineSegment.setAttribute('stroke-width', '0.2');
 
       const box = symbol.append('rect').datum(datum).node();
       box.setAttribute('class', `topology-renderer__canvas__symbol switch _${datum.name}_ ${datum.open ? 'open' : 'closed'}`);
@@ -834,6 +807,95 @@ export class TopologyRenderer extends React.Component<Props, State> {
 
     const group = container.append('g').attr('class', 'switch-symbol-container');
     group.node().appendChild(fragment);
+  }
+
+  private _renderCapacitorSymbols(
+    container: Selection<SVGElement, any, SVGElement, any>,
+    capacitors: Capacitor[],
+    nodeNameToEdgeMap: Map<string, Edge>
+  ) {
+    const { width, height } = this._symbolDimensions[NodeType.CAPACITOR];
+    const _45PercentWidth = width * 0.45;
+    const _10PercentWidth = width * 0.10;
+    const _50PercentHeight = height * 0.5;
+
+    this._renderNonSwitchSymbols(
+      container,
+      capacitors,
+      nodeNameToEdgeMap,
+      `
+        M\${startingPoint}
+        h${_45PercentWidth}
+        m0,${-_50PercentHeight}
+        v${height}
+        m${_10PercentWidth},0
+        v${-height}
+        m0,${_50PercentHeight}
+        h${_45PercentWidth}
+      `
+    );
+  }
+
+  private _renderBatterySymbols(
+    container: Selection<SVGElement, any, SVGElement, any>,
+    batteries: Battery[],
+    nodeNameToEdgeMap: Map<string, Edge>
+  ) {
+    const { width, height } = this._symbolDimensions[NodeType.BATTERY];
+    const _10PercentWidth = width * 0.10;
+    const _20PercentWidth = width * 0.20;
+    const _40PercentWidth = width * 0.40;
+    const _60PercentWidth = width * 0.60;
+    const _80PercentWidth = width * 0.80;
+    const _25PercentHeight = height * 0.25;
+    const _30PercentHeight = height * 0.30;
+    const _50PercentHeight = height * 0.5;
+
+    this._renderNonSwitchSymbols(
+      container,
+      batteries,
+      nodeNameToEdgeMap,
+      `
+        M\${startingPoint}
+        h${_40PercentWidth}
+        m0,${-_50PercentHeight}
+        v${height}
+        m${_20PercentWidth},${-_25PercentHeight}
+        v${-_50PercentHeight}
+        m0,${_25PercentHeight}
+        h${_40PercentWidth}
+        m${-_80PercentWidth},${-_30PercentHeight}
+        h${-_10PercentWidth}
+        h${_20PercentWidth}
+        m${-_10PercentWidth},${-_10PercentWidth}
+        v${_20PercentWidth}
+        m${_60PercentWidth},${-_10PercentWidth}
+        h${-_10PercentWidth}
+        h${_20PercentWidth}
+      `
+    );
+  }
+
+  private _renderSolarPanelSymbols(
+    container: Selection<SVGElement, any, SVGElement, any>,
+    solarPanels: SolarPanel[],
+    nodeNameToEdgeMap: Map<string, Edge>
+  ) {
+    const { width, height } = this._symbolDimensions[NodeType.SOLAR_PANEL];
+    const _33PercentWidth = width * 0.33;
+
+    this._renderNonSwitchSymbols(
+      container,
+      solarPanels,
+      nodeNameToEdgeMap,
+      `
+        M\${startingPoint}
+        h${width}
+        l${-_33PercentWidth},${height}
+        h${-width}
+        Z
+      `
+    );
   }
 
   render() {

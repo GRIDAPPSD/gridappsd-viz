@@ -27,7 +27,8 @@
         }
 
         .topology-renderer__canvas__symbol.capacitor,
-        .topology-renderer__canvas__symbol.transformer {
+        .topology-renderer__canvas__symbol.transformer,
+        .topology-renderer__canvas__symbol.battery {
             stroke-width: 0.6px;
 
             &.no-power {
@@ -52,7 +53,8 @@
         }
 
         .topology-renderer__canvas__symbol.capacitor,
-        .topology-renderer__canvas__symbol.transformer {
+        .topology-renderer__canvas__symbol.transformer,
+        .topology-renderer__canvas__symbol.battery {
             stroke-width: 0.3px;
 
             &.no-power {
@@ -100,7 +102,6 @@
 .topology-renderer__canvas__edge {
     stroke-width: 0.2px;
     fill: none;
-    stroke-linecap: round;
 }
 
 .topology-renderer__canvas__symbol__image {
@@ -125,6 +126,7 @@ foreignObject.topology-renderer__canvas__symbol {
 .topology-renderer__canvas__symbol.capacitor,
 .topology-renderer__canvas__symbol.transformer,
 .topology-renderer__canvas__symbol.regulator,
-.topology-renderer__canvas__symbol.substation {
+.topology-renderer__canvas__symbol.substation,
+.topology-renderer__canvas__symbol.battery {
     fill: transparent;
 }
