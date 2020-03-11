@@ -35,10 +35,6 @@ export class SimulationChannel {
     this._host.notifySelf(SimulationSynchronizationEvent.INIT_SIMULATION_SNAPSHOT);
   }
 
-  removeMember(member: SimulationParticipant) {
-    this._members.delete(member);
-  }
-
   activate() {
     if (this._simulationStatus === SimulationStatus.STOPPED) {
       this._simulationSnapshotWatchSubscription = this._beginSendingSimulationSnapshotsToAllMembers();

@@ -1,7 +1,6 @@
 import * as React from 'react';
 import { Subscription } from 'rxjs';
 import { map, takeWhile } from 'rxjs/operators';
-import { extent } from 'd3-array';
 
 import { TopologyRenderer } from './TopologyRenderer';
 import {
@@ -18,7 +17,8 @@ import {
   Switch,
   TopologyModel,
   Capacitor,
-  CapacitorControlMode
+  CapacitorControlMode,
+  NodeType
 } from '@shared/topology';
 import { OpenOrCloseCapacitorRequest } from './models/OpenOrCloseCapacitorRequest';
 import { ToggleSwitchStateRequest } from './models/ToggleSwitchStateRequest';
@@ -173,7 +173,7 @@ export class TopologyRendererContainer extends React.Component<Props, State> {
           case 'swing_nodes':
             node = this._createNewNode({
               ...datum,
-              type: 'swing_node',
+              type: NodeType.SWING_NODE,
               mRIDs: resolvedMRIDs
             });
             break;
@@ -181,14 +181,14 @@ export class TopologyRendererContainer extends React.Component<Props, State> {
           case 'batteries':
             node = this._createNewNode({
               ...datum,
-              type: 'battery',
+              type: NodeType.BATTERY,
               mRIDs: resolvedMRIDs
             });
             break;
 
           case 'switches':
             node = this._createNewNode({
-              type: 'switch',
+              type: NodeType.SWITCH,
               screenX2: 0,
               screenY2: 0,
               ...datum,
@@ -200,7 +200,7 @@ export class TopologyRendererContainer extends React.Component<Props, State> {
           case 'solarpanels':
             node = this._createNewNode({
               ...datum,
-              type: 'solarpanel',
+              type: NodeType.SOLAR_PANEL,
               mRIDs: resolvedMRIDs
             });
             break;
@@ -208,7 +208,7 @@ export class TopologyRendererContainer extends React.Component<Props, State> {
           case 'transformers':
             node = this._createNewNode({
               ...datum,
-              type: 'transformer',
+              type: NodeType.TRANSFORMER,
               x1: datum.x1 !== 0 ? datum.x1 : datum.x2,
               y1: datum.y1 !== 0 ? datum.y1 : datum.y2,
               mRIDs: resolvedMRIDs
@@ -218,7 +218,7 @@ export class TopologyRendererContainer extends React.Component<Props, State> {
           case 'capacitors':
             node = this._createNewNode({
               ...datum,
-              type: 'capacitor',
+              type: NodeType.CAPACITOR,
               open: datum.open === 'open',
               manual: datum.manual === 'manual',
               controlMode: CapacitorControlMode.UNSPECIFIED,
@@ -231,7 +231,7 @@ export class TopologyRendererContainer extends React.Component<Props, State> {
           case 'regulators':
             node = this._createNewNode({
               ...datum,
-              type: 'regulator',
+              type: NodeType.REGULATOR,
               x1: datum.x2,
               y1: datum.y2,
               manual: datum.manual === 'manual',
@@ -246,7 +246,7 @@ export class TopologyRendererContainer extends React.Component<Props, State> {
       }
     }
 
-    for (const overheadLine of feeder.overhead_lines.filter(e => !e.name.startsWith('tpx'))) {
+    for (const overheadLine of feeder.overhead_lines) {
       const fromNode = nodeMap.get(overheadLine.from) || this._createNewNode({ name: overheadLine.from });
       const toNode = nodeMap.get(overheadLine.to) || this._createNewNode({ name: overheadLine.to });
       if (!nodeMap.has(fromNode.name)) {
@@ -279,7 +279,7 @@ export class TopologyRendererContainer extends React.Component<Props, State> {
       screenX1: 0,
       screenY1: 0,
       name: '',
-      type: 'unknown',
+      type: NodeType.UNKNOWN,
       ...properties
     } as Node;
   }

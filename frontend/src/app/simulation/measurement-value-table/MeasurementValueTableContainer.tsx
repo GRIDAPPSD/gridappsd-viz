@@ -5,7 +5,7 @@ import { takeUntil, filter } from 'rxjs/operators';
 import { SimulationQueue, SimulationControlService, SimulationOutputMeasurement } from '@shared/simulation';
 import { SimulationStatus } from '@commons/SimulationStatus';
 import { MeasurementValueTable } from './MeasurementValueTable';
-import { ModelDictionaryMeasurementType } from '@shared/topology';
+import { MeasurementType } from '@shared/topology';
 
 interface Props {
 }
@@ -118,7 +118,7 @@ export class MeasurementValueTableContainer extends React.Component<Props, State
             // Getting values for taps
             simulationOutputMeasurements.forEach(measurement => {
               if (
-                measurement.type === ModelDictionaryMeasurementType.TAP &&
+                measurement.type === MeasurementType.TAP &&
                 measurement.conductingEquipmentName.includes(nodeName) &&
                 phases.includes(measurement.phases) &&
                 // Discard measurements with duplicate phases
@@ -132,7 +132,7 @@ export class MeasurementValueTableContainer extends React.Component<Props, State
               simulationOutputMeasurements.forEach(measurement => {
                 // Getting measurements for voltages
                 if (
-                  measurement.type === ModelDictionaryMeasurementType.VOLTAGE &&
+                  measurement.type === MeasurementType.VOLTAGE &&
                   measurements.taps[0]?.connectivityNode === measurement.connectivityNode &&
                   phases.includes(measurement.phases) &&
                   // Discard measurements with duplicate phases
@@ -143,7 +143,7 @@ export class MeasurementValueTableContainer extends React.Component<Props, State
 
                 // Getting measurements for powers
                 if (
-                  measurement.type === ModelDictionaryMeasurementType.POWER &&
+                  measurement.type === MeasurementType.POWER &&
                   measurement.conductingEquipmentName === 'hvmv_sub' &&
                   phases.includes(measurement.phases) &&
                   // Discard measurements with duplicate phases
