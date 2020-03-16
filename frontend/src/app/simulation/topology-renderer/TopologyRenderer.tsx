@@ -87,7 +87,8 @@ export class TopologyRenderer extends React.Component<Props, State> {
   private _showNodeSymbols = false;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private _timer: any;
-
+  private _switches: Switch[];
+  private _showPowerFlowDirection = false;
 
   constructor(props: Props) {
     super(props);
@@ -101,6 +102,7 @@ export class TopologyRenderer extends React.Component<Props, State> {
     this.showMenuOnComponentClicked = this.showMenuOnComponentClicked.bind(this);
     this.showTooltip = this.showTooltip.bind(this);
     this.showNodeSearcher = this.showNodeSearcher.bind(this);
+    this.togglePowerFlowDirectionIndicator = this.togglePowerFlowDirectionIndicator.bind(this);
     this.onNodeSearcherClosed = this.onNodeSearcherClosed.bind(this);
     this.locateNode = this.locateNode.bind(this);
 
@@ -121,6 +123,7 @@ export class TopologyRenderer extends React.Component<Props, State> {
       for (const measurement of nextProps.simulationOutputMeasurements) {
         this._toggleSwitchesBasedOnSimulationOutputMeasurement(measurement);
         this._toggleACLineSegmentsWithNoPower(measurement);
+        this._addPowerFlowDirectionIndicator(measurement);
       }
       return false;
     }
@@ -187,6 +190,33 @@ export class TopologyRenderer extends React.Component<Props, State> {
       }
     });
     return foundNode;
+  }
+
+  private _addPowerFlowDirectionIndicator(measurement: SimulationOutputMeasurement) {
+    if (-90 <= measurement.angle && measurement.angle <= 90) {
+      this._showPowerFlowDirectionIndicator(measurement.conductingEquipmentName, 'normal');
+    } else if (Math.abs(180 + measurement.angle) <= 1) { // Is angle ~ -180?
+      this._showPowerFlowDirectionIndicator(measurement.conductingEquipmentName, 'reverse');
+    }
+  }
+
+  private _showPowerFlowDirectionIndicator(conductingEquipmentName: string, direction: 'normal' | 'reverse') {
+    if (!this._htmlElements.has(conductingEquipmentName)) {
+      this._htmlElements.set(conductingEquipmentName, this.svgRef.current.querySelectorAll(`._${conductingEquipmentName}_`));
+    }
+    if (direction === 'normal') {
+      selectAll(this._htmlElements.get(conductingEquipmentName))
+        .classed('normal-power-flow-direction', true)
+        .classed('reverse-power-flow-direction', false)
+        // The ternary makes it more obvious than just !this._showPowerFlowDirection
+        .classed('no-power-flow-direction-indicator', this._showPowerFlowDirection ? false : true);
+    } else {
+      selectAll(this._htmlElements.get(conductingEquipmentName))
+        .classed('reverse-power-flow-direction', true)
+        .classed('normal-power-flow-direction', false)
+        // The ternary makes it more obvious than just !this._showPowerFlowDirection
+        .classed('no-power-flow-direction-indicator', this._showPowerFlowDirection ? false : true);
+    }
   }
 
   componentDidMount() {
@@ -644,12 +674,12 @@ export class TopologyRenderer extends React.Component<Props, State> {
       const fragment = document.createDocumentFragment();
       for (const datum of nodes) {
         const symbol = create('svg:g');
-        symbol.attr('class', `topology-renderer__canvas__symbol ${nodeType}`)
+        symbol.attr('class', `topology-renderer__canvas__symbol-container ${nodeType}`)
           .style('transform-origin', this._calculateSymbolTransformOrigin(datum))
           .style('transform', this._calculateSymbolTransform(datum, nodeNameToEdgeMap))
           .append('path')
           .datum(datum)
-          .attr('class', `topology-renderer__canvas__symbol ${nodeType} _${datum.name}_`)
+          .attr('class', `topology-renderer__canvas__symbol ${nodeType} _${datum.name}_  normal-power-flow-direction`)
           .attr('d', shapeTemplate.replace('${startingPoint}', `${datum.screenX1},${datum.screenY1}`));
         fragment.appendChild(symbol.node());
       }
@@ -775,20 +805,15 @@ export class TopologyRenderer extends React.Component<Props, State> {
       }
       const symbol = create('svg:g').attr('class', 'topology-renderer__canvas__switch-symbol');
 
-      const lineSegment = symbol.append('line').node();
+      const lineSegment = symbol.append('path').node();
       lineSegment.setAttribute('class', 'topology-renderer__canvas__edge');
-      lineSegment.setAttribute('x1', String(datum.screenX1));
-      lineSegment.setAttribute('y1', String(datum.screenY1));
-      lineSegment.setAttribute('x2', String(datum.screenX2));
-      lineSegment.setAttribute('y2', String(datum.screenY2));
+      lineSegment.setAttribute('d', `M${datum.screenX1},${datum.screenY1} L${datum.screenX2},${datum.screenY2}`);
 
-      const box = symbol.append('rect').datum(datum).node();
-      box.setAttribute('class', `topology-renderer__canvas__symbol switch _${datum.name}_ ${datum.open ? 'open' : 'closed'}`);
-      box.setAttribute('x', String(datum.midpointX - halfWidth));
-      box.setAttribute('y', String(datum.midpointY - halfHeight));
-      box.setAttribute('width', String(width));
-      box.setAttribute('height', String(height));
+      const box = symbol.append('path').datum(datum).node();
+      box.setAttribute('class', `topology-renderer__canvas__symbol switch _${datum.name}_ ${datum.open ? 'open' : 'closed'} normal-power-flow-direction`);
+      box.setAttribute('d', `M${datum.midpointX - halfWidth},${datum.midpointY - halfHeight} h${width} v${height} h${-width} Z`);
       box.setAttribute('transform', transformValue);
+
       fragment.appendChild(symbol.node());
     }
 
@@ -896,13 +921,13 @@ export class TopologyRenderer extends React.Component<Props, State> {
           width='10000'
           height='10000'
           preserveAspectRatio='xMidYMid'
-          className={`topology-renderer__canvas ${this.props.topology.name}`}
+          className='topology-renderer__canvas'
           onClick={this.showMenuOnComponentClicked}
           onMouseOver={this.showTooltip}
           onMouseOut={hideTooltip}>
           <defs>
             <marker
-              id='arrow'
+              id='regulator-shape__arrow'
               orient='auto'
               markerWidth='4'
               markerHeight='4'
@@ -914,7 +939,7 @@ export class TopologyRenderer extends React.Component<Props, State> {
                 refX='-0.5' />
             </marker>
             <marker
-              id='red-arrow'
+              id='regulator-shape__red-arrow'
               orient='auto'
               markerWidth='4'
               markerHeight='4'
@@ -925,6 +950,7 @@ export class TopologyRenderer extends React.Component<Props, State> {
                 d='M1,1 L3,2 L1,3 Z'
                 refX='-0.5' />
             </marker>
+            {this.renderPowerFlowDirectionIndicatorMarkups()}
           </defs>
           <g className='topology-renderer__canvas__container' />
         </svg>
@@ -943,6 +969,13 @@ export class TopologyRenderer extends React.Component<Props, State> {
                 size='small'
                 style='accent'
                 onClick={this.showNodeSearcher} />
+            </Tooltip>
+            <Tooltip content='Toggle power flow direction indicator'>
+              <IconButton
+                icon='trending_flat'
+                size='small'
+                style='accent'
+                onClick={this.togglePowerFlowDirectionIndicator} />
             </Tooltip>
           </div>
         </div>
@@ -1046,10 +1079,172 @@ export class TopologyRenderer extends React.Component<Props, State> {
     return value ? value[0].toUpperCase() + value.substr(1) : '';
   }
 
+  renderPowerFlowDirectionIndicatorMarkups() {
+    if (this.isModelLarge()) {
+      return (
+        <>
+          {/* For edges */}
+          <marker
+            id='normal-power-flow-indicator--edge'
+            orient='auto'
+            markerWidth='20'
+            markerHeight='20'
+            refX='20'
+            refY='10'>
+            <path
+              className='topology-renderer__canvas__arrow'
+              d='M1,1 L19,10 L1,19 Z' />
+          </marker>
+          <marker
+            id='reverse-power-flow-indicator--edge'
+            orient='auto'
+            markerWidth='20'
+            markerHeight='20'
+            refX='0'
+            refY='10'>
+            <path
+              className='topology-renderer__canvas__arrow'
+              d='M1,10 L19,1 L19,19 Z' />
+          </marker>
+
+          {/* For capacitors */}
+          <marker
+            id='normal-power-flow-indicator--capacitor'
+            orient='auto'
+            markerWidth='7'
+            markerHeight='7'
+            refX='10'
+            refY='3.5'>
+            <path
+              className='topology-renderer__canvas__arrow'
+              d='M1,1 L6,3.5 L1,6 Z' />
+          </marker>
+          <marker
+            id='reverse-power-flow-indicator--capacitor'
+            orient='auto'
+            markerWidth='7'
+            markerHeight='7'
+            refX='-15'
+            refY='3.5'>
+            <path
+              className='topology-renderer__canvas__arrow'
+              d='M1,3.5 L6,1 L6,6 Z' />
+          </marker>
+
+          {/* For switches */}
+          <marker
+            id='normal-power-flow-indicator--switch'
+            orient='auto'
+            markerWidth='20'
+            markerHeight='20'
+            refX='10.1'
+            refY='7.99'>
+            <path
+              className='topology-renderer__canvas__arrow'
+              d='M7.5,10 h5 m-1.5,-2 l1.5,2.25 m-1.5,1.75 l1.5,-2.25' />
+          </marker>
+          <marker
+            id='reverse-power-flow-indicator--switch'
+            orient='auto'
+            markerWidth='20'
+            markerHeight='20'
+            refX='9.9'
+            refY='7.78'>
+            <path
+              className='topology-renderer__canvas__arrow'
+              d='M12.5,10 h-5 m1.5,-2 l-1.5,2 l1.5,2' />
+          </marker>
+        </>
+      );
+    }
+    return (
+      <>
+        {/* For edges */}
+        <marker
+          id='normal-power-flow-indicator--edge'
+          orient='auto'
+          markerWidth='20'
+          markerHeight='20'
+          refX='35'
+          refY='10'>
+          <path
+            className='topology-renderer__canvas__arrow'
+            d='M1,1 L19,10 L1,19 Z' />
+        </marker>
+        <marker
+          id='reverse-power-flow-indicator--edge'
+          orient='auto'
+          markerWidth='20'
+          markerHeight='20'
+          refX='-15'
+          refY='10'>
+          <path
+            className='topology-renderer__canvas__arrow'
+            d='M1,10 L19,1 L19,19 Z' />
+        </marker>
+
+        {/* For capacitors */}
+        <marker
+          id='normal-power-flow-indicator--capacitor'
+          orient='auto'
+          markerWidth='7'
+          markerHeight='7'
+          refX='10'
+          refY='3.5'>
+          <path
+            className='topology-renderer__canvas__arrow'
+            d='M1,1 L6,3.5 L1,6 Z' />
+        </marker>
+        <marker
+          id='reverse-power-flow-indicator--capacitor'
+          orient='auto'
+          markerWidth='7'
+          markerHeight='7'
+          refX='-15'
+          refY='3.5'>
+          <path
+            className='topology-renderer__canvas__arrow'
+            d='M1,3.5 L6,1 L6,6 Z' />
+        </marker>
+
+        {/* For switches */}
+        <marker
+          id='normal-power-flow-indicator--switch'
+          orient='auto'
+          markerWidth='20'
+          markerHeight='20'
+          refX='8.1'
+          refY='1'>
+          <path
+            className='topology-renderer__canvas__arrow'
+            d='M7.5,10 h5 m-1.5,-2 l1.5,2.25 m-1.5,1.75 l1.5,-2.25' />
+        </marker>
+        <marker
+          id='reverse-power-flow-indicator--switch'
+          orient='auto'
+          markerWidth='30'
+          markerHeight='30'
+          refX='9.9'
+          refY='7.78'>
+          <path
+            className='topology-renderer__canvas__arrow'
+            d='M12.5,10 h-5 m1.5,-2 l-1.5,2 l1.5,2' />
+        </marker>
+      </>
+    );
+  }
+
   showNodeSearcher() {
     this.setState({
       showNodeSearcher: true
     });
+  }
+
+  togglePowerFlowDirectionIndicator() {
+    this._showPowerFlowDirection = !this._showPowerFlowDirection;
+    this._containerSelection.selectAll('.normal-power-flow-direction,.reverse-power-flow-direction')
+      // The ternary makes it more obvious than just !this._showPowerFlowDirection
+      .classed('no-power-flow-direction-indicator', this._showPowerFlowDirection ? false : true);
   }
 
   onNodeSearcherClosed() {
