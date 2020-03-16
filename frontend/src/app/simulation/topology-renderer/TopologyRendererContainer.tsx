@@ -18,7 +18,8 @@ import {
   TopologyModel,
   Capacitor,
   CapacitorControlMode,
-  NodeType
+  NodeType,
+  Edge
 } from '@shared/topology';
 import { OpenOrCloseCapacitorRequest } from './models/OpenOrCloseCapacitorRequest';
 import { ToggleSwitchStateRequest } from './models/ToggleSwitchStateRequest';
@@ -272,6 +273,7 @@ export class TopologyRendererContainer extends React.Component<Props, State> {
     }
 
     this._resolveCoordinates(renderableTopology.nodeMap);
+    this._removeDegenerateEdges(renderableTopology.edgeMap);
 
     return renderableTopology;
   }
@@ -329,6 +331,14 @@ export class TopologyRendererContainer extends React.Component<Props, State> {
       x: Math.floor(136.0 * (longitude + 77.0292) / (-77.0075 + 77.0292)) / 10,
       y: Math.floor(117.0 * (lat - 38.8762) / (38.8901 - 38.8762)) / 10
     };
+  }
+
+  private _removeDegenerateEdges(edgeMap: Map<string, Edge>) {
+    edgeMap.forEach((edge, edgeId) => {
+      if (edge.from.x1 === edge.to.x1 && edge.from.y1 === edge.to.y1) {
+        edgeMap.delete(edgeId);
+      }
+    });
   }
 
   private _subscribeToSimulationOutputMeasurementMapStream() {
