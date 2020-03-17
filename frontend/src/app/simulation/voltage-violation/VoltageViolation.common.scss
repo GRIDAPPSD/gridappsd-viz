@@ -1,45 +1,35 @@
-.voltage-violations {
+.voltage-violation {
     position: absolute;
     right: 5px;
     top: 110px;
     z-index: 0;
-}
-
-.voltage-violation {
-    position: relative;
     display: flex;
     font-size: 0.8em;
-    flex-flow: row nowrap;
-    align-items: center;
-    justify-content: flex-end;
-    margin: 5px 0;
-    overflow: hidden;
-    border-radius: 1000px;
-}
-
-.voltage-violation__label {
-    position: relative;
-    left: 5px;
-    padding: 5px 10px;
-    padding-right: 15px;
-    border-top-left-radius: 3px;
-    border-bottom-left-radius: 3px;
-    overflow: hidden;
-    transition: transform 0.25s ease;
-    white-space: nowrap;
-    pointer-events: none;
-    transform: translateX(0);
-}
-
-.voltage-violation__counts {
+    flex-flow: column nowrap;
+    background-color: #555;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3), 0 -0.5px 1px rgba(0, 0, 0, 0.2);
+    min-width: 30px;
+    min-height: 30px;
     border-radius: 100%;
-    text-align: right;
-    width: 45px;
-    height: 45px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: 0px -0.5px 2px #555;
-    -moz-user-select: none;
-    -webkit-user-select: none;
+    border: 1px solid #8e8e8e;
+
+    &.open {
+        padding: 5px;
+        padding-top: 30px;
+        border-radius: 5px;
+
+        table {
+            display: table;
+        }
+    }
+
+    .icon-button {
+        position: absolute;
+        top: 0;
+        right: 0;
+    }
+
+    table {
+        display: none;
+    }
 }
