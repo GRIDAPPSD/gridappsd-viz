@@ -1,17 +1,18 @@
 import * as React from 'react';
 
-import { Ripple } from '@shared/ripple';
+import { IconButton } from '@shared/buttons';
 
 import './VoltageViolation.light.scss';
 import './VoltageViolation.dark.scss';
 
 interface Props {
-  violationCounts: number;
-  label: string;
+  totalVoltageViolations: number;
+  numberOfViolationsAtZero: number;
+  timestamp: string;
 }
 
 interface State {
-  showLabel: boolean;
+  tableVisible: boolean;
 }
 
 export class VoltageViolation extends React.Component<Props, State> {
@@ -20,38 +21,55 @@ export class VoltageViolation extends React.Component<Props, State> {
     super(props);
 
     this.state = {
-      showLabel: true
+      tableVisible: true
     };
 
-    this.toggleLabel = this.toggleLabel.bind(this);
+    this.toggleTable = this.toggleTable.bind(this);
   }
 
   render() {
     return (
-      <section className='voltage-violation'>
-        <div
-          className='voltage-violation__label'
-          style={{
-            transform: this.state.showLabel ? 'translateX(0)' : 'translateX(100%)'
-          }}>
-          {this.props.label}
-        </div>
-        <Ripple
-          fixed
-          duration={1500}>
-          <div
-            className='voltage-violation__counts'
-            onClick={this.toggleLabel}>
-            {this.props.violationCounts}
-          </div>
-        </Ripple>
+      <section className={`voltage-violation${this.state.tableVisible ? ' open' : ''}`}>
+        <IconButton
+          icon={this.state.tableVisible ? 'remove' : 'add'}
+          size='small'
+          hasBackground={false}
+          onClick={this.toggleTable} />
+        <table>
+          <tbody>
+            <tr>
+              <td>
+                <div>Timestamp</div>
+              </td>
+              <td>
+                <div>{this.props.timestamp}</div>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <div>Total voltage violations</div>
+              </td>
+              <td>
+                <div>{this.props.totalVoltageViolations}</div>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <div>Violations at 0</div>
+              </td>
+              <td>
+                <div>{this.props.numberOfViolationsAtZero}</div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
       </section>
     );
   }
 
-  toggleLabel() {
+  toggleTable() {
     this.setState({
-      showLabel: !this.state.showLabel
+      tableVisible: !this.state.tableVisible
     });
   }
 
