@@ -93,5 +93,6 @@ export class IconButton extends React.Component<Props, {}> {
   size: 'normal',
   rounded: true,
   style: 'primary',
-  hasBackground: true
+  hasBackground: true,
+  rippleDuration: 1250
 };

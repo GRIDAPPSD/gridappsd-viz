@@ -5,7 +5,6 @@
     overflow: hidden;
 
     &.small {
-
         #normal-power-flow-indicator--switch .topology-renderer__canvas__arrow {
             transform-origin: 10px 10px;
             transform: rotate(45deg) scale(1.5) translate(-2px, -0.02px);
@@ -16,8 +15,15 @@
             transform: rotate(45deg) scale(1.5) translate(2.5px, 2.33px);
         }
 
+        #normal-power-flow-indicator--edge,
+        #reverse-power-flow-indicator--edge {
+            .topology-renderer__canvas__arrow {
+                transform: scale(0.4, 0.4);
+            }
+        }
+
         .topology-renderer__canvas__edge.no-power {
-            stroke-width: 2px;
+            stroke-width: 2px !important;
         }
 
         .topology-renderer__canvas__symbol.substation {
@@ -52,10 +58,8 @@
 
         #normal-power-flow-indicator--edge,
         #reverse-power-flow-indicator--edge {
-
             .topology-renderer__canvas__arrow {
-                transform-origin: 10px 10px;
-                transform: scale(0.3, 0.3);
+                transform: scale(0.1, 0.1);
             }
         }
 
@@ -78,7 +82,7 @@
         }
 
         .topology-renderer__canvas__edge.no-power {
-            stroke-width: 1px;
+            stroke-width: 1px !important;
         }
 
         .topology-renderer__canvas__symbol.substation,
@@ -100,9 +104,14 @@
             }
 
         }
-
     }
+}
 
+#normal-power-flow-indicator--transformer,
+#reverse-power-flow-indicator--transformer {
+    .topology-renderer__canvas__arrow {
+        fill: none;
+    }
 }
 
 .topology-renderer__canvas {
@@ -128,7 +137,7 @@
 }
 
 .topology-renderer__canvas__edge {
-    stroke-width: 0.2px;
+    stroke-width: 0.15px;
     fill: none;
     stroke-linecap: round;
 
@@ -138,6 +147,10 @@
 
     &.inverse-power-flow-direction:not(.no-power-flow-direction-indicator):not(.no-power) {
         marker-start: url(#inverse-power-flow-indicator--edge);
+    }
+
+    &.no-power-flow-direction-indicator {
+        stroke-width: 0.2px !important;
     }
 }
 
@@ -161,11 +174,9 @@
     &.no-power {
         marker-end: url(#regulator-shape__red-arrow);
     }
-
 }
 
 .topology-renderer__canvas__symbol.capacitor {
-
     &.normal-power-flow-direction:not(.no-power-flow-direction-indicator):not(.no-power) {
         marker-end: url(#normal-power-flow-indicator--capacitor);
     }
@@ -184,4 +195,27 @@
     &.inverse-power-flow-direction:not(.no-power-flow-direction-indicator):not(.no-power) {
         marker-start: url(#inverse-power-flow-indicator--switch);
     }
+}
+
+.topology-renderer__canvas__symbol.transformer {
+
+    &.normal-power-flow-direction:not(.no-power-flow-direction-indicator):not(.no-power) {
+        marker-end: url(#normal-power-flow-indicator--transformer);
+    }
+
+    &.inverse-power-flow-direction:not(.no-power-flow-direction-indicator):not(.no-power) {
+        marker-start: url(#inverse-power-flow-indicator--transformer);
+    }
+}
+
+.topology-renderer__toolbox__toggle-power-direction-indicator.off::after {
+    content: '';
+    position: absolute;
+    width: 85%;
+    height: 2px;
+    background-color: white;
+    transform: rotate(45deg);
+    border-width: 2px;
+    border-style: solid;
+    border-radius: 10px;
 }

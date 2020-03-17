@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable camelcase */
 import { MessageRequest } from '@shared/MessageRequest';
 
@@ -50,8 +51,8 @@ export class SimulationVsExpectedRequest implements MessageRequest {
       appId: 'sample_app',
       testId: (Math.random() * 1_000_000) | 0,
       testType: 'simulation_vs_expected',
-      expectedResults: null,
-      events: null,
+      expectedResults: null as any,
+      events: null as any,
       testInput: true,
       testOutput: true,
       matchInputTimes: true,

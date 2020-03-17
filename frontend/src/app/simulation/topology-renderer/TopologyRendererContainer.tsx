@@ -1,6 +1,6 @@
 import * as React from 'react';
-import { Subscription } from 'rxjs';
-import { takeWhile } from 'rxjs/operators';
+import { Subject, Subscription } from 'rxjs';
+import { takeUntil, takeWhile } from 'rxjs/operators';
 
 import { TopologyRenderer } from './TopologyRenderer';
 import {
@@ -34,6 +34,8 @@ import { RenderableTopology } from './models/RenderableTopology';
 import { waitUntil } from '@shared/misc';
 import { ProgressIndicator } from '@shared/overlay/progress-indicator';
 import { SimulationManagementService } from '@shared/simulation';
+import { StateStore } from '@shared/state-store';
+import { CurrentLimit } from '@shared/measurement-limits';
 
 interface Props {
   mRIDs: Map<string, string | string[]>;
@@ -50,15 +52,18 @@ const topologyModelCache = new Map<string, TopologyModel>();
 
 export class TopologyRendererContainer extends React.Component<Props, State> {
 
+  // Keys are conducting equipment MRID's
+  readonly currentLimitMap = new Map<string, CurrentLimit>();
+
   activeSimulationConfig: SimulationConfiguration = DEFAULT_SIMULATION_CONFIGURATION;
 
   private readonly _stompClientService = StompClientService.getInstance();
   private readonly _simulationQueue = SimulationQueue.getInstance();
   private readonly _simulationManagementService = SimulationManagementService.getInstance();
+  private readonly _stateStore = StateStore.getInstance();
+  private readonly _unsubscriber = new Subject<void>();
 
   private _activeSimulationStream: Subscription = null;
-  private _simulationOutputStream: Subscription = null;
-  private _simulationSnapshotStream: Subscription = null;
 
   constructor(props: Props) {
     super(props);
@@ -82,13 +87,14 @@ export class TopologyRendererContainer extends React.Component<Props, State> {
   }
 
   componentDidMount() {
-    this._activeSimulationStream = this._observeActiveSimulationChangeEvent();
-    this._simulationOutputStream = this._subscribeToSimulationOutputMeasurementMapStream();
-    this._simulationSnapshotStream = this._updateRenderableTopologyOnSimulationSnapshotReceived();
+    this._observeActiveSimulationChangeEvent();
+    this._subscribeToSimulationOutputMeasurementMapStream();
+    this._updateRenderableTopologyOnSimulationSnapshotReceived();
+    this._fetchCurrentLimitsFromStateStore();
   }
 
   private _observeActiveSimulationChangeEvent() {
-    return this._simulationQueue.activeSimulationChanged()
+    this._activeSimulationStream = this._simulationQueue.activeSimulationChanged()
       .pipe(takeWhile(() => this._activeSimulationStream === null))
       .subscribe({
         next: simulation => {
@@ -342,7 +348,8 @@ export class TopologyRendererContainer extends React.Component<Props, State> {
   }
 
   private _subscribeToSimulationOutputMeasurementMapStream() {
-    return this._simulationManagementService.simulationOutputMeasurementMapReceived()
+    this._simulationManagementService.simulationOutputMeasurementMapReceived()
+      .pipe(takeUntil(this._unsubscriber))
       .subscribe({
         next: measurements => {
           this.setState({
@@ -353,7 +360,8 @@ export class TopologyRendererContainer extends React.Component<Props, State> {
   }
 
   private _updateRenderableTopologyOnSimulationSnapshotReceived() {
-    return this._simulationManagementService.selectSimulationSnapshotState('topologyModel')
+    this._simulationManagementService.selectSimulationSnapshotState('topologyModel')
+      .pipe(takeUntil(this._unsubscriber))
       .subscribe({
         next: (topologyModel: TopologyModel) => {
           waitUntil(() => this.props.mRIDs.size > 0)
@@ -368,9 +376,21 @@ export class TopologyRendererContainer extends React.Component<Props, State> {
       });
   }
 
+  private _fetchCurrentLimitsFromStateStore() {
+    this._stateStore.select('currentLimits')
+      .pipe(takeUntil(this._unsubscriber))
+      .subscribe({
+        next: currentLimits => {
+          for (const currentLimit of currentLimits) {
+            this.currentLimitMap.set(currentLimit.id, currentLimit);
+          }
+        }
+      });
+  }
+
   componentWillUnmount() {
-    this._simulationOutputStream.unsubscribe();
-    this._simulationSnapshotStream.unsubscribe();
+    this._unsubscriber.next();
+    this._unsubscriber.complete();
     this._activeSimulationStream.unsubscribe();
   }
 
@@ -380,6 +400,7 @@ export class TopologyRendererContainer extends React.Component<Props, State> {
         <TopologyRenderer
           topology={this.state.topology}
           simulationOutputMeasurements={this.state.simulationOutputMeasurements}
+          currentLimitMap={this.currentLimitMap}
           onToggleSwitch={this.onToggleSwitchState}
           onCapacitorControlMenuFormSubmitted={this.onCapacitorControlMenuFormSubmitted}
           onRegulatorControlMenuFormSubmitted={this.onRegulatorControlMenuFormSubmitted} />

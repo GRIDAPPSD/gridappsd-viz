@@ -395,7 +395,7 @@ export class PlotModelCreator extends React.Component<Props, State> {
     // For plot model that has useMagnitude and useAngle both
     // set to true, we need to duplicate it and set either useMagnitude
     // or useAngle to true and leave the other flag false, and update the name accordingly
-    const resultingPlotModels = [];
+    const resultingPlotModels = [] as PlotModel[];
     for (const createdPlotModel of this.state.createdPlotModels) {
       if (createdPlotModel.useAngle && createdPlotModel.useMagnitude) {
         const plotModelUsingMagnitude = this._createNewPlotModel();

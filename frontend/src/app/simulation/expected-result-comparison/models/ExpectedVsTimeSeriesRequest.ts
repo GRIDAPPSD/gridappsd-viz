@@ -1,4 +1,3 @@
-/* eslint-disable camelcase */
 import { MessageRequest } from '@shared/MessageRequest';
 
 export class ExpectedVsTimeSeriesRequest implements MessageRequest {
@@ -9,7 +8,8 @@ export class ExpectedVsTimeSeriesRequest implements MessageRequest {
     appId: 'sample_app',
     testId: -1,
     compareWithSimId: -1,
-    expectedResults: null,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    expectedResults: null as any,
     testType: 'expected_vs_timeseries'
   };
 
