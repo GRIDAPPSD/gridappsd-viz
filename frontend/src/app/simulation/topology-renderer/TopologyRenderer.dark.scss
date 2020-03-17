@@ -74,3 +74,7 @@
 .topology-renderer__canvas__symbol.battery {
     stroke: #0f0;
 }
+
+.topology-renderer__toolbox__toggle-power-direction-indicator.off::after {
+    border-color: #607d8b;
+}
