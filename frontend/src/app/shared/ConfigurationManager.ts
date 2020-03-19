@@ -21,12 +21,11 @@ export class ConfigurationManager {
   }
 
   private _fetchConfigurations() {
-    const xhr = new XMLHttpRequest();
-    xhr.open('GET', '/config.json');
-    xhr.onload = event => {
-      this._configurationChanges.next(JSON.parse((event.target as XMLHttpRequest).responseText));
-    };
-    xhr.send();
+    fetch('/config.json')
+      .then<Configurations>(response => response.json())
+      .then(payload => {
+        this._configurationChanges.next(payload);
+      });
   }
 
   configurationChanges<K extends keyof Configurations>(key: K): Observable<Configurations[K]> {
