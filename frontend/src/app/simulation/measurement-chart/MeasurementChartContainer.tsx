@@ -77,33 +77,31 @@ export class MeasurementChartContainer extends React.Component<Props, State> {
   }
 
   private _updateMeasurementChartModels(resetAllTimeSeries = false) {
-    if (this._plotModels.length > 0) {
-      const measurementChartModels = [];
-      for (let i = 0; i < this._plotModels.length; i++) {
-        const plotModel = this._plotModels[i];
-        const measurementChartModel = this._createDefaultMeasurementChartModel(plotModel);
-        const templateMeasurementChartModel = this.state.measurementChartModels[i];
-        if (templateMeasurementChartModel) {
-          if (resetAllTimeSeries) {
-            for (const series of templateMeasurementChartModel.timeSeries) {
-              series.points = [];
-            }
+    const measurementChartModels = [];
+    for (let i = 0; i < this._plotModels.length; i++) {
+      const plotModel = this._plotModels[i];
+      const measurementChartModel = this._createDefaultMeasurementChartModel(plotModel);
+      const templateMeasurementChartModel = this.state.measurementChartModels[i];
+      if (templateMeasurementChartModel) {
+        if (resetAllTimeSeries) {
+          for (const series of templateMeasurementChartModel.timeSeries) {
+            series.points = [];
           }
-          measurementChartModel.yAxisLabel = templateMeasurementChartModel.yAxisLabel;
         }
-        measurementChartModel.timeSeries = plotModel.components.map(
-          component => this._findOrCreateTimeSeries(plotModel, component)
-        );
-        measurementChartModels.push(measurementChartModel);
+        measurementChartModel.yAxisLabel = templateMeasurementChartModel.yAxisLabel;
       }
-      this.setState({
+      measurementChartModel.timeSeries = plotModel.components.map(
+        component => this._findOrCreateTimeSeries(plotModel, component)
+      );
+      measurementChartModels.push(measurementChartModel);
+    }
+    this.setState({
+      measurementChartModels
+    });
+    if (this._simulationControlService.didUserStartActiveSimulation()) {
+      this._simulationControlService.syncSimulationSnapshotState({
         measurementChartModels
       });
-      if (this._simulationControlService.didUserStartActiveSimulation()) {
-        this._simulationControlService.syncSimulationSnapshotState({
-          measurementChartModels
-        });
-      }
     }
   }
 

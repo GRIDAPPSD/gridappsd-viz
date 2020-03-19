@@ -27,6 +27,7 @@ interface State {
 export class LogsContainer extends React.Component<Props, State> {
 
   private readonly _stompClientService = StompClientService.getInstance();
+
   private _queryLogsResultSubscription: Subscription;
   private _sourcesSubscription: Subscription;
   private _stompClientStatusSubscription: Subscription;

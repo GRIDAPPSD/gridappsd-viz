@@ -307,7 +307,7 @@ export class PlotModelCreator extends React.Component<Props, State> {
         newCreatedPlotModels,
         model => model.name
       ),
-      disableSubmitButton: newCreatedPlotModels.length === 0
+      disableSubmitButton: false
     });
     if (this.currentPlotModelFormGroup.getValue().name === plotModelToRemove.name) {
       this.currentPlotModelFormGroup.reset();
@@ -326,7 +326,8 @@ export class PlotModelCreator extends React.Component<Props, State> {
     });
     this.setState({
       allPlotModelOptionBuilder: new SelectionOptionBuilder(updatedPlotModels, model => model.name),
-      createdPlotModels: updatedPlotModels
+      createdPlotModels: updatedPlotModels,
+      disableSubmitButton: false
     });
     if (updatedPlotModel === this.selectedPlotModelFormControl.getValue()) {
       this.setState({

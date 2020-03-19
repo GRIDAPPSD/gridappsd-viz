@@ -26,6 +26,7 @@ import { Service } from '@shared/Service';
 import { ServiceConfigurationModel } from './models/ServiceConfigurationModel';
 import { FormGroupModel, Form, FormArrayModel } from '@shared/form';
 import { TestConfigurationModel } from './models/TestConfigurationModel';
+import { unique } from '@shared/misc';
 
 import './SimulationConfigurationEditor.light.scss';
 import './SimulationConfigurationEditor.dark.scss';
@@ -367,7 +368,7 @@ export class SimulationConfigurationEditor extends React.Component<Props, State>
       PhaseConnectedFaultKind: faultEvent.faultKind,
       FaultImpedance: faultEvent.faultImpedance,
       ObjectMRID: Array.isArray(faultEvent.mRID)
-        ? [...new Set(faultEvent.phases.map(phase => faultEvent.mRID[phase.phaseIndex]).filter(e => e !== undefined))]
+        ? unique(faultEvent.phases.map(e => faultEvent.mRID[e.phaseIndex]).filter(e => e !== undefined))
         : [faultEvent.mRID],
       phases: faultEvent.phases.map(phase => phase.phaseLabel).join(''),
       event_type: faultEvent.eventType,
@@ -377,8 +378,7 @@ export class SimulationConfigurationEditor extends React.Component<Props, State>
   }
 
   private _populateServiceConfigSection() {
-    this.currentConfig.service_configs = this.formGroupModel.findControl('serviceConfig')
-      .getValue();
+    this.currentConfig.service_configs = this.formGroupModel.findControl('serviceConfig').getValue();
   }
 
 }

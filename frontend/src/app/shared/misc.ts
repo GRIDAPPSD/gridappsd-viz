@@ -33,7 +33,7 @@ export function download(filename: string, fileContent: any, contentType: Downlo
   const blob = new Blob([fileContent], { type: contentType });
   const downloadUrl = URL.createObjectURL(blob);
   a.href = downloadUrl;
-  a.download = filename;
+  a.download = `${filename}.${contentType === DownloadType.JSON ? 'json' : 'csv'}`;
   document.body.appendChild(a);
   a.click();
   URL.revokeObjectURL(downloadUrl);

@@ -60,14 +60,9 @@ export class CanvasTransformService {
 
       this._currentTransform = this._currentTransform.translate(centerX, centerY);
       this._currentTransform = this._currentTransform.scale(currentZoomLevel);
-      const transformTransition = this._svgSelection.transition()
-        .on('end', resolve);
+      const transformTransition = this._svgSelection.transition().on('end', resolve);
       this._zoomer.transform(transformTransition, this._currentTransform);
     });
-  }
-
-  getCurrentTransform() {
-    return this._currentTransform;
   }
 
   getCurrentZoomLevel() {
