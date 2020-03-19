@@ -380,7 +380,7 @@ export class TestConfigurationTab extends React.Component<Props, State> {
 
   saveEventsIntoFile() {
     download(
-      'events.json',
+      'events',
       JSON.stringify({
         outageEvents: this._convertEpochTimesToDateTimeStrings(this.state.outageEvents),
         faultEvents: this._convertEpochTimesToDateTimeStrings(this.state.faultEvents),

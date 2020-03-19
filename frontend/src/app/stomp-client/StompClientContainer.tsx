@@ -5,7 +5,6 @@ import { map } from 'rxjs/operators';
 import { StompClientService, StompClientConnectionStatus } from '@shared/StompClientService';
 import { StompClient } from './StompClient';
 import { download, DownloadType } from '@shared/misc';
-import { MessageBanner } from '@shared/overlay/message-banner';
 import { showNotification } from '@shared/overlay/notification';
 
 interface Props {
@@ -71,13 +70,11 @@ export class StompClientContainer extends React.Component<Props, State> {
 
   render() {
     return (
-      <>
-        <StompClient
-          onRequestSubmitted={this.sendRequest}
-          response={this.state.responseBody}
-          showLoadingIndicator={this.state.isFetching}
-          onDownloadResponse={this.downloadResponse} />
-      </>
+      <StompClient
+        onRequestSubmitted={this.sendRequest}
+        response={this.state.responseBody}
+        showLoadingIndicator={this.state.isFetching}
+        onDownloadResponse={this.downloadResponse} />
     );
   }
 
@@ -95,10 +92,10 @@ export class StompClientContainer extends React.Component<Props, State> {
 
   downloadResponse(downloadType: DownloadType) {
     if (downloadType === DownloadType.JSON) {
-      download('response.json', this.state.responseBody, downloadType);
+      download('response', this.state.responseBody, downloadType);
     } else {
       try {
-        download('response.csv', this._convertResponseBodyToCsv(), downloadType);
+        download('response', this._convertResponseBodyToCsv(), downloadType);
       } catch {
         showNotification('There was a problem exporting the response to CSV');
       }
