@@ -53,6 +53,7 @@ export class SimulationStatusLogContainer extends React.Component<Props, State> 
         takeUntil(this._unsubscriber),
         filter(status => status === StompClientConnectionStatus.CONNECTED),
         switchMap(() => this._stateStore.select('simulationId')),
+        takeUntil(this._unsubscriber),
         filter(simulationId => simulationId !== ''),
         switchMap(this._newObservableForLogMessages)
       )
@@ -91,7 +92,8 @@ export class SimulationStatusLogContainer extends React.Component<Props, State> 
   private _clearAllLogMessagesWhenSimulationStarts() {
     this._simulationControlService.statusChanges()
       .pipe(
-        filter(status => status === SimulationStatus.STARTED && this._simulationControlService.didUserStartActiveSimulation())
+        filter(status => status === SimulationStatus.STARTED && this._simulationControlService.didUserStartActiveSimulation()),
+        takeUntil(this._unsubscriber)
       )
       .subscribe({
         next: () => {

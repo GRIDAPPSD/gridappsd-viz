@@ -48,7 +48,8 @@ export class VoltageViolationContainer extends React.Component<Props, State> {
         filter(id => id !== '' && this._simulationControlService.didUserStartActiveSimulation()),
         switchMap(id => this._stompClientService.readFrom(`/topic/goss.gridappsd.simulation.voltage_violation.${id}.output`)),
         takeWhile(this._simulationControlService.isUserInActiveSimulation),
-        map(JSON.parse as (payload: string) => { [mrid: string]: number })
+        map(JSON.parse as (payload: string) => { [mrid: string]: number }),
+        takeUntil(this._unsubscriber)
       )
       .subscribe({
         next: payload => {
@@ -71,7 +72,10 @@ export class VoltageViolationContainer extends React.Component<Props, State> {
       this._simulationControlService.selectSimulationSnapshotState('violationsAtZero'),
       this._simulationControlService.selectSimulationSnapshotState('voltageViolationTimestamp')
     )
-      .pipe(filter(this._simulationControlService.isUserInActiveSimulation))
+      .pipe(
+        filter(this._simulationControlService.isUserInActiveSimulation),
+        takeUntil(this._unsubscriber)
+      )
       .subscribe({
         next: tuple => {
           this.setState({
