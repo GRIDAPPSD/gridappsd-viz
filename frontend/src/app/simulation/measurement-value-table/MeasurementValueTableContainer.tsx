@@ -102,12 +102,15 @@ export class MeasurementValueTableContainer extends React.Component<Props, State
   }
 
   private _subscribeToSimulationOutputMeasurementsStream() {
+    const simulationName = this._simulationQueue.getActiveSimulation().name;
+    const nodeNames: { [key: string]: string[] } = NODES_PER_TOPOLOGY[simulationName];
     this._simulationControlService.simulationOutputMeasurementsReceived()
-      .pipe(takeUntil(this._unsubscriber))
+      .pipe(
+        takeUntil(this._unsubscriber),
+        filter(() => nodeNames !== undefined)
+      )
       .subscribe({
         next: simulationOutputMeasurements => {
-          const simulationName = this._simulationQueue.getActiveSimulation().name;
-          const nodeNames: { [key: string]: string[] } = NODES_PER_TOPOLOGY[simulationName];
           const measurementValueTables = [];
           for (const [nodeName, phases] of Object.entries(nodeNames)) {
             const measurements = {

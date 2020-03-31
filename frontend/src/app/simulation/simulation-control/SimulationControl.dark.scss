@@ -18,3 +18,21 @@
 .simulation-control__simulation-id__value-wrapper {
     transform: translateX(-2px);
 }
+
+.simulation-control__delayed-pause-duration-input {
+    box-shadow: 0 1px 3px #271e1e, 0 -0.5px 3px #271e1e;
+    background-color: #555;
+    color: #fff;
+    border: 1px solid #8e8e8e;
+
+    &__arrow::after {
+        background-color: #555;
+        border: 1px solid rgba(0, 0, 0, 0.1);
+        box-shadow: 0 0 2px 271e1e;
+        border: 1px solid #8e8e8e;
+    }
+
+    .input-field-wrapper::after {
+        color: rgba(255, 255, 255, 0.5);
+    }
+}

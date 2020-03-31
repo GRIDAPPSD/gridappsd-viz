@@ -19,9 +19,9 @@ interface Props {
   rounded?: boolean;
   style?: 'primary' | 'accent';
   disabled?: boolean;
-  onClick?: (event: React.MouseEvent) => void;
   hasBackground?: boolean;
   rippleDuration?: number;
+  onClick?: (event: React.MouseEvent) => void;
 }
 
 export class IconButton extends React.Component<Props, {}> {

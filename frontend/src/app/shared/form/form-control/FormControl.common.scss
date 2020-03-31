@@ -12,6 +12,7 @@
     transition: color 0.1s ease;
     position: relative;
     flex-shrink: 0;
+    pointer-events: none;
 }
 
 .form-control__label__hint {

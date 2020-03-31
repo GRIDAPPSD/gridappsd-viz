@@ -130,6 +130,7 @@ export class SimulationControlContainer extends React.Component<Props, State> {
         onStopSimulation={this.simulationControlService.stopSimulation}
         onPauseSimulation={this.simulationControlService.pauseSimulation}
         onResumeSimulation={this.simulationControlService.resumeSimulation}
+        onResumeThenPauseSimulation={this.simulationControlService.resumeThenPauseSimulationAfter}
         onPlotModelCreationDone={this.updatePlotModels} />
     );
   }

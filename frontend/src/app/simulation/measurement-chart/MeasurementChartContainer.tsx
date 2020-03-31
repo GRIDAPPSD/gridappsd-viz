@@ -105,6 +105,36 @@ export class MeasurementChartContainer extends React.Component<Props, State> {
     }
   }
 
+  private _createDefaultMeasurementChartModel(plotModel: PlotModel): MeasurementChartModel {
+    return {
+      name: plotModel.name,
+      timeSeries: [],
+      yAxisLabel: this._deriveYAxisLabel(plotModel)
+    };
+  }
+
+  private _deriveYAxisLabel(plotModel: PlotModel) {
+    switch (plotModel.measurementType) {
+      case MeasurementType.POWER:
+        return 'W';
+      case MeasurementType.VOLTAGE:
+        return 'V';
+      case MeasurementType.TAP:
+        return '';
+      default:
+        return '';
+    }
+  }
+
+  private _findOrCreateTimeSeries(plotModel: PlotModel, component: PlotModelComponent): TimeSeries {
+    const timeSeriesName = component.displayName;
+    const timeSeriesId = `${plotModel.name}_${timeSeriesName}`;
+    if (!this._timeSeries.has(timeSeriesId)) {
+      this._timeSeries.set(timeSeriesId, { name: timeSeriesName, points: [] });
+    }
+    return this._timeSeries.get(timeSeriesId);
+  }
+
   private _subscribeToSimulationOutputMeasurementsStream(): Subscription {
     return this._simulationControlService.simulationOutputMeasurementsReceived()
       .pipe(
@@ -152,15 +182,6 @@ export class MeasurementChartContainer extends React.Component<Props, State> {
     return timeSeries;
   }
 
-  private _findOrCreateTimeSeries(plotModel: PlotModel, component: PlotModelComponent): TimeSeries {
-    const timeSeriesName = component.displayName;
-    const timeSeriesId = `${plotModel.name}_${timeSeriesName}`;
-    if (!this._timeSeries.has(timeSeriesId)) {
-      this._timeSeries.set(timeSeriesId, { name: timeSeriesName, points: [] });
-    }
-    return this._timeSeries.get(timeSeriesId);
-  }
-
   private _getDataPointForTimeSeries(
     plotModel: PlotModel,
     component: PlotModelComponent,
@@ -188,26 +209,7 @@ export class MeasurementChartContainer extends React.Component<Props, State> {
     return null;
   }
 
-  private _createDefaultMeasurementChartModel(plotModel: PlotModel): MeasurementChartModel {
-    return {
-      name: plotModel.name,
-      timeSeries: [],
-      yAxisLabel: this._deriveYAxisLabel(plotModel)
-    };
-  }
 
-  private _deriveYAxisLabel(plotModel: PlotModel) {
-    switch (plotModel.measurementType) {
-      case MeasurementType.POWER:
-        return 'W';
-      case MeasurementType.VOLTAGE:
-        return 'V';
-      case MeasurementType.TAP:
-        return '';
-      default:
-        return '';
-    }
-  }
   private _resetMeasurementChartModelsWhenSimulationStarts() {
     this._simulationControlService.statusChanges()
       .pipe(

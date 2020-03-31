@@ -24,6 +24,7 @@ export class Tooltip extends React.Component<Props, State> {
   private _tooltipContainer: HTMLElement;
   private _tooltipRect: ClientRect;
   private _anchor: Element;
+  private _timer: any;
 
   constructor(props: Props) {
     super(props);
@@ -69,6 +70,7 @@ export class Tooltip extends React.Component<Props, State> {
   }
 
   hide() {
+    clearTimeout(this._timer);
     if (this.tooltipRef.current) {
       this.tooltipRef.current.classList.add('fade-out');
       this.tooltipRef.current.addEventListener('animationend', this._cleanup, false);
@@ -83,16 +85,20 @@ export class Tooltip extends React.Component<Props, State> {
   }
 
   show() {
-    if (!this._tooltipContainer) {
-      this._addTooltip(this._createDefaultTooltipContainer());
-      this._show();
-    }
+    this._timer = setTimeout(() => {
+      if (!this._tooltipContainer) {
+        this._addTooltip(this._createDefaultTooltipContainer());
+        this._show();
+      }
+    }, 250);
   }
 
   showAt(anchor: Element, container?: HTMLElement) {
-    this._addTooltip(container || this._createDefaultTooltipContainer());
-    this._anchor = anchor;
-    this._show();
+    this._timer = setTimeout(() => {
+      this._addTooltip(container || this._createDefaultTooltipContainer());
+      this._anchor = anchor;
+      this._show();
+    }, 250);
   }
 
   private _createDefaultTooltipContainer(): HTMLElement {

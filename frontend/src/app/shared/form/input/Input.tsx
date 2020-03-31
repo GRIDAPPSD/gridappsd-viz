@@ -26,6 +26,8 @@ export class Input<T extends 'text' | 'number' | 'datetime' | 'password' = 'text
   private readonly _valueChanges = new Subject<string>();
   private readonly _dateTimeService = DateTimeService.getInstance();
 
+  private _internalValue: string | number;
+
   constructor(props: Props<T>) {
     super(props);
 
@@ -43,6 +45,7 @@ export class Input<T extends 'text' | 'number' | 'datetime' | 'password' = 'text
       .pipe(map(this._parseValue))
       .subscribe({
         next: value => {
+          this._internalValue = value;
           // If value is null, then this._parseValue failed to parse value,
           // in that case, we want to use the value currently in the input box instead
           // of the parsed value
@@ -54,10 +57,8 @@ export class Input<T extends 'text' | 'number' | 'datetime' | 'password' = 'text
     (this.props.formControlModel as FormControlModel<string | number>).valueChanges()
       .subscribe({
         next: value => {
-          // This is true when this.props.formControlModel.setValue()
-          // was called from outside of this component, in that case
-          // we want to update this component to reflect the new value
-          if (this.state.value !== value && this.props.formControlModel.isValid()) {
+          if (value !== this._internalValue && this.props.formControlModel.isValid()) {
+            this._internalValue = value;
             if (this.props.type === 'datetime') {
               this.setState({
                 value: this._dateTimeService.format(value)
@@ -73,6 +74,9 @@ export class Input<T extends 'text' | 'number' | 'datetime' | 'password' = 'text
   }
 
   private _parseValue(value: string) {
+    if (value === '') {
+      return '';
+    }
     if (this.props.type === 'number') {
       return +value;
     }
@@ -93,7 +97,7 @@ export class Input<T extends 'text' | 'number' | 'datetime' | 'password' = 'text
         className={`input-field${this.props.className ? ' ' + this.props.className : ''}`}
         formControlModel={this.props.formControlModel}
         label={this.props.label}
-        hint={this.props.type === 'datetime' ? 'YYY-MM-DD HH:MM:SS' : this.props.hint}>
+        hint={this.props.type === 'datetime' ? 'YYYY-MM-DD HH:MM:SS' : this.props.hint}>
         <div className='input-field-wrapper'>
           <input
             // Only if this.props.type is "password", then we want to set the input element's type
