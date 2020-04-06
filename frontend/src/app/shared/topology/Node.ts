@@ -1,14 +1,14 @@
-type NodeType = (
-  'battery'
-  | 'switch'
-  | 'solarpanel'
-  | 'swing_node'
-  | 'transformer'
-  | 'capacitor'
-  | 'regulator'
-  | 'unknown'
-  | 'substation'
-);
+export const enum NodeType {
+  SWITCH = 'switch',
+  CAPACITOR = 'capacitor',
+  TRANSFORMER = 'transformer',
+  REGULATOR = 'regulator',
+  SUBSTATION = 'substation',
+  SOLAR_PANEL = 'solar-panel',
+  SWING_NODE = 'swing-node',
+  BATTERY = 'battery',
+  UNKNOWN = 'unknown'
+}
 
 export interface Node {
   name: string;

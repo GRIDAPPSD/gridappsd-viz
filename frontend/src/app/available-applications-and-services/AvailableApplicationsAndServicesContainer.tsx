@@ -5,7 +5,6 @@ import { GetAvailableApplicationsAndServices } from './models/GetAvailableApplic
 import { StompClientService } from '@shared/StompClientService';
 import { Payload } from './models/Payload';
 import { AvailableApplicationsAndServices } from './AvailableApplicationsAndServices';
-import { ProgressIndicator } from '@shared/overlay/progress-indicator';
 
 interface Props { }
 
@@ -38,8 +37,8 @@ export class AvailableApplicationsAndServicesContainer extends React.Component<P
     });
   }
 
-  private _subscribeForApplicationAndServicesResponse(destination: string) {
-    this._stompClientService.readOnceFrom(destination)
+  private _subscribeForApplicationAndServicesResponse(topic: string) {
+    this._stompClientService.readOnceFrom(topic)
       .pipe(map(JSON.parse as (body: string) => Payload))
       .subscribe({
         next: payload => {
@@ -51,11 +50,6 @@ export class AvailableApplicationsAndServicesContainer extends React.Component<P
   }
 
   render() {
-    if (!this.state.payload) {
-      return (
-        <ProgressIndicator show />
-      );
-    }
     return (
       <AvailableApplicationsAndServices payload={this.state.payload} />
     );

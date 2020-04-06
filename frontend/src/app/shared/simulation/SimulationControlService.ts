@@ -13,6 +13,7 @@ import { ModelDictionaryMeasurement } from '@shared/topology';
 import { SimulationOutputMeasurement, SimulationOutputPayload } from '.';
 import { StateStore } from '@shared/state-store';
 import { Simulation } from './Simulation';
+import { ConductingEquipmentType } from '@shared/topology/model-dictionary';
 
 interface SimulationStartedEventResponse {
   simulationId: string;
@@ -75,6 +76,7 @@ export class SimulationControlService {
     this.resumeSimulation = this.resumeSimulation.bind(this);
     this.requestToJoinActiveSimulation = this.requestToJoinActiveSimulation.bind(this);
     this.isUserInActiveSimulation = this.isUserInActiveSimulation.bind(this);
+    this.resumeThenPauseSimulationAfter = this.resumeThenPauseSimulationAfter.bind(this);
   }
 
   private _onActiveSimulationIdsReceived() {
@@ -267,6 +269,7 @@ export class SimulationControlService {
           mRID: rawSimulationOutputMeasurement.measurement_mrid,
           phases: measurementInModelDictionary.phases,
           conductingEquipmentName: measurementInModelDictionary.ConductingEquipment_name,
+          conductingEquipmentType: measurementInModelDictionary.ConductingEquipment_type as ConductingEquipmentType,
           connectivityNode: measurementInModelDictionary.ConnectivityNode,
           conductingEquipmentMRID: measurementInModelDictionary.ConductingEquipment_mRID
         };
@@ -350,6 +353,25 @@ export class SimulationControlService {
     this._stompClientService.send({
       destination: `${CONTROL_SIMULATION_TOPIC}.${simulationId}`,
       body: `{"command":"${command}"}`
+    });
+  }
+
+  resumeThenPauseSimulationAfter(seconds: number) {
+    this._currentSimulationStatus = SimulationStatus.RESUMED;
+    this._currentSimulationStatusNotifer.next(SimulationStatus.RESUMED);
+    setTimeout(() => {
+      this._currentSimulationStatus = SimulationStatus.PAUSED;
+      this._currentSimulationStatusNotifer.next(SimulationStatus.PAUSED);
+    }, seconds * 1000);
+    const simulationId = this._simulationQueue.getActiveSimulation().id;
+    this._stompClientService.send({
+      destination: `${CONTROL_SIMULATION_TOPIC}.${simulationId}`,
+      body: JSON.stringify({
+        command: 'resumePauseAt',
+        input: {
+          pauseIn: seconds
+        }
+      })
     });
   }
 

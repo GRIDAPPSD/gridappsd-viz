@@ -1,14 +1,43 @@
 @import 'TopologyRenderer.common';
 
+.topology-renderer {
+
+    &.small,
+    &.large {
+        .topology-renderer__canvas__edge.no-power {
+            stroke: #f00;
+        }
+
+        .topology-renderer__canvas__node.no-power {
+            fill: #f00;
+        }
+
+        .topology-renderer__canvas__symbol.capacitor.no-power,
+        .topology-renderer__canvas__symbol.transformer.no-power,
+        .topology-renderer__canvas__symbol.regulator.no-power,
+        .topology-renderer__canvas__symbol.substation.no-power {
+            stroke: #f00;
+        }
+
+        .topology-renderer__canvas__symbol.no-power.switch {
+            fill: #f00;
+        }
+    }
+}
+
 .topology-renderer__toolbox {
     box-shadow: 0 0 3px #555;
     background-color: rgb(233, 204, 204);
 }
 
-
 .topology-renderer__canvas__arrow {
     stroke: #ffa500;
     fill: #ffa500;
+
+    &.red {
+        stroke: #f00;
+        fill: #f00;
+    }
 }
 
 .topology-renderer__canvas__edge {
@@ -24,4 +53,24 @@
 .topology-renderer__canvas__symbol.regulator,
 .topology-renderer__canvas__symbol.substation {
     stroke: #ffa500;
+}
+
+.topology-renderer__canvas__node.switch,
+.topology-renderer__canvas__symbol.switch {
+    &.open {
+        fill: #4aff4a;
+    }
+
+    &.closed {
+        fill: #f00;
+    }
+}
+
+.topology-renderer__canvas__symbol.solar-panel {
+    fill: #add8e6;
+}
+
+
+.topology-renderer__canvas__symbol.battery {
+    stroke: #0f0;
 }

@@ -5,7 +5,7 @@ import { takeUntil, filter } from 'rxjs/operators';
 import { SimulationQueue, SimulationControlService, SimulationOutputMeasurement } from '@shared/simulation';
 import { SimulationStatus } from '@commons/SimulationStatus';
 import { MeasurementValueTable } from './MeasurementValueTable';
-import { ModelDictionaryComponentType } from '@shared/topology';
+import { MeasurementType } from '@shared/topology';
 
 interface Props {
 }
@@ -102,12 +102,15 @@ export class MeasurementValueTableContainer extends React.Component<Props, State
   }
 
   private _subscribeToSimulationOutputMeasurementsStream() {
+    const simulationName = this._simulationQueue.getActiveSimulation().name;
+    const nodeNames: { [key: string]: string[] } = NODES_PER_TOPOLOGY[simulationName];
     this._simulationControlService.simulationOutputMeasurementsReceived()
-      .pipe(takeUntil(this._unsubscriber))
+      .pipe(
+        takeUntil(this._unsubscriber),
+        filter(() => nodeNames !== undefined)
+      )
       .subscribe({
         next: simulationOutputMeasurements => {
-          const simulationName = this._simulationQueue.getActiveSimulation().name;
-          const nodeNames: { [key: string]: string[] } = NODES_PER_TOPOLOGY[simulationName];
           const measurementValueTables = [];
           for (const [nodeName, phases] of Object.entries(nodeNames)) {
             const measurements = {
@@ -118,7 +121,7 @@ export class MeasurementValueTableContainer extends React.Component<Props, State
             // Getting values for taps
             simulationOutputMeasurements.forEach(measurement => {
               if (
-                measurement.type === ModelDictionaryComponentType.TAP &&
+                measurement.type === MeasurementType.TAP &&
                 measurement.conductingEquipmentName.includes(nodeName) &&
                 phases.includes(measurement.phases) &&
                 // Discard measurements with duplicate phases
@@ -132,7 +135,7 @@ export class MeasurementValueTableContainer extends React.Component<Props, State
               simulationOutputMeasurements.forEach(measurement => {
                 // Getting measurements for voltages
                 if (
-                  measurement.type === ModelDictionaryComponentType.VOLTAGE &&
+                  measurement.type === MeasurementType.VOLTAGE &&
                   measurements.taps[0]?.connectivityNode === measurement.connectivityNode &&
                   phases.includes(measurement.phases) &&
                   // Discard measurements with duplicate phases
@@ -143,7 +146,7 @@ export class MeasurementValueTableContainer extends React.Component<Props, State
 
                 // Getting measurements for powers
                 if (
-                  measurement.type === ModelDictionaryComponentType.POWER &&
+                  measurement.type === MeasurementType.POWER &&
                   measurement.conductingEquipmentName === 'hvmv_sub' &&
                   phases.includes(measurement.phases) &&
                   // Discard measurements with duplicate phases

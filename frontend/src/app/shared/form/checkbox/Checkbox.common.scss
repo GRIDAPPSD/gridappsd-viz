@@ -4,6 +4,11 @@
     line-height: initial;
     flex-flow: row;
     align-items: center;
+
+    .form-control__label {
+        cursor: pointer;
+        pointer-events: all;
+    }
 }
 
 .checkbox.disabled {
@@ -27,10 +32,6 @@
         justify-content: center;
         align-items: center;
     }
-}
-
-.checkbox .form-control__label {
-    cursor: pointer;
 }
 
 .checkbox-wrapper {

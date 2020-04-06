@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { IconButton } from '@shared/buttons';
+import { IconButton, BasicButton } from '@shared/buttons';
 import { SimulationStatus } from '@commons/SimulationStatus';
 import { Tooltip } from '@shared/tooltip';
 import { Ripple } from '@shared/ripple';
@@ -10,6 +10,9 @@ import { ModelDictionaryComponent } from '@shared/topology';
 import { copyToClipboard } from '@shared/misc';
 import { Restricted } from '@shared/authenticator';
 import { PortalRenderer } from '@shared/overlay/portal-renderer';
+import { Input, FormControlModel } from '@shared/form';
+import { Backdrop } from '@shared/overlay/backdrop';
+import { Validators } from '@shared/form/validation';
 
 import './SimulationControl.light.scss';
 import './SimulationControl.dark.scss';
@@ -23,6 +26,7 @@ interface Props {
   onStopSimulation: () => void;
   onPauseSimulation: () => void;
   onResumeSimulation: () => void;
+  onResumeThenPauseSimulation: (delay: number) => void;
   onPlotModelCreationDone: (plotModels: PlotModel[]) => void;
 }
 
@@ -41,6 +45,7 @@ export class SimulationControl extends React.Component<Props, State> {
     };
 
     this.saveSimulationIdToClipboard = this.saveSimulationIdToClipboard.bind(this);
+    this.showDelayedPauseDurationInputBox = this.showDelayedPauseDurationInputBox.bind(this);
     this.showPlotModelCreator = this.showPlotModelCreator.bind(this);
   }
 
@@ -74,49 +79,50 @@ export class SimulationControl extends React.Component<Props, State> {
         <Restricted roles={['testmanager']}>
           {
             this.props.simulationStatus === SimulationStatus.STARTED || this.props.simulationStatus === SimulationStatus.RESUMED
-              ?
-              <>
-                <Tooltip position='bottom' content='Pause simulation'>
-                  <IconButton
-                    icon='pause'
-                    className='simulation-control__action'
-                    onClick={this.props.onPauseSimulation} />
-                </Tooltip>
-                <Tooltip position='bottom' content='Stop simulation'>
-                  <IconButton
-                    icon='stop'
-                    className='simulation-control__action'
-                    onClick={this.props.onStopSimulation} />
-                </Tooltip>
-              </>
-              : this.props.simulationStatus === SimulationStatus.PAUSED
-                ?
+              ? (
                 <>
-                  <Tooltip position='bottom' content='Resume simulation'>
+                  <Tooltip content='Pause simulation'>
                     <IconButton
-                      icon='play_arrow'
-                      className='simulation-control__action resume'
-                      onClick={this.props.onResumeSimulation} />
+                      icon='pause'
+                      className='simulation-control__action'
+                      onClick={this.props.onPauseSimulation} />
                   </Tooltip>
-                  <Tooltip position='bottom' content='Stop simulation'>
+                  <Tooltip content='Stop simulation'>
                     <IconButton
                       icon='stop'
                       className='simulation-control__action'
                       onClick={this.props.onStopSimulation} />
                   </Tooltip>
                 </>
-                :
-                <Tooltip position='bottom' content='Start simulation'>
-                  <IconButton
-                    icon='play_arrow'
-                    disabled={this.props.modelDictionaryComponentsWithConsolidatedPhases.length === 0}
-                    className='simulation-control__action start'
-                    onClick={this.props.onStartSimulation} />
-                </Tooltip>
+              )
+              : this.props.simulationStatus === SimulationStatus.PAUSED
+                ? (
+                  <>
+                    <Tooltip content='Resume simulation'>
+                      <IconButton
+                        icon='play_arrow'
+                        className='simulation-control__action resume'
+                        onClick={this.showDelayedPauseDurationInputBox} />
+                    </Tooltip>
+                    <Tooltip content='Stop simulation'>
+                      <IconButton
+                        icon='stop'
+                        className='simulation-control__action'
+                        onClick={this.props.onStopSimulation} />
+                    </Tooltip>
+                  </>
+                )
+                : (
+                  <Tooltip content='Start simulation'>
+                    <IconButton
+                      icon='play_arrow'
+                      disabled={this.props.modelDictionaryComponentsWithConsolidatedPhases.length === 0}
+                      className='simulation-control__action start'
+                      onClick={this.props.onStartSimulation} />
+                  </Tooltip>
+                )
           }
-          <Tooltip
-            position='bottom'
-            content='Edit plots'>
+          <Tooltip content='Edit plots'>
             <IconButton
               icon='show_chart'
               className='simulation-control__action add-component-to-plot'
@@ -138,6 +144,77 @@ export class SimulationControl extends React.Component<Props, State> {
         simulationIdCopiedSuccessfully: false
       });
     }, 2000);
+  }
+
+  showDelayedPauseDurationInputBox(event: React.MouseEvent) {
+    const delayedPauseDurationFormControl = new FormControlModel(
+      0,
+      [Validators.checkNotEmpty('Duration'), Validators.checkValidNumber('Duration')]
+    );
+    const anchorBoundingBox = (event.target as HTMLElement).getBoundingClientRect();
+    const portalRenderer = new PortalRenderer({
+      containerClassName: 'simulation-control__delayed-pause-duration-input-container'
+    });
+    const inputBoxRef = React.createRef<HTMLDivElement>();
+    const hideDelayedPauseDurationInputBox = () => {
+      inputBoxRef.current.classList.remove('visible');
+      inputBoxRef.current.classList.add('hidden');
+      setTimeout(portalRenderer.unmount, 500);
+      delayedPauseDurationFormControl.cleanup();
+    };
+    const resumeSimulation = () => {
+      const pauseAfterDelayDuration = delayedPauseDurationFormControl.getValue();
+      if (pauseAfterDelayDuration === 0) {
+        this.props.onResumeSimulation();
+      } else {
+        this.props.onResumeThenPauseSimulation(pauseAfterDelayDuration);
+      }
+    };
+
+    delayedPauseDurationFormControl.validityChanges()
+      .subscribe({
+        next: isValid => {
+          if (inputBoxRef.current) {
+            (inputBoxRef.current.querySelector('button.positive') as HTMLButtonElement).disabled = !isValid;
+          }
+        }
+      });
+
+    portalRenderer.mount(
+      <>
+        <Backdrop
+          visible
+          transparent
+          onClick={hideDelayedPauseDurationInputBox} />
+        <div
+          ref={inputBoxRef}
+          className='simulation-control__delayed-pause-duration-input visible'
+          style={{
+            left: anchorBoundingBox.left,
+            top: anchorBoundingBox.top + anchorBoundingBox.height
+          }}>
+          <div className='simulation-control__delayed-pause-duration-input__arrow' />
+          <Input
+            label='Pause after'
+            hint='Use 0 to disable'
+            type='number'
+            formControlModel={delayedPauseDurationFormControl} />
+          <div className='simulation-control__delayed-pause-duration-input__action-container'>
+            <BasicButton
+              type='negative'
+              label='Cancel'
+              onClick={hideDelayedPauseDurationInputBox} />
+            <BasicButton
+              type='positive'
+              label='Submit'
+              onClick={() => {
+                hideDelayedPauseDurationInputBox();
+                resumeSimulation();
+              }} />
+          </div>
+        </div>
+      </>
+    );
   }
 
   showPlotModelCreator() {

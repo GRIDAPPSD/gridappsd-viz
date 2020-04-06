@@ -1,4 +1,4 @@
-import { client, Client, StompHeaders, Message } from '@stomp/stompjs';
+import { Client, Message } from '@stomp/stompjs';
 import { BehaviorSubject, Observable, using, timer, iif, of, Subject } from 'rxjs';
 import { filter, switchMap, take, timeout, takeWhile } from 'rxjs/operators';
 
@@ -31,7 +31,7 @@ export class StompClientService {
 
   private _client: Client;
   private _statusChanges = new BehaviorSubject<StompClientConnectionStatus>(StompClientConnectionStatus.UNINITIALIZED);
-  private _status: StompClientConnectionStatus = StompClientConnectionStatus.UNINITIALIZED;
+  private _status = StompClientConnectionStatus.UNINITIALIZED;
   private _username = '';
   // Need to store the password for reconnecting after timeout,
   // the backend should listen to hearbeat messages
@@ -58,14 +58,21 @@ export class StompClientService {
     this._configurationManager.configurationChanges('host')
       .subscribe({
         next: host => {
-          this._client = client(`ws://${host}`);
-          this._client.heartbeat.outgoing = 0;
-          this._client.heartbeat.incoming = 0;
+          this._client = new Client({
+            brokerURL: `ws://${host}`,
+            heartbeatIncoming: 0,
+            heartbeatOutgoing: 0,
+            reconnectDelay: 0
+          });
 
           this._username = sessionStorage.getItem('username');
           this._password = sessionStorage.getItem('password');
 
           if (this._username && this._password) {
+            this._client.connectHeaders = {
+              login: this._username,
+              passcode: this._password
+            };
             this.reconnect();
           }
         }
@@ -76,22 +83,33 @@ export class StompClientService {
     const subject = new Subject<StompClientInitializationResult>();
     this._username = username;
     this._password = password;
-
-    this._client.connect(
-      this._username,
-      this._password,
-      () => {
-        this._client.disconnect(() => {
+    this._client.configure({
+      connectHeaders: {
+        login: username,
+        passcode: password
+      },
+      onConnect: () => {
+        this._client.onDisconnect = () => {
           this.reconnect();
           subject.next(StompClientInitializationResult.OK);
-        });
+          this._client.onDisconnect = null;
+          this._client.onConnect = null;
+        };
+        this._client.deactivate();
         // need to reevaluate this strategy
         sessionStorage.setItem('username', username);
         sessionStorage.setItem('password', password);
       },
-      () => subject.error(StompClientInitializationResult.AUTHENTICATION_FAILURE),
-      () => subject.error(StompClientInitializationResult.CONNECTION_FAILURE)
-    );
+      onStompError: () => {
+        subject.error(StompClientInitializationResult.AUTHENTICATION_FAILURE);
+        this._client.onStompError = null;
+      },
+      onWebSocketError: () => {
+        subject.error(StompClientInitializationResult.CONNECTION_FAILURE);
+        this._client.onWebSocketError = null;
+      }
+    });
+    this._client.activate();
     return subject.pipe(take(1));
   }
 
@@ -116,13 +134,11 @@ export class StompClientService {
     if (!this.isActive()) {
       this._status = StompClientConnectionStatus.CONNECTING;
       this._statusChanges.next(this._status);
-      return this._client.connect(
-        this._username,
-        this._password,
-        this._connectionEstablished,
-        undefined,
-        this._connectionClosed
-      );
+      this._client.configure({
+        onConnect: this._connectionEstablished,
+        onWebSocketClose: this._connectionClosed
+      });
+      this._client.activate();
     }
     return {};
   }
@@ -144,7 +160,6 @@ export class StompClientService {
     this._statusChanges.next(this._status);
   }
 
-  // send(destination: string, headers: StompHeaders, body: string) {
   send(request: StompClientRequest) {
     if (this._status !== StompClientConnectionStatus.DISCONNECTED) {
       const headers = Object.assign(
@@ -160,7 +175,15 @@ export class StompClientService {
           filter(this.isActive),
           take(1),
         )
-        .subscribe(() => this._client.send(request.destination, headers, request.body));
+        .subscribe({
+          next: () => {
+            this._client.publish({
+              destination: request.destination,
+              headers,
+              body: request.body
+            });
+          }
+        });
     }
   }
 

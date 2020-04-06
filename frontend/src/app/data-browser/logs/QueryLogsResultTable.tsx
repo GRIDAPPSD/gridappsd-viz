@@ -27,8 +27,7 @@ export function QueryLogsResultTable(props: Props) {
             Cell: row => (
               row.value.length > 15
                 ?
-                <Tooltip position='bottom'
-                  content={row.value}>
+                <Tooltip content={row.value}>
                   <span style={{
                     display: 'inline-block',
                     width: '100%',

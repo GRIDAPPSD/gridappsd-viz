@@ -9,7 +9,7 @@ import { SimulationStatus } from '@commons/SimulationStatus';
 import { TimeSeries } from './models/TimeSeries';
 import { TimeSeriesDataPoint } from './models/TimeSeriesDataPoint';
 import { StateStore } from '@shared/state-store';
-import { ModelDictionaryComponentType } from '@shared/topology';
+import { MeasurementType } from '@shared/topology';
 import { PlotModel, PlotModelComponent } from '@shared/plot-model';
 
 interface Props {
@@ -77,34 +77,62 @@ export class MeasurementChartContainer extends React.Component<Props, State> {
   }
 
   private _updateMeasurementChartModels(resetAllTimeSeries = false) {
-    if (this._plotModels.length > 0) {
-      const measurementChartModels = [];
-      for (let i = 0; i < this._plotModels.length; i++) {
-        const plotModel = this._plotModels[i];
-        const measurementChartModel = this._createDefaultMeasurementChartModel(plotModel);
-        const templateMeasurementChartModel = this.state.measurementChartModels[i];
-        if (templateMeasurementChartModel) {
-          if (resetAllTimeSeries) {
-            for (const series of templateMeasurementChartModel.timeSeries) {
-              series.points = [];
-            }
+    const measurementChartModels = [];
+    for (let i = 0; i < this._plotModels.length; i++) {
+      const plotModel = this._plotModels[i];
+      const measurementChartModel = this._createDefaultMeasurementChartModel(plotModel);
+      const templateMeasurementChartModel = this.state.measurementChartModels[i];
+      if (templateMeasurementChartModel) {
+        if (resetAllTimeSeries) {
+          for (const series of templateMeasurementChartModel.timeSeries) {
+            series.points = [];
           }
-          measurementChartModel.yAxisLabel = templateMeasurementChartModel.yAxisLabel;
         }
-        measurementChartModel.timeSeries = plotModel.components.map(
-          component => this._findOrCreateTimeSeries(plotModel, component)
-        );
-        measurementChartModels.push(measurementChartModel);
+        measurementChartModel.yAxisLabel = templateMeasurementChartModel.yAxisLabel;
       }
-      this.setState({
+      measurementChartModel.timeSeries = plotModel.components.map(
+        component => this._findOrCreateTimeSeries(plotModel, component)
+      );
+      measurementChartModels.push(measurementChartModel);
+    }
+    this.setState({
+      measurementChartModels
+    });
+    if (this._simulationControlService.didUserStartActiveSimulation()) {
+      this._simulationControlService.syncSimulationSnapshotState({
         measurementChartModels
       });
-      if (this._simulationControlService.didUserStartActiveSimulation()) {
-        this._simulationControlService.syncSimulationSnapshotState({
-          measurementChartModels
-        });
-      }
     }
+  }
+
+  private _createDefaultMeasurementChartModel(plotModel: PlotModel): MeasurementChartModel {
+    return {
+      name: plotModel.name,
+      timeSeries: [],
+      yAxisLabel: this._deriveYAxisLabel(plotModel)
+    };
+  }
+
+  private _deriveYAxisLabel(plotModel: PlotModel) {
+    switch (plotModel.measurementType) {
+      case MeasurementType.POWER:
+        return 'W';
+      case MeasurementType.VOLTAGE:
+        return 'V';
+      case MeasurementType.TAP:
+        return '';
+      default:
+        return '';
+    }
+  }
+
+  private _findOrCreateTimeSeries(plotModel: PlotModel, component: PlotModelComponent): TimeSeries {
+    const timeSeriesName = component.displayName;
+    const timeSeriesId = `${plotModel.name}_${timeSeriesName}`;
+    if (!this._timeSeries.has(timeSeriesId)) {
+      this._timeSeries.set(timeSeriesId, { name: timeSeriesName, points: [] });
+    }
+    return this._timeSeries.get(timeSeriesId);
   }
 
   private _subscribeToSimulationOutputMeasurementsStream(): Subscription {
@@ -154,15 +182,6 @@ export class MeasurementChartContainer extends React.Component<Props, State> {
     return timeSeries;
   }
 
-  private _findOrCreateTimeSeries(plotModel: PlotModel, component: PlotModelComponent): TimeSeries {
-    const timeSeriesName = component.displayName;
-    const timeSeriesId = `${plotModel.name}_${timeSeriesName}`;
-    if (!this._timeSeries.has(timeSeriesId)) {
-      this._timeSeries.set(timeSeriesId, { name: timeSeriesName, points: [] });
-    }
-    return this._timeSeries.get(timeSeriesId);
-  }
-
   private _getDataPointForTimeSeries(
     plotModel: PlotModel,
     component: PlotModelComponent,
@@ -174,13 +193,13 @@ export class MeasurementChartContainer extends React.Component<Props, State> {
         timestamp: new Date(this._simulationControlService.getOutputTimestamp() * 1000),
         measurement: 0
       };
-      switch (plotModel.componentType) {
-        case ModelDictionaryComponentType.VOLTAGE:
-        case ModelDictionaryComponentType.POWER:
+      switch (plotModel.measurementType) {
+        case MeasurementType.VOLTAGE:
+        case MeasurementType.POWER:
           const valueType = plotModel.useMagnitude ? 'magnitude' : 'angle';
           dataPoint.measurement = measurement[valueType];
           return dataPoint;
-        case ModelDictionaryComponentType.TAP:
+        case MeasurementType.TAP:
           dataPoint.measurement = measurement.value;
           return dataPoint;
       }
@@ -190,26 +209,7 @@ export class MeasurementChartContainer extends React.Component<Props, State> {
     return null;
   }
 
-  private _createDefaultMeasurementChartModel(plotModel: PlotModel): MeasurementChartModel {
-    return {
-      name: plotModel.name,
-      timeSeries: [],
-      yAxisLabel: this._deriveYAxisLabel(plotModel)
-    };
-  }
 
-  private _deriveYAxisLabel(plotModel: PlotModel) {
-    switch (plotModel.componentType) {
-      case ModelDictionaryComponentType.POWER:
-        return 'W';
-      case ModelDictionaryComponentType.VOLTAGE:
-        return 'V';
-      case ModelDictionaryComponentType.TAP:
-        return '';
-      default:
-        return '';
-    }
-  }
   private _resetMeasurementChartModelsWhenSimulationStarts() {
     this._simulationControlService.statusChanges()
       .pipe(

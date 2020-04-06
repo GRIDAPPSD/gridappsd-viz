@@ -122,7 +122,7 @@ export class MeasurementChart extends React.Component<Props, State> {
   }
 
   private _tooClose(dataPoint1: TimeSeriesDataPoint, dataPoint2: TimeSeriesDataPoint) {
-    return Math.abs(this._yScale(dataPoint1.measurement) - this._yScale(dataPoint2.measurement)) <= 5;
+    return Math.abs(this._yScale(dataPoint1.measurement) - this._yScale(dataPoint2.measurement)) <= 2;
   }
 
   private _calculateXYAxisExtents(): { x: [Date, Date], y: [number, number] } {
@@ -231,7 +231,7 @@ export class MeasurementChart extends React.Component<Props, State> {
     if (this.state.overlappingTimeSeries.length === 0 || this.state.overlappingTimeSeries[0].points[0] === undefined) {
       return null;
     }
-    const paddingLeft = 5;
+    const paddingLeft = 10;
     const x = this.margin.left + paddingLeft;
     const paddingBottom = 5;
     const y = this._yScale(this.state.overlappingTimeSeries[0].points[0].measurement) - paddingBottom;

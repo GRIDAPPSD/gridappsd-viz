@@ -40,22 +40,17 @@ export class ServiceConfiguration extends React.Component<Props, State> {
   }
 
   private _buildFormGroupModelForUserOptions() {
-    for (const [optionLabel, userInputSpec] of Object.entries(this.props.service.user_input)) {
-      this.userInputOptionsFormGroupModel.setControl(
-        optionLabel,
-        new FormControlModel(
-          this._formatDefaultValue(userInputSpec),
-          this._resolveValidatorsForUserInputSpec(optionLabel, userInputSpec)
-        )
-      );
+    if ('user_input' in this.props.service) {
+      for (const [optionLabel, userInputSpec] of Object.entries(this.props.service.user_input)) {
+        this.userInputOptionsFormGroupModel.setControl(
+          optionLabel,
+          new FormControlModel(
+            userInputSpec.default_value,
+            this._resolveValidatorsForUserInputSpec(optionLabel, userInputSpec)
+          )
+        );
+      }
     }
-  }
-
-  private _formatDefaultValue(userInputSpec: ServiceConfigUserInputSpec) {
-    if (userInputSpec.type === 'object') {
-      return JSON.stringify(userInputSpec.default_value, null, 4);
-    }
-    return userInputSpec.default_value;
   }
 
   private _resolveValidatorsForUserInputSpec(label: string, userInputSpec: ServiceConfigUserInputSpec) {
@@ -84,6 +79,9 @@ export class ServiceConfiguration extends React.Component<Props, State> {
   }
 
   render() {
+    if (!('user_input' in this.props.service)) {
+      return null;
+    }
     return (
       <FormGroup
         className='service-configuration'

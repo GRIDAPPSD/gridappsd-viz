@@ -26,7 +26,14 @@ export class PortalRenderer extends React.Component<Props, State> {
   constructor(props: Props = PortalRenderer.defaultProps) {
     super(props);
 
-    this.container.className = this.props.containerClassName || 'portal-renderer';
+    if (!props.portal) {
+      props.portal = document.body;
+    }
+
+    this.container.className = 'portal-renderer';
+    if (this.props.containerClassName) {
+      this.container.className += ' ' + this.props.containerClassName;
+    }
     props.portal.appendChild(this.container);
 
     this.unmount = this.unmount.bind(this);
@@ -34,7 +41,10 @@ export class PortalRenderer extends React.Component<Props, State> {
 
   componentDidUpdate(prevProps: Props) {
     if (this.props.containerClassName !== prevProps.containerClassName) {
-      this.container.className = this.props.containerClassName || 'portal-renderer';
+      this.container.className = 'portal-renderer';
+      if (this.props.containerClassName) {
+        this.container.className += ' ' + this.props.containerClassName;
+      }
     }
   }
 

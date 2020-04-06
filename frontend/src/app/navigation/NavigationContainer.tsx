@@ -3,7 +3,7 @@ import { Subject, Subscription } from 'rxjs';
 import { takeUntil, map } from 'rxjs/operators';
 
 import { Navigation } from './Navigation';
-import { Simulation, SimulationQueue, SimulationConfiguration, SimulationControlService } from '@shared/simulation';
+import { Simulation, SimulationQueue, SimulationConfiguration } from '@shared/simulation';
 import { StompClientConnectionStatus, StompClientService } from '@shared/StompClientService';
 import { ConfigurationManager } from '@shared/ConfigurationManager';
 import { StateStore } from '@shared/state-store';
@@ -23,8 +23,6 @@ interface State {
 
 export class NavigationContainer extends React.Component<Props, State> {
 
-  readonly simulationControlService = SimulationControlService.getInstance();
-
   private readonly _stateStore = StateStore.getInstance();
   private readonly _simulationQueue = SimulationQueue.getInstance();
   private readonly _stompClientService = StompClientService.getInstance();
@@ -35,7 +33,7 @@ export class NavigationContainer extends React.Component<Props, State> {
     super(props);
 
     this.state = {
-      previousSimulations: this._simulationQueue.getAllSimulations(),
+      previousSimulations: this._simulationQueue.getAllSimulations().filter(e => e.didRun),
       stompClientConnectionStatus: this._stompClientService.isActive() ? StompClientConnectionStatus.CONNECTED : StompClientConnectionStatus.CONNECTING,
       version: '',
       activeSimulationIds: []
