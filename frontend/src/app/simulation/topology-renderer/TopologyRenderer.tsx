@@ -21,7 +21,7 @@ import {
   Substation,
   Battery
 } from '@shared/topology';
-import { Tooltip } from '@shared/tooltip';
+import { Tooltip, showTooltipAt, hideTooltip } from '@shared/tooltip';
 import { SwitchControlMenu } from './views/switch-control-menu/SwitchControlMenu';
 import { CapacitorControlMenu } from './views/capacitor-control-menu/CapacitorControlMenu';
 import { RegulatorControlMenu } from './views/regulator-control-menu/RegulatorControlMenu';
@@ -98,7 +98,6 @@ export class TopologyRenderer extends React.Component<Props, State> {
 
     this.showMenuOnComponentClicked = this.showMenuOnComponentClicked.bind(this);
     this.showTooltip = this.showTooltip.bind(this);
-    this.hideTooltip = this.hideTooltip.bind(this);
     this.showNodeSearcher = this.showNodeSearcher.bind(this);
     this.onNodeSearcherClosed = this.onNodeSearcherClosed.bind(this);
     this.locateNode = this.locateNode.bind(this);
@@ -107,7 +106,7 @@ export class TopologyRenderer extends React.Component<Props, State> {
   }
 
   componentWillUnmount() {
-    this.hideTooltip();
+    hideTooltip();
     this._unsubscriber.next();
     this._unsubscriber.complete();
     this._stateStore.update({
@@ -909,7 +908,7 @@ export class TopologyRenderer extends React.Component<Props, State> {
           className={`topology-renderer__canvas ${this.props.topology.name}`}
           onClick={this.showMenuOnComponentClicked}
           onMouseOver={this.showTooltip}
-          onMouseOut={this.hideTooltip}>
+          onMouseOut={hideTooltip}>
           <defs>
             <marker
               id='arrow'
@@ -1041,8 +1040,7 @@ export class TopologyRenderer extends React.Component<Props, State> {
         if (target.classed('topology-renderer__canvas__node') || target.classed('topology-renderer__canvas__symbol')) {
           const node = target.datum() as Node;
           const content = `${this._capitalize(node.type.replace(/-/g, ' '))}: ${node.name}`;
-          this._tooltip = new Tooltip({ position: 'bottom', content });
-          this._tooltip.showAt(target.node());
+          showTooltipAt(target.node(), content);
         }
       });
   }
@@ -1055,12 +1053,6 @@ export class TopologyRenderer extends React.Component<Props, State> {
 
   private _capitalize(value: string) {
     return value ? value[0].toUpperCase() + value.substr(1) : '';
-  }
-
-  hideTooltip() {
-    clearTimeout(this._timer);
-    this._tooltip?.hide();
-    this._tooltip = null;
   }
 
   showNodeSearcher() {
