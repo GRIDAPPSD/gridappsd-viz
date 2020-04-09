@@ -58,7 +58,7 @@ export class VoltageViolationContainer extends React.Component<Props, State> {
           const state = {
             totalVoltageViolations: violatingValues.length,
             violationsAtZero,
-            voltageViolationTimestamp: this._dateTimeService.format(new Date())
+            voltageViolationTimestamp: this._dateTimeService.format(this._simulationControlService.getOutputTimestamp())
           };
           this.setState(state);
           this._simulationControlService.syncSimulationSnapshotState(state);

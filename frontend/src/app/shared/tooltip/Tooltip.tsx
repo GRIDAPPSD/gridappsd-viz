@@ -28,8 +28,10 @@ export class Tooltip extends React.Component<Props, State> {
 
   constructor(props: Props) {
     super(props);
+
     this.state = {
     };
+
     this._anchor = props.anchor;
 
     this.show = this.show.bind(this);
@@ -271,4 +273,17 @@ export class Tooltip extends React.Component<Props, State> {
     }, 0);
   }
 
+}
+
+let tooltip: Tooltip;
+
+export function showTooltipAt(anchor: Element, content: string | React.ReactElement<any>, position: 'top' | 'left' | 'right' | 'bottom' = 'bottom') {
+  tooltip?.hide();
+  tooltip = new Tooltip({ content, position });
+  tooltip.showAt(anchor);
+}
+
+export function hideTooltip() {
+  tooltip?.hide();
+  tooltip = null;
 }
