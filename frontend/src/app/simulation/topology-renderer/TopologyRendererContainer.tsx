@@ -236,7 +236,7 @@ export class TopologyRendererContainer extends React.Component<Props, State> {
               y1: datum.y2,
               manual: datum.manual === 'manual',
               controlModel: RegulatorControlMode.UNSPECIFIED,
-              phaseValues: {},
+              phaseValues: null,
               phases: this.props.phases.get(datum.name),
               mRIDs: resolvedMRIDs
             });
@@ -294,7 +294,7 @@ export class TopologyRendererContainer extends React.Component<Props, State> {
       }
       node.x1 = Math.trunc(node.x1);
       node.y1 = Math.trunc(node.y1);
-      if (node.type === 'switch') {
+      if (node.type === NodeType.SWITCH) {
         if (coordinatesInLatLong) {
           const { x, y } = this._latLongToXY((node as Switch).x2, (node as Switch).y2);
           (node as Switch).x2 = x;

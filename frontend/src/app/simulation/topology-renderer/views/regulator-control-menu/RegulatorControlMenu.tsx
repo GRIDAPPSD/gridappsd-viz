@@ -10,8 +10,6 @@ import { Validators } from '@shared/form/validation';
 import './RegulatorControlMenu.light.scss';
 import './RegulatorControlMenu.dark.scss';
 
-export type RegulatorControlMenuFormGroupModel = Pick<Regulator, 'controlMode' | 'manual'>;
-
 interface Props {
   left: number;
   top: number;
@@ -72,6 +70,45 @@ export class RegulatorControlMenu extends React.Component<Props, State> {
     return null;
   }
 
+  private _addFormGroupModelForLineDropCompensationControlMode() {
+    const formGroupModel = new FormGroupModel<Regulator['phaseValues']>();
+    for (const phase of this.props.regulator.phases) {
+      const { lineDropR, lineDropX, tap } = this.props.regulator.phaseValues?.[phase] || { lineDropR: 0, lineDropX: 0, tap: 0 };
+      formGroupModel.setControl(
+        phase,
+        new FormGroupModel({
+          lineDropR: new FormControlModel(lineDropR, this._getValidators('LineDropR')),
+          lineDropX: new FormControlModel(lineDropX, this._getValidators('lineDropX')),
+          tap
+        })
+      );
+    }
+    return formGroupModel;
+  }
+
+  private _getValidators(controlDisplayName: string) {
+    return [
+      Validators.checkNotEmpty(controlDisplayName),
+      Validators.checkValidNumber(controlDisplayName)
+    ];
+  }
+
+  private _addFormGroupModelForManualControlMode() {
+    const formGroupModel = new FormGroupModel<Regulator['phaseValues']>();
+    for (const phase of this.props.regulator.phases) {
+      const { lineDropR, lineDropX, tap } = this.props.regulator.phaseValues?.[phase] || { lineDropR: 0, lineDropX: 0, tap: 0 };
+      formGroupModel.setControl(
+        phase,
+        new FormGroupModel({
+          lineDropR,
+          lineDropX,
+          tap: new FormControlModel(tap, this._getValidators(`Tap ${phase}`)),
+        })
+      );
+    }
+    return formGroupModel;
+  }
+
   componentDidMount() {
     this.regulatorControlMenuFormGroupModel.findControl('controlMode')
       .valueChanges()
@@ -102,45 +139,6 @@ export class RegulatorControlMenu extends React.Component<Props, State> {
           });
         }
       });
-  }
-
-  private _addFormGroupModelForLineDropCompensationControlMode() {
-    const formGroupModel = new FormGroupModel<Regulator['phaseValues']>();
-    for (const phase of this.props.regulator.phases) {
-      const { lineDropR, lineDropX, tap } = this.props.regulator.phaseValues[phase] || { lineDropR: 0, lineDropX: 0, tap: 0 };
-      formGroupModel.setControl(
-        phase,
-        new FormGroupModel({
-          lineDropR: new FormControlModel(lineDropR, this._getValidators('LineDropR')),
-          lineDropX: new FormControlModel(lineDropX, this._getValidators('lineDropX')),
-          tap
-        })
-      );
-    }
-    return formGroupModel;
-  }
-
-  private _getValidators(controlDisplayName: string) {
-    return [
-      Validators.checkNotEmpty(controlDisplayName),
-      Validators.checkValidNumber(controlDisplayName)
-    ];
-  }
-
-  private _addFormGroupModelForManualControlMode() {
-    const formGroupModel = new FormGroupModel<Regulator['phaseValues']>();
-    for (const phase of this.props.regulator.phases) {
-      const { lineDropR, lineDropX, tap } = this.props.regulator.phaseValues[phase] || { lineDropR: 0, lineDropX: 0, tap: 0 };
-      formGroupModel.setControl(
-        phase,
-        new FormGroupModel({
-          lineDropR,
-          lineDropX,
-          tap: new FormControlModel(tap, this._getValidators(`Tap ${phase}`)),
-        })
-      );
-    }
-    return formGroupModel;
   }
 
   componentWillUnmount() {

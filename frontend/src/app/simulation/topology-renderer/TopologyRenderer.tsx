@@ -81,10 +81,8 @@ export class TopologyRenderer extends React.Component<Props, State> {
   private readonly _unsubscriber = new Subject<void>();
   private readonly _elementsToToggleDuringSimulation = new Map<string, Element>();
 
-  private _svgSelection: Selection<SVGElement, any, any, any> = null;
   private _containerSelection: Selection<SVGElement, any, any, any> = null;
   private _showNodeSymbols = false;
-  private _tooltip: Tooltip;
   private _timer: any;
   private _switches: Switch[];
 
@@ -145,13 +143,8 @@ export class TopologyRenderer extends React.Component<Props, State> {
           this._elementsToToggleDuringSimulation.get(switchNodeKey),
           this._elementsToToggleDuringSimulation.get(switchSymbolKey)
         ]);
-        if (swjtch.open) {
-          selections.classed('closed', false);
-          selections.classed('open', true);
-        } else {
-          selections.classed('closed', true);
-          selections.classed('open', false);
-        }
+        selections.classed('open', swjtch.open);
+        selections.classed('closed', !swjtch.open);
       }
     }
   }
@@ -243,8 +236,7 @@ export class TopologyRenderer extends React.Component<Props, State> {
     this.svgRef.current.setAttribute('viewBox', `0 0 ${canvasBoundingBox.width} ${canvasBoundingBox.height}`);
     this._xScale.range([spacing, canvasBoundingBox.width - spacing]);
     this._yScale.range([spacing, canvasBoundingBox.height - spacing]);
-    this._svgSelection = this.canvasTransformService.bindToSvgCanvas(this.svgRef.current);
-    this._containerSelection = this._svgSelection.select<SVGGElement>('.topology-renderer__canvas__container');
+    this._containerSelection = this.canvasTransformService.bindToSvgCanvas(this.svgRef.current).select('.topology-renderer__canvas__container');
     this.canvasTransformService.onTransformed()
       .pipe(takeUntil(this._unsubscriber))
       .subscribe({
@@ -326,6 +318,7 @@ export class TopologyRenderer extends React.Component<Props, State> {
       map.set(edge.to.name, edge);
       return map;
     }, new Map<string, Edge>());
+
     const nodeRadius = this.isModelLarge() ? 1 : 3;
 
     this._xScale.domain(extent(topology.nodes, (d: Node) => d.x1));
@@ -974,18 +967,21 @@ export class TopologyRenderer extends React.Component<Props, State> {
   }
 
   showMenuOnComponentClicked(event: React.MouseEvent) {
-    const target = select(event.target as SVGElement);
-    if (target.classed('switch')) {
-      this._onSwitchClicked(target, event.clientX, event.clientY);
-    } else if (target.classed('capacitor')) {
-      this._onCapacitorClicked(target, event.clientX, event.clientY);
-    } else if (target.classed('regulator')) {
-      this._onRegulatorClicked(target, event.clientX, event.clientY);
+    const node = select(event.target as SVGElement).datum() as Node;
+    switch (node?.type) {
+      case NodeType.SWITCH:
+        this._onSwitchClicked(node as Switch, event.clientX, event.clientY);
+        break;
+      case NodeType.CAPACITOR:
+        this._onCapacitorClicked(node as Capacitor, event.clientX, event.clientY);
+        break;
+      case NodeType.REGULATOR:
+        this._onRegulatorClicked(node as Regulator, event.clientX, event.clientY);
+        break;
     }
   }
 
-  private _onSwitchClicked(clickedElement: Selection<SVGElement, any, SVGElement, any>, clickX: number, clickY: number) {
-    const swjtch = clickedElement.datum() as Switch;
+  private _onSwitchClicked(swjtch: Switch, clickX: number, clickY: number) {
     const portalRenderer = new PortalRenderer();
     portalRenderer.mount(
       <SwitchControlMenu
@@ -1003,8 +999,7 @@ export class TopologyRenderer extends React.Component<Props, State> {
     }
   }
 
-  private _onCapacitorClicked(clickedElement: Selection<SVGElement, any, SVGElement, any>, clickX: number, clickY: number) {
-    const capacitor = clickedElement.datum() as Capacitor;
+  private _onCapacitorClicked(capacitor: Capacitor, clickX: number, clickY: number) {
     const portalRenderer = new PortalRenderer();
     portalRenderer.mount(
       <CapacitorControlMenu
@@ -1018,8 +1013,7 @@ export class TopologyRenderer extends React.Component<Props, State> {
     );
   }
 
-  private _onRegulatorClicked(clickedElement: Selection<SVGElement, any, SVGElement, any>, clickX: number, clickY: number) {
-    const regulator = clickedElement.datum() as Regulator;
+  private _onRegulatorClicked(regulator: Regulator, clickX: number, clickY: number) {
     const portalRenderer = new PortalRenderer();
     portalRenderer.mount(
       <RegulatorControlMenu
@@ -1034,18 +1028,19 @@ export class TopologyRenderer extends React.Component<Props, State> {
   }
 
   showTooltip(event: React.SyntheticEvent) {
-    const target = select(event.target as SVGElement);
+    const eventTarget = event.target as SVGElement;
     this._timeout(250)
       .then(() => {
-        if (target.classed('topology-renderer__canvas__node') || target.classed('topology-renderer__canvas__symbol')) {
-          const node = target.datum() as Node;
+        const node = select(eventTarget).datum() as Node;
+        if (node) {
           const content = `${this._capitalize(node.type.replace(/-/g, ' '))}: ${node.name}`;
-          showTooltipAt(target.node(), content);
+          showTooltipAt(eventTarget, content);
         }
       });
   }
 
   private _timeout(duration: number) {
+    clearTimeout(this._timer);
     return new Promise(resolve => {
       this._timer = setTimeout(resolve, duration);
     });

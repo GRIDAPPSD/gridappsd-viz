@@ -12,8 +12,8 @@ interface Props {
 
 export function NewAlarmNotification(props: Props) {
   const style = {
-    left: Infinity,
-    top: Infinity,
+    left: undefined,
+    top: undefined,
     width: 0,
     height: 0,
   };

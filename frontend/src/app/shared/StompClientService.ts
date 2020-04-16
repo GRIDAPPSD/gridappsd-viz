@@ -62,7 +62,9 @@ export class StompClientService {
             brokerURL: `ws://${host}`,
             heartbeatIncoming: 0,
             heartbeatOutgoing: 0,
-            reconnectDelay: 0
+            reconnectDelay: 0,
+            debug: console.log,
+            logRawCommunication: true
           });
 
           this._username = sessionStorage.getItem('username');
