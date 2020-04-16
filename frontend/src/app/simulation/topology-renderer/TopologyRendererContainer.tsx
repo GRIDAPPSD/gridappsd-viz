@@ -236,7 +236,7 @@ export class TopologyRendererContainer extends React.Component<Props, State> {
               y1: datum.y2,
               manual: datum.manual === 'manual',
               controlModel: RegulatorControlMode.UNSPECIFIED,
-              phaseValues: {},
+              phaseValues: null,
               phases: this.props.phases.get(datum.name),
               mRIDs: resolvedMRIDs
             });

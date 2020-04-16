@@ -1,13 +1,5 @@
 .node-searcher {
-    position: fixed;
-    left: 0;
-    top: 0;
-    width: 100vw;
-    height: 100vh;
-    z-index: 500;
-    display: flex;
-    flex-flow: column;
-    align-items: center;
+    pointer-events: all;
 
     .backdrop {
         z-index: -1;

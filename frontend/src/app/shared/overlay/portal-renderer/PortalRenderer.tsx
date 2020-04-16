@@ -66,6 +66,9 @@ export class PortalRenderer extends React.Component<Props, State> {
     if (this.props.portal.contains(this.container)) {
       this.props.portal.removeChild(this.container);
     }
+    if (this.props.portal !== document.body) {
+      this.props.portal.parentElement.removeChild(this.props.portal);
+    }
     unmountComponentAtNode(this.container);
   }
 

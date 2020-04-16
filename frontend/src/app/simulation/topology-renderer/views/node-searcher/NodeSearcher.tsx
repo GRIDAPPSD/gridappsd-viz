@@ -143,7 +143,7 @@ export class NodeSearcher extends React.Component<Props, State> {
       return null;
     }
     return (
-      <PortalRenderer>
+      <PortalRenderer containerClassName='node-searcher-container'>
         <Fade in={this.state.show}>
           <div
             ref={this.nodeSearcherElementRef}

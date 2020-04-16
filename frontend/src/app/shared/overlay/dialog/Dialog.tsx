@@ -72,9 +72,7 @@ export class Dialog extends React.Component<Props, State> {
             top: this.props.top === 0 ? undefined : this.props.top
           }}
           onAnimationEnd={this.onAnimationEnd}>
-          {
-            this.props.children
-          }
+          {this.props.children}
         </div>
       </PortalRenderer>
     );
