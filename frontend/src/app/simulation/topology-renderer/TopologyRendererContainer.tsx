@@ -65,8 +65,8 @@ export class TopologyRendererContainer extends React.Component<Props, State> {
     this.state = {
       topology: {
         name: this.activeSimulationConfig.simulation_config.simulation_name,
-        nodes: [],
-        edges: [],
+        nodeMap: new Map(),
+        edgeMap: new Map,
         inverted: false
       },
       isFetching: true,
@@ -157,11 +157,10 @@ export class TopologyRendererContainer extends React.Component<Props, State> {
     const feeder = model.feeders[0];
     const renderableTopology: RenderableTopology = {
       name: feeder.name,
-      nodes: [],
-      edges: [],
+      nodeMap: new Map(),
+      edgeMap: new Map(),
       inverted: false
     };
-    const nodeMap = new Map<string, Node>();
 
     for (const group of ['batteries', 'switches', 'solarpanels', 'swing_nodes', 'transformers', 'capacitors', 'regulators']) {
       for (const datum of feeder[group]) {
@@ -242,33 +241,42 @@ export class TopologyRendererContainer extends React.Component<Props, State> {
             });
             break;
         }
-        nodeMap.set(node.name, node);
+        renderableTopology.nodeMap.set(node.name, node);
       }
     }
 
     for (const overheadLine of feeder.overhead_lines) {
-      const fromNode = nodeMap.get(overheadLine.from) || this._createNewNode({ name: overheadLine.from });
-      const toNode = nodeMap.get(overheadLine.to) || this._createNewNode({ name: overheadLine.to });
-      if (!nodeMap.has(fromNode.name)) {
-        fromNode.x1 = overheadLine.x1;
-        fromNode.y1 = overheadLine.y1;
-        nodeMap.set(fromNode.name, fromNode);
+      let fromNode = renderableTopology.nodeMap.get(overheadLine.from);
+      let toNode = renderableTopology.nodeMap.get(overheadLine.to);
+
+      if (!fromNode) {
+        fromNode = this._createNewNode({
+          name: overheadLine.from,
+          x1: overheadLine.x1,
+          y1: overheadLine.y1
+        });
+        renderableTopology.nodeMap.set(fromNode.name, fromNode);
       }
-      if (!nodeMap.has(toNode.name)) {
-        toNode.x1 = overheadLine.x2;
-        toNode.y1 = overheadLine.y2;
-        nodeMap.set(toNode.name, toNode);
+      if (!toNode) {
+        toNode = this._createNewNode({
+          name: overheadLine.to,
+          x1: overheadLine.x2,
+          y1: overheadLine.y2
+        });
+        renderableTopology.nodeMap.set(toNode.name, toNode);
       }
-      renderableTopology.edges.push({
-        name: overheadLine.name,
-        from: fromNode,
-        to: toNode,
-      });
+      renderableTopology.edgeMap.set(
+        overheadLine.name,
+        {
+          name: overheadLine.name,
+          from: fromNode,
+          to: toNode
+        }
+      );
     }
 
-    this._resolveCoordinates(nodeMap);
+    this._resolveCoordinates(renderableTopology.nodeMap);
 
-    renderableTopology.nodes = [...nodeMap.values()];
     return renderableTopology;
   }
 
