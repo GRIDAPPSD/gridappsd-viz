@@ -109,7 +109,6 @@ module.exports = env => {
         disableDotRule: true,
         htmlAcceptHeaders: ['text/html', 'application/xhtml+xml']
       },
-      open: true,
       proxy: {
         '/': {
           target: 'http://localhost:8092'

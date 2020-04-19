@@ -2,17 +2,13 @@ import * as React from 'react';
 import { Subject } from 'rxjs';
 import { filter, takeUntil, map, switchMap, take, tap } from 'rxjs/operators';
 
-import {
-  SimulationControlService,
-  SIMULATION_STATUS_LOG_TOPIC
-} from '@shared/simulation';
+import { SimulationControlService } from '@shared/simulation';
 import { SimulationStatus } from '@commons/SimulationStatus';
 import { SimulationControl } from './SimulationControl';
 import { StateStore } from '@shared/state-store';
 import { StompClientService, StompClientConnectionStatus } from '@shared/StompClientService';
 import { ModelDictionaryComponent } from '@shared/topology';
 import { PlotModel } from '@shared/plot-model/PlotModel';
-import { SimulationStatusLogMessage } from './models/SimulationStatusLogMessage';
 
 interface Props {
 }
@@ -42,7 +38,6 @@ export class SimulationControlContainer extends React.Component<Props, State> {
       modelDictionaryComponentsWithGroupedPhases: []
     };
 
-    this.startSimulation = this.startSimulation.bind(this);
     this.updatePlotModels = this.updatePlotModels.bind(this);
   }
 
@@ -76,7 +71,7 @@ export class SimulationControlContainer extends React.Component<Props, State> {
             });
           }
         }),
-        filter(status => status === SimulationStatus.STARTED),
+        filter(status => status === SimulationStatus.STARTING),
         switchMap(() => this._stateStore.select('simulationId')),
         takeUntil(this._unsubscriber),
         filter(simulationId => simulationId !== '')
@@ -126,32 +121,13 @@ export class SimulationControlContainer extends React.Component<Props, State> {
         simulationStatus={this.state.simulationStatus}
         existingPlotModels={this.state.existingPlotModels}
         modelDictionaryComponentsWithConsolidatedPhases={this.state.modelDictionaryComponentsWithGroupedPhases}
-        onStartSimulation={this.startSimulation}
+        onStartSimulation={this.simulationControlService.startSimulation}
         onStopSimulation={this.simulationControlService.stopSimulation}
         onPauseSimulation={this.simulationControlService.pauseSimulation}
         onResumeSimulation={this.simulationControlService.resumeSimulation}
         onResumeThenPauseSimulation={this.simulationControlService.resumeThenPauseSimulationAfter}
         onPlotModelCreationDone={this.updatePlotModels} />
     );
-  }
-
-  startSimulation() {
-    this._stopSimulationAfterReceivingCompleteProcessStatusMessage();
-    this.simulationControlService.startSimulation();
-  }
-
-  private _stopSimulationAfterReceivingCompleteProcessStatusMessage() {
-    this._stateStore.select('simulationId')
-      .pipe(
-        filter(simulationId => simulationId !== ''),
-        switchMap(id => this._stompClientService.readFrom(`${SIMULATION_STATUS_LOG_TOPIC}.${id}`)),
-        map((JSON.parse as (payload: string) => SimulationStatusLogMessage)),
-        filter(message => message.processStatus === 'COMPLETE'),
-        take(1)
-      )
-      .subscribe({
-        next: this.simulationControlService.stopSimulation
-      });
   }
 
   updatePlotModels(plotModels: PlotModel[]) {

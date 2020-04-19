@@ -6,3 +6,4 @@ export * from './SimulationControlService';
 export * from './SimulationOutputPayload';
 export * from './topics';
 export * from './default-simulation-configuration';
+export * from './SimulationStatusLogMessage';

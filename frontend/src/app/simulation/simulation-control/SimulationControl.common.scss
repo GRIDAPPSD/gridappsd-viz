@@ -50,6 +50,12 @@
     cursor: pointer;
 }
 
+.simulation-control__simulation-starting-message {
+    display: inline-block;
+    font-size: 1em;
+    white-space: nowrap;
+}
+
 .simulation-control__action {
     z-index: 1;
 

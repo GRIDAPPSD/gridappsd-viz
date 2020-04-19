@@ -91,7 +91,7 @@ export class VoltageViolationContainer extends React.Component<Props, State> {
     this._simulationControlService.statusChanges()
       .pipe(
         takeUntil(this._unsubscriber),
-        filter(status => status === SimulationStatus.STARTED && this._simulationControlService.didUserStartActiveSimulation())
+        filter(status => status === SimulationStatus.STARTING && this._simulationControlService.didUserStartActiveSimulation())
       )
       .subscribe({
         next: () => {
