@@ -13,6 +13,7 @@ import { PortalRenderer } from '@shared/overlay/portal-renderer';
 import { Input, FormControlModel } from '@shared/form';
 import { Backdrop } from '@shared/overlay/backdrop';
 import { Validators } from '@shared/form/validation';
+import { ThreeDots } from '@shared/three-dots';
 
 import './SimulationControl.light.scss';
 import './SimulationControl.dark.scss';
@@ -77,51 +78,7 @@ export class SimulationControl extends React.Component<Props, State> {
           </div>
         }
         <Restricted roles={['testmanager']}>
-          {
-            this.props.simulationStatus === SimulationStatus.STARTED || this.props.simulationStatus === SimulationStatus.RESUMED
-              ? (
-                <>
-                  <Tooltip content='Pause simulation'>
-                    <IconButton
-                      icon='pause'
-                      className='simulation-control__action'
-                      onClick={this.props.onPauseSimulation} />
-                  </Tooltip>
-                  <Tooltip content='Stop simulation'>
-                    <IconButton
-                      icon='stop'
-                      className='simulation-control__action'
-                      onClick={this.props.onStopSimulation} />
-                  </Tooltip>
-                </>
-              )
-              : this.props.simulationStatus === SimulationStatus.PAUSED
-                ? (
-                  <>
-                    <Tooltip content='Resume simulation'>
-                      <IconButton
-                        icon='play_arrow'
-                        className='simulation-control__action resume'
-                        onClick={this.showDelayedPauseDurationInputBox} />
-                    </Tooltip>
-                    <Tooltip content='Stop simulation'>
-                      <IconButton
-                        icon='stop'
-                        className='simulation-control__action'
-                        onClick={this.props.onStopSimulation} />
-                    </Tooltip>
-                  </>
-                )
-                : (
-                  <Tooltip content='Start simulation'>
-                    <IconButton
-                      icon='play_arrow'
-                      disabled={this.props.modelDictionaryComponentsWithConsolidatedPhases.length === 0}
-                      className='simulation-control__action start'
-                      onClick={this.props.onStartSimulation} />
-                  </Tooltip>
-                )
-          }
+          {this.showSimulationControlButtons()}
           <Tooltip content='Edit plots'>
             <IconButton
               icon='show_chart'
@@ -144,6 +101,62 @@ export class SimulationControl extends React.Component<Props, State> {
         simulationIdCopiedSuccessfully: false
       });
     }, 2000);
+  }
+
+  showSimulationControlButtons() {
+    switch (this.props.simulationStatus) {
+      case SimulationStatus.STARTING:
+        return (
+          <span className='simulation-control__simulation-starting-message'>
+            Simulation starting<ThreeDots />
+          </span>
+        );
+      case SimulationStatus.STARTED:
+      case SimulationStatus.RESUMED:
+        return (
+          <>
+            <Tooltip content='Pause simulation'>
+              <IconButton
+                icon='pause'
+                className='simulation-control__action'
+                onClick={this.props.onPauseSimulation} />
+            </Tooltip>
+            <Tooltip content='Stop simulation'>
+              <IconButton
+                icon='stop'
+                className='simulation-control__action'
+                onClick={this.props.onStopSimulation} />
+            </Tooltip>
+          </>
+        );
+      case SimulationStatus.PAUSED:
+        return (
+          <>
+            <Tooltip content='Resume simulation'>
+              <IconButton
+                icon='play_arrow'
+                className='simulation-control__action resume'
+                onClick={this.showDelayedPauseDurationInputBox} />
+            </Tooltip>
+            <Tooltip content='Stop simulation'>
+              <IconButton
+                icon='stop'
+                className='simulation-control__action'
+                onClick={this.props.onStopSimulation} />
+            </Tooltip>
+          </>
+        );
+      default:
+        return (
+          <Tooltip content='Start simulation'>
+            <IconButton
+              icon='play_arrow'
+              disabled={this.props.modelDictionaryComponentsWithConsolidatedPhases.length === 0}
+              className='simulation-control__action start'
+              onClick={this.props.onStartSimulation} />
+          </Tooltip>
+        );
+    }
   }
 
   showDelayedPauseDurationInputBox(event: React.MouseEvent) {

@@ -1,10 +1,10 @@
 import { Subject, Observable, Subscription, BehaviorSubject, timer } from 'rxjs';
-import { filter, map, pluck, debounce, takeWhile } from 'rxjs/operators';
+import { filter, map, pluck, debounce, takeWhile, switchMap, take } from 'rxjs/operators';
 import * as socketIo from 'socket.io-client';
 
 import { SimulationConfiguration } from './SimulationConfiguration';
 import { StompClientService, StompClientConnectionStatus } from '@shared/StompClientService';
-import { START_SIMULATION_TOPIC, CONTROL_SIMULATION_TOPIC, SIMULATION_OUTPUT_TOPIC } from './topics';
+import { START_SIMULATION_TOPIC, CONTROL_SIMULATION_TOPIC, SIMULATION_OUTPUT_TOPIC, SIMULATION_STATUS_LOG_TOPIC } from './topics';
 import { SimulationQueue } from './SimulationQueue';
 import { SimulationStatus } from '@commons/SimulationStatus';
 import { SimulationSnapshot, DEFAULT_SIMULATION_SNAPSHOT } from '@commons/SimulationSnapshot';
@@ -14,6 +14,7 @@ import { SimulationOutputMeasurement, SimulationOutputPayload } from '.';
 import { StateStore } from '@shared/state-store';
 import { Simulation } from './Simulation';
 import { ConductingEquipmentType } from '@shared/topology/model-dictionary';
+import { SimulationStatusLogMessage } from './SimulationStatusLogMessage';
 
 interface SimulationStartedEventResponse {
   simulationId: string;
@@ -54,6 +55,7 @@ export class SimulationControlService {
   private _outputTimestamp: number;
   private _simulationOutputMeasurementsStream = new Subject<Map<string, SimulationOutputMeasurement>>();
   private _simulationOutputSubscription: Subscription;
+  private _simulationStatusLogStreamSubscription: Subscription;
   private _currentSimulationId = '';
   private _syncingEnabled = false;
 
@@ -71,6 +73,7 @@ export class SimulationControlService {
     this._onActiveSimulationSnapshotStateReceived();
     this._onSimulationOutputSnapshotStateReceived();
 
+    this.startSimulation = this.startSimulation.bind(this);
     this.stopSimulation = this.stopSimulation.bind(this);
     this.pauseSimulation = this.pauseSimulation.bind(this);
     this.resumeSimulation = this.resumeSimulation.bind(this);
@@ -198,7 +201,7 @@ export class SimulationControlService {
   }
 
   startSimulation() {
-    if (this._currentSimulationStatus !== SimulationStatus.STARTED) {
+    if (this._currentSimulationStatus !== SimulationStatus.STARTED && this._currentSimulationStatus !== SimulationStatus.STARTING) {
       const activeSimulation = this._simulationQueue.getActiveSimulation();
       const simulationConfig = activeSimulation.config;
       const startTime = new Date(simulationConfig.simulation_config.start_time.replace(/-/g, '/'));
@@ -213,13 +216,13 @@ export class SimulationControlService {
       activeSimulation.didRun = true;
       this._didUserStartActiveSimulation = true;
       this._isUserInActiveSimulation = true;
-      this._currentSimulationStatus = SimulationStatus.STARTED;
-      this._currentSimulationStatusNotifer.next(SimulationStatus.STARTED);
+      this._currentSimulationStatus = SimulationStatus.STARTING;
+      this._currentSimulationStatusNotifer.next(SimulationStatus.STARTING);
       if (!this._simulationOutputSubscription) {
         this._simulationOutputSubscription = this._subscribeToSimulationOutputTopic();
       }
       this._subscribeToStartSimulationTopic();
-
+      this._readSimulationProcessStatusFromSimulationLogStream();
       // Reset this state
       this.syncSimulationSnapshotState({
         simulationOutput: null
@@ -240,7 +243,7 @@ export class SimulationControlService {
   private _subscribeToSimulationOutputTopic() {
     return this._stompClientService.readFrom(SIMULATION_OUTPUT_TOPIC)
       .pipe(
-        filter(() => this._currentSimulationStatus === SimulationStatus.STARTED),
+        filter(() => this._currentSimulationStatus === SimulationStatus.STARTED || this._currentSimulationStatus === SimulationStatus.RESUMED),
         map(JSON.parse as (value: string) => SimulationOutputPayload),
         filter(payload => Boolean(payload))
       )
@@ -289,18 +292,37 @@ export class SimulationControlService {
         next: payload => {
           this._currentSimulationId = payload.simulationId;
           this._simulationQueue.updateIdOfActiveSimulation(payload.simulationId);
-          this._socket.emit(
-            SimulationSynchronizationEvent.QUERY_SIMULATION_STATUS,
-            {
-              status: SimulationStatus.STARTED,
-              simulationId: payload.simulationId
-            }
-          );
           this._stateStore.update({
             simulationId: payload.simulationId,
             faultMRIDs: payload.events.map(event => event.faultMRID)
           });
         }
+      });
+  }
+
+  private _readSimulationProcessStatusFromSimulationLogStream() {
+    this._simulationStatusLogStreamSubscription = this._stateStore.select('simulationId')
+      .pipe(
+        filter(simulationId => simulationId !== ''),
+        switchMap(id => this._stompClientService.readFrom(`${SIMULATION_STATUS_LOG_TOPIC}.${id}`)),
+        map((JSON.parse as (payload: string) => SimulationStatusLogMessage)),
+        takeWhile(message => message.processStatus !== 'COMPLETE')
+      )
+      .subscribe({
+        next: message => {
+          if (message.logMessage.startsWith('Started simulation')) {
+            this._currentSimulationStatus = SimulationStatus.STARTED;
+            this._currentSimulationStatusNotifer.next(SimulationStatus.STARTED);
+            this._socket.emit(
+              SimulationSynchronizationEvent.QUERY_SIMULATION_STATUS,
+              {
+                status: SimulationStatus.STARTED,
+                simulationId: this._currentSimulationId
+              }
+            );
+          }
+        },
+        complete: this.stopSimulation
       });
   }
 
@@ -315,6 +337,7 @@ export class SimulationControlService {
           simulationId: this._currentSimulationId
         }
       );
+      this._simulationStatusLogStreamSubscription.unsubscribe();
       this._sendSimulationControlCommand('stop');
       this._didUserStartActiveSimulation = false;
       this._isUserInActiveSimulation = false;

@@ -75,7 +75,7 @@ export class MeasurementValueTableContainer extends React.Component<Props, State
     this._simulationControlService.statusChanges()
       .pipe(
         takeUntil(this._unsubscriber),
-        filter(status => status === SimulationStatus.STARTED && this._simulationControlService.isUserInActiveSimulation())
+        filter(status => status === SimulationStatus.STARTING && this._simulationControlService.isUserInActiveSimulation())
       )
       .subscribe({
         next: () => {
@@ -102,70 +102,70 @@ export class MeasurementValueTableContainer extends React.Component<Props, State
   }
 
   private _subscribeToSimulationOutputMeasurementsStream() {
-    const simulationName = this._simulationQueue.getActiveSimulation().name;
-    const nodeNames: { [key: string]: string[] } = NODES_PER_TOPOLOGY[simulationName];
     this._simulationControlService.simulationOutputMeasurementsReceived()
-      .pipe(
-        takeUntil(this._unsubscriber),
-        filter(() => nodeNames !== undefined)
-      )
+      .pipe(takeUntil(this._unsubscriber))
       .subscribe({
         next: simulationOutputMeasurements => {
-          const measurementValueTables = [];
-          for (const [nodeName, phases] of Object.entries(nodeNames)) {
-            const measurements = {
-              taps: [] as SimulationOutputMeasurement[],
-              voltages: [] as SimulationOutputMeasurement[],
-              powers: [] as SimulationOutputMeasurement[]
-            };
-            // Getting values for taps
-            simulationOutputMeasurements.forEach(measurement => {
-              if (
-                measurement.type === MeasurementType.TAP &&
-                measurement.conductingEquipmentName.includes(nodeName) &&
-                phases.includes(measurement.phases) &&
-                // Discard measurements with duplicate phases
-                measurements.taps.find(e => e.phases === measurement.phases) === undefined
-              ) {
-                measurements.taps.push(measurement);
-              }
-            });
-
-            if (!nodeName.includes('capbank') && !nodeName.includes('c83')) {
+          const simulationName = this._simulationQueue.getActiveSimulation().name;
+          const nodeNames: { [key: string]: string[] } = NODES_PER_TOPOLOGY[simulationName];
+          if (nodeNames) {
+            const measurementValueTables = [];
+            for (const [nodeName, phases] of Object.entries(nodeNames)) {
+              const measurements = {
+                taps: [] as SimulationOutputMeasurement[],
+                voltages: [] as SimulationOutputMeasurement[],
+                powers: [] as SimulationOutputMeasurement[]
+              };
+              // Getting values for taps
               simulationOutputMeasurements.forEach(measurement => {
-                // Getting measurements for voltages
                 if (
-                  measurement.type === MeasurementType.VOLTAGE &&
-                  measurements.taps[0]?.connectivityNode === measurement.connectivityNode &&
+                  measurement.type === MeasurementType.TAP &&
+                  measurement.conductingEquipmentName.includes(nodeName) &&
                   phases.includes(measurement.phases) &&
                   // Discard measurements with duplicate phases
-                  measurements.voltages.find(e => e.phases === measurement.phases) === undefined
+                  measurements.taps.find(e => e.phases === measurement.phases) === undefined
                 ) {
-                  measurements.voltages.push(measurement);
-                }
-
-                // Getting measurements for powers
-                if (
-                  measurement.type === MeasurementType.POWER &&
-                  measurement.conductingEquipmentName === 'hvmv_sub' &&
-                  phases.includes(measurement.phases) &&
-                  // Discard measurements with duplicate phases
-                  measurements.powers.find(e => e.phases === measurement.phases) === undefined
-                ) {
-                  measurements.powers.push(measurement);
+                  measurements.taps.push(measurement);
                 }
               });
-              measurements.voltages.sort((a, b) => a.phases.localeCompare(b.phases));
-              measurements.powers.sort((a, b) => a.phases.localeCompare(b.phases));
+
+              if (!nodeName.includes('capbank') && !nodeName.includes('c83')) {
+                simulationOutputMeasurements.forEach(measurement => {
+                  // Getting measurements for voltages
+                  if (
+                    measurement.type === MeasurementType.VOLTAGE &&
+                    measurements.taps[0]?.connectivityNode === measurement.connectivityNode &&
+                    phases.includes(measurement.phases) &&
+                    // Discard measurements with duplicate phases
+                    measurements.voltages.find(e => e.phases === measurement.phases) === undefined
+                  ) {
+                    measurements.voltages.push(measurement);
+                  }
+
+                  // Getting measurements for powers
+                  if (
+                    measurement.type === MeasurementType.POWER &&
+                    measurement.conductingEquipmentName === 'hvmv_sub' &&
+                    phases.includes(measurement.phases) &&
+                    // Discard measurements with duplicate phases
+                    measurements.powers.find(e => e.phases === measurement.phases) === undefined
+                  ) {
+                    measurements.powers.push(measurement);
+                  }
+                });
+                measurements.taps.sort((a, b) => a.phases.localeCompare(b.phases));
+                measurements.voltages.sort((a, b) => a.phases.localeCompare(b.phases));
+                measurements.powers.sort((a, b) => a.phases.localeCompare(b.phases));
+              }
+              measurementValueTables.push({
+                nodeNameToAttachTo: nodeName,
+                measurements
+              });
             }
-            measurementValueTables.push({
-              nodeNameToAttachTo: nodeName,
-              measurements
+            this.setState({
+              measurementValueTables
             });
           }
-          this.setState({
-            measurementValueTables
-          });
         }
       });
   }

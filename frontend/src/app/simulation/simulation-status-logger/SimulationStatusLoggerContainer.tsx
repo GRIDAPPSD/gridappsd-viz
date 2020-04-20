@@ -92,7 +92,7 @@ export class SimulationStatusLogContainer extends React.Component<Props, State> 
   private _clearAllLogMessagesWhenSimulationStarts() {
     this._simulationControlService.statusChanges()
       .pipe(
-        filter(status => status === SimulationStatus.STARTED && this._simulationControlService.didUserStartActiveSimulation()),
+        filter(status => status === SimulationStatus.STARTING && this._simulationControlService.didUserStartActiveSimulation()),
         takeUntil(this._unsubscriber)
       )
       .subscribe({
