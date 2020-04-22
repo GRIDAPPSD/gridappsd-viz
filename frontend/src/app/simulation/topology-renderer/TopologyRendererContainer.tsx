@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { Subscription } from 'rxjs';
-import { map, takeWhile } from 'rxjs/operators';
+import { takeWhile } from 'rxjs/operators';
 
 import { TopologyRenderer } from './TopologyRenderer';
 import {
@@ -123,12 +123,8 @@ export class TopologyRendererContainer extends React.Component<Props, State> {
   }
 
   private _subscribeToTopologyModelTopic(destination: string) {
-    this._stompClientService.readOnceFrom(destination)
-      .pipe(
-        takeWhile(() => !this._activeSimulationStream.closed),
-        map(JSON.parse as (body: string) => GetTopologyModelRequestPayload),
-        map(payload => typeof payload.data === 'string' ? JSON.parse(payload.data) : payload.data)
-      )
+    this._stompClientService.readOnceFrom<TopologyModel>(destination)
+      .pipe(takeWhile(() => !this._activeSimulationStream.closed))
       .subscribe({
         next: (topologyModel: TopologyModel) => {
           this._processModelForRendering(topologyModel);

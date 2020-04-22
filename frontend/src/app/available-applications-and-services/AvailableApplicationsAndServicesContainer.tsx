@@ -1,5 +1,4 @@
 import * as React from 'react';
-import { map } from 'rxjs/operators';
 
 import { GetAvailableApplicationsAndServices } from './models/GetAvailableApplicationsAndServicesRequest';
 import { StompClientService } from '@shared/StompClientService';
@@ -38,8 +37,7 @@ export class AvailableApplicationsAndServicesContainer extends React.Component<P
   }
 
   private _subscribeForApplicationAndServicesResponse(topic: string) {
-    this._stompClientService.readOnceFrom(topic)
-      .pipe(map(JSON.parse as (body: string) => Payload))
+    this._stompClientService.readOnceFrom<Payload>(topic)
       .subscribe({
         next: payload => {
           this.setState({

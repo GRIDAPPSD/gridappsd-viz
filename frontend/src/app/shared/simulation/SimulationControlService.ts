@@ -241,11 +241,11 @@ export class SimulationControlService {
   }
 
   private _subscribeToSimulationOutputTopic() {
-    return this._stompClientService.readFrom(SIMULATION_OUTPUT_TOPIC)
+    return this._stompClientService.readFrom<SimulationOutputPayload>(SIMULATION_OUTPUT_TOPIC)
       .pipe(
-        filter(() => this._currentSimulationStatus === SimulationStatus.STARTED || this._currentSimulationStatus === SimulationStatus.RESUMED),
-        map(JSON.parse as (value: string) => SimulationOutputPayload),
-        filter(payload => Boolean(payload))
+        filter(
+          payload => (this._currentSimulationStatus === SimulationStatus.STARTED || this._currentSimulationStatus === SimulationStatus.RESUMED) && Boolean(payload)
+        )
       )
       .subscribe({
         next: payload => {
@@ -286,8 +286,7 @@ export class SimulationControlService {
   }
 
   private _subscribeToStartSimulationTopic() {
-    this._stompClientService.readOnceFrom(START_SIMULATION_TOPIC)
-      .pipe(map(JSON.parse as (payload: string) => SimulationStartedEventResponse))
+    this._stompClientService.readOnceFrom<SimulationStartedEventResponse>(START_SIMULATION_TOPIC)
       .subscribe({
         next: payload => {
           this._currentSimulationId = payload.simulationId;
@@ -304,8 +303,7 @@ export class SimulationControlService {
     this._simulationStatusLogStreamSubscription = this._stateStore.select('simulationId')
       .pipe(
         filter(simulationId => simulationId !== ''),
-        switchMap(id => this._stompClientService.readFrom(`${SIMULATION_STATUS_LOG_TOPIC}.${id}`)),
-        map((JSON.parse as (payload: string) => SimulationStatusLogMessage)),
+        switchMap(id => this._stompClientService.readFrom<SimulationStatusLogMessage>(`${SIMULATION_STATUS_LOG_TOPIC}.${id}`)),
         takeWhile(message => message.processStatus !== 'COMPLETE')
       )
       .subscribe({

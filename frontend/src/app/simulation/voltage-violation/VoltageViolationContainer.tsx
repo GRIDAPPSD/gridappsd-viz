@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { zip, Subject } from 'rxjs';
-import { switchMap, map, filter, takeWhile, takeUntil, timestamp } from 'rxjs/operators';
+import { switchMap, filter, takeWhile, takeUntil, timestamp } from 'rxjs/operators';
 
 import { VoltageViolation } from './VoltageViolation';
 import { StompClientService } from '@shared/StompClientService';
@@ -46,9 +46,8 @@ export class VoltageViolationContainer extends React.Component<Props, State> {
     return this._stateStore.select('simulationId')
       .pipe(
         filter(id => id !== '' && this._simulationControlService.didUserStartActiveSimulation()),
-        switchMap(id => this._stompClientService.readFrom(`/topic/goss.gridappsd.simulation.voltage_violation.${id}.output`)),
+        switchMap(id => this._stompClientService.readFrom<{ [mrid: string]: number }>(`/topic/goss.gridappsd.simulation.voltage_violation.${id}.output`)),
         takeWhile(this._simulationControlService.isUserInActiveSimulation),
-        map(JSON.parse as (payload: string) => { [mrid: string]: number }),
         takeUntil(this._unsubscriber)
       )
       .subscribe({

@@ -34,7 +34,5 @@ export class GetModelDictionaryRequest implements MessageRequest {
 }
 
 export interface GetModelDictionaryResponsePayload {
-  data: {
-    feeders: ModelDictionary[];
-  };
+  feeders: ModelDictionary[];
 }

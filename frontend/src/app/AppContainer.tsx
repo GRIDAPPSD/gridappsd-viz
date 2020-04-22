@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { zip } from 'rxjs';
-import { map, take, filter } from 'rxjs/operators';
+import { take, filter } from 'rxjs/operators';
 
 import { App } from './App';
 import { Application } from '@shared/Application';
@@ -108,8 +108,7 @@ export class AppContainer extends React.Component<Props, State> {
   }
 
   private _subscribeToAvailableApplicationsTopic(destination: string) {
-    this._stompClientService.readOnceFrom(destination)
-      .pipe(map(JSON.parse as (body: string) => GetAvailableApplicationsRequestPayload))
+    this._stompClientService.readOnceFrom<GetAvailableApplicationsRequestPayload>(destination)
       .subscribe({
         next: payload => {
           this._stateStore.update({
@@ -134,16 +133,12 @@ export class AppContainer extends React.Component<Props, State> {
   }
 
   private _subscribeToFeederModelsTopic(destination: string) {
-    this._stompClientService.readOnceFrom(destination)
-      .pipe(map(JSON.parse as (body: string) => GetFeederModelsResponsePayload))
+    this._stompClientService.readOnceFrom<GetFeederModelsResponsePayload>(destination)
       .subscribe({
         next: payload => {
           const feederModel = {} as FeederModel;
-          if (typeof payload.data === 'string') {
-            payload.data = JSON.parse(payload.data);
-          }
 
-          for (const binding of payload.data.results.bindings) {
+          for (const binding of payload.results.bindings) {
             const regionId = binding.regionID.value;
             if (!(regionId in feederModel)) {
               feederModel[regionId] = {
@@ -221,14 +216,10 @@ export class AppContainer extends React.Component<Props, State> {
   }
 
   private _subscribeToModelDictionaryTopic(getModelDictionaryRequest: GetModelDictionaryRequest) {
-    this._stompClientService.readOnceFrom(getModelDictionaryRequest.replyTo)
-      .pipe(map(JSON.parse as (body: string) => GetModelDictionaryResponsePayload))
+    this._stompClientService.readOnceFrom<GetModelDictionaryResponsePayload>(getModelDictionaryRequest.replyTo)
       .subscribe({
         next: payload => {
-          if (typeof payload.data === 'string') {
-            payload.data = JSON.parse(payload.data);
-          }
-          const modelDictionary = payload.data.feeders[0];
+          const modelDictionary = payload.feeders[0];
           this._availableModelDictionaries.set(
             getModelDictionaryRequest.requestBody.parameters.model_id,
             modelDictionary
