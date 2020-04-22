@@ -14,30 +14,34 @@ const dateTimeService = DateTimeService.getInstance();
 
 export function CommandEventTable(props: Props) {
   return (
-    <table className='command-event-table'>
+    <table>
       <thead>
         <tr>
-          <th className='command-event-table__header'>occuredDateTime</th>
-          <th className='command-event-table__header'>stopDateTime</th>
-          <th className='command-event-table__header'>forward_differences</th>
-          <th className='command-event-table__header'>reverse_differences</th>
+          <th>occuredDateTime</th>
+          <th>stopDateTime</th>
+          <th>forward_differences</th>
+          <th>reverse_differences</th>
         </tr>
       </thead>
       <tbody>
         {
           props.events.map((event, i) => (
             <tr key={i}>
-              <td className='command-event-table__cell-value'>
-                {dateTimeService.format(event.occuredDateTime)}
+              <td>
+                <div>
+                  {dateTimeService.format(event.occuredDateTime)}
+                </div>
               </td>
-              <td className='command-event-table__cell-value'>
-                {dateTimeService.format(event.stopDateTime)}
+              <td>
+                <div>
+                  {dateTimeService.format(event.stopDateTime)}
+                </div>
               </td>
-              <td className='command-event-table__cell-value'>
-                {renderDifferences(event.message.forward_differences)}
+              <td>
+                {renderDifferenceTable(event.message.forward_differences)}
               </td>
-              <td className='command-event-table__cell-value'>
-                {renderDifferences(event.message.reverse_differences)}
+              <td>
+                {renderDifferenceTable(event.message.reverse_differences)}
               </td>
             </tr>
           ))
@@ -47,28 +51,34 @@ export function CommandEventTable(props: Props) {
   );
 }
 
-function renderDifferences(differences: CommandEventDifference[]) {
+function renderDifferenceTable(differences: CommandEventDifference[]) {
   return (
-    <table className='command-event-table__difference-table'>
+    <table>
       <thead>
         <tr>
-          <th className='command-event-table__difference-table__header'>object</th>
-          <th className='command-event-table__difference-table__header'>attribute</th>
-          <th className='command-event-table__difference-table__header'>value</th>
+          <th>object</th>
+          <th>attribute</th>
+          <th>value</th>
         </tr>
       </thead>
       <tbody>
         {
           differences.map((difference, index) => (
             <tr key={index}>
-              <td className='command-event-table__difference-table__cell-value'>
-                {difference.object}
+              <td>
+                <div>
+                  {difference.object}
+                </div>
               </td>
-              <td className='command-event-table__difference-table__cell-value'>
-                {difference.attribute}
+              <td>
+                <div>
+                  {difference.attribute}
+                </div>
               </td>
-              <td className='command-event-table__difference-table__cell-value'>
-                {difference.value}
+              <td>
+                <div>
+                  {difference.value}
+                </div>
               </td>
             </tr>
           ))
