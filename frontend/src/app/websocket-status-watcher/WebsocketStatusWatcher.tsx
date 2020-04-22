@@ -5,6 +5,7 @@ import { IconButton } from '@shared/buttons';
 import { StompClientConnectionStatus, StompClientService } from '@shared/StompClientService';
 import { MessageBanner } from '@shared/overlay/message-banner';
 import { ThreeDots } from '@shared/three-dots';
+import { PortalRenderer } from '@shared/overlay/portal-renderer';
 
 import './WebsocketStatusWatcher.light.scss';
 import './WebsocketStatusWatcher.dark.scss';
@@ -45,9 +46,11 @@ export class WebsocketStatusWatcher extends React.Component<Props, State> {
       return null;
     }
     return (
-      <MessageBanner>
-        {this._showComponentForCurrentStatus()}
-      </MessageBanner>
+      <PortalRenderer containerClassName='websocket-status-watcher-container'>
+        <MessageBanner>
+          {this._showComponentForCurrentStatus()}
+        </MessageBanner>
+      </PortalRenderer>
     );
   }
 
