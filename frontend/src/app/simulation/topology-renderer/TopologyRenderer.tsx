@@ -168,23 +168,23 @@ export class TopologyRenderer extends React.Component<Props, State> {
           );
           this._elementsToToggleDuringSimulation.set(
             fromNodeKey,
-            this.svgRef.current.querySelector(`.topology-renderer__canvas__node.${edge.from.type}._${edge.from.name}_`)
+            this.svgRef.current.querySelector(`.topology-renderer__canvas__node.${edge.from.type}._${edge.from.name}_:not(.switch)`)
           );
           this._elementsToToggleDuringSimulation.set(
             fromSymbolKey,
-            this.svgRef.current.querySelector(`.topology-renderer__canvas__symbol.${edge.from.type}._${edge.from.name}_`)
+            this.svgRef.current.querySelector(`.topology-renderer__canvas__symbol.${edge.from.type}._${edge.from.name}_:not(.switch)`)
           );
           this._elementsToToggleDuringSimulation.set(
             toNodeKey,
-            this.svgRef.current.querySelector(`.topology-renderer__canvas__node.${edge.to.type}._${edge.to.name}_`)
+            this.svgRef.current.querySelector(`.topology-renderer__canvas__node.${edge.to.type}._${edge.to.name}_:not(.switch)`)
           );
           this._elementsToToggleDuringSimulation.set(
             toSymbolKey,
-            this.svgRef.current.querySelector(`.topology-renderer__canvas__symbol.${edge.to.type}._${edge.to.name}_`)
+            this.svgRef.current.querySelector(`.topology-renderer__canvas__symbol.${edge.to.type}._${edge.to.name}_:not(.switch)`)
           );
           this._elementsToToggleDuringSimulation.set(
             nodeColocatedWithFromNodeKey,
-            this.svgRef.current.querySelector(`.topology-renderer__canvas__symbol.${edge.to.type}._${edge.to.name}_`)
+            this.svgRef.current.querySelector(`.topology-renderer__canvas__symbol.${edge.to.type}._${edge.to.name}_:not(.switch)`)
           );
           this._locateNodesAtLocation(edge.from.x1, edge.from.y1);
           this._locateNodesAtLocation(edge.to.x1, edge.to.y1);
@@ -219,11 +219,11 @@ export class TopologyRenderer extends React.Component<Props, State> {
       const symbolKey = `symbol-${x}-${y}`;
       this._elementsToToggleDuringSimulation.set(
         nodeKey,
-        this.svgRef.current.querySelector(`.topology-renderer__canvas__node.${foundNode.type}._${foundNode.name}_`)
+        this.svgRef.current.querySelector(`.topology-renderer__canvas__node.${foundNode.type}._${foundNode.name}_:not(.switch)`)
       );
       this._elementsToToggleDuringSimulation.set(
         symbolKey,
-        this.svgRef.current.querySelector(`.topology-renderer__canvas__symbol.${foundNode.type}._${foundNode.name}_`)
+        this.svgRef.current.querySelector(`.topology-renderer__canvas__symbol.${foundNode.type}._${foundNode.name}_:not(.switch)`)
       );
     }
   }
