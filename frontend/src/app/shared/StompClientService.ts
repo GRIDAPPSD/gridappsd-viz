@@ -197,8 +197,8 @@ export class StompClientService {
    * Subscribe to destination, then unsubscribe right away after a response arrives
    * @param destination The topic to subscribe to to get the response from
    */
-  readOnceFrom(destination: string): Observable<string> {
-    return this.readFrom(destination)
+  readOnceFrom<T>(destination: string): Observable<T> {
+    return this.readFrom<T>(destination)
       .pipe(take(1));
   }
 
@@ -206,16 +206,29 @@ export class StompClientService {
    * Subscribe to destination, and continuously watch for responses from the server
    * @param destination The topic to subscribe to to get the response from
    */
-  readFrom(destination: string): Observable<string> {
+  readFrom<T>(destination: string): Observable<T> {
     return timer(0, 1000)
       .pipe(
         filter(this.isActive),
         take(1),
         switchMap(() => {
-          const source = new BehaviorSubject<string>(null);
+          const source = new BehaviorSubject<T>(null);
           const id = `${destination}[${Math.random() * 1_000_000 | 0}]`;
           return using(
-            () => this._client.subscribe(destination, (message: Message) => source.next(message.body), { id }),
+            () => {
+              return this._client.subscribe(destination, (message: Message) => {
+                const payload = JSON.parse(message.body);
+                if ('error' in payload) {
+                  source.error(payload.error.message);
+                } else if (!('data' in payload)) {
+                  source.next(payload);
+                } else if (typeof payload.data !== 'string') {
+                  source.next(payload.data);
+                } else {
+                  source.next(JSON.parse(payload.data));
+                }
+              }, { id });
+            },
             () => source.asObservable().pipe(filter(responseBody => Boolean(responseBody)))
           );
         })

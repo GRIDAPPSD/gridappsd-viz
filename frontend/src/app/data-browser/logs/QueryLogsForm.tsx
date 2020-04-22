@@ -101,6 +101,11 @@ export class QueryLogsForm extends React.Component<Props, State> {
         )
       });
     }
+    if (this.props.sources !== prevProps.sources) {
+      this.setState({
+        sourceOptionBuilder: new SelectionOptionBuilder(this.props.sources)
+      });
+    }
   }
 
   render() {

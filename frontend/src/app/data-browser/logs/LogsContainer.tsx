@@ -53,12 +53,11 @@ export class LogsContainer extends React.Component<Props, State> {
     this.setState({
       showSpinner: true
     });
-    this._stompClientService.readOnceFrom('query-logs.process-id')
-      .pipe(map(JSON.parse as (body: string) => { data: SimulationId[] }))
+    this._stompClientService.readOnceFrom<SimulationId[]>('query-logs.process-id')
       .subscribe({
         next: payload => {
           this.setState({
-            simulationIds: payload.data,
+            simulationIds: payload,
             showSpinner: false
           });
         }
@@ -89,12 +88,11 @@ export class LogsContainer extends React.Component<Props, State> {
   }
 
   private _observeQueryLogsResult() {
-    return this._stompClientService.readFrom('query-logs.result')
-      .pipe(map(JSON.parse as (body: string) => any))
+    return this._stompClientService.readFrom<any[]>('query-logs.result')
       .subscribe({
-        next: queryResults => {
+        next: payload => {
           this.setState({
-            result: queryResults.data || [],
+            result: payload || [],
             showSpinner: false
           });
         }
@@ -102,11 +100,8 @@ export class LogsContainer extends React.Component<Props, State> {
   }
 
   private _observeSources() {
-    return this._stompClientService.readFrom('query-logs.source')
-      .pipe(
-        map(JSON.parse as (body: string) => { data: Array<{ source: string }> }),
-        map(payload => payload.data.map(source => source.source))
-      )
+    return this._stompClientService.readFrom<Array<{ source: string }>>('query-logs.source')
+      .pipe(map(payload => payload.map(source => source.source)))
       .subscribe({
         next: sources => this.setState({ sources: ['ALL', ...sources] })
       });

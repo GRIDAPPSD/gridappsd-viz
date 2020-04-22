@@ -1,6 +1,6 @@
 import * as React from 'react';
-import { Subscription } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { Subscription, of } from 'rxjs';
+import { map, catchError } from 'rxjs/operators';
 
 import { PowerGridModels } from './PowergridModels';
 import {
@@ -60,8 +60,8 @@ export class PowergridModelsContainer extends React.Component<Props, State> {
   private _subscribeToPowerGridModelsTopic() {
     return this._stompClientService.readFrom(this._queryPowerGridModelsRequest.replyTo)
       .pipe(
-        map(JSON.parse as (body: string) => any),
-        map(payload => JSON.stringify(payload.data, null, 4) || payload.error.message)
+        map(payload => JSON.stringify(payload, null, 4)),
+        catchError(of)
       )
       .subscribe({
         next: response => {

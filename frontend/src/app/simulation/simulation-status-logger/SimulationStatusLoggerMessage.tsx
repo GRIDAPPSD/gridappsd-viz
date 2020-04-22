@@ -1,17 +1,17 @@
 import * as React from 'react';
 
 import { IconButton } from '@shared/buttons';
+import { SimulationStatusLogMessage } from '@shared/simulation';
 
 import './SimulationStatusLoggerMessage.light.scss';
 import './SimulationStatusLoggerMessage.dark.scss';
 
 interface Props {
-  message: string;
+  message: SimulationStatusLogMessage;
 }
 
 interface State {
   showMessageAsJson: boolean;
-  messageAsJson: any;
 }
 
 export class SimulationStatusLoggerMessage extends React.Component<Props, State> {
@@ -21,8 +21,7 @@ export class SimulationStatusLoggerMessage extends React.Component<Props, State>
   constructor(props: Props) {
     super(props);
     this.state = {
-      showMessageAsJson: false,
-      messageAsJson: JSON.parse(this.props.message)
+      showMessageAsJson: false
     };
     this.showAsJson = this.showAsJson.bind(this);
     this.showAsString = this.showAsString.bind(this);
@@ -30,7 +29,7 @@ export class SimulationStatusLoggerMessage extends React.Component<Props, State>
   render() {
     return (
       <div
-        className={'simulation-status-logger-message ' + this.state.messageAsJson.logLevel}
+        className={'simulation-status-logger-message ' + this.props.message.logLevel}
         ref={this.messageElementRef}>
         {
           this.state.showMessageAsJson
@@ -42,7 +41,7 @@ export class SimulationStatusLoggerMessage extends React.Component<Props, State>
                 icon='remove'
                 onClick={this.showAsString} />
               <span>
-                {JSON.stringify(this.state.messageAsJson, null, 4)}
+                {JSON.stringify(this.props.message, null, 4)}
               </span>
             </>
             :
@@ -53,7 +52,7 @@ export class SimulationStatusLoggerMessage extends React.Component<Props, State>
                 icon='add'
                 onClick={this.showAsJson} />
               <span className='simulation-status-logger-message__body'>
-                {this.state.messageAsJson.logMessage}
+                {this.props.message.logMessage}
               </span>
             </>
         }
