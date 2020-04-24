@@ -1,7 +1,5 @@
 import * as React from 'react';
 
-import { RequestEditor } from '../RequestEditor';
-import { Response } from '../Response';
 import {
   QueryPowerGridModelsRequestType, QueryPowerGridModelsRequestBody, QueryPowerGridModelsResultFormat
 } from './models/QueryPowerGridModelsRequest';
@@ -10,6 +8,7 @@ import { BasicButton } from '@shared/buttons';
 import { ProgressIndicator } from '@shared/overlay/progress-indicator';
 import { FeederModelLine } from '@shared/topology';
 import { Validators } from '@shared/form/validation';
+import { RequestEditor, Response } from '../DataBrowser';
 
 import './PowergridModels.light.scss';
 import './PowergridModels.dark.scss';
@@ -153,7 +152,8 @@ export class PowerGridModels extends React.Component<Props, State> {
             </Form>
           </RequestEditor>
           {
-            this.state.response &&
+            this.state.response
+            &&
             <Response>
               {this.state.response}
             </Response>

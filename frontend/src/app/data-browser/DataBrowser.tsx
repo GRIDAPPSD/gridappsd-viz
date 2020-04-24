@@ -75,7 +75,7 @@ export class DataBrowser extends React.Component<Props, State> {
         </NavLink>
           </li>
         </ul>
-        <div className='request-response'>
+        <div className='data-browser__body'>
           <Route
             exact
             path={`${props.match.path}`}
@@ -94,4 +94,21 @@ export class DataBrowser extends React.Component<Props, State> {
     );
   }
 
+}
+
+export function RequestEditor({ children, styles = {} }) {
+  return (
+    <div className='data-browser__request-editor' style={{ ...styles }}>
+      {children}
+    </div>
+  );
+}
+
+
+export function Response({ children, styles = {} }) {
+  return (
+    <div className='data-browser__response' style={{ ...styles }}>
+      {children}
+    </div>
+  );
 }

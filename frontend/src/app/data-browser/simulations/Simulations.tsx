@@ -1,6 +1,7 @@
 import * as React from 'react';
 
-import { RequestEditor } from '../RequestEditor';
+import { RequestEditor } from '../DataBrowser';
+import { MessageBanner } from '@shared/overlay/message-banner';
 
 import './Simulations.light.scss';
 import './Simulations.dark.scss';
@@ -22,11 +23,11 @@ export class Simulations extends React.Component<Props, State> {
   render() {
     const requestEditorContainerStyles = { height: '100%', maxHeight: '100%' };
     return (
-      <>
-        <RequestEditor styles={requestEditorContainerStyles}>
-          <h1>Not yet implemented</h1>
-        </RequestEditor>
-      </>
+      <RequestEditor styles={requestEditorContainerStyles}>
+        <MessageBanner>
+          Not yet implemented
+        </MessageBanner>
+      </RequestEditor>
     );
   }
 

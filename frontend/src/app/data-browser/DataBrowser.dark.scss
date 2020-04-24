@@ -20,13 +20,13 @@
     }
 }
 
-.request-editor,
-.response {
+.data-browser__request-editor,
+.data-browser__response {
     box-shadow: 0 0 2px #fff;
     color: $primary-text-color;
 }
 
-.response {
+.data-browser__response {
     &::-webkit-scrollbar {
         background: $theme-color;
         box-shadow: 0 0 3px #808080 inset;

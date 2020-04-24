@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { map } from 'rxjs/operators';
 
 import { Dialog, DialogContent, DialogActionGroup } from '@shared/overlay/dialog';
 import { BasicButton } from '@shared/buttons';
@@ -108,11 +109,14 @@ export class PlotModelCreator extends React.Component<Props, State> {
 
   componentDidMount() {
     this.currentPlotModelFormGroup.validityChanges()
+      .pipe(map(isValid => !isValid))
       .subscribe({
-        next: isValid => {
-          this.setState({
-            disableAddComponentButton: !isValid
-          });
+        next: invalid => {
+          if (this.state.disableAddComponentButton !== invalid) {
+            this.setState({
+              disableAddComponentButton: invalid
+            });
+          }
         }
       });
     this._onExistingPlotModelSelectionChange();
@@ -157,6 +161,7 @@ export class PlotModelCreator extends React.Component<Props, State> {
               this.selectedMeasurementTypeFormControl.disable();
               this.selectedComponentFormControl.enable();
             } else {
+              this.selectedMeasurementTypeFormControl.enable();
               this.selectedMeasurementTypeFormControl.reset();
               this.setState({
                 componentOptionBuilder: SelectionOptionBuilder.defaultBuilder(),
@@ -165,7 +170,7 @@ export class PlotModelCreator extends React.Component<Props, State> {
             }
           } else {
             this.selectedMeasurementTypeFormControl.reset();
-            plotNameFormControl.disable();
+            this.selectedMeasurementTypeFormControl.disable();
           }
         }
       });
@@ -234,8 +239,8 @@ export class PlotModelCreator extends React.Component<Props, State> {
               className='plot-model-creator__body__form'
               formGroupModel={this.currentPlotModelFormGroup}>
               <Select
+                optional
                 label='Created plots'
-                optional={true}
                 selectionOptionBuilder={this.state.allPlotModelOptionBuilder}
                 formControlModel={this.selectedPlotModelFormControl} />
               <Input

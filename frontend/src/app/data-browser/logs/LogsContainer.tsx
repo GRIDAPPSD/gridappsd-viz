@@ -7,7 +7,7 @@ import { QueryLogsRequestBody } from './models/QueryLogsRequestBody';
 import { SimulationId } from './models/SimulationId';
 import { QueryLogsForm } from './QueryLogsForm';
 import { QueryLogsResultTable } from './QueryLogsResultTable';
-import { Response } from '../Response';
+import { Response } from '../DataBrowser';
 import { MessageBanner } from '@shared/overlay/message-banner';
 import { ProgressIndicator } from '@shared/overlay/progress-indicator';
 
