@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { RequestEditor } from '../RequestEditor';
+import { RequestEditor } from '../DataBrowser';
 import { Input, Select, SelectionOptionBuilder, Form, FormGroupModel, FormControlModel } from '@shared/form';
 import { BasicButton } from '@shared/buttons';
 import { QueryLogsRequestBody } from './models/QueryLogsRequestBody';

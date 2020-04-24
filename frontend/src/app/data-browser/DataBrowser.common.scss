@@ -84,7 +84,7 @@ $app-bar-height: 60px;
     }
 }
 
-.request-response {
+.data-browser__body {
     width: 100%;
     position: relative;
     overflow-x: hidden;
@@ -95,8 +95,8 @@ $app-bar-height: 60px;
     margin-left: 15px;
 }
 
-.request-editor,
-.response {
+.data-browser__request-editor,
+.data-browser__response {
     max-height: 50%;
     overflow: auto;
     height: 50%;
@@ -108,7 +108,7 @@ $app-bar-height: 60px;
     position: relative;
 }
 
-.response {
+.data-browser__response {
     white-space: pre-wrap;
     margin-top: 5px;
 
