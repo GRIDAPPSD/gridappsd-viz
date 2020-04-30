@@ -16,7 +16,7 @@ import './NodeSearcher.dark.scss';
 
 interface Props {
   show: boolean;
-  nodes: Node[];
+  nodeMap: Map<string, Node>;
   onNodeSelected: (node: Node) => boolean;
   onClose: () => void;
 }
@@ -37,7 +37,7 @@ export class NodeSearcher extends React.Component<Props, State> {
   readonly searchTermFormControlModel = new FormControlModel('');
   readonly nodeSearcherElementRef = React.createRef<HTMLDivElement>();
 
-  private _matchedNodes: Set<Node>;
+  private _matchedNodes: Map<string, Node>;
   private _previousSearchTerm = '';
 
   constructor(props: Props) {
@@ -49,10 +49,12 @@ export class NodeSearcher extends React.Component<Props, State> {
       visibleMatches: []
     };
 
-    this._matchedNodes = new Set(props.nodes);
+    this._matchedNodes = new Map(props.nodeMap);
 
     this.close = this.close.bind(this);
     this.clear = this.clear.bind(this);
+
+    this._onSearchTermChange = this._onSearchTermChange.bind(this);
   }
 
   componentDidUpdate(prevProps: Props) {
@@ -77,7 +79,7 @@ export class NodeSearcher extends React.Component<Props, State> {
   componentDidMount() {
     this.searchTermFormControlModel.valueChanges()
       .subscribe({
-        next: searchTerm => this._onSearchTermChange(searchTerm)
+        next: this._onSearchTermChange
       });
   }
 
@@ -86,12 +88,12 @@ export class NodeSearcher extends React.Component<Props, State> {
     const searcher = fuzzySearch(searchTerm, true);
 
     if (searchTerm.length < this._previousSearchTerm.length || this._matchedNodes.size === 0) {
-      this._matchedNodes = new Set(this.props.nodes);
+      this._matchedNodes = new Map(this.props.nodeMap);
     }
 
     this._previousSearchTerm = searchTerm;
 
-    for (const node of this._matchedNodes) {
+    this._matchedNodes.forEach(node => {
       const result = searcher(node.name);
       if (result) {
         matches.push({
@@ -112,12 +114,12 @@ export class NodeSearcher extends React.Component<Props, State> {
         if (matchedMRIDs.length > 0) {
           matches.push(...matchedMRIDs);
         } else {
-          this._matchedNodes.delete(node);
+          this._matchedNodes.delete(node.name);
         }
       } else {
-        this._matchedNodes.delete(node);
+        this._matchedNodes.delete((node as Node).name);
       }
-    }
+    });
     this.setState({
       matches: matches.sort((a, b) => {
         if (a.result.inaccuracy === b.result.inaccuracy) {
@@ -214,65 +216,13 @@ export class NodeSearcher extends React.Component<Props, State> {
     setTimeout(this.props.onClose, 500);
   }
 
-  onSearchTermChanged(searchTerm: string) {
-    const matches: Match[] = [];
-    const searcher = fuzzySearch(searchTerm, true);
-
-    if (searchTerm.length < this._previousSearchTerm.length || this._matchedNodes.size === 0) {
-      this._matchedNodes = new Set(this.props.nodes);
-    }
-
-    this._previousSearchTerm = searchTerm;
-
-    for (const node of this._matchedNodes) {
-      const result = searcher(node.name);
-      if (result) {
-        matches.push({
-          node,
-          result
-        });
-      } else if ('mRIDs' in node) {
-        const matchedMRIDs = [];
-        for (const mRID of node.mRIDs) {
-          const searchResult = searcher(mRID);
-          if (searchResult) {
-            matchedMRIDs.push({
-              node,
-              result: searchResult
-            });
-          }
-        }
-        if (matchedMRIDs.length > 0) {
-          matches.push(...matchedMRIDs);
-        } else {
-          this._matchedNodes.delete(node);
-        }
-      } else {
-        this._matchedNodes.delete(node);
-      }
-    }
-    this.setState({
-      matches: matches.sort((a, b) => {
-        if (a.result.inaccuracy === b.result.inaccuracy) {
-          // If both matches have the same inaccuracy
-          // we want to sort them by their inputs' length,
-          // the one with shorter input should come first,
-          // if their input lengths are the same,
-          // then we want to sort them by their start of the first matched boundary
-          return a.result.input.length - b.result.input.length || a.result.boundaries[1].start - b.result.boundaries[1].start;
-        }
-        return a.result.inaccuracy - b.result.inaccuracy;
-      })
-    });
-  }
-
   clear() {
     this.searchTermFormControlModel.setValue('');
     this.setState({
       matches: []
     });
     this._previousSearchTerm = '';
-    this._matchedNodes = new Set(this.props.nodes);
+    this._matchedNodes = new Map(this.props.nodeMap);
   }
 
   renderMatchedNode(matchedNode: Match) {

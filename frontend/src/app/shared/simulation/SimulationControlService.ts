@@ -47,13 +47,13 @@ export class SimulationControlService {
   private readonly _socket = socketIo();
   private readonly _simulationSnapshot: SimulationSnapshot = DEFAULT_SIMULATION_SNAPSHOT;
   private readonly _simulationSnapshotReceivedNotifier = new BehaviorSubject<SimulationSnapshot>({} as any);
+  private readonly _simulationOutputMeasurementMapStream = new Subject<Map<string, SimulationOutputMeasurement>>();
 
   private _currentSimulationStatus = SimulationStatus.STOPPED;
   private _didUserStartActiveSimulation = false;
   private _isUserInActiveSimulation = false;
   private _modelDictionaryMeasurementMap: Map<string, ModelDictionaryMeasurement> = null;
   private _outputTimestamp: number;
-  private _simulationOutputMeasurementsStream = new Subject<Map<string, SimulationOutputMeasurement>>();
   private _simulationOutputSubscription: Subscription;
   private _simulationStatusLogStreamSubscription: Subscription;
   private _currentSimulationId = '';
@@ -180,7 +180,7 @@ export class SimulationControlService {
   }
 
   simulationOutputMeasurementsReceived(): Observable<Map<string, SimulationOutputMeasurement>> {
-    return this._simulationOutputMeasurementsStream.asObservable();
+    return this._simulationOutputMeasurementMapStream.asObservable();
   }
 
   syncSimulationSnapshotState<K extends keyof SimulationSnapshot>(state: Pick<SimulationSnapshot, K>) {
@@ -281,8 +281,7 @@ export class SimulationControlService {
         measurements.set(measurementInModelDictionary.ConnectivityNode, measurement);
       }
     }
-    this._simulationOutputMeasurementsStream.next(measurements);
-
+    this._simulationOutputMeasurementMapStream.next(measurements);
   }
 
   private _subscribeToStartSimulationTopic() {

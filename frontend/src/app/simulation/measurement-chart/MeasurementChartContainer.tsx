@@ -196,8 +196,7 @@ export class MeasurementChartContainer extends React.Component<Props, State> {
       switch (plotModel.measurementType) {
         case MeasurementType.VOLTAGE:
         case MeasurementType.POWER:
-          const valueType = plotModel.useMagnitude ? 'magnitude' : 'angle';
-          dataPoint.measurement = measurement[valueType];
+          dataPoint.measurement = measurement[plotModel.useMagnitude ? 'magnitude' : 'angle'];
           return dataPoint;
         case MeasurementType.TAP:
           dataPoint.measurement = measurement.value;

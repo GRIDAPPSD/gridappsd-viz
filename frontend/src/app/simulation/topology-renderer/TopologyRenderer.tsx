@@ -1,5 +1,4 @@
 import * as React from 'react';
-import { extent } from 'd3-array';
 import { line } from 'd3-shape';
 import { select, Selection, create } from 'd3-selection';
 import { scaleLinear, ScaleLinear, selectAll } from 'd3';
@@ -79,12 +78,13 @@ export class TopologyRenderer extends React.Component<Props, State> {
   private readonly _yScale: ScaleLinear<number, number> = scaleLinear();
   private readonly _stateStore = StateStore.getInstance();
   private readonly _unsubscriber = new Subject<void>();
-  private readonly _elementsToToggleDuringSimulation = new Map<string, Element>();
+  private readonly _htmlElements = new Map<string, NodeListOf<Element>>();
+  // Keys are switches' MRID
+  private _switchMap = new Map<string, Switch>();
 
   private _containerSelection: Selection<SVGElement, any, any, any> = null;
   private _showNodeSymbols = false;
   private _timer: any;
-  private _switches: Switch[];
 
   constructor(props: Props) {
     super(props);
@@ -124,108 +124,65 @@ export class TopologyRenderer extends React.Component<Props, State> {
   }
 
   private _toggleSwitchesBasedOnSimulationOutputMeasurement(measurement: SimulationOutputMeasurement) {
-    for (const swjtch of this._switches) {
-      if (measurement.conductingEquipmentMRID === swjtch.mRIDs[0] && measurement.type === MeasurementType.TAP) {
-        swjtch.open = measurement.value === 0;
-        const switchNodeKey = `node-switch-${swjtch.name}`;
-        const switchSymbolKey = `symbol-switch-${swjtch.name}`;
-        if (!this._elementsToToggleDuringSimulation.has(switchNodeKey)) {
-          this._elementsToToggleDuringSimulation.set(
-            switchNodeKey,
-            this.svgRef.current.querySelector(`.topology-renderer__canvas__node.switch._${swjtch.name}_`)
-          );
-          this._elementsToToggleDuringSimulation.set(
-            switchSymbolKey,
-            this.svgRef.current.querySelector(`.topology-renderer__canvas__symbol.switch._${swjtch.name}_`)
-          );
-        }
-        const selections = selectAll([
-          this._elementsToToggleDuringSimulation.get(switchNodeKey),
-          this._elementsToToggleDuringSimulation.get(switchSymbolKey)
-        ]);
-        selections.classed('open', swjtch.open);
-        selections.classed('closed', !swjtch.open);
+    const swjtch = this._switchMap.get(measurement.conductingEquipmentMRID);
+    if (measurement.type === MeasurementType.TAP && swjtch) {
+      swjtch.open = measurement.value === 0;
+      if (!this._htmlElements.has(swjtch.name)) {
+        this._htmlElements.set(
+          swjtch.name,
+          this.svgRef.current.querySelectorAll(
+            `.topology-renderer__canvas__node.switch._${swjtch.name}_,.topology-renderer__canvas__symbol.switch._${swjtch.name}_`
+          )
+        );
       }
+      selectAll(this._htmlElements.get(swjtch.name))
+        .classed('open', swjtch.open)
+        .classed('closed', !swjtch.open);
     }
   }
 
   private _toggleACLineSegmentsWithNoPower(measurement: SimulationOutputMeasurement) {
     if (measurement.conductingEquipmentType === ConductingEquipmentType.ACLineSegment) {
-      const edge = this.props.topology.edges.find(e => e.name === measurement.conductingEquipmentName);
+      const edge = this.props.topology.edgeMap.get(measurement.conductingEquipmentName);
       if (edge) {
-        const fromNodeKey = `node-${edge.from.type}-${edge.from.name}`;
-        const fromSymbolKey = `symbol-${edge.from.type}-${edge.from.name}`;
-        const toNodeKey = `node-${edge.to.type}-${edge.to.name}`;
-        const toSymbolKey = `symbol-${edge.to.type}-${edge.to.name}`;
-        const nodeColocatedWithFromNodeKey = `node-${edge.from.x1}-${edge.from.y1}`;
-        const symbolColocatedWithFromNodeKey = `symbol-${edge.from.x1}-${edge.from.y1}`;
-        const nodeColocatedWithToNodeKey = `node-${edge.to.x1}-${edge.to.y1}`;
-        const symbolColocatedWithToNodeKey = `symbol-${edge.to.x1}-${edge.to.y1}`;
-        if (!this._elementsToToggleDuringSimulation.has(edge.name)) {
-          this._elementsToToggleDuringSimulation.set(
-            edge.name,
-            this.svgRef.current.querySelector(`.topology-renderer__canvas__edge._${edge.name}_`)
-          );
-          this._elementsToToggleDuringSimulation.set(
-            fromNodeKey,
-            this.svgRef.current.querySelector(`.topology-renderer__canvas__node.${edge.from.type}._${edge.from.name}_:not(.switch)`)
-          );
-          this._elementsToToggleDuringSimulation.set(
-            fromSymbolKey,
-            this.svgRef.current.querySelector(`.topology-renderer__canvas__symbol.${edge.from.type}._${edge.from.name}_:not(.switch)`)
-          );
-          this._elementsToToggleDuringSimulation.set(
-            toNodeKey,
-            this.svgRef.current.querySelector(`.topology-renderer__canvas__node.${edge.to.type}._${edge.to.name}_:not(.switch)`)
-          );
-          this._elementsToToggleDuringSimulation.set(
-            toSymbolKey,
-            this.svgRef.current.querySelector(`.topology-renderer__canvas__symbol.${edge.to.type}._${edge.to.name}_:not(.switch)`)
-          );
-          this._elementsToToggleDuringSimulation.set(
-            nodeColocatedWithFromNodeKey,
-            this.svgRef.current.querySelector(`.topology-renderer__canvas__symbol.${edge.to.type}._${edge.to.name}_:not(.switch)`)
-          );
-          this._locateNodesAtLocation(edge.from.x1, edge.from.y1);
-          this._locateNodesAtLocation(edge.to.x1, edge.to.y1);
+        if (!this._htmlElements.has(edge.name)) {
+          const selectors = [
+            `.topology-renderer__canvas__edge._${edge.name}_`,
+            `.topology-renderer__canvas__node.${edge.from.type}._${edge.from.name}_:not(.switch)`,
+            `.topology-renderer__canvas__symbol.${edge.from.type}._${edge.from.name}_:not(.switch)`,
+            `.topology-renderer__canvas__node.${edge.to.type}._${edge.to.name}_:not(.switch)`,
+            `.topology-renderer__canvas__symbol.${edge.to.type}._${edge.to.name}_:not(.switch)`
+          ];
+          const nodeAtFromLocation = this._locateNodeAtLocation(edge.from.x1, edge.from.y1);
+          if (nodeAtFromLocation) {
+            selectors.push(
+              `.topology-renderer__canvas__node.${nodeAtFromLocation.type}._${nodeAtFromLocation.name}_:not(.switch)`,
+              `.topology-renderer__canvas__symbol.${nodeAtFromLocation.type}._${nodeAtFromLocation.name}_:not(.switch)`
+            );
+          }
+          const nodeAtToLocation = this._locateNodeAtLocation(edge.to.x1, edge.to.y1);
+          if (nodeAtToLocation) {
+            selectors.push(
+              `.topology-renderer__canvas__node.${nodeAtToLocation.type}._${nodeAtToLocation.name}_:not(.switch)`,
+              `.topology-renderer__canvas__symbol.${nodeAtToLocation.type}._${nodeAtToLocation.name}_:not(.switch)`
+            );
+          }
+          this._htmlElements.set(edge.name, this.svgRef.current.querySelectorAll(selectors.join(',')));
         }
-        const selections = selectAll([
-          this._elementsToToggleDuringSimulation.get(edge.name),
-          this._elementsToToggleDuringSimulation.get(fromNodeKey),
-          this._elementsToToggleDuringSimulation.get(fromSymbolKey),
-          this._elementsToToggleDuringSimulation.get(toNodeKey),
-          this._elementsToToggleDuringSimulation.get(toSymbolKey),
-          this._elementsToToggleDuringSimulation.get(nodeColocatedWithFromNodeKey),
-          this._elementsToToggleDuringSimulation.get(symbolColocatedWithFromNodeKey),
-          this._elementsToToggleDuringSimulation.get(nodeColocatedWithToNodeKey),
-          this._elementsToToggleDuringSimulation.get(symbolColocatedWithToNodeKey)
-        ]);
-        if (-0.3 <= measurement.magnitude && measurement.magnitude <= 0.3) {
-          selections.classed('no-power', true);
-        } else {
-          selections.classed('no-power', false);
-        }
+        selectAll(this._htmlElements.get(edge.name))
+          .classed('no-power', -0.3 <= measurement.magnitude && measurement.magnitude <= 0.3);
       }
     }
   }
 
-  private _locateNodesAtLocation(x: number, y: number) {
-    const foundNodes = this.props.topology.nodes.filter(
-      node => node.type !== NodeType.UNKNOWN && node.x1 === x && node.y1 === y
-    );
-    const foundNode = foundNodes[foundNodes.length - 1];
-    if (foundNode) {
-      const nodeKey = `node-${x}-${y}`;
-      const symbolKey = `symbol-${x}-${y}`;
-      this._elementsToToggleDuringSimulation.set(
-        nodeKey,
-        this.svgRef.current.querySelector(`.topology-renderer__canvas__node.${foundNode.type}._${foundNode.name}_:not(.switch)`)
-      );
-      this._elementsToToggleDuringSimulation.set(
-        symbolKey,
-        this.svgRef.current.querySelector(`.topology-renderer__canvas__symbol.${foundNode.type}._${foundNode.name}_:not(.switch)`)
-      );
-    }
+  private _locateNodeAtLocation(x: number, y: number) {
+    let foundNode: Node = null;
+    this.props.topology.nodeMap.forEach(node => {
+      if (node.type !== NodeType.UNKNOWN && node.x1 === x && node.y1 === y) {
+        foundNode = node;
+      }
+    });
+    return foundNode;
   }
 
   componentDidMount() {
@@ -252,7 +209,7 @@ export class TopologyRenderer extends React.Component<Props, State> {
       )
       .subscribe({
         next: nodeName => {
-          const foundNode = this.props.topology.nodes.find(node => node.name === nodeName);
+          const foundNode = this.props.topology.nodeMap.get(nodeName);
           if (foundNode) {
             this.locateNode(foundNode);
           } else {
@@ -271,7 +228,7 @@ export class TopologyRenderer extends React.Component<Props, State> {
   }
 
   private _toggleNodeSymbols(currentTransformScaleDegree: number) {
-    if (this.props.topology.nodes.length <= 200) {
+    if (this.props.topology.nodeMap.size <= 200) {
       if (currentTransformScaleDegree > 1.5 && !this._showNodeSymbols) {
         this._showNodeSymbols = true;
         this._showSymbols();
@@ -279,14 +236,12 @@ export class TopologyRenderer extends React.Component<Props, State> {
         this._showNodeSymbols = false;
         this._hideSymbols();
       }
-    } else if (this.props.topology.nodes.length > 200) {
-      if (currentTransformScaleDegree > 2.5 && !this._showNodeSymbols) {
-        this._showNodeSymbols = true;
-        this._showSymbols();
-      } else if (currentTransformScaleDegree < 2.5 && this._showNodeSymbols) {
-        this._showNodeSymbols = false;
-        this._hideSymbols();
-      }
+    } else if (currentTransformScaleDegree > 2.5 && !this._showNodeSymbols) {
+      this._showNodeSymbols = true;
+      this._showSymbols();
+    } else if (currentTransformScaleDegree < 2.5 && this._showNodeSymbols) {
+      this._showNodeSymbols = false;
+      this._hideSymbols();
     }
   }
 
@@ -306,36 +261,35 @@ export class TopologyRenderer extends React.Component<Props, State> {
 
   componentDidUpdate(prevProps: Props) {
     if (this.props.topology !== prevProps.topology) {
-      this._elementsToToggleDuringSimulation.clear();
+      this._htmlElements.clear();
       this._render();
     }
   }
 
   private _render() {
     const topology = this.props.topology;
-    const nodeNameToEdgeMap = topology.edges.reduce((map, edge) => {
-      map.set(edge.from.name, edge);
-      map.set(edge.to.name, edge);
-      return map;
-    }, new Map<string, Edge>());
-
+    const nodeNameToEdgeMap = new Map<string, Edge>();
+    topology.edgeMap.forEach(edge => {
+      nodeNameToEdgeMap.set(edge.from.name, edge);
+      nodeNameToEdgeMap.set(edge.to.name, edge);
+    });
     const nodeRadius = this.isModelLarge() ? 1 : 3;
-
-    this._xScale.domain(extent(topology.nodes, (d: Node) => d.x1));
-    this._yScale.domain(extent(topology.nodes, (d: Node) => d.y1));
+    const extents = this._calculateXYExtents(topology.nodeMap);
+    this._xScale.domain(extents.x);
+    this._yScale.domain(extents.y);
 
     this._resolveSymbolDimensions();
 
     if (topology.name.includes('9500') && !topology.inverted) {
       topology.inverted = true;
-      this._invert9500Model(topology.nodes);
+      this._invert9500Model(topology.nodeMap);
     }
 
-    const categories = this._categorizeNodes(topology.nodes);
+    const categories = this._categorizeNodes(topology.nodeMap);
 
     this._containerSelection.selectAll('g').remove();
 
-    this._renderEdges(topology.edges);
+    this._renderEdges(topology.edgeMap);
 
     if (!this.isModelLarge()) {
       const container = create('svg:g') as Selection<SVGElement, any, SVGElement, any>;
@@ -447,7 +401,30 @@ export class TopologyRenderer extends React.Component<Props, State> {
   }
 
   isModelLarge() {
-    return this.props.topology.nodes.length >= 1000;
+    return this.props.topology.nodeMap.size >= 1000;
+  }
+
+  private _calculateXYExtents(nodeMap: Map<string, Node>) {
+    const xExtent = [Infinity, -Infinity] as [number, number];
+    const yExtent = [Infinity, -Infinity] as [number, number];
+    nodeMap.forEach(node => {
+      if (node.x1 < xExtent[0]) {
+        xExtent[0] = node.x1;
+      }
+      if (node.x1 > xExtent[1]) {
+        xExtent[1] = node.x1;
+      }
+      if (node.y1 < yExtent[0]) {
+        yExtent[0] = node.y1;
+      }
+      if (node.y1 > yExtent[1]) {
+        yExtent[1] = node.y1;
+      }
+    });
+    return {
+      x: xExtent,
+      y: yExtent
+    };
   }
 
   private _resolveSymbolDimensions() {
@@ -477,17 +454,17 @@ export class TopologyRenderer extends React.Component<Props, State> {
     }
   }
 
-  private _invert9500Model(nodes: Node[]) {
+  private _invert9500Model(nodeMap: Map<string, Node>) {
     const [minYCoordinate, maxYCoordinate] = this._yScale.domain();
-    for (const node of nodes) {
+    nodeMap.forEach(node => {
       node.y1 = minYCoordinate + (maxYCoordinate - node.y1);
       if ('y2' in node) {
         (node as any).y2 = minYCoordinate + (maxYCoordinate - (node as any).y2);
       }
-    }
+    });
   }
 
-  private _categorizeNodes(nodes: Node[]) {
+  private _categorizeNodes(nodeMap: Map<string, Node>) {
     const categories = {
       switches: [] as Switch[],
       capacitors: [] as Capacitor[],
@@ -497,10 +474,10 @@ export class TopologyRenderer extends React.Component<Props, State> {
       solarPanels: [] as SolarPanel[],
       batteries: [] as Battery[],
       unknownNodes: [] as Node[],
-      otherNodes: [] as Node[],
+      otherNodes: [] as Node[]
     };
 
-    for (const node of nodes) {
+    nodeMap.forEach(node => {
       node.screenX1 = this._xScale(node.x1);
       node.screenY1 = this._yScale(node.y1);
 
@@ -511,6 +488,9 @@ export class TopologyRenderer extends React.Component<Props, State> {
           (node as Switch).midpointX = (node.screenX1 + (node as Switch).screenX2) / 2;
           (node as Switch).midpointY = (node.screenY1 + (node as Switch).screenY2) / 2;
           categories.switches.push(node as Switch);
+          if (node.mRIDs.length > 0) {
+            this._switchMap.set(node.mRIDs[0], node as Switch);
+          }
           break;
         case NodeType.CAPACITOR:
           categories.capacitors.push(node as Capacitor);
@@ -537,22 +517,21 @@ export class TopologyRenderer extends React.Component<Props, State> {
           categories.otherNodes.push(node);
           break;
       }
-    }
-    this._switches = categories.switches;
+    });
     return categories;
   }
 
-  private _renderEdges(edges: Edge[]) {
+  private _renderEdges(edgeMap: Map<string, Edge>) {
     const documentFragment = document.createDocumentFragment();
     const edgeGenerator = line<Node>()
       .x(node => node.screenX1)
       .y(node => node.screenY1);
-    for (const datum of edges) {
-      const edge = create('svg:path').node();
-      edge.setAttribute('class', `topology-renderer__canvas__edge _${datum.name}_`);
-      edge.setAttribute('d', edgeGenerator([datum.from, datum.to]));
-      documentFragment.appendChild(edge);
-    }
+    edgeMap.forEach(edge => {
+      const path = create('svg:path').node();
+      path.setAttribute('class', `topology-renderer__canvas__edge _${edge.name}_`);
+      path.setAttribute('d', edgeGenerator([edge.from, edge.to]));
+      documentFragment.appendChild(path);
+    });
 
     this._containerSelection.append('g')
       .attr('class', 'topology-renderer__canvas__edge-container')
@@ -952,7 +931,7 @@ export class TopologyRenderer extends React.Component<Props, State> {
         </div>
         <NodeSearcher
           show={this.state.showNodeSearcher}
-          nodes={this.props.topology ? this.props.topology.nodes : []}
+          nodeMap={this.props.topology ? this.props.topology.nodeMap : new Map()}
           onClose={this.onNodeSearcherClosed}
           onNodeSelected={this.locateNode} />
         {

@@ -108,7 +108,7 @@ export class SimulationControl extends React.Component<Props, State> {
       case SimulationStatus.STARTING:
         return (
           <span className='simulation-control__simulation-starting-message'>
-            Simulation starting<ThreeDots />
+            Simulation is starting<ThreeDots />
           </span>
         );
       case SimulationStatus.STARTED:
