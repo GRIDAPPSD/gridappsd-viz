@@ -56,11 +56,8 @@ export class AuthenticatorService {
   private _fetchUserRoles() {
     waitUntil(() => this._stompClientService.isActive())
       .then(() => {
-        this._stompClientService.readOnceFrom('/user/roles')
-          .pipe(
-            map(JSON.parse as (body: string) => { data: { roles: string[] } }),
-            map(payload => payload.data.roles)
-          )
+        this._stompClientService.readOnceFrom<{ roles: string[] }>('/user/roles')
+          .pipe(map(payload => payload.roles))
           .subscribe({
             next: userRoles => {
               this._userRoles = userRoles;

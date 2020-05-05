@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { RequestEditor } from '../RequestEditor';
+import { RequestEditor } from '../DataBrowser';
 import { Input, Select, SelectionOptionBuilder, Form, FormGroupModel, FormControlModel } from '@shared/form';
 import { BasicButton } from '@shared/buttons';
 import { QueryLogsRequestBody } from './models/QueryLogsRequestBody';
@@ -99,6 +99,11 @@ export class QueryLogsForm extends React.Component<Props, State> {
           this.props.simulationIds,
           simulationId => simulationId.process_id
         )
+      });
+    }
+    if (this.props.sources !== prevProps.sources) {
+      this.setState({
+        sourceOptionBuilder: new SelectionOptionBuilder(this.props.sources)
       });
     }
   }

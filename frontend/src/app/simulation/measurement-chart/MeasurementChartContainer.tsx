@@ -196,8 +196,7 @@ export class MeasurementChartContainer extends React.Component<Props, State> {
       switch (plotModel.measurementType) {
         case MeasurementType.VOLTAGE:
         case MeasurementType.POWER:
-          const valueType = plotModel.useMagnitude ? 'magnitude' : 'angle';
-          dataPoint.measurement = measurement[valueType];
+          dataPoint.measurement = measurement[plotModel.useMagnitude ? 'magnitude' : 'angle'];
           return dataPoint;
         case MeasurementType.TAP:
           dataPoint.measurement = measurement.value;
@@ -214,7 +213,7 @@ export class MeasurementChartContainer extends React.Component<Props, State> {
     this._simulationControlService.statusChanges()
       .pipe(
         takeUntil(this._unsubscriber),
-        filter(status => status === SimulationStatus.STARTED && this._simulationControlService.didUserStartActiveSimulation())
+        filter(status => status === SimulationStatus.STARTING && this._simulationControlService.didUserStartActiveSimulation())
       )
       .subscribe({
         next: () => this._updateMeasurementChartModels(true)

@@ -51,11 +51,10 @@ export class AlarmsContainer extends React.Component<Props, State> {
         filter(simulationId => simulationId !== '' && this._simulationControlService.didUserStartActiveSimulation()),
         map(id => `/topic/goss.gridappsd.simulation.gridappsd-alarms.${id}.output`),
         switchMap(this._stompClientService.readFrom),
-        map(JSON.parse as (str: string) => Alarm[]),
         takeUntil(this._unsubscriber)
       )
       .subscribe({
-        next: alarms => {
+        next: (alarms: Alarm[]) => {
           const timestamp = Date.now() / 1000;
           for (const alarm of alarms) {
             alarm.timestamp = timestamp;
@@ -89,7 +88,7 @@ export class AlarmsContainer extends React.Component<Props, State> {
     this._simulationControlService.statusChanges()
       .pipe(
         takeUntil(this._unsubscriber),
-        filter(status => status === SimulationStatus.STARTED && this._simulationControlService.didUserStartActiveSimulation())
+        filter(status => status === SimulationStatus.STARTING && this._simulationControlService.didUserStartActiveSimulation())
       )
       .subscribe({
         next: () => {
@@ -110,9 +109,6 @@ export class AlarmsContainer extends React.Component<Props, State> {
   }
 
   render() {
-    if (this.state.alarms.length === 0) {
-      return null;
-    }
     return (
       <>
         <Alarms

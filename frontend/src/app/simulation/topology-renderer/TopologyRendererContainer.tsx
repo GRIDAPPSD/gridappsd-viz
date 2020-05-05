@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { Subscription } from 'rxjs';
-import { map, takeWhile } from 'rxjs/operators';
+import { takeWhile } from 'rxjs/operators';
 
 import { TopologyRenderer } from './TopologyRenderer';
 import {
@@ -65,8 +65,8 @@ export class TopologyRendererContainer extends React.Component<Props, State> {
     this.state = {
       topology: {
         name: this.activeSimulationConfig.simulation_config.simulation_name,
-        nodes: [],
-        edges: [],
+        nodeMap: new Map(),
+        edgeMap: new Map,
         inverted: false
       },
       isFetching: true,
@@ -123,12 +123,8 @@ export class TopologyRendererContainer extends React.Component<Props, State> {
   }
 
   private _subscribeToTopologyModelTopic(destination: string) {
-    this._stompClientService.readOnceFrom(destination)
-      .pipe(
-        takeWhile(() => !this._activeSimulationStream.closed),
-        map(JSON.parse as (body: string) => GetTopologyModelRequestPayload),
-        map(payload => typeof payload.data === 'string' ? JSON.parse(payload.data) : payload.data)
-      )
+    this._stompClientService.readOnceFrom<TopologyModel>(destination)
+      .pipe(takeWhile(() => !this._activeSimulationStream.closed))
       .subscribe({
         next: (topologyModel: TopologyModel) => {
           this._processModelForRendering(topologyModel);
@@ -157,11 +153,10 @@ export class TopologyRendererContainer extends React.Component<Props, State> {
     const feeder = model.feeders[0];
     const renderableTopology: RenderableTopology = {
       name: feeder.name,
-      nodes: [],
-      edges: [],
+      nodeMap: new Map(),
+      edgeMap: new Map(),
       inverted: false
     };
-    const nodeMap = new Map<string, Node>();
 
     for (const group of ['batteries', 'switches', 'solarpanels', 'swing_nodes', 'transformers', 'capacitors', 'regulators']) {
       for (const datum of feeder[group]) {
@@ -236,39 +231,48 @@ export class TopologyRendererContainer extends React.Component<Props, State> {
               y1: datum.y2,
               manual: datum.manual === 'manual',
               controlModel: RegulatorControlMode.UNSPECIFIED,
-              phaseValues: {},
+              phaseValues: null,
               phases: this.props.phases.get(datum.name),
               mRIDs: resolvedMRIDs
             });
             break;
         }
-        nodeMap.set(node.name, node);
+        renderableTopology.nodeMap.set(node.name, node);
       }
     }
 
     for (const overheadLine of feeder.overhead_lines) {
-      const fromNode = nodeMap.get(overheadLine.from) || this._createNewNode({ name: overheadLine.from });
-      const toNode = nodeMap.get(overheadLine.to) || this._createNewNode({ name: overheadLine.to });
-      if (!nodeMap.has(fromNode.name)) {
-        fromNode.x1 = overheadLine.x1;
-        fromNode.y1 = overheadLine.y1;
-        nodeMap.set(fromNode.name, fromNode);
+      let fromNode = renderableTopology.nodeMap.get(overheadLine.from);
+      let toNode = renderableTopology.nodeMap.get(overheadLine.to);
+
+      if (!fromNode) {
+        fromNode = this._createNewNode({
+          name: overheadLine.from,
+          x1: overheadLine.x1,
+          y1: overheadLine.y1
+        });
+        renderableTopology.nodeMap.set(fromNode.name, fromNode);
       }
-      if (!nodeMap.has(toNode.name)) {
-        toNode.x1 = overheadLine.x2;
-        toNode.y1 = overheadLine.y2;
-        nodeMap.set(toNode.name, toNode);
+      if (!toNode) {
+        toNode = this._createNewNode({
+          name: overheadLine.to,
+          x1: overheadLine.x2,
+          y1: overheadLine.y2
+        });
+        renderableTopology.nodeMap.set(toNode.name, toNode);
       }
-      renderableTopology.edges.push({
-        name: overheadLine.name,
-        from: fromNode,
-        to: toNode,
-      });
+      renderableTopology.edgeMap.set(
+        overheadLine.name,
+        {
+          name: overheadLine.name,
+          from: fromNode,
+          to: toNode
+        }
+      );
     }
 
-    this._resolveCoordinates(nodeMap);
+    this._resolveCoordinates(renderableTopology.nodeMap);
 
-    renderableTopology.nodes = [...nodeMap.values()];
     return renderableTopology;
   }
 
@@ -294,7 +298,7 @@ export class TopologyRendererContainer extends React.Component<Props, State> {
       }
       node.x1 = Math.trunc(node.x1);
       node.y1 = Math.trunc(node.y1);
-      if (node.type === 'switch') {
+      if (node.type === NodeType.SWITCH) {
         if (coordinatesInLatLong) {
           const { x, y } = this._latLongToXY((node as Switch).x2, (node as Switch).y2);
           (node as Switch).x2 = x;

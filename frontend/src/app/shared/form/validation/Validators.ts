@@ -10,7 +10,7 @@ interface ValidationResult {
 }
 
 const numberRegex = /^(?:-?\d+\.?\d*)?$/;
-// YYYY-MM-DD HH:MM:SS
+// YYYY-MM-DD HH:MM:SS[.LLL]
 const dateTimePattern = /^(?:\d{4}-\d{2}-\d{2}\s\d{2}:\d{2}:\d{2}(?:\.\d{1,3})?)?$/;
 const dateTimeService = DateTimeService.getInstance();
 
@@ -69,7 +69,7 @@ export class Validators {
 
   static checkValidDateTime(subjectDisplayName: string): Validator {
     return (control: FormControlModel<number> | FormControlModel<string> | FormControlModel<Date>) => ({
-      isValid: dateTimePattern.test(dateTimeService.format((control.getValue()))),
+      isValid: dateTimePattern.test(dateTimeService.format(control.getValue())),
       errorMessage: `${subjectDisplayName} must have format YYYY-MM-DD HH:MM:SS`
     });
   }

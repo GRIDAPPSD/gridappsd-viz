@@ -2,7 +2,7 @@ import { Edge, Node } from '@shared/topology';
 
 export interface RenderableTopology {
   name: string;
-  nodes: Node[];
-  edges: Edge[];
+  nodeMap: Map<string, Node>;
+  edgeMap: Map<string, Edge>;
   inverted: boolean;
 }

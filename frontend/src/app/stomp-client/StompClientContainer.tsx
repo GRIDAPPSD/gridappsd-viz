@@ -54,10 +54,7 @@ export class StompClientContainer extends React.Component<Props, State> {
 
   private _subscribeForResponse() {
     return this._stompClientService.readFrom('/stomp-client/response-queue')
-      .pipe(
-        map(JSON.parse as (body: string) => any),
-        map(payload => JSON.stringify(payload, null, 4))
-      )
+      .pipe(map(payload => JSON.stringify(payload, null, 4)))
       .subscribe({
         next: result => this.setState({ responseBody: result }, () => this.setState({ isFetching: false }))
       });
