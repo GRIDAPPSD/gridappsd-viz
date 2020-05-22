@@ -2,7 +2,7 @@ import * as React from 'react';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 
-import { SimulationConfiguration, SimulationControlService } from '@shared/simulation';
+import { SimulationConfiguration, SimulationManagementService } from '@shared/simulation';
 import { SimulationStatus } from '@commons/SimulationStatus';
 import { FeederModel, ModelDictionary, ModelDictionaryComponent } from '@shared/topology';
 import { Application } from '@shared/Application';
@@ -45,7 +45,7 @@ interface State {
   modelDictionary: ModelDictionary;
   disableSubmitButton: boolean;
   lineName: string;
-  componentsWithGroupedPhases: ModelDictionaryComponent[];
+  modelDictionaryComponents: ModelDictionaryComponent[];
   services: Service[];
 }
 
@@ -70,7 +70,7 @@ export class SimulationConfigurationEditor extends React.Component<Props, State>
   faultEvents: FaultEvent[] = [];
   commandEvents: CommandEvent[] = [];
 
-  private readonly _simulationControlService = SimulationControlService.getInstance();
+  private readonly _simulationManagementService = SimulationManagementService.getInstance();
   private readonly _stateStore = StateStore.getInstance();
   private readonly _unsubscriber = new Subject<void>();
 
@@ -81,7 +81,7 @@ export class SimulationConfigurationEditor extends React.Component<Props, State>
       modelDictionary: null,
       disableSubmitButton: true,
       lineName: props.initialConfig.power_system_config.Line_name,
-      componentsWithGroupedPhases: [],
+      modelDictionaryComponents: [],
       services: []
     };
 
@@ -121,7 +121,7 @@ export class SimulationConfigurationEditor extends React.Component<Props, State>
         next: modelDictionary => this.setState({ modelDictionary })
       });
 
-    this._simulationControlService.statusChanges()
+    this._simulationManagementService.simulationStatusChanges()
       .pipe(takeUntil(this._unsubscriber))
       .subscribe({
         next: status => this.setState({
@@ -129,11 +129,11 @@ export class SimulationConfigurationEditor extends React.Component<Props, State>
         })
       });
 
-    this._stateStore.select('modelDictionaryComponentsWithGroupedPhases')
+    this._stateStore.select('modelDictionaryComponents')
       .pipe(takeUntil(this._unsubscriber))
       .subscribe({
         next: components => this.setState({
-          componentsWithGroupedPhases: components
+          modelDictionaryComponents: components
         })
       });
 
@@ -262,7 +262,7 @@ export class SimulationConfigurationEditor extends React.Component<Props, State>
         modelDictionary={this.state.modelDictionary}
         simulationStartDateTime={this.simulationStartDate}
         simulationStopDateTime={+this.currentConfig.simulation_config.duration + this.simulationStartDate}
-        componentWithConsolidatedPhases={this.state.componentsWithGroupedPhases} />
+        modelDictionaryComponents={this.state.modelDictionaryComponents} />
     );
   }
 

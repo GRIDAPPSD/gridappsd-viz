@@ -1,5 +1,4 @@
 import { Phase } from '../Phase';
-import { ModelDictionaryComponent, ModelDictionaryRegulator, ModelDictionaryCapacitor, ModelDictionarySwitch } from '@shared/topology';
 
 export interface FaultEvent {
   eventType: 'Fault';

@@ -14,7 +14,6 @@ interface Props {
   labelPosition?: 'left' | 'right';
   className?: string;
   hint?: string;
-
 }
 
 interface State {

@@ -1,15 +1,8 @@
 import { MessageRequest } from '@shared/MessageRequest';
-import { Application } from '@shared/Application';
 
-interface RequestBody {
-  applications: boolean;
-  services: boolean;
-  appInstances: boolean;
-  serviceInstances: boolean;
-}
+export class GetAvailableApplicationsAndServicesRequest implements MessageRequest {
 
-export class GetAvailableApplicationsAndServices implements MessageRequest {
-  private _requestBody: RequestBody = {
+  private readonly _requestBody = {
     applications: true,
     services: true,
     appInstances: true,
@@ -24,14 +17,7 @@ export class GetAvailableApplicationsAndServices implements MessageRequest {
     return 'application-and-services';
   }
 
-  get requestBody(): RequestBody {
+  get requestBody() {
     return this._requestBody;
   }
-}
-
-export interface GetAvailableApplicationsAndServicesPayload {
-  applications: Application[];
-  services: string;
-  appInstances: string;
-  serviceInstances: string;
 }

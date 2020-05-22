@@ -13,7 +13,7 @@ import { ModelDictionaryMeasurement } from '@shared/topology';
 import { SimulationOutputMeasurement, SimulationOutputPayload } from '.';
 import { StateStore } from '@shared/state-store';
 import { Simulation } from './Simulation';
-import { ConductingEquipmentType } from '@shared/topology/model-dictionary';
+import { ConductingEquipmentType, MeasurementType } from '@shared/topology/model-dictionary';
 import { SimulationStatusLogMessage } from './SimulationStatusLogMessage';
 import { DateTimeService } from '@shared/DateTimeService';
 
@@ -37,9 +37,9 @@ interface SimulationStartedEventResponse {
  * This class is responsible for communicating with the platform to process the simulation.
  * Simulation is started when the play button is clicked
  */
-export class SimulationControlService {
+export class SimulationManagementService {
 
-  private static readonly _INSTANCE_: SimulationControlService = new SimulationControlService();
+  private static readonly _INSTANCE_: SimulationManagementService = new SimulationManagementService();
 
   private readonly _simulationQueue = SimulationQueue.getInstance();
   private readonly _stateStore = StateStore.getInstance();
@@ -60,8 +60,8 @@ export class SimulationControlService {
   private _currentSimulationId = '';
   private _syncingEnabled = false;
 
-  static getInstance(): SimulationControlService {
-    return SimulationControlService._INSTANCE_;
+  static getInstance(): SimulationManagementService {
+    return SimulationManagementService._INSTANCE_;
   }
 
   private constructor() {
@@ -180,7 +180,7 @@ export class SimulationControlService {
     this._modelDictionaryMeasurementMap = newMap;
   }
 
-  simulationOutputMeasurementsReceived(): Observable<Map<string, SimulationOutputMeasurement>> {
+  simulationOutputMeasurementMapReceived(): Observable<Map<string, SimulationOutputMeasurement>> {
     return this._simulationOutputMeasurementMapStream.asObservable();
   }
 
@@ -193,7 +193,7 @@ export class SimulationControlService {
     }
   }
 
-  statusChanges(): Observable<SimulationStatus> {
+  simulationStatusChanges(): Observable<SimulationStatus> {
     return this._currentSimulationStatusNotifer.asObservable();
   }
 

@@ -42,13 +42,13 @@ export class FormControl extends React.Component<Props<any>, State> {
             htmlFor={this.props.htmlFor}>
             {this.props.label}
             &nbsp;
-        <span className='form-control__label__hint'>{this.props.hint}</span>
+            <span className='form-control__label__hint'>
+              {this.props.hint}
+            </span>
           </label>
         }
         <div className='form-control__body'>
-          {
-            this.props.children
-          }
+          {this.props.children}
           {
             !this.props.formControlModel.isPristine()
             &&

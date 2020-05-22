@@ -11,10 +11,10 @@ import './Input.dark.scss';
 
 interface Props<T extends 'text' | 'number' | 'datetime' | 'password' = 'text'> {
   label: string;
+  formControlModel: T extends 'number' ? FormControlModel<number> : T extends 'datetime' ? FormControlModel<number> : FormControlModel<string>;
   hint?: string;
   className?: string;
   type?: T;
-  formControlModel: T extends 'number' ? FormControlModel<number> : T extends 'datetime' ? FormControlModel<number> : FormControlModel<string>;
 }
 
 interface State {

@@ -1,14 +1,16 @@
 import * as React from 'react';
 
-import { GetAvailableApplicationsAndServices } from './models/GetAvailableApplicationsAndServicesRequest';
+import { GetAvailableApplicationsAndServicesRequest } from './models/GetAvailableApplicationsAndServicesRequest';
 import { StompClientService } from '@shared/StompClientService';
-import { Payload } from './models/Payload';
+import { ResponseBody } from './models/ResponseBody';
 import { AvailableApplicationsAndServices } from './AvailableApplicationsAndServices';
 
-interface Props { }
+interface Props {
+
+}
 
 interface State {
-  payload: Payload;
+  responseBody: ResponseBody;
 }
 export class AvailableApplicationsAndServicesContainer extends React.Component<Props, State> {
 
@@ -18,7 +20,7 @@ export class AvailableApplicationsAndServicesContainer extends React.Component<P
     super(props);
 
     this.state = {
-      payload: null
+      responseBody: null
     };
 
   }
@@ -27,21 +29,21 @@ export class AvailableApplicationsAndServicesContainer extends React.Component<P
   }
 
   private _fetchAvailableApplicationsAndServices() {
-    const getApplicationsAndServices = new GetAvailableApplicationsAndServices();
-    this._subscribeForApplicationAndServicesResponse(getApplicationsAndServices.replyTo);
+    const getApplicationsAndServicesRequest = new GetAvailableApplicationsAndServicesRequest();
+    this._subscribeForApplicationAndServicesResponse(getApplicationsAndServicesRequest.replyTo);
     this._stompClientService.send({
-      destination: getApplicationsAndServices.url,
-      replyTo: getApplicationsAndServices.replyTo,
-      body: JSON.stringify(getApplicationsAndServices.requestBody)
+      destination: getApplicationsAndServicesRequest.url,
+      replyTo: getApplicationsAndServicesRequest.replyTo,
+      body: JSON.stringify(getApplicationsAndServicesRequest.requestBody)
     });
   }
 
   private _subscribeForApplicationAndServicesResponse(topic: string) {
-    this._stompClientService.readOnceFrom<Payload>(topic)
+    this._stompClientService.readOnceFrom<ResponseBody>(topic)
       .subscribe({
-        next: payload => {
+        next: responseBody => {
           this.setState({
-            payload
+            responseBody
           });
         }
       });
@@ -49,7 +51,7 @@ export class AvailableApplicationsAndServicesContainer extends React.Component<P
 
   render() {
     return (
-      <AvailableApplicationsAndServices payload={this.state.payload} />
+      <AvailableApplicationsAndServices responseBody={this.state.responseBody} />
     );
   }
 

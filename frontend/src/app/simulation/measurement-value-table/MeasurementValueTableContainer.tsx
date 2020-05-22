@@ -2,7 +2,7 @@ import * as React from 'react';
 import { Subject } from 'rxjs';
 import { takeUntil, filter } from 'rxjs/operators';
 
-import { SimulationQueue, SimulationControlService, SimulationOutputMeasurement } from '@shared/simulation';
+import { SimulationQueue, SimulationManagementService, SimulationOutputMeasurement } from '@shared/simulation';
 import { SimulationStatus } from '@commons/SimulationStatus';
 import { MeasurementValueTable } from './MeasurementValueTable';
 import { MeasurementType } from '@shared/topology';
@@ -54,7 +54,7 @@ const NODES_PER_TOPOLOGY = {
 export class MeasurementValueTableContainer extends React.Component<Props, State> {
 
   private readonly _simulationQueue = SimulationQueue.getInstance();
-  private readonly _simulationControlService = SimulationControlService.getInstance();
+  private readonly _simulationManagementService = SimulationManagementService.getInstance();
   private readonly _unsubscriber = new Subject<void>();
 
   constructor(props: Props) {
@@ -67,15 +67,15 @@ export class MeasurementValueTableContainer extends React.Component<Props, State
   }
 
   componentDidMount() {
-    this._subscribeToSimulationOutputMeasurementsStream();
+    this._subscribeToSimulationOutputMeasurementMapStream();
     this._resetLabelsWhenSimulationStarts();
   }
 
   private _resetLabelsWhenSimulationStarts() {
-    this._simulationControlService.statusChanges()
+    this._simulationManagementService.simulationStatusChanges()
       .pipe(
         takeUntil(this._unsubscriber),
-        filter(status => status === SimulationStatus.STARTING && this._simulationControlService.isUserInActiveSimulation())
+        filter(status => status === SimulationStatus.STARTING && this._simulationManagementService.isUserInActiveSimulation())
       )
       .subscribe({
         next: () => {
@@ -101,8 +101,8 @@ export class MeasurementValueTableContainer extends React.Component<Props, State
     );
   }
 
-  private _subscribeToSimulationOutputMeasurementsStream() {
-    this._simulationControlService.simulationOutputMeasurementsReceived()
+  private _subscribeToSimulationOutputMeasurementMapStream() {
+    this._simulationManagementService.simulationOutputMeasurementMapReceived()
       .pipe(takeUntil(this._unsubscriber))
       .subscribe({
         next: simulationOutputMeasurements => {

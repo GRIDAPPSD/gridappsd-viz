@@ -4,7 +4,7 @@ import { filter, takeUntil } from 'rxjs/operators';
 
 import { MeasurementChart } from './MeasurementChart';
 import { MeasurementChartModel } from './models/MeasurementChartModel';
-import { SimulationOutputMeasurement, SimulationControlService } from '@shared/simulation';
+import { SimulationOutputMeasurement, SimulationManagementService } from '@shared/simulation';
 import { SimulationStatus } from '@commons/SimulationStatus';
 import { TimeSeries } from './models/TimeSeries';
 import { TimeSeriesDataPoint } from './models/TimeSeriesDataPoint';
@@ -22,7 +22,7 @@ interface State {
 export class MeasurementChartContainer extends React.Component<Props, State> {
 
   private readonly _stateStore = StateStore.getInstance();
-  private readonly _simulationControlService = SimulationControlService.getInstance();
+  private readonly _simulationManagementService = SimulationManagementService.getInstance();
   private readonly _timeSeries = new Map<string, TimeSeries>();
   private readonly _unsubscriber = new Subject<void>();
 
@@ -38,15 +38,15 @@ export class MeasurementChartContainer extends React.Component<Props, State> {
   componentDidMount() {
     this._pickMeasurementChartModelsFromSimulationSnapshotStream();
     this._subscribeToPlotModelsStateStore();
-    this._subscribeToSimulationOutputMeasurementsStream();
+    this._subscribeToSimulationOutputMeasurementMapStream();
     this._resetMeasurementChartModelsWhenSimulationStarts();
   }
 
   private _pickMeasurementChartModelsFromSimulationSnapshotStream() {
-    this._simulationControlService.selectSimulationSnapshotState('measurementChartModels')
+    this._simulationManagementService.selectSimulationSnapshotState('measurementChartModels')
       .pipe(
         takeUntil(this._unsubscriber),
-        filter(this._simulationControlService.isUserInActiveSimulation)
+        filter(this._simulationManagementService.isUserInActiveSimulation)
       )
       .subscribe({
         next: (measurementChartModels: MeasurementChartModel[]) => {
@@ -98,8 +98,8 @@ export class MeasurementChartContainer extends React.Component<Props, State> {
     this.setState({
       measurementChartModels
     });
-    if (this._simulationControlService.didUserStartActiveSimulation()) {
-      this._simulationControlService.syncSimulationSnapshotState({
+    if (this._simulationManagementService.didUserStartActiveSimulation()) {
+      this._simulationManagementService.syncSimulationSnapshotState({
         measurementChartModels
       });
     }
@@ -135,21 +135,25 @@ export class MeasurementChartContainer extends React.Component<Props, State> {
     return this._timeSeries.get(timeSeriesId);
   }
 
-  private _subscribeToSimulationOutputMeasurementsStream(): Subscription {
-    return this._simulationControlService.simulationOutputMeasurementsReceived()
+  private _subscribeToSimulationOutputMeasurementMapStream(): Subscription {
+    return this._simulationManagementService.simulationOutputMeasurementMapReceived()
       .pipe(
         takeUntil(this._unsubscriber),
-        filter(() => this._plotModels.length > 0 && this._simulationControlService.didUserStartActiveSimulation())
+        filter(() => this._simulationManagementService.didUserStartActiveSimulation())
       )
       .subscribe({
         next: measurements => {
-          const measurementChartModels = this._plotModels
-            .map(plotModel => this._buildMeasurementChartModel(plotModel, measurements));
+          const measurementChartModels = [];
+          if (this._plotModels.length > 0) {
+            measurementChartModels.push(
+              ...this._plotModels.map(plotModel => this._buildMeasurementChartModel(plotModel, measurements))
+            );
+          }
           this.setState({
             measurementChartModels
           });
-          if (this._simulationControlService.didUserStartActiveSimulation()) {
-            this._simulationControlService.syncSimulationSnapshotState({
+          if (this._simulationManagementService.didUserStartActiveSimulation()) {
+            this._simulationManagementService.syncSimulationSnapshotState({
               measurementChartModels
             });
           }
@@ -190,7 +194,7 @@ export class MeasurementChartContainer extends React.Component<Props, State> {
     const measurement = measurements.get(component.id);
     if (measurement !== undefined) {
       const dataPoint: TimeSeriesDataPoint = {
-        timestamp: new Date(this._simulationControlService.getOutputTimestamp() * 1000),
+        timestamp: new Date(this._simulationManagementService.getOutputTimestamp() * 1000),
         measurement: 0
       };
       switch (plotModel.measurementType) {
@@ -210,10 +214,10 @@ export class MeasurementChartContainer extends React.Component<Props, State> {
 
 
   private _resetMeasurementChartModelsWhenSimulationStarts() {
-    this._simulationControlService.statusChanges()
+    this._simulationManagementService.simulationStatusChanges()
       .pipe(
         takeUntil(this._unsubscriber),
-        filter(status => status === SimulationStatus.STARTING && this._simulationControlService.didUserStartActiveSimulation())
+        filter(status => status === SimulationStatus.STARTING && this._simulationManagementService.didUserStartActiveSimulation())
       )
       .subscribe({
         next: () => this._updateMeasurementChartModels(true)

@@ -7,7 +7,7 @@ import { StateStore } from '@shared/state-store';
 import { StompClientService } from '@shared/StompClientService';
 import { Alarm } from './models/Alarm';
 import { NewAlarmNotification } from './views/new-alarm-notification/NewAlarmNotification';
-import { SimulationControlService } from '@shared/simulation';
+import { SimulationManagementService } from '@shared/simulation';
 import { SimulationStatus } from '@commons/SimulationStatus';
 
 interface Props {
@@ -24,7 +24,7 @@ export class AlarmsContainer extends React.Component<Props, State> {
 
   private readonly _stateStore = StateStore.getInstance();
   private readonly _stompClientService = StompClientService.getInstance();
-  private readonly _simulationControlService = SimulationControlService.getInstance();
+  private readonly _simulationManagementService = SimulationManagementService.getInstance();
   private readonly _unsubscriber = new Subject<void>();
 
   constructor(props: Props) {
@@ -48,7 +48,7 @@ export class AlarmsContainer extends React.Component<Props, State> {
   private _subscribeToNewAlarmsTopic() {
     this._stateStore.select('simulationId')
       .pipe(
-        filter(simulationId => simulationId !== '' && this._simulationControlService.didUserStartActiveSimulation()),
+        filter(simulationId => simulationId !== '' && this._simulationManagementService.didUserStartActiveSimulation()),
         map(id => `/topic/goss.gridappsd.simulation.gridappsd-alarms.${id}.output`),
         switchMap(this._stompClientService.readFrom),
         takeUntil(this._unsubscriber)
@@ -63,7 +63,7 @@ export class AlarmsContainer extends React.Component<Props, State> {
             alarms: [...this.state.alarms, ...alarms],
             newAlarmCounts: alarms.length + this.state.newAlarmCounts
           });
-          this._simulationControlService.syncSimulationSnapshotState({
+          this._simulationManagementService.syncSimulationSnapshotState({
             alarms
           });
         },
@@ -72,7 +72,7 @@ export class AlarmsContainer extends React.Component<Props, State> {
   }
 
   private _pickAlarmsFromSimulationSnapshotStream() {
-    this._simulationControlService.selectSimulationSnapshotState('alarms')
+    this._simulationManagementService.selectSimulationSnapshotState('alarms')
       .pipe(takeUntil(this._unsubscriber))
       .subscribe({
         next: (alarms: Alarm[]) => {
@@ -85,10 +85,10 @@ export class AlarmsContainer extends React.Component<Props, State> {
   }
 
   private _clearAllAlarmsWhenSimulationStarts() {
-    this._simulationControlService.statusChanges()
+    this._simulationManagementService.simulationStatusChanges()
       .pipe(
         takeUntil(this._unsubscriber),
-        filter(status => status === SimulationStatus.STARTING && this._simulationControlService.didUserStartActiveSimulation())
+        filter(status => status === SimulationStatus.STARTING && this._simulationManagementService.didUserStartActiveSimulation())
       )
       .subscribe({
         next: () => {
@@ -96,7 +96,7 @@ export class AlarmsContainer extends React.Component<Props, State> {
             alarms: [],
             newAlarmCounts: 0
           });
-          this._simulationControlService.syncSimulationSnapshotState({
+          this._simulationManagementService.syncSimulationSnapshotState({
             alarms: []
           });
         }

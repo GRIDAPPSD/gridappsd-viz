@@ -1,6 +1,5 @@
 import { AbstractControlModel } from './AbstractControlModel';
 import { FormControlModel } from './FormControlModel';
-import { FormGroupModel } from './FormGroupModel';
 
 export class FormArrayModel<T = any> extends AbstractControlModel<T[]> {
 
@@ -82,13 +81,6 @@ export class FormArrayModel<T = any> extends AbstractControlModel<T[]> {
     const control = this._controls.splice(index, 1)[0];
     control?.cleanup();
     this._valueChangeNotifier.next(this.getValue());
-  }
-
-  removeAllControls() {
-    const numberOfControls = this._controls.length;
-    this._controls.forEach(control => control.cleanup());
-    this._controls.splice(0, numberOfControls);
-    this._valueChangeNotifier.next([]);
   }
 
   reset() {

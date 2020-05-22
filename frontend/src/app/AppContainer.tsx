@@ -16,7 +16,7 @@ import {
   SimulationConfiguration,
   Simulation,
   SimulationQueue,
-  SimulationControlService
+  SimulationManagementService
 } from '@shared/simulation';
 import { StompClientService, StompClientConnectionStatus } from '@shared/StompClientService';
 import { GetModelDictionaryRequest, GetModelDictionaryResponsePayload } from './models/message-requests/GetModelDictionaryRequest';
@@ -42,10 +42,10 @@ interface State {
 
 export class AppContainer extends React.Component<Props, State> {
 
-  readonly componentMRIDs = new Map<string, string & string[]>();
+  readonly componentMRIDs = new Map<string, string | string[]>();
   readonly componentPhases = new Map<string, string[]>();
   readonly authenticatorService = AuthenticatorService.getInstance();
-  readonly simulationControlService = SimulationControlService.getInstance();
+  readonly simulationManagementService = SimulationManagementService.getInstance();
 
   private readonly _stateStore = StateStore.getInstance();
   private readonly _stompClientService = StompClientService.getInstance();
@@ -83,8 +83,8 @@ export class AppContainer extends React.Component<Props, State> {
         }
       });
     zip(
-      this.simulationControlService.selectSimulationSnapshotState('stateStore'),
-      this.simulationControlService.selectSimulationSnapshotState('topologyModel')
+      this.simulationManagementService.selectSimulationSnapshotState('stateStore'),
+      this.simulationManagementService.selectSimulationSnapshotState('topologyModel')
     )
       .subscribe({
         next: (tuple: [ApplicationState, TopologyModel]) => {
@@ -184,13 +184,13 @@ export class AppContainer extends React.Component<Props, State> {
         onLogout={this.authenticatorService.logout}
         onMRIDChanged={this.retrieveModelDictionary}
         onSimulationConfigFormSubmitted={this.onSimulationConfigFormSubmitted}
-        onJoinActiveSimulation={this.simulationControlService.requestToJoinActiveSimulation} />
+        onJoinActiveSimulation={this.simulationManagementService.requestToJoinActiveSimulation} />
     );
   }
 
   retrieveModelDictionary(mRID: string) {
     this._stateStore.update({
-      modelDictionaryComponentsWithGroupedPhases: [],
+      modelDictionaryComponents: [],
       plotModels: []
     });
     if (!this._availableModelDictionaries.has(mRID)) {
@@ -235,14 +235,14 @@ export class AppContainer extends React.Component<Props, State> {
       modelDictionaryMeasurementMap.set(measurement.mRID, measurement);
     }
     this._collectMRIDsAndPhasesForComponents(modelDictionary);
-    this.simulationControlService.updateModelDictionaryMeasurementMap(modelDictionaryMeasurementMap);
+    this.simulationManagementService.updateModelDictionaryMeasurementMap(modelDictionaryMeasurementMap);
     this._findAllPhasesForEachComponentThenGroupThem(modelDictionary);
     this._stateStore.update({
       modelDictionary
     });
   }
 
-  private _collectMRIDsAndPhasesForComponents(modelDictionary: any) {
+  private _collectMRIDsAndPhasesForComponents(modelDictionary: ModelDictionary) {
     this.componentMRIDs.clear();
     this.componentPhases.clear();
     for (const swjtch of modelDictionary.switches) {
@@ -259,7 +259,7 @@ export class AppContainer extends React.Component<Props, State> {
   }
 
   private _findAllPhasesForEachComponentThenGroupThem(modelDictionary: ModelDictionary) {
-    const componentWithGroupedPhasesMap = new Map<string, ModelDictionaryComponent>();
+    const modelDictionaryComponentMap = new Map<string, ModelDictionaryComponent>();
     const measurementMRIDMap = new Map<string, Array<{ phase: string; mrid: string; }>>();
     for (const measurement of modelDictionary.measurements) {
       const name = measurement.measurementType === MeasurementType.VOLTAGE
@@ -267,9 +267,9 @@ export class AppContainer extends React.Component<Props, State> {
         : measurement.ConductingEquipment_name;
       const phases = measurement.phases;
       const id = measurement.name;
-      let componentInMeasurement = componentWithGroupedPhasesMap.get(id);
-      if (!componentInMeasurement) {
-        componentInMeasurement = {
+      let modelDictionaryComponent = modelDictionaryComponentMap.get(id);
+      if (!modelDictionaryComponent) {
+        modelDictionaryComponent = {
           id,
           name,
           conductingEquipmentName: measurement.ConductingEquipment_name,
@@ -281,22 +281,22 @@ export class AppContainer extends React.Component<Props, State> {
           measurementMRIDs: []
         };
         measurementMRIDMap.set(id, []);
-        componentWithGroupedPhasesMap.set(id, componentInMeasurement);
+        modelDictionaryComponentMap.set(id, modelDictionaryComponent);
       }
-      if (!componentInMeasurement.phases.includes(phases)) {
+      if (!modelDictionaryComponent.phases.includes(phases)) {
         const measurementMRIDAndPhaseArray = measurementMRIDMap.get(id);
         measurementMRIDAndPhaseArray.push({ phase: phases, mrid: measurement.mRID });
-        componentInMeasurement.measurementMRIDs = measurementMRIDAndPhaseArray.sort(
+        modelDictionaryComponent.measurementMRIDs = measurementMRIDAndPhaseArray.sort(
           (a, b) => a.phase.localeCompare(b.phase)
         ).map(e => e.mrid);
-        componentInMeasurement.phases.push(phases);
-        componentInMeasurement.phases.sort((a, b) => a.localeCompare(b));
-        componentInMeasurement.displayName = `${name} (${componentInMeasurement.phases.join(', ')})`;
-        componentInMeasurement.conductingEquipmentMRIDs.push(measurement.ConductingEquipment_mRID);
+        modelDictionaryComponent.phases.push(phases);
+        modelDictionaryComponent.phases.sort((a, b) => a.localeCompare(b));
+        modelDictionaryComponent.displayName = `${name} (${modelDictionaryComponent.phases.join(', ')})`;
+        modelDictionaryComponent.conductingEquipmentMRIDs.push(measurement.ConductingEquipment_mRID);
       }
     }
     this._stateStore.update({
-      modelDictionaryComponentsWithGroupedPhases: [...componentWithGroupedPhasesMap.values()]
+      modelDictionaryComponents: [...modelDictionaryComponentMap.values()]
     });
   }
 
