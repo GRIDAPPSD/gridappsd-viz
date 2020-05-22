@@ -3,7 +3,7 @@ import { Subject } from 'rxjs';
 import { filter, switchMap, tap, takeWhile, finalize, takeUntil } from 'rxjs/operators';
 
 import { SimulationStatusLogger } from './SimulationStatusLogger';
-import { SIMULATION_STATUS_LOG_TOPIC, SimulationControlService, SimulationStatusLogMessage } from '@shared/simulation';
+import { SIMULATION_STATUS_LOG_TOPIC, SimulationManagementService, SimulationStatusLogMessage } from '@shared/simulation';
 import { StompClientService, StompClientConnectionStatus } from '@shared/StompClientService';
 import { StateStore } from '@shared/state-store';
 import { generateUniqueId } from '@shared/misc';
@@ -22,7 +22,7 @@ interface State {
 export class SimulationStatusLogContainer extends React.Component<Props, State> {
 
   private readonly _stompClientService = StompClientService.getInstance();
-  private readonly _simulationControlService = SimulationControlService.getInstance();
+  private readonly _simulationManagementService = SimulationManagementService.getInstance();
   private readonly _stateStore = StateStore.getInstance();
   private readonly _unsubscriber = new Subject<void>();
 
@@ -68,8 +68,8 @@ export class SimulationStatusLogContainer extends React.Component<Props, State> 
     });
     return this._stompClientService.readFrom<SimulationStatusLogMessage>(`${SIMULATION_STATUS_LOG_TOPIC}.${simulationId}`)
       .pipe(
-        takeWhile(this._simulationControlService.isUserInActiveSimulation),
-        takeUntil(this._simulationControlService.statusChanges().pipe(filter(status => status === SimulationStatus.STOPPED))),
+        takeWhile(this._simulationManagementService.isUserInActiveSimulation),
+        takeUntil(this._simulationManagementService.simulationStatusChanges().pipe(filter(status => status === SimulationStatus.STOPPED))),
         takeUntil(this._unsubscriber),
         finalize(() => {
           this.setState({
@@ -93,9 +93,9 @@ export class SimulationStatusLogContainer extends React.Component<Props, State> 
   }
 
   private _clearAllLogMessagesWhenSimulationStarts() {
-    this._simulationControlService.statusChanges()
+    this._simulationManagementService.simulationStatusChanges()
       .pipe(
-        filter(status => status === SimulationStatus.STARTING && this._simulationControlService.didUserStartActiveSimulation()),
+        filter(status => status === SimulationStatus.STARTING && this._simulationManagementService.didUserStartActiveSimulation()),
         takeUntil(this._unsubscriber)
       )
       .subscribe({

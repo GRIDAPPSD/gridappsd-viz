@@ -21,7 +21,7 @@ import './PlotModelCreator.light.scss';
 import './PlotModelCreator.dark.scss';
 
 interface Props {
-  modelDictionaryComponentsWithConsolidatedPhases: ModelDictionaryComponent[];
+  modelDictionaryComponents: ModelDictionaryComponent[];
   existingPlotModels: PlotModel[];
   onClose: () => void;
   onSubmit: (plotModels: PlotModel[]) => void;
@@ -32,7 +32,7 @@ interface State {
   createdPlotModels: PlotModel[];
   allPlotModelOptionBuilder: SelectionOptionBuilder<PlotModel>;
   measurementTypeOptionBuilder: SelectionOptionBuilder<MeasurementType>;
-  componentOptionBuilder: SelectionOptionBuilder<ModelDictionaryComponent>;
+  modelDictionaryComponentOptionBuilder: SelectionOptionBuilder<ModelDictionaryComponent>;
   phaseOptionBuilder: SelectionOptionBuilder<string>;
   disableAddComponentButton: boolean;
   disableSubmitButton: boolean;
@@ -76,7 +76,7 @@ export class PlotModelCreator extends React.Component<Props, State> {
           }
         }
       ),
-      componentOptionBuilder: SelectionOptionBuilder.defaultBuilder(),
+      modelDictionaryComponentOptionBuilder: SelectionOptionBuilder.defaultBuilder(),
       phaseOptionBuilder: SelectionOptionBuilder.defaultBuilder(),
       disableAddComponentButton: true,
       disableSubmitButton: true
@@ -152,8 +152,8 @@ export class PlotModelCreator extends React.Component<Props, State> {
             if (existingPlotModel !== undefined) {
               this.selectedMeasurementTypeFormControl.setValue(existingPlotModel.measurementType);
               this.setState({
-                componentOptionBuilder: new SelectionOptionBuilder(
-                  this.props.modelDictionaryComponentsWithConsolidatedPhases.filter(e => e.type === existingPlotModel.measurementType),
+                modelDictionaryComponentOptionBuilder: new SelectionOptionBuilder(
+                  this.props.modelDictionaryComponents.filter(e => e.type === existingPlotModel.measurementType),
                   e => e.displayName
                 ),
                 phaseOptionBuilder: SelectionOptionBuilder.defaultBuilder()
@@ -164,7 +164,7 @@ export class PlotModelCreator extends React.Component<Props, State> {
               this.selectedMeasurementTypeFormControl.enable();
               this.selectedMeasurementTypeFormControl.reset();
               this.setState({
-                componentOptionBuilder: SelectionOptionBuilder.defaultBuilder(),
+                modelDictionaryComponentOptionBuilder: SelectionOptionBuilder.defaultBuilder(),
                 phaseOptionBuilder: SelectionOptionBuilder.defaultBuilder()
               });
             }
@@ -185,8 +185,8 @@ export class PlotModelCreator extends React.Component<Props, State> {
           this.useAngleFormControl.reset();
           if (this.selectedMeasurementTypeFormControl.isValid()) {
             this.setState({
-              componentOptionBuilder: new SelectionOptionBuilder(
-                this.props.modelDictionaryComponentsWithConsolidatedPhases.filter(e => e.type === selectedType),
+              modelDictionaryComponentOptionBuilder: new SelectionOptionBuilder(
+                this.props.modelDictionaryComponents.filter(e => e.type === selectedType),
                 e => e.displayName
               ),
               phaseOptionBuilder: SelectionOptionBuilder.defaultBuilder()
@@ -263,7 +263,7 @@ export class PlotModelCreator extends React.Component<Props, State> {
                 formControlModel={this.currentPlotModelFormGroup.findControl('useAngle')} />
               <Select
                 label='Component'
-                selectionOptionBuilder={this.state.componentOptionBuilder}
+                selectionOptionBuilder={this.state.modelDictionaryComponentOptionBuilder}
                 formControlModel={this.selectedComponentFormControl} />
               <Select
                 multiple
@@ -318,7 +318,7 @@ export class PlotModelCreator extends React.Component<Props, State> {
       this.currentPlotModelFormGroup.reset();
       this.setState({
         measurementTypeOptionBuilder: SelectionOptionBuilder.defaultBuilder(),
-        componentOptionBuilder: SelectionOptionBuilder.defaultBuilder(),
+        modelDictionaryComponentOptionBuilder: SelectionOptionBuilder.defaultBuilder(),
         phaseOptionBuilder: SelectionOptionBuilder.defaultBuilder()
       });
     }

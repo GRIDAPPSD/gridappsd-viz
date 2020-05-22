@@ -32,7 +32,7 @@ interface Props {
   modelDictionary: ModelDictionary;
   simulationStartDateTime: number;
   simulationStopDateTime: number;
-  componentWithConsolidatedPhases: ModelDictionaryComponent[];
+  modelDictionaryComponents: ModelDictionaryComponent[];
 }
 
 interface State {
@@ -292,7 +292,7 @@ export class TestConfigurationTab extends React.Component<Props, State> {
             modelDictionary={this.props.modelDictionary}
             startDateTime={this.props.simulationStartDateTime}
             stopDateTime={this.props.simulationStopDateTime}
-            componentsWithConsolidatedPhases={this.props.componentWithConsolidatedPhases}
+            modelDictionaryComponents={this.props.modelDictionaryComponents}
             onAddEvent={this.addFaultEvent} />
         );
       default:

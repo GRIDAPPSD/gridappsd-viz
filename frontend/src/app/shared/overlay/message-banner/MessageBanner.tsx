@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { Fade } from '@shared/fade';
+import { Fade } from '@shared/effects/fade';
 import { Backdrop } from '@shared/overlay/backdrop';
 
 import './MessageBanner.light.scss';

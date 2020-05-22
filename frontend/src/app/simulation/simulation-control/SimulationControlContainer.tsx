@@ -2,7 +2,7 @@ import * as React from 'react';
 import { Subject } from 'rxjs';
 import { filter, takeUntil, map, switchMap, take, tap } from 'rxjs/operators';
 
-import { SimulationControlService } from '@shared/simulation';
+import { SimulationManagementService } from '@shared/simulation';
 import { SimulationStatus } from '@commons/SimulationStatus';
 import { SimulationControl } from './SimulationControl';
 import { StateStore } from '@shared/state-store';
@@ -17,12 +17,12 @@ interface State {
   simulationStatus: SimulationStatus;
   activeSimulationId: string;
   existingPlotModels: PlotModel[];
-  modelDictionaryComponentsWithGroupedPhases: ModelDictionaryComponent[];
+  modelDictionaryComponents: ModelDictionaryComponent[];
 }
 
 export class SimulationControlContainer extends React.Component<Props, State> {
 
-  readonly simulationControlService = SimulationControlService.getInstance();
+  readonly simulationManagementService = SimulationManagementService.getInstance();
 
   private readonly _stompClientService = StompClientService.getInstance();
   private readonly _stateStore = StateStore.getInstance();
@@ -32,10 +32,10 @@ export class SimulationControlContainer extends React.Component<Props, State> {
     super(props);
 
     this.state = {
-      simulationStatus: this.simulationControlService.currentStatus(),
+      simulationStatus: this.simulationManagementService.currentStatus(),
       activeSimulationId: '',
       existingPlotModels: [],
-      modelDictionaryComponentsWithGroupedPhases: []
+      modelDictionaryComponents: []
     };
 
     this.updatePlotModels = this.updatePlotModels.bind(this);
@@ -56,16 +56,16 @@ export class SimulationControlContainer extends React.Component<Props, State> {
         filter(status => status !== StompClientConnectionStatus.CONNECTED)
       )
       .subscribe({
-        next: this.simulationControlService.stopSimulation
+        next: this.simulationManagementService.stopSimulation
       });
   }
 
   private _subscribeToSimulationStatusChanges() {
-    this.simulationControlService.statusChanges()
+    this.simulationManagementService.simulationStatusChanges()
       .pipe(
         takeUntil(this._unsubscriber),
         tap(status => {
-          if (this.simulationControlService.isUserInActiveSimulation()) {
+          if (this.simulationManagementService.isUserInActiveSimulation()) {
             this.setState({
               simulationStatus: status
             });
@@ -94,10 +94,10 @@ export class SimulationControlContainer extends React.Component<Props, State> {
   }
 
   private _subscribeToComponentsWithConsolidatedPhasesStateChanges() {
-    this._stateStore.select('modelDictionaryComponentsWithGroupedPhases')
+    this._stateStore.select('modelDictionaryComponents')
       .pipe(takeUntil(this._unsubscriber))
       .subscribe({
-        next: components => this.setState({ modelDictionaryComponentsWithGroupedPhases: components })
+        next: components => this.setState({ modelDictionaryComponents: components })
       });
   }
 
@@ -120,12 +120,12 @@ export class SimulationControlContainer extends React.Component<Props, State> {
         simulationId={this.state.activeSimulationId}
         simulationStatus={this.state.simulationStatus}
         existingPlotModels={this.state.existingPlotModels}
-        modelDictionaryComponentsWithConsolidatedPhases={this.state.modelDictionaryComponentsWithGroupedPhases}
-        onStartSimulation={this.simulationControlService.startSimulation}
-        onStopSimulation={this.simulationControlService.stopSimulation}
-        onPauseSimulation={this.simulationControlService.pauseSimulation}
-        onResumeSimulation={this.simulationControlService.resumeSimulation}
-        onResumeThenPauseSimulation={this.simulationControlService.resumeThenPauseSimulationAfter}
+        onStartSimulation={this.simulationManagementService.startSimulation}
+        modelDictionaryComponents={this.state.modelDictionaryComponents}
+        onStopSimulation={this.simulationManagementService.stopSimulation}
+        onPauseSimulation={this.simulationManagementService.pauseSimulation}
+        onResumeSimulation={this.simulationManagementService.resumeSimulation}
+        onResumeThenPauseSimulation={this.simulationManagementService.resumeThenPauseSimulationAfter}
         onPlotModelCreationDone={this.updatePlotModels} />
     );
   }

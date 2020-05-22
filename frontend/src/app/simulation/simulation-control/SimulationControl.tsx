@@ -22,7 +22,7 @@ interface Props {
   simulationStatus: SimulationStatus;
   simulationId: string;
   existingPlotModels: PlotModel[];
-  modelDictionaryComponentsWithConsolidatedPhases: ModelDictionaryComponent[];
+  modelDictionaryComponents: ModelDictionaryComponent[];
   onStartSimulation: () => void;
   onStopSimulation: () => void;
   onPauseSimulation: () => void;
@@ -53,37 +53,39 @@ export class SimulationControl extends React.Component<Props, State> {
   render() {
     return (
       <div className='simulation-control'>
-        {
-          this.props.simulationId
-          &&
-          <div className='simulation-control__simulation-id'>
-            <span className='simulation-control__simulation-id__label'>Simulation ID</span>
-            <Ripple>
-              <span className='simulation-control__simulation-id__value-wrapper'>
-                {
-                  this.state.simulationIdCopiedSuccessfully
-                  &&
-                  <Tooltip content='Copied to clipboard'>
-                    <span className='simulation-control__simulation-id__value__copied-successfully-tooltip' />
-                  </Tooltip>
-                }
-                <span
-                  className='simulation-control__simulation-id__value'
-                  onClick={this.saveSimulationIdToClipboard}
-                  style={{ pointerEvents: this.state.simulationIdCopiedSuccessfully ? 'none' : 'all' }}>
-                  {this.props.simulationId}
-                </span>
+        <div
+          className='simulation-control__simulation-id'
+          style={{
+            visibility: this.props.simulationId ? 'visible' : 'hidden'
+          }}>
+          <span className='simulation-control__simulation-id__label'>
+            Simulation ID
+          </span>
+          <Ripple>
+            <span className='simulation-control__simulation-id__value-wrapper'>
+              {
+                this.state.simulationIdCopiedSuccessfully
+                &&
+                <Tooltip content='Copied to clipboard'>
+                  <span className='simulation-control__simulation-id__value__copied-successfully-tooltip' />
+                </Tooltip>
+              }
+              <span
+                className='simulation-control__simulation-id__value'
+                onClick={this.saveSimulationIdToClipboard}
+                style={{ pointerEvents: this.state.simulationIdCopiedSuccessfully ? 'none' : 'all' }}>
+                {this.props.simulationId}
               </span>
-            </Ripple>
-          </div>
-        }
+            </span>
+          </Ripple>
+        </div>
         <Restricted roles={['testmanager']}>
           {this.showSimulationControlButtons()}
           <Tooltip content='Edit plots'>
             <IconButton
               icon='show_chart'
               className='simulation-control__action add-component-to-plot'
-              disabled={this.props.modelDictionaryComponentsWithConsolidatedPhases.length === 0}
+              disabled={this.props.modelDictionaryComponents.length === 0}
               onClick={this.showPlotModelCreator} />
           </Tooltip>
         </Restricted>
@@ -107,7 +109,7 @@ export class SimulationControl extends React.Component<Props, State> {
     switch (this.props.simulationStatus) {
       case SimulationStatus.STARTING:
         return (
-          <span className='simulation-control__simulation-starting-message'>
+          <span className='simulation-control__simulation-is-starting-message'>
             Simulation is starting<ThreeDots />
           </span>
         );
@@ -151,7 +153,7 @@ export class SimulationControl extends React.Component<Props, State> {
           <Tooltip content='Start simulation'>
             <IconButton
               icon='play_arrow'
-              disabled={this.props.modelDictionaryComponentsWithConsolidatedPhases.length === 0}
+              disabled={this.props.modelDictionaryComponents.length === 0}
               className='simulation-control__action start'
               onClick={this.props.onStartSimulation} />
           </Tooltip>
@@ -234,7 +236,7 @@ export class SimulationControl extends React.Component<Props, State> {
     const portalRenderer = new PortalRenderer();
     portalRenderer.mount(
       <PlotModelCreator
-        modelDictionaryComponentsWithConsolidatedPhases={this.props.modelDictionaryComponentsWithConsolidatedPhases}
+        modelDictionaryComponents={this.props.modelDictionaryComponents}
         existingPlotModels={this.props.existingPlotModels}
         onSubmit={this.props.onPlotModelCreationDone}
         onClose={portalRenderer.unmount} />

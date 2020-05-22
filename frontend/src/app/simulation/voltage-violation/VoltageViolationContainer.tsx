@@ -5,7 +5,7 @@ import { switchMap, filter, takeWhile, takeUntil, timestamp } from 'rxjs/operato
 import { VoltageViolation } from './VoltageViolation';
 import { StompClientService } from '@shared/StompClientService';
 import { StateStore } from '@shared/state-store';
-import { SimulationControlService } from '@shared/simulation';
+import { SimulationManagementService } from '@shared/simulation';
 import { SimulationStatus } from '@commons/SimulationStatus';
 import { DateTimeService } from '@shared/DateTimeService';
 
@@ -21,7 +21,7 @@ interface State {
 export class VoltageViolationContainer extends React.Component<Props, State> {
 
   private readonly _stompClientService = StompClientService.getInstance();
-  private readonly _simulationControlService = SimulationControlService.getInstance();
+  private readonly _simulationManagementService = SimulationManagementService.getInstance();
   private readonly _dateTimeService = DateTimeService.getInstance();
   private readonly _stateStore = StateStore.getInstance();
   private readonly _unsubscriber = new Subject<void>();
@@ -45,9 +45,9 @@ export class VoltageViolationContainer extends React.Component<Props, State> {
   private _observeVoltageViolationChanges() {
     return this._stateStore.select('simulationId')
       .pipe(
-        filter(id => id !== '' && this._simulationControlService.didUserStartActiveSimulation()),
+        filter(id => id !== '' && this._simulationManagementService.didUserStartActiveSimulation()),
         switchMap(id => this._stompClientService.readFrom<{ [mrid: string]: number }>(`/topic/goss.gridappsd.simulation.voltage_violation.${id}.output`)),
-        takeWhile(this._simulationControlService.isUserInActiveSimulation),
+        takeWhile(this._simulationManagementService.isUserInActiveSimulation),
         takeUntil(this._unsubscriber)
       )
       .subscribe({
@@ -57,22 +57,22 @@ export class VoltageViolationContainer extends React.Component<Props, State> {
           const state = {
             totalVoltageViolations: violatingValues.length,
             violationsAtZero,
-            voltageViolationTimestamp: this._dateTimeService.format(this._simulationControlService.getOutputTimestamp())
+            voltageViolationTimestamp: this._dateTimeService.format(this._simulationManagementService.getOutputTimestamp())
           };
           this.setState(state);
-          this._simulationControlService.syncSimulationSnapshotState(state);
+          this._simulationManagementService.syncSimulationSnapshotState(state);
         }
       });
   }
 
   private _readViolationsOnSimulationSnapshotReceived() {
     return zip(
-      this._simulationControlService.selectSimulationSnapshotState('totalVoltageViolations'),
-      this._simulationControlService.selectSimulationSnapshotState('violationsAtZero'),
-      this._simulationControlService.selectSimulationSnapshotState('voltageViolationTimestamp')
+      this._simulationManagementService.selectSimulationSnapshotState('totalVoltageViolations'),
+      this._simulationManagementService.selectSimulationSnapshotState('violationsAtZero'),
+      this._simulationManagementService.selectSimulationSnapshotState('voltageViolationTimestamp')
     )
       .pipe(
-        filter(this._simulationControlService.isUserInActiveSimulation),
+        filter(this._simulationManagementService.isUserInActiveSimulation),
         takeUntil(this._unsubscriber)
       )
       .subscribe({
@@ -87,10 +87,10 @@ export class VoltageViolationContainer extends React.Component<Props, State> {
   }
 
   private _clearAllViolationCountsWhenSimulationStarts() {
-    this._simulationControlService.statusChanges()
+    this._simulationManagementService.simulationStatusChanges()
       .pipe(
         takeUntil(this._unsubscriber),
-        filter(status => status === SimulationStatus.STARTING && this._simulationControlService.didUserStartActiveSimulation())
+        filter(status => status === SimulationStatus.STARTING && this._simulationManagementService.didUserStartActiveSimulation())
       )
       .subscribe({
         next: () => {
@@ -100,7 +100,7 @@ export class VoltageViolationContainer extends React.Component<Props, State> {
             voltageViolationTimestamp: ''
           };
           this.setState(newStates);
-          this._simulationControlService.syncSimulationSnapshotState(newStates);
+          this._simulationManagementService.syncSimulationSnapshotState(newStates);
         }
       });
   }

@@ -2,7 +2,7 @@ import * as React from 'react';
 
 import { PortalRenderer } from '@shared/overlay/portal-renderer';
 import { Backdrop } from '@shared/overlay/backdrop';
-import { Fade } from '@shared/fade';
+import { Fade } from '@shared/effects/fade';
 
 import './MatchedNodeLocator.light.scss';
 import './MatchedNodeLocator.dark.scss';

@@ -151,7 +151,7 @@ export class SimulationStatusLogger extends React.Component<Props, State> {
     document.documentElement.removeEventListener('mouseup', this._mouseUp, false);
   }
 
-  private _resize(event) {
+  private _resize(event: MouseEvent) {
     const newPosition = Math.min(this._dragHandleMaxPosition, Math.max(event.clientY - 90, this._dragHandleMinPosition));
     this.setState({
       dragHandlePosition: newPosition

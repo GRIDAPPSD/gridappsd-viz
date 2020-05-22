@@ -9,7 +9,7 @@ export const DEFAULT_APPLICATION_STATE: ApplicationState = {
   applications: [],
   services: [],
   modelDictionary: null,
-  modelDictionaryComponentsWithGroupedPhases: [],
+  modelDictionaryComponents: [],
   plotModels: [],
   activeSimulationIds: [],
   nodeNameToLocate: ''

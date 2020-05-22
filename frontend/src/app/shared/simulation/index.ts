@@ -2,7 +2,7 @@ export * from './Simulation';
 export * from './SimulationConfiguration';
 export * from './SimulationOutputMeasurement';
 export * from './SimulationQueue';
-export * from './SimulationControlService';
+export * from './SimulationManagementService';
 export * from './SimulationOutputPayload';
 export * from './topics';
 export * from './default-simulation-configuration';
