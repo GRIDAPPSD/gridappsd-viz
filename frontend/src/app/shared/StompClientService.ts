@@ -116,11 +116,11 @@ export class StompClientService {
   }
 
   reconnect() {
-    timer(0, 5000)
+    timer(0, 5_000)
       .pipe(
         switchMap(() => iif(this.isActive, of(null), of(this._connect()))),
-        filter(this.isActive),
         timeout(25_000),
+        filter(this.isActive),
         take(1)
       )
       .subscribe({
@@ -134,6 +134,7 @@ export class StompClientService {
 
   private _connect() {
     if (!this.isActive()) {
+      this._client.deactivate();
       this._status = StompClientConnectionStatus.CONNECTING;
       this._statusChanges.next(this._status);
       this._client.configure({

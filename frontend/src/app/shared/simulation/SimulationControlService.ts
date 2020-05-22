@@ -15,6 +15,7 @@ import { StateStore } from '@shared/state-store';
 import { Simulation } from './Simulation';
 import { ConductingEquipmentType } from '@shared/topology/model-dictionary';
 import { SimulationStatusLogMessage } from './SimulationStatusLogMessage';
+import { DateTimeService } from '@shared/DateTimeService';
 
 interface SimulationStartedEventResponse {
   simulationId: string;
@@ -204,13 +205,12 @@ export class SimulationControlService {
     if (this._currentSimulationStatus !== SimulationStatus.STARTED && this._currentSimulationStatus !== SimulationStatus.STARTING) {
       const activeSimulation = this._simulationQueue.getActiveSimulation();
       const simulationConfig = activeSimulation.config;
-      const startTime = new Date(simulationConfig.simulation_config.start_time.replace(/-/g, '/'));
-      const startEpoch = startTime.getTime() / 1000.0;
+      const startTime = DateTimeService.getInstance().parse(simulationConfig.simulation_config.start_time);
       const config: SimulationConfiguration = {
         ...simulationConfig,
         simulation_config: {
           ...simulationConfig.simulation_config,
-          start_time: String(startEpoch)
+          start_time: String(startTime)
         }
       };
       activeSimulation.didRun = true;
@@ -249,9 +249,11 @@ export class SimulationControlService {
       )
       .subscribe({
         next: payload => {
-          this.syncSimulationSnapshotState({
-            simulationOutput: payload
-          });
+          if (this._syncingEnabled) {
+            this.syncSimulationSnapshotState({
+              simulationOutput: payload
+            });
+          }
           this._broadcastSimulationOutputMeasurements(payload);
         }
       });
