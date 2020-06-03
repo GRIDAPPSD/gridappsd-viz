@@ -72,7 +72,9 @@ export class ApplicationConfigurationTab extends React.Component<Props, State> {
 
   render() {
     return (
-      <FormGroup label=''>
+      <FormGroup
+        label=''
+        className='application-configuration-tab'>
         <Select
           optional
           label='Application name'

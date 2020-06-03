@@ -1,15 +1,15 @@
 .select.form-control {
-    align-items: flex-start;
+    align-items: center;
 }
 
 
 .select__option-list__opener {
     display: flex;
-    padding: 8px 5px 8px 10px;
-    min-width: 160px;
-    max-width: 160px;
+    padding: 8px 10px 8px 15px;
+    min-width: 170px;
+    max-width: 170px;
     align-items: center;
-    border-radius: 5px;
+    border-radius: 50px;
     cursor: pointer;
     text-decoration: none;
     position: relative;

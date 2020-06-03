@@ -4,7 +4,7 @@
     "description": "",
     "main": "index.js",
     "scripts": {
-        "dev": "webpack-dev-server --progress --inline",
+        "webpack-dev-server": "webpack-dev-server --progress --inline",
         "build": "rm -rf dist && webpack --env=production --env.BUILD_VERSION"
     },
     "husky": {

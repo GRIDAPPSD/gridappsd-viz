@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { Subscription, of } from 'rxjs';
-import { map, catchError } from 'rxjs/operators';
+import { catchError, map } from 'rxjs/operators';
 
 import { PowerGridModels } from './PowergridModels';
 import {
@@ -15,7 +15,7 @@ interface Props {
 }
 
 interface State {
-  response: any;
+  response: string;
   isFetching: boolean;
 }
 
@@ -31,7 +31,7 @@ export class PowergridModelsContainer extends React.Component<Props, State> {
   constructor(props: Props) {
     super(props);
     this.state = {
-      response: null,
+      response: '',
       isFetching: false
     };
     this.fetchPowerGridModels = this.fetchPowerGridModels.bind(this);
@@ -61,7 +61,7 @@ export class PowergridModelsContainer extends React.Component<Props, State> {
     return this._stompClientService.readFrom(this._queryPowerGridModelsRequest.replyTo)
       .pipe(
         map(payload => JSON.stringify(payload, null, 4)),
-        catchError(of)
+        catchError(() => of(''))
       )
       .subscribe({
         next: response => {

@@ -4,7 +4,7 @@ Make sure that NodeJS is installed ([https://nodejs.org/en/](https://nodejs.org/
 ## Bootstrapping the front-end
 - `cd frontend`
 - `npm install`
-- `npm run dev`
+- `npm run webpack-dev-server`
 - Go to http://localhost:4000
 
 ## Bootstrapping the back-end

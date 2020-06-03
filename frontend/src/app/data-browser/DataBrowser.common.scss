@@ -13,7 +13,6 @@ $app-bar-height: 60px;
 
     .vertical-divider {
         width: 1px;
-        box-shadow: 0 0 2px #888;
         height: 100%;
     }
 }
@@ -23,20 +22,17 @@ $app-bar-height: 60px;
     padding: 0;
     width: 350px;
     z-index: 1;
-    border-radius: 3px; // box-shadow: 0 0 2px #888;
 }
 
 .data-browser__selection__item {
     line-height: 5em;
     margin: 10px;
     text-align: center;
-    box-shadow: 0 0 2px #888;
-    border-radius: 3px;
+    border-radius: 10px;
     text-transform: uppercase;
     font-size: 20px;
     transition: transform 0.4s cubic-bezier(0.85, 1.72, 0, 1.32);
     position: relative;
-    color: #3f51b5;
     display: block;
     -moz-user-select: none;
     user-select: none;
@@ -62,9 +58,8 @@ $app-bar-height: 60px;
 
     &:before {
         content: '';
-        width: 30px;
+        width: 40px;
         height: 40px;
-        background-color: #fff;
         position: absolute;
         left: 100%;
         top: 20px;
@@ -72,11 +67,8 @@ $app-bar-height: 60px;
 
     &:after {
         content: '';
-        width: 30px;
+        width: 34px;
         height: 40px;
-        border-top: 2px solid #eee;
-        border-bottom: 2px solid #eee;
-        background-color: #fff;
         position: absolute;
         left: 100%;
         top: 20px;
@@ -95,14 +87,12 @@ $app-bar-height: 60px;
     margin-left: 15px;
 }
 
-.data-browser__request-editor,
+.data-browser__request,
 .data-browser__response {
     max-height: 50%;
     overflow: auto;
     height: 50%;
-    box-shadow: 0 0 2px #888;
-    border-radius: 3px;
-    padding: 5px;
+    border-radius: 10px;
     white-space: pre;
     box-sizing: border-box;
     position: relative;
@@ -113,7 +103,8 @@ $app-bar-height: 60px;
     margin-top: 5px;
 
     &::-webkit-scrollbar {
-        border-radius: 10px;
+        border-radius: 100px;
+        margin-right: 2px;
     }
 
     &::-webkit-scrollbar:horizontal {

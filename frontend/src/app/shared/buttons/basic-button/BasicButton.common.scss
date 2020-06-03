@@ -2,22 +2,19 @@ button {
     border: none;
     outline: none;
     transition: background-color 0.2s ease, box-shadow 0.2s ease;
-    border-radius: 3px;
+    border-radius: 50px;
     cursor: pointer;
     position: relative;
-    font-size: 13px;
 }
 
-button.negative {
-    padding: 8px 20px;
-}
-
+button.negative,
 button.positive {
-    padding: 8px 20px;
+    font-size: 0.9em;
+    padding: 10px 30px;
+}
 
-    &:disabled {
-        opacity: 0.25;
-    }
+button.positive:disabled {
+    opacity: 0.25;
 }
 
 button:disabled {

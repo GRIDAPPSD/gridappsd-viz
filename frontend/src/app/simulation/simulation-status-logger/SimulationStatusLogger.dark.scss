@@ -4,13 +4,12 @@
 .simulation-status-logger__header__label {
     background-color: #7d6d6d;
     color: $accent-text-color;
-    border-top-right-radius: 3px;
-    box-shadow: 5px -1px 5px #333;
+    box-shadow: 0 0 2px #333;
 }
 
 .simulation-status-logger__header__legends {
     background-color: #564d4d;
-    box-shadow: 0px -0.5px 2px #555;
+    box-shadow: 0 0 2px #555;
 }
 
 $logLevels: FATAL ERROR WARN INFO DEBUG TRACE;
