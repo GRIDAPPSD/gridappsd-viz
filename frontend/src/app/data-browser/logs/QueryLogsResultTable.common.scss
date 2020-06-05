@@ -1,6 +1,13 @@
 @import '~react-table/react-table.css';
 
-.query-logs-result-table {
+.query-logs-result-table.ReactTable {
     height: 100%;
     max-height: 100%;
+    border-radius: 10px;
+
+    .-previous button,
+    .-next button {
+        border-radius: 50px;
+    }
+
 }

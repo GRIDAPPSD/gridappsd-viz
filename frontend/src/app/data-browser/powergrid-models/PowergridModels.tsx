@@ -21,7 +21,6 @@ interface Props {
 }
 
 interface State {
-  response: any;
   lineOptionBuilder: SelectionOptionBuilder<FeederModelLine>;
   requestTypeOptionBuilder: SelectionOptionBuilder<QueryPowerGridModelsRequestType>;
   resultFormatOptionBuilder: SelectionOptionBuilder<QueryPowerGridModelsResultFormat>;
@@ -58,11 +57,12 @@ export class PowerGridModels extends React.Component<Props, State> {
     resultFormat: new FormControlModel(QueryPowerGridModelsResultFormat.JSON)
   });
 
+  readonly response = new FormControlModel(this.props.response);
+
   constructor(props: Props) {
     super(props);
 
     this.state = {
-      response: props.response,
       lineOptionBuilder: new SelectionOptionBuilder(
         props.feederModelLines,
         line => line.name
@@ -103,8 +103,8 @@ export class PowerGridModels extends React.Component<Props, State> {
       .valueChanges()
       .subscribe({
         next: requestType => {
+          this.response.setValue('');
           this.setState({
-            response: null,
             selectedRequestType: requestType
           });
         }
@@ -117,20 +117,18 @@ export class PowerGridModels extends React.Component<Props, State> {
 
   componentDidUpdate(prevProps: Props) {
     if (prevProps !== this.props) {
-      this.setState({
-        response: this.props.response
-      });
+      this.response.setValue(this.props.response);
     }
   }
 
   render() {
     if (this.props.feederModelLines.length > 0) {
-      const requestContainerStyles = !this.state.response ? { height: '100%', maxHeight: '100%' } : {};
+      const requestContainerStyles = this.response.getValue() === '' ? { height: '100%', maxHeight: '100%' } : {};
       return (
-        <>
-          <RequestEditor styles={requestContainerStyles}>
+        <section className='powergrid-models'>
+          <RequestEditor style={requestContainerStyles}>
             <Form
-              className='query-powergrid-models-form'
+              className='query-powergrid-models__form'
               formGroupModel={this.formGroupModel}>
               <Select
                 label='Request type'
@@ -151,15 +149,15 @@ export class PowerGridModels extends React.Component<Props, State> {
                 onClick={this.onSubmitForm} />
             </Form>
           </RequestEditor>
-          {
-            this.state.response
-            &&
-            <Response>
-              {this.state.response}
-            </Response>
-          }
+          <Response style={{ display: !this.props.response ? 'none' : 'block' }}>
+            <TextArea
+              type='plaintext'
+              readonly
+              label=''
+              formControlModel={this.response} />
+          </Response>
           <ProgressIndicator show={!this.props.isResponseReady} />
-        </>
+        </section>
       );
     }
     return null;

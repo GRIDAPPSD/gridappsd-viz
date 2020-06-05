@@ -3,12 +3,14 @@
     display: flex;
     flex-flow: column nowrap;
     height: 100%;
+    border-radius: 10px;
 
-    .data-browser__request-editor {
+    .data-browser__request {
         overflow: auto;
         border-radius: initial;
         box-shadow: initial;
-        height: initial
+        height: initial;
+        border: none;
     }
 
     .data-browser__response {
@@ -19,6 +21,9 @@
         overflow: hidden;
         min-height: 10%;
         flex: auto;
+        border: none;
+        margin-top: 0;
+        padding: 5px;
     }
 
     .message-banner {

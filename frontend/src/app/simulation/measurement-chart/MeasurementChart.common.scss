@@ -1,5 +1,5 @@
 .measurement-chart {
-    border-radius: 2px;
+    border-radius: 10px;
     margin: 5px auto;
     width: 95%;
 
@@ -7,6 +7,7 @@
         font-weight: bold;
         text-transform: uppercase;
         padding-left: 5px;
+        padding-top: 3px;
     }
 
     &__canvas {
@@ -37,7 +38,7 @@
     padding-right: 5px;
     margin-right: 10px;
     margin-bottom: 5px;
-    border-radius: 3px;
+    border-radius: 10px;
     box-sizing: border-box;
     cursor: pointer;
 }
@@ -46,9 +47,10 @@
     width: 15px;
     height: 10px;
     display: inline-block;
-    padding: 2.5px 0;
-    border-top-left-radius: 3px;
-    border-bottom-left-radius: 3px;
+    padding: 2px 0;
+    border-top-left-radius: 10px;
+    border-bottom-left-radius: 10px;
+    border: 1px solid transparent;
 }
 
 .measurement-chart__legend__label {

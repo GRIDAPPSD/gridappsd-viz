@@ -3,10 +3,18 @@
 }
 
 .query-logs-form__left {
-    width: 50%;
+    margin-right: 90px;
+
+    .form-control__label {
+        width: 170px;
+    }
+}
+
+.query-logs-form__right .form-control__label {
+    width: 130px;
 }
 
 .query-logs-form__submit {
-    transform: translate(10px, 3px);
+    transform: translate(10px, -5px);
     align-self: flex-start;
 }

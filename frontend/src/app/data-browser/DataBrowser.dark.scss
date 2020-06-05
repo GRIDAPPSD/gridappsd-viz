@@ -1,9 +1,15 @@
 @import '@constants.dark';
 @import 'DataBrowser.common';
+@import 'constants.dark';
+
+.data-browser .vertical-divider {
+    box-shadow: 0 0 2px #888;
+}
 
 .data-browser__selection__item {
-    box-shadow: 0 0 2px #fff;
-    color: #ffa500;
+    border: $border;
+    box-shadow: $box-shadow;
+    color: #9e917b;
 }
 
 .data-browser__selection__item.selected {
@@ -14,16 +20,17 @@
     }
 
     &:after {
-        border-top: 1px solid #999;
-        border-bottom: 1px solid #999;
+        border-top: $border;
+        border-bottom: $border;
         background-color: $theme-color;
     }
 }
 
-.data-browser__request-editor,
+.data-browser__request,
 .data-browser__response {
-    box-shadow: 0 0 2px #fff;
+    border: $border;
     color: $primary-text-color;
+    box-shadow: $box-shadow;
 }
 
 .data-browser__response {

@@ -104,6 +104,7 @@ export class ServiceConfigurationTab extends React.Component<Props, State> {
       <div className='service-configuration-tab'>
         <Select
           multiple
+          optional
           label='Available Services'
           selectionOptionBuilder={this.state.serviceOptionBuilder}
           formControlModel={this.availableServicesFormControl} />

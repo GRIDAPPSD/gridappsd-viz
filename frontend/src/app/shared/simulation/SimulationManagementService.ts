@@ -197,7 +197,7 @@ export class SimulationManagementService {
     return this._currentSimulationStatusNotifer.asObservable();
   }
 
-  currentStatus() {
+  currentSimulationStatus() {
     return this._currentSimulationStatus;
   }
 
@@ -261,7 +261,7 @@ export class SimulationManagementService {
 
   private _broadcastSimulationOutputMeasurements(payload: SimulationOutputPayload) {
     this._outputTimestamp = payload.message.timestamp;
-    const measurements = new Map<string, SimulationOutputMeasurement>();
+    const measurementMap = new Map<string, SimulationOutputMeasurement>();
     for (const [mrid, rawSimulationOutputMeasurement] of Object.entries(payload.message.measurements)) {
       const measurementInModelDictionary = this._modelDictionaryMeasurementMap.get(mrid);
       if (measurementInModelDictionary) {
@@ -278,12 +278,12 @@ export class SimulationManagementService {
           connectivityNode: measurementInModelDictionary.ConnectivityNode,
           conductingEquipmentMRID: measurementInModelDictionary.ConductingEquipment_mRID
         };
-        measurements.set(mrid, measurement);
-        measurements.set(measurementInModelDictionary.ConductingEquipment_name, measurement);
-        measurements.set(measurementInModelDictionary.ConnectivityNode, measurement);
+        measurementMap.set(mrid, measurement);
+        measurementMap.set(measurementInModelDictionary.ConductingEquipment_name, measurement);
+        measurementMap.set(measurementInModelDictionary.ConnectivityNode, measurement);
       }
     }
-    this._simulationOutputMeasurementMapStream.next(measurements);
+    this._simulationOutputMeasurementMapStream.next(measurementMap);
   }
 
   private _subscribeToStartSimulationTopic() {

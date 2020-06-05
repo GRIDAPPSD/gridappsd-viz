@@ -22,14 +22,15 @@
 }
 
 .icon-button--primary.has-background:disabled,
-.icon-button--accent.has-background:disabled{
+.icon-button--accent.has-background:disabled {
     box-shadow: none;
 }
 
 .icon-button--has-label {
     width: auto;
     height: auto;
-    padding: 5px 10px;
+    padding: 5px 20px;
+    border-radius: 50px;
 
     .icon-button__icon {
         margin-right: 10px;

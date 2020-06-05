@@ -32,7 +32,7 @@ export class SimulationControlContainer extends React.Component<Props, State> {
     super(props);
 
     this.state = {
-      simulationStatus: this.simulationManagementService.currentStatus(),
+      simulationStatus: this.simulationManagementService.currentSimulationStatus(),
       activeSimulationId: '',
       existingPlotModels: [],
       modelDictionaryComponents: []

@@ -81,7 +81,7 @@
     height: 100%;
 }
 
-.topology-renderer__toolbox-container {
+.topology-renderer__toolbox {
     position: absolute;
     top: 5px;
     right: 5px;
@@ -89,14 +89,13 @@
     justify-content: center;
     flex-flow: column nowrap;
     z-index: 1;
-}
-
-.topology-renderer__toolbox {
     padding: 5px;
-    border-radius: 5px;
-    display: flex;
-    flex-flow: column nowrap;
+    border-radius: 10px;
     margin-bottom: 6px;
+
+    &>*:not(:last-child) {
+        margin-bottom: 5px;
+    }
 }
 
 .topology-renderer__canvas__edge {

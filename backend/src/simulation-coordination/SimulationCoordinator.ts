@@ -24,7 +24,7 @@ export class SimulationCoordinator {
     requestedChannel.addMember(participant);
     participant.notifySelf(
       SimulationSynchronizationEvent.QUERY_SIMULATION_STATUS,
-      requestedChannel.currentStatus()
+      requestedChannel.currentSimulationStatus()
     );
   }
 
