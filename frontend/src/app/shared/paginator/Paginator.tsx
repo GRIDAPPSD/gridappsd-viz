@@ -1,13 +1,14 @@
 import * as React from 'react';
 
 import { IconButton } from '@shared/buttons';
+import { PageChangeEvent } from './PageChangeEvent';
 
 import './Paginator.light.scss';
 import './Paginator.dark.scss';
 
 interface Props<T> {
-  items: T[];
-  onPageChanged: (page: T[]) => void;
+  items: Array<T>;
+  onPageChange: (event: PageChangeEvent<T>) => void;
   pageSize?: number;
 }
 
@@ -33,13 +34,19 @@ export class Paginator<T> extends React.Component<Props<T>, State> {
   }
 
   componentDidMount() {
-    this.props.onPageChanged(this.props.items.slice(0, this.props.pageSize));
+    this.props.onPageChange(new PageChangeEvent(this.props.items.slice(0, this.props.pageSize), 0, this.props.pageSize));
   }
 
   componentDidUpdate(prevProps: Props<T>) {
     if (this.props.items !== prevProps.items) {
-      this._reset();
-      this.props.onPageChanged(this.props.items.slice(0, this.props.pageSize));
+      this.setState({
+        totalPages: Math.ceil(this.props.items.length / this.props.pageSize)
+      });
+      this.props.onPageChange(new PageChangeEvent(
+        this.props.items.slice(this.state.currentPageNumber, this.props.pageSize),
+        this.state.currentPageNumber,
+        this.props.pageSize
+      ));
     }
   }
 
@@ -87,7 +94,11 @@ export class Paginator<T> extends React.Component<Props<T>, State> {
 
   private _goToPage(pageNumber: number) {
     const startSlice = pageNumber * this.props.pageSize;
-    this.props.onPageChanged(this.props.items.slice(startSlice, startSlice + this.props.pageSize));
+    this.props.onPageChange(new PageChangeEvent(
+      this.props.items.slice(startSlice, startSlice + this.props.pageSize),
+      startSlice,
+      startSlice + this.props.pageSize
+    ));
     this.setState({
       currentPageNumber: pageNumber,
       currentPageNumberDisplay: String(pageNumber + 1)

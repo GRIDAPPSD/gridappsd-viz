@@ -202,7 +202,7 @@ export class NodeSearcher extends React.Component<Props, State> {
             </div>
             <Paginator
               items={this.state.matches}
-              onPageChanged={page => this.setState({ visibleMatches: page })} />
+              onPageChange={event => this.setState({ visibleMatches: event.currentPage })} />
           </div>
         </Fade>
       </PortalRenderer>
