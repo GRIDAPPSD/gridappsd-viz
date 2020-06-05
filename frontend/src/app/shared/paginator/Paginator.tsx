@@ -1,13 +1,17 @@
 import * as React from 'react';
 
 import { IconButton } from '@shared/buttons';
+import { PageChangeEvent } from './PageChangeEvent';
 
 import './Paginator.light.scss';
 import './Paginator.dark.scss';
 
 interface Props<T> {
-  items: T[];
-  onPageChanged: (page: T[]) => void;
+  /**
+   * Total number of items
+   */
+  total: number;
+  onPageChange: (event: PageChangeEvent) => void;
   pageSize?: number;
 }
 
@@ -24,7 +28,7 @@ export class Paginator<T> extends React.Component<Props<T>, State> {
     this.state = {
       currentPageNumber: 0,
       currentPageNumberDisplay: '1',
-      totalPages: Math.ceil(props.items.length / this.props.pageSize)
+      totalPages: Math.ceil(props.total / this.props.pageSize)
     };
 
     this.navigateToNextPage = this.navigateToNextPage.bind(this);
@@ -33,25 +37,25 @@ export class Paginator<T> extends React.Component<Props<T>, State> {
   }
 
   componentDidMount() {
-    this.props.onPageChanged(this.props.items.slice(0, this.props.pageSize));
+    this.props.onPageChange(new PageChangeEvent(0, this.props.pageSize));
   }
 
   componentDidUpdate(prevProps: Props<T>) {
-    if (this.props.items !== prevProps.items) {
+    if (this.props.total !== prevProps.total) {
       this._reset();
-      this.props.onPageChanged(this.props.items.slice(0, this.props.pageSize));
+      this.props.onPageChange(new PageChangeEvent(0, this.props.pageSize));
     }
   }
 
   private _reset() {
     this.setState({
       currentPageNumber: 0,
-      totalPages: Math.ceil(this.props.items.length / this.props.pageSize)
+      totalPages: Math.ceil(this.props.total / this.props.pageSize)
     });
   }
 
   render() {
-    if (this.props.items.length > this.props.pageSize) {
+    if (this.props.total > this.props.pageSize) {
       return (
         <section className='paginator'>
           <IconButton
@@ -87,7 +91,7 @@ export class Paginator<T> extends React.Component<Props<T>, State> {
 
   private _goToPage(pageNumber: number) {
     const startSlice = pageNumber * this.props.pageSize;
-    this.props.onPageChanged(this.props.items.slice(startSlice, startSlice + this.props.pageSize));
+    this.props.onPageChange(new PageChangeEvent(startSlice, startSlice + this.props.pageSize));
     this.setState({
       currentPageNumber: pageNumber,
       currentPageNumberDisplay: String(pageNumber + 1)

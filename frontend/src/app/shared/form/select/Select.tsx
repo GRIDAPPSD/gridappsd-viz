@@ -6,7 +6,7 @@ import { OptionList } from './OptionList';
 import { OptionListFilter } from './OptionListFilter';
 import { SelectedOptionList } from './SelectedOptionList';
 import { BasicButton } from '@shared/buttons';
-import { Paginator } from '@shared/paginator';
+import { Paginator, PageChangeEvent } from '@shared/paginator';
 import { fuzzySearch } from '@shared/misc';
 import { SelectionOptionBuilder } from './SelectionOptionBuilder';
 import { FormControlModel } from '../models/FormControlModel';
@@ -73,7 +73,7 @@ export class Select<T, E extends boolean> extends React.Component<Props<T, E>, S
     this.onOpen = this.onOpen.bind(this);
     this.filterOptionList = this.filterOptionList.bind(this);
     this.deselectOption = this.deselectOption.bind(this);
-    this.onPageChanged = this.onPageChanged.bind(this);
+    this.onPageChange = this.onPageChange.bind(this);
     this.closeAndNotifySelectionChange = this.closeAndNotifySelectionChange.bind(this);
   }
 
@@ -188,8 +188,8 @@ export class Select<T, E extends boolean> extends React.Component<Props<T, E>, S
               options={this.state.currentPage}
               onSelectOption={this.onChange} />
             <Paginator
-              items={this.state.filteredOptions}
-              onPageChanged={this.onPageChanged} />
+              total={this.state.filteredOptions.length}
+              onPageChange={this.onPageChange} />
             {
               this.props.multiple
               &&
@@ -298,7 +298,8 @@ export class Select<T, E extends boolean> extends React.Component<Props<T, E>, S
     }
   }
 
-  onPageChanged(newPage: Option<T>[]) {
+  onPageChange(event: PageChangeEvent) {
+    const newPage = this.state.filteredOptions.slice(event.start, event.count);
     if (this._firstPage.length === 0) {
       this._firstPage = newPage;
     }
