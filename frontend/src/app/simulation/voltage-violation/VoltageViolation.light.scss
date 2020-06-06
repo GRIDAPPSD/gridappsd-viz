@@ -2,6 +2,11 @@
 
 .voltage-violation {
     color: #fff;
+
+    table td:first-child>div {
+        color: #ffa;
+        font-weight: bold;
+    }
 }
 
 .voltage-violation__label,

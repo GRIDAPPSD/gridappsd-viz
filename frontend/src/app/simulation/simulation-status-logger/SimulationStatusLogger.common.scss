@@ -1,3 +1,7 @@
+body.dragging .simulation-status-logger {
+    transition: none;
+}
+
 .simulation-status-logger {
     position: absolute;
     background-color: transparent;
@@ -6,6 +10,7 @@
     width: 100%;
     z-index: 1;
     height: auto;
+    transition: top 0.5s cubic-bezier(0, 0.87, 0.49, 1.01);
 }
 
 .simulation-status-logger__header {
@@ -26,7 +31,16 @@
     display: inline-block;
     padding: 7px 15px;
     font-size: 13px;
+    padding-right: 40px;
     border-top-right-radius: 10px;
+}
+
+.simulation-status-logger__header__label__toggle-log-message-visiblity {
+    pointer-events: all;
+    position: absolute;
+    top: 50%;
+    transform: translate(5px, -50%);
+    color: #fff !important;
 }
 
 .simulation-status-logger__header__legends {
@@ -55,10 +69,33 @@
     display: inline-block;
 }
 
-.simulation-status-logger__body {
+.simulation-status-logger__body,
+.simulation-status-logger__body-wrapper {
+    position: relative;
+    height: 100%;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    overflow: hidden;
+}
+
+.simulation-status-logger__body__message-container {
     position: relative;
     max-height: 100%;
-    height: 100%;
+    width: 100%;
     overflow: hidden auto;
     white-space: pre;
+    padding-bottom: 55px;
+}
+
+.simulation-status-logger .paginator {
+    position: absolute;
+    bottom: 5px;
+    border-radius: 50px;
+    padding: 5px 10px;
+
+    button {
+        width: 30px;
+        height: 30px;
+    }
 }

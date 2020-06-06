@@ -5,6 +5,9 @@ button {
     border-radius: 50px;
     cursor: pointer;
     position: relative;
+    -moz-user-select: none;
+    -webkit-user-select: none;
+    user-select: none;
 }
 
 button.negative,

@@ -4,19 +4,19 @@
 .simulation-status-logger__header__label {
     background-color: #7d6d6d;
     color: $accent-text-color;
-    box-shadow: 0 0 2px #333;
+    box-shadow: 5px -1px 5px #333;
 }
 
 .simulation-status-logger__header__legends {
     background-color: #564d4d;
-    box-shadow: 0 0 2px #555;
+    box-shadow: 0px -0.5px 2px #555;
 }
 
 $logLevels: FATAL ERROR WARN INFO DEBUG TRACE;
 $logLevelColors: #B71C1C #D32F2F #FFFF00 #F0F4C3 #686868 #C0CA33;
 
 @for $index from 1 through length($logLevels) {
-    .simulation-status-logger__header__legends__level__color.#{nth($logLevels, $index)} {
+    .simulation-status-logger__header__legends__level.#{nth($logLevels, $index)} .simulation-status-logger__header__legends__level__color {
         background-color: #{nth($logLevelColors, $index)};
     }
 }
@@ -30,6 +30,11 @@ $logLevelColors: #B71C1C #D32F2F #FFFF00 #F0F4C3 #686868 #C0CA33;
 }
 
 .simulation-status-logger__body {
-    background-color: scale-color($theme-color, $lightness: 5%);
+    background-color: #676767;
     box-shadow: 0 -5px 25px #2e2e2e;
+}
+
+.simulation-status-logger .paginator {
+    background-color: $theme-color;
+    box-shadow: 0 0px 3px #525252, 0 2px 2px #525252;
 }
