@@ -1,3 +1,35 @@
-.query-powergrid-models-form button.positive {
-    margin-left: 270px;
+.powergrid-models {
+    height: 100%;
+
+    .data-browser__request {
+        padding: 5px;
+    }
+}
+
+.query-powergrid-models__form button.positive {
+    margin-left: 200px;
+    transform: translateY(-10px);
+}
+
+.powergrid-models .data-browser__response {
+    .textarea {
+        margin: 0;
+        border: none;
+        width: 100%;
+        height: 100%;
+    }
+
+    .form-control__body {
+        width: 100%;
+        height: 100%;
+    }
+
+    .textarea__input-box-container {
+        width: 100%;
+        height: 100%;
+        max-height: 100%;
+        border: none;
+        border-radius: 0;
+    }
+
 }

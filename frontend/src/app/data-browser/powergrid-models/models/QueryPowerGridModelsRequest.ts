@@ -2,6 +2,7 @@ import { MessageRequest } from '@shared/MessageRequest';
 
 
 export class QueryPowerGridModelsRequest implements MessageRequest {
+
   private _requestBody: QueryPowerGridModelsRequestBody = {} as QueryPowerGridModelsRequestBody;
 
   get url() {
@@ -34,6 +35,7 @@ export const enum QueryPowerGridModelsResultFormat {
   JSON = 'JSON',
   CSV = 'CSV'
 }
+
 export interface QueryPowerGridModelsRequestBody {
   requestType: QueryPowerGridModelsRequestType;
   resultFormat: QueryPowerGridModelsResultFormat;

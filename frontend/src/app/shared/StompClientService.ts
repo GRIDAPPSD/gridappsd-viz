@@ -116,7 +116,7 @@ export class StompClientService {
   }
 
   reconnect() {
-    timer(0, 5000)
+    timer(0, 5_000)
       .pipe(
         switchMap(() => iif(this.isActive, of(null), of(this._connect()))),
         filter(this.isActive),
@@ -134,6 +134,7 @@ export class StompClientService {
 
   private _connect() {
     if (!this.isActive()) {
+      this._client.deactivate();
       this._status = StompClientConnectionStatus.CONNECTING;
       this._statusChanges.next(this._status);
       this._client.configure({
@@ -197,7 +198,7 @@ export class StompClientService {
    * Subscribe to destination, then unsubscribe right away after a response arrives
    * @param destination The topic to subscribe to to get the response from
    */
-  readOnceFrom<T>(destination: string): Observable<T> {
+  readOnceFrom<T = any>(destination: string): Observable<T> {
     return this.readFrom<T>(destination)
       .pipe(take(1));
   }
@@ -206,7 +207,7 @@ export class StompClientService {
    * Subscribe to destination, and continuously watch for responses from the server
    * @param destination The topic to subscribe to to get the response from
    */
-  readFrom<T>(destination: string): Observable<T> {
+  readFrom<T = any>(destination: string): Observable<T> {
     return timer(0, 1000)
       .pipe(
         filter(this.isActive),

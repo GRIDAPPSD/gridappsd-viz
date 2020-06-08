@@ -1,5 +1,7 @@
 @import 'Logs.common';
+@import '../constants.light';
 
 .log-data-browser {
-    box-shadow: 0 0 2px #888;
+    border: $border;
+    box-shadow: $box-shadow;
 }

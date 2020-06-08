@@ -15,7 +15,7 @@ export class SimulationChannel {
   constructor(private readonly _host: SimulationParticipant) {
   }
 
-  currentStatus() {
+  currentSimulationStatus() {
     return this._simulationStatus;
   }
 

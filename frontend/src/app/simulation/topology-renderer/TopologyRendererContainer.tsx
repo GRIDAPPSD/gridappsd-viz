@@ -32,7 +32,7 @@ import { RegulatorTapChangerRequest } from './models/RegulatorTapChangerRequest'
 import { RenderableTopology } from './models/RenderableTopology';
 import { waitUntil } from '@shared/misc';
 import { ProgressIndicator } from '@shared/overlay/progress-indicator';
-import { SimulationControlService } from '@shared/simulation';
+import { SimulationManagementService } from '@shared/simulation';
 
 interface Props {
   mRIDs: Map<string, string & string[]>;
@@ -53,7 +53,7 @@ export class TopologyRendererContainer extends React.Component<Props, State> {
 
   private readonly _stompClientService = StompClientService.getInstance();
   private readonly _simulationQueue = SimulationQueue.getInstance();
-  private readonly _simulationControlService = SimulationControlService.getInstance();
+  private readonly _simulationManagementService = SimulationManagementService.getInstance();
 
   private _activeSimulationStream: Subscription = null;
   private _simulationOutputStream: Subscription = null;
@@ -82,7 +82,7 @@ export class TopologyRendererContainer extends React.Component<Props, State> {
 
   componentDidMount() {
     this._activeSimulationStream = this._observeActiveSimulationChangeEvent();
-    this._simulationOutputStream = this._subscribeToSimulationOutputMeasurementStream();
+    this._simulationOutputStream = this._subscribeToSimulationOutputMeasurementMapStream();
     this._simulationSnapshotStream = this._updateRenderableTopologyOnSimulationSnapshotReceived();
   }
 
@@ -96,12 +96,12 @@ export class TopologyRendererContainer extends React.Component<Props, State> {
           // and currently not in a simulation, they were the one that created
           // it. Otherwise, they received it by joining an active simulation,
           // in that case, we don't want to do anything here
-          if (!this._simulationControlService.isUserInActiveSimulation()) {
+          if (!this._simulationManagementService.isUserInActiveSimulation()) {
             const lineName = simulation.config.power_system_config.Line_name;
             if (topologyModelCache.has(lineName)) {
               const topologyModel = topologyModelCache.get(lineName);
               this._processModelForRendering(topologyModel);
-              this._simulationControlService.syncSimulationSnapshotState({
+              this._simulationManagementService.syncSimulationSnapshotState({
                 topologyModel
               });
             } else {
@@ -128,7 +128,7 @@ export class TopologyRendererContainer extends React.Component<Props, State> {
       .subscribe({
         next: (topologyModel: TopologyModel) => {
           this._processModelForRendering(topologyModel);
-          this._simulationControlService.syncSimulationSnapshotState({
+          this._simulationManagementService.syncSimulationSnapshotState({
             topologyModel
           });
           topologyModelCache.set(this.activeSimulationConfig.power_system_config.Line_name, topologyModel);
@@ -331,8 +331,8 @@ export class TopologyRendererContainer extends React.Component<Props, State> {
     };
   }
 
-  private _subscribeToSimulationOutputMeasurementStream() {
-    return this._simulationControlService.simulationOutputMeasurementsReceived()
+  private _subscribeToSimulationOutputMeasurementMapStream() {
+    return this._simulationManagementService.simulationOutputMeasurementMapReceived()
       .subscribe({
         next: measurements => {
           this.setState({
@@ -343,7 +343,7 @@ export class TopologyRendererContainer extends React.Component<Props, State> {
   }
 
   private _updateRenderableTopologyOnSimulationSnapshotReceived() {
-    return this._simulationControlService.selectSimulationSnapshotState('topologyModel')
+    return this._simulationManagementService.selectSimulationSnapshotState('topologyModel')
       .subscribe({
         next: (topologyModel: TopologyModel) => {
           waitUntil(() => this.props.mRIDs.size > 0)

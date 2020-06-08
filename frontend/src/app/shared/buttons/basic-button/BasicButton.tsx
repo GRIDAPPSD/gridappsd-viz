@@ -6,13 +6,25 @@ import './BasicButton.light.scss';
 import './BasicButton.dark.scss';
 
 interface Props {
+  /**
+   * The text to show in the button
+   */
   label: string;
+
+  /**
+   *  Type `positive` is used for buttons such as "Confirm", "Submit", "Apply", etc.
+   *  Type `negative` is used for buttons such as "Cancel", "Dismiss", "Close", etc.
+   */
   type: 'positive' | 'negative';
+  onClick: (event: React.MouseEvent) => void;
   className?: string;
   disabled?: boolean;
-  onClick: (event: React.MouseEvent) => void;
 }
 
+/**
+ * Basic buttons are buttons with a rectangular shape and rounded corners
+ * @param props
+ */
 export function BasicButton(props: Props) {
   return (
     <Ripple>

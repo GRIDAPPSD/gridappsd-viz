@@ -13,7 +13,7 @@ export interface ApplicationState {
   applications: Application[];
   services: Service[];
   modelDictionary: ModelDictionary;
-  modelDictionaryComponentsWithGroupedPhases: ModelDictionaryComponent[];
+  modelDictionaryComponents: ModelDictionaryComponent[];
   plotModels: PlotModel[];
   activeSimulationIds: string[];
   nodeNameToLocate: string;

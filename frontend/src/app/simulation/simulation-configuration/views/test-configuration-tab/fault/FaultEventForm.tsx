@@ -15,7 +15,7 @@ interface Props {
   startDateTime: number;
   stopDateTime: number;
   modelDictionary: ModelDictionary;
-  componentsWithConsolidatedPhases: ModelDictionaryComponent[];
+  modelDictionaryComponents: ModelDictionaryComponent[];
   onAddEvent: (event: FaultEvent) => void;
 }
 
@@ -155,7 +155,7 @@ export class FaultEventForm extends React.Component<Props, State> {
               case 'PowerTransformer':
                 this.setState({
                   componentOptionBuilder: new SelectionOptionBuilder(
-                    this.props.componentsWithConsolidatedPhases.filter(e => e.conductingEquipmentType === selectedType.id),
+                    this.props.modelDictionaryComponents.filter(e => e.conductingEquipmentType === selectedType.id),
                     e => `${e.conductingEquipmentName} (${e.phases.join(', ')})`
                   ),
                   phaseOptionBuilder: SelectionOptionBuilder.defaultBuilder()

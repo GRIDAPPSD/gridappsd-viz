@@ -85,9 +85,12 @@ export class SimulationConfigurationTab extends React.Component<Props, State> {
 
   render() {
     return (
-      <FormGroup label=''>
+      <FormGroup
+        label=''
+        className='simulation-configuration-tab'>
         <Input
           label='Start time'
+          hint='YYYY-MM-DD HH:MM:SS'
           formControlModel={this.props.parentFormGroupModel.findControl('start_time')} />
 
         <Input

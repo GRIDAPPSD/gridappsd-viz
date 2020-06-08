@@ -918,8 +918,6 @@ export class TopologyRenderer extends React.Component<Props, State> {
                 style='accent'
                 onClick={this.canvasTransformService.reset} />
             </Tooltip>
-          </div>
-          <div className='topology-renderer__toolbox'>
             <Tooltip content='Search for nodes by name or MRID'>
               <IconButton
                 icon='search'

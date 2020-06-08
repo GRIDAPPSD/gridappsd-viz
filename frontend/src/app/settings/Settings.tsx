@@ -3,7 +3,7 @@ import * as React from 'react';
 import { IconButton } from '@shared/buttons';
 import { Tooltip } from '@shared/tooltip';
 import { SlideToggle, FormControlModel } from '@shared/form';
-import { Fade } from '@shared/fade';
+import { Fade } from '@shared/effects/fade';
 import { Dialog } from '@shared/overlay/dialog';
 
 import './Settings.light.scss';

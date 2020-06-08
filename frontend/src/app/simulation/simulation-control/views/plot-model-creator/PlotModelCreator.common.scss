@@ -11,22 +11,23 @@
         display: inline-flex;
         justify-content: center;
         align-items: center;
-        padding: 5px 15px;
-    }
-
-    button.positive {
-        margin-left: 270px;
+        padding: 10px 15px;
+        border-top-left-radius: 6px;
     }
 
     .form-control:nth-child(4) {
         margin-bottom: 0;
-        margin-left: 270px;
+        margin-left: 220px;
         margin-top: -10px;
     }
 
     .form-control:nth-child(5) {
         margin-top: -5px;
-        margin-left: 270px;
+        margin-left: 220px;
+    }
+
+    button.positive {
+        margin-left: 200px;
     }
 }
 

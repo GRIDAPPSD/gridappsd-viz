@@ -23,7 +23,7 @@ export class Simulations extends React.Component<Props, State> {
   render() {
     const requestEditorContainerStyles = { height: '100%', maxHeight: '100%' };
     return (
-      <RequestEditor styles={requestEditorContainerStyles}>
+      <RequestEditor style={requestEditorContainerStyles}>
         <MessageBanner>
           Not yet implemented
         </MessageBanner>

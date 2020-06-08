@@ -1,7 +1,10 @@
 @import 'TextArea.common';
 
-.textarea__input-box {
+.textarea__input-box-container {
     border: 2px solid #ccc;
+}
+
+.textarea__input-box {
 
     &.focused {
         &::before {
@@ -42,18 +45,20 @@
     border-bottom: 3px solid #999;
 }
 
-.form-control.invalid .textarea__input-box {
+.textarea.invalid .textarea__input-box-container {
     border-color: red;
 }
 
-.form-control.disabled {
+.textarea.disabled {
+    .textarea__input-box-container {
+        border: 2px solid #eee;
+    }
 
     .textarea__input-box-resize-handle {
         opacity: 0.2;
     }
 
     .textarea__input-box {
-        border: 2px solid #eee;
         background-color: #f9f9f9;
         color: #ddd;
     }

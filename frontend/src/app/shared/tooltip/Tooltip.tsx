@@ -43,6 +43,7 @@ export class Tooltip extends React.Component<Props, State> {
     this._anchor = this.props.anchor || ReactDOM.findDOMNode(this) as HTMLElement;
     if (this._anchor) {
       this._anchor.addEventListener('mouseover', this.show, false);
+      this._anchor.addEventListener('click', this.hide, false);
       this._anchor.addEventListener('mouseout', this.hide, false);
     }
   }
@@ -50,6 +51,7 @@ export class Tooltip extends React.Component<Props, State> {
   componentWillUnmount() {
     if (this._anchor) {
       this._anchor.removeEventListener('mouseover', this.show, false);
+      this._anchor.removeEventListener('click', this.hide, false);
       this._anchor.removeEventListener('mouseout', this.hide, false);
       this.hide();
     }

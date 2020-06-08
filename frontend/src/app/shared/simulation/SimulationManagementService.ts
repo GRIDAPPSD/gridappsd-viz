@@ -13,8 +13,9 @@ import { ModelDictionaryMeasurement } from '@shared/topology';
 import { SimulationOutputMeasurement, SimulationOutputPayload } from '.';
 import { StateStore } from '@shared/state-store';
 import { Simulation } from './Simulation';
-import { ConductingEquipmentType } from '@shared/topology/model-dictionary';
+import { ConductingEquipmentType, MeasurementType } from '@shared/topology/model-dictionary';
 import { SimulationStatusLogMessage } from './SimulationStatusLogMessage';
+import { DateTimeService } from '@shared/DateTimeService';
 
 interface SimulationStartedEventResponse {
   simulationId: string;
@@ -36,9 +37,9 @@ interface SimulationStartedEventResponse {
  * This class is responsible for communicating with the platform to process the simulation.
  * Simulation is started when the play button is clicked
  */
-export class SimulationControlService {
+export class SimulationManagementService {
 
-  private static readonly _INSTANCE_: SimulationControlService = new SimulationControlService();
+  private static readonly _INSTANCE_: SimulationManagementService = new SimulationManagementService();
 
   private readonly _simulationQueue = SimulationQueue.getInstance();
   private readonly _stateStore = StateStore.getInstance();
@@ -59,8 +60,8 @@ export class SimulationControlService {
   private _currentSimulationId = '';
   private _syncingEnabled = false;
 
-  static getInstance(): SimulationControlService {
-    return SimulationControlService._INSTANCE_;
+  static getInstance(): SimulationManagementService {
+    return SimulationManagementService._INSTANCE_;
   }
 
   private constructor() {
@@ -179,7 +180,7 @@ export class SimulationControlService {
     this._modelDictionaryMeasurementMap = newMap;
   }
 
-  simulationOutputMeasurementsReceived(): Observable<Map<string, SimulationOutputMeasurement>> {
+  simulationOutputMeasurementMapReceived(): Observable<Map<string, SimulationOutputMeasurement>> {
     return this._simulationOutputMeasurementMapStream.asObservable();
   }
 
@@ -192,11 +193,11 @@ export class SimulationControlService {
     }
   }
 
-  statusChanges(): Observable<SimulationStatus> {
+  simulationStatusChanges(): Observable<SimulationStatus> {
     return this._currentSimulationStatusNotifer.asObservable();
   }
 
-  currentStatus() {
+  currentSimulationStatus() {
     return this._currentSimulationStatus;
   }
 
@@ -204,13 +205,12 @@ export class SimulationControlService {
     if (this._currentSimulationStatus !== SimulationStatus.STARTED && this._currentSimulationStatus !== SimulationStatus.STARTING) {
       const activeSimulation = this._simulationQueue.getActiveSimulation();
       const simulationConfig = activeSimulation.config;
-      const startTime = new Date(simulationConfig.simulation_config.start_time.replace(/-/g, '/'));
-      const startEpoch = startTime.getTime() / 1000.0;
+      const startTime = DateTimeService.getInstance().parse(simulationConfig.simulation_config.start_time);
       const config: SimulationConfiguration = {
         ...simulationConfig,
         simulation_config: {
           ...simulationConfig.simulation_config,
-          start_time: String(startEpoch)
+          start_time: String(startTime)
         }
       };
       activeSimulation.didRun = true;
@@ -249,9 +249,11 @@ export class SimulationControlService {
       )
       .subscribe({
         next: payload => {
-          this.syncSimulationSnapshotState({
-            simulationOutput: payload
-          });
+          if (this._syncingEnabled) {
+            this.syncSimulationSnapshotState({
+              simulationOutput: payload
+            });
+          }
           this._broadcastSimulationOutputMeasurements(payload);
         }
       });
@@ -259,7 +261,7 @@ export class SimulationControlService {
 
   private _broadcastSimulationOutputMeasurements(payload: SimulationOutputPayload) {
     this._outputTimestamp = payload.message.timestamp;
-    const measurements = new Map<string, SimulationOutputMeasurement>();
+    const measurementMap = new Map<string, SimulationOutputMeasurement>();
     for (const [mrid, rawSimulationOutputMeasurement] of Object.entries(payload.message.measurements)) {
       const measurementInModelDictionary = this._modelDictionaryMeasurementMap.get(mrid);
       if (measurementInModelDictionary) {
@@ -276,12 +278,12 @@ export class SimulationControlService {
           connectivityNode: measurementInModelDictionary.ConnectivityNode,
           conductingEquipmentMRID: measurementInModelDictionary.ConductingEquipment_mRID
         };
-        measurements.set(mrid, measurement);
-        measurements.set(measurementInModelDictionary.ConductingEquipment_name, measurement);
-        measurements.set(measurementInModelDictionary.ConnectivityNode, measurement);
+        measurementMap.set(mrid, measurement);
+        measurementMap.set(measurementInModelDictionary.ConductingEquipment_name, measurement);
+        measurementMap.set(measurementInModelDictionary.ConnectivityNode, measurement);
       }
     }
-    this._simulationOutputMeasurementMapStream.next(measurements);
+    this._simulationOutputMeasurementMapStream.next(measurementMap);
   }
 
   private _subscribeToStartSimulationTopic() {

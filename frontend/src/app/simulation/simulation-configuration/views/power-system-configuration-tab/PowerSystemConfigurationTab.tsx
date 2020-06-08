@@ -100,7 +100,8 @@ export class PowerSystemConfigurationTab extends React.Component<Props, State> {
   render() {
     return (
       <FormGroup
-        label=''>
+        label=''
+        className='power-system-configuration-tab'>
         <Select
           label='Geographical region name'
           formControlModel={this.regionFormControlModel}

@@ -1,24 +1,44 @@
 @import '@constants.light';
 @import 'DataBrowser.common';
+@import 'constants.light';
+
+.data-browser .vertical-divider {
+    box-shadow: 0 0 2px #09008c;
+}
 
 .data-browser__selection__item {
-    box-shadow: 0 0 2px #888;
-    color: $primary-color;
+    box-shadow: $box-shadow;
+    border: $border;
+    color: #32b4a9;
 }
 
 .data-browser__selection__item.selected {
+    color: $primary-color;
+
     &:before {
         background-color: $theme-color;
     }
 
     &:after {
-        border-top: 2px solid #eee;
-        border-bottom: 2px solid #eee;
+        border-top: $border;
+        border-bottom: $border;
         background-color: $theme-color;
     }
 }
 
-.data-browser__request-editor,
+.data-browser__request,
 .data-browser__response {
+    border: $border;
     box-shadow: 0 0 2px #888;
+}
+
+.data-browser__response {
+    &::-webkit-scrollbar {
+        background: $theme-color;
+        box-shadow: 0 0 3px #808080 inset;
+    }
+
+    &::-webkit-scrollbar-thumb {
+        background-color: $primary-color;
+    }
 }

@@ -34,8 +34,11 @@
     }
 }
 
-.textarea__input-box {
+.textarea__input-box-container {
     border: 2px solid rgba($primary-text-color, 0.5);
+}
+
+.textarea__input-box {
 
     &.focused {
         &::before {
@@ -72,14 +75,17 @@
     border-bottom: 3px solid #999;
 }
 
-.form-control.invalid .textarea__input-box {
+.textarea.invalid .textarea__input-box-container {
     border-color: red;
 }
 
-.form-control.disabled {
+.textarea.disabled {
+
+    .textarea__input-box-container {
+        border: 2px solid #e6e6e620;
+    }
 
     .textarea__input-box {
-        border: 2px solid #c4b2b220;
         background-color: $theme-color;
         color: rgba($primary-text-color, 0.1);
     }

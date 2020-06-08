@@ -1,7 +1,7 @@
 import * as React from 'react';
-import { createPortal } from 'react-dom';
 
 import { FilePickerService } from './FilePickerService';
+import { PortalRenderer } from '@shared/overlay/portal-renderer';
 
 import './FilePicker.light.scss';
 import './FilePicker.dark.scss';
@@ -25,16 +25,17 @@ export class FilePicker extends React.Component<Props, State> {
   }
 
   render() {
-    return createPortal(
-      <form className='file-picker'>
-        <input
-          className='file-picker__input'
-          accept='.json, application/json'
-          type='file'
-          name='filePicker'
-          onChange={this.onFilePicked} />
-      </form>,
-      document.body
+    return (
+      <PortalRenderer containerClassName='file-picker-container'>
+        <form className='file-picker'>
+          <input
+            className='file-picker__input'
+            accept='.json, application/json'
+            type='file'
+            name='filePicker'
+            onChange={this.onFilePicked} />
+        </form>
+      </PortalRenderer>
     );
   }
 

@@ -11,7 +11,6 @@
 
 .simulation-control__simulation-id {
     display: inline-flex;
-    width: 100%;
     justify-content: flex-start;
     box-sizing: border-box;
     padding-left: 10px;
@@ -23,7 +22,7 @@
 .simulation-control__simulation-id__label {
     display: inline-block;
     padding: 8px 10px;
-    border-top-left-radius: 7px;
+    border-top-left-radius: 10px;
 }
 
 .simulation-control__simulation-id__value-wrapper {
@@ -46,11 +45,13 @@
     position: relative;
     display: inline-block;
     border-left: none;
-    border-bottom-right-radius: 7px;
+    border-bottom-right-radius: 10px;
     cursor: pointer;
 }
 
-.simulation-control__simulation-starting-message {
+.simulation-control__simulation-is-starting-message {
+    position: relative;
+    margin-left: auto;
     display: inline-block;
     font-size: 1em;
     white-space: nowrap;
@@ -61,6 +62,10 @@
 
     &:not(:last-of-type) {
         margin-right: 5px;
+
+        &:first-of-type {
+            margin-left: auto;
+        }
     }
 }
 

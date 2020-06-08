@@ -24,6 +24,11 @@ interface Props {
   onClick?: (event: React.MouseEvent) => void;
 }
 
+/**
+ * IconButton's are buttons that use icons for their label instead of plain text.
+ * They have a circular shape by default which can be turned off by setting the `rounded` boolean prop
+ * to `false`
+ */
 export class IconButton extends React.Component<Props, {}> {
 
   readonly buttonRef = React.createRef<HTMLButtonElement>();

@@ -96,19 +96,27 @@ export class DataBrowser extends React.Component<Props, State> {
 
 }
 
-export function RequestEditor({ children, styles = {} }) {
+interface RequestProps {
+  style?: React.CSSProperties;
+  children: any;
+}
+export function RequestEditor(props: RequestProps) {
   return (
-    <div className='data-browser__request-editor' style={{ ...styles }}>
-      {children}
+    <div className='data-browser__request' style={props.style}>
+      {props.children}
     </div>
   );
 }
 
+interface ResponseProps {
+  style?: React.CSSProperties;
+  children: any;
+}
 
-export function Response({ children, styles = {} }) {
+export function Response(props: ResponseProps) {
   return (
-    <div className='data-browser__response' style={{ ...styles }}>
-      {children}
+    <div className='data-browser__response' style={props.style}>
+      {props.children}
     </div>
   );
 }

@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { Fade } from '../../fade/Fade';
+import { Fade } from '@shared/effects/fade';
 
 import './Backdrop.light.scss';
 import './Backdrop.dark.scss';

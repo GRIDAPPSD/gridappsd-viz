@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { Payload } from './models/Payload';
+import { ResponseBody } from './models/ResponseBody';
 import { TabGroup, Tab } from '@shared/tabs';
 import { ApplicationsTab } from './views/applications-tab/ApplicationsTab';
 import { ServicesTab } from './views/services-tab/ServicesTab';
@@ -12,11 +12,11 @@ import './AvailableApplicationsAndServices.light.scss';
 import './AvailableApplicationsAndServices.dark.scss';
 
 export interface Props {
-  payload: Payload;
+  responseBody: ResponseBody;
 }
 
 export function AvailableApplicationsAndServices(props: Props) {
-  if (!props.payload) {
+  if (!props.responseBody) {
     return (
       <ProgressIndicator show />
     );
@@ -26,16 +26,16 @@ export function AvailableApplicationsAndServices(props: Props) {
     <section className='available-applications-and-services'>
       <TabGroup>
         <Tab label='Applications'>
-          <ApplicationsTab applications={props.payload.applications} />
+          <ApplicationsTab applications={props.responseBody.applications} />
         </Tab>
         <Tab label='Services'>
-          <ServicesTab services={props.payload.services} />
+          <ServicesTab services={props.responseBody.services} />
         </Tab>
         <Tab label='Application Instances'>
-          <ApplicationInstancesTab instances={props.payload.appInstances} />
+          <ApplicationInstancesTab instances={props.responseBody.appInstances} />
         </Tab>
         <Tab label='Service Instances'>
-          <ServiceIntancesTab instances={props.payload.serviceInstances} />
+          <ServiceIntancesTab instances={props.responseBody.serviceInstances} />
         </Tab>
       </TabGroup>
     </section>

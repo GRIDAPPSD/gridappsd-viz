@@ -1,7 +1,7 @@
 .voltage-violation {
     position: absolute;
-    right: 5px;
-    top: 110px;
+    right: 9px;
+    top: 90px;
     z-index: 0;
     display: flex;
     font-size: 0.8em;
@@ -16,7 +16,7 @@
     &.open {
         padding: 5px;
         padding-top: 30px;
-        border-radius: 5px;
+        border-radius: 10px;
 
         table {
             display: table;

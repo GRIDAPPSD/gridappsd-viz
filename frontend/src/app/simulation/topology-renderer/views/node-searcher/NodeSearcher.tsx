@@ -2,7 +2,7 @@ import * as React from 'react';
 
 import { Backdrop } from '@shared/overlay/backdrop';
 import { PortalRenderer } from '@shared/overlay/portal-renderer';
-import { Fade } from '@shared/fade';
+import { Fade } from '@shared/effects/fade';
 import { Input, FormControlModel } from '@shared/form';
 import { IconButton } from '@shared/buttons';
 import { Tooltip } from '@shared/tooltip';
@@ -202,7 +202,7 @@ export class NodeSearcher extends React.Component<Props, State> {
             </div>
             <Paginator
               items={this.state.matches}
-              onPageChanged={page => this.setState({ visibleMatches: page })} />
+              onPageChange={event => this.setState({ visibleMatches: event.currentPage })} />
           </div>
         </Fade>
       </PortalRenderer>

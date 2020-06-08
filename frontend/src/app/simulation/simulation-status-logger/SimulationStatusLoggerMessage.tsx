@@ -33,28 +33,30 @@ export class SimulationStatusLoggerMessage extends React.Component<Props, State>
         ref={this.messageElementRef}>
         {
           this.state.showMessageAsJson
-            ?
-            <>
-              <IconButton
-                size='small'
-                style='accent'
-                icon='remove'
-                onClick={this.showAsString} />
-              <span>
-                {JSON.stringify(this.props.message, null, 4)}
-              </span>
-            </>
-            :
-            <>
-              <IconButton
-                size='small'
-                style='accent'
-                icon='add'
-                onClick={this.showAsJson} />
-              <span className='simulation-status-logger-message__body'>
-                {this.props.message.logMessage}
-              </span>
-            </>
+            ? (
+              <>
+                <IconButton
+                  size='small'
+                  style='accent'
+                  icon='remove'
+                  onClick={this.showAsString} />
+                <span>
+                  {JSON.stringify(this.props.message, null, 4)}
+                </span>
+              </>
+            )
+            : (
+              <>
+                <IconButton
+                  size='small'
+                  style='accent'
+                  icon='add'
+                  onClick={this.showAsJson} />
+                <span className='simulation-status-logger-message__body'>
+                  {this.props.message.logMessage}
+                </span>
+              </>
+            )
         }
       </div>
     );
