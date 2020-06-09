@@ -1,7 +1,12 @@
+@import '@constants.dark';
 @import 'SimulationStatusLoggerMessage.common';
 
 .simulation-status-logger-message {
     border-bottom: 2px solid #a2a6a8;
+
+    table td:first-child>div {
+        color: $active-item-color;
+    }
 }
 
 $logLevels: FATAL ERROR WARN INFO DEBUG TRACE;
@@ -12,15 +17,5 @@ $textColors: #fff #fff #000 #000 #fff #000;
     .simulation-status-logger-message.#{nth($logLevels, $index)} {
         background-color: #{nth($logLevelColors, $index)};
         color: #{nth($textColors, $index)} !important;
-    }
-}
-
-.simulation-status-logger-message.highlight {
-    animation: highlight 2s ease;
-}
-
-@keyframes highlight {
-    to {
-        background-color: rgba(0, 0, 0, 0.2);
     }
 }

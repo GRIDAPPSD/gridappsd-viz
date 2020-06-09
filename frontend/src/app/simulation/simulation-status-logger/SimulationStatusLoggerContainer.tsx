@@ -6,40 +6,69 @@ import { SimulationStatusLogger } from './SimulationStatusLogger';
 import { SIMULATION_STATUS_LOG_TOPIC, SimulationManagementService, SimulationStatusLogMessage } from '@shared/simulation';
 import { StompClientService, StompClientConnectionStatus } from '@shared/StompClientService';
 import { StateStore } from '@shared/state-store';
-import { generateUniqueId } from '@shared/misc';
-import { LogMessage } from './models/LogMessage';
 import { SimulationStatus } from '@commons/SimulationStatus';
+import { Deque } from './models/Deque';
+import { waitUntil } from '@shared/misc';
+import { Buffer } from './models/Buffer';
+import { LogMessage } from './models/LogMessage';
 
 interface Props {
 
 }
 
 interface State {
-  logMessages: LogMessage[];
   isFetching: boolean;
+  totalLogMessageCount: number;
+  visibleLogMessageDeque: Deque<LogMessage>;
 }
 
+const logMessageStoreName = 'SimulationStatusLogMessageStore';
+const numberOfMessagesToShow = 30;
+const lowestLogMessageId = 0;
+
 export class SimulationStatusLogContainer extends React.Component<Props, State> {
+
+  visibleLogMessageDeque = new Deque<LogMessage>();
 
   private readonly _stompClientService = StompClientService.getInstance();
   private readonly _simulationManagementService = SimulationManagementService.getInstance();
   private readonly _stateStore = StateStore.getInstance();
   private readonly _unsubscriber = new Subject<void>();
 
+  private _logMessageBuffer = new Buffer<LogMessage>();
+  private _nextLogMessageId = lowestLogMessageId;
+  private _db: IDBDatabase = null;
+
   constructor(props: Props) {
     super(props);
     this.state = {
-      logMessages: [],
-      isFetching: false
+      isFetching: false,
+      totalLogMessageCount: 0,
+      visibleLogMessageDeque: this.visibleLogMessageDeque
     };
 
     this._newObservableForLogMessages = this._newObservableForLogMessages.bind(this);
     this._onSimulationStatusLogMessageReceived = this._onSimulationStatusLogMessageReceived.bind(this);
+    this.onLoadMoreMessages = this.onLoadMoreMessages.bind(this);
   }
 
   componentDidMount() {
+    this._initializeLogMessageStore();
     this._subscribeToSimulationStatusLogMessageStream();
     this._clearAllLogMessagesWhenSimulationStarts();
+  }
+
+  private _initializeLogMessageStore() {
+    indexedDB.deleteDatabase(SimulationStatusLogContainer.name).onsuccess = () => {
+      const request = indexedDB.open(SimulationStatusLogContainer.name, 1);
+      request.onsuccess = event => {
+        this._db = (event.target as IDBOpenDBRequest).result;
+      };
+      request.onupgradeneeded = event => {
+        this._db = (event.target as IDBOpenDBRequest).result;
+        this._db.createObjectStore(logMessageStoreName, { keyPath: 'id' });
+      };
+    };
   }
 
   private _subscribeToSimulationStatusLogMessageStream() {
@@ -75,21 +104,39 @@ export class SimulationStatusLogContainer extends React.Component<Props, State> 
           this.setState({
             isFetching: false
           });
+          this._flushLogMessageBufferToObjectStoreIfNeeded(true);
         })
       );
   }
 
-  private _onSimulationStatusLogMessageReceived(logMessage: SimulationStatusLogMessage) {
-    this.setState({
-      logMessages: [
-        {
-          id: generateUniqueId(),
-          content: logMessage
-        },
-        ...this.state.logMessages
-      ],
+  private _flushLogMessageBufferToObjectStoreIfNeeded(force = false) {
+    if (this._logMessageBuffer.isFull() || force) {
+      const buffer = this._logMessageBuffer;
+      this._logMessageBuffer = new Buffer();
+      this._transaction('readwrite').then(store => buffer.forEach(message => store.add(message)));
+    }
+  }
+
+  private _transaction(mode: 'readonly' | 'readwrite' = 'readonly') {
+    return waitUntil(() => this._db !== null)
+      .then(() => this._db.transaction(logMessageStoreName, mode).objectStore(logMessageStoreName));
+  }
+
+  private _onSimulationStatusLogMessageReceived(content: SimulationStatusLogMessage) {
+    const logMessage: LogMessage = {
+      id: this._nextLogMessageId++,
+      content
+    };
+    if (this.visibleLogMessageDeque.size() === numberOfMessagesToShow) {
+      this.visibleLogMessageDeque.popBack();
+    }
+    this.visibleLogMessageDeque.pushFront(logMessage);
+    this._logMessageBuffer.add(logMessage);
+    this._flushLogMessageBufferToObjectStoreIfNeeded();
+    this.setState(state => ({
+      totalLogMessageCount: state.totalLogMessageCount + 1,
       isFetching: false
-    });
+    }));
   }
 
   private _clearAllLogMessagesWhenSimulationStarts() {
@@ -100,15 +147,23 @@ export class SimulationStatusLogContainer extends React.Component<Props, State> 
       )
       .subscribe({
         next: () => {
+          this._transaction('readwrite').then(store => store.clear());
+          this.visibleLogMessageDeque.clear();
+          this._logMessageBuffer.clear();
+          this._nextLogMessageId = lowestLogMessageId;
           this.setState({
-            logMessages: [],
-            isFetching: true
+            totalLogMessageCount: 0,
+            isFetching: true,
+            visibleLogMessageDeque: this.visibleLogMessageDeque
           });
         }
       });
   }
 
   componentWillUnmount() {
+    this.visibleLogMessageDeque.clear();
+    this._logMessageBuffer.clear();
+    this._transaction('readwrite').then(store => store.clear());
     this._unsubscriber.next();
     this._unsubscriber.complete();
   }
@@ -116,9 +171,30 @@ export class SimulationStatusLogContainer extends React.Component<Props, State> 
   render() {
     return (
       <SimulationStatusLogger
-        messages={this.state.logMessages}
-        isFetching={this.state.isFetching} />
+        totalLogMessageCount={this.state.totalLogMessageCount}
+        visibleLogMessageDeque={this.state.visibleLogMessageDeque}
+        showProgressIndicator={this.state.isFetching}
+        onLoadMoreLogMessages={this.onLoadMoreMessages} />
     );
+  }
+
+  onLoadMoreMessages(start: number, count: number) {
+    this._transaction()
+      .then(store => {
+        store.getAll(IDBKeyRange.lowerBound(start - count), count).onsuccess = event => {
+          const logMessages = (event.target as IDBRequest).result as LogMessage[];
+          if (logMessages.length > 0) {
+            const messageDeque = new Deque<LogMessage>();
+            for (let i = logMessages.length - 1; i > -1; i--) {
+              messageDeque.pushBack(logMessages[i]);
+            }
+            this.visibleLogMessageDeque = messageDeque;
+            this.setState({
+              visibleLogMessageDeque: messageDeque
+            });
+          }
+        };
+      });
   }
 
 }

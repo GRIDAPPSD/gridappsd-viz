@@ -2,14 +2,31 @@
     display: flex;
     align-items: center;
     padding: 5px;
-    max-width: 100%;
-    overflow: auto hidden;
+    // max-width: 100%;
+    // overflow: auto hidden;
 
     .icon-button {
         margin-right: 10px;
+    }
+
+    table {
+        width: initial;
+
+        td:first-child>div {
+            font-weight: bold;
+        }
+
+        td:not(:first-child)>div {
+            text-align: left;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
     }
 }
 
 .simulation-status-logger-message__body {
     display: inline-block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
