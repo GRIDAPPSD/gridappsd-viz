@@ -292,7 +292,7 @@ export class TopologyRenderer extends React.Component<Props, State> {
     this._renderEdges(topology.edgeMap);
 
     if (!this.isModelLarge()) {
-      const container = create('svg:g') as Selection<SVGElement, any, SVGElement, any>;
+      const container = create<SVGElement>('svg:g') as Selection<SVGElement, any, SVGElement, any>;
       this._renderNonSwitchNodes(
         container,
         'topology-renderer__canvas__unknown-node-container',
@@ -305,7 +305,7 @@ export class TopologyRenderer extends React.Component<Props, State> {
         .appendChild(unknownNodeContainer.node());
     }
 
-    const knownNodeContainers = create('svg:g')
+    const knownNodeContainers = create<SVGElement>('svg:g')
       .attr('class', 'topology-renderer__canvas__known-node-containers')
       .attr('style', 'visibility: visible') as Selection<SVGElement, any, SVGElement, any>;
     this._renderNonSwitchNodes(
@@ -356,7 +356,7 @@ export class TopologyRenderer extends React.Component<Props, State> {
       nodeRadius
     );
 
-    const symbolContainers = create('svg:g')
+    const symbolContainers = create<SVGElement>('svg:g')
       .attr('class', 'topology-renderer__canvas__symbol-containers')
       .attr('style', 'visibility: hidden') as Selection<SVGElement, any, SVGElement, any>;
     this._renderRegulatorSymbols(

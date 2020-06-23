@@ -106,7 +106,7 @@ export class CommOutageEventForm extends React.Component<Props, State> {
 
   private _createFormGroupModelForEvent() {
     return new FormGroupModel<CommOutageEvent>({
-      eventType: 'CommOutage',
+      event_type: 'CommOutage',
       tag: '',
       startDateTime: new FormControlModel(
         this.props.startDateTime,

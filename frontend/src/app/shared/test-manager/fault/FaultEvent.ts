@@ -1,7 +1,7 @@
 import { Phase } from '../Phase';
 
 export interface FaultEvent {
-  eventType: 'Fault';
+  event_type: 'Fault';
   tag: string;
   equipmentType: string;
   equipmentName: string;

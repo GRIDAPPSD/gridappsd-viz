@@ -345,7 +345,7 @@ export class SimulationConfigurationEditor extends React.Component<Props, State>
         };
       })),
       outputOutageList: outageEvent.outputList.map(outputItem => outputItem.mRID),
-      event_type: outageEvent.eventType,
+      event_type: outageEvent.event_type,
       occuredDateTime: outageEvent.startDateTime,
       stopDateTime: outageEvent.stopDateTime
     };
@@ -371,7 +371,7 @@ export class SimulationConfigurationEditor extends React.Component<Props, State>
         ? unique(faultEvent.phases.map(e => faultEvent.mRID[e.phaseIndex]).filter(e => e !== undefined))
         : [faultEvent.mRID],
       phases: faultEvent.phases.map(phase => phase.phaseLabel).join(''),
-      event_type: faultEvent.eventType,
+      event_type: faultEvent.event_type,
       occuredDateTime: faultEvent.startDateTime,
       stopDateTime: faultEvent.stopDateTime
     };
