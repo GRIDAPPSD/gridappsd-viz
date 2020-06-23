@@ -110,7 +110,7 @@ export class FaultEventForm extends React.Component<Props, State> {
 
   private _createFormGroupModelForFaultEvent() {
     return new FormGroupModel<FaultEvent>({
-      eventType: 'Fault',
+      event_type: 'Fault',
       tag: '',
       equipmentType: '',
       equipmentName: '',

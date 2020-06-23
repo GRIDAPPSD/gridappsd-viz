@@ -122,40 +122,6 @@ export class TestConfigurationTab extends React.Component<Props, State> {
       });
   }
 
-  private _defaultOutageEventFormValue(): CommOutageEvent {
-    return {
-      eventType: 'CommOutage',
-      tag: this.currentEventTagFormControlModel.getValue(),
-      allInputOutage: false,
-      inputList: [],
-      allOutputOutage: false,
-      outputList: [],
-      startDateTime: this.props.simulationStartDateTime,
-      stopDateTime: this.props.simulationStopDateTime
-    };
-  }
-
-  private _defaultFaultEventFormValue(): FaultEvent {
-    return {
-      eventType: 'Fault',
-      tag: this.currentEventTagFormControlModel.getValue(),
-      equipmentType: '',
-      equipmentName: '',
-      phases: [],
-      mRID: '',
-      faultKind: FaultKind.LINE_TO_GROUND,
-      faultImpedance: {
-        rGround: '',
-        xGround: '',
-        rLineToLine: '',
-        xLineToLine: ''
-      },
-      startDateTime: this.props.simulationStartDateTime,
-      stopDateTime: this.props.simulationStopDateTime
-    };
-  }
-
-
   componentWillUnmount() {
     this.currentEventTagFormControlModel.cleanup();
     this.selectedEventTypeToEditFormControlModel.cleanup();

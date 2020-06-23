@@ -188,11 +188,11 @@ export function generateUniqueId() {
 }
 
 export function unique<T>(iterable: Iterable<T>): T[] {
-  const uniqueItems = [] as T[];
+  const visitedElements = new Map<T, true>();
   for (const element of iterable) {
-    if (!uniqueItems.includes(element)) {
-      uniqueItems.push(element);
+    if (!visitedElements.has(element)) {
+      visitedElements.set(element, true);
     }
   }
-  return uniqueItems;
+  return [...visitedElements.keys()];
 }
