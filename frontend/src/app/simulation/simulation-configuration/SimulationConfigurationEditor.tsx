@@ -3,7 +3,7 @@ import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 
 import { SimulationConfiguration, SimulationManagementService } from '@shared/simulation';
-import { SimulationStatus } from '@commons/SimulationStatus';
+import { SimulationStatus } from '@common/SimulationStatus';
 import { FeederModel, ModelDictionary, ModelDictionaryComponent } from '@shared/topology';
 import { Application } from '@shared/Application';
 import { Dialog, DialogContent, DialogActionGroup } from '@shared/overlay/dialog';

@@ -8,7 +8,7 @@ import { StompClientService } from '@shared/StompClientService';
 import { Alarm } from './models/Alarm';
 import { NewAlarmNotification } from './views/new-alarm-notification/NewAlarmNotification';
 import { SimulationManagementService } from '@shared/simulation';
-import { SimulationStatus } from '@commons/SimulationStatus';
+import { SimulationStatus } from '@common/SimulationStatus';
 
 interface Props {
   onNewAlarmsConfirmed: () => void;

@@ -4,7 +4,7 @@ import * as socketIo from 'socket.io';
 
 import { App } from './App';
 import { SimulationCoordinator } from './simulation-coordination/SimulationCoordinator';
-import { SimulationStatus } from '@commons/SimulationStatus';
+import { SimulationStatus } from '@common/SimulationStatus';
 
 const EXPRESS = express();
 const EXPRESS_SERVER = http.createServer(EXPRESS);

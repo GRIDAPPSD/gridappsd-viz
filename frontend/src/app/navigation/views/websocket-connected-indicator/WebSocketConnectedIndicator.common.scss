@@ -4,11 +4,11 @@
     align-items: center;
     justify-content: center;
     height: 100%;
-}
 
-.websocket-connected-indicator__icon {
-    font-size: 2em;
-    font-weight: bold;
+    .websocket-connected-indicator__icon {
+        font-size: 2em;
+        font-weight: bold;
+    }
 }
 
 .websocket-connected-indicator__status-text {
