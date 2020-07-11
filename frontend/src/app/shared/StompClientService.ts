@@ -1,5 +1,5 @@
 import { Client, Message } from '@stomp/stompjs';
-import { BehaviorSubject, Observable, using, timer, iif, of, Subject } from 'rxjs';
+import { BehaviorSubject, Observable, using, timer, iif, of, Subject, zip } from 'rxjs';
 import { filter, switchMap, take, timeout, takeWhile } from 'rxjs/operators';
 
 import { ConfigurationManager } from './ConfigurationManager';
@@ -55,16 +55,19 @@ export class StompClientService {
   }
 
   private _initializeStompClient() {
-    this._configurationManager.configurationChanges('host')
+    zip(
+      this._configurationManager.configurationChanges('host'),
+      this._configurationManager.configurationChanges('port')
+    )
       .subscribe({
-        next: host => {
+        next: ([host, port]) => {
           this._client = new Client({
-            brokerURL: `ws://${host}`,
+            brokerURL: `ws://${host}:${port}`,
             heartbeatIncoming: 0,
             heartbeatOutgoing: 0,
             reconnectDelay: 0,
-            debug: console.log,
-            logRawCommunication: true
+            debug: __ENABLE_STOMP_CLIENT_LOGS__ ? console.log : () => { },
+            logRawCommunication: __ENABLE_STOMP_CLIENT_LOGS__
           });
 
           this._username = sessionStorage.getItem('username');

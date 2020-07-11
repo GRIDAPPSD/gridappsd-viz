@@ -6,7 +6,7 @@ import { SimulationStatusLogger } from './SimulationStatusLogger';
 import { SIMULATION_STATUS_LOG_TOPIC, SimulationManagementService, SimulationStatusLogMessage } from '@shared/simulation';
 import { StompClientService, StompClientConnectionStatus } from '@shared/StompClientService';
 import { StateStore } from '@shared/state-store';
-import { SimulationStatus } from '@commons/SimulationStatus';
+import { SimulationStatus } from '@common/SimulationStatus';
 import { Deque } from './models/Deque';
 import { waitUntil } from '@shared/misc';
 import { Buffer } from './models/Buffer';

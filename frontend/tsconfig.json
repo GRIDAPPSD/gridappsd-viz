@@ -9,8 +9,8 @@
             "@shared/*": [
                 "frontend/src/app/shared/*"
             ],
-            "@commons/*": [
-                "commons/*"
+            "@common/*": [
+                "common/*"
             ]
         },
         "lib": [

@@ -1,7 +1,7 @@
 import * as React from 'react';
 
 import { IconButton, BasicButton } from '@shared/buttons';
-import { SimulationStatus } from '@commons/SimulationStatus';
+import { SimulationStatus } from '@common/SimulationStatus';
 import { Tooltip } from '@shared/tooltip';
 import { Ripple } from '@shared/ripple';
 import { PlotModel } from '@shared/plot-model/PlotModel';

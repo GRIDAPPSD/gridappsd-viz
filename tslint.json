@@ -4,7 +4,7 @@
             "*.js",
             "dist",
             "runConfig.ts",
-            "frontend/webpack.config.js"
+            "frontend/webpack.*.config.js"
         ]
     },
     "rules": {

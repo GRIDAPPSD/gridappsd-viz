@@ -5,7 +5,7 @@ import { filter, takeUntil } from 'rxjs/operators';
 import { MeasurementChart } from './MeasurementChart';
 import { MeasurementChartModel } from './models/MeasurementChartModel';
 import { SimulationOutputMeasurement, SimulationManagementService } from '@shared/simulation';
-import { SimulationStatus } from '@commons/SimulationStatus';
+import { SimulationStatus } from '@common/SimulationStatus';
 import { TimeSeries } from './models/TimeSeries';
 import { TimeSeriesDataPoint } from './models/TimeSeriesDataPoint';
 import { StateStore } from '@shared/state-store';

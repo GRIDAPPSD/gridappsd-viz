@@ -3,7 +3,7 @@ import { Subject } from 'rxjs';
 import { takeUntil, filter } from 'rxjs/operators';
 
 import { SimulationQueue, SimulationManagementService, SimulationOutputMeasurement } from '@shared/simulation';
-import { SimulationStatus } from '@commons/SimulationStatus';
+import { SimulationStatus } from '@common/SimulationStatus';
 import { MeasurementValueTable } from './MeasurementValueTable';
 import { MeasurementType } from '@shared/topology';
 

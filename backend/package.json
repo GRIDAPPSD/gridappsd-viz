@@ -4,9 +4,8 @@
     "main": "dist/index.js",
     "scripts": {
         "build": "rm -rf dist && tsc && cp -rf ../frontend/dist/** dist/backend/src",
-        "tsc": "tsc --watch",
         "start": "node dist/backend/src/index.js",
-        "nodemon": "nodemon dist/backend/src/index.js",
+        "nodemon": "tsc --watch & nodemon dist/backend/src/index.js",
         "debug": "node --inspect dist/backend/src/index.js"
     },
     "author": "Nhuy Van",
