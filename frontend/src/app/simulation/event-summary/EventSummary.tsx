@@ -115,10 +115,12 @@ export class EventSummary extends React.Component<Props, State> {
   }
 
   initializeEvent(event: CommOutageEvent | FaultEvent) {
+    // eslint-disable-next-line no-console
     console.log(event);
   }
 
   clearEvent(event: CommOutageEvent | FaultEvent) {
+    // eslint-disable-next-line no-console
     console.log(event);
   }
 

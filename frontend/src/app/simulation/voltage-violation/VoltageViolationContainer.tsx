@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { zip, Subject } from 'rxjs';
-import { switchMap, filter, takeWhile, takeUntil, timestamp } from 'rxjs/operators';
+import { switchMap, filter, takeWhile, takeUntil } from 'rxjs/operators';
 
 import { VoltageViolation } from './VoltageViolation';
 import { StompClientService } from '@shared/StompClientService';

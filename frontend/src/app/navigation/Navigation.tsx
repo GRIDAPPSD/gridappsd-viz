@@ -93,7 +93,7 @@ export class Navigation extends React.Component<Props, {}> {
                     <strong>Name:&nbsp;</strong>
                     {simulation.name}
                     &nbsp;&mdash;&nbsp;
-                            <strong>ID:&nbsp;</strong>
+                    <strong>ID:&nbsp;</strong>
                     {simulation.id}
                   </DrawerItem>
                 ))

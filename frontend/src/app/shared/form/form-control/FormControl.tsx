@@ -6,6 +6,7 @@ import { ValidationErrorMessageDisplay } from '../validation';
 import './FormControl.light.scss';
 import './FormControl.dark.scss';
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 interface Props<T = any> {
   label: string;
   className: string;
@@ -18,6 +19,7 @@ interface State {
 
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export class FormControl extends React.Component<Props<any>, State> {
 
   componentDidMount() {

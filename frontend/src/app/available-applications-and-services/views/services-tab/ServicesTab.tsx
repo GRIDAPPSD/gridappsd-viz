@@ -212,6 +212,7 @@ export function ServicesTab(props: Props) {
   );
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function formatValue(value: any, type: ServiceConfigUserInputSpec['type']) {
   if (type === 'object') {
     const formattedValue = JSON.stringify(value, null, 4);

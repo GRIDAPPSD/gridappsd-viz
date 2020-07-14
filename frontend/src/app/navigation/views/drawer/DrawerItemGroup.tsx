@@ -17,7 +17,7 @@ interface State {
 
 export class DrawerItemGroup extends React.Component<Props, State> {
 
-  constructor(props: any) {
+  constructor(props: Props) {
     super(props);
     this.state = {
       isExpanded: false,

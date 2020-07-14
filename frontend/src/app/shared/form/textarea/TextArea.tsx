@@ -66,7 +66,7 @@ export class TextArea<T extends 'plaintext' | 'json' = 'json'> extends React.Com
   }
 
   componentDidMount() {
-    const formControlProp = this.props.formControlModel as FormControlModel<any>;
+    const formControlProp = this.props.formControlModel as FormControlModel<string | object>;
     this._inputBoxBoundingBox = this.inputBoxContainerRef.current.getBoundingClientRect();
     this._textBoxValueStream.pipe(debounceTime(250))
       .subscribe({
@@ -180,7 +180,7 @@ export class TextArea<T extends 'plaintext' | 'json' = 'json'> extends React.Com
     this._codeMirror.on('blur', this._onCodeMirrorEditorFocusLost);
   }
 
-  private _onValueChange(codeMirror: CodeMirror.Editor, _: any) {
+  private _onValueChange(codeMirror: CodeMirror.Editor) {
     this.currentValueToDisplay = codeMirror.getValue();
     this._textBoxValueStream.next(codeMirror.getValue());
   }
@@ -256,6 +256,7 @@ export class TextArea<T extends 'plaintext' | 'json' = 'json'> extends React.Com
 
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 (TextArea as any).defaultProps = {
   type: 'json'
 } as Props;

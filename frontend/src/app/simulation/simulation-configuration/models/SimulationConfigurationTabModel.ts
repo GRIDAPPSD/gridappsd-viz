@@ -1,3 +1,4 @@
+/* eslint-disable camelcase */
 export interface SimulationConfigurationTabModel {
   start_time: string;
   duration: string;

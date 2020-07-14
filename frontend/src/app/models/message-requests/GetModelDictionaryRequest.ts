@@ -4,6 +4,7 @@ import { ModelDictionary } from '@shared/topology';
 export interface GetModelDictionaryRequestBody {
   configurationType: string;
   parameters: {
+    // eslint-disable-next-line camelcase
     model_id: string;
   };
 }
@@ -18,6 +19,7 @@ export class GetModelDictionaryRequest implements MessageRequest {
     this._requestBody = {
       configurationType: RequestConfigurationType.CIM_DICTIONARY,
       parameters: {
+        // eslint-disable-next-line camelcase
         model_id: '_4F76A5F9-271D-9EB8-5E31-AA362D86F2C3'
       }
     };

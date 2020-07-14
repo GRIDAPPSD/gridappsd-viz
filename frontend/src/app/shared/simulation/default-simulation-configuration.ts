@@ -1,3 +1,4 @@
+/* eslint-disable camelcase */
 import { SimulationConfiguration } from '@shared/simulation';
 
 export const DEFAULT_SIMULATION_CONFIGURATION: SimulationConfiguration = {

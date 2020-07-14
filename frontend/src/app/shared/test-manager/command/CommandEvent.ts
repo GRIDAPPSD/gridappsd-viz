@@ -1,11 +1,12 @@
+/* eslint-disable camelcase */
 export interface CommandEvent {
   event_type: 'ScheduledCommandEvent';
   message: {
     forward_differences: CommandEventDifference[];
     reverse_differences: CommandEventDifference[];
   };
-  occuredDateTime: number;
-  stopDateTime: number;
+  occuredDateTime: number | string;
+  stopDateTime: number | string;
 }
 
 export interface CommandEventDifference {

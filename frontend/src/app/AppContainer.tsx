@@ -260,7 +260,7 @@ export class AppContainer extends React.Component<Props, State> {
 
   private _findAllPhasesForEachComponentThenGroupThem(modelDictionary: ModelDictionary) {
     const modelDictionaryComponentMap = new Map<string, ModelDictionaryComponent>();
-    const measurementMRIDMap = new Map<string, Array<{ phase: string; mrid: string; }>>();
+    const measurementMRIDMap = new Map<string, Array<{ phase: string; mrid: string }>>();
     for (const measurement of modelDictionary.measurements) {
       const name = measurement.measurementType === MeasurementType.VOLTAGE
         ? measurement.ConnectivityNode

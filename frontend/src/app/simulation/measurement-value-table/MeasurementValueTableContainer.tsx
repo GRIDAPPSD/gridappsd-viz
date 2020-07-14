@@ -44,9 +44,13 @@ const NODES_PER_TOPOLOGY = {
     reg3: ['A', 'B', 'C'],
     reg4: ['A', 'B', 'C']
   },
+  // eslint-disable-next-line camelcase
   ieee8500new_335: {
+    // eslint-disable-next-line camelcase
     feeder_reg1: ['A', 'B', 'C'],
+    // eslint-disable-next-line camelcase
     feeder_reg2: ['A', 'B', 'C'],
+    // eslint-disable-next-line camelcase
     feeder_reg3: ['A', 'B', 'C']
   }
 };

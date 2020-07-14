@@ -1,3 +1,4 @@
+/* eslint-disable camelcase */
 import { Node } from './Node';
 import { CapacitorControlMode } from './CapacitorControlMode';
 

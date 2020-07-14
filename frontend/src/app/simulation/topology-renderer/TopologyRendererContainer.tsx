@@ -22,7 +22,7 @@ import {
 } from '@shared/topology';
 import { OpenOrCloseCapacitorRequest } from './models/OpenOrCloseCapacitorRequest';
 import { ToggleSwitchStateRequest } from './models/ToggleSwitchStateRequest';
-import { GetTopologyModelRequest, GetTopologyModelRequestPayload } from './models/GetTopologyModelRequest';
+import { GetTopologyModelRequest } from './models/GetTopologyModelRequest';
 import { ToggleCapacitorManualModeRequest } from './models/ToggleCapacitorManualModeRequest';
 import { ToggleRegulatorManualModeRequest } from './models/ToggleRegulatorManualModeRequest';
 import { CapacitorVarUpdateRequest } from './models/CapacitorVarUpdateRequest';
@@ -35,7 +35,7 @@ import { ProgressIndicator } from '@shared/overlay/progress-indicator';
 import { SimulationManagementService } from '@shared/simulation';
 
 interface Props {
-  mRIDs: Map<string, string & string[]>;
+  mRIDs: Map<string, string | string[]>;
   phases: Map<string, string[]>;
 }
 
@@ -276,7 +276,7 @@ export class TopologyRendererContainer extends React.Component<Props, State> {
     return renderableTopology;
   }
 
-  private _createNewNode(properties: { [key: string]: any }): Node {
+  private _createNewNode(properties: { [key: string]: string | number | NodeType }): Node {
     return {
       x1: -1,
       y1: -1,
@@ -380,7 +380,7 @@ export class TopologyRendererContainer extends React.Component<Props, State> {
 
   onToggleSwitchState(swjtch: Switch, open: boolean) {
     const toggleSwitchStateRequest = new ToggleSwitchStateRequest({
-      componentMRID: this.props.mRIDs.get(swjtch.name),
+      componentMRID: this.props.mRIDs.get(swjtch.name) as string,
       simulationId: this._simulationQueue.getActiveSimulation().id,
       open,
       differenceMRID: this.activeSimulationConfig.power_system_config.Line_name
@@ -428,7 +428,7 @@ export class TopologyRendererContainer extends React.Component<Props, State> {
 
   private _toggleCapacitorManualMode(capacitor: Capacitor) {
     const toggleCapacitorManualModeRequest = new ToggleCapacitorManualModeRequest({
-      componentMRID: this.props.mRIDs.get(capacitor.name),
+      componentMRID: this.props.mRIDs.get(capacitor.name) as string,
       simulationId: this._simulationQueue.getActiveSimulation().id,
       manual: capacitor.manual,
       differenceMRID: this.activeSimulationConfig.power_system_config.Line_name
@@ -442,7 +442,7 @@ export class TopologyRendererContainer extends React.Component<Props, State> {
 
   private _openOrCloseCapacitor(capacitor: Capacitor) {
     const openOrCloseCapacitorRequest = new OpenOrCloseCapacitorRequest({
-      componentMRID: this.props.mRIDs.get(capacitor.name),
+      componentMRID: this.props.mRIDs.get(capacitor.name) as string,
       simulationId: this._simulationQueue.getActiveSimulation().id,
       open: capacitor.open,
       differenceMRID: this.activeSimulationConfig.power_system_config.Line_name
@@ -456,7 +456,7 @@ export class TopologyRendererContainer extends React.Component<Props, State> {
 
   private _sendCapacitorVarUpdateRequest(capacitor: Capacitor) {
     const capacitorVarUpdateRequest = new CapacitorVarUpdateRequest({
-      componentMRID: this.props.mRIDs.get(capacitor.name),
+      componentMRID: this.props.mRIDs.get(capacitor.name) as string,
       simulationId: this._simulationQueue.getActiveSimulation().id,
       target: capacitor.var.target,
       deadband: capacitor.var.deadband,
@@ -471,7 +471,7 @@ export class TopologyRendererContainer extends React.Component<Props, State> {
 
   private _sendCapacitorVoltUpdateRequest(capacitor: Capacitor) {
     const capacitorVoltUpdateRequest = new CapacitorVoltUpdateRequest({
-      componentMRID: this.props.mRIDs.get(capacitor.name),
+      componentMRID: this.props.mRIDs.get(capacitor.name) as string,
       simulationId: this._simulationQueue.getActiveSimulation().id,
       target: capacitor.volt.target,
       deadband: capacitor.volt.deadband,
@@ -504,7 +504,7 @@ export class TopologyRendererContainer extends React.Component<Props, State> {
 
   private _toggleRegulatorManualMode(regulator: Regulator) {
     const toggleRegulatorManualModeRequest = new ToggleRegulatorManualModeRequest({
-      componentMRID: this.props.mRIDs.get(regulator.name),
+      componentMRID: this.props.mRIDs.get(regulator.name) as string,
       simulationId: this._simulationQueue.getActiveSimulation().id,
       manual: regulator.manual,
       differenceMRID: this.activeSimulationConfig.power_system_config.Line_name
@@ -517,7 +517,7 @@ export class TopologyRendererContainer extends React.Component<Props, State> {
   }
 
   private _sendRegulatorTapChangerRequestForAllPhases(regulator: Regulator) {
-    this.props.mRIDs.get(regulator.name)
+    (this.props.mRIDs.get(regulator.name) as string[])
       .map((mRID, index) => {
         const phase = regulator.phases[index];
         const phaseValue = regulator.phaseValues[phase];
@@ -539,7 +539,7 @@ export class TopologyRendererContainer extends React.Component<Props, State> {
   }
 
   private _sendRegulatorLineDropComponensationRequestForAllPhases(regulator: Regulator) {
-    this.props.mRIDs.get(regulator.name)
+    (this.props.mRIDs.get(regulator.name) as string[])
       .map((mRID, index) => {
         const phase = regulator.phases[index];
         const phaseValue = regulator.phaseValues[phase];

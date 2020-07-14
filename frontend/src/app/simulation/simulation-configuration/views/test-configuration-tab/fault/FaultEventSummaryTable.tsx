@@ -20,17 +20,15 @@ export function FaultEventSummaryTable(props: Props) {
     <div className='fault-event-table-wrapper'>
       <FaultEventTable
         events={props.events}
-        actions={(_, index) => {
-          return (
-            <Tooltip content='Delete'>
-              <IconButton
-                icon='delete'
-                size='small'
-                style='accent'
-                onClick={() => props.onDeleteEvent(index)} />
-            </Tooltip>
-          );
-        }} />
+        actions={(_, index) => (
+          <Tooltip content='Delete'>
+            <IconButton
+              icon='delete'
+              size='small'
+              style='accent'
+              onClick={() => props.onDeleteEvent(index)} />
+          </Tooltip>
+        )} />
     </div>
   );
 }

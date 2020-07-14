@@ -29,6 +29,8 @@ export class SimulationParticipant {
     return this._socket.connected;
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   listenFor<T = any>(event: SimulationSynchronizationEvent) {
     const notifier = new Subject<T>();
     this._socket.on(event, (payload?: T) => notifier.next(payload));
@@ -44,10 +46,12 @@ export class SimulationParticipant {
       .pipe(take(1));
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   notifySelf(event: SimulationSynchronizationEvent, payload?: any) {
     this._socket.emit(event, payload);
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   broadcast(event: SimulationSynchronizationEvent, payload?: any) {
     this._socket.broadcast.emit(event, payload);
   }

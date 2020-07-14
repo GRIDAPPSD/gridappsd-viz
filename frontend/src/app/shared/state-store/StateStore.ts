@@ -6,6 +6,7 @@ export class StateStore {
 
   private static readonly _INSTANCE = new StateStore();
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private readonly _stateChangeNotifiers = new Map<string, BehaviorSubject<any>>();
 
   private _isInitialized = false;
@@ -22,7 +23,7 @@ export class StateStore {
       throw new Error('Store has been initialized');
     }
     for (const [key, value] of Object.entries(defaultState)) {
-      const notifier = new BehaviorSubject<any>(value);
+      const notifier = new BehaviorSubject<{}>(value);
       this._stateChangeNotifiers.set(key, notifier);
       notifier.next(value);
     }
@@ -36,8 +37,7 @@ export class StateStore {
   }
 
   select<K extends keyof ApplicationState>(key: K): Observable<ApplicationState[K]> {
-    return this._stateChangeNotifiers.get(key)
-      .asObservable();
+    return this._stateChangeNotifiers.get(key).asObservable();
   }
 
   toJson() {

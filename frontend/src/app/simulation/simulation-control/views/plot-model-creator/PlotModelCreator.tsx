@@ -326,9 +326,7 @@ export class PlotModelCreator extends React.Component<Props, State> {
 
   onPlotModelUpdated(updatedPlotModel: PlotModel) {
     const newPlotModel = { ...updatedPlotModel } as PlotModel;
-    const updatedPlotModels = this.state.createdPlotModels.map(model => {
-      return model !== updatedPlotModel ? model : newPlotModel;
-    });
+    const updatedPlotModels = this.state.createdPlotModels.map(model => model !== updatedPlotModel ? model : newPlotModel);
     this.setState({
       allPlotModelOptionBuilder: new SelectionOptionBuilder(updatedPlotModels, model => model.name),
       createdPlotModels: updatedPlotModels,

@@ -64,6 +64,7 @@ export class ServiceConfigurationTab extends React.Component<Props, State> {
           const servicesWithUserInput = selectedServices.filter(service => 'user_input' in service);
           for (const userInput of servicesWithUserInput.map(service => service.user_input)) {
             for (const inputSpec of Object.values(userInput)) {
+              // eslint-disable-next-line camelcase
               inputSpec.help_example = this._formatUserInputExampleValue(inputSpec);
             }
           }

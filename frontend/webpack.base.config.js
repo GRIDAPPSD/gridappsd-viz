@@ -6,6 +6,7 @@ const TsConfigPathsPlugin = require('tsconfig-paths-webpack-plugin');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 const ExcludeAssetsPlugin = require('@ianwalter/exclude-assets-plugin');
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
+const webpack = require('webpack');
 
 class RefReplacerPlugin {
 
@@ -66,8 +67,9 @@ class RefReplacerPlugin {
 /**
  *
  * @param {'production' | 'development'} mode
+ * @param {boolean} enableLogging
  */
-module.exports = mode => ({
+module.exports = (mode, enableLogging) => ({
   mode,
 
   entry: createEntry(path.resolve(__dirname, 'src'), { main: `./src/main.${mode}.tsx`, dark: [], light: [] }),
@@ -143,7 +145,10 @@ module.exports = mode => ({
         from: './src/assets',
         to: './assets'
       }
-    ])
+    ]),
+    new webpack.DefinePlugin({
+      __ENABLE_STOMP_CLIENT_LOGS__: JSON.stringify(enableLogging)
+    })
   ],
 
   devtool: 'source-map',

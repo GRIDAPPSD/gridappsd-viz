@@ -1,7 +1,7 @@
 import * as React from 'react';
 
 import { BasicButton, IconButton } from '@shared/buttons';
-import { ModelDictionary, ModelDictionaryMeasurement, ModelDictionaryRegulator, ModelDictionaryCapacitor, ModelDictionarySwitch } from '@shared/topology/model-dictionary';
+import { ModelDictionary, ModelDictionaryMeasurement, ModelDictionaryRegulator, ModelDictionaryCapacitor, ModelDictionarySwitch, MeasurementType } from '@shared/topology/model-dictionary';
 import {
   FormGroup,
   Checkbox,
@@ -48,13 +48,13 @@ interface Props {
 
 interface State {
   inputEquipmentTypeOptionBuilder: SelectionOptionBuilder<{ id: string; label: string }>;
-  inputComponentOptionBuilder: SelectionOptionBuilder<any>;
+  inputComponentOptionBuilder: SelectionOptionBuilder<ModelDictionaryCapacitor | ModelDictionaryRegulator | ModelDictionarySwitch>;
   inputPhaseOptionBuilder: SelectionOptionBuilder<Phase>;
   inputAttributeOptionBuilder: SelectionOptionBuilder<string>;
   outputEquipmentTypeOptionBuilder: SelectionOptionBuilder<string>;
   outputComponentOptionBuilder: SelectionOptionBuilder<ModelDictionaryMeasurement>;
   outputPhaseOptionBuilder: SelectionOptionBuilder<string>;
-  outputMeasurementTypeOptionBuilder: SelectionOptionBuilder<any>;
+  outputMeasurementTypeOptionBuilder: SelectionOptionBuilder<MeasurementType>;
   disableAddInputItemButton: boolean;
   disableAddOutputItemButton: boolean;
   inputList: CommOutageEventInputListItem[];
@@ -106,6 +106,7 @@ export class CommOutageEventForm extends React.Component<Props, State> {
 
   private _createFormGroupModelForEvent() {
     return new FormGroupModel<CommOutageEvent>({
+      // eslint-disable-next-line camelcase
       event_type: 'CommOutage',
       tag: '',
       startDateTime: new FormControlModel(
@@ -224,7 +225,7 @@ export class CommOutageEventForm extends React.Component<Props, State> {
             this.setState({
               inputComponentOptionBuilder: new SelectionOptionBuilder(
                 this.props.modelDictionary[selectedType.id] || [],
-                e => e.name || e.bankName
+                e => 'name' in e ? e.name : e.bankName
               ),
               inputAttributeOptionBuilder: new SelectionOptionBuilder(
                 COMPONENT_ATTRIBUTES[selectedType.id] || []
@@ -373,11 +374,13 @@ export class CommOutageEventForm extends React.Component<Props, State> {
           label='Start Date Time'
           hint='YYYY-MM-DD HH:MM:SS'
           type='datetime'
-          formControlModel={this.currentEventFormGroup.findControl('startDateTime')} />
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          formControlModel={this.currentEventFormGroup.findControl('startDateTime') as any} />
         <Input
           label='Stop Date Time'
           type='datetime'
-          formControlModel={this.currentEventFormGroup.findControl('stopDateTime')} />
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          formControlModel={this.currentEventFormGroup.findControl('stopDateTime') as any} />
         <FormGroup
           label='Input Outage List'
           collapsible={false}>

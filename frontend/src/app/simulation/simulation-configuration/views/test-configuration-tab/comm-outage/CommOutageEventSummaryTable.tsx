@@ -20,18 +20,16 @@ export function CommOutageEventSummaryTable(props: Props) {
     <div className='comm-outage-event-table-wrapper'>
       <CommOutageEventTable
         events={props.events}
-        actions={(_, index) => {
-          return (
-            <Tooltip content='Delete'>
-              <IconButton
-                rounded
-                icon='delete'
-                style='accent'
-                size='small'
-                onClick={() => props.onDeleteEvent(index)} />
-            </Tooltip>
-          );
-        }} />
+        actions={(_, index) => (
+          <Tooltip content='Delete'>
+            <IconButton
+              rounded
+              icon='delete'
+              style='accent'
+              size='small'
+              onClick={() => props.onDeleteEvent(index)} />
+          </Tooltip>
+        )} />
     </div>
   );
 }

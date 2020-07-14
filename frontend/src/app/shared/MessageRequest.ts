@@ -1,4 +1,5 @@
-export interface MessageRequest {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export interface MessageRequest<T = any> {
   /**
    * The topic url to which the request is posted to
    */
@@ -7,7 +8,7 @@ export interface MessageRequest {
   /**
    * The request body to send to the message queue
    */
-  readonly requestBody: any;
+  readonly requestBody: T;
 
   /**
    * The url from which subscribers can retrieve posted messages

@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Route, Redirect, withRouter } from 'react-router-dom';
+import { Route, Redirect, withRouter, RouteComponentProps } from 'react-router-dom';
 
 import { Application } from '@shared/Application';
 import { AvailableApplicationsAndServicesContainer } from './available-applications-and-services';
@@ -32,23 +32,22 @@ import { PortalRenderer } from '@shared/overlay/portal-renderer';
 import './App.light.scss';
 import './App.dark.scss';
 
-interface Props {
+interface Props extends RouteComponentProps {
   feederModel: FeederModel;
   availableApplications: Application[];
-  componentMRIDs: Map<string, string & string[]>;
+  componentMRIDs: Map<string, string | string[]>;
   componentPhases: Map<string, string[]>;
   stompClientConnectionStatus: StompClientConnectionStatus;
   onLogout: () => void;
   onMRIDChanged: (mRID: string) => void;
   onSimulationConfigFormSubmitted: (simulationConfig: SimulationConfiguration) => void;
   onJoinActiveSimulation: (simulationId: string) => void;
-  history: any;
 }
 
 interface State {
 }
 
-export const App = (withRouter as any)(class extends React.Component<Props, State> {
+export const App = withRouter(class extends React.Component<Props, State> {
 
   readonly tabGroupRef = React.createRef<TabGroup>();
 

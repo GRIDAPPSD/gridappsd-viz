@@ -66,6 +66,7 @@ export class StompClientService {
             heartbeatIncoming: 0,
             heartbeatOutgoing: 0,
             reconnectDelay: 0,
+            // eslint-disable-next-line no-console
             debug: __ENABLE_STOMP_CLIENT_LOGS__ ? console.log : () => { },
             logRawCommunication: __ENABLE_STOMP_CLIENT_LOGS__
           });
@@ -170,6 +171,7 @@ export class StompClientService {
     if (this._status !== StompClientConnectionStatus.DISCONNECTED) {
       const headers = Object.assign(
         {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           GOSS_HAS_SUBJECT: true as any,
           GOSS_SUBJECT: this._username
         },
@@ -201,6 +203,7 @@ export class StompClientService {
    * Subscribe to destination, then unsubscribe right away after a response arrives
    * @param destination The topic to subscribe to to get the response from
    */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   readOnceFrom<T = any>(destination: string): Observable<T> {
     return this.readFrom<T>(destination)
       .pipe(take(1));
@@ -210,6 +213,7 @@ export class StompClientService {
    * Subscribe to destination, and continuously watch for responses from the server
    * @param destination The topic to subscribe to to get the response from
    */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   readFrom<T = any>(destination: string): Observable<T> {
     return timer(0, 1000)
       .pipe(
@@ -219,20 +223,18 @@ export class StompClientService {
           const source = new BehaviorSubject<T>(null);
           const id = `${destination}[${Math.random() * 1_000_000 | 0}]`;
           return using(
-            () => {
-              return this._client.subscribe(destination, (message: Message) => {
-                const payload = JSON.parse(message.body);
-                if ('error' in payload) {
-                  source.error(payload.error.message);
-                } else if (!('data' in payload)) {
-                  source.next(payload);
-                } else if (typeof payload.data !== 'string') {
-                  source.next(payload.data);
-                } else {
-                  source.next(JSON.parse(payload.data));
-                }
-              }, { id });
-            },
+            () => this._client.subscribe(destination, (message: Message) => {
+              const payload = JSON.parse(message.body);
+              if ('error' in payload) {
+                source.error(payload.error.message);
+              } else if (!('data' in payload)) {
+                source.next(payload);
+              } else if (typeof payload.data !== 'string') {
+                source.next(payload.data);
+              } else {
+                source.next(JSON.parse(payload.data));
+              }
+            }, { id }),
             () => source.asObservable().pipe(filter(responseBody => Boolean(responseBody)))
           );
         })
