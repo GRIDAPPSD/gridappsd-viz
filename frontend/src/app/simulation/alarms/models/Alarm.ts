@@ -1,3 +1,4 @@
+/* eslint-disable camelcase */
 export interface Alarm {
   equipment_mrid: string;
   value: number;

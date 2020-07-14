@@ -67,6 +67,7 @@ export class AlarmsContainer extends React.Component<Props, State> {
             alarms
           });
         },
+        // eslint-disable-next-line no-console
         error: console.error
       });
   }

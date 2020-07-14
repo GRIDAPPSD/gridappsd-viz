@@ -12,7 +12,7 @@ interface State {
 
 export class SimulationsContainer extends React.Component<Props, State> {
 
-  constructor(props: any) {
+  constructor(props: Props) {
     super(props);
   }
 

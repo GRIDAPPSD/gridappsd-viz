@@ -48,4 +48,4 @@ SOCKET_SERVER.on('connection', socket => {
     });
 });
 
-EXPRESS_SERVER.listen(PORT, () => console.log(`Server started on port ${PORT}`));
+EXPRESS_SERVER.listen(PORT);

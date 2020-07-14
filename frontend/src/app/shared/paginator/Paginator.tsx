@@ -118,6 +118,8 @@ export class Paginator<T> extends React.Component<Props<T>, State> {
 
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 (Paginator as any).defaultProps = {
   pageSize: 50
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
 } as Props<any>;

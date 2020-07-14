@@ -6,6 +6,7 @@ import './ApplicationInstancesTab.light.scss';
 import './ApplicationInstancesTab.dark.scss';
 
 interface Props {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   instances: any[];
 }
 

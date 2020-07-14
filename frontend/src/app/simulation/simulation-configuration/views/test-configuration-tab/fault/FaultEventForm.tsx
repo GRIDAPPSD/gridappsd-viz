@@ -20,8 +20,8 @@ interface Props {
 }
 
 interface State {
-  equipmentTypeOptionBuilder: SelectionOptionBuilder<{ id: string; label: string; }>;
-  componentOptionBuilder: SelectionOptionBuilder<any>;
+  equipmentTypeOptionBuilder: SelectionOptionBuilder<{ id: string; label: string }>;
+  componentOptionBuilder: SelectionOptionBuilder<ModelDictionaryComponent | ModelDictionaryRegulator | ModelDictionaryCapacitor | ModelDictionarySwitch>;
   phaseOptionBuilder: SelectionOptionBuilder<Phase>;
   faultKindOptionBuilder: SelectionOptionBuilder<FaultKind>;
   selectedFaultKind: FaultKind;
@@ -29,7 +29,7 @@ interface State {
 
 export class FaultEventForm extends React.Component<Props, State> {
 
-  readonly equipmentTypeFormControl: FormControlModel<{ id: string; label: string; }>;
+  readonly equipmentTypeFormControl: FormControlModel<{ id: string; label: string }>;
   readonly componentFormControl: FormControlModel<ModelDictionaryComponent | ModelDictionaryRegulator | ModelDictionaryCapacitor | ModelDictionarySwitch>;
   readonly eventFormGroupModel: FormGroupModel<FaultEvent>;
 
@@ -110,6 +110,7 @@ export class FaultEventForm extends React.Component<Props, State> {
 
   private _createFormGroupModelForFaultEvent() {
     return new FormGroupModel<FaultEvent>({
+      // eslint-disable-next-line camelcase
       event_type: 'Fault',
       tag: '',
       equipmentType: '',
@@ -161,16 +162,17 @@ export class FaultEventForm extends React.Component<Props, State> {
                   phaseOptionBuilder: SelectionOptionBuilder.defaultBuilder()
                 });
                 break;
-              default:
+              default: {
                 const components = this.props.modelDictionary[selectedType.id] || [];
                 this.setState({
                   componentOptionBuilder: new SelectionOptionBuilder(
                     components,
-                    e => `${e.name || e.bankName} (${e.phases || e.bankPhases})`
+                    e => `${'name' in e ? e.name : e.bankName} (${'phases' in e ? e.phases : e.bankPhases})`
                   ),
                   phaseOptionBuilder: SelectionOptionBuilder.defaultBuilder()
                 });
                 break;
+              }
             }
             this.eventFormGroupModel.setValue({
               equipmentType: selectedType.label
@@ -303,6 +305,7 @@ export class FaultEventForm extends React.Component<Props, State> {
               <Input
                 key={kind}
                 label={kind}
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 formControlModel={(this.faultImpedanceFormGroup as any).findControl(kind)} />
             ))
           }

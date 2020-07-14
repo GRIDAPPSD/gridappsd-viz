@@ -5,11 +5,12 @@
     "main": "index.js",
     "scripts": {
         "wds": "webpack-dev-server --config webpack.development.config.js --progress --inline",
-        "build": "webpack --config webpack.production.config.js --env.build-version"
+        "build": "webpack --config webpack.production.config.js --env.build-version",
+        "lint": "eslint . --ext .ts,.tsx"
     },
     "husky": {
         "hooks": {
-            "pre-commit": "tslint --project ."
+            "pre-commit": "npm run lint"
         }
     },
     "author": "Nhuy Van",
@@ -37,10 +38,15 @@
         "@types/react-table": "^6.7.21",
         "@types/socket.io-client": "^1.4.33",
         "@types/stompjs": "^2.3.4",
+        "@typescript-eslint/eslint-plugin": "^3.6.1",
+        "@typescript-eslint/eslint-plugin-tslint": "^3.6.1",
+        "@typescript-eslint/parser": "^3.6.1",
         "awesome-typescript-loader": "^5.2.1",
         "clean-webpack-plugin": "^3.0.0",
         "copy-webpack-plugin": "^5.0.3",
         "css-loader": "^3.6.0",
+        "eslint": "^7.4.0",
+        "eslint-plugin-react": "^7.20.3",
         "file-loader": "^4.0.0",
         "html-webpack-plugin": "^4.3.0",
         "husky": "^4.2.5",

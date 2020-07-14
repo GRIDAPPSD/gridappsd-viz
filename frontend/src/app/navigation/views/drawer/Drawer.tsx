@@ -13,7 +13,7 @@ interface State {
 }
 export class Drawer extends React.Component<Props, State> {
 
-  constructor(props: any) {
+  constructor(props: Props) {
     super(props);
     this.state = {
       isOpen: false

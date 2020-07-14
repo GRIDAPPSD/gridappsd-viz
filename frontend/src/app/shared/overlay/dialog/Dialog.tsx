@@ -37,6 +37,7 @@ export class Dialog extends React.Component<Props, State> {
 
   componentDidUpdate(prevProps: Props) {
     if (this.props.show) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       if (this.props.children !== (prevProps as any).children) {
         this.dialogRef.current.style.top = `${this.props.top}px`;
       }

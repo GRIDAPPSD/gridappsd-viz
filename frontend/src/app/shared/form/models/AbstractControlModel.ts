@@ -51,7 +51,7 @@ export abstract class AbstractControlModel<T> {
     this._disableStatusNotifier.complete();
   }
 
-  dependsOn(anotherControl: AbstractControlModel<any>) {
+  dependsOn(anotherControl: AbstractControlModel<unknown>) {
     anotherControl.validityChanges()
       .subscribe({
         next: isValid => {

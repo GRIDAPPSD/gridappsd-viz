@@ -12,6 +12,7 @@ export class RegulatorTapChangerRequest implements MessageRequest {
 
   readonly url: string;
   readonly replyTo: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   readonly requestBody: any;
 
   constructor(inputs: Inputs) {
@@ -20,11 +21,15 @@ export class RegulatorTapChangerRequest implements MessageRequest {
     this.requestBody = {
       command: 'update',
       input: {
+        // eslint-disable-next-line camelcase
         simulation_id: inputs.simulationId,
         message: {
           timestamp: new Date().toISOString(),
+          // eslint-disable-next-line camelcase
           difference_mrid: inputs.differenceMRID,
+          // eslint-disable-next-line camelcase
           reverse_differences: [],
+          // eslint-disable-next-line camelcase
           forward_differences: [
             {
               object: inputs.mRID,

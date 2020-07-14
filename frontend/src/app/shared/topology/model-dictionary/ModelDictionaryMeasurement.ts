@@ -1,3 +1,4 @@
+/* eslint-disable camelcase */
 import { MeasurementType } from './MeasurementType';
 
 export interface ModelDictionaryMeasurement {

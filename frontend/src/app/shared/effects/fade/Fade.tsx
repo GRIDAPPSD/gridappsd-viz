@@ -26,7 +26,7 @@ export class Fade extends React.Component<Props, State> {
   // The child component's first DOM element to apply the animation to
   private _element: HTMLElement;
 
-  constructor(props: any) {
+  constructor(props: Props) {
     super(props);
   }
 
@@ -34,6 +34,7 @@ export class Fade extends React.Component<Props, State> {
     if (React.Children.count(this.props.children) !== 1) {
       throw new Error('<Fade /> component can only accept one child component with an enclosing DOM element');
     }
+    // eslint-disable-next-line react/no-find-dom-node
     this._element = ReactDOM.findDOMNode(this) as HTMLElement;
     if (this.props.in) {
       this._element.classList.add('fade-in');

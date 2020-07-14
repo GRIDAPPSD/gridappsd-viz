@@ -201,6 +201,7 @@ export class RegulatorControlMenu extends React.Component<Props, State> {
                         hint='Unit in Ohms'
                         type='number'
                         formControlModel={
+                          // eslint-disable-next-line @typescript-eslint/no-explicit-any
                           this.regulatorControlMenuFormGroupModel.findControl(`phaseValues.${phase}.lineDropR` as any)
                         } />
                     </li>
@@ -210,6 +211,7 @@ export class RegulatorControlMenu extends React.Component<Props, State> {
                         hint='Unit in Ohms'
                         type='number'
                         formControlModel={
+                          // eslint-disable-next-line @typescript-eslint/no-explicit-any
                           this.regulatorControlMenuFormGroupModel.findControl(`phaseValues.${phase}.lineDropX` as any)
                         } />
                     </li>
@@ -227,6 +229,7 @@ export class RegulatorControlMenu extends React.Component<Props, State> {
               label={`Tap ${phase}`}
               type='number'
               formControlModel={
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 this.regulatorControlMenuFormGroupModel.findControl(`phaseValues.${phase}.tap` as any)
               } />
           ))

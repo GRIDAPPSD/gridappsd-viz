@@ -8,7 +8,7 @@ import './DrawerItem.dark.scss';
 interface DrawerItemProps {
   className?: string;
   onClick?: (event: React.SyntheticEvent) => void;
-  children: any;
+  children: React.ReactChild[] | React.ReactChild;
 }
 
 export function DrawerItem(props: DrawerItemProps) {

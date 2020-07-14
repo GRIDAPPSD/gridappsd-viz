@@ -51,6 +51,7 @@ export class ApplicationConfigurationTab extends React.Component<Props, State> {
       new FormArrayModel([
         new FormGroupModel({
           name: this.nameFormControlModel,
+          // eslint-disable-next-line camelcase
           config_string: this.configStringFormControlModel
         })
       ])

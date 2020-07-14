@@ -1,6 +1,7 @@
 import { Phase } from '../Phase';
 
 export interface CommOutageEvent {
+  // eslint-disable-next-line camelcase
   event_type: 'CommOutage';
   tag: string;
   allInputOutage: boolean;
@@ -8,8 +9,8 @@ export interface CommOutageEvent {
   allOutputOutage: boolean;
   outputList: CommOutageEventOutputListItem[];
   // Epoch time with second precision
-  startDateTime: number;
-  stopDateTime: number;
+  startDateTime: number | string;
+  stopDateTime: number | string;
 }
 
 

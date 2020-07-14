@@ -4,7 +4,10 @@ import { Application } from '@shared/Application';
 export class EnableApplicationRequest implements MessageRequest {
 
   readonly url: string;
-  readonly requestBody: any;
+  readonly requestBody: {
+    command: 'no-op';
+    message: 'enable';
+  };
   readonly replyTo: string;
 
   constructor(application: Application, simulationId: string) {

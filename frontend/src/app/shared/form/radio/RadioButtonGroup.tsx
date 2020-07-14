@@ -32,6 +32,7 @@ export class RadioButtonGroup<T> extends React.Component<Props<T>, State> {
 
   componentDidMount() {
     if (this.props.style === 'switches') {
+      // eslint-disable-next-line react/no-find-dom-node
       const radioButtonGroup = findDOMNode(this) as HTMLElement;
       const radioButtons = Array.from(radioButtonGroup.querySelectorAll('.radio-button')) as HTMLElement[];
       const maxWidth = Math.max(...radioButtons.map(e => e.clientWidth));

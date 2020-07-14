@@ -27,7 +27,7 @@ export const enum DownloadType {
  * @param fileContent The content of the file to be downloaded
  * @param contentType The content type of the downloaded file
  */
-export function download(filename: string, fileContent: any, contentType: DownloadType) {
+export function download(filename: string, fileContent: string, contentType: DownloadType) {
   const a = document.createElement('a');
   a.setAttribute('style', 'display:none');
   const blob = new Blob([fileContent], { type: contentType });

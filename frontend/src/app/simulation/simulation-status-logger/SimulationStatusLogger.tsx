@@ -1,6 +1,4 @@
 import * as React from 'react';
-import { Subject } from 'rxjs';
-import { debounceTime, filter } from 'rxjs/operators';
 
 import { ProgressIndicator } from '@shared/overlay/progress-indicator';
 import { Tooltip } from '@shared/tooltip';
@@ -194,7 +192,7 @@ export class SimulationStatusLogger extends React.Component<Props, State> {
     });
   }
 
-  onPageChange(event: PageChangeEvent<any>) {
+  onPageChange(event: PageChangeEvent<LogMessage>) {
     if (event.start !== this._logMessageSearchStart) {
       this._logMessageSearchStart = event.start;
       this.props.onLoadMoreLogMessages(this.props.totalLogMessageCount - event.start, event.count);

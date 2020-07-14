@@ -3,9 +3,9 @@ const fs = require('fs');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const TsConfigPathsPlugin = require('tsconfig-paths-webpack-plugin');
-const CopyWebpackPlugin = require('copy-webpack-plugin');
 const ExcludeAssetsPlugin = require('@ianwalter/exclude-assets-plugin');
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
+const webpack = require('webpack');
 
 class RefReplacerPlugin {
 
@@ -66,8 +66,9 @@ class RefReplacerPlugin {
 /**
  *
  * @param {'production' | 'development'} mode
+ * @param {boolean} enableLogging
  */
-module.exports = mode => ({
+module.exports = (mode, enableLogging) => ({
   mode,
 
   entry: createEntry(path.resolve(__dirname, 'src'), { main: `./src/main.${mode}.tsx`, dark: [], light: [] }),
@@ -108,12 +109,16 @@ module.exports = mode => ({
         ]
       },
       {
-        test: /\.(svg|png|woff|woff2|ttf|eot)$/,
+        test: /\.ttf$/,
         use: [
           {
-            loader: 'url-loader',
+            loader: 'file-loader',
             options: {
-              fallback: 'file-loader'
+              outputPath: (filename, fullPath, context) => {
+                const containingFolderPath = path.resolve(fullPath, '..');
+                const containingFolderName = containingFolderPath.substring(containingFolderPath.lastIndexOf('/') + 1);
+                return `assets/${containingFolderName}/${filename}`;
+              }
             }
           }
         ]
@@ -125,7 +130,7 @@ module.exports = mode => ({
     new CleanWebpackPlugin(),
     new RefReplacerPlugin(),
     new HtmlWebpackPlugin({
-      template: './index.template.html',
+      template: './template.html',
       excludeAssets: [
         /light\.[\w\d]+\.(?:css|js)/,
         /dark\.[\w\d]+\.js/,
@@ -138,12 +143,9 @@ module.exports = mode => ({
       filename: '[name].[hash:10].css',
       chunkFilename: '[name].[hash:10].css'
     }),
-    new CopyWebpackPlugin([
-      {
-        from: './src/assets',
-        to: './assets'
-      }
-    ])
+    new webpack.DefinePlugin({
+      __ENABLE_STOMP_CLIENT_LOGS__: JSON.stringify(enableLogging)
+    })
   ],
 
   devtool: 'source-map',

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/indent */
 import * as React from 'react';
 
 import {
@@ -53,7 +54,7 @@ export class PowerGridModels extends React.Component<Props, State> {
     ),
     objectId: new FormControlModel(this.props.feederModelLines.find(line => line.name === 'ieee8500')),
     modelId: new FormControlModel(this.props.feederModelLines.find(line => line.name === 'ieee8500')),
-    filter: new FormControlModel(`?s cim:IdentifiedObject.name 'q14733'","objectType":"http://iec.ch/TC57/2012/CIM-schema-cim17#ConnectivityNode`),
+    filter: new FormControlModel('?s cim:IdentifiedObject.name \'q14733\'","objectType":"http://iec.ch/TC57/2012/CIM-schema-cim17#ConnectivityNode'),
     resultFormat: new FormControlModel(QueryPowerGridModelsResultFormat.JSON)
   });
 

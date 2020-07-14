@@ -7,8 +7,10 @@ export class CanvasTransformService {
   private static readonly _INSTANCE_ = new CanvasTransformService();
 
   private readonly _notifier = new Subject<ZoomTransform>();
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private readonly _zoomer = zoom<SVGElement, any>();
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private _svgSelection: Selection<SVGElement, any, any, any>;
   private _currentTransform: ZoomTransform;
 

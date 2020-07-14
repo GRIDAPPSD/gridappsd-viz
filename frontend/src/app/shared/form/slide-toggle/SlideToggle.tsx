@@ -80,6 +80,7 @@ export class SlideToggle extends React.Component<Props, State> {
 
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 (SlideToggle as any).defaultProps = {
   direction: 'horizontal',
   isOn: false,

@@ -44,8 +44,11 @@ export class MeasurementChart extends React.Component<Props, State> {
   private readonly _lineGenerator: Line<TimeSeriesDataPoint>;
   private readonly _stateStore = StateStore.getInstance();
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private _container: Selection<SVGElement, any, SVGElement, any>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private _xAxis: Selection<SVGElement, any, SVGElement, any>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private _yAxis: Selection<SVGGElement, any, SVGElement, any>;
 
   constructor(props: Props) {
@@ -125,7 +128,7 @@ export class MeasurementChart extends React.Component<Props, State> {
     return Math.abs(this._yScale(dataPoint1.measurement) - this._yScale(dataPoint2.measurement)) <= 2;
   }
 
-  private _calculateXYAxisExtents(): { x: [Date, Date], y: [number, number] } {
+  private _calculateXYAxisExtents(): { x: [Date, Date]; y: [number, number] } {
     const dataPoints: Array<TimeSeriesDataPoint> = this.props.measurementChartModel.timeSeries.reduce(
       (points, series) => {
         points.push(...series.points);

@@ -3,9 +3,6 @@ const path = require('path');
 const fs = require('fs');
 const TerserJSPlugin = require('terser-webpack-plugin');
 const OptimizeCSSAssetsPlugin = require('optimize-css-assets-webpack-plugin');
-const webpack = require('webpack');
-
-const baseConfig = require('./webpack.base.config')('production');
 
 /**
  *
@@ -13,6 +10,7 @@ const baseConfig = require('./webpack.base.config')('production');
  */
 module.exports = (env) => {
   updateVersion(env);
+  const baseConfig = require('./webpack.base.config')('production', env.enableLogging !== undefined);
   return {
     ...baseConfig,
 
@@ -43,14 +41,8 @@ module.exports = (env) => {
       ]
     },
 
-    plugins: [
-      ...baseConfig.plugins,
-      new webpack.DefinePlugin({
-        __ENABLE_STOMP_CLIENT_LOGS__: JSON.stringify(env.enableLogging !== undefined)
-      })
-    ],
-
     stats: 'errors-only'
+
   };
 };
 

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/indent */
 import * as React from 'react';
 
 import { Ripple } from '../../ripple/Ripple';
@@ -15,7 +16,7 @@ interface Props {
   icon: Icon;
   size?: 'large' | 'normal' | 'small';
   className?: string;
-  label?: any;
+  label?: string;
   rounded?: boolean;
   style?: 'primary' | 'accent';
   disabled?: boolean;
@@ -87,6 +88,7 @@ export class IconButton extends React.Component<Props, {}> {
 
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 (IconButton as any).defaultProps = {
   size: 'normal',
   rounded: true,

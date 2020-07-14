@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable camelcase */
 export interface SimulationConfiguration {
   power_system_config: {
     GeographicalRegion_name: string;
@@ -24,7 +26,7 @@ export interface SimulationConfiguration {
     };
   };
   application_config: {
-    applications: Array<{ name: string; config_string: string; }>
+    applications: Array<{ name: string; config_string: string }>;
   };
   service_configs: Array<{ id: string; user_options: any }>;
   test_config: {

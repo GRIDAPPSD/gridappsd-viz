@@ -29,7 +29,7 @@ export class FilePickerService {
     return this;
   }
 
-  readFileAsJson<T = any>(): Observable<T> {
+  readFileAsJson<T>(): Observable<T> {
     return this._fileSelection.asObservable()
       .pipe(
         switchMap(file => {
