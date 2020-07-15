@@ -12,16 +12,16 @@ export interface ModelDictionary {
   subregionID: string;
   region: string;
   regionID: string;
-  synchronousmachines: any[];
+  synchronousmachines: unknown[];
   capacitors: ModelDictionaryCapacitor[];
   regulators: ModelDictionaryRegulator[];
-  solarpanels: any[];
-  batteries: any[];
+  solarpanels: unknown[];
+  batteries: unknown[];
   switches: ModelDictionarySwitch[];
-  fuses: any[];
-  sectionalisers: any[];
-  breakers: any[];
-  reclosers: any[];
-  disconnectors: any[];
+  fuses: unknown[];
+  sectionalisers: unknown[];
+  breakers: unknown[];
+  reclosers: unknown[];
+  disconnectors: unknown[];
   measurements: ModelDictionaryMeasurement[];
 }

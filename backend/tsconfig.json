@@ -9,8 +9,8 @@
             "es6"
         ],
         "paths": {
-            "@commons/*": [
-                "commons/*"
+            "@common/*": [
+                "common/*"
             ]
         },
         "typeRoots": [

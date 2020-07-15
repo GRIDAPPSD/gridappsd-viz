@@ -50,7 +50,7 @@ export class MeasurementValueTable extends React.Component<Props, State> {
       .then(() => this._repositionLabelWhenMapIsTransformed());
   }
 
-  private _calculateAnchorPosition(): { left: number; top: number; } {
+  private _calculateAnchorPosition(): { left: number; top: number } {
     for (const phase of ['', 'a', 'b', 'c']) {
       const anchor = document.querySelector(`.topology-renderer ._${this.props.nodeNameToAttachTo}${phase}_`);
       if (anchor) {

@@ -60,9 +60,9 @@ export class Select<T, E extends boolean> extends React.Component<Props<T, E>, S
 
     if (props.optional !== true) {
       props.formControlModel.addValidator(control => {
-        const value = control.getValue();
+        const value = control.getValue() as T | T[] | string;
         return {
-          isValid: !this.props.multiple ? value !== null && value !== undefined && value !== '' : value.length > 0,
+          isValid: !Array.isArray(value) ? value !== null && value !== undefined && value !== '' : value.length > 0,
           errorMessage: 'Please select an option'
         };
       });
@@ -140,6 +140,7 @@ export class Select<T, E extends boolean> extends React.Component<Props<T, E>, S
   }
 
   private _updateFormControlValue(value: T | T[]) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     this.props.formControlModel.setValue(value as any);
   }
 

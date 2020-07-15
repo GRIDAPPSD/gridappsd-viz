@@ -1,94 +1,76 @@
 import * as React from 'react';
-import { Subject } from 'rxjs';
-import { debounceTime, filter } from 'rxjs/operators';
 
-import { SimulationStatusLoggerMessage } from './SimulationStatusLoggerMessage';
 import { ProgressIndicator } from '@shared/overlay/progress-indicator';
+import { Tooltip } from '@shared/tooltip';
+import { IconButton } from '@shared/buttons';
+import { MessageBanner } from '@shared/overlay/message-banner';
+import { Deque } from './models/Deque';
 import { LogMessage } from './models/LogMessage';
+import { SimulationStatusLoggerMessage } from './SimulationStatusLoggerMessage';
+import { Paginator, PageChangeEvent } from '@shared/paginator';
 
 import './SimulationStatusLogger.light.scss';
 import './SimulationStatusLogger.dark.scss';
 
 interface Props {
-  messages: LogMessage[];
-  isFetching: boolean;
+  visibleLogMessageDeque: Deque<LogMessage>;
+  totalLogMessageCount: number;
+  showProgressIndicator: boolean;
+  onLoadMoreLogMessages: (start: number, count: number) => void;
 }
 
 interface State {
   dragHandlePosition: number;
-  visibleMessages: LogMessage[];
+  showLogMessages: boolean;
 }
 
-const numberOfMessagesToLoadNext = 30;
-const logLevels = ['FATAL', 'ERROR', 'WARN', 'INFO', 'DEBUG', 'TRACE'];
-
+const numberOfMessagesToShow = 30;
+const dragHandleMinPosition = 30;
+const dragHandleDefaultPosition = 430;
+const dragHandleMaxPosition = document.body.clientHeight - 110;
 export class SimulationStatusLogger extends React.Component<Props, State> {
 
-  readonly simulationStatusLoggerBodyRef = React.createRef<HTMLElement>();
+  readonly logMessageContainerRef = React.createRef<HTMLElement>();
+  readonly logMessageTemporaryContainer = {
+    length: 0,
+    slice() {
+      return null;
+    }
+  } as Array<LogMessage>;
 
-  private readonly _dragHandleMinPosition = 30;
-  private readonly _dragHandleMaxPosition = document.body.clientHeight - 110;
-  private readonly _loggerBodyScrollNotifier = new Subject<number>();
+  private _logMessageSearchStart = numberOfMessagesToShow;
 
   constructor(props: Props) {
     super(props);
+
     this.state = {
-      dragHandlePosition: this._dragHandleMaxPosition,
-      visibleMessages: []
+      dragHandlePosition: dragHandleMaxPosition,
+      showLogMessages: true
     };
+
+    this.toggleLogMessageVisibility = this.toggleLogMessageVisibility.bind(this);
     this.mouseDown = this.mouseDown.bind(this);
     this._mouseUp = this._mouseUp.bind(this);
     this._resize = this._resize.bind(this);
-    this.loadMoreMessages = this.loadMoreMessages.bind(this);
+    this.onPageChange = this.onPageChange.bind(this);
+  }
+
+  shouldComponentUpdate(nextProps: Props, nextState: State) {
+    if (this.props.totalLogMessageCount !== nextProps.totalLogMessageCount) {
+      this.logMessageTemporaryContainer.length = this.props.totalLogMessageCount;
+    }
+    if (!nextState.showLogMessages) {
+      return this.state.dragHandlePosition !== nextState.dragHandlePosition;
+    }
+    return true;
   }
 
   componentDidUpdate(prevProps: Props) {
-    if (prevProps !== this.props) {
-      if (this.props.isFetching) {
-        this.setState({
-          dragHandlePosition: 430
-        });
-      }
-      if (this.props.messages !== prevProps.messages) {
-        const currentNumberOfVisibleMessages = this.state.visibleMessages.length;
-        if (currentNumberOfVisibleMessages <= numberOfMessagesToLoadNext) {
-          this.setState({
-            visibleMessages: this.props.messages.slice(0, numberOfMessagesToLoadNext)
-          });
-        } else {
-          this.setState({
-            visibleMessages: this.props.messages.slice(0, currentNumberOfVisibleMessages)
-          });
-        }
-      }
-    }
-  }
-
-  componentDidMount() {
-    this._loggerBodyScrollNotifier.pipe(
-      debounceTime(250),
-      filter(
-        scrollTop => scrollTop === this.simulationStatusLoggerBodyRef.current.scrollHeight - this.simulationStatusLoggerBodyRef.current.clientHeight
-      )
-    )
-      .subscribe({
-        next: scrollTop => {
-          // When the user scrolls to the bottom of the messages body
-          // then just keep appending ${messageBatchToShowNext} more messages until there is no more
-          if (this.state.visibleMessages.length < this.props.messages.length) {
-            this.setState({
-              visibleMessages: this.props.messages.slice(0, this.state.visibleMessages.length + numberOfMessagesToLoadNext)
-            });
-            // Move the scroll bar up to the previous scroll top position so that it does not just keep
-            // sticking to the bottom and causes the messages to keep getting appended
-            this.simulationStatusLoggerBodyRef.current.scrollTop = scrollTop;
-          }
-        }
+    if (prevProps.showProgressIndicator !== this.props.showProgressIndicator && this.props.showProgressIndicator) {
+      this.setState({
+        dragHandlePosition: dragHandleDefaultPosition
       });
-  }
-
-  componentWillUnmount() {
-    this._loggerBodyScrollNotifier.complete();
+    }
   }
 
   render() {
@@ -103,63 +85,140 @@ export class SimulationStatusLogger extends React.Component<Props, State> {
             className='simulation-status-logger__header__label'
             onMouseDown={this.mouseDown}>
             Simulation Status
+            <Tooltip content={this.state.showLogMessages ? 'Hide logs' : 'Show logs'}>
+              <IconButton
+                hasBackground={false}
+                className='simulation-status-logger__header__label__toggle-log-message-visiblity'
+                icon={this.state.showLogMessages ? 'visibility_off' : 'visibility'}
+                size='small'
+                onClick={this.toggleLogMessageVisibility} />
+            </Tooltip>
           </span>
-          {
-            this.props.messages.length > 0
-            &&
-            <div className='simulation-status-logger__header__legends'>
+          <div
+            className='simulation-status-logger__header__legends'
+            style={{
+              visibility: this.props.visibleLogMessageDeque.size() > 0 ? 'visible' : 'hidden'
+            }}>
+            <div className='simulation-status-logger__header__legends__level FATAL'>
+              <span className='simulation-status-logger__header__legends__level__color' />
+              <span className='simulation-status-logger__header__legends__level__label'>FATAL</span>
+            </div>
+            <div className='simulation-status-logger__header__legends__level ERROR'>
+              <span className='simulation-status-logger__header__legends__level__color' />
+              <span className='simulation-status-logger__header__legends__level__label'>ERROR</span>
+            </div>
+            <div className='simulation-status-logger__header__legends__level WARN'>
+              <span className='simulation-status-logger__header__legends__level__color' />
+              <span className='simulation-status-logger__header__legends__level__label'>WARN</span>
+            </div>
+            <div className='simulation-status-logger__header__legends__level INFO'>
+              <span className='simulation-status-logger__header__legends__level__color' />
+              <span className='simulation-status-logger__header__legends__level__label'>INFO</span>
+            </div>
+            <div className='simulation-status-logger__header__legends__level DEBUG'>
+              <span className='simulation-status-logger__header__legends__level__color' />
+              <span className='simulation-status-logger__header__legends__level__label'>DEBUG</span>
+            </div>
+            <div className='simulation-status-logger__header__legends__level TRACE'>
+              <span className='simulation-status-logger__header__legends__level__color' />
+              <span className='simulation-status-logger__header__legends__level__label'>TRACE</span>
+            </div>
+          </div>
+        </header>
+        <section className='simulation-status-logger__body'>
+          <div
+            className='simulation-status-logger__body-wrapper'
+            style={{ display: this.state.showLogMessages ? 'flex' : 'none' }}>
+            <section
+              ref={this.logMessageContainerRef}
+              className='simulation-status-logger__body__message-container'>
               {
-                logLevels.map(logLevel => (
-                  <div
-                    key={logLevel}
-                    className='simulation-status-logger__header__legends__level'>
-                    <span className={`simulation-status-logger__header__legends__level__color ${logLevel}`} />
-                    <span className='simulation-status-logger__header__legends__level__label'>
-                      {logLevel}
-                    </span>
-                  </div>
+                this.props.visibleLogMessageDeque.toArray(message => (
+                  <SimulationStatusLoggerMessage key={message.id} message={message.content} />
                 ))
               }
-            </div>
-          }
-        </header>
-        <section
-          className='simulation-status-logger__body'
-          ref={this.simulationStatusLoggerBodyRef}
-          onScroll={this.loadMoreMessages}>
+            </section>
+            <Paginator
+              items={this.logMessageTemporaryContainer}
+              pageSize={numberOfMessagesToShow}
+              onPageChange={this.onPageChange} />
+          </div>
           {
-            this.state.visibleMessages.map(message => (
-              <SimulationStatusLoggerMessage key={message.id} message={message.content} />
-            ))
+            !this.state.showLogMessages
+            &&
+            <MessageBanner>
+              Logs are turned off
+            </MessageBanner>
           }
         </section>
-        <ProgressIndicator show={this.props.isFetching} />
-      </div>
+        <ProgressIndicator show={this.props.showProgressIndicator} />
+      </div >
     );
   }
 
+  toggleLogMessageVisibility() {
+    if (this.state.showLogMessages) {
+      this.setState({
+        showLogMessages: false,
+        dragHandlePosition: dragHandleMaxPosition
+      });
+    } else {
+      this.setState(state => ({
+        showLogMessages: true,
+        dragHandlePosition: state.dragHandlePosition !== dragHandleMaxPosition
+          ? state.dragHandlePosition
+          : dragHandleDefaultPosition
+      }));
+    }
+  }
+
   mouseDown() {
-    this.simulationStatusLoggerBodyRef.current.style.userSelect = 'none';
+    document.body.classList.add('dragging');
     document.documentElement.addEventListener('mousemove', this._resize, false);
     document.documentElement.addEventListener('mouseup', this._mouseUp, false);
   }
 
   private _mouseUp() {
-    this.simulationStatusLoggerBodyRef.current.style.userSelect = 'initial';
+    document.body.classList.remove('dragging');
     window.getSelection().empty();
     document.documentElement.removeEventListener('mousemove', this._resize, false);
     document.documentElement.removeEventListener('mouseup', this._mouseUp, false);
   }
 
   private _resize(event: MouseEvent) {
-    const newPosition = Math.min(this._dragHandleMaxPosition, Math.max(event.clientY - 90, this._dragHandleMinPosition));
+    const newPosition = Math.min(dragHandleMaxPosition, Math.max(event.clientY - 90, dragHandleMinPosition));
     this.setState({
       dragHandlePosition: newPosition
     });
   }
 
-  loadMoreMessages() {
-    this._loggerBodyScrollNotifier.next(this.simulationStatusLoggerBodyRef.current.scrollTop);
+  onPageChange(event: PageChangeEvent<LogMessage>) {
+    if (event.start !== this._logMessageSearchStart) {
+      this._logMessageSearchStart = event.start;
+      this.props.onLoadMoreLogMessages(this.props.totalLogMessageCount - event.start, event.count);
+      this._restoreMessageContainerScrollTop(1000);
+    }
+  }
+
+  private _restoreMessageContainerScrollTop(duration: number) {
+    const messageContainer = this.logMessageContainerRef.current;
+    let start: DOMHighResTimeStamp;
+    let scrollTop = this.logMessageContainerRef.current.scrollTop;
+
+    function step(timestamp: DOMHighResTimeStamp) {
+      if (start === undefined) {
+        start = timestamp;
+        window.requestAnimationFrame(step);
+      } else {
+        const t = Math.min(1, (timestamp - start) / duration);
+        scrollTop *= (1 - t);
+        messageContainer.scrollTop = scrollTop;
+        if (t < 1) {
+          window.requestAnimationFrame(step);
+        }
+      }
+    }
+    window.requestAnimationFrame(step);
   }
 
 }

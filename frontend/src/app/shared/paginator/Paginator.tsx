@@ -15,18 +15,19 @@ interface Props<T> {
 interface State {
   currentPageNumber: number;
   currentPageNumberDisplay: string;
-  totalPages: number;
 }
 
 export class Paginator<T> extends React.Component<Props<T>, State> {
+
+  totalPages = 0;
 
   constructor(props: Props<T>) {
     super(props);
     this.state = {
       currentPageNumber: 0,
       currentPageNumberDisplay: '1',
-      totalPages: Math.ceil(props.items.length / this.props.pageSize)
     };
+    this.totalPages = Math.ceil(props.items.length / this.props.pageSize);
 
     this.navigateToNextPage = this.navigateToNextPage.bind(this);
     this.updateCurrentPageNumber = this.updateCurrentPageNumber.bind(this);
@@ -34,31 +35,20 @@ export class Paginator<T> extends React.Component<Props<T>, State> {
   }
 
   componentDidMount() {
-    this.props.onPageChange(new PageChangeEvent(this.props.items.slice(0, this.props.pageSize), 0, this.props.pageSize));
+    this._goToPage(0);
   }
 
   componentDidUpdate(prevProps: Props<T>) {
     if (this.props.items !== prevProps.items) {
-      this.setState({
-        totalPages: Math.ceil(this.props.items.length / this.props.pageSize)
-      });
-      this.props.onPageChange(new PageChangeEvent(
-        this.props.items.slice(this.state.currentPageNumber, this.props.pageSize),
-        this.state.currentPageNumber,
-        this.props.pageSize
-      ));
+      this.totalPages = Math.ceil(this.props.items.length / this.props.pageSize);
+      this._goToPage(this.state.currentPageNumber);
     }
-  }
-
-  private _reset() {
-    this.setState({
-      currentPageNumber: 0,
-      totalPages: Math.ceil(this.props.items.length / this.props.pageSize)
-    });
   }
 
   render() {
     if (this.props.items.length > this.props.pageSize) {
+      this.totalPages = Math.ceil(this.props.items.length / this.props.pageSize);
+
       return (
         <section className='paginator'>
           <IconButton
@@ -75,10 +65,10 @@ export class Paginator<T> extends React.Component<Props<T>, State> {
             &nbsp;
             /
             &nbsp;
-            {this.state.totalPages}
+            {this.totalPages}
           </div>
           <IconButton
-            disabled={this.state.currentPageNumber === this.state.totalPages - 1}
+            disabled={this.state.currentPageNumber === this.totalPages - 1}
             icon='navigate_next'
             style='accent'
             onClick={this.navigateToNextPage} />
@@ -94,11 +84,13 @@ export class Paginator<T> extends React.Component<Props<T>, State> {
 
   private _goToPage(pageNumber: number) {
     const startSlice = pageNumber * this.props.pageSize;
-    this.props.onPageChange(new PageChangeEvent(
-      this.props.items.slice(startSlice, startSlice + this.props.pageSize),
-      startSlice,
-      startSlice + this.props.pageSize
-    ));
+    this.props.onPageChange(
+      new PageChangeEvent(
+        this.props.items.slice(startSlice, startSlice + this.props.pageSize),
+        startSlice,
+        this.props.pageSize
+      )
+    );
     this.setState({
       currentPageNumber: pageNumber,
       currentPageNumberDisplay: String(pageNumber + 1)
@@ -108,7 +100,7 @@ export class Paginator<T> extends React.Component<Props<T>, State> {
   updateCurrentPageNumber(event: React.ChangeEvent<HTMLInputElement>) {
     const enteredPageNumber = event.target.value;
     const newPageNumber = +enteredPageNumber - 1;
-    if (newPageNumber >= 0 && newPageNumber < this.state.totalPages) {
+    if (newPageNumber >= 0 && newPageNumber < this.totalPages) {
       this.setState({
         currentPageNumber: newPageNumber,
       });
@@ -126,6 +118,8 @@ export class Paginator<T> extends React.Component<Props<T>, State> {
 
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 (Paginator as any).defaultProps = {
   pageSize: 50
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
 } as Props<any>;

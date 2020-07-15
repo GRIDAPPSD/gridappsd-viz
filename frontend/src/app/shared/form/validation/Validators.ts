@@ -2,7 +2,7 @@ import { AbstractControlModel } from '../models/AbstractControlModel';
 import { DateTimeService } from '@shared/DateTimeService';
 import { FormControlModel } from '../models/FormControlModel';
 
-export type Validator = (control: AbstractControlModel<any>) => ValidationResult;
+export type Validator = (control: AbstractControlModel<unknown>) => ValidationResult;
 
 interface ValidationResult {
   isValid: boolean;

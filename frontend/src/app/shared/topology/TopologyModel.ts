@@ -1,3 +1,4 @@
+/* eslint-disable camelcase */
 import { SwingNode } from './SwingNode';
 import { Transformer } from './Transformer';
 import { Capacitor } from './Capacitor';

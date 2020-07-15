@@ -1,6 +1,7 @@
 import { AbstractControlModel } from './AbstractControlModel';
 import { FormControlModel } from './FormControlModel';
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export class FormArrayModel<T = any> extends AbstractControlModel<T[]> {
 
   private readonly _invalidFormControls = new Set<AbstractControlModel<T>>();

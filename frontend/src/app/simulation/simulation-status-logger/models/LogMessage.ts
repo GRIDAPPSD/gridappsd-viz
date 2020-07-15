@@ -1,6 +1,6 @@
 import { SimulationStatusLogMessage } from '@shared/simulation';
 
 export interface LogMessage {
-  id: string;
+  id: number;
   content: SimulationStatusLogMessage;
 }

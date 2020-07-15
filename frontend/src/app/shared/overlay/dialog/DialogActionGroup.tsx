@@ -4,7 +4,7 @@ import './DialogActionGroup.light.scss';
 import './DialogActionGroup.dark.scss';
 
 interface Props {
-  children: any;
+  children: React.ReactChild | React.ReactChild[];
 }
 
 export function DialogActionGroup(props: Props) {

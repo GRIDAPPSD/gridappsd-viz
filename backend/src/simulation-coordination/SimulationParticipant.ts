@@ -2,11 +2,11 @@ import { Socket } from 'socket.io';
 import { Subject } from 'rxjs';
 import { take, finalize, takeUntil } from 'rxjs/operators';
 
-import { SimulationStatus } from '@commons/SimulationStatus';
-import { SimulationSynchronizationEvent } from '@commons/SimulationSynchronizationEvent';
+import { SimulationStatus } from '@common/SimulationStatus';
+import { SimulationSynchronizationEvent } from '@common/SimulationSynchronizationEvent';
 
 /**
- * A simulation participant is those clients that have joined a running simulation
+ * A simulation participant is a client that have joined a running simulation
  */
 export class SimulationParticipant {
 
@@ -29,6 +29,7 @@ export class SimulationParticipant {
     return this._socket.connected;
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   listenFor<T = any>(event: SimulationSynchronizationEvent) {
     const notifier = new Subject<T>();
     this._socket.on(event, (payload?: T) => notifier.next(payload));
@@ -44,10 +45,12 @@ export class SimulationParticipant {
       .pipe(take(1));
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   notifySelf(event: SimulationSynchronizationEvent, payload?: any) {
     this._socket.emit(event, payload);
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   broadcast(event: SimulationSynchronizationEvent, payload?: any) {
     this._socket.broadcast.emit(event, payload);
   }

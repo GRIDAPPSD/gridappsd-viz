@@ -10,6 +10,7 @@ import './DataBrowser.light.scss';
 import './DataBrowser.dark.scss';
 
 interface Props {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   match: any;
   feederModel: FeederModel;
 }
@@ -56,7 +57,7 @@ export class DataBrowser extends React.Component<Props, State> {
               className='data-browser__selection__item'
               to={`${props.match.url}/powergrid-models`}>
               Powergrid Models
-          </NavLink>
+            </NavLink>
           </li>
           <li>
             <NavLink
@@ -64,7 +65,7 @@ export class DataBrowser extends React.Component<Props, State> {
               className='data-browser__selection__item'
               to={`${props.match.url}/logs`}>
               Logs
-        </NavLink>
+            </NavLink>
           </li>
           <li>
             <NavLink
@@ -72,7 +73,7 @@ export class DataBrowser extends React.Component<Props, State> {
               className='data-browser__selection__item'
               to={`${props.match.url}/simulations`}>
               Simulations
-        </NavLink>
+            </NavLink>
           </li>
         </ul>
         <div className='data-browser__body'>
@@ -98,6 +99,7 @@ export class DataBrowser extends React.Component<Props, State> {
 
 interface RequestProps {
   style?: React.CSSProperties;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   children: any;
 }
 export function RequestEditor(props: RequestProps) {
@@ -110,6 +112,7 @@ export function RequestEditor(props: RequestProps) {
 
 interface ResponseProps {
   style?: React.CSSProperties;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   children: any;
 }
 

@@ -7,6 +7,7 @@ import './Form.dark.scss';
 
 interface Props {
   className: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   formGroupModel?: FormGroupModel<any>;
   onSubmit?: () => void;
 }

@@ -82,9 +82,12 @@ export class TopologyRenderer extends React.Component<Props, State> {
   // Keys are switches' MRID
   private _switchMap = new Map<string, Switch>();
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private _containerSelection: Selection<SVGElement, any, any, any> = null;
   private _showNodeSymbols = false;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private _timer: any;
+
 
   constructor(props: Props) {
     super(props);
@@ -93,6 +96,7 @@ export class TopologyRenderer extends React.Component<Props, State> {
       showNodeSearcher: false,
       nodeToLocate: null
     };
+
 
     this.showMenuOnComponentClicked = this.showMenuOnComponentClicked.bind(this);
     this.showTooltip = this.showTooltip.bind(this);
@@ -292,7 +296,8 @@ export class TopologyRenderer extends React.Component<Props, State> {
     this._renderEdges(topology.edgeMap);
 
     if (!this.isModelLarge()) {
-      const container = create('svg:g') as Selection<SVGElement, any, SVGElement, any>;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const container = create<SVGElement>('svg:g') as Selection<SVGElement, any, SVGElement, any>;
       this._renderNonSwitchNodes(
         container,
         'topology-renderer__canvas__unknown-node-container',
@@ -300,13 +305,15 @@ export class TopologyRenderer extends React.Component<Props, State> {
         nodeRadius
       );
       const unknownNodeContainer = container.select(':first-child')
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         .attr('style', 'visibility: visible') as Selection<SVGElement, any, SVGElement, any>;
       this._containerSelection.node()
         .appendChild(unknownNodeContainer.node());
     }
 
-    const knownNodeContainers = create('svg:g')
+    const knownNodeContainers = create<SVGElement>('svg:g')
       .attr('class', 'topology-renderer__canvas__known-node-containers')
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       .attr('style', 'visibility: visible') as Selection<SVGElement, any, SVGElement, any>;
     this._renderNonSwitchNodes(
       knownNodeContainers,
@@ -356,8 +363,9 @@ export class TopologyRenderer extends React.Component<Props, State> {
       nodeRadius
     );
 
-    const symbolContainers = create('svg:g')
+    const symbolContainers = create<SVGElement>('svg:g')
       .attr('class', 'topology-renderer__canvas__symbol-containers')
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       .attr('style', 'visibility: hidden') as Selection<SVGElement, any, SVGElement, any>;
     this._renderRegulatorSymbols(
       symbolContainers,
@@ -459,6 +467,7 @@ export class TopologyRenderer extends React.Component<Props, State> {
     nodeMap.forEach(node => {
       node.y1 = minYCoordinate + (maxYCoordinate - node.y1);
       if ('y2' in node) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (node as any).y2 = minYCoordinate + (maxYCoordinate - (node as any).y2);
       }
     });
@@ -540,6 +549,7 @@ export class TopologyRenderer extends React.Component<Props, State> {
   }
 
   private _renderNonSwitchNodes(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     container: Selection<SVGElement, any, SVGElement, any>,
     groupId: string,
     nonSwitchNodes: Node[],
@@ -559,6 +569,7 @@ export class TopologyRenderer extends React.Component<Props, State> {
   }
 
   private _renderSwitchNodes(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     container: Selection<SVGElement, any, SVGElement, any>,
     switchNodes: Switch[],
     nodeRadius: number
@@ -587,6 +598,7 @@ export class TopologyRenderer extends React.Component<Props, State> {
   }
 
   private _renderRegulatorSymbols(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     container: Selection<SVGElement, any, SVGElement, any>,
     regulators: Regulator[],
     nodeNameToEdgeMap: Map<string, Edge>
@@ -618,6 +630,7 @@ export class TopologyRenderer extends React.Component<Props, State> {
   }
 
   private _renderNonSwitchSymbols(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     container: Selection<SVGElement, any, SVGElement, any>,
     nodes: Node[],
     nodeNameToEdgeMap: Map<string, Edge>,
@@ -625,7 +638,7 @@ export class TopologyRenderer extends React.Component<Props, State> {
   ) {
     if (nodes.length > 0) {
       if (!shapeTemplate.includes('${startingPoint}')) {
-        throw new Error(`Symbol's path template must contain \${startingPoint} place holder`);
+        throw new Error('Symbol\'s path template must contain ${startingPoint} place holder');
       }
       const nodeType = nodes[0]?.type;
       const fragment = document.createDocumentFragment();
@@ -656,6 +669,7 @@ export class TopologyRenderer extends React.Component<Props, State> {
   }
 
   private _calculateSymbolTransform(node: Node, nodeNameToEdgeMap: Map<string, Edge>) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const edge = nodeNameToEdgeMap.get((node as any).from) || nodeNameToEdgeMap.get((node as any).to);
     if (!edge && node.type === NodeType.CAPACITOR) {
       return 'translate(0, 0) rotate(0)';
@@ -681,6 +695,7 @@ export class TopologyRenderer extends React.Component<Props, State> {
   }
 
   private _renderSubstationSymbols(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     container: Selection<SVGElement, any, SVGElement, any>,
     substations: Node[],
     nodeNameToEdgeMap: Map<string, Edge>
@@ -699,6 +714,7 @@ export class TopologyRenderer extends React.Component<Props, State> {
   }
 
   private _renderTransformerSymbols(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     container: Selection<SVGElement, any, SVGElement, any>,
     transformers: Transformer[],
     nodeNameToEdgeMap: Map<string, Edge>
@@ -737,6 +753,7 @@ export class TopologyRenderer extends React.Component<Props, State> {
   }
 
   private _renderSwitchSymbols(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     container: Selection<SVGElement, any, SVGElement, any>,
     switchNodes: Switch[]
   ) {
@@ -781,6 +798,7 @@ export class TopologyRenderer extends React.Component<Props, State> {
   }
 
   private _renderCapacitorSymbols(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     container: Selection<SVGElement, any, SVGElement, any>,
     capacitors: Capacitor[],
     nodeNameToEdgeMap: Map<string, Edge>
@@ -808,6 +826,7 @@ export class TopologyRenderer extends React.Component<Props, State> {
   }
 
   private _renderBatterySymbols(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     container: Selection<SVGElement, any, SVGElement, any>,
     batteries: Battery[],
     nodeNameToEdgeMap: Map<string, Edge>
@@ -848,6 +867,7 @@ export class TopologyRenderer extends React.Component<Props, State> {
   }
 
   private _renderSolarPanelSymbols(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     container: Selection<SVGElement, any, SVGElement, any>,
     solarPanels: SolarPanel[],
     nodeNameToEdgeMap: Map<string, Edge>

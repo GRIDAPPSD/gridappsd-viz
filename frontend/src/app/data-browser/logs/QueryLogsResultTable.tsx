@@ -7,6 +7,7 @@ import './QueryLogsResultTable.light.scss';
 import './QueryLogsResultTable.dark.scss';
 
 interface Props {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   rows: any[];
 }
 
@@ -14,9 +15,7 @@ export function QueryLogsResultTable(props: Props) {
   return (
     <ReactTable
       filterable={true}
-      defaultFilterMethod={(filter, row) => {
-        return row[filter.id] !== undefined ? String(row[filter.id]).includes(filter.value.toLowerCase()) : true;
-      }}
+      defaultFilterMethod={(filter, row) => row[filter.id] !== undefined ? String(row[filter.id]).includes(filter.value.toLowerCase()) : true}
       defaultPageSize={5}
       data={props.rows}
       columns={

@@ -2,7 +2,7 @@ import { Socket } from 'socket.io';
 
 import { SimulationParticipant } from './SimulationParticipant';
 import { SimulationChannel } from './SimulationChannel';
-import { SimulationSynchronizationEvent } from '@commons/SimulationSynchronizationEvent';
+import { SimulationSynchronizationEvent } from '@common/SimulationSynchronizationEvent';
 
 export class SimulationCoordinator {
 

@@ -21,6 +21,7 @@ interface State {
 
 export class ServiceConfiguration extends React.Component<Props, State> {
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   readonly userInputOptionsFormGroupModel = new FormGroupModel<{ [optionLabel: string]: any }>();
 
   constructor(props: Props) {
@@ -34,6 +35,7 @@ export class ServiceConfiguration extends React.Component<Props, State> {
     this.props.parentFormArrayModel.pushControl(
       new FormGroupModel({
         id: this.props.service.id,
+        // eslint-disable-next-line camelcase
         user_options: this.userInputOptionsFormGroupModel
       })
     );
@@ -57,7 +59,7 @@ export class ServiceConfiguration extends React.Component<Props, State> {
     const validators = [Validators.checkNotEmpty(label)] as Validator[];
     switch (userInputSpec.type) {
       case 'float':
-      case 'int':
+      case 'int': {
         validators.push(Validators.checkValidNumber(label));
         const min = userInputSpec.min_value;
         const max = userInputSpec.max_value;
@@ -71,6 +73,7 @@ export class ServiceConfiguration extends React.Component<Props, State> {
           validators.push(Validators.checkMax(label, max));
         }
         break;
+      }
       case 'object':
         validators.push(Validators.checkValidJSON(label));
         break;

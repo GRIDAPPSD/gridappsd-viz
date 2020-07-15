@@ -17,7 +17,7 @@ export class ProgressIndicator extends React.Component<Props, State> {
 
   readonly waitElementRef = React.createRef<HTMLDivElement>();
 
-  constructor(props: any) {
+  constructor(props: Props) {
     super(props);
     this.state = {
       height: 0

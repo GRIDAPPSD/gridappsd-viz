@@ -11,7 +11,7 @@ import { IconButton } from '@shared/buttons';
 import { FilePicker, FilePickerService } from '@shared/file-picker';
 import { Tooltip } from '@shared/tooltip';
 import { FaultEventSummaryTable } from './fault/FaultEventSummaryTable';
-import { CommOutageEvent, FaultEvent, FaultKind, CommandEvent } from '@shared/test-manager';
+import { CommOutageEvent, FaultEvent, CommandEvent } from '@shared/test-manager';
 import { Validators, Validator } from '@shared/form/validation';
 import { download, DownloadType, generateUniqueId } from '@shared/misc';
 import { CommandEventSummaryTable } from './command/CommandEventSummaryTable';
@@ -122,40 +122,6 @@ export class TestConfigurationTab extends React.Component<Props, State> {
       });
   }
 
-  private _defaultOutageEventFormValue(): CommOutageEvent {
-    return {
-      eventType: 'CommOutage',
-      tag: this.currentEventTagFormControlModel.getValue(),
-      allInputOutage: false,
-      inputList: [],
-      allOutputOutage: false,
-      outputList: [],
-      startDateTime: this.props.simulationStartDateTime,
-      stopDateTime: this.props.simulationStopDateTime
-    };
-  }
-
-  private _defaultFaultEventFormValue(): FaultEvent {
-    return {
-      eventType: 'Fault',
-      tag: this.currentEventTagFormControlModel.getValue(),
-      equipmentType: '',
-      equipmentName: '',
-      phases: [],
-      mRID: '',
-      faultKind: FaultKind.LINE_TO_GROUND,
-      faultImpedance: {
-        rGround: '',
-        xGround: '',
-        rLineToLine: '',
-        xLineToLine: ''
-      },
-      startDateTime: this.props.simulationStartDateTime,
-      stopDateTime: this.props.simulationStopDateTime
-    };
-  }
-
-
   componentWillUnmount() {
     this.currentEventTagFormControlModel.cleanup();
     this.selectedEventTypeToEditFormControlModel.cleanup();
@@ -226,7 +192,7 @@ export class TestConfigurationTab extends React.Component<Props, State> {
 
   showEventFilePicker() {
     this._filePicker.open()
-      .readFileAsJson<{ outageEvents: CommOutageEvent[]; faultEvents: FaultEvent[]; commandEvents: CommandEvent[]; }>()
+      .readFileAsJson<{ outageEvents: CommOutageEvent[]; faultEvents: FaultEvent[]; commandEvents: CommandEvent[] }>()
       /* File content should look like this
         {
           "outageEvents": [...],
@@ -393,12 +359,12 @@ export class TestConfigurationTab extends React.Component<Props, State> {
   private _convertEpochTimesToDateTimeStrings(events: Array<FaultEvent | CommOutageEvent | CommandEvent>) {
     const resultedEvents = [];
     for (const event of events) {
-      const clonedEvent = { ...event } as any;
+      const clonedEvent = { ...event } as FaultEvent | CommOutageEvent | CommandEvent;
       clonedEvent.stopDateTime = this.dateTimeService.format(event.stopDateTime);
       if ('startDateTime' in event) {
-        clonedEvent.startDateTime = this.dateTimeService.format(event.startDateTime);
+        clonedEvent['startDateTime'] = this.dateTimeService.format(event.startDateTime);
       } else if ('occuredDateTime' in event) {
-        clonedEvent.occuredDateTime = this.dateTimeService.format(event.occuredDateTime);
+        clonedEvent['occuredDateTime'] = this.dateTimeService.format(event.occuredDateTime);
       }
       resultedEvents.push(clonedEvent);
     }

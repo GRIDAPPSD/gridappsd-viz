@@ -1,12 +1,12 @@
 import * as React from 'react';
 import { zip, Subject } from 'rxjs';
-import { switchMap, filter, takeWhile, takeUntil, timestamp } from 'rxjs/operators';
+import { switchMap, filter, takeWhile, takeUntil } from 'rxjs/operators';
 
 import { VoltageViolation } from './VoltageViolation';
 import { StompClientService } from '@shared/StompClientService';
 import { StateStore } from '@shared/state-store';
 import { SimulationManagementService } from '@shared/simulation';
-import { SimulationStatus } from '@commons/SimulationStatus';
+import { SimulationStatus } from '@common/SimulationStatus';
 import { DateTimeService } from '@shared/DateTimeService';
 
 interface Props {

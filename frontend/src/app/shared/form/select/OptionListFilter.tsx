@@ -73,7 +73,7 @@ export class OptionListFilter extends React.Component<Props, State> {
     );
   }
 
-  onChange(event: any) {
+  onChange(event: React.ChangeEvent<HTMLInputElement>) {
     const filterValue = event.target.value.toLowerCase();
     this._valueChanger.next([filterValue, this.state.filterValue]);
     this.setState({

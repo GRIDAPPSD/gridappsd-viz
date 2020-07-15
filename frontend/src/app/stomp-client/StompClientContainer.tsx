@@ -22,7 +22,7 @@ export class StompClientContainer extends React.Component<Props, State> {
   private _responseSubscription: Subscription = null;
   private _stompClientStatusSubscription: Subscription;
 
-  constructor(props: any) {
+  constructor(props: Props) {
     super(props);
     this.state = {
       isFetching: false,

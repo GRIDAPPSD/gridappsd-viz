@@ -1,9 +1,9 @@
 import * as React from 'react';
 import { Subject } from 'rxjs';
-import { filter, takeUntil, map, switchMap, take, tap } from 'rxjs/operators';
+import { filter, takeUntil, switchMap, tap } from 'rxjs/operators';
 
 import { SimulationManagementService } from '@shared/simulation';
-import { SimulationStatus } from '@commons/SimulationStatus';
+import { SimulationStatus } from '@common/SimulationStatus';
 import { SimulationControl } from './SimulationControl';
 import { StateStore } from '@shared/state-store';
 import { StompClientService, StompClientConnectionStatus } from '@shared/StompClientService';

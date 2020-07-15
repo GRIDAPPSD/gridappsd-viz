@@ -1,7 +1,8 @@
 import { Phase } from '../Phase';
 
 export interface FaultEvent {
-  eventType: 'Fault';
+  // eslint-disable-next-line camelcase
+  event_type: 'Fault';
   tag: string;
   equipmentType: string;
   equipmentName: string;

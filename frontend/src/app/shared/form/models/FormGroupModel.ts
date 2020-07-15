@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { AbstractControlModel } from './AbstractControlModel';
 import { FormControlModel } from './FormControlModel';
 

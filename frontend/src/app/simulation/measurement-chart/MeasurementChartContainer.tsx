@@ -5,7 +5,7 @@ import { filter, takeUntil } from 'rxjs/operators';
 import { MeasurementChart } from './MeasurementChart';
 import { MeasurementChartModel } from './models/MeasurementChartModel';
 import { SimulationOutputMeasurement, SimulationManagementService } from '@shared/simulation';
-import { SimulationStatus } from '@commons/SimulationStatus';
+import { SimulationStatus } from '@common/SimulationStatus';
 import { TimeSeries } from './models/TimeSeries';
 import { TimeSeriesDataPoint } from './models/TimeSeriesDataPoint';
 import { StateStore } from '@shared/state-store';
@@ -28,7 +28,7 @@ export class MeasurementChartContainer extends React.Component<Props, State> {
 
   private _plotModels: PlotModel[] = [];
 
-  constructor(props: any) {
+  constructor(props: Props) {
     super(props);
     this.state = {
       measurementChartModels: []
@@ -207,6 +207,7 @@ export class MeasurementChartContainer extends React.Component<Props, State> {
           return dataPoint;
       }
     } else {
+      // eslint-disable-next-line no-console
       console.warn(`No measurement found for component "${component.id}", plot name "${plotModel.name}"`);
     }
     return null;

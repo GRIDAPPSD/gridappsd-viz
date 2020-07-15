@@ -4,7 +4,7 @@ import './DialogContent.light.scss';
 import './DialogContent.dark.scss';
 
 interface Props {
-  children: any;
+  children: React.ReactChild;
   style?: React.CSSProperties;
 }
 

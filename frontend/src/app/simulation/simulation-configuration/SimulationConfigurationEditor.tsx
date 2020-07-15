@@ -3,7 +3,7 @@ import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 
 import { SimulationConfiguration, SimulationManagementService } from '@shared/simulation';
-import { SimulationStatus } from '@commons/SimulationStatus';
+import { SimulationStatus } from '@common/SimulationStatus';
 import { FeederModel, ModelDictionary, ModelDictionaryComponent } from '@shared/topology';
 import { Application } from '@shared/Application';
 import { Dialog, DialogContent, DialogActionGroup } from '@shared/overlay/dialog';
@@ -93,21 +93,27 @@ export class SimulationConfigurationEditor extends React.Component<Props, State>
 
   private _cloneConfigObject(original: SimulationConfiguration): SimulationConfiguration {
     return {
+      // eslint-disable-next-line camelcase
       power_system_config: {
         ...original.power_system_config
       },
+      // eslint-disable-next-line camelcase
       application_config: {
         applications: original.application_config.applications.length > 0 ?
           [{ ...original.application_config.applications[0] }] : []
       },
+      // eslint-disable-next-line camelcase
       simulation_config: {
         ...original.simulation_config,
+        // eslint-disable-next-line camelcase
         start_time: this.dateTimeService.format(this.simulationStartDate)
       },
+      // eslint-disable-next-line camelcase
       test_config: {
         events: original.test_config.events.map(event => Object.assign({}, event)),
         appId: original.test_config.appId
       },
+      // eslint-disable-next-line camelcase
       service_configs: [
         ...original.service_configs
       ]
@@ -168,12 +174,14 @@ export class SimulationConfigurationEditor extends React.Component<Props, State>
               this.setState({
                 lineName: formValue.line.id
               });
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
               this.formGroupModel.findControl('simulationConfig.simulation_name' as any)
                 .setValue(formValue.line.name);
             } else {
               this.setState({
                 lineName: ''
               });
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
               this.formGroupModel.findControl('simulationConfig.simulation_name' as any).setValue('');
             }
           }
@@ -286,12 +294,16 @@ export class SimulationConfigurationEditor extends React.Component<Props, State>
 
   private _populatePowerSystemConfigSection() {
     const powerSystemConfigFormValue = this.formGroupModel.findControl('powerSystemConfig').getValue();
+    // eslint-disable-next-line camelcase
     this.currentConfig.power_system_config.GeographicalRegion_name = powerSystemConfigFormValue.region.id;
+    // eslint-disable-next-line camelcase
     this.currentConfig.power_system_config.SubGeographicalRegion_name = powerSystemConfigFormValue.subregion.id;
+    // eslint-disable-next-line camelcase
     this.currentConfig.power_system_config.Line_name = powerSystemConfigFormValue.line.id;
   }
 
   private _populateSimulationConfigSection() {
+    // eslint-disable-next-line camelcase
     this.currentConfig.simulation_config = {
       ...this.currentConfig.simulation_config,
       ...this.formGroupModel.findControl('simulationConfig').getValue()
@@ -299,6 +311,7 @@ export class SimulationConfigurationEditor extends React.Component<Props, State>
   }
 
   private _populateApplicationConfigSection() {
+    // eslint-disable-next-line camelcase
     this.currentConfig.application_config = this.formGroupModel.findControl('applicationConfig').getValue();
     // if "name" is an empty string, no app was selected, so we only
     // want to send an empty array in that case in the config
@@ -345,12 +358,14 @@ export class SimulationConfigurationEditor extends React.Component<Props, State>
         };
       })),
       outputOutageList: outageEvent.outputList.map(outputItem => outputItem.mRID),
-      event_type: outageEvent.eventType,
+      // eslint-disable-next-line camelcase
+      event_type: outageEvent.event_type,
       occuredDateTime: outageEvent.startDateTime,
       stopDateTime: outageEvent.stopDateTime
     };
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private _flattenArray(array: any[]) {
     const result = [];
     for (const element of array) {
@@ -371,13 +386,15 @@ export class SimulationConfigurationEditor extends React.Component<Props, State>
         ? unique(faultEvent.phases.map(e => faultEvent.mRID[e.phaseIndex]).filter(e => e !== undefined))
         : [faultEvent.mRID],
       phases: faultEvent.phases.map(phase => phase.phaseLabel).join(''),
-      event_type: faultEvent.eventType,
+      // eslint-disable-next-line camelcase
+      event_type: faultEvent.event_type,
       occuredDateTime: faultEvent.startDateTime,
       stopDateTime: faultEvent.stopDateTime
     };
   }
 
   private _populateServiceConfigSection() {
+    // eslint-disable-next-line camelcase
     this.currentConfig.service_configs = this.formGroupModel.findControl('serviceConfig').getValue();
   }
 

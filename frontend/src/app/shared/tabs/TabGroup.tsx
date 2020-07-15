@@ -27,7 +27,7 @@ export class TabGroup extends React.Component<Props, State> {
   tabs: Tab[] = [];
   tabLabels: NodeListOf<HTMLElement>;
 
-  constructor(props: any) {
+  constructor(props: Props) {
     super(props);
     this.state = {
       activeTabIndex: props.selectedTabIndex,

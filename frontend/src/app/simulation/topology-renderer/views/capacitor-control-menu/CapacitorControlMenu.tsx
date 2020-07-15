@@ -195,11 +195,13 @@ export class CapacitorControlMenu extends React.Component<Props, State> {
               label='Target'
               hint='Unit in Var'
               type='number'
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
               formControlModel={this.capacitorControlFormGroupModel.findControl('var.target' as any)} />
             <Input
               label='Deadband'
               hint='Unit in Var'
               type='number'
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
               formControlModel={this.capacitorControlFormGroupModel.findControl('var.deadband' as any)} />
           </>
         );
@@ -210,11 +212,13 @@ export class CapacitorControlMenu extends React.Component<Props, State> {
               label='Target'
               hint='Unit in Volt'
               type='number'
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
               formControlModel={this.capacitorControlFormGroupModel.findControl('volt.target' as any)} />
             <Input
               label='Deadband'
               hint='Unit in Volt'
               type='number'
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
               formControlModel={this.capacitorControlFormGroupModel.findControl('volt.deadband' as any)} />
           </>
         );

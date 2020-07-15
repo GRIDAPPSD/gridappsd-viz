@@ -6,7 +6,7 @@ import './Tooltip.dark.scss';
 
 interface Props {
   position?: 'top' | 'left' | 'right' | 'bottom';
-  content: string | React.ReactElement<any>;
+  content: React.ReactChild;
   anchor?: HTMLElement;
 }
 
@@ -24,6 +24,7 @@ export class Tooltip extends React.Component<Props, State> {
   private _tooltipContainer: HTMLElement;
   private _tooltipRect: ClientRect;
   private _anchor: Element;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private _timer: any;
 
   constructor(props: Props) {
@@ -40,6 +41,7 @@ export class Tooltip extends React.Component<Props, State> {
   }
 
   componentDidMount() {
+    // eslint-disable-next-line react/no-find-dom-node
     this._anchor = this.props.anchor || ReactDOM.findDOMNode(this) as HTMLElement;
     if (this._anchor) {
       this._anchor.addEventListener('mouseover', this.show, false);
@@ -279,7 +281,7 @@ export class Tooltip extends React.Component<Props, State> {
 
 let tooltip: Tooltip;
 
-export function showTooltipAt(anchor: Element, content: string | React.ReactElement<any>, position: 'top' | 'left' | 'right' | 'bottom' = 'bottom') {
+export function showTooltipAt(anchor: Element, content: React.ReactChild, position: 'top' | 'left' | 'right' | 'bottom' = 'bottom') {
   tooltip?.hide();
   tooltip = new Tooltip({ content, position });
   tooltip.showAt(anchor);

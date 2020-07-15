@@ -1,9 +1,9 @@
 import { Subscription } from 'rxjs';
 
-import { SimulationStatus } from '@commons/SimulationStatus';
+import { SimulationStatus } from '@common/SimulationStatus';
 import { SimulationParticipant } from './SimulationParticipant';
-import { SimulationSnapshot } from '@commons/SimulationSnapshot';
-import { SimulationSynchronizationEvent } from '@commons/SimulationSynchronizationEvent';
+import { SimulationSnapshot } from '@common/SimulationSnapshot';
+import { SimulationSynchronizationEvent } from '@common/SimulationSynchronizationEvent';
 
 export class SimulationChannel {
 
@@ -21,6 +21,7 @@ export class SimulationChannel {
 
   addMember(member: SimulationParticipant) {
     if (this._host === null) {
+      // eslint-disable-next-line @typescript-eslint/quotes
       throw new Error(`Can't add new member because channel host is null`);
     }
     this._members.add(member);
@@ -51,6 +52,7 @@ export class SimulationChannel {
       });
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private _notifyAllMembers(event: SimulationSynchronizationEvent, payload?: any) {
     for (const member of this._members) {
       if (member.isConnected()) {

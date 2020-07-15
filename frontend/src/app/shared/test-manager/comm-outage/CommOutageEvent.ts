@@ -1,15 +1,16 @@
 import { Phase } from '../Phase';
 
 export interface CommOutageEvent {
-  eventType: 'CommOutage';
+  // eslint-disable-next-line camelcase
+  event_type: 'CommOutage';
   tag: string;
   allInputOutage: boolean;
   inputList: CommOutageEventInputListItem[];
   allOutputOutage: boolean;
   outputList: CommOutageEventOutputListItem[];
   // Epoch time with second precision
-  startDateTime: number;
-  stopDateTime: number;
+  startDateTime: number | string;
+  stopDateTime: number | string;
 }
 
 

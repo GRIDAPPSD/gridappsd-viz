@@ -1,19 +1,19 @@
 import { Subject, Observable, Subscription, BehaviorSubject, timer } from 'rxjs';
-import { filter, map, pluck, debounce, takeWhile, switchMap, take } from 'rxjs/operators';
+import { filter, pluck, debounce, takeWhile, switchMap } from 'rxjs/operators';
 import * as socketIo from 'socket.io-client';
 
 import { SimulationConfiguration } from './SimulationConfiguration';
 import { StompClientService, StompClientConnectionStatus } from '@shared/StompClientService';
 import { START_SIMULATION_TOPIC, CONTROL_SIMULATION_TOPIC, SIMULATION_OUTPUT_TOPIC, SIMULATION_STATUS_LOG_TOPIC } from './topics';
 import { SimulationQueue } from './SimulationQueue';
-import { SimulationStatus } from '@commons/SimulationStatus';
-import { SimulationSnapshot, DEFAULT_SIMULATION_SNAPSHOT } from '@commons/SimulationSnapshot';
-import { SimulationSynchronizationEvent } from '@commons/SimulationSynchronizationEvent';
+import { SimulationStatus } from '@common/SimulationStatus';
+import { SimulationSnapshot, DEFAULT_SIMULATION_SNAPSHOT } from '@common/SimulationSnapshot';
+import { SimulationSynchronizationEvent } from '@common/SimulationSynchronizationEvent';
 import { ModelDictionaryMeasurement } from '@shared/topology';
 import { SimulationOutputMeasurement, SimulationOutputPayload } from '.';
 import { StateStore } from '@shared/state-store';
 import { Simulation } from './Simulation';
-import { ConductingEquipmentType, MeasurementType } from '@shared/topology/model-dictionary';
+import { ConductingEquipmentType } from '@shared/topology/model-dictionary';
 import { SimulationStatusLogMessage } from './SimulationStatusLogMessage';
 import { DateTimeService } from '@shared/DateTimeService';
 
@@ -22,9 +22,10 @@ interface SimulationStartedEventResponse {
   events: Array<{
     allOutputOutage: boolean;
     allInputOutage: boolean;
-    inputOutageList: Array<{ objectMRID: string; attribute: string; }>;
+    inputOutageList: Array<{ objectMRID: string; attribute: string }>;
     outputOutageList: string[];
     faultMRID: string;
+    // eslint-disable-next-line camelcase
     event_type: string;
     occuredDateTime: number;
     stopDateTime: number;
@@ -47,7 +48,7 @@ export class SimulationManagementService {
   private readonly _currentSimulationStatusNotifer = new BehaviorSubject<SimulationStatus>(SimulationStatus.STOPPED);
   private readonly _socket = socketIo();
   private readonly _simulationSnapshot: SimulationSnapshot = DEFAULT_SIMULATION_SNAPSHOT;
-  private readonly _simulationSnapshotReceivedNotifier = new BehaviorSubject<SimulationSnapshot>({} as any);
+  private readonly _simulationSnapshotReceivedNotifier = new BehaviorSubject<SimulationSnapshot>({} as SimulationSnapshot);
   private readonly _simulationOutputMeasurementMapStream = new Subject<Map<string, SimulationOutputMeasurement>>();
 
   private _currentSimulationStatus = SimulationStatus.STOPPED;
@@ -208,8 +209,10 @@ export class SimulationManagementService {
       const startTime = DateTimeService.getInstance().parse(simulationConfig.simulation_config.start_time);
       const config: SimulationConfiguration = {
         ...simulationConfig,
+        // eslint-disable-next-line camelcase
         simulation_config: {
           ...simulationConfig.simulation_config,
+          // eslint-disable-next-line camelcase
           start_time: String(startTime)
         }
       };

@@ -3,7 +3,7 @@ import { MessageRequest } from '@shared/MessageRequest';
 export class GetAllFeederModelsRequest implements MessageRequest {
   readonly url = 'goss.gridappsd.process.request.data.powergridmodel';
   readonly replyTo = 'feeder-models';
-  readonly requestBody = `{"requestType":"QUERY","resultFormat":"JSON","queryString":"SELECT ?name ?mRID ?substationName ?substationID ?subregionName ?subregionID ?regionName ?regionID WHERE {?s r:type c:Feeder.?s c:IdentifiedObject.name ?name.?s c:IdentifiedObject.mRID ?mRID.?s c:Feeder.NormalEnergizingSubstation ?subStation.?subStation c:IdentifiedObject.name ?substationName.?subStation c:IdentifiedObject.mRID ?substationID.?subStation c:Substation.Region ?subRegion.?subRegion c:IdentifiedObject.name ?subregionName.?subRegion c:IdentifiedObject.mRID ?subregionID.?subRegion c:SubGeographicalRegion.Region ?region.?region c:IdentifiedObject.name ?regionName.?region c:IdentifiedObject.mRID ?regionID.}  ORDER by ?name "}`;
+  readonly requestBody = '{"requestType":"QUERY","resultFormat":"JSON","queryString":"SELECT ?name ?mRID ?substationName ?substationID ?subregionName ?subregionID ?regionName ?regionID WHERE {?s r:type c:Feeder.?s c:IdentifiedObject.name ?name.?s c:IdentifiedObject.mRID ?mRID.?s c:Feeder.NormalEnergizingSubstation ?subStation.?subStation c:IdentifiedObject.name ?substationName.?subStation c:IdentifiedObject.mRID ?substationID.?subStation c:Substation.Region ?subRegion.?subRegion c:IdentifiedObject.name ?subregionName.?subRegion c:IdentifiedObject.mRID ?subregionID.?subRegion c:SubGeographicalRegion.Region ?region.?region c:IdentifiedObject.name ?regionName.?region c:IdentifiedObject.mRID ?regionID.}  ORDER by ?name "}';
 
 }
 
@@ -33,16 +33,16 @@ export interface GetFeederModelsResponsePayload {
       };
       subregionID: {
         type: 'literal';
-        value: string
+        value: string;
       };
       regionName: {
         type: 'literal';
-        value: string
+        value: string;
       };
       regionID: {
         type: 'literal';
         value: string;
       };
-    }>
+    }>;
   };
 }

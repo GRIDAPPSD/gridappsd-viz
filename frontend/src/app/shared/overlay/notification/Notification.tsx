@@ -24,6 +24,7 @@ export class Notification extends React.Component<Props, State> {
   static readonly LIFE_TIME = 5_000;
   static readonly ANIMATION_DURATION = 500;
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private _scheduler: any;
 
   constructor(props: Props) {

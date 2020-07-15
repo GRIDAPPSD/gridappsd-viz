@@ -18,12 +18,13 @@ export class Ripple extends React.Component<Props, {}> {
 
   private _rippleTrigger: HTMLElement = null;
 
-  constructor(props: any) {
+  constructor(props: Props) {
     super(props);
     this._showRipple = this._showRipple.bind(this);
   }
 
   componentDidMount() {
+    // eslint-disable-next-line react/no-find-dom-node
     this._rippleTrigger = findDOMNode(this) as HTMLElement;
     this._rippleTrigger.addEventListener('mousedown', this._showRipple, false);
     this._rippleTrigger.style.cursor = 'pointer';

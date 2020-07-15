@@ -87,7 +87,7 @@ export class Checkbox extends React.Component<Props, State> {
     );
   }
 
-  onCheckBoxToggled(event: any) {
+  onCheckBoxToggled(event: React.ChangeEvent<HTMLInputElement>) {
     this.props.formControlModel.setValue(event.currentTarget.checked);
   }
 

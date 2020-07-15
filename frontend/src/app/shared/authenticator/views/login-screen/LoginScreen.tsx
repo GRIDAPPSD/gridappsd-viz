@@ -11,6 +11,7 @@ import './LoginScreen.light.scss';
 import './LoginScreen.dark.scss';
 
 interface Props {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   onLogin: (username: string, password: string) => Observable<any>;
 }
 

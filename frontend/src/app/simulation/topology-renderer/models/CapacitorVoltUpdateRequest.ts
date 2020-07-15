@@ -11,6 +11,7 @@ interface Inputs {
 export class CapacitorVoltUpdateRequest implements MessageRequest {
   readonly url: string;
   readonly replyTo = '/topic/goss.gridappsd.simulation.input.capacitor';
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   readonly requestBody: any;
 
   constructor(inputs: Inputs) {
@@ -18,11 +19,15 @@ export class CapacitorVoltUpdateRequest implements MessageRequest {
     this.requestBody = {
       command: 'update',
       input: {
+        // eslint-disable-next-line camelcase
         simulation_id: inputs.simulationId,
         message: {
           timestamp: new Date().toISOString(),
+          // eslint-disable-next-line camelcase
           difference_mrid: inputs.differenceMRID,
+          // eslint-disable-next-line camelcase
           reverse_differences: [],
+          // eslint-disable-next-line camelcase
           forward_differences: [
             {
               object: inputs.componentMRID,
