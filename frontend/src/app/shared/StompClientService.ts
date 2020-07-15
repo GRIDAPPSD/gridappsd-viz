@@ -33,6 +33,8 @@ export class StompClientService {
   private _statusChanges = new BehaviorSubject<StompClientConnectionStatus>(StompClientConnectionStatus.UNINITIALIZED);
   private _status = StompClientConnectionStatus.UNINITIALIZED;
   private _username = '';
+  private _token = null;
+
   // Need to store the password for reconnecting after timeout,
   // the backend should listen to hearbeat messages
   // so that this wouldn't be neccessary
@@ -73,7 +75,7 @@ export class StompClientService {
 
           this._username = sessionStorage.getItem('username');
           this._password = sessionStorage.getItem('password');
-
+		  //todo get token
           if (this._username && this._password) {
             this._client.connectHeaders = {
               login: this._username,
@@ -89,10 +91,12 @@ export class StompClientService {
     const subject = new Subject<StompClientInitializationResult>();
     this._username = username;
     this._password = password;
+	this._token = _getToken();
+	
     this._client.configure({
       connectHeaders: {
-        login: username,
-        passcode: password
+        login: this._token,
+        passcode: ""
       },
       onConnect: () => {
         this._client.onDisconnect = () => {
@@ -167,13 +171,114 @@ export class StompClientService {
     this._statusChanges.next(this._status);
   }
 
+
+  private _getToken() {
+	  
+	if(this._token==null){  
+        //get token
+        //get initial connection
+        replyDest = "temp.token_resp."+this._username;
+
+        //create token request string
+        userAuthStr = this._username+":"+this._password;
+        base64Str = base64.b64encode(userAuthStr.encode());
+
+        //set up token callback
+        //send request to token topic
+        tokenTopic = "/topic/pnnl.goss.token.topic";
+
+
+		tmpClient.configure({
+		  connectHeaders: {
+				login: this._username,
+			passcode: this._password
+		  },
+		  onConnect: () => {
+			tmpClient.onDisconnect = () => {
+			  //this.reconnect();
+			  subject.next(StompClientInitializationResult.OK);
+			  tmpClient.onDisconnect = null;
+			  tmpClient.onConnect = null;
+			};
+			this._client.deactivate();
+			// need to reevaluate this strategy
+			sessionStorage.setItem('username', this._username);
+			sessionStorage.setItem('password', this._password);
+		  },
+		  onStompError: () => {
+			subject.error(StompClientInitializationResult.AUTHENTICATION_FAILURE);
+			tmpClient.onStompError = null;
+		  },
+		  onWebSocketError: () => {
+			subject.error(StompClientInitializationResult.CONNECTION_FAILURE);
+			tmpClient.onWebSocketError = null;
+		  }
+		});
+		tmpClient.activate();
+
+
+
+
+        //tmpConn = Connection([(self.stomp_address, self.stomp_port)])
+        //if self._override_thread_fc is not None:
+        //    tmpConn.transport.override_threading(self._override_thread_fc)
+        //tmpConn.connect(self.__user, self.__pass, wait=True)
+                
+        //        class TokenResponseListener():
+        //            def __init__(self):
+        //                self.__token = None
+
+        //            def get_token(self):
+        //                return self.__token
+
+        //            def on_message(self, header, message):
+        //                _log.debug("Internal on message is: {} {}".format(header, message))
+        //                
+        //                self.__token = str(message)
+         //           def on_error(self, headers, message): 
+        //                _log.error("ERR: {}".format(headers))
+        //                _log.error("OUR ERROR: {}".format(message))
+
+        //            def on_disconnect(self, header, message):
+        //                _log.debug("Disconnected")
+        //        #receive token and set token variable
+        //        #set callback
+        //        listener = TokenResponseListener()
+        //        #self.subscribe(replyDest, listener)
+		tmpClient.subscribe('/queue/'+replyDest, (message: Message) => {
+                const payload = JSON.parse(message.body);
+                console.log("received message "+payload);
+				this._token = payload;
+              }        
+
+        //tmpConn.subscribe('/queue/'+replyDest, 123)
+        //        tmpConn.set_listener('token_resp', listener)
+		send({
+          destination: tokenTopic,
+          replyTo: replyDest,
+          body: base64Str
+        });
+               //// tmpConn.send(body=base64Str, destination=tokenTopic,
+                //        headers={'reply-to': replyDest})
+        //while token is null or for x iterations
+               // iter=0
+                //while((self.__token is None) and (iter<10)):
+                //    #wait
+                //    self.__token = listener.get_token()
+                //    sleep(1)
+               //     iter+=1
+
+    }
+  }
+
+
+
   send(request: StompClientRequest) {
     if (this._status !== StompClientConnectionStatus.DISCONNECTED) {
       const headers = Object.assign(
         {
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           GOSS_HAS_SUBJECT: true as any,
-          GOSS_SUBJECT: this._username
+          GOSS_SUBJECT: this._token
         },
         request.replyTo ? { 'reply-to': request.replyTo } : {}
       );
