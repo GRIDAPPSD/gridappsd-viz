@@ -6,23 +6,6 @@
         "baseUrl": "./",
         "module": "commonjs",
         "target": "ES2017",
-        "lib": [
-            "ES2017"
-        ],
-        "paths": {
-            "@common/*": [
-                "../common/*"
-            ]
-        },
-        "typeRoots": [
-            "node_modules/@types"
-        ],
-        "types": [
-            "node"
-        ],
-        "rootDirs": [
-            "src"
-        ],
         "sourceMap": true,
         "allowJs": true,
         "moduleResolution": "node",
@@ -35,13 +18,7 @@
         "noUnusedLocals": true,
         "noUnusedParameters": true
     },
-    "references": [
-        {
-            "path": "../common"
-        }
-    ],
     "exclude": [
-        "node_modules",
         "dist"
     ]
 }

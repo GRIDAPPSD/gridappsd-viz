@@ -31,6 +31,7 @@ export class Dialog extends React.Component<Props, State> {
 
   componentDidMount() {
     if (this.props.show) {
+      this.dialogRef.current.parentElement.classList.add('active');
       this._shiftIntoViewIfOverflowScreen();
     }
   }

@@ -74,7 +74,7 @@ module.exports = (mode, enableLogging) => ({
   entry: createEntry(path.resolve(__dirname, 'src'), { main: `./src/main.${mode}.tsx`, dark: [], light: [] }),
 
   output: {
-    path: path.resolve(__dirname, 'dist'),
+    path: path.resolve(__dirname, '..', 'backend', 'dist', 'public'),
     filename: '[name].[hash:10].js',
     chunkFilename: '[name].[hash:10].js',
     publicPath: '/'

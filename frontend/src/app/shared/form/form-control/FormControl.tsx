@@ -10,9 +10,9 @@ import './FormControl.dark.scss';
 interface Props<T = any> {
   label: string;
   className: string;
+  formControlModel: FormControlModel<T>;
   hint?: string;
   htmlFor?: string;
-  formControlModel: FormControlModel<T>;
 }
 
 interface State {

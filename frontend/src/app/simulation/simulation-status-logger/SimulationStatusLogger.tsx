@@ -59,6 +59,7 @@ export class SimulationStatusLogger extends React.Component<Props, State> {
     if (this.props.totalLogMessageCount !== nextProps.totalLogMessageCount) {
       this.logMessageTemporaryContainer.length = this.props.totalLogMessageCount;
     }
+    // If logs are currently hidden, we want to update iff the drag position changes
     if (!nextState.showLogMessages) {
       return this.state.dragHandlePosition !== nextState.dragHandlePosition;
     }
