@@ -4,14 +4,13 @@ Make sure that NodeJS is installed ([https://nodejs.org/en/](https://nodejs.org/
 ## Bootstrapping the front-end
 - `cd frontend`
 - `npm install`
-- `npm run wds`
+- `npm start`
 - Go to http://localhost:4000
 
 ## Bootstrapping the back-end
 - `cd backend`
 - `npm install`
-- `npm run nodemon` to start an HTTP server with hot-loading
-- Then in a different terminal, `npm run tsc` to start the compilation in watch mode
+- `npm run nodemon` to start an HTTP server with hot-loading and TypeScript server in watch mode
 
 # For deployment
 ## Building the front-end code

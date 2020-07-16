@@ -15,7 +15,11 @@ export function QueryLogsResultTable(props: Props) {
   return (
     <ReactTable
       filterable={true}
-      defaultFilterMethod={(filter, row) => row[filter.id] !== undefined ? String(row[filter.id]).includes(filter.value.toLowerCase()) : true}
+      defaultFilterMethod={
+        (filter, row) => row[filter.id] !== undefined
+          ? String(row[filter.id]).toLowerCase().includes(filter.value.toLowerCase())
+          : true
+      }
       defaultPageSize={5}
       data={props.rows}
       columns={
@@ -25,31 +29,33 @@ export function QueryLogsResultTable(props: Props) {
             Header: columnName,
             Cell: row => (
               row.value.length > 15
-                ?
-                <Tooltip content={row.value}>
+                ? (
+                  <Tooltip content={row.value}>
+                    <span style={{
+                      display: 'inline-block',
+                      width: '100%',
+                      position: 'relative',
+                      top: '50%',
+                      transform: 'translateY(-50%)',
+                      textOverflow: 'ellipsis',
+                      overflow: 'hidden'
+                    }}>
+                      {row.value}
+                    </span>
+                  </Tooltip>
+                )
+                : (
                   <span style={{
                     display: 'inline-block',
                     width: '100%',
                     position: 'relative',
                     top: '50%',
                     transform: 'translateY(-50%)',
-                    textOverflow: 'ellipsis',
-                    overflow: 'hidden'
+                    textAlign: 'center'
                   }}>
                     {row.value}
                   </span>
-                </Tooltip>
-                :
-                <span style={{
-                  display: 'inline-block',
-                  width: '100%',
-                  position: 'relative',
-                  top: '50%',
-                  transform: 'translateY(-50%)',
-                  textAlign: 'center'
-                }}>
-                  {row.value}
-                </span>
+                )
             )
           }))
       }

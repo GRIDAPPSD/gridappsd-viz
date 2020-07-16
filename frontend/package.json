@@ -4,7 +4,7 @@
     "description": "",
     "main": "index.js",
     "scripts": {
-        "wds": "webpack-dev-server --config webpack.development.config.js --progress --inline",
+        "start": "webpack-dev-server --config webpack.development.config.js --progress --inline",
         "build": "webpack --config webpack.production.config.js --env.build-version",
         "lint": "eslint . --ext .ts,.tsx"
     },

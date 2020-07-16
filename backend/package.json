@@ -3,10 +3,10 @@
     "version": "1.0.0",
     "main": "dist/index.js",
     "scripts": {
-        "build": "rm -rf dist && tsc && cp -rf ../frontend/dist/** dist/backend/src",
-        "start": "node dist/backend/src/index.js",
-        "nodemon": "tsc --watch & nodemon dist/backend/src/index.js",
-        "debug": "node --inspect dist/backend/src/index.js",
+        "build": "cd ../common && tsc && cd ../backend && tsc",
+        "start": "node dist/src/index.js",
+        "nodemon": "tsc --watch & nodemon dist/src/index.js",
+        "debug": "node --inspect dist/src/index.js",
         "lint": "eslint . --ext .ts && cd ../frontend && npm run lint"
     },
     "husky": {

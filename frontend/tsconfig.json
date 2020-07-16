@@ -3,14 +3,17 @@
         "outDir": "./dist",
         "module": "esnext",
         "target": "es2017",
-        "baseUrl": "../",
-        "rootDir": "../",
+        "baseUrl": "./",
+        "rootDirs": [
+            "src",
+            "../common"
+        ],
         "paths": {
             "@shared/*": [
-                "frontend/src/app/shared/*"
+                "src/app/shared/*"
             ],
             "@common/*": [
-                "common/*"
+                "../common/*"
             ]
         },
         "lib": [
@@ -32,14 +35,6 @@
     },
     "exclude": [
         "node_modules",
-        "build",
-        "dist",
-        "scripts",
-        "acceptance-tests",
-        "webpack",
-        "jest",
-        "src/setupTests.ts",
-        "exclude",
-        "backend"
+        "dist"
     ]
 }
