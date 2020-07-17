@@ -1,7 +1,7 @@
 const path = require('path');
 
 module.exports = (env) => {
-  const baseConfig = require('./webpack.base.config')('development', true);
+  const baseConfig = require('./webpack.base.config')('development', true, env.action === 'enable-css-hmr');
   return {
     ...baseConfig,
 

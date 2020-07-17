@@ -66,9 +66,11 @@ export class StompClientService {
             heartbeatIncoming: 0,
             heartbeatOutgoing: 0,
             reconnectDelay: 0,
+            // These variables are injected by webpack
+            // They are declared in src/webpack-injections.d.ts
             // eslint-disable-next-line no-console
-            debug: __ENABLE_STOMP_CLIENT_LOGS__ ? console.log : () => { },
-            logRawCommunication: __ENABLE_STOMP_CLIENT_LOGS__
+            debug: __STOMP_CLIENT_LOGGING_ENABLED__ ? console.log : () => { },
+            logRawCommunication: __STOMP_CLIENT_LOGGING_ENABLED__
           });
 
           this._username = sessionStorage.getItem('username');

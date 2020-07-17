@@ -63,12 +63,18 @@ class RefReplacerPlugin {
   }
 }
 
+class NoOpPlugin {
+  apply() {
+
+  }
+}
+
 /**
  *
  * @param {'production' | 'development'} mode
  * @param {boolean} enableLogging
  */
-module.exports = (mode, enableLogging) => ({
+module.exports = (mode, enableLogging, cssHmr) => ({
   mode,
 
   entry: createEntry(path.resolve(__dirname, 'src'), { main: `./src/main.${mode}.tsx`, dark: [], light: [] }),
@@ -103,7 +109,7 @@ module.exports = (mode, enableLogging) => ({
       {
         test: /\.scss/,
         use: [
-          MiniCssExtractPlugin.loader,
+          cssHmr ? 'style-loader' : MiniCssExtractPlugin.loader,
           'css-loader',
           'sass-loader',
         ]
@@ -128,7 +134,7 @@ module.exports = (mode, enableLogging) => ({
 
   plugins: [
     new CleanWebpackPlugin(),
-    new RefReplacerPlugin(),
+    cssHmr ? new NoOpPlugin() : new RefReplacerPlugin(),
     new HtmlWebpackPlugin({
       template: './template.html',
       excludeAssets: [
@@ -144,7 +150,8 @@ module.exports = (mode, enableLogging) => ({
       chunkFilename: '[name].[hash:10].css'
     }),
     new webpack.DefinePlugin({
-      __ENABLE_STOMP_CLIENT_LOGS__: JSON.stringify(enableLogging)
+      __STOMP_CLIENT_LOGGING_ENABLED__: JSON.stringify(enableLogging),
+      __CSS_HMR_ENABLED__: JSON.stringify(cssHmr)
     })
   ],
 

@@ -10,7 +10,7 @@ const OptimizeCSSAssetsPlugin = require('optimize-css-assets-webpack-plugin');
  */
 module.exports = (env) => {
   updateVersion(env);
-  const baseConfig = require('./webpack.base.config')('production', env.enableLogging !== undefined);
+  const baseConfig = require('./webpack.base.config')('production', env.enableLogging !== undefined, false);
   return {
     ...baseConfig,
 
