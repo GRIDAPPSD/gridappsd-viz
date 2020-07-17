@@ -5,6 +5,9 @@ import { BrowserRouter } from 'react-router-dom';
 
 import { AppContainer as OriginalAppContainer } from './app/AppContainer';
 
+import './global-styles.light.scss';
+import './global-styles.dark.scss';
+
 const AppContainer = hot(OriginalAppContainer);
 
 ReactDOM.render(
