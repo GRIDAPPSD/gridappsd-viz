@@ -2,6 +2,21 @@ const path = require('path');
 
 module.exports = (env) => {
   const baseConfig = require('./webpack.base.config')('development', true, env.action === 'enable-css-hmr');
+  baseConfig.module.rules.push({
+    test: /(\.tsx?)$/,
+    use: [
+      {
+        loader: 'babel-loader',
+        options: {
+          plugins: [
+            'react-hot-loader/babel'
+          ]
+        }
+      },
+      'awesome-typescript-loader'
+    ]
+  });
+
   return {
     ...baseConfig,
 
