@@ -11,6 +11,11 @@ const OptimizeCSSAssetsPlugin = require('optimize-css-assets-webpack-plugin');
 module.exports = (env) => {
   updateVersion(env);
   const baseConfig = require('./webpack.base.config')('production', env.enableLogging !== undefined, false);
+  baseConfig.module.rules.push({
+    test: /(\.tsx?)$/,
+    use: 'awesome-typescript-loader'
+  });
+
   return {
     ...baseConfig,
 
