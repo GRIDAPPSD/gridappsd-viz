@@ -43,15 +43,32 @@
     display: none;
 }
 
+.form-group__header__toggle {
+
+    i.material-icons {
+        font-size: 3em;
+        transition: transform 0.25s ease;
+        transform-origin: 50% 50%;
+    }
+
+    &.expand i.material-icons {
+        transform: rotate(180deg);
+    }
+
+    &.collapse i.material-icons {
+        transform: rotate(0);
+    }
+}
+
 .form-group__controls {
     position: relative;
+    transition: max-height 0.25s;
 }
 
 .form-group__controls.collapsed {
     overflow: hidden;
-    max-height: 0;
 }
 
 .form-group__controls.expanded {
-    max-height: auto;
+    overflow: initial;
 }

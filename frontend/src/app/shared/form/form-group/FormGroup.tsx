@@ -1,6 +1,7 @@
 import * as React from 'react';
 
 import { Tooltip } from '@shared/tooltip';
+import { IconButton } from '@shared/buttons';
 
 import './FormGroup.light.scss';
 import './FormGroup.dark.scss';
@@ -23,6 +24,10 @@ export class FormGroup extends React.Component<Props, State> {
     collapsed: false
   };
 
+  readonly formControlContainerRef = React.createRef<HTMLDivElement>();
+
+  private _contentHeight = 0;
+
   constructor(props: Props) {
     super(props);
 
@@ -31,6 +36,19 @@ export class FormGroup extends React.Component<Props, State> {
     };
 
     this.toggleCollapse = this.toggleCollapse.bind(this);
+  }
+
+  componentDidMount() {
+    setTimeout(() => {
+      if (this.props.collapsible) {
+        this._contentHeight = this.formControlContainerRef.current.clientHeight;
+        this._toggleFormControlContainerMaxHeight();
+      }
+    });
+  }
+
+  private _toggleFormControlContainerMaxHeight() {
+    this.formControlContainerRef.current.style.maxHeight = `${this.state.collapsed ? 0 : this._contentHeight}px`;
   }
 
   render() {
@@ -45,11 +63,11 @@ export class FormGroup extends React.Component<Props, State> {
                 this.props.collapsible
                 &&
                 <Tooltip content={this.state.collapsed ? 'Expand' : 'Collapse'}>
-                  <i
-                    className='material-icons'
-                    onClick={this.toggleCollapse}>
-                    {this.state.collapsed ? 'add' : 'remove'}
-                  </i>
+                  <IconButton
+                    className={`form-group__header__toggle ${this.state.collapsed ? 'collapse' : 'expand'}`}
+                    icon='keyboard_arrow_down'
+                    hasBackground={false}
+                    onClick={this.toggleCollapse} />
                 </Tooltip>
               }
             </div>
@@ -58,7 +76,9 @@ export class FormGroup extends React.Component<Props, State> {
             </div>
           </div>
         }
-        <div className={`form-group__controls ${this.state.collapsed ? 'collapsed' : 'expanded'}`}>
+        <div
+          ref={this.formControlContainerRef}
+          className={`form-group__controls ${this.state.collapsed ? 'collapsed' : 'expanded'}`}>
           {this.props.children}
         </div>
       </div>
@@ -68,7 +88,7 @@ export class FormGroup extends React.Component<Props, State> {
   toggleCollapse() {
     this.setState(state => ({
       collapsed: !state.collapsed
-    }));
+    }), () => this._toggleFormControlContainerMaxHeight());
   }
 
 }
