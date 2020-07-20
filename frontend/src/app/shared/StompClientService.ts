@@ -72,14 +72,16 @@ export class StompClientService {
             debug: __ENABLE_STOMP_CLIENT_LOGS__ ? console.log : () => { },
             logRawCommunication: __ENABLE_STOMP_CLIENT_LOGS__
           });
-
+		
+		  
           this._username = sessionStorage.getItem('username');
           this._password = sessionStorage.getItem('password');
-		  //todo get token
+		  
           if (this._username && this._password) {
+			this._token = this._getToken(host, port);
             this._client.connectHeaders = {
-              login: this._username,
-              passcode: this._password
+              login: this._token,
+              passcode: ''
             };
             this.reconnect();
           }
@@ -91,7 +93,7 @@ export class StompClientService {
     const subject = new Subject<StompClientInitializationResult>();
     this._username = username;
     this._password = password;
-	this._token = this._getToken();
+	
 	
     this._client.configure({
       connectHeaders: {
@@ -172,7 +174,7 @@ export class StompClientService {
   }
 
 
-  private _getToken() {
+  private _getToken(host: string, port: string) {
 	  
 	if(this._token==null){  
         //get token
