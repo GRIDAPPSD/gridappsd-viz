@@ -177,11 +177,13 @@ export class StompClientService {
 	if(this._token==null){  
         //get token
         //get initial connection
-        replyDest = "temp.token_resp."+this._username;
+        var replyDest = "temp.token_resp."+this._username;
 
         //create token request string
         var userAuthStr = this._username+":"+this._password;
-        var base64Str = base64.b64encode(userAuthStr.encode());
+		let buff = new Buffer(userAuthStr);
+		let base64Str = buff.toString('base64');
+        //var base64Str = base64.b64encode(userAuthStr.encode());
 
         //set up token callback
         //send request to token topic
