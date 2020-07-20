@@ -91,7 +91,7 @@ export class StompClientService {
     const subject = new Subject<StompClientInitializationResult>();
     this._username = username;
     this._password = password;
-	this._token = _getToken();
+	this._token = this._getToken();
 	
     this._client.configure({
       connectHeaders: {
@@ -180,8 +180,8 @@ export class StompClientService {
         replyDest = "temp.token_resp."+this._username;
 
         //create token request string
-        userAuthStr = this._username+":"+this._password;
-        base64Str = base64.b64encode(userAuthStr.encode());
+        var userAuthStr = this._username+":"+this._password;
+        var base64Str = base64.b64encode(userAuthStr.encode());
 
         //set up token callback
         //send request to token topic
@@ -252,12 +252,15 @@ export class StompClientService {
               }        
 
         //tmpConn.subscribe('/queue/'+replyDest, 123)
-        //        tmpConn.set_listener('token_resp', listener)
-		send({
-          destination: tokenTopic,
-          replyTo: replyDest,
-          body: base64Str
-        });
+   		//tmpConn.set_listener('token_resp', listener);
+        //
+		//TODO
+		//send({
+        //  destination: tokenTopic,
+        //  replyTo: replyDest,
+        //  body: base64Str
+        //});
+		console.log("send auth str "+base64Str);
                //// tmpConn.send(body=base64Str, destination=tokenTopic,
                 //        headers={'reply-to': replyDest})
         //while token is null or for x iterations
