@@ -187,7 +187,18 @@ export class StompClientService {
 
         //set up token callback
         //send request to token topic
-        tokenTopic = "/topic/pnnl.goss.token.topic";
+        let tokenTopic = "/topic/pnnl.goss.token.topic";
+
+
+		let tmpClient = new Client({
+            brokerURL: `ws://${host}:${port}`,
+            heartbeatIncoming: 0,
+            heartbeatOutgoing: 0,
+            reconnectDelay: 0,
+            // eslint-disable-next-line no-console
+            debug: __ENABLE_STOMP_CLIENT_LOGS__ ? console.log : () => { },
+            logRawCommunication: __ENABLE_STOMP_CLIENT_LOGS__
+          });
 
 
 		tmpClient.configure({
@@ -251,7 +262,7 @@ export class StompClientService {
                 const payload = JSON.parse(message.body);
                 console.log("received message "+payload);
 				this._token = payload;
-              }        
+              } );       
 
         //tmpConn.subscribe('/queue/'+replyDest, 123)
    		//tmpConn.set_listener('token_resp', listener);
