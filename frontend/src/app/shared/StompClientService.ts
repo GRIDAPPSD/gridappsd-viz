@@ -62,7 +62,7 @@ export class StompClientService {
       .subscribe({
         next: ([host, port]) => {
           this._client = new Client({
-            brokerURL: `ws://${host}:${port}`,
+            brokerURL: port ? `ws://${host}:${port}` : `ws://${host}`,
             heartbeatIncoming: 0,
             heartbeatOutgoing: 0,
             reconnectDelay: 0,

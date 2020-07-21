@@ -4,7 +4,8 @@ import { filter, take, pluck } from 'rxjs/operators';
 export interface Configurations {
   version: string;
   host: string;
-  port: string;
+  // Old format doesn't have "port" property
+  port?: string;
 }
 
 export class ConfigurationManager {
