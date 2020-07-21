@@ -190,7 +190,7 @@ export class StompClientService {
         //set up token callback
         //send request to token topic
         let tokenTopic = "/topic/pnnl.goss.token.topic";
-
+		const subject = new Subject<StompClientInitializationResult>();
 
 		let tmpClient = new Client({
             brokerURL: `ws://${host}:${port}`,
