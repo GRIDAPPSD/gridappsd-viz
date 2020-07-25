@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { Subject } from 'rxjs';
-import { filter, switchMap, tap, takeWhile, finalize, takeUntil } from 'rxjs/operators';
+import { filter, switchMap, takeWhile, finalize, takeUntil } from 'rxjs/operators';
 
 import { SimulationStatusLogger } from './SimulationStatusLogger';
 import { SIMULATION_STATUS_LOG_TOPIC, SimulationManagementService, SimulationStatusLogMessage } from '@shared/simulation';
@@ -74,17 +74,11 @@ export class SimulationStatusLogContainer extends React.Component<Props, State> 
   private _subscribeToSimulationStatusLogMessageStream() {
     this._stompClientService.statusChanges()
       .pipe(
-        tap(() => {
-          this.setState({
-            isFetching: false
-          });
-        }),
-        takeUntil(this._unsubscriber),
         filter(status => status === StompClientConnectionStatus.CONNECTED),
         switchMap(() => this._stateStore.select('simulationId')),
-        takeUntil(this._unsubscriber),
         filter(simulationId => simulationId !== ''),
-        switchMap(this._newObservableForLogMessages)
+        switchMap(this._newObservableForLogMessages),
+        takeUntil(this._unsubscriber)
       )
       .subscribe({
         next: this._onSimulationStatusLogMessageReceived
@@ -100,12 +94,7 @@ export class SimulationStatusLogContainer extends React.Component<Props, State> 
         takeWhile(this._simulationManagementService.isUserInActiveSimulation),
         takeUntil(this._simulationManagementService.simulationStatusChanges().pipe(filter(status => status === SimulationStatus.STOPPED))),
         takeUntil(this._unsubscriber),
-        finalize(() => {
-          this.setState({
-            isFetching: false
-          });
-          this._flushLogMessageBufferToObjectStoreIfNeeded(true);
-        })
+        finalize(() => this._flushLogMessageBufferToObjectStoreIfNeeded(true))
       );
   }
 

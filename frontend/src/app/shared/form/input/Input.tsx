@@ -113,7 +113,7 @@ export class Input<T extends 'text' | 'number' | 'datetime' | 'password' = 'text
   }
 
   handleChange(event: React.FocusEvent<HTMLInputElement>) {
-    const value = (event.target as HTMLInputElement).value;
+    const value = event.target.value;
     this.setState({
       value
     });
