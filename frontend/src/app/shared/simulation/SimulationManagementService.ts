@@ -56,7 +56,7 @@ export class SimulationManagementService {
   private _isUserInActiveSimulation = false;
   private _modelDictionaryMeasurementMap: Map<string, ModelDictionaryMeasurement> = null;
   private _outputTimestamp: number;
-  private _simulationOutputSubscription: Subscription;
+  private _simulationOutputSubscription: Subscription = null;
   private _simulationStatusLogStreamSubscription: Subscription;
   private _currentSimulationId = '';
   private _syncingEnabled = false;
@@ -119,16 +119,12 @@ export class SimulationManagementService {
 
   private _watchStompClientStatusChanges() {
     return this._stompClientService.statusChanges()
-      .pipe(filter(status => status === StompClientConnectionStatus.CONNECTING))
+      .pipe(filter(status => status === StompClientConnectionStatus.CONNECTED && this.didUserStartActiveSimulation()))
       .subscribe({
         next: () => {
-          if (this._simulationOutputSubscription) {
-            this._simulationOutputSubscription.unsubscribe();
-            this._simulationOutputSubscription = null;
-          }
-          if (this._currentSimulationStatus === SimulationStatus.STARTED) {
-            this.stopSimulation();
-          }
+          this._simulationOutputSubscription?.unsubscribe();
+          this._simulationOutputSubscription = null;
+          this.stopSimulation();
         }
       });
   }
@@ -313,32 +309,30 @@ export class SimulationManagementService {
       .subscribe({
         next: message => {
           if (message.logMessage.startsWith('Started simulation')) {
-            this._currentSimulationStatus = SimulationStatus.STARTED;
-            this._currentSimulationStatusNotifer.next(SimulationStatus.STARTED);
-            this._socket.emit(
-              SimulationSynchronizationEvent.QUERY_SIMULATION_STATUS,
-              {
-                status: SimulationStatus.STARTED,
-                simulationId: this._currentSimulationId
-              }
-            );
+            this._updateSimulationStatus(SimulationStatus.STARTED);
+          } else if (message.logMessage === 'The simulation has paused.') {
+            this._updateSimulationStatus(SimulationStatus.PAUSED);
           }
         },
         complete: this.stopSimulation
       });
   }
 
+  private _updateSimulationStatus(newStatus: SimulationStatus) {
+    this._currentSimulationStatus = newStatus;
+    this._currentSimulationStatusNotifer.next(newStatus);
+    this._socket.emit(
+      SimulationSynchronizationEvent.QUERY_SIMULATION_STATUS,
+      {
+        status: newStatus,
+        simulationId: this._currentSimulationId
+      }
+    );
+  }
+
   stopSimulation() {
     if (this._didUserStartActiveSimulation) {
-      this._currentSimulationStatus = SimulationStatus.STOPPED;
-      this._currentSimulationStatusNotifer.next(SimulationStatus.STOPPED);
-      this._socket.emit(
-        SimulationSynchronizationEvent.QUERY_SIMULATION_STATUS,
-        {
-          status: SimulationStatus.STOPPED,
-          simulationId: this._currentSimulationId
-        }
-      );
+      this._updateSimulationStatus(SimulationStatus.STOPPED);
       this._simulationStatusLogStreamSubscription.unsubscribe();
       this._sendSimulationControlCommand('stop');
       this._didUserStartActiveSimulation = false;
@@ -348,49 +342,28 @@ export class SimulationManagementService {
   }
 
   pauseSimulation() {
-    this._currentSimulationStatus = SimulationStatus.PAUSED;
-    this._currentSimulationStatusNotifer.next(SimulationStatus.PAUSED);
-    this._socket.emit(
-      SimulationSynchronizationEvent.QUERY_SIMULATION_STATUS,
-      {
-        status: this._currentSimulationStatus,
-        simulationId: this._currentSimulationId
-      }
-    );
     this._sendSimulationControlCommand('pause');
   }
 
   resumeSimulation() {
-    this._currentSimulationStatus = SimulationStatus.RESUMED;
-    this._currentSimulationStatusNotifer.next(SimulationStatus.RESUMED);
-    this._socket.emit(
-      SimulationSynchronizationEvent.QUERY_SIMULATION_STATUS,
-      {
-        status: this._currentSimulationStatus,
-        simulationId: this._currentSimulationId
-      }
-    );
+    this._updateSimulationStatus(SimulationStatus.RESUMED);
     this._sendSimulationControlCommand('resume');
   }
 
   private _sendSimulationControlCommand(command: 'stop' | 'pause' | 'resume') {
-    const simulationId = this._simulationQueue.getActiveSimulation().id;
     this._stompClientService.send({
-      destination: `${CONTROL_SIMULATION_TOPIC}.${simulationId}`,
+      destination: `${CONTROL_SIMULATION_TOPIC}.${this._currentSimulationId}`,
       body: `{"command":"${command}"}`
     });
   }
 
   resumeThenPauseSimulationAfter(seconds: number) {
-    this._currentSimulationStatus = SimulationStatus.RESUMED;
-    this._currentSimulationStatusNotifer.next(SimulationStatus.RESUMED);
+    this._updateSimulationStatus(SimulationStatus.RESUMED);
     setTimeout(() => {
-      this._currentSimulationStatus = SimulationStatus.PAUSED;
-      this._currentSimulationStatusNotifer.next(SimulationStatus.PAUSED);
+      this._updateSimulationStatus(SimulationStatus.PAUSED);
     }, seconds * 1000);
-    const simulationId = this._simulationQueue.getActiveSimulation().id;
     this._stompClientService.send({
-      destination: `${CONTROL_SIMULATION_TOPIC}.${simulationId}`,
+      destination: `${CONTROL_SIMULATION_TOPIC}.${this._currentSimulationId}`,
       body: JSON.stringify({
         command: 'resumePauseAt',
         input: {

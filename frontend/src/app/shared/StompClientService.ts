@@ -61,16 +61,16 @@ export class StompClientService {
     )
       .subscribe({
         next: ([host, port]) => {
+          const isLoggingEnabled = (localStorage.getItem('isLoggingEnabled') ?? String(__STOMP_CLIENT_LOGGING_ENABLED__)) === 'true';
+
           this._client = new Client({
             brokerURL: port ? `ws://${host}:${port}` : `ws://${host}`,
             heartbeatIncoming: 0,
             heartbeatOutgoing: 0,
             reconnectDelay: 0,
-            // These variables are injected by webpack
-            // They are declared in src/webpack-injections.d.ts
             // eslint-disable-next-line no-console
-            debug: __STOMP_CLIENT_LOGGING_ENABLED__ ? console.log : () => { },
-            logRawCommunication: __STOMP_CLIENT_LOGGING_ENABLED__
+            debug: isLoggingEnabled ? console.log : () => { },
+            logRawCommunication: isLoggingEnabled
           });
 
           this._username = sessionStorage.getItem('username');
@@ -89,6 +89,8 @@ export class StompClientService {
 
   connect(username: string, password: string): Observable<StompClientInitializationResult> {
     const subject = new Subject<StompClientInitializationResult>();
+    const noOp = () => { };
+
     this._username = username;
     this._password = password;
     this._client.configure({
@@ -100,8 +102,8 @@ export class StompClientService {
         this._client.onDisconnect = () => {
           this.reconnect();
           subject.next(StompClientInitializationResult.OK);
-          this._client.onDisconnect = null;
-          this._client.onConnect = null;
+          this._client.onDisconnect = noOp;
+          this._client.onConnect = noOp;
         };
         this._client.deactivate();
         // need to reevaluate this strategy
@@ -110,11 +112,11 @@ export class StompClientService {
       },
       onStompError: () => {
         subject.error(StompClientInitializationResult.AUTHENTICATION_FAILURE);
-        this._client.onStompError = null;
+        this._client.onStompError = noOp;
       },
       onWebSocketError: () => {
         subject.error(StompClientInitializationResult.CONNECTION_FAILURE);
-        this._client.onWebSocketError = null;
+        this._client.onWebSocketError = noOp;
       }
     });
     this._client.activate();
@@ -224,21 +226,18 @@ export class StompClientService {
         switchMap(() => {
           const source = new BehaviorSubject<T>(null);
           const id = `${destination}[${Math.random() * 1_000_000 | 0}]`;
-          return using(
-            () => this._client.subscribe(destination, (message: Message) => {
-              const payload = JSON.parse(message.body);
-              if ('error' in payload) {
-                source.error(payload.error.message);
-              } else if (!('data' in payload)) {
-                source.next(payload);
-              } else if (typeof payload.data !== 'string') {
-                source.next(payload.data);
-              } else {
-                source.next(JSON.parse(payload.data));
-              }
-            }, { id }),
-            () => source.asObservable().pipe(filter(responseBody => Boolean(responseBody)))
-          );
+          return using(() => this._client.subscribe(destination, (message: Message) => {
+            const payload = JSON.parse(message.body);
+            if ('error' in payload) {
+              source.error(payload.error.message);
+            } else if (!('data' in payload)) {
+              source.next(payload);
+            } else if (typeof payload.data !== 'string') {
+              source.next(payload.data);
+            } else {
+              source.next(JSON.parse(payload.data));
+            }
+          }, { id }), () => source.asObservable().pipe(filter(responseBody => Boolean(responseBody))));
         })
       );
   }

@@ -11,7 +11,6 @@ interface Props {
   className?: string;
   onText?: string;
   offText?: string;
-  isOn?: boolean;
   direction?: 'horizontal' | 'vertical';
 }
 
@@ -25,11 +24,26 @@ export class SlideToggle extends React.Component<Props, State> {
     super(props);
 
     this.state = {
-      isOn: props.isOn
+      isOn: props.formControlModel.getValue()
     };
 
     this.toggle = this.toggle.bind(this);
 
+  }
+
+  componentDidMount() {
+    this.props.formControlModel.valueChanges()
+      .subscribe({
+        next: isOn => {
+          this.setState({
+            isOn
+          });
+        }
+      });
+  }
+
+  componentWillUnmount() {
+    this.props.formControlModel.cleanup();
   }
 
   render() {
@@ -69,13 +83,7 @@ export class SlideToggle extends React.Component<Props, State> {
   }
 
   toggle() {
-    this.setState(prevState => {
-      const newState = !prevState.isOn;
-      this.props.formControlModel.setValue(newState);
-      return {
-        isOn: newState
-      };
-    });
+    this.props.formControlModel.setValue(!this.props.formControlModel.getValue());
   }
 
 }
@@ -83,7 +91,6 @@ export class SlideToggle extends React.Component<Props, State> {
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 (SlideToggle as any).defaultProps = {
   direction: 'horizontal',
-  isOn: false,
   onText: '',
   offText: ''
 };
