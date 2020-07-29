@@ -114,7 +114,7 @@ export class Settings extends React.Component<Props, State> {
         </Tooltip>
         <Dialog
           transparentBackdrop
-          show={this.state.showSettingsMenu}
+          open={this.state.showSettingsMenu}
           top={this.state.top}
           left={this.state.left}
           onBackdropClicked={this.hideSettingsMenu}>

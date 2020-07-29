@@ -24,6 +24,12 @@ export class ServiceConfiguration extends React.Component<Props, State> {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   readonly userInputOptionsFormGroupModel = new FormGroupModel<{ [optionLabel: string]: any }>();
 
+  private readonly _serviceConfigurationFormGroupModel = new FormGroupModel({
+    id: this.props.service.id,
+    // eslint-disable-next-line camelcase
+    user_options: this.userInputOptionsFormGroupModel
+  });
+
   constructor(props: Props) {
     super(props);
 
@@ -32,13 +38,7 @@ export class ServiceConfiguration extends React.Component<Props, State> {
 
   private _setupServiceConfigurationFormModel() {
     this._buildFormGroupModelForUserOptions();
-    this.props.parentFormArrayModel.pushControl(
-      new FormGroupModel({
-        id: this.props.service.id,
-        // eslint-disable-next-line camelcase
-        user_options: this.userInputOptionsFormGroupModel
-      })
-    );
+    this.props.parentFormArrayModel.pushControl(this._serviceConfigurationFormGroupModel);
   }
 
   private _buildFormGroupModelForUserOptions() {
@@ -79,6 +79,10 @@ export class ServiceConfiguration extends React.Component<Props, State> {
         break;
     }
     return validators;
+  }
+
+  componentWillUnmount() {
+    this.props.parentFormArrayModel.removeControl(this._serviceConfigurationFormGroupModel);
   }
 
   render() {

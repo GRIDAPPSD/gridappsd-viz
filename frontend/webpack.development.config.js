@@ -31,7 +31,7 @@ module.exports = (env) => {
     devServer: {
       port: 4000,
       contentBase: [
-        path.resolve(__dirname),
+        path.resolve(__dirname, 'assets'),
         path.resolve(__dirname, 'dist')
       ],
       overlay: true,
