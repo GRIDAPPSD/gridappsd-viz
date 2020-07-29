@@ -7,7 +7,7 @@ import './Dialog.light.scss';
 import './Dialog.dark.scss';
 
 interface Props {
-  show: boolean;
+  open: boolean;
   top?: number;
   left?: number;
   className?: string;
@@ -30,14 +30,14 @@ export class Dialog extends React.Component<Props, State> {
   }
 
   componentDidMount() {
-    if (this.props.show) {
+    if (this.props.open) {
       this.dialogRef.current.parentElement.classList.add('active');
       this._shiftIntoViewIfOverflowScreen();
     }
   }
 
   componentDidUpdate(prevProps: Props) {
-    if (this.props.show) {
+    if (this.props.open) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       if (this.props.children !== (prevProps as any).children) {
         this.dialogRef.current.style.top = `${this.props.top}px`;
@@ -67,7 +67,7 @@ export class Dialog extends React.Component<Props, State> {
         <div
           ref={this.dialogRef}
           className={
-            `dialog ${this.props.show ? 'dialog--entering' : 'dialog--leaving'}${this.props.className ? ' ' + this.props.className : ''}`
+            `dialog ${this.props.open ? 'dialog--entering' : 'dialog--leaving'}${this.props.className ? ' ' + this.props.className : ''}`
           }
           style={{
             left: this.props.left === 0 ? undefined : this.props.left,
@@ -81,7 +81,7 @@ export class Dialog extends React.Component<Props, State> {
   }
 
   onAnimationEnd() {
-    if (!this.props.show) {
+    if (!this.props.open) {
       this.props.onAfterClosed?.();
       if (this.dialogRef.current) {
         this.dialogRef.current.parentElement.classList.remove('active');

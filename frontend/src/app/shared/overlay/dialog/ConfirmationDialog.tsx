@@ -51,7 +51,7 @@ export class ConfirmationDialog extends React.Component<Props, State> {
   render() {
     return (
       <Dialog
-        show={this.state.open}
+        open={this.state.open}
         className='confirmation-dialog'>
         <DialogContent>
           {this.props.children}
