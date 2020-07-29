@@ -76,7 +76,7 @@ export class SimulationStatusLogContainer extends React.Component<Props, State> 
       .pipe(
         filter(status => status === StompClientConnectionStatus.CONNECTED),
         switchMap(() => this._stateStore.select('simulationId')),
-        filter(simulationId => simulationId !== ''),
+        filter(simulationId => simulationId !== '' && this._simulationManagementService.isUserInActiveSimulation()),
         switchMap(this._newObservableForLogMessages),
         takeUntil(this._unsubscriber)
       )
