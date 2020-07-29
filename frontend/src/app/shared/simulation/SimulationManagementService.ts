@@ -119,12 +119,14 @@ export class SimulationManagementService {
 
   private _watchStompClientStatusChanges() {
     return this._stompClientService.statusChanges()
-      .pipe(filter(status => status === StompClientConnectionStatus.CONNECTED && this.didUserStartActiveSimulation()))
+      .pipe(filter(status => status === StompClientConnectionStatus.CONNECTED))
       .subscribe({
         next: () => {
-          this._simulationOutputSubscription?.unsubscribe();
-          this._simulationOutputSubscription = null;
-          this.stopSimulation();
+          if (this._simulationOutputSubscription !== null) {
+            this._simulationOutputSubscription.unsubscribe();
+            this._simulationOutputSubscription = null;
+            this.stopSimulation();
+          }
         }
       });
   }
