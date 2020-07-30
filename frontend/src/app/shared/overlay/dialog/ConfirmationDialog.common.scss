@@ -1,0 +1,17 @@
+.confirmation-dialog {
+    padding-left: 5px;
+    padding-right: 5px;
+    max-width: 600px;
+    white-space: pre-wrap;
+
+    .dialog-content {
+        font-size: 1.5em;
+        text-align: center;
+        margin: 5px 5px 10px 5px;
+    }
+
+    .dialog-action-group {
+        justify-content: flex-end;
+        transform: translateX(-20px);
+    }
+}

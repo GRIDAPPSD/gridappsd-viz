@@ -48,4 +48,5 @@ SOCKET_SERVER.on('connection', socket => {
     });
 });
 
-EXPRESS_SERVER.listen(PORT);
+// eslint-disable-next-line no-console
+EXPRESS_SERVER.listen(PORT, () => console.log(`Server started on port ${PORT}`));

@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { Subject } from 'rxjs';
-import { filter, map, switchMap, takeUntil } from 'rxjs/operators';
+import { filter, switchMap, takeUntil } from 'rxjs/operators';
 
 import { Alarms } from './Alarms';
 import { StateStore } from '@shared/state-store';
@@ -49,12 +49,11 @@ export class AlarmsContainer extends React.Component<Props, State> {
     this._stateStore.select('simulationId')
       .pipe(
         filter(simulationId => simulationId !== '' && this._simulationManagementService.didUserStartActiveSimulation()),
-        map(id => `/topic/goss.gridappsd.simulation.gridappsd-alarms.${id}.output`),
-        switchMap(this._stompClientService.readFrom),
+        switchMap(id => this._stompClientService.readFrom<Alarm[]>(`/topic/goss.gridappsd.simulation.gridappsd-alarms.${id}.output`)),
         takeUntil(this._unsubscriber)
       )
       .subscribe({
-        next: (alarms: Alarm[]) => {
+        next: alarms => {
           const timestamp = Date.now() / 1000;
           for (const alarm of alarms) {
             alarm.timestamp = timestamp;

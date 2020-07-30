@@ -16,9 +16,9 @@ export class App {
       response.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
       next();
     });
-    // __dirname is backend/dist/backend/src
-    this._expressServer.use(express.static(path.resolve(__dirname)));
-    this._expressServer.use(express.static(path.resolve(__dirname, '../../../..')));
+    // __dirname is backend/dist/src
+    this._expressServer.use(express.static(path.resolve(__dirname, '..', 'public')));
+    this._expressServer.use(express.static(path.resolve(__dirname, '..', '..', '..', 'assets')));
     this._expressServer.use((_, response, next) => {
       response.redirect('/');
       next();

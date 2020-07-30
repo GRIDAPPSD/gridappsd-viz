@@ -27,7 +27,7 @@ interface Props<T, E extends boolean = false> {
 
 interface State<T> {
   currentLabel: string;
-  opened: boolean;
+  open: boolean;
   selectedOptions: Option<T>[];
   left: number;
   top: number;
@@ -43,12 +43,13 @@ export class Select<T, E extends boolean> extends React.Component<Props<T, E>, S
 
   private _firstPage: Option<T>[] = [];
   private _defaultSelectedOptions: Option<T>[] = [];
+  private _selectedOptionsBeforeOpening: Option<T>[] = [];
 
   constructor(props: Props<T, E>) {
     super(props);
     this.state = {
       currentLabel: props.defaultLabel || props.multiple ? 'Select one or more' : 'Select an option',
-      opened: false,
+      open: false,
       selectedOptions: [],
       left: 0,
       top: 0,
@@ -166,7 +167,7 @@ export class Select<T, E extends boolean> extends React.Component<Props<T, E>, S
         <button
           ref={this.optionListOpenerRef}
           type='button'
-          className={`select__option-list__opener${this.state.opened ? ' opened' : ''}`}
+          className={`select__option-list__opener${this.state.open ? ' opened' : ''}`}
           title={this.state.currentLabel}
           onClick={this.onOpen}>
           <span className='text'>{this.state.currentLabel}</span>
@@ -174,13 +175,13 @@ export class Select<T, E extends boolean> extends React.Component<Props<T, E>, S
         </button>
         <Dialog
           transparentBackdrop
-          show={this.state.opened}
+          open={this.state.open}
           top={this.state.top}
           left={this.state.left}
           onBackdropClicked={this.closeOptionList}>
           <div className='select__option-list-wrapper'>
             <OptionListFilter
-              shouldReset={this.state.opened}
+              shouldReset={this.state.open}
               onChange={this.filterOptionList} />
             <SelectedOptionList
               options={this.state.selectedOptions}
@@ -201,8 +202,8 @@ export class Select<T, E extends boolean> extends React.Component<Props<T, E>, S
                   onClick={this.closeOptionList} />
                 <BasicButton
                   type='positive'
-                  label='Add'
-                  disabled={this.state.selectedOptions.length === 0}
+                  label='Confirm'
+                  disabled={this.state.selectedOptions.length === 0 && this.props.formControlModel.isPristine()}
                   onClick={this.closeAndNotifySelectionChange} />
               </footer>
             }
@@ -215,16 +216,24 @@ export class Select<T, E extends boolean> extends React.Component<Props<T, E>, S
   onOpen() {
     const rect = this.optionListOpenerRef.current.getBoundingClientRect();
     this.setState({
-      opened: true,
+      open: true,
       left: rect.left,
       top: rect.top
     });
+    if (this.props.multiple) {
+      this._selectedOptionsBeforeOpening = this.state.selectedOptions;
+    }
   }
 
   closeOptionList() {
     this.setState({
-      opened: false
+      open: false
     });
+    if (this.state.selectedOptions !== this._selectedOptionsBeforeOpening) {
+      this.setState({
+        selectedOptions: this._selectedOptionsBeforeOpening
+      }, () => this._toggleAllSelectedOptionsTo(true));
+    }
   }
 
   filterOptionList(newFilterValue: string, oldFilterValue: string) {
@@ -289,7 +298,7 @@ export class Select<T, E extends boolean> extends React.Component<Props<T, E>, S
       this._toggleAllSelectedOptionsTo(false);
       this.setState({
         currentLabel: clickedOption.label,
-        opened: false,
+        open: false,
         selectedOptions: [clickedOption]
       });
       clickedOption.isSelected = true;
@@ -313,7 +322,7 @@ export class Select<T, E extends boolean> extends React.Component<Props<T, E>, S
       currentLabel: this.state.selectedOptions.length === 0
         ? this._defaultLabel
         : this.state.selectedOptions.map(option => option.label).join(', '),
-      opened: false
+      open: false
     });
     this._updateFormControlValue(this.state.selectedOptions.map(option => option.value));
   }

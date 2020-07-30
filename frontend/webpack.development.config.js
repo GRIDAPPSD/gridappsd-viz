@@ -1,7 +1,22 @@
 const path = require('path');
 
 module.exports = (env) => {
-  const baseConfig = require('./webpack.base.config')('development', true);
+  const baseConfig = require('./webpack.base.config')('development', true, env.action === 'enable-css-hmr');
+  baseConfig.module.rules.push({
+    test: /(\.tsx?)$/,
+    use: [
+      {
+        loader: 'babel-loader',
+        options: {
+          plugins: [
+            'react-hot-loader/babel'
+          ]
+        }
+      },
+      'awesome-typescript-loader'
+    ]
+  });
+
   return {
     ...baseConfig,
 
@@ -16,7 +31,7 @@ module.exports = (env) => {
     devServer: {
       port: 4000,
       contentBase: [
-        path.resolve(__dirname),
+        path.resolve(__dirname, 'assets'),
         path.resolve(__dirname, 'dist')
       ],
       overlay: true,
