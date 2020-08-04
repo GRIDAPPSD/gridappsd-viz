@@ -6,7 +6,7 @@ import { SimulationManagementService } from '@shared/simulation';
 import { SimulationStatus } from '@common/SimulationStatus';
 import { SimulationControl } from './SimulationControl';
 import { StateStore } from '@shared/state-store';
-import { StompClientService, StompClientConnectionStatus } from '@shared/StompClientService';
+import { StompClientService } from '@shared/StompClientService';
 import { ModelDictionaryComponent } from '@shared/topology';
 import { PlotModel } from '@shared/plot-model/PlotModel';
 
@@ -42,28 +42,15 @@ export class SimulationControlContainer extends React.Component<Props, State> {
   }
 
   componentDidMount() {
-    this._stopSimulationWhenStompClientStatusChanges();
     this._subscribeToSimulationStatusChanges();
     this._subscribeToPlotModelsStateChanges();
     this._subscribeToComponentsWithConsolidatedPhasesStateChanges();
     this._subscribeToSimulationIdChanges();
   }
 
-  private _stopSimulationWhenStompClientStatusChanges() {
-    this._stompClientService.statusChanges()
-      .pipe(
-        takeUntil(this._unsubscriber),
-        filter(status => status !== StompClientConnectionStatus.CONNECTED)
-      )
-      .subscribe({
-        next: this.simulationManagementService.stopSimulation
-      });
-  }
-
   private _subscribeToSimulationStatusChanges() {
     this.simulationManagementService.simulationStatusChanges()
       .pipe(
-        takeUntil(this._unsubscriber),
         tap(status => {
           if (this.simulationManagementService.isUserInActiveSimulation()) {
             this.setState({
@@ -73,8 +60,8 @@ export class SimulationControlContainer extends React.Component<Props, State> {
         }),
         filter(status => status === SimulationStatus.STARTING),
         switchMap(() => this._stateStore.select('simulationId')),
-        takeUntil(this._unsubscriber),
-        filter(simulationId => simulationId !== '')
+        filter(simulationId => simulationId !== ''),
+        takeUntil(this._unsubscriber)
       )
       .subscribe({
         next: simulationId => {

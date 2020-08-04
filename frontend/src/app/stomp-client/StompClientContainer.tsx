@@ -19,6 +19,7 @@ interface State {
 export class StompClientContainer extends React.Component<Props, State> {
 
   private readonly _stompClientService = StompClientService.getInstance();
+
   private _responseSubscription: Subscription = null;
   private _stompClientStatusSubscription: Subscription;
 

@@ -1,12 +1,11 @@
 import * as React from 'react';
+import { filter } from 'rxjs/operators';
 
 import { Service, ServiceConfigUserInputSpec } from '@shared/Service';
 import { ServiceConfigurationModel } from '../../models/ServiceConfigurationModel';
 import { BasicButton } from '@shared/buttons';
-
 import { MessageBanner } from '@shared/overlay/message-banner';
 import { showNotification } from '@shared/overlay/notification';
-
 import { FormArrayModel, SelectionOptionBuilder, FormControlModel, Select } from '@shared/form';
 import { ServiceConfiguration } from './ServiceConfiguration';
 
@@ -59,6 +58,7 @@ export class ServiceConfigurationTab extends React.Component<Props, State> {
         }
       });
     this.availableServicesFormControl.valueChanges()
+      .pipe(filter(selectedServices => selectedServices !== this.state.selectedServices))
       .subscribe({
         next: selectedServices => {
           const servicesWithUserInput = selectedServices.filter(service => 'user_input' in service);
@@ -71,6 +71,7 @@ export class ServiceConfigurationTab extends React.Component<Props, State> {
           this.setState({
             selectedServices
           }, () => {
+            this.props.parentFormArrayModel.removeAllControls();
             this.props.parentFormArrayModel.setValue(this.internalFormArrayModel.getValue());
           });
         }

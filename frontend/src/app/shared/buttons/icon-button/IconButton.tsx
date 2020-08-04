@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/indent */
 import * as React from 'react';
 
-import { Ripple } from '../../ripple/Ripple';
+import { Ripple } from '@shared/ripple';
 
 import './IconButton.light.scss';
 import './IconButton.dark.scss';

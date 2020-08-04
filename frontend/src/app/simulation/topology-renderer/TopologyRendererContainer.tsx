@@ -300,12 +300,12 @@ export class TopologyRendererContainer extends React.Component<Props, State> {
       node.y1 = Math.trunc(node.y1);
       if (node.type === NodeType.SWITCH) {
         if (coordinatesInLatLong) {
-          const { x, y } = this._latLongToXY((node as Switch).x2, (node as Switch).y2);
-          (node as Switch).x2 = x;
-          (node as Switch).y2 = y;
+          const { x, y } = this._latLongToXY(node['x2'], node['y2']);
+          node['x2'] = x;
+          node['y2'] = y;
         }
-        (node as Switch).x2 = Math.trunc((node as Switch).x2);
-        (node as Switch).y2 = Math.trunc((node as Switch).y2);
+        node['x2'] = Math.trunc(node['x2']);
+        node['y2'] = Math.trunc(node['y2']);
       }
     });
   }

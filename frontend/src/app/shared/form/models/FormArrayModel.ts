@@ -6,7 +6,7 @@ export class FormArrayModel<T = any> extends AbstractControlModel<T[]> {
 
   private readonly _invalidFormControls = new Set<AbstractControlModel<T>>();
 
-  constructor(private readonly _controls: AbstractControlModel<T>[] = []) {
+  constructor(private _controls: AbstractControlModel<T>[] = []) {
     super();
 
     for (const control of _controls) {
@@ -78,10 +78,20 @@ export class FormArrayModel<T = any> extends AbstractControlModel<T[]> {
     }
   }
 
-  removeControl(index: number) {
+  removeControl(item: number | AbstractControlModel<T>) {
+    const index = typeof item === 'number' ? item : this._controls.findIndex(e => e === item);
     const control = this._controls.splice(index, 1)[0];
     control?.cleanup();
     this._valueChangeNotifier.next(this.getValue());
+  }
+
+  removeAllControls() {
+    for (const control of this._controls) {
+      control.cleanup();
+    }
+    this._controls = [];
+    this._valueChangeNotifier.next([]);
+    this._invalidFormControls.clear();
   }
 
   reset() {
@@ -100,10 +110,6 @@ export class FormArrayModel<T = any> extends AbstractControlModel<T[]> {
   enable() {
     super.enable();
     this._controls.forEach(control => control.enable());
-  }
-
-  get controls() {
-    return this._controls;
   }
 
 }

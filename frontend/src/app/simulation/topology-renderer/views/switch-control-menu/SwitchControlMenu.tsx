@@ -61,7 +61,7 @@ export class SwitchControlMenu extends React.Component<Props, State> {
     return (
       <Dialog
         className='switch-control-menu'
-        show={this.state.show}
+        open={this.state.show}
         top={this.props.top}
         left={this.props.left}
         onAfterClosed={this.props.onAfterClosed}>

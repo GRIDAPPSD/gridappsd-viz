@@ -54,6 +54,7 @@ export const App = withRouter(class extends React.Component<Props, State> {
   shouldRedirect = false;
 
   private readonly _stateStore = StateStore.getInstance();
+
   constructor(props: Props) {
     super(props);
 

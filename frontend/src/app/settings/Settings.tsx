@@ -4,7 +4,7 @@ import { IconButton } from '@shared/buttons';
 import { Tooltip } from '@shared/tooltip';
 import { SlideToggle, FormControlModel } from '@shared/form';
 import { Fade } from '@shared/effects/fade';
-import { Dialog } from '@shared/overlay/dialog';
+import { Dialog, ConfirmationDialog } from '@shared/overlay/dialog';
 
 import './Settings.light.scss';
 import './Settings.dark.scss';
@@ -16,13 +16,15 @@ interface State {
   showSettingsMenu: boolean;
   top: number;
   left: number;
-  themeSelectedPreviously: 'light' | 'dark';
 }
 
 export class Settings extends React.Component<Props, State> {
 
-  readonly isDarkThemeSelectedFormControl = new FormControlModel(true);
+  readonly isDarkThemeSelectedFormControl = new FormControlModel((localStorage.getItem('theme') as 'light' | 'dark' ?? __DEFAULT_SELECTED_THEME__) === 'dark');
+  readonly enableLoggingFormControl = new FormControlModel((localStorage.getItem('isLoggingEnabled') ?? String(__STOMP_CLIENT_LOGGING_ENABLED__)) === 'true');
   readonly menuOpenerRef = React.createRef<HTMLElement>();
+
+  private _isLoggingEnabled = this.enableLoggingFormControl.getValue();
 
   constructor(props: Props) {
     super(props);
@@ -30,17 +32,11 @@ export class Settings extends React.Component<Props, State> {
     this.state = {
       showSettingsMenu: false,
       top: 0,
-      left: 0,
-      themeSelectedPreviously: this._getPreviouslySelectedTheme()
+      left: 0
     };
 
     this.showSettingsMenu = this.showSettingsMenu.bind(this);
     this.hideSettingsMenu = this.hideSettingsMenu.bind(this);
-  }
-
-  private _getPreviouslySelectedTheme() {
-    const selectedTheme = localStorage.getItem('theme') as 'light' | 'dark';
-    return selectedTheme ? selectedTheme : __DEFAULT_SELECTED_THEME__;
   }
 
   componentDidMount() {
@@ -49,9 +45,14 @@ export class Settings extends React.Component<Props, State> {
       left: boundingBox.left - 200,
       top: boundingBox.top + 15
     });
-    if (this.state.themeSelectedPreviously !== 'dark') {
+    this._watchForThemeChanges();
+    this._watchForLoggingEnablement();
+  }
+
+  private _watchForThemeChanges() {
+    if (this.isDarkThemeSelectedFormControl.getValue() === false) {
       setTimeout(() => {
-        this._toggleTheme(this.state.themeSelectedPreviously === 'dark');
+        this._toggleTheme(false);
       }, 16);
     }
     this.isDarkThemeSelectedFormControl.valueChanges()
@@ -63,14 +64,37 @@ export class Settings extends React.Component<Props, State> {
   private _toggleTheme(isDarkThemeSelected: boolean) {
     // These variables are injected by webpack
     // They are declared in src/webpack-injections.d.ts
-    const styleFilename = isDarkThemeSelected ? __DARK_THEME_STYLE_FILENAME__ : __LIGHT_THEME_STYLE_FILENAME__;
-    const link = document.head.querySelector('link[rel=stylesheet]:last-of-type') as HTMLLinkElement;
-    link.href = '/' + styleFilename;
+    if (!__CSS_HMR_ENABLED__) {
+      const styleFilename = isDarkThemeSelected ? __DARK_THEME_STYLE_FILENAME__ : __LIGHT_THEME_STYLE_FILENAME__;
+      const link = document.head.querySelector('link[rel=stylesheet]:last-of-type') as HTMLLinkElement;
+      link.href = '/' + styleFilename;
+    }
     localStorage.setItem('theme', isDarkThemeSelected ? 'dark' : 'light');
+  }
+
+  private _watchForLoggingEnablement() {
+    this.enableLoggingFormControl.valueChanges()
+      .subscribe({
+        next: isOn => {
+          if (this._isLoggingEnabled !== this.enableLoggingFormControl.getValue()) {
+            ConfirmationDialog.open('This will reload the browser, do you wish to continue?')
+              .then(() => {
+                this._isLoggingEnabled = isOn;
+                location.reload();
+                localStorage.setItem('isLoggingEnabled', String(isOn));
+              })
+              .catch(() => {
+                // Reset it back
+                this.enableLoggingFormControl.setValue(this._isLoggingEnabled);
+              });
+          }
+        }
+      });
   }
 
   componentWillUnmount() {
     this.isDarkThemeSelectedFormControl.cleanup();
+    this.enableLoggingFormControl.cleanup();
   }
 
   render() {
@@ -90,7 +114,7 @@ export class Settings extends React.Component<Props, State> {
         </Tooltip>
         <Dialog
           transparentBackdrop
-          show={this.state.showSettingsMenu}
+          open={this.state.showSettingsMenu}
           top={this.state.top}
           left={this.state.left}
           onBackdropClicked={this.hideSettingsMenu}>
@@ -106,8 +130,20 @@ export class Settings extends React.Component<Props, State> {
                     direction='horizontal'
                     onText='Dark'
                     offText='Light'
-                    isOn={this.state.themeSelectedPreviously === 'dark'}
                     formControlModel={this.isDarkThemeSelectedFormControl} />
+                </div>
+              </li>
+              <li className='settings__menu__item'>
+                <div className='settings__menu__item__name'>
+                  Logging
+                </div>
+                <div className='settings__menu__item__action toggle-logging'>
+                  <SlideToggle
+                    className='theme-toggler'
+                    direction='horizontal'
+                    onText='On'
+                    offText='Off'
+                    formControlModel={this.enableLoggingFormControl} />
                 </div>
               </li>
             </ul>
