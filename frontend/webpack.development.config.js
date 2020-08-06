@@ -1,7 +1,11 @@
-const path = require('path');
+const { resolve } = require('path');
 
+/**
+ *
+ * @param {{action: 'enable-css-hmr'}} env
+ */
 module.exports = (env) => {
-  const baseConfig = require('./webpack.base.config')('development', true, env.action === 'enable-css-hmr');
+  const baseConfig = require('./webpack.base.config')('development', env.action === 'enable-css-hmr');
   baseConfig.module.rules.push({
     test: /(\.tsx?)$/,
     use: [
@@ -31,8 +35,8 @@ module.exports = (env) => {
     devServer: {
       port: 4000,
       contentBase: [
-        path.resolve(__dirname, 'assets'),
-        path.resolve(__dirname, 'dist')
+        resolve(__dirname, 'assets'),
+        resolve(__dirname, 'dist')
       ],
       overlay: true,
       historyApiFallback: {

@@ -12,10 +12,9 @@ const { RefReplacerPlugin, NoOpPlugin } = require('./webpack.plugins');
 /**
  *
  * @param {'production' | 'development'} mode
- * @param {boolean} enableStompClientLogging
  * @param {boolean} cssHmr Whether to enable CSS hot module reload
  */
-module.exports = (mode, enableStompClientLogging, cssHmr) => ({
+module.exports = (mode, cssHmr) => ({
   mode,
 
   entry: createEntry(path.resolve(__dirname, 'src'), { main: `./src/main.${mode}.tsx`, dark: [], light: [] }),
@@ -87,7 +86,7 @@ module.exports = (mode, enableStompClientLogging, cssHmr) => ({
       chunkFilename: '[name].[hash:10].css'
     }),
     new webpack.DefinePlugin({
-      __STOMP_CLIENT_LOGGING_ENABLED__: JSON.stringify(enableStompClientLogging),
+      __PRODUCTION__: JSON.stringify(mode === 'production'),
       __CSS_HMR_ENABLED__: JSON.stringify(cssHmr)
     })
   ],

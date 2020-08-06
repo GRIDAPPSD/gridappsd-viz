@@ -61,7 +61,7 @@ export class StompClientService {
     )
       .subscribe({
         next: ([host, port]) => {
-          const isLoggingEnabled = (localStorage.getItem('isLoggingEnabled') ?? String(__STOMP_CLIENT_LOGGING_ENABLED__)) === 'true';
+          const isLoggingEnabled = (localStorage.getItem('isLoggingEnabled') ?? String(!__PRODUCTION__)) === 'true';
 
           this._client = new Client({
             brokerURL: port ? `ws://${host}:${port}` : `ws://${host}`,
