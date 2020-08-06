@@ -9,7 +9,6 @@ module.exports = {
     apply(compiler) {
       const lightThemeStyleFilenameRef = '__LIGHT_THEME_STYLE_FILENAME__';
       const darkThemeStyleFilenameRef = '__DARK_THEME_STYLE_FILENAME__';
-      const defaultSelectedThemeRef = '__DEFAULT_SELECTED_THEME__';
 
       compiler.hooks.emit.tap('RefReplacerPlugin', compilation => {
         const assetNames = compilation.getAssets().map(e => e.name);
@@ -23,8 +22,7 @@ module.exports = {
         if (sourceCode.includes(lightThemeStyleFilenameRef)) {
           modifiedSourceCode = sourceCode
             .replace(lightThemeStyleFilenameRef, `"${newLightThemeFilename}"`)
-            .replace(darkThemeStyleFilenameRef, `"${newDarkThemeFilename}"`)
-            .replace(defaultSelectedThemeRef, '"dark"');
+            .replace(darkThemeStyleFilenameRef, `"${newDarkThemeFilename}"`);
         } else {
           modifiedSourceCode = sourceCode
             .replace(this.previousLightThemeFilename, newLightThemeFilename)
