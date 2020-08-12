@@ -76,7 +76,7 @@ export class StompClientService {
 		  
           this._username = sessionStorage.getItem('username');
           this._password = sessionStorage.getItem('password');
-		  
+          console.log("IN INITIALIZE");		  
           if (this._username && this._password) {
 			this._token = this._getToken(host, port);
             this._client.connectHeaders = {
@@ -175,7 +175,7 @@ export class StompClientService {
 
 
   private _getToken(host: string, port: string) {
-	  
+	  console.log("GET TOKEN "+this._token);
 	if(this._token==null){  
         //get token
         //get initial connection
@@ -183,16 +183,16 @@ export class StompClientService {
 
         //create token request string
         var userAuthStr = this._username+":"+this._password;
-		let buff = new Buffer(userAuthStr);
-		let base64Str = buff.toString('base64');
+		var buff = new Buffer(userAuthStr);
+		var base64Str = buff.toString('base64');
         //var base64Str = base64.b64encode(userAuthStr.encode());
 
         //set up token callback
         //send request to token topic
-        let tokenTopic = "/topic/pnnl.goss.token.topic";
+        var tokenTopic = "/topic/pnnl.goss.token.topic";
 		const subject = new Subject<StompClientInitializationResult>();
 
-		let tmpClient = new Client({
+		var tmpClient = new Client({
             brokerURL: `ws://${host}:${port}`,
             heartbeatIncoming: 0,
             heartbeatOutgoing: 0,
@@ -202,7 +202,7 @@ export class StompClientService {
             logRawCommunication: __ENABLE_STOMP_CLIENT_LOGS__
           });
 
-
+console.log("ABOUT TO CONFIGURE TMP CLIENT");
 		tmpClient.configure({
 		  connectHeaders: {
 				login: this._username,
@@ -221,8 +221,9 @@ export class StompClientService {
 			sessionStorage.setItem('password', this._password);
 		  },
 		  onStompError: () => {
+		        console.log("ON ERROR");
 			subject.error(StompClientInitializationResult.AUTHENTICATION_FAILURE);
-			tmpClient.onStompError = null;
+			//tmpClient.onStompError = null;
 		  },
 		  onWebSocketError: () => {
 			subject.error(StompClientInitializationResult.CONNECTION_FAILURE);
@@ -284,8 +285,15 @@ export class StompClientService {
                 //    #wait
                 //    self.__token = listener.get_token()
                 //    sleep(1)
-               //     iter+=1
+		//     iter+=1
 
+	
+	       //wait to receive a token from the server, or fail after 10 iterations	
+	       var i=0;
+	       while(this._token==null && i<10){
+	           setTimeout(function(){  }, 500);
+                   i++;
+	       }
     }
   }
 
