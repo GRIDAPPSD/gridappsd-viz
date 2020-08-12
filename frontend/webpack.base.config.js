@@ -7,74 +7,20 @@ const ExcludeAssetsPlugin = require('@ianwalter/exclude-assets-plugin');
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 const webpack = require('webpack');
 
-class RefReplacerPlugin {
-
-  constructor() {
-    this.previousLightThemeFilename = ''
-    this.previousDarkThemeFilename = '';
-  }
-
-  apply(compiler) {
-    const lightThemeStyleFilenameRef = '__LIGHT_THEME_STYLE_FILENAME__';
-    const darkThemeStyleFilenameRef = '__DARK_THEME_STYLE_FILENAME__';
-    const defaultSelectedThemeRef = '__DEFAULT_SELECTED_THEME__';
-
-    compiler.hooks.emit.tap('RefReplacerPlugin', compilation => {
-      const assetNames = compilation.getAssets().map(e => e.name);
-      const mainChunkName = assetNames.find(e => e.startsWith('main') && e.endsWith('.js'));
-      const hash = mainChunkName.split('.')[1];
-      const newLightThemeFilename = `light.${hash}.css`;
-      const newDarkThemeFilename = `dark.${hash}.css`;
-      const sourceCode = compilation.assets[mainChunkName].source();
-      let modifiedSourceCode = sourceCode;
-
-      if (sourceCode.includes(lightThemeStyleFilenameRef)) {
-        modifiedSourceCode = sourceCode
-          .replace(lightThemeStyleFilenameRef, `"${newLightThemeFilename}"`)
-          .replace(darkThemeStyleFilenameRef, `"${newDarkThemeFilename}"`)
-          .replace(defaultSelectedThemeRef, '"dark"');
-      } else {
-        modifiedSourceCode = sourceCode
-          .replace(this.previousLightThemeFilename, newLightThemeFilename)
-          .replace(this.previousDarkThemeFilename, newDarkThemeFilename);
-      }
-
-      delete compilation.assets[`dark.${hash}.js`];
-      delete compilation.assets[`dark.${hash}.js.map`];
-      delete compilation.assets[`light.${hash}.js`];
-      delete compilation.assets[`light.${hash}.js.map`];
-      delete compilation.assets[`main.${hash}.css`];
-      delete compilation.assets[`main.${hash}.css.map`];
-
-      compilation.getAsset(mainChunkName).source.children = [
-        {
-          source() {
-            return modifiedSourceCode;
-          },
-          size() {
-            return modifiedSourceCode.length;
-          }
-        }
-      ];
-
-      this.previousLightThemeFilename = newLightThemeFilename;
-      this.previousDarkThemeFilename = newDarkThemeFilename;
-    });
-  }
-}
+const { RefReplacerPlugin, NoOpPlugin } = require('./webpack.plugins');
 
 /**
  *
  * @param {'production' | 'development'} mode
- * @param {boolean} enableLogging
+ * @param {boolean} cssHmr Whether to enable CSS hot module reload
  */
-module.exports = (mode, enableLogging) => ({
+module.exports = (mode, cssHmr) => ({
   mode,
 
   entry: createEntry(path.resolve(__dirname, 'src'), { main: `./src/main.${mode}.tsx`, dark: [], light: [] }),
 
   output: {
-    path: path.resolve(__dirname, 'dist'),
+    path: path.resolve(__dirname, '..', 'backend', 'dist', 'public'),
     filename: '[name].[hash:10].js',
     chunkFilename: '[name].[hash:10].js',
     publicPath: '/'
@@ -97,13 +43,9 @@ module.exports = (mode, enableLogging) => ({
   module: {
     rules: [
       {
-        test: /(\.tsx?)$/,
-        use: 'awesome-typescript-loader'
-      },
-      {
         test: /\.scss/,
         use: [
-          MiniCssExtractPlugin.loader,
+          cssHmr ? 'style-loader' : MiniCssExtractPlugin.loader,
           'css-loader',
           'sass-loader',
         ]
@@ -128,7 +70,7 @@ module.exports = (mode, enableLogging) => ({
 
   plugins: [
     new CleanWebpackPlugin(),
-    new RefReplacerPlugin(),
+    cssHmr ? new NoOpPlugin() : new RefReplacerPlugin(),
     new HtmlWebpackPlugin({
       template: './template.html',
       excludeAssets: [
@@ -144,7 +86,8 @@ module.exports = (mode, enableLogging) => ({
       chunkFilename: '[name].[hash:10].css'
     }),
     new webpack.DefinePlugin({
-      __ENABLE_STOMP_CLIENT_LOGS__: JSON.stringify(enableLogging)
+      __PRODUCTION__: JSON.stringify(mode === 'production'),
+      __CSS_HMR_ENABLED__: JSON.stringify(cssHmr)
     })
   ],
 

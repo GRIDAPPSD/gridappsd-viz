@@ -10,3 +10,5 @@ node_modules/*
 .DS_Store
 
 pull.sh
+
+tsconfig.tsbuildinfo

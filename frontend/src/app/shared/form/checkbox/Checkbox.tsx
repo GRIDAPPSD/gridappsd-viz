@@ -3,6 +3,7 @@ import * as React from 'react';
 import { Ripple } from '@shared/ripple';
 import { FormControl } from '../form-control/FormControl';
 import { FormControlModel } from '../models/FormControlModel';
+import { generateUniqueId } from '@shared/misc';
 
 import './Checkbox.light.scss';
 import './Checkbox.dark.scss';
@@ -21,6 +22,8 @@ interface State {
 }
 
 export class Checkbox extends React.Component<Props, State> {
+
+  readonly id = generateUniqueId();
 
   constructor(props: Props) {
     super(props);
@@ -52,7 +55,7 @@ export class Checkbox extends React.Component<Props, State> {
       <FormControl
         className={this.resolveClassNames()}
         label={this.props.label}
-        htmlFor={this.props.label}
+        htmlFor={this.id}
         hint={this.props.hint}
         formControlModel={this.props.formControlModel}>
         <Ripple
@@ -61,7 +64,7 @@ export class Checkbox extends React.Component<Props, State> {
           <div className='checkbox-wrapper'>
             <input
               className='checkbox__input'
-              id={this.props.label}
+              id={this.id}
               type='checkbox'
               name={this.props.name}
               disabled={this.props.formControlModel.isDisabled()}

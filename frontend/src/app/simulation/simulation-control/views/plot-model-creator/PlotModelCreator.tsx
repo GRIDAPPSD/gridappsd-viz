@@ -230,7 +230,7 @@ export class PlotModelCreator extends React.Component<Props, State> {
   render() {
     return (
       <Dialog
-        show={this.state.show}
+        open={this.state.show}
         className='plot-model-creator'
         onAfterClosed={this.props.onClose}>
         <DialogContent>

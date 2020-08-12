@@ -3,10 +3,10 @@
     "version": "1.0.0",
     "main": "dist/index.js",
     "scripts": {
-        "build": "rm -rf dist && tsc && cp -rf ../frontend/dist/** dist/backend/src",
-        "start": "node dist/backend/src/index.js",
-        "nodemon": "tsc --watch & nodemon dist/backend/src/index.js",
-        "debug": "node --inspect dist/backend/src/index.js",
+        "build": "cd ../common && tsc && cd ../backend && tsc",
+        "start": "node dist/src/index.js",
+        "nodemon": "tsc --watch & nodemon dist/src/index.js",
+        "debug": "node --inspect dist/src/index.js",
         "lint": "eslint . --ext .ts && cd ../frontend && npm run lint"
     },
     "husky": {
@@ -31,7 +31,7 @@
         "@typescript-eslint/parser": "^3.6.1",
         "eslint": "^7.4.0",
         "husky": "^4.2.5",
-        "nodemon": "^2.0.2",
+        "nodemon": "^2.0.4",
         "tslint": "^6.1.2",
         "typescript": "^3.9.6"
     }

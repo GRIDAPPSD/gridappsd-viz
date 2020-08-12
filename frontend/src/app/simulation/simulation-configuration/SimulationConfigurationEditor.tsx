@@ -198,7 +198,7 @@ export class SimulationConfigurationEditor extends React.Component<Props, State>
   render() {
     return (
       <Dialog
-        show={this.state.show}
+        open={this.state.show}
         onAfterClosed={this.props.onClose}>
         <DialogContent>
           <Form

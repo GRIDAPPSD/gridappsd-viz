@@ -468,7 +468,7 @@ export class TopologyRenderer extends React.Component<Props, State> {
       node.y1 = minYCoordinate + (maxYCoordinate - node.y1);
       if ('y2' in node) {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (node as any).y2 = minYCoordinate + (maxYCoordinate - (node as any).y2);
+        (node as any).y2 = minYCoordinate + (maxYCoordinate - node['y2']);
       }
     });
   }
@@ -492,10 +492,10 @@ export class TopologyRenderer extends React.Component<Props, State> {
 
       switch (node.type) {
         case NodeType.SWITCH:
-          (node as Switch).screenX2 = this._xScale((node as Switch).x2);
-          (node as Switch).screenY2 = this._yScale((node as Switch).y2);
-          (node as Switch).midpointX = (node.screenX1 + (node as Switch).screenX2) / 2;
-          (node as Switch).midpointY = (node.screenY1 + (node as Switch).screenY2) / 2;
+          node['screenX2'] = this._xScale(node['x2']);
+          node['screenY2'] = this._yScale(node['y2']);
+          node['midpointX'] = (node.screenX1 + node['screenX2']) / 2;
+          node['midpointY'] = (node.screenY1 + node['screenY2']) / 2;
           categories.switches.push(node as Switch);
           if (node.mRIDs.length > 0) {
             this._switchMap.set(node.mRIDs[0], node as Switch);
@@ -669,8 +669,7 @@ export class TopologyRenderer extends React.Component<Props, State> {
   }
 
   private _calculateSymbolTransform(node: Node, nodeNameToEdgeMap: Map<string, Edge>) {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const edge = nodeNameToEdgeMap.get((node as any).from) || nodeNameToEdgeMap.get((node as any).to);
+    const edge = nodeNameToEdgeMap.get(node['from']) || nodeNameToEdgeMap.get(node['to']);
     if (!edge && node.type === NodeType.CAPACITOR) {
       return 'translate(0, 0) rotate(0)';
     }

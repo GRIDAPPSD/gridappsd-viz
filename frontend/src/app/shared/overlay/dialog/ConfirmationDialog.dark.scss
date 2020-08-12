@@ -1,0 +1,9 @@
+@import 'ConfirmationDialog.common';
+
+.confirmation-dialog-container+.dialog-container .backdrop {
+    background-color: rgba(80, 54, 54, 0.8);
+}
+
+.confirmation-dialog .dialog-content {
+    color: #fff;
+}

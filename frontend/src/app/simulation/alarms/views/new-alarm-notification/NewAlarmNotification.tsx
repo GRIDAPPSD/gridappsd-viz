@@ -11,11 +11,12 @@ interface Props {
 }
 
 export function NewAlarmNotification(props: Props) {
-  const style = {
+  const style: React.CSSProperties = {
     left: undefined,
     top: undefined,
     width: 0,
     height: 0,
+    pointerEvents: props.newAlarmCounts === 0 ? 'none' : 'all'
   };
   const alarmsTab = document.querySelector('.tab-group__header__label.tab-label-3');
   if (alarmsTab) {

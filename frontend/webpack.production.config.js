@@ -6,11 +6,16 @@ const OptimizeCSSAssetsPlugin = require('optimize-css-assets-webpack-plugin');
 
 /**
  *
- * @param {{ buildVersion: string | true; enableLogging?: boolean; }} env
+ * @param {{ buildVersion: string | true; }} env
  */
 module.exports = (env) => {
   updateVersion(env);
-  const baseConfig = require('./webpack.base.config')('production', env.enableLogging !== undefined);
+  const baseConfig = require('./webpack.base.config')('production', false);
+  baseConfig.module.rules.push({
+    test: /(\.tsx?)$/,
+    use: 'awesome-typescript-loader'
+  });
+
   return {
     ...baseConfig,
 
@@ -67,7 +72,7 @@ function updateVersion(env) {
 }
 
 function writeVersionNumber(versionNumber) {
-  const configFilePath = path.resolve(__dirname, '..', 'config.json')
+  const configFilePath = path.resolve(__dirname, '..', 'assets', 'config.json')
   const config = JSON.parse(fs.readFileSync(configFilePath).toString());
   config.version = versionNumber.trim();
   fs.writeFileSync(configFilePath, JSON.stringify(config, null, 4));

@@ -20,6 +20,10 @@
         &__action {
             position: relative;
             margin-left: auto;
+
+            &.toggle-logging {
+                transform: translate(-13px, 0px);
+            }
         }
     }
 }
