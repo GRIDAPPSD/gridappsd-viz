@@ -30,7 +30,7 @@ export class StompClientService {
   private readonly _configurationManager = ConfigurationManager.getInstance();
 
   private _client: Client;
-  private _statusChanges = new BehaviorSubject<StompClientConnectionStatus>(StompClientConnectionStatus.UNINITIALIZED);
+  private _statusChanges = new BehaviorSubject(StompClientConnectionStatus.UNINITIALIZED);
   private _status = StompClientConnectionStatus.UNINITIALIZED;
   private _username = '';
   private _authenticationToken = '';
@@ -118,7 +118,7 @@ export class StompClientService {
 
   private _retrieveToken(username: string, password: string): Promise<string> {
     return new Promise(resolve => {
-      const destination = `/tokens/${username}`;
+      const destination = `/queue/temp.token_resp.${username}`;
       this.readOnceFrom<string>(destination)
         .subscribe({
           next: token => {
@@ -159,7 +159,8 @@ export class StompClientService {
       this._statusChanges.next(this._status);
       this._client.configure({
         connectHeaders: {
-          login: this._authenticationToken
+          login: this._authenticationToken,
+          passcode: ''
         },
         onConnect: this._connectionEstablished,
         onWebSocketClose: this._connectionClosed
@@ -242,15 +243,20 @@ export class StompClientService {
           const source = new BehaviorSubject<T>(null);
           const id = `${destination}[${Math.random() * 1_000_000 | 0}]`;
           return using(() => this._client.subscribe(destination, (message: Message) => {
-            const payload = JSON.parse(message.body);
-            if ('error' in payload) {
-              source.error(payload.error.message);
-            } else if (!('data' in payload)) {
-              source.next(payload);
-            } else if (typeof payload.data !== 'string') {
-              source.next(payload.data);
-            } else {
-              source.next(JSON.parse(payload.data));
+            const body = message.body;
+            try {
+              const payload = JSON.parse(body);
+              if ('error' in payload) {
+                source.error(payload.error.message);
+              } else if (!('data' in payload)) {
+                source.next(payload);
+              } else if (typeof payload.data !== 'string') {
+                source.next(payload.data);
+              } else {
+                source.next(JSON.parse(payload.data));
+              }
+            } catch {
+              source.next(body as unknown as T);
             }
           }, { id }), () => source.asObservable().pipe(filter(responseBody => Boolean(responseBody))));
         })
