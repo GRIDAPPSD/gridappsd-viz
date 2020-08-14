@@ -32,7 +32,6 @@ export class StompClientService {
   private _client: Client;
   private _statusChanges = new BehaviorSubject(StompClientConnectionStatus.UNINITIALIZED);
   private _status = StompClientConnectionStatus.UNINITIALIZED;
-  private _username = '';
   private _authenticationToken = '';
 
   static getInstance() {
@@ -69,10 +68,7 @@ export class StompClientService {
             debug: isLoggingEnabled ? console.log : () => { },
             logRawCommunication: isLoggingEnabled
           });
-
           this._authenticationToken = sessionStorage.getItem('token');
-          this._username = sessionStorage.getItem('username');
-
           if (this._authenticationToken) {
             this.reconnect();
           }
@@ -84,7 +80,6 @@ export class StompClientService {
     const subject = new Subject<StompClientInitializationResult>();
     const noOp = () => { };
 
-    this._username = username;
     this._client.configure({
       connectHeaders: {
         login: username,
@@ -101,7 +96,6 @@ export class StompClientService {
           .then(() => {
             this._client.deactivate();
           });
-        sessionStorage.setItem('username', username);
       },
       onStompError: () => {
         subject.error(StompClientInitializationResult.AUTHENTICATION_FAILURE);
@@ -122,8 +116,8 @@ export class StompClientService {
       this.readOnceFrom<string>(destination)
         .subscribe({
           next: token => {
+            sessionStorage.setItem('token', this._authenticationToken);
             this._authenticationToken = token;
-            sessionStorage.setItem('token', token);
             resolve();
           }
         });
@@ -193,7 +187,7 @@ export class StompClientService {
         {
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           GOSS_HAS_SUBJECT: true as any,
-          GOSS_SUBJECT: this._username
+          GOSS_SUBJECT: this._authenticationToken
         },
         request.replyTo ? { 'reply-to': request.replyTo } : {}
       );
