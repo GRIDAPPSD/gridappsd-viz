@@ -5,7 +5,7 @@ import { Service, ServiceConfigUserInputSpec } from '@shared/Service';
 import { ServiceConfigurationModel } from '../../models/ServiceConfigurationModel';
 import { BasicButton } from '@shared/buttons';
 import { MessageBanner } from '@shared/overlay/message-banner';
-import { showNotification } from '@shared/overlay/notification';
+import { Notification } from '@shared/overlay/notification';
 import { FormArrayModel, SelectionOptionBuilder, FormControlModel, Select } from '@shared/form';
 import { ServiceConfiguration } from './ServiceConfiguration';
 
@@ -137,12 +137,12 @@ export class ServiceConfigurationTab extends React.Component<Props, State> {
   saveChanges() {
     try {
       this.props.parentFormArrayModel.setValue(this.internalFormArrayModel.getValue());
-      showNotification('Changes saved successfully');
+      Notification.open('Changes saved successfully');
       this.setState({
         disableApplyButton: true
       });
     } catch {
-      showNotification('Failed to save changes');
+      Notification.open('Failed to save changes');
     }
   }
 

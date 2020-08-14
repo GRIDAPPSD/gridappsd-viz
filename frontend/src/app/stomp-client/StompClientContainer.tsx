@@ -5,7 +5,7 @@ import { map } from 'rxjs/operators';
 import { StompClientService, StompClientConnectionStatus } from '@shared/StompClientService';
 import { StompClient } from './StompClient';
 import { download, DownloadType } from '@shared/misc';
-import { showNotification } from '@shared/overlay/notification';
+import { Notification } from '@shared/overlay/notification';
 
 interface Props {
 }
@@ -95,7 +95,7 @@ export class StompClientContainer extends React.Component<Props, State> {
       try {
         download('response', this._convertResponseBodyToCsv(), downloadType);
       } catch {
-        showNotification('There was a problem exporting the response to CSV');
+        Notification.open('There was a problem exporting the response to CSV');
       }
     }
   }

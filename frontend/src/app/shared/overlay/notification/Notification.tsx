@@ -36,6 +36,15 @@ export class Notification extends React.Component<Props, State> {
     this.hideNotification = this.hideNotification.bind(this);
   }
 
+  static open(content: React.ReactChild) {
+    const portalRenderer = new PortalRenderer();
+    portalRenderer.mount(
+      <Notification onHide={portalRenderer.unmount}>
+        {content}
+      </Notification>
+    );
+  }
+
   componentDidMount() {
     if (this.props.show) {
       this._showNotification();
@@ -86,14 +95,4 @@ export class Notification extends React.Component<Props, State> {
     );
   }
 
-}
-
-const portalRenderer = new PortalRenderer();
-export function showNotification(content: React.ReactChild) {
-  portalRenderer.unmount();
-  portalRenderer.mount(
-    <Notification onHide={portalRenderer.unmount}>
-      {content}
-    </Notification>
-  );
 }
