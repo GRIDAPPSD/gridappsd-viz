@@ -77,7 +77,9 @@ export class MeasurementChartContainer extends React.Component<Props, State> {
   }
 
   private _updateMeasurementChartModels(resetAllTimeSeries = false) {
-    const measurementChartModels = [];
+    const measurementChartModels = [
+      this._createMinAverageMaxVoltageChartModel()
+    ];
     for (let i = 0; i < this._plotModels.length; i++) {
       const plotModel = this._plotModels[i];
       const measurementChartModel = this._createDefaultMeasurementChartModel(plotModel);
@@ -103,6 +105,58 @@ export class MeasurementChartContainer extends React.Component<Props, State> {
         measurementChartModels
       });
     }
+  }
+
+  private _createMinAverageMaxVoltageChartModel(measurements?: Map<string, SimulationOutputMeasurement>): MeasurementChartModel {
+    let minVoltage = Infinity;
+    let maxVoltage = -Infinity;
+    let averageVoltage = Infinity;
+    if (measurements) {
+      let totalVoltage = 0;
+      measurements.forEach(measurement => {
+        if (measurement.type === MeasurementType.VOLTAGE) {
+          const magnitude = measurement.magnitude;
+          if (magnitude < minVoltage) {
+            minVoltage = magnitude;
+          }
+          if (magnitude > maxVoltage) {
+            maxVoltage = magnitude;
+          }
+          totalVoltage += magnitude;
+        }
+      });
+      averageVoltage = totalVoltage / measurements.size;
+    }
+    return {
+      name: 'Min/Average/Max Voltages',
+      yAxisLabel: 'V',
+      timeSeries: [
+        this._getMinAverageMaxVoltageTimeseriesLine('Min', minVoltage),
+        this._getMinAverageMaxVoltageTimeseriesLine('Average', averageVoltage),
+        this._getMinAverageMaxVoltageTimeseriesLine('Max', maxVoltage)
+      ]
+    };
+  }
+
+  private _getMinAverageMaxVoltageTimeseriesLine(type: 'Min' | 'Average' | 'Max', value: number) {
+    let line = this._timeSeries.get(type);
+    if (!line) {
+      line = {
+        name: type,
+        points: []
+      };
+      this._timeSeries.set(type, line);
+    }
+    if (line.points.length === 20) {
+      line.points.pop();
+    }
+    if (value !== Infinity && value !== -Infinity) {
+      line.points.push({
+        timestamp: new Date(this._simulationManagementService.getOutputTimestamp() * 1000),
+        measurement: value
+      });
+    }
+    return line;
   }
 
   private _createDefaultMeasurementChartModel(plotModel: PlotModel): MeasurementChartModel {
