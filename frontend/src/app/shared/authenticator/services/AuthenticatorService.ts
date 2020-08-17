@@ -54,22 +54,24 @@ export class AuthenticatorService {
   }
 
   private _fetchUserRoles() {
-    waitUntil(() => this._stompClientService.isActive())
-      .then(() => {
-        this._stompClientService.readOnceFrom<{ roles: string[] }>('/user/roles')
-          .pipe(map(payload => payload.roles))
-          .subscribe({
-            next: userRoles => {
-              this._userRoles = userRoles;
-              sessionStorage.setItem('userRoles', JSON.stringify(userRoles));
-            }
-          });
-        this._stompClientService.send({
-          destination: 'goss.gridappsd.process.request.roles',
-          replyTo: '/user/roles',
-          body: '{}'
-        });
-      });
+    //waitUntil(() => this._stompClientService.isActive())
+    //  .then(() => {
+    //    this._stompClientService.readOnceFrom<{ roles: string[] }>('/user/roles')
+    //      .pipe(map(payload => payload.roles))
+    //      .subscribe({
+    //        next: userRoles => {
+    //          this._userRoles = userRoles;
+    //          sessionStorage.setItem('userRoles', JSON.stringify(userRoles));
+    //        }
+    //      });
+    //    this._stompClientService.send({
+    //      destination: 'goss.gridappsd.process.request.roles',
+    //      replyTo: '/user/roles',
+    //      body: '{}'
+    //    });
+    //  });
+    //TODO retreive roles from user token
+    this._userRoles = ['testmanager', 'application', 'service', 'admin', 'operator', 'evaluator'];
   }
 
   userHasRole(role: string) {
