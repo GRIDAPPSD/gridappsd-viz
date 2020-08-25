@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { Subscription, Subject } from 'rxjs';
-import { filter, takeUntil } from 'rxjs/operators';
+import { filter, takeUntil, map } from 'rxjs/operators';
 
 import { MeasurementChart } from './MeasurementChart';
 import { MeasurementChartModel } from './models/MeasurementChartModel';
@@ -11,6 +11,9 @@ import { TimeSeriesDataPoint } from './models/TimeSeriesDataPoint';
 import { StateStore } from '@shared/state-store';
 import { MeasurementType } from '@shared/topology';
 import { PlotModel, PlotModelComponent } from '@shared/plot-model';
+import { Limits } from './models/Limits';
+import { StompClientService } from '@shared/StompClientService';
+import { FetchLimitsFileRequest } from './models/FetchLimitsFileRequest';
 
 interface Props {
 }
@@ -23,8 +26,10 @@ export class MeasurementChartContainer extends React.Component<Props, State> {
 
   private readonly _stateStore = StateStore.getInstance();
   private readonly _simulationManagementService = SimulationManagementService.getInstance();
+  private readonly _stompClientService = StompClientService.getInstance();
   private readonly _timeSeries = new Map<string, TimeSeries>();
   private readonly _unsubscriber = new Subject<void>();
+  private readonly _nominalVoltageDivisorMap = new Map<string, number>();
 
   private _plotModels: PlotModel[] = [];
 
@@ -40,6 +45,7 @@ export class MeasurementChartContainer extends React.Component<Props, State> {
     this._subscribeToPlotModelsStateStore();
     this._subscribeToSimulationOutputMeasurementMapStream();
     this._resetMeasurementChartModelsWhenSimulationStarts();
+    this._fetchLimitsFileWhenSimulationIdChanges();
   }
 
   private _pickMeasurementChartModelsFromSimulationSnapshotStream() {
@@ -70,16 +76,43 @@ export class MeasurementChartContainer extends React.Component<Props, State> {
       .pipe(takeUntil(this._unsubscriber))
       .subscribe({
         next: plotModels => {
-          this._plotModels = plotModels;
+          this._plotModels = [
+            this._createPlotModelForMinAverageMaxChart(),
+            ...plotModels
+          ];
           this._updateMeasurementChartModels();
         }
       });
   }
 
+  private _createPlotModelForMinAverageMaxChart(): PlotModel {
+    return {
+      name: 'Min/Average/Max Voltages',
+      measurementType: MeasurementType.VOLTAGE,
+      components: [
+        {
+          id: 'min',
+          phase: '',
+          displayName: 'Min'
+        },
+        {
+          id: 'average',
+          phase: '',
+          displayName: 'Average'
+        },
+        {
+          id: 'max',
+          phase: '',
+          displayName: 'Max'
+        }
+      ],
+      useMagnitude: true,
+      useAngle: false
+    };
+  }
+
   private _updateMeasurementChartModels(resetAllTimeSeries = false) {
-    const measurementChartModels = [
-      this._createMinAverageMaxVoltageChartModel()
-    ];
+    const measurementChartModels: MeasurementChartModel[] = [];
     for (let i = 0; i < this._plotModels.length; i++) {
       const plotModel = this._plotModels[i];
       const measurementChartModel = this._createDefaultMeasurementChartModel(plotModel);
@@ -105,58 +138,6 @@ export class MeasurementChartContainer extends React.Component<Props, State> {
         measurementChartModels
       });
     }
-  }
-
-  private _createMinAverageMaxVoltageChartModel(measurements?: Map<string, SimulationOutputMeasurement>): MeasurementChartModel {
-    let minVoltage = Infinity;
-    let maxVoltage = -Infinity;
-    let averageVoltage = Infinity;
-    if (measurements) {
-      let totalVoltage = 0;
-      measurements.forEach(measurement => {
-        if (measurement.type === MeasurementType.VOLTAGE) {
-          const magnitude = measurement.magnitude;
-          if (magnitude < minVoltage) {
-            minVoltage = magnitude;
-          }
-          if (magnitude > maxVoltage) {
-            maxVoltage = magnitude;
-          }
-          totalVoltage += magnitude;
-        }
-      });
-      averageVoltage = totalVoltage / measurements.size;
-    }
-    return {
-      name: 'Min/Average/Max Voltages',
-      yAxisLabel: 'V',
-      timeSeries: [
-        this._getMinAverageMaxVoltageTimeseriesLine('Min', minVoltage),
-        this._getMinAverageMaxVoltageTimeseriesLine('Average', averageVoltage),
-        this._getMinAverageMaxVoltageTimeseriesLine('Max', maxVoltage)
-      ]
-    };
-  }
-
-  private _getMinAverageMaxVoltageTimeseriesLine(type: 'Min' | 'Average' | 'Max', value: number) {
-    let line = this._timeSeries.get(type);
-    if (!line) {
-      line = {
-        name: type,
-        points: []
-      };
-      this._timeSeries.set(type, line);
-    }
-    if (line.points.length === 20) {
-      line.points.pop();
-    }
-    if (value !== Infinity && value !== -Infinity) {
-      line.points.push({
-        timestamp: new Date(this._simulationManagementService.getOutputTimestamp() * 1000),
-        measurement: value
-      });
-    }
-    return line;
   }
 
   private _createDefaultMeasurementChartModel(plotModel: PlotModel): MeasurementChartModel {
@@ -197,11 +178,13 @@ export class MeasurementChartContainer extends React.Component<Props, State> {
       )
       .subscribe({
         next: measurements => {
-          const measurementChartModels = [];
-          if (this._plotModels.length > 0) {
-            measurementChartModels.push(
-              ...this._plotModels.map(plotModel => this._buildMeasurementChartModel(plotModel, measurements))
-            );
+          const measurementChartModels: MeasurementChartModel[] = [
+            this._buildMinAverageMaxVoltageMeasurementChartModel(measurements)
+          ];
+
+          // Skip the first element because it is the Min/Average/Max PlotModel
+          for (let i = 1; i < this._plotModels.length; i++) {
+            measurementChartModels.push(this._buildMeasurementChartModel(this._plotModels[i], measurements));
           }
           this.setState({
             measurementChartModels
@@ -213,6 +196,50 @@ export class MeasurementChartContainer extends React.Component<Props, State> {
           }
         }
       });
+  }
+
+  private _buildMinAverageMaxVoltageMeasurementChartModel(measurements: Map<string, SimulationOutputMeasurement>): MeasurementChartModel {
+    let minVoltage = Infinity;
+    let maxVoltage = -Infinity;
+    let averageVoltage = Infinity;
+    const plotModel = this._plotModels[0];
+    const measurementChartModel = this._createDefaultMeasurementChartModel(plotModel);
+
+    if (measurements) {
+      let totalVoltage = 0;
+      let numberOfVoltageMeasurements = 0;
+      measurements.forEach(measurement => {
+        if (measurement.type === MeasurementType.VOLTAGE) {
+          const nominalVoltage = measurement.magnitude / this._nominalVoltageDivisorMap.get(measurement.connectivityNode);
+          if (nominalVoltage < minVoltage) {
+            minVoltage = nominalVoltage;
+          }
+          if (nominalVoltage > maxVoltage) {
+            maxVoltage = nominalVoltage;
+          }
+          totalVoltage += nominalVoltage;
+          numberOfVoltageMeasurements++;
+        }
+      });
+      averageVoltage = totalVoltage / numberOfVoltageMeasurements;
+    }
+    measurementChartModel.timeSeries[0] = this._updateMinAverageMaxTimeSeriesLine(this._findOrCreateTimeSeries(plotModel, plotModel.components[0]), minVoltage);
+    measurementChartModel.timeSeries[1] = this._updateMinAverageMaxTimeSeriesLine(this._findOrCreateTimeSeries(plotModel, plotModel.components[1]), averageVoltage);
+    measurementChartModel.timeSeries[2] = this._updateMinAverageMaxTimeSeriesLine(this._findOrCreateTimeSeries(plotModel, plotModel.components[2]), maxVoltage);
+    return measurementChartModel;
+  }
+
+  private _updateMinAverageMaxTimeSeriesLine(timeSeries: TimeSeries, value: number) {
+    if (timeSeries.points.length === 20) {
+      timeSeries.points.pop();
+    }
+    if (value !== Infinity && value !== -Infinity) {
+      timeSeries.points.push({
+        timestamp: new Date(this._simulationManagementService.getOutputTimestamp() * 1000),
+        measurement: value
+      });
+    }
+    return timeSeries;
   }
 
   private _buildMeasurementChartModel(plotModel: PlotModel, measurements: Map<string, SimulationOutputMeasurement>): MeasurementChartModel {
@@ -276,6 +303,38 @@ export class MeasurementChartContainer extends React.Component<Props, State> {
       )
       .subscribe({
         next: () => this._updateMeasurementChartModels(true)
+      });
+  }
+
+  private _fetchLimitsFileWhenSimulationIdChanges() {
+    this._stateStore.select('simulationId')
+      .pipe(
+        takeUntil(this._unsubscriber),
+        filter(simulationId => simulationId !== ''),
+        map(simulationId => new FetchLimitsFileRequest(simulationId))
+      )
+      .subscribe({
+        next: request => {
+          this._stompClientService.readOnceFrom<{ limits: Limits }>(request.replyTo)
+            .subscribe({
+              next: payload => {
+                for (const limit of payload.limits.voltages) {
+                  /*
+                    Get the percentage of nominal voltage for each ConnectivityNode
+                    by taking the average of Alo and Blo, then divide each measured
+                    voltage value by this average, then find the min/average/max
+                    voltages after applying the divisions.
+                  */
+                  this._nominalVoltageDivisorMap.set(limit.ConnectivityNode, (limit.Alo + limit.Blo) / 2);
+                }
+              }
+            });
+          this._stompClientService.send({
+            destination: request.url,
+            body: JSON.stringify(request.requestBody),
+            replyTo: request.replyTo
+          });
+        }
       });
   }
 

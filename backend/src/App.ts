@@ -5,6 +5,7 @@ import * as path from 'path';
 export class App {
   constructor(private readonly _expressServer: express.Express) {
     this._addMiddlewares();
+    _expressServer.get(['/'], (_, response) => response.sendFile('/index.html'));
   }
 
   private _addMiddlewares() {
@@ -23,10 +24,6 @@ export class App {
       response.redirect('/');
       next();
     });
-  }
-
-  onIndex(cb: (request: express.Request, response: express.Response) => void) {
-    this._expressServer.get('/', cb);
   }
 
   onGetConfigFile(cb: (request: express.Request, response: express.Response) => void) {

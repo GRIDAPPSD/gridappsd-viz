@@ -7,34 +7,32 @@ import { SimulationCoordinator } from './simulation-coordination/SimulationCoord
 import { SimulationStatus } from '@common/SimulationStatus';
 
 const EXPRESS = express();
-const EXPRESS_SERVER = http.createServer(EXPRESS);
-const SOCKET_SERVER = socketIo(EXPRESS_SERVER);
-const PORT = process.env.PORT || 8092;
-const APP = new App(EXPRESS);
-const SIMULATION_COORDINATOR = new SimulationCoordinator();
+const expressServer = http.createServer(EXPRESS);
+const socketServer = socketIo(expressServer);
+const port = process.env.PORT || 8092;
+const app = new App(EXPRESS);
+const simulationCoordinator = new SimulationCoordinator();
 
-APP.onIndex((_, response) => response.sendFile('/index.html'));
+app.onGetConfigFile((_, response) => response.sendFile('/config.json'));
 
-APP.onGetConfigFile((_, response) => response.sendFile('/config.json'));
-
-SOCKET_SERVER.on('connection', socket => {
-  const participant = SIMULATION_COORDINATOR.createNewParticipant(socket);
+socketServer.on('connection', socket => {
+  const participant = simulationCoordinator.createNewParticipant(socket);
 
   participant.simulationStatusChanges()
     .subscribe({
       next: payload => {
         switch (payload.status) {
           case SimulationStatus.STARTED:
-            SIMULATION_COORDINATOR.startSimulationChannel(payload.simulationId, participant);
+            simulationCoordinator.startSimulationChannel(payload.simulationId, participant);
             break;
           case SimulationStatus.STOPPED:
-            SIMULATION_COORDINATOR.deactivateSimulationChannel(payload.simulationId, participant);
+            simulationCoordinator.deactivateSimulationChannel(payload.simulationId, participant);
             break;
           case SimulationStatus.RESUMED:
-            SIMULATION_COORDINATOR.resumeSimulationChannel(payload.simulationId);
+            simulationCoordinator.resumeSimulationChannel(payload.simulationId);
             break;
           case SimulationStatus.PAUSED:
-            SIMULATION_COORDINATOR.pauseSimulationChannel(payload.simulationId);
+            simulationCoordinator.pauseSimulationChannel(payload.simulationId);
             break;
         }
       }
@@ -43,10 +41,10 @@ SOCKET_SERVER.on('connection', socket => {
   participant.requestToJoinSimulationChannel()
     .subscribe({
       next: (simulationId: string) => {
-        SIMULATION_COORDINATOR.addParticipantToSimulationChannel(simulationId, participant);
+        simulationCoordinator.addParticipantToSimulationChannel(simulationId, participant);
       }
     });
 });
 
 // eslint-disable-next-line no-console
-EXPRESS_SERVER.listen(PORT, () => console.log(`Server started on port ${PORT}`));
+expressServer.listen(port, () => console.log(`Server started on port ${port}`));
