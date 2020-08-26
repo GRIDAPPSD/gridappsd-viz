@@ -2,7 +2,7 @@ import * as React from 'react';
 import { Subscription } from 'rxjs';
 import { map } from 'rxjs/operators';
 
-import { StompClientService, StompClientConnectionStatus } from '@shared/StompClientService';
+import { StompClientService } from '@shared/StompClientService';
 import { StompClient } from './StompClient';
 import { download, DownloadType } from '@shared/misc';
 import { showNotification } from '@shared/overlay/notification';
@@ -33,34 +33,6 @@ export class StompClientContainer extends React.Component<Props, State> {
     this.downloadResponse = this.downloadResponse.bind(this);
   }
 
-  componentDidMount() {
-    this._stompClientStatusSubscription = this._watchStompClientStatusChanges();
-  }
-
-  private _watchStompClientStatusChanges() {
-    return this._stompClientService.statusChanges()
-      .subscribe({
-        next: status => {
-          switch (status) {
-            case StompClientConnectionStatus.CONNECTING:
-              this._responseSubscription?.unsubscribe();
-              break;
-            case StompClientConnectionStatus.CONNECTED:
-              this._responseSubscription = this._subscribeForResponse();
-              break;
-          }
-        }
-      });
-  }
-
-  private _subscribeForResponse() {
-    return this._stompClientService.readFrom('/stomp-client/response-queue')
-      .pipe(map(payload => JSON.stringify(payload, null, 4)))
-      .subscribe({
-        next: result => this.setState({ responseBody: result }, () => this.setState({ isFetching: false }))
-      });
-  }
-
   componentWillUnmount() {
     this._responseSubscription.unsubscribe();
     this._stompClientStatusSubscription.unsubscribe();
@@ -76,16 +48,26 @@ export class StompClientContainer extends React.Component<Props, State> {
     );
   }
 
-  sendRequest(topic: string, requestBody: string) {
+  sendRequest(destinationTopic: string, responseTopic: string, requestBody: string) {
+    this._subscribeForResponse(responseTopic);
     this.setState({
       isFetching: true,
       responseBody: ''
     });
     this._stompClientService.send({
-      destination: topic,
-      replyTo: '/stomp-client/response-queue',
+      destination: destinationTopic,
+      replyTo: responseTopic,
       body: requestBody
     });
+  }
+
+  private _subscribeForResponse(topic: string) {
+    this._responseSubscription?.unsubscribe();
+    this._responseSubscription = this._stompClientService.readOnceFrom(topic)
+      .pipe(map(payload => JSON.stringify(payload, null, 4)))
+      .subscribe({
+        next: result => this.setState({ responseBody: result }, () => this.setState({ isFetching: false }))
+      });
   }
 
   downloadResponse(downloadType: DownloadType) {
