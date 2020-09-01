@@ -1,0 +1,27 @@
+.simulation-vs-expected {
+    display: flex;
+    margin-left: 15px;
+    margin-bottom: 15px;
+    margin-top: 5px;
+    align-items: flex-start;
+}
+
+.simulation-vs-expected__file-upload {
+    display: flex;
+    flex-flow: column nowrap;
+    margin-right: 20px;
+    align-items: flex-start;
+}
+
+.simulation-vs-expected__file-upload__file-name {
+    display: inline-block;
+    color: #fff;
+    margin-top: 5px;
+    opacity: 0.5;
+    font-style: italic;
+    font-size: 13px;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    max-width: 240px;
+}

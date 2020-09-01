@@ -30,7 +30,7 @@ export class FilePicker extends React.Component<Props, State> {
         <form className='file-picker'>
           <input
             className='file-picker__input'
-            accept='.json, application/json'
+            accept='application/json, text/plain'
             type='file'
             name='filePicker'
             onChange={this.onFilePicked} />

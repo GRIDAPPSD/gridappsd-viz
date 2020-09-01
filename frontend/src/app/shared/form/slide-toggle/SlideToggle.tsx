@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { Subscription } from 'rxjs';
 
 import { Ripple } from '@shared/ripple';
 import { FormControlModel } from '../models/FormControlModel';
@@ -20,6 +21,8 @@ interface State {
 
 export class SlideToggle extends React.Component<Props, State> {
 
+  private _subscription: Subscription;
+
   constructor(props: Props) {
     super(props);
 
@@ -32,7 +35,7 @@ export class SlideToggle extends React.Component<Props, State> {
   }
 
   componentDidMount() {
-    this.props.formControlModel.valueChanges()
+    this._subscription = this.props.formControlModel.valueChanges()
       .subscribe({
         next: isOn => {
           this.setState({
@@ -43,7 +46,7 @@ export class SlideToggle extends React.Component<Props, State> {
   }
 
   componentWillUnmount() {
-    this.props.formControlModel.cleanup();
+    this._subscription.unsubscribe();
   }
 
   render() {

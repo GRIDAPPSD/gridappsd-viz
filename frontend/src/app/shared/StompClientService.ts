@@ -205,7 +205,7 @@ export class StompClientService {
 
   /**
    * Subscribe to destination, then unsubscribe right away after a response arrives
-   * @param destination The topic to subscribe to to get the response from
+   * @param destination The topic to subscribe to from which to get the response
    */
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   readOnceFrom<T = any>(destination: string): Observable<T> {
@@ -215,7 +215,7 @@ export class StompClientService {
 
   /**
    * Subscribe to destination, and continuously watch for responses from the server
-   * @param destination The topic to subscribe to to get the response from
+   * @param destination The topic to subscribe to from which to get the response
    */
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   readFrom<T = any>(destination: string): Observable<T> {

@@ -15,7 +15,7 @@
 
     .drawer-item {
         font-size: 0.8em;
-        padding: 0 20px 0 80px;
+        padding: 0 20px 0 65px;
     }
 
     .drawer-item:last-of-type {
@@ -23,7 +23,7 @@
     }
 }
 
-.drawer-item-group__angle {
+.drawer-item-group .drawer-item-group__angle {
     position: relative;
     margin-left: auto;
     transition: transform 0.25s cubic-bezier(0.35, 0, 0.25, 1);
@@ -36,7 +36,7 @@
     max-height: 100%;
 
     .drawer-item-group__angle {
-        transform: rotate(-90deg);
+        transform: rotate(-180deg);
     }
 
 }

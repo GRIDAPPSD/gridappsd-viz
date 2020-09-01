@@ -14,15 +14,13 @@ interface Props {
 
 interface State {
   showSettingsMenu: boolean;
-  top: number;
-  left: number;
 }
 
 export class Settings extends React.Component<Props, State> {
 
   readonly isDarkThemeSelectedFormControl = new FormControlModel((localStorage.getItem('theme') as 'light' | 'dark' || 'dark') === 'dark');
   readonly enableLoggingFormControl = new FormControlModel((localStorage.getItem('isLoggingEnabled') ?? String(!__PRODUCTION__)) === 'true');
-  readonly menuOpenerRef = React.createRef<HTMLElement>();
+  readonly menuOpenerRef = React.createRef<HTMLDivElement>();
 
   private _isLoggingEnabled = this.enableLoggingFormControl.getValue();
 
@@ -30,21 +28,13 @@ export class Settings extends React.Component<Props, State> {
     super(props);
 
     this.state = {
-      showSettingsMenu: false,
-      top: 0,
-      left: 0
+      showSettingsMenu: false
     };
 
     this.showSettingsMenu = this.showSettingsMenu.bind(this);
-    this.hideSettingsMenu = this.hideSettingsMenu.bind(this);
   }
 
   componentDidMount() {
-    const boundingBox = this.menuOpenerRef.current.getBoundingClientRect();
-    this.setState({
-      left: boundingBox.left - 200,
-      top: boundingBox.top + 15
-    });
     this._watchForThemeChanges();
     this._watchForLoggingEnablement();
   }
@@ -99,7 +89,7 @@ export class Settings extends React.Component<Props, State> {
 
   render() {
     return (
-      <section
+      <div
         ref={this.menuOpenerRef}
         className='settings'>
         <Tooltip content='Settings'>
@@ -112,44 +102,7 @@ export class Settings extends React.Component<Props, State> {
             rippleDuration={1250}
             onClick={this.showSettingsMenu} />
         </Tooltip>
-        <Dialog
-          transparentBackdrop
-          open={this.state.showSettingsMenu}
-          top={this.state.top}
-          left={this.state.left}
-          onBackdropClicked={this.hideSettingsMenu}>
-          <Fade in={this.state.showSettingsMenu}>
-            <ul className='settings__menu'>
-              <li className='settings__menu__item'>
-                <div className='settings__menu__item__name'>
-                  Theme
-                </div>
-                <div className='settings__menu__item__action'>
-                  <SlideToggle
-                    className='theme-toggler'
-                    direction='horizontal'
-                    onText='Dark'
-                    offText='Light'
-                    formControlModel={this.isDarkThemeSelectedFormControl} />
-                </div>
-              </li>
-              <li className='settings__menu__item'>
-                <div className='settings__menu__item__name'>
-                  Logging
-                </div>
-                <div className='settings__menu__item__action toggle-logging'>
-                  <SlideToggle
-                    className='theme-toggler'
-                    direction='horizontal'
-                    onText='On'
-                    offText='Off'
-                    formControlModel={this.enableLoggingFormControl} />
-                </div>
-              </li>
-            </ul>
-          </Fade>
-        </Dialog>
-      </section>
+      </div>
     );
   }
 
@@ -157,12 +110,44 @@ export class Settings extends React.Component<Props, State> {
     this.setState({
       showSettingsMenu: true
     });
-  }
-
-  hideSettingsMenu() {
-    this.setState({
-      showSettingsMenu: false
-    });
+    const settingsMenu = (
+      <Fade in={this.state.showSettingsMenu}>
+        <ul className='settings__menu'>
+          <li className='settings__menu__item'>
+            <div className='settings__menu__item__name'>
+              Theme
+            </div>
+            <div className='settings__menu__item__action'>
+              <SlideToggle
+                className='theme-toggler'
+                direction='horizontal'
+                onText='Dark'
+                offText='Light'
+                formControlModel={this.isDarkThemeSelectedFormControl} />
+            </div>
+          </li>
+          <li className='settings__menu__item'>
+            <div className='settings__menu__item__name'>
+              Logging
+            </div>
+            <div className='settings__menu__item__action toggle-logging'>
+              <SlideToggle
+                className='theme-toggler'
+                direction='horizontal'
+                onText='On'
+                offText='Off'
+                formControlModel={this.enableLoggingFormControl} />
+            </div>
+          </li>
+        </ul>
+      </Fade>
+    );
+    const anchorBoundingBox = this.menuOpenerRef.current.getBoundingClientRect();
+    Dialog.create(settingsMenu)
+      .addClassName('settings-dialog')
+      .dismissible()
+      .transparentBackdrop()
+      .open(anchorBoundingBox.left - 200, anchorBoundingBox.top + 15);
   }
 
 }

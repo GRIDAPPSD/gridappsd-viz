@@ -24,12 +24,6 @@ interface State {
 
 export class RadioButtonGroup<T> extends React.Component<Props<T>, State> {
 
-  constructor(props: Props<T>) {
-    super(props);
-    this.state = {
-    };
-  }
-
   componentDidMount() {
     if (this.props.style === 'switches') {
       // eslint-disable-next-line react/no-find-dom-node
@@ -53,7 +47,7 @@ export class RadioButtonGroup<T> extends React.Component<Props<T>, State> {
             value={{
               id: this.props.id,
               formControlModel: this.props.formControlModel
-            }} >
+            }}>
             {this.props.children}
           </IdContextProvider.Provider>
         </div>
