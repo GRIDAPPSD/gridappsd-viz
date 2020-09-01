@@ -58,6 +58,7 @@ export class SimulationVsTimeSeriesRequest implements MessageRequest {
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   constructor(simulationId: number) {
+    this.url = 'goss.gridappsd.process.request.simulation';
     this.requestBody.test_config.testId = (Math.random() * 1_000_000) | 0;
     this.requestBody.test_config.compareWithSimId = simulationId;
     this.replyTo = '/expected-result-comparison/simulation-vs-time-series';
