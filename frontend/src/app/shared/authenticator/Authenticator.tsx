@@ -4,7 +4,7 @@ import { Observable } from 'rxjs';
 import { LoginScreen } from './views/login-screen/LoginScreen';
 import { AuthenticationStatusCode } from './models/AuthenticationStatusCode';
 import { AuthenticationResult } from './models/AuthenticationResult';
-import { showNotification } from '@shared/overlay/notification';
+import { Notification } from '@shared/overlay/notification';
 
 interface Props {
   authenticationResult: AuthenticationResult;
@@ -23,11 +23,11 @@ export class Authenticator extends React.Component<Props, State> {
     ) {
       switch (this.props.authenticationResult.statusCode) {
         case AuthenticationStatusCode.INCORRECT_CREDENTIALS:
-          showNotification('Incorrect username or password');
+          Notification.open('Incorrect username or password');
           break;
 
         case AuthenticationStatusCode.SERVER_FAILURE:
-          showNotification('There was a problem contacting the server');
+          Notification.open('There was a problem contacting the server');
           break;
       }
     }

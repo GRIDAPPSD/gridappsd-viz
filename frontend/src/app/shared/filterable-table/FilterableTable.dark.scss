@@ -1,12 +1,18 @@
 @import '@constants.dark';
-@import 'QueryLogsResultTable.common';
+@import 'FilterableTable.common';
 
-.query-logs-result-table.ReactTable {
-
+.filterable-table.ReactTable {
+    color: $primary-text-color;
     border: 1px solid rgba(#fff, 0.25);
 
+    .rt-thead.-filters,
+    .rt-thead.-headerGroups {
+        border-bottom: 1px solid hsla(0, 0%, 100%, .25);
+    }
+
     .rt-thead.-header {
-        box-shadow: 0 1px 3px 0 rgba(150, 150, 150, 0.9);
+        box-shadow: none;
+        border-bottom: 1px solid hsla(0, 0%, 100%, .25);
     }
 
     .rt-thead.-filters input {
@@ -15,19 +21,14 @@
         color: $primary-text-color;
     }
 
-    .rt-tbody .rt-td,
-    .rt-thead .rt-th,
-    .rt-thead .rt-td {
+    .rt-tbody .rt-td:not(:last-of-type),
+    .rt-thead .rt-th:not(:last-of-type),
+    .rt-thead .rt-td:not(:last-of-type) {
         border-right: 1px solid rgba(#fff, 0.25);
     }
 
     .rt-tbody .rt-tr-group {
         border-bottom: solid 1px rgba(#fff, 0.25);
-    }
-
-    .-pagination {
-        box-shadow: 0 0 2px 0 rgba(150, 150, 150, 0.5);
-        border-top: 2px solid rgba(255, 255, 255, 0.25);
     }
 
     .-previous button,
@@ -37,7 +38,7 @@
         transition: background-color 0.25s ease;
 
         &:disabled {
-            background-color: rgba($accent-color, 0.25);
+            background-color: rgba($accent-color, 0.25) !important;
         }
 
         &:hover {
@@ -45,4 +46,9 @@
         }
     }
 
+
+    .-previous button,
+    .-next button {
+        background-color: 50px;
+    }
 }

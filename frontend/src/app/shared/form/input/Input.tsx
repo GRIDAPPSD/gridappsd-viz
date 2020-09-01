@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { Subject } from 'rxjs';
-import { debounceTime, map } from 'rxjs/operators';
+import { debounceTime, map, takeUntil } from 'rxjs/operators';
 
 import { FormControl } from '../form-control/FormControl';
 import { FormControlModel } from '../models/FormControlModel';
@@ -25,6 +25,7 @@ export class Input<T extends 'text' | 'number' | 'datetime' | 'password' = 'text
 
   private readonly _valueChanges = new Subject<string>();
   private readonly _dateTimeService = DateTimeService.getInstance();
+  private readonly _unsubscriber = new Subject<void>();
 
   private _internalValue: string | number;
 
@@ -42,7 +43,10 @@ export class Input<T extends 'text' | 'number' | 'datetime' | 'password' = 'text
 
   componentDidMount() {
     this._valueChanges.pipe(debounceTime(250))
-      .pipe(map(this._parseValue))
+      .pipe(
+        map(this._parseValue),
+        takeUntil(this._unsubscriber)
+      )
       .subscribe({
         next: value => {
           this._internalValue = value;
@@ -55,6 +59,7 @@ export class Input<T extends 'text' | 'number' | 'datetime' | 'password' = 'text
     // In case FormControlModel.setValue was called somewhere else,
     // we want to update the state to reflect the new value in UI
     (this.props.formControlModel as FormControlModel<string | number>).valueChanges()
+      .pipe(takeUntil(this._unsubscriber))
       .subscribe({
         next: value => {
           if (value !== this._internalValue && this.props.formControlModel.isValid()) {
@@ -87,8 +92,8 @@ export class Input<T extends 'text' | 'number' | 'datetime' | 'password' = 'text
   }
 
   componentWillUnmount() {
-    this._valueChanges.complete();
-    this.props.formControlModel.cleanup();
+    this._unsubscriber.next();
+    this._unsubscriber.complete();
   }
 
   render() {

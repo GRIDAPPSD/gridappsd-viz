@@ -1,0 +1,20 @@
+.result-viewer {
+    display: flex;
+    flex-flow: column;
+    height: 100%;
+    overflow: hidden;
+
+    .form-control.radio-button-group {
+        margin-top: 0;
+        margin-bottom: 0;
+        flex-flow: column;
+        align-items: flex-start;
+    }
+
+    .result-viewer__body {
+        overflow-x: hidden;
+        overflow-y: auto;
+        height: 100%;
+        position: relative;
+    }
+}

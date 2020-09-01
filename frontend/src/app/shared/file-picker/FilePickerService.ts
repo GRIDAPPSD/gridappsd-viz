@@ -1,6 +1,5 @@
-import { Subject, Observable, fromEvent, of } from 'rxjs';
-
-import { switchMap, map, take } from 'rxjs/operators';
+import { Subject, Observable, fromEvent, of, throwError } from 'rxjs';
+import { switchMap, take } from 'rxjs/operators';
 
 export class FilePickerService {
 
@@ -17,6 +16,10 @@ export class FilePickerService {
 
   selectFile(file: File) {
     this._fileSelection.next(file);
+  }
+
+  fileSelectionChanges() {
+    return this._fileSelection.asObservable();
   }
 
   clearSelection() {
@@ -36,7 +39,13 @@ export class FilePickerService {
           if (file) {
             const fileReader = new FileReader();
             const fileReaderResultObservable = fromEvent(fileReader, 'load')
-              .pipe(map(() => JSON.parse(fileReader.result as string) as T));
+              .pipe(switchMap(() => {
+                try {
+                  return of(JSON.parse(fileReader.result as string) as T);
+                } catch (e) {
+                  return throwError(e.message);
+                }
+              }));
             fileReader.readAsText(file);
             return fileReaderResultObservable;
           }
@@ -45,6 +54,5 @@ export class FilePickerService {
         take(1)
       );
   }
-
 
 }

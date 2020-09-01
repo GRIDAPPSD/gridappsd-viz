@@ -1,0 +1,15 @@
+.time-series-vs-time-series-form {
+    display: flex;
+    align-items: center;
+    margin-bottom: 30px;
+
+    .form-control.select {
+        margin-top: 0;
+        margin-bottom: 0;
+
+        .form-control__label {
+            width: initial;
+            margin-right: 5px;
+        }
+    }
+}

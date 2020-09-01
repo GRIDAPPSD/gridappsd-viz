@@ -5,11 +5,11 @@ import { map } from 'rxjs/operators';
 import { StompClientService, StompClientConnectionStatus } from '@shared/StompClientService';
 import { QueryLogsRequestBody } from './models/QueryLogsRequestBody';
 import { SimulationId } from './models/SimulationId';
-import { QueryLogsForm } from './QueryLogsForm';
-import { QueryLogsResultTable } from './QueryLogsResultTable';
+import { QueryLogsForm } from './views/query-logs-form/QueryLogsForm';
 import { Response } from '../DataBrowser';
-import { MessageBanner } from '@shared/overlay/message-banner';
 import { ProgressIndicator } from '@shared/overlay/progress-indicator';
+import { FilterableTable } from '@shared/filterable-table';
+import { RequestEditor } from '../DataBrowser';
 
 import './Logs.light.scss';
 import './Logs.dark.scss';
@@ -118,21 +118,15 @@ export class LogsContainer extends React.Component<Props, State> {
   render() {
     return (
       <div className='log-data-browser'>
-        <QueryLogsForm
-          simulationIds={this.state.simulationIds}
-          sources={this.state.sources}
-          onSimulationIdSelected={this.getSource}
-          onSubmit={this.getLogs} />
+        <RequestEditor>
+          <QueryLogsForm
+            simulationIds={this.state.simulationIds}
+            sources={this.state.sources}
+            onSimulationIdSelected={this.getSource}
+            onSubmit={this.getLogs} />
+        </RequestEditor>
         <Response>
-          {
-            this.state.result.length > 0
-              ?
-              <QueryLogsResultTable rows={this.state.result} />
-              :
-              <MessageBanner>
-                No result
-              </MessageBanner>
-          }
+          <FilterableTable rows={this.state.result} />
         </Response>
         <ProgressIndicator show={this.state.showSpinner} />
       </div>

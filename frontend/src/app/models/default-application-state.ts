@@ -12,5 +12,6 @@ export const DEFAULT_APPLICATION_STATE: ApplicationState = {
   modelDictionaryComponents: [],
   plotModels: [],
   activeSimulationIds: [],
-  nodeNameToLocate: ''
+  nodeNameToLocate: '',
+  expectedResultComparisonType: null
 };
