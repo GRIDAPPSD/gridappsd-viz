@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { Subject } from 'rxjs';
-import { debounceTime, filter } from 'rxjs/operators';
+import { debounceTime, filter, takeUntil } from 'rxjs/operators';
 import * as CodeMirror from 'codemirror';
 
 import { FormControl } from '../form-control/FormControl';
@@ -30,6 +30,7 @@ export class TextArea<T extends 'plaintext' | 'json' = 'json'> extends React.Com
   currentValueToDisplay: string;
 
   private readonly _textBoxValueStream = new Subject<string>();
+  private readonly _unsubscriber = new Subject<void>();
 
   private _isResizing = false;
   // The x coordinate of the mousedown event when the user begins the resize
@@ -68,13 +69,19 @@ export class TextArea<T extends 'plaintext' | 'json' = 'json'> extends React.Com
   componentDidMount() {
     const formControlProp = this.props.formControlModel as FormControlModel<string | object>;
     this._inputBoxBoundingBox = this.inputBoxContainerRef.current.getBoundingClientRect();
-    this._textBoxValueStream.pipe(debounceTime(250))
+
+    this._textBoxValueStream.pipe(
+      takeUntil(this._unsubscriber),
+      debounceTime(250)
+    )
       .subscribe({
         next: value => {
           this.internalFormControl.setValue(value);
         }
       });
+
     this.internalFormControl.valueChanges()
+      .pipe(takeUntil(this._unsubscriber))
       .subscribe({
         next: value => {
           if (this.internalFormControl.isValid()) {
@@ -83,8 +90,12 @@ export class TextArea<T extends 'plaintext' | 'json' = 'json'> extends React.Com
           }
         }
       });
+
     this.internalFormControl.validityChanges()
-      .pipe(filter(() => !this.internalFormControl.isPristine()))
+      .pipe(
+        takeUntil(this._unsubscriber),
+        filter(() => !this.internalFormControl.isPristine())
+      )
       .subscribe({
         next: isValid => {
           formControlProp.setValidity(isValid);
@@ -107,6 +118,7 @@ export class TextArea<T extends 'plaintext' | 'json' = 'json'> extends React.Com
       });
 
     formControlProp.valueChanges()
+      .pipe(takeUntil(this._unsubscriber))
       .subscribe({
         next: value => {
           // This is true when this.props.formControlModel.setValue()
@@ -122,7 +134,9 @@ export class TextArea<T extends 'plaintext' | 'json' = 'json'> extends React.Com
           }
         }
       });
+
     formControlProp.onDisableToggled()
+      .pipe(takeUntil(this._unsubscriber))
       .subscribe({
         next: isDisabled => {
           if (isDisabled) {
@@ -214,9 +228,8 @@ export class TextArea<T extends 'plaintext' | 'json' = 'json'> extends React.Com
   }
 
   componentWillUnmount() {
-    this._textBoxValueStream.complete();
-    this.props.formControlModel.cleanup();
-    this.internalFormControl.cleanup();
+    this._unsubscriber.next();
+    this._unsubscriber.complete();
     window.removeEventListener('mousemove', this._resize, false);
     window.removeEventListener('mouseup', this._stopResize, false);
     if (this._codeMirror) {

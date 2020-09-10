@@ -1,8 +1,13 @@
 .query-logs-form {
     display: flex;
+    flex-flow: column nowrap;
 }
 
-.query-logs-form__left {
+.query-logs-form__panel-container {
+    display: flex;
+}
+
+.query-logs-form__panel.left {
     margin-right: 90px;
 
     .form-control__label {
@@ -10,7 +15,7 @@
     }
 }
 
-.query-logs-form__right .form-control__label {
+.query-logs-form__panel.right .form-control__label {
     width: 130px;
 }
 

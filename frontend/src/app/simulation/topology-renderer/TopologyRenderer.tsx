@@ -28,7 +28,7 @@ import { RenderableTopology } from './models/RenderableTopology';
 import { IconButton } from '@shared/buttons';
 import { NodeSearcher } from './views/node-searcher/NodeSearcher';
 import { MatchedNodeLocator } from './views/matched-node-locator/MatchedNodeLocator';
-import { showNotification } from '@shared/overlay/notification';
+import { Notification } from '@shared/overlay/notification';
 import { StateStore } from '@shared/state-store';
 import { PortalRenderer } from '@shared/overlay/portal-renderer';
 import { SimulationOutputMeasurement } from '@shared/simulation';
@@ -217,7 +217,7 @@ export class TopologyRenderer extends React.Component<Props, State> {
           if (foundNode) {
             this.locateNode(foundNode);
           } else {
-            showNotification(
+            Notification.open(
               <>
                 Unable to locate node &nbsp;
                 <span className='topology-renderer__non-existing-searched-node'>
@@ -1073,7 +1073,7 @@ export class TopologyRenderer extends React.Component<Props, State> {
         });
       return true;
     } else {
-      showNotification(
+      Notification.open(
         <>
           Unable to locate node &nbsp;
           <span className='topology-renderer__non-existing-searched-node'>

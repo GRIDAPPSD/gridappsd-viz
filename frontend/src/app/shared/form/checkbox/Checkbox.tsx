@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { Subscription } from 'rxjs';
 
 import { Ripple } from '@shared/ripple';
 import { FormControl } from '../form-control/FormControl';
@@ -25,6 +26,7 @@ export class Checkbox extends React.Component<Props, State> {
 
   readonly id = generateUniqueId();
 
+  private _subscription: Subscription;
   constructor(props: Props) {
     super(props);
 
@@ -36,7 +38,7 @@ export class Checkbox extends React.Component<Props, State> {
   }
 
   componentDidMount() {
-    this.props.formControlModel.valueChanges()
+    this._subscription = this.props.formControlModel.valueChanges()
       .subscribe({
         next: isChecked => {
           this.setState({
@@ -47,7 +49,7 @@ export class Checkbox extends React.Component<Props, State> {
   }
 
   componentWillUnmount() {
-    this.props.formControlModel.cleanup();
+    this._subscription.unsubscribe();
   }
 
   render() {

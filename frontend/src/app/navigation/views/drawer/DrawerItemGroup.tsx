@@ -7,7 +7,7 @@ import './DrawerItemGroup.dark.scss';
 
 interface Props {
   header: string;
-  icon: 'memory' | 'merge_type';
+  icon: 'memory' | 'merge_type' | 'compare_arrows';
 }
 
 interface State {

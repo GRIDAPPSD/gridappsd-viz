@@ -7,11 +7,13 @@ import { Simulation, SimulationQueue, SimulationConfiguration } from '@shared/si
 import { StompClientConnectionStatus, StompClientService } from '@shared/StompClientService';
 import { ConfigurationManager } from '@shared/ConfigurationManager';
 import { StateStore } from '@shared/state-store';
+import { ExpectedResultComparisonType } from '@shared/ExpectedResultComparisonType';
 
 interface Props {
   onShowSimulationConfigForm: (config: SimulationConfiguration) => void;
   onLogout: () => void;
   onJoinActiveSimulation: (simulationId: string) => void;
+  onShowExpectedResultViewer: () => void;
 }
 
 interface State {
@@ -19,6 +21,7 @@ interface State {
   version: string;
   stompClientConnectionStatus: StompClientConnectionStatus;
   activeSimulationIds: string[];
+
 }
 
 export class NavigationContainer extends React.Component<Props, State> {
@@ -39,6 +42,7 @@ export class NavigationContainer extends React.Component<Props, State> {
       activeSimulationIds: []
     };
 
+    this.onSelectExpectedResultComparisonType = this.onSelectExpectedResultComparisonType.bind(this);
   }
 
   componentDidMount() {
@@ -97,10 +101,18 @@ export class NavigationContainer extends React.Component<Props, State> {
         activeSimulationIds={this.state.activeSimulationIds}
         onShowSimulationConfigForm={this.props.onShowSimulationConfigForm}
         onLogout={this.props.onLogout}
-        onJoinActiveSimulation={this.props.onJoinActiveSimulation}>
+        onJoinActiveSimulation={this.props.onJoinActiveSimulation}
+        onSelectExpectedResultComparisonType={this.onSelectExpectedResultComparisonType}>
         {this.props.children}
       </Navigation>
     );
+  }
+
+  onSelectExpectedResultComparisonType(selectedType: ExpectedResultComparisonType) {
+    this._stateStore.update({
+      expectedResultComparisonType: selectedType
+    });
+    this.props.onShowExpectedResultViewer();
   }
 
 }

@@ -36,6 +36,21 @@ export class Notification extends React.Component<Props, State> {
     this.hideNotification = this.hideNotification.bind(this);
   }
 
+  static open(content: React.ReactChild) {
+    return new Promise<void>(resolve => {
+      const portalRenderer = new PortalRenderer();
+      portalRenderer.mount(
+        <Notification
+          onHide={() => {
+            resolve();
+            portalRenderer.unmount();
+          }}>
+          {content}
+        </Notification>
+      );
+    });
+  }
+
   componentDidMount() {
     if (this.props.show) {
       this._showNotification();
@@ -75,25 +90,15 @@ export class Notification extends React.Component<Props, State> {
 
   render() {
     return (
-      <PortalRenderer containerClassName={`notification-container ${this.state.show ? 'visible' : 'hidden'}`}>
+      <div className={`notification-container ${this.state.show ? 'visible' : 'hidden'}`}>
         <Backdrop
           visible={this.state.show}
           onClick={this.hideNotification} />
         <div className='notification'>
           {this.props.children}
         </div>
-      </PortalRenderer>
+      </div>
     );
   }
 
-}
-
-const portalRenderer = new PortalRenderer();
-export function showNotification(content: React.ReactChild) {
-  portalRenderer.unmount();
-  portalRenderer.mount(
-    <Notification onHide={portalRenderer.unmount}>
-      {content}
-    </Notification>
-  );
 }
