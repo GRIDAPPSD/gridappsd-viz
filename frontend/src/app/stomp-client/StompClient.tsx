@@ -14,7 +14,7 @@ import './StompClient.dark.scss';
 interface Props {
   response: string;
   showLoadingIndicator: boolean;
-  onRequestSubmitted: (topic: string, requestBody: string) => void;
+  onRequestSubmitted: (destinationTopic: string, responseTopic: string, requestBody: string) => void;
   onDownloadResponse: (downloadType: DownloadType) => void;
 }
 
@@ -26,9 +26,13 @@ interface State {
 export class StompClient extends React.Component<Props, State> {
 
   readonly formGroupModel = new FormGroupModel({
-    topic: new FormControlModel(
+    destinationTopic: new FormControlModel(
       'goss.gridappsd.process.request.status.platform',
-      [Validators.checkNotEmpty('Topic')]
+      [Validators.checkNotEmpty('Destination topic')]
+    ),
+    responseTopic: new FormControlModel(
+      '/stomp-client/response-queue',
+      [Validators.checkNotEmpty('Response topic')]
     ),
     requestBody: new FormControlModel(
       '{}',
@@ -54,9 +58,9 @@ export class StompClient extends React.Component<Props, State> {
   }
 
   componentDidMount() {
-    this.formGroupModel.findControl('topic')
+    this.formGroupModel.findControl('destinationTopic')
       .valueChanges()
-      .pipe(filter(topic => !topic.endsWith('timeseries')))
+      .pipe(filter(destinationTopic => !destinationTopic.endsWith('timeseries')))
       .subscribe({
         next: () => {
           this.setState({
@@ -78,7 +82,7 @@ export class StompClient extends React.Component<Props, State> {
   componentDidUpdate(prevProps: Props) {
     if (this.props.response !== prevProps.response) {
       this.setState({
-        disableCsvExport: !this.props.response || !this.formGroupModel.getValue().topic.endsWith('timeseries')
+        disableCsvExport: !this.props.response || !this.formGroupModel.getValue().destinationTopic.endsWith('timeseries')
       });
       this.response.setValue(this.props.response);
     }
@@ -95,9 +99,13 @@ export class StompClient extends React.Component<Props, State> {
           className='stomp-client'
           formGroupModel={this.formGroupModel}>
           <Input
-            className='stomp-client__topic'
-            label='Topic'
-            formControlModel={this.formGroupModel.findControl('topic')} />
+            className='stomp-client__destination-topic'
+            label='Destination topic'
+            formControlModel={this.formGroupModel.findControl('destinationTopic')} />
+          <Input
+            className='stomp-client__response-topic'
+            label='Response topic'
+            formControlModel={this.formGroupModel.findControl('responseTopic')} />
           <TextArea
             type='plaintext'
             className='stomp-client__request-body'
@@ -141,7 +149,7 @@ export class StompClient extends React.Component<Props, State> {
 
   onSubmit() {
     const formValue = this.formGroupModel.getValue();
-    this.props.onRequestSubmitted(formValue.topic, formValue.requestBody);
+    this.props.onRequestSubmitted(formValue.destinationTopic, formValue.responseTopic, formValue.requestBody);
   }
 
 }

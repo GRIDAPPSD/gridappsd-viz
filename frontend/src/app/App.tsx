@@ -28,6 +28,8 @@ import { StompClientConnectionStatus } from '@shared/StompClientService';
 import { StateStore } from '@shared/state-store';
 import { waitUntil } from '@shared/misc';
 import { PortalRenderer } from '@shared/overlay/portal-renderer';
+import { Dialog } from '@shared/overlay/dialog';
+import { ExpectedResultComparisonContainer } from './simulation/expected-result-comparison';
 
 import './App.light.scss';
 import './App.dark.scss';
@@ -77,7 +79,8 @@ export const App = withRouter(class extends React.Component<Props, State> {
               <NavigationContainer
                 onShowSimulationConfigForm={this.showSimulationConfigForm}
                 onLogout={this.props.onLogout}
-                onJoinActiveSimulation={this.onJoinActiveSimulation}>
+                onJoinActiveSimulation={this.onJoinActiveSimulation}
+                onShowExpectedResultViewer={this.onShowExpectedResultViewer}>
                 <Settings />
               </NavigationContainer>
               <Route
@@ -165,6 +168,13 @@ export const App = withRouter(class extends React.Component<Props, State> {
   onJoinActiveSimulation(simulationId: string) {
     this.props.history.push('/simulation');
     this.props.onJoinActiveSimulation(simulationId);
+  }
+
+  onShowExpectedResultViewer() {
+    Dialog.create(<ExpectedResultComparisonContainer />)
+      .addClassName('expected-result-comparison-container')
+      .addNegativeButton('Close')
+      .open();
   }
 
   onLocateNodeForAlarm(alarm: Alarm) {

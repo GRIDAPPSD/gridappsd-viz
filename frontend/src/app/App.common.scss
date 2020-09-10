@@ -28,3 +28,7 @@
     height: calc(100vh - 60px);
     z-index: 1;
 }
+
+.expected-result-comparison-container .dialog-content {
+    overflow: hidden;
+}

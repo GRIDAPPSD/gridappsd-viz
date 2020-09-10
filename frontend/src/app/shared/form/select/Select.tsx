@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { Subscription } from 'rxjs';
 
 import { Option } from './Option';
 import { FormControl } from '../form-control/FormControl';
@@ -44,6 +45,7 @@ export class Select<T, E extends boolean> extends React.Component<Props<T, E>, S
   private _firstPage: Option<T>[] = [];
   private _defaultSelectedOptions: Option<T>[] = [];
   private _selectedOptionsBeforeOpening: Option<T>[] = [];
+  private _subscription: Subscription;
 
   constructor(props: Props<T, E>) {
     super(props);
@@ -79,7 +81,7 @@ export class Select<T, E extends boolean> extends React.Component<Props<T, E>, S
   }
 
   componentDidMount() {
-    this.props.formControlModel.onReset()
+    this._subscription = this.props.formControlModel.onReset()
       .subscribe({
         next: () => this._reset()
       });
@@ -154,7 +156,7 @@ export class Select<T, E extends boolean> extends React.Component<Props<T, E>, S
   }
 
   componentWillUnmount() {
-    this.props.formControlModel.cleanup();
+    this._subscription.unsubscribe();
     this._toggleAllSelectedOptionsTo(false);
   }
 

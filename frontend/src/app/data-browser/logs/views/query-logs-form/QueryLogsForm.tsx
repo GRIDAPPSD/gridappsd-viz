@@ -1,10 +1,9 @@
 import * as React from 'react';
 
-import { RequestEditor } from '../DataBrowser';
 import { Input, Select, SelectionOptionBuilder, Form, FormGroupModel, FormControlModel } from '@shared/form';
 import { BasicButton } from '@shared/buttons';
-import { QueryLogsRequestBody } from './models/QueryLogsRequestBody';
-import { SimulationId } from './models/SimulationId';
+import { QueryLogsRequestBody } from '../../models/QueryLogsRequestBody';
+import { SimulationId } from '../../models/SimulationId';
 import { Validators } from '@shared/form/validation';
 import { DateTimeService } from '@shared/DateTimeService';
 
@@ -110,48 +109,46 @@ export class QueryLogsForm extends React.Component<Props, State> {
 
   render() {
     return (
-      <>
-        <RequestEditor>
-          <Form className='query-logs-form'>
-            <div className='query-logs-form__left'>
-              <Input
-                label='Start time'
-                type='datetime'
-                formControlModel={this.formGroupModel.findControl('startTime')} />
-              <Select
-                label='Simulation ID'
-                formControlModel={this.formGroupModel.findControl('simulationId')}
-                selectionOptionBuilder={this.state.simulationIdOptionBuilder} />
-              <Input
-                label='Username'
-                formControlModel={this.formGroupModel.findControl('username')} />
-            </div>
-            <div className='query-logs-form__right'>
-              <Select
-                label='Source'
-                formControlModel={this.formGroupModel.findControl('source')}
-                selectionOptionBuilder={this.state.sourceOptionBuilder}
-                selectedOptionFinder={source => source === 'ALL'} />
-              <Select
-                label='Log level'
-                formControlModel={this.formGroupModel.findControl('logLevel')}
-                selectionOptionBuilder={this.state.logLevelOptionBuilder}
-                selectedOptionFinder={level => level === 'ALL'} />
-              <Select
-                label='Process status'
-                formControlModel={this.formGroupModel.findControl('processStatus')}
-                selectionOptionBuilder={this.state.processStatusOptionBuilder}
-                selectedOptionFinder={status => status === 'ALL'} />
-            </div>
-          </Form>
-        </RequestEditor>
+      <Form className='query-logs-form'>
+        <div className='query-logs-form__panel-container'>
+          <div className='query-logs-form__panel left'>
+            <Input
+              label='Start time'
+              type='datetime'
+              formControlModel={this.formGroupModel.findControl('startTime')} />
+            <Select
+              label='Simulation ID'
+              formControlModel={this.formGroupModel.findControl('simulationId')}
+              selectionOptionBuilder={this.state.simulationIdOptionBuilder} />
+            <Input
+              label='Username'
+              formControlModel={this.formGroupModel.findControl('username')} />
+          </div>
+          <div className='query-logs-form__panel right'>
+            <Select
+              label='Source'
+              formControlModel={this.formGroupModel.findControl('source')}
+              selectionOptionBuilder={this.state.sourceOptionBuilder}
+              selectedOptionFinder={source => source === 'ALL'} />
+            <Select
+              label='Log level'
+              formControlModel={this.formGroupModel.findControl('logLevel')}
+              selectionOptionBuilder={this.state.logLevelOptionBuilder}
+              selectedOptionFinder={level => level === 'ALL'} />
+            <Select
+              label='Process status'
+              formControlModel={this.formGroupModel.findControl('processStatus')}
+              selectionOptionBuilder={this.state.processStatusOptionBuilder}
+              selectedOptionFinder={status => status === 'ALL'} />
+          </div>
+        </div>
         <BasicButton
           className='query-logs-form__submit'
           label='Submit'
           type='positive'
           disabled={this.state.disableSubmitButton}
           onClick={this.onSubmitForm} />
-      </>
+      </Form>
     );
   }
 

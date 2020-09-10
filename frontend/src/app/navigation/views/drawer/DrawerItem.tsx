@@ -25,12 +25,8 @@ export function DrawerItem(props: DrawerItemProps) {
   );
 }
 
-type IconName = (
-  'assignment' | 'storage' | 'search' | 'laptop' | 'memory' | 'power_settings_new' | 'merge_type'
-);
-
 interface DrawerItemIconProps {
-  icon: IconName;
+  icon: 'assignment' | 'storage' | 'search' | 'laptop' | 'memory' | 'power_settings_new' | 'merge_type' | 'compare_arrows';
 }
 
 export function DrawerItemIcon(props: DrawerItemIconProps) {

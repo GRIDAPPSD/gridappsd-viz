@@ -9,11 +9,13 @@
 
     .form-control {
         width: 100%;
-        margin-bottom: 10px;
+        margin: 20px 0 10px 0;
     }
 
     label {
-        width: 100px;
+        width: 130px;
+        text-align: right;
+        margin-right: 20px;
     }
 
     .form-control__body {
@@ -22,26 +24,29 @@
 
 }
 
-.stomp-client__topic .input-field-wrapper {
-    width: calc(100% + 18px);
+.stomp-client__destination-topic,
+.stomp-client__response-topic {
+    .input-field-wrapper {
+        width: 99.3%;
 
-    input {
-        width: 100%;
+        input {
+            width: 100%;
+        }
     }
 }
 
 .stomp-client__request-body .textarea__input-box-container {
-    width: calc(100% + 14px);
+    width: 99%;
 }
 
 .stomp-client__send-request {
-    margin-left: 120px;
+    margin-left: 150px;
     display: block;
 }
 
 .stomp-client__download-types {
     margin-top: 10px;
-    margin-left: 120px;
+    margin-left: 150px;
     margin-bottom: -10px;
 
     .icon-button {
@@ -63,6 +68,6 @@
         white-space: pre;
         max-height: 100%;
         overflow: auto;
-        width: calc(100% + 14px);
+        width: 99%;
     }
 }

@@ -11,6 +11,7 @@ import { SimulationConfiguration, Simulation } from '@shared/simulation';
 import { StompClientConnectionStatus } from '@shared/StompClientService';
 import { IconButton } from '@shared/buttons';
 import { Restricted } from '@shared/authenticator';
+import { ExpectedResultComparisonType } from '@shared/ExpectedResultComparisonType';
 
 import './Navigation.light.scss';
 import './Navigation.dark.scss';
@@ -23,6 +24,7 @@ interface Props {
   onShowSimulationConfigForm: (config: SimulationConfiguration) => void;
   onLogout: () => void;
   onJoinActiveSimulation: (simulationId: string) => void;
+  onSelectExpectedResultComparisonType: (selectedType: ExpectedResultComparisonType) => void;
 }
 
 export class Navigation extends React.Component<Props, {}> {
@@ -79,6 +81,22 @@ export class Navigation extends React.Component<Props, {}> {
               <DrawerItemLabel value='Configure New Simulation' />
             </DrawerItem>
           </Restricted>
+          <DrawerItemGroup
+            header='Select Comparison Type'
+            icon='compare_arrows'>
+            <DrawerItem onClick={() => this.props.onSelectExpectedResultComparisonType(ExpectedResultComparisonType.SIMULATION_VS_EXPECTED)}>
+              1. {ExpectedResultComparisonType.SIMULATION_VS_EXPECTED}
+            </DrawerItem>
+            <DrawerItem onClick={() => this.props.onSelectExpectedResultComparisonType(ExpectedResultComparisonType.SIMULATION_VS_TIME_SERIES)}>
+              2. {ExpectedResultComparisonType.SIMULATION_VS_TIME_SERIES}
+            </DrawerItem>
+            <DrawerItem onClick={() => this.props.onSelectExpectedResultComparisonType(ExpectedResultComparisonType.EXPECTED_VS_TIME_SERIES)}>
+              3. {ExpectedResultComparisonType.EXPECTED_VS_TIME_SERIES}
+            </DrawerItem>
+            <DrawerItem onClick={() => this.props.onSelectExpectedResultComparisonType(ExpectedResultComparisonType.TIME_SERIES_VS_TIME_SERIES)}>
+              4. {ExpectedResultComparisonType.TIME_SERIES_VS_TIME_SERIES}
+            </DrawerItem>
+          </DrawerItemGroup>
           {
             this.props.previousSimulations.length > 0
             &&
