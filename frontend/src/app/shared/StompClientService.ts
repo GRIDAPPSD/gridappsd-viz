@@ -11,10 +11,17 @@ export const enum StompClientConnectionStatus {
   UNINITIALIZED = 'UNINITIALIZED'
 }
 
-export const enum StompClientInitializationResult {
+export const enum StompClientInitializationStatus {
   OK = '0K',
   AUTHENTICATION_FAILURE = 'AUTHENTICATION_FAILURE',
   CONNECTION_FAILURE = 'CONNECTION_FAILURE'
+}
+
+export interface StompClientInitializationResult {
+
+  readonly status: StompClientInitializationStatus;
+  readonly token?: string;
+
 }
 
 export interface StompClientRequest {
@@ -30,13 +37,9 @@ export class StompClientService {
   private readonly _configurationManager = ConfigurationManager.getInstance();
 
   private _client: Client;
-  private _statusChanges = new BehaviorSubject<StompClientConnectionStatus>(StompClientConnectionStatus.UNINITIALIZED);
+  private _statusChanges = new BehaviorSubject(StompClientConnectionStatus.UNINITIALIZED);
   private _status = StompClientConnectionStatus.UNINITIALIZED;
-  private _username = '';
-  // Need to store the password for reconnecting after timeout,
-  // the backend should listen to hearbeat messages
-  // so that this wouldn't be neccessary
-  private _password = '';
+  private _authenticationToken = '';
 
   static getInstance() {
     return StompClientService._INSTANCE;
@@ -72,15 +75,8 @@ export class StompClientService {
             debug: isLoggingEnabled ? console.log : () => { },
             logRawCommunication: isLoggingEnabled
           });
-
-          this._username = sessionStorage.getItem('username');
-          this._password = sessionStorage.getItem('password');
-
-          if (this._username && this._password) {
-            this._client.connectHeaders = {
-              login: this._username,
-              passcode: this._password
-            };
+          this._authenticationToken = sessionStorage.getItem('token');
+          if (this._authenticationToken) {
             this.reconnect();
           }
         }
@@ -91,36 +87,71 @@ export class StompClientService {
     const subject = new Subject<StompClientInitializationResult>();
     const noOp = () => { };
 
-    this._username = username;
-    this._password = password;
     this._client.configure({
       connectHeaders: {
         login: username,
         passcode: password
       },
       onConnect: () => {
-        this._client.onDisconnect = () => {
-          this.reconnect();
-          subject.next(StompClientInitializationResult.OK);
-          this._client.onDisconnect = noOp;
-          this._client.onConnect = noOp;
-        };
-        this._client.deactivate();
-        // need to reevaluate this strategy
-        sessionStorage.setItem('username', username);
-        sessionStorage.setItem('password', password);
+        this._retrieveToken(username, password)
+          .then(() => {
+            this._client.onDisconnect = () => {
+              this.reconnect();
+              subject.next({
+                status: StompClientInitializationStatus.OK,
+                token: this._authenticationToken
+              });
+              this._client.onDisconnect = noOp;
+              this._client.onConnect = noOp;
+            };
+          })
+          .catch(() => {
+            subject.error({
+              status: StompClientInitializationStatus.AUTHENTICATION_FAILURE
+            } as StompClientInitializationResult);
+          })
+          .finally(() => {
+            this._client.deactivate();
+          });
       },
       onStompError: () => {
-        subject.error(StompClientInitializationResult.AUTHENTICATION_FAILURE);
+        subject.error({
+          status: StompClientInitializationStatus.AUTHENTICATION_FAILURE
+        } as StompClientInitializationResult);
         this._client.onStompError = noOp;
       },
       onWebSocketError: () => {
-        subject.error(StompClientInitializationResult.CONNECTION_FAILURE);
+        subject.error({
+          status: StompClientInitializationStatus.CONNECTION_FAILURE
+        });
         this._client.onWebSocketError = noOp;
       }
     });
     this._client.activate();
     return subject.pipe(take(1));
+  }
+
+  private _retrieveToken(username: string, password: string): Promise<string> {
+    return new Promise((resolve, reject) => {
+      const destination = `/queue/temp.token_resp.${username}`;
+      this.readOnceFrom<string>(destination)
+        .subscribe({
+          next: token => {
+            if (token !== 'authentication failed') {
+              sessionStorage.setItem('token', token);
+              this._authenticationToken = token;
+              resolve();
+            } else {
+              reject();
+            }
+          }
+        });
+      this.send({
+        destination: '/topic/pnnl.goss.token.topic',
+        replyTo: destination,
+        body: btoa(`${username}:${password}`)
+      });
+    });
   }
 
   reconnect() {
@@ -146,6 +177,10 @@ export class StompClientService {
       this._status = StompClientConnectionStatus.CONNECTING;
       this._statusChanges.next(this._status);
       this._client.configure({
+        connectHeaders: {
+          login: this._authenticationToken,
+          passcode: ''
+        },
         onConnect: this._connectionEstablished,
         onWebSocketClose: this._connectionClosed
       });
@@ -177,7 +212,7 @@ export class StompClientService {
         {
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           GOSS_HAS_SUBJECT: true as any,
-          GOSS_SUBJECT: this._username
+          GOSS_SUBJECT: this._authenticationToken
         },
         request.replyTo ? { 'reply-to': request.replyTo } : {}
       );
@@ -227,15 +262,20 @@ export class StompClientService {
           const source = new BehaviorSubject<T>(null);
           const id = `${destination}[${Math.random() * 1_000_000 | 0}]`;
           return using(() => this._client.subscribe(destination, (message: Message) => {
-            const payload = JSON.parse(message.body);
-            if ('error' in payload) {
-              source.error(payload.error.message);
-            } else if (!('data' in payload)) {
-              source.next(payload);
-            } else if (typeof payload.data !== 'string') {
-              source.next(payload.data);
-            } else {
-              source.next(JSON.parse(payload.data));
+            const body = message.body;
+            try {
+              const payload = JSON.parse(body);
+              if ('error' in payload) {
+                source.error(payload.error.message);
+              } else if (!('data' in payload)) {
+                source.next(payload);
+              } else if (typeof payload.data !== 'string') {
+                source.next(payload.data);
+              } else {
+                source.next(JSON.parse(payload.data));
+              }
+            } catch {
+              source.next(body as unknown as T);
             }
           }, { id }), () => source.asObservable().pipe(filter(responseBody => Boolean(responseBody))));
         })
