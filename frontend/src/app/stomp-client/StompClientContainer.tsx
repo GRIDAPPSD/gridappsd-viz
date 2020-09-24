@@ -21,7 +21,6 @@ export class StompClientContainer extends React.Component<Props, State> {
   private readonly _stompClientService = StompClientService.getInstance();
 
   private _responseSubscription: Subscription = null;
-  private _stompClientStatusSubscription: Subscription;
 
   constructor(props: Props) {
     super(props);
@@ -34,8 +33,7 @@ export class StompClientContainer extends React.Component<Props, State> {
   }
 
   componentWillUnmount() {
-    this._responseSubscription.unsubscribe();
-    this._stompClientStatusSubscription.unsubscribe();
+    this._responseSubscription?.unsubscribe();
   }
 
   render() {
@@ -100,18 +98,13 @@ export class StompClientContainer extends React.Component<Props, State> {
 
   private _convertResponseBodyToCsv() {
     const responseBody = JSON.parse(this.state.responseBody);
-    const responseBodyKeys = Object.keys(responseBody);
-    if (responseBodyKeys.length === 0) {
+    if (!Array.isArray(responseBody) || responseBody.length === 0) {
       return '';
     }
-    const data = responseBody[responseBodyKeys[0]];
-    if (!Array.isArray(data) || data.length === 0) {
-      return '';
-    }
-    const columnNames = Object.keys(data[0]);
+    const columnNames = Object.keys(responseBody[0]);
     const rows = [columnNames.join(',')];
-    for (let i = 1; i < data.length; i++) {
-      rows.push(columnNames.map(columnName => data[i][columnName]).join(','));
+    for (const row of responseBody) {
+      rows.push(columnNames.map(columnName => row[columnName]).join(','));
     }
     return rows.join('\n');
   }
