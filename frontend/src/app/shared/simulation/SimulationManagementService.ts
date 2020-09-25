@@ -310,9 +310,9 @@ export class SimulationManagementService {
       )
       .subscribe({
         next: message => {
-          if (message.logMessage.startsWith('Started simulation')) {
+          if (message.processStatus === 'STARTED') {
             this._updateSimulationStatus(SimulationStatus.STARTED);
-          } else if (message.logMessage === 'The simulation has paused.') {
+          } else if (message.processStatus === 'PAUSED') {
             this._updateSimulationStatus(SimulationStatus.PAUSED);
           }
         },
