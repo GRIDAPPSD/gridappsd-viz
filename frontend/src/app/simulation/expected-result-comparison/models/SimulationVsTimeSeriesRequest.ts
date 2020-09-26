@@ -3,7 +3,7 @@ import { MessageRequest } from '@shared/MessageRequest';
 
 export class SimulationVsTimeSeriesRequest implements MessageRequest {
 
-  readonly url: string;
+  readonly url = 'goss.gridappsd.process.request.simulation';
 
   readonly requestBody = {
     power_system_config: {
@@ -48,20 +48,20 @@ export class SimulationVsTimeSeriesRequest implements MessageRequest {
     simulation_request_type: 'NEW',
     test_config: {
       appId: 'sample_app',
-      testId: -1,
+      testId: (Math.random() * 1_000_000) | 0,
       compareWithSimId: -1,
       testType: 'simulation_vs_timeseries'
     }
   };
 
-  readonly replyTo: string;
+  readonly replyTo = '/expected-result-comparison/simulation-vs-time-series';
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  constructor(simulationId: number) {
-    this.url = 'goss.gridappsd.process.request.simulation';
-    this.requestBody.test_config.testId = (Math.random() * 1_000_000) | 0;
+  constructor(simulationConfiguration: any | null, simulationId: number) {
+    if (simulationConfiguration !== null) {
+      Object.assign(this.requestBody, simulationConfiguration);
+    }
     this.requestBody.test_config.compareWithSimId = simulationId;
-    this.replyTo = '/expected-result-comparison/simulation-vs-time-series';
   }
 
 }

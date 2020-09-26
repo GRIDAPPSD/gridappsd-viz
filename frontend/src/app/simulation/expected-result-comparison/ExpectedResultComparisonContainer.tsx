@@ -142,8 +142,8 @@ export class ExpectedResultComparisonContainer extends React.Component<Props, St
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  onSimulationVsExpectedFormSubmited(expectedResults: any, events: any[]) {
-    this._fetchResponse(new SimulationVsExpectedRequest(expectedResults, events));
+  onSimulationVsExpectedFormSubmited(simulationConfiguration: any, expectedResults: any, events: any[]) {
+    this._fetchResponse(new SimulationVsExpectedRequest(simulationConfiguration, expectedResults, events));
   }
 
   private _fetchResponse(request: MessageRequest) {
@@ -175,8 +175,9 @@ export class ExpectedResultComparisonContainer extends React.Component<Props, St
     });
   }
 
-  onSimulationVsTimeSeriesFormSubmit(simulationId: number) {
-    this._fetchResponse(new SimulationVsTimeSeriesRequest(simulationId));
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  onSimulationVsTimeSeriesFormSubmit(simulationId: number, simulationConfiguration: any) {
+    this._fetchResponse(new SimulationVsTimeSeriesRequest(simulationConfiguration, simulationId));
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
