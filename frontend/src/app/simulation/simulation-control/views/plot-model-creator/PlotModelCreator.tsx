@@ -400,23 +400,24 @@ export class PlotModelCreator extends React.Component<Props, State> {
       if (createdPlotModel.useAngle && createdPlotModel.useMagnitude) {
         const plotModelUsingMagnitude = this._createNewPlotModel();
         const plotModelUsingAngle = this._createNewPlotModel();
-        plotModelUsingMagnitude.name = createdPlotModel.name + ' (Magnitude)';
+
+        plotModelUsingMagnitude.name = createdPlotModel.name + (!createdPlotModel.name.endsWith('(Magnitude)') ? ' (Magnitude)' : '');
         plotModelUsingMagnitude.components = createdPlotModel.components;
         plotModelUsingMagnitude.measurementType = createdPlotModel.measurementType;
         plotModelUsingMagnitude.useMagnitude = true;
         plotModelUsingMagnitude.useAngle = false;
 
-        plotModelUsingAngle.name = createdPlotModel.name + ' (Angle)';
-        plotModelUsingAngle.measurementType = createdPlotModel.measurementType;
-        plotModelUsingAngle.useAngle = true;
-        plotModelUsingAngle.useMagnitude = false;
+        plotModelUsingAngle.name = createdPlotModel.name + (!createdPlotModel.name.endsWith('(Angle)') ? ' (Angle)' : '');
         plotModelUsingAngle.components = createdPlotModel.components;
+        plotModelUsingAngle.measurementType = createdPlotModel.measurementType;
+        plotModelUsingAngle.useMagnitude = false;
+        plotModelUsingAngle.useAngle = true;
 
         resultingPlotModels.push(plotModelUsingMagnitude, plotModelUsingAngle);
       } else {
-        if (createdPlotModel.useAngle) {
+        if (createdPlotModel.useAngle && !createdPlotModel.name.endsWith('(Angle)')) {
           createdPlotModel.name += ' (Angle)';
-        } else if (createdPlotModel.useMagnitude) {
+        } else if (createdPlotModel.useMagnitude && !createdPlotModel.name.endsWith('(Magnitude)')) {
           createdPlotModel.name += ' (Magnitude)';
         }
         resultingPlotModels.push(createdPlotModel);
