@@ -1,57 +1,63 @@
 import * as React from 'react';
 import { Subscription, Subject } from 'rxjs';
-import { filter, takeUntil } from 'rxjs/operators';
+import { filter, takeUntil, map } from 'rxjs/operators';
 
 import { MeasurementChart } from './MeasurementChart';
-import { MeasurementChartModel } from './models/MeasurementChartModel';
+import { RenderableChartModel } from './models/RenderableChartModel';
 import { SimulationOutputMeasurement, SimulationManagementService } from '@shared/simulation';
 import { SimulationStatus } from '@common/SimulationStatus';
 import { TimeSeries } from './models/TimeSeries';
 import { TimeSeriesDataPoint } from './models/TimeSeriesDataPoint';
 import { StateStore } from '@shared/state-store';
-import { MeasurementType } from '@shared/topology';
+import { MeasurementType, ConductingEquipmentType } from '@shared/topology';
 import { PlotModel, PlotModelComponent } from '@shared/plot-model';
+import { Limits } from './models/Limits';
+import { StompClientService } from '@shared/StompClientService';
+import { FetchLimitsFileRequest } from './models/FetchLimitsFileRequest';
 
 interface Props {
 }
 
 interface State {
-  measurementChartModels: MeasurementChartModel[];
+  renderableChartModels: RenderableChartModel[];
 }
 
 export class MeasurementChartContainer extends React.Component<Props, State> {
 
   private readonly _stateStore = StateStore.getInstance();
   private readonly _simulationManagementService = SimulationManagementService.getInstance();
+  private readonly _stompClientService = StompClientService.getInstance();
   private readonly _timeSeries = new Map<string, TimeSeries>();
   private readonly _unsubscriber = new Subject<void>();
+  private readonly _nominalVoltageDivisorMap = new Map<string, number>();
 
   private _plotModels: PlotModel[] = [];
 
   constructor(props: Props) {
     super(props);
     this.state = {
-      measurementChartModels: []
+      renderableChartModels: []
     };
   }
 
   componentDidMount() {
-    this._pickMeasurementChartModelsFromSimulationSnapshotStream();
+    this._pickRenderableChartModelsFromSimulationSnapshotStream();
     this._subscribeToPlotModelsStateStore();
     this._subscribeToSimulationOutputMeasurementMapStream();
-    this._resetMeasurementChartModelsWhenSimulationStarts();
+    this._resetRenderableChartModelsWhenSimulationStarts();
+    this._fetchLimitsFileWhenSimulationIdChanges();
   }
 
-  private _pickMeasurementChartModelsFromSimulationSnapshotStream() {
-    this._simulationManagementService.selectSimulationSnapshotState('measurementChartModels')
+  private _pickRenderableChartModelsFromSimulationSnapshotStream() {
+    this._simulationManagementService.selectSimulationSnapshotState('renderableChartModels')
       .pipe(
         takeUntil(this._unsubscriber),
         filter(this._simulationManagementService.isUserInActiveSimulation)
       )
       .subscribe({
-        next: (measurementChartModels: MeasurementChartModel[]) => {
+        next: (renderableChartModels: RenderableChartModel[]) => {
           // After serialization, date values were converted to string
-          for (const model of measurementChartModels) {
+          for (const model of renderableChartModels) {
             for (const series of model.timeSeries) {
               for (const point of series.points) {
                 point.timestamp = new Date(point.timestamp);
@@ -59,7 +65,7 @@ export class MeasurementChartContainer extends React.Component<Props, State> {
             }
           }
           this.setState({
-            measurementChartModels
+            renderableChartModels
           });
         }
       });
@@ -70,42 +76,111 @@ export class MeasurementChartContainer extends React.Component<Props, State> {
       .pipe(takeUntil(this._unsubscriber))
       .subscribe({
         next: plotModels => {
-          this._plotModels = plotModels;
-          this._updateMeasurementChartModels();
+          this._plotModels = [
+            this._createPlotModelForMinAverageMaxChart(),
+            this._createPlotModelForLoadDemandChart(),
+            ...plotModels
+          ];
+          this._updateRenderableChartModels();
         }
       });
   }
 
-  private _updateMeasurementChartModels(resetAllTimeSeries = false) {
-    const measurementChartModels = [];
+  private _createPlotModelForMinAverageMaxChart(): PlotModel {
+    return {
+      name: 'Min/Average/Max Voltages',
+      measurementType: MeasurementType.VOLTAGE,
+      components: [
+        {
+          id: 'min',
+          phase: '',
+          displayName: 'Min'
+        },
+        {
+          id: 'average',
+          phase: '',
+          displayName: 'Average'
+        },
+        {
+          id: 'max',
+          phase: '',
+          displayName: 'Max'
+        }
+      ],
+      useMagnitude: true,
+      useAngle: false
+    };
+  }
+
+  private _createPlotModelForLoadDemandChart(): PlotModel {
+    return {
+      name: 'Load Demand',
+      measurementType: MeasurementType.NONE,
+      components: [
+        {
+          id: 'energyConsumerP',
+          phase: '',
+          displayName: 'EnergyConsumer p'
+        },
+        {
+          id: 'energyConsumerQ',
+          phase: '',
+          displayName: 'EnergyConsumer q'
+        },
+        {
+          id: 'batteryP',
+          phase: '',
+          displayName: 'Battery p'
+        },
+        {
+          id: 'batteryQ',
+          phase: '',
+          displayName: 'Battery q'
+        },
+        {
+          id: 'solarP',
+          phase: '',
+          displayName: 'Solar p'
+        },
+        {
+          id: 'solarQ',
+          phase: '',
+          displayName: 'Solar q'
+        }
+      ],
+      useMagnitude: false,
+      useAngle: false
+    };
+  }
+
+  private _updateRenderableChartModels(resetAllTimeSeries = false) {
+    const renderableChartModels: RenderableChartModel[] = [];
     for (let i = 0; i < this._plotModels.length; i++) {
       const plotModel = this._plotModels[i];
-      const measurementChartModel = this._createDefaultMeasurementChartModel(plotModel);
-      const templateMeasurementChartModel = this.state.measurementChartModels[i];
-      if (templateMeasurementChartModel) {
+      const renderableChartModel = this._createDefaultRenderableChartModel(plotModel);
+      const templateRenderableChartModel = this.state.renderableChartModels[i];
+      if (templateRenderableChartModel) {
         if (resetAllTimeSeries) {
-          for (const series of templateMeasurementChartModel.timeSeries) {
+          for (const series of templateRenderableChartModel.timeSeries) {
             series.points = [];
           }
         }
-        measurementChartModel.yAxisLabel = templateMeasurementChartModel.yAxisLabel;
+        renderableChartModel.yAxisLabel = templateRenderableChartModel.yAxisLabel;
       }
-      measurementChartModel.timeSeries = plotModel.components.map(
-        component => this._findOrCreateTimeSeries(plotModel, component)
-      );
-      measurementChartModels.push(measurementChartModel);
+      renderableChartModel.timeSeries = plotModel.components.map(e => this._findOrCreateTimeSeries(plotModel, e));
+      renderableChartModels.push(renderableChartModel);
     }
     this.setState({
-      measurementChartModels
+      renderableChartModels
     });
     if (this._simulationManagementService.didUserStartActiveSimulation()) {
       this._simulationManagementService.syncSimulationSnapshotState({
-        measurementChartModels
+        renderableChartModels
       });
     }
   }
 
-  private _createDefaultMeasurementChartModel(plotModel: PlotModel): MeasurementChartModel {
+  private _createDefaultRenderableChartModel(plotModel: PlotModel): RenderableChartModel {
     return {
       name: plotModel.name,
       timeSeries: [],
@@ -142,86 +217,189 @@ export class MeasurementChartContainer extends React.Component<Props, State> {
         filter(() => this._simulationManagementService.didUserStartActiveSimulation())
       )
       .subscribe({
-        next: measurements => {
-          const measurementChartModels = [];
-          if (this._plotModels.length > 0) {
-            measurementChartModels.push(
-              ...this._plotModels.map(plotModel => this._buildMeasurementChartModel(plotModel, measurements))
-            );
+        next: measurementMap => {
+          const renderableChartModels = this._createDefaultCharts(measurementMap);
+
+          // Skip the first 2 elements because they are the Min/Average/Max and Load Demand PlotModels
+          for (let i = 2; i < this._plotModels.length; i++) {
+            renderableChartModels.push(this._createRenderableChartModel(this._plotModels[i], measurementMap));
           }
           this.setState({
-            measurementChartModels
+            renderableChartModels
           });
           if (this._simulationManagementService.didUserStartActiveSimulation()) {
             this._simulationManagementService.syncSimulationSnapshotState({
-              measurementChartModels
+              renderableChartModels
             });
           }
         }
       });
   }
 
-  private _buildMeasurementChartModel(plotModel: PlotModel, measurements: Map<string, SimulationOutputMeasurement>): MeasurementChartModel {
-    return plotModel.components.map(component => this._buildTimeSeries(plotModel, component, measurements))
-      .reduce((measurementChartModel: MeasurementChartModel, timeSeries: TimeSeries) => {
-        measurementChartModel.timeSeries.push(timeSeries);
-        return measurementChartModel;
-      }, this._createDefaultMeasurementChartModel(plotModel));
+  private _createDefaultCharts(measurements: Map<string, SimulationOutputMeasurement>) {
+    let minVoltage = Infinity;
+    let maxVoltage = -Infinity;
+    let averageVoltage = Infinity;
+    let energyConsumerP = 0;
+    let energyConsumerQ = 0;
+    let batteryP = 0;
+    let batteryQ = 0;
+    let solarP = 0;
+    let solarQ = 0;
+
+    if (measurements) {
+      let totalVoltage = 0;
+      let numberOfVoltageMeasurements = 0;
+      measurements.forEach(measurement => {
+        if (measurement.type === MeasurementType.VOLTAGE) {
+          const nominalVoltage = measurement.magnitude / this._nominalVoltageDivisorMap.get(measurement.connectivityNode);
+          if (nominalVoltage < minVoltage) {
+            minVoltage = nominalVoltage;
+          }
+          if (nominalVoltage > maxVoltage) {
+            maxVoltage = nominalVoltage;
+          }
+          totalVoltage += nominalVoltage;
+          numberOfVoltageMeasurements++;
+        }
+        if (measurement.conductingEquipmentType === ConductingEquipmentType.EnergyConsumer) {
+          const [p, q] = this._calculatePQValues(measurement);
+          energyConsumerP += p;
+          energyConsumerQ += q;
+        } else if (measurement.name.startsWith('PowerElectronicsConnection_BatteryUnit')) {
+          const [p, q] = this._calculatePQValues(measurement);
+          batteryP += p;
+          batteryQ += q;
+        } else if (measurement.name.startsWith('PowerElectronicsConnection_PhotovoltaicUnit')) {
+          const [p, q] = this._calculatePQValues(measurement);
+          solarP += p;
+          solarQ += q;
+        }
+      });
+      averageVoltage = totalVoltage / numberOfVoltageMeasurements;
+    }
+    const minAverageMaxPlotModel = this._plotModels[0];
+    const minAverageMaxRenderableChartModel = this._createDefaultRenderableChartModel(minAverageMaxPlotModel);
+    minAverageMaxRenderableChartModel.timeSeries = [
+      this._addValueToTimeSeries(this._findOrCreateTimeSeries(minAverageMaxPlotModel, minAverageMaxPlotModel.components[0]), minVoltage),
+      this._addValueToTimeSeries(this._findOrCreateTimeSeries(minAverageMaxPlotModel, minAverageMaxPlotModel.components[1]), averageVoltage),
+      this._addValueToTimeSeries(this._findOrCreateTimeSeries(minAverageMaxPlotModel, minAverageMaxPlotModel.components[2]), maxVoltage)
+    ];
+
+    const loadDemandPlotModel = this._plotModels[1];
+    const loadDemandRenderableChartModel = this._createDefaultRenderableChartModel(loadDemandPlotModel);
+    loadDemandRenderableChartModel.yAxisLabel = 'KVA';
+    loadDemandRenderableChartModel.timeSeries = [
+      this._addValueToTimeSeries(this._findOrCreateTimeSeries(loadDemandPlotModel, loadDemandPlotModel.components[0]), energyConsumerP / 1000),
+      this._addValueToTimeSeries(this._findOrCreateTimeSeries(loadDemandPlotModel, loadDemandPlotModel.components[1]), energyConsumerQ / 1000),
+      this._addValueToTimeSeries(this._findOrCreateTimeSeries(loadDemandPlotModel, loadDemandPlotModel.components[2]), batteryP / 1000),
+      this._addValueToTimeSeries(this._findOrCreateTimeSeries(loadDemandPlotModel, loadDemandPlotModel.components[3]), batteryQ / 1000),
+      this._addValueToTimeSeries(this._findOrCreateTimeSeries(loadDemandPlotModel, loadDemandPlotModel.components[4]), solarP / 1000),
+      this._addValueToTimeSeries(this._findOrCreateTimeSeries(loadDemandPlotModel, loadDemandPlotModel.components[5]), solarQ / 1000)
+    ];
+
+    return [
+      minAverageMaxRenderableChartModel,
+      loadDemandRenderableChartModel
+    ];
   }
 
-  private _buildTimeSeries(
-    plotModel: PlotModel,
-    component: PlotModelComponent,
-    measurements: Map<string, SimulationOutputMeasurement>
-  ): TimeSeries {
-    const timeSeries = this._findOrCreateTimeSeries(plotModel, component);
-    const nextTimeStepDataPoint = this._getDataPointForTimeSeries(plotModel, component, measurements);
+  private _calculatePQValues(measurement: SimulationOutputMeasurement): [p: number, q: number] {
+    if (Number.isFinite(measurement.magnitude) && Number.isFinite(measurement.angle)) {
+      const angleInRadian = measurement.angle * Math.PI / 180;
+      return [
+        measurement.magnitude * Math.cos(angleInRadian),
+        measurement.magnitude * Math.sin(angleInRadian)
+      ];
+    }
+    return [0, 0];
+  }
 
-    if (nextTimeStepDataPoint) {
+  private _addValueToTimeSeries(timeSeries: TimeSeries, value: number) {
+    if (Number.isFinite(value)) {
       if (timeSeries.points.length === 20) {
-        timeSeries.points.shift();
+        timeSeries.points.pop();
       }
-      timeSeries.points.push(nextTimeStepDataPoint);
+      timeSeries.points.push({
+        timestamp: new Date(this._simulationManagementService.getOutputTimestamp() * 1000),
+        measurement: value
+      } as TimeSeriesDataPoint);
     }
     return timeSeries;
   }
 
-  private _getDataPointForTimeSeries(
-    plotModel: PlotModel,
-    component: PlotModelComponent,
-    measurements: Map<string, SimulationOutputMeasurement>
-  ): TimeSeriesDataPoint {
-    const measurement = measurements.get(component.id);
+  private _createRenderableChartModel(plotModel: PlotModel, measurements: Map<string, SimulationOutputMeasurement>): RenderableChartModel {
+    return plotModel.components.map(component => this._createTimeSeries(plotModel, component, measurements))
+      .reduce((renderableChartModel: RenderableChartModel, timeSeries: TimeSeries) => {
+        renderableChartModel.timeSeries.push(timeSeries);
+        return renderableChartModel;
+      }, this._createDefaultRenderableChartModel(plotModel));
+  }
+
+  private _createTimeSeries(plotModel: PlotModel, component: PlotModelComponent, measurements: Map<string, SimulationOutputMeasurement>) {
+    const timeSeries = this._findOrCreateTimeSeries(plotModel, component);
+    const nextMeasurementValue = this._getNextMeasurementValue(plotModel, measurements.get(component.id));
+
+    if (nextMeasurementValue === null) {
+      // eslint-disable-next-line no-console
+      console.warn(`No measurement found for component "${component.id}", plot name "${plotModel.name}"`);
+    }
+    return this._addValueToTimeSeries(timeSeries, nextMeasurementValue);
+  }
+
+  private _getNextMeasurementValue(plotModel: PlotModel, measurement: SimulationOutputMeasurement) {
     if (measurement !== undefined) {
-      const dataPoint: TimeSeriesDataPoint = {
-        timestamp: new Date(this._simulationManagementService.getOutputTimestamp() * 1000),
-        measurement: 0
-      };
       switch (plotModel.measurementType) {
         case MeasurementType.VOLTAGE:
         case MeasurementType.POWER:
-          dataPoint.measurement = measurement[plotModel.useMagnitude ? 'magnitude' : 'angle'];
-          return dataPoint;
+          return measurement[plotModel.useMagnitude ? 'magnitude' : 'angle'];
         case MeasurementType.TAP:
-          dataPoint.measurement = measurement.value;
-          return dataPoint;
+          return measurement.value;
       }
-    } else {
-      // eslint-disable-next-line no-console
-      console.warn(`No measurement found for component "${component.id}", plot name "${plotModel.name}"`);
     }
     return null;
   }
 
-
-  private _resetMeasurementChartModelsWhenSimulationStarts() {
+  private _resetRenderableChartModelsWhenSimulationStarts() {
     this._simulationManagementService.simulationStatusChanges()
       .pipe(
         takeUntil(this._unsubscriber),
         filter(status => status === SimulationStatus.STARTING && this._simulationManagementService.didUserStartActiveSimulation())
       )
       .subscribe({
-        next: () => this._updateMeasurementChartModels(true)
+        next: () => this._updateRenderableChartModels(true)
+      });
+  }
+
+  private _fetchLimitsFileWhenSimulationIdChanges() {
+    this._stateStore.select('simulationId')
+      .pipe(
+        takeUntil(this._unsubscriber),
+        filter(simulationId => simulationId !== ''),
+        map(simulationId => new FetchLimitsFileRequest(simulationId))
+      )
+      .subscribe({
+        next: request => {
+          this._stompClientService.readOnceFrom<{ limits: Limits }>(request.replyTo)
+            .subscribe({
+              next: payload => {
+                for (const limit of payload.limits.voltages) {
+                  /*
+                    Get the percentage of nominal voltage for each ConnectivityNode
+                    by taking the average of Alo and Blo, then divide each measured
+                    voltage value by this average, then find the min/average/max
+                    voltages after applying the divisions.
+                  */
+                  this._nominalVoltageDivisorMap.set(limit.ConnectivityNode, (limit.Alo + limit.Blo) / 2);
+                }
+              }
+            });
+          this._stompClientService.send({
+            destination: request.url,
+            body: JSON.stringify(request.requestBody),
+            replyTo: request.replyTo
+          });
+        }
       });
   }
 
@@ -232,8 +410,8 @@ export class MeasurementChartContainer extends React.Component<Props, State> {
 
   render() {
     return (
-      this.state.measurementChartModels.map(
-        measurementChartModel => <MeasurementChart key={measurementChartModel.name} measurementChartModel={measurementChartModel} />
+      this.state.renderableChartModels.map(
+        renderableChartModel => <MeasurementChart key={renderableChartModel.name} renderableChartModel={renderableChartModel} />
       )
     );
   }

@@ -7,7 +7,7 @@ import { extent } from 'd3-array';
 import { timeFormat } from 'd3-time-format';
 import { format as numberFormat } from 'd3-format';
 
-import { MeasurementChartModel } from './models/MeasurementChartModel';
+import { RenderableChartModel } from './models/RenderableChartModel';
 import { TimeSeriesDataPoint } from './models/TimeSeriesDataPoint';
 import { TimeSeries } from './models/TimeSeries';
 import { StateStore } from '@shared/state-store';
@@ -17,7 +17,7 @@ import './MeasurementChart.light.scss';
 import './MeasurementChart.dark.scss';
 
 interface Props {
-  measurementChartModel: MeasurementChartModel;
+  renderableChartModel: RenderableChartModel;
 }
 
 interface State {
@@ -101,7 +101,7 @@ export class MeasurementChart extends React.Component<Props, State> {
 
   private _findOverlappingTimeSeries() {
     const overlappingTimeSeries = [];
-    for (const suspect of this.props.measurementChartModel.timeSeries) {
+    for (const suspect of this.props.renderableChartModel.timeSeries) {
       if (suspect.points.length >= 2 && this._suspectSeriesOverlapsOtherSeries(suspect)) {
         overlappingTimeSeries.push(suspect);
       }
@@ -110,7 +110,7 @@ export class MeasurementChart extends React.Component<Props, State> {
   }
 
   private _suspectSeriesOverlapsOtherSeries(suspect: TimeSeries) {
-    for (const current of this.props.measurementChartModel.timeSeries) {
+    for (const current of this.props.renderableChartModel.timeSeries) {
       // Only checking for the first and last datapoints
       // to determine if the provided series overlaps some other series which is good enough
       if (
@@ -129,7 +129,7 @@ export class MeasurementChart extends React.Component<Props, State> {
   }
 
   private _calculateXYAxisExtents(): { x: [Date, Date]; y: [number, number] } {
-    const dataPoints: Array<TimeSeriesDataPoint> = this.props.measurementChartModel.timeSeries.reduce(
+    const dataPoints: Array<TimeSeriesDataPoint> = this.props.renderableChartModel.timeSeries.reduce(
       (points, series) => {
         points.push(...series.points);
         return points;
@@ -162,13 +162,13 @@ export class MeasurementChart extends React.Component<Props, State> {
 
   private _renderTimeSeriesLineCharts() {
     this._container.selectAll('.measurement-chart__canvas__time-series-line')
-      .data(this.props.measurementChartModel.timeSeries)
+      .data(this.props.renderableChartModel.timeSeries)
       .join(enter => enter.append('path').attr('class', 'measurement-chart__canvas__time-series-line'))
       .attr('d', timeSeries => this._lineGenerator(timeSeries.points));
   }
 
   componentDidUpdate(prevProps: Props) {
-    if (prevProps.measurementChartModel !== this.props.measurementChartModel) {
+    if (prevProps.renderableChartModel !== this.props.renderableChartModel) {
       this._render();
     }
   }
@@ -177,11 +177,11 @@ export class MeasurementChart extends React.Component<Props, State> {
     return (
       <div className='measurement-chart'>
         <header className='measurement-chart__name'>
-          {this.props.measurementChartModel.name}
+          {this.props.renderableChartModel.name}
         </header>
         <div className='measurement-chart__legend-container'>
           {
-            this.props.measurementChartModel.timeSeries.map(timeSeries => (
+            this.props.renderableChartModel.timeSeries.map(timeSeries => (
               <Ripple key={timeSeries.name}>
                 <div
                   className='measurement-chart__legend'
@@ -215,7 +215,7 @@ export class MeasurementChart extends React.Component<Props, State> {
               y={this.margin.top}
               dy='-5'
               textAnchor='middle'>
-              {this.props.measurementChartModel.yAxisLabel}
+              {this.props.renderableChartModel.yAxisLabel}
             </text>
             {this.showLabelsForOverlappingTimeSeries()}
           </g>
