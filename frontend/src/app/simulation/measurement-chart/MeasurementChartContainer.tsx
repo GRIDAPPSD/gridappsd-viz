@@ -11,9 +11,8 @@ import { TimeSeriesDataPoint } from './models/TimeSeriesDataPoint';
 import { StateStore } from '@shared/state-store';
 import { MeasurementType, ConductingEquipmentType } from '@shared/topology';
 import { PlotModel, PlotModelComponent } from '@shared/plot-model';
-import { Limits } from './models/Limits';
 import { StompClientService } from '@shared/StompClientService';
-import { FetchLimitsFileRequest } from './models/FetchLimitsFileRequest';
+import { FetchLimitsFileRequest, FetchLimitsFileRequestPayload } from './models/FetchLimitsFileRequest';
 
 interface Props {
 }
@@ -380,7 +379,7 @@ export class MeasurementChartContainer extends React.Component<Props, State> {
       )
       .subscribe({
         next: request => {
-          this._stompClientService.readOnceFrom<{ limits: Limits }>(request.replyTo)
+          this._stompClientService.readOnceFrom<FetchLimitsFileRequestPayload>(request.replyTo)
             .subscribe({
               next: payload => {
                 for (const limit of payload.limits.voltages) {
@@ -392,6 +391,9 @@ export class MeasurementChartContainer extends React.Component<Props, State> {
                   */
                   this._nominalVoltageDivisorMap.set(limit.ConnectivityNode, (limit.Alo + limit.Blo) / 2);
                 }
+                this._stateStore.update({
+                  currentLimits: payload.limits.currents
+                });
               }
             });
           this._stompClientService.send({

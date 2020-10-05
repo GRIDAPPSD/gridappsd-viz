@@ -1,4 +1,5 @@
 /* eslint-disable camelcase */
+import { CurrentLimit, VoltageLimit } from '@shared/measurement-limits';
 import { MessageRequest, RequestConfigurationType } from '@shared/MessageRequest';
 
 export class FetchLimitsFileRequest implements MessageRequest {
@@ -16,4 +17,11 @@ export class FetchLimitsFileRequest implements MessageRequest {
     this.requestBody.parameters.simulation_id = simulationId;
   }
 
+}
+
+export interface FetchLimitsFileRequestPayload {
+  limits: {
+    voltages: VoltageLimit[];
+    currents: CurrentLimit[];
+  };
 }

@@ -19,7 +19,7 @@
             stroke: #f00;
         }
 
-        .topology-renderer__canvas__symbol.no-power.switch.no-power {
+        .topology-renderer__canvas__symbol.switch.no-power {
             fill: #f00;
         }
     }
@@ -68,4 +68,8 @@
 
 .topology-renderer__canvas__symbol.battery {
     stroke: #006400;
+}
+
+.topology-renderer__toolbox__toggle-power-direction-indicator.off::after {
+    border-color: #db356d;
 }

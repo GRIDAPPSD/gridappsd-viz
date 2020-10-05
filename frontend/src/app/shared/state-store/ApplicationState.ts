@@ -4,6 +4,7 @@ import { Service } from '@shared/Service';
 import { ModelDictionary, ModelDictionaryComponent } from '@shared/topology';
 import { PlotModel } from '@shared/plot-model/PlotModel';
 import { ExpectedResultComparisonType } from '@shared/ExpectedResultComparisonType';
+import { CurrentLimit } from '@shared/measurement-limits';
 
 export interface ApplicationState {
   simulationId: string;
@@ -19,4 +20,5 @@ export interface ApplicationState {
   activeSimulationIds: string[];
   nodeNameToLocate: string;
   expectedResultComparisonType: ExpectedResultComparisonType;
+  currentLimits: CurrentLimit[];
 }

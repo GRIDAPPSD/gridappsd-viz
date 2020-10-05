@@ -1,8 +1,3 @@
-export interface Limits {
-  voltages: VoltageLimit[];
-  currents: CurrentLimit[];
-}
-
 export interface CurrentLimit {
   id: string;
   Normal: number;
