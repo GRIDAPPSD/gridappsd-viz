@@ -53,7 +53,7 @@ export class ServiceConfigurationTab extends React.Component<Props, State> {
       .subscribe({
         next: isValid => {
           this.setState({
-            disableApplyButton: this.internalFormArrayModel.isPristine() || !isValid
+            disableApplyButton: !isValid
           });
         }
       });
@@ -70,10 +70,7 @@ export class ServiceConfigurationTab extends React.Component<Props, State> {
           }
           this.setState({
             selectedServices
-          }, () => {
-            this.props.parentFormArrayModel.removeAllControls();
-            this.props.parentFormArrayModel.setValue(this.internalFormArrayModel.getValue());
-          });
+          }, () => this.props.parentFormArrayModel.removeAllControls());
         }
       });
   }
