@@ -96,9 +96,7 @@ export class MeasurementValueTable extends React.Component<Props, State> {
         </header>
         <div className='measurement-value-table__content'>
           <table>
-            {
-              this.renderMeasurementValueTable()
-            }
+            {this.renderMeasurementValueTable()}
           </table>
         </div>
       </div>
@@ -122,8 +120,8 @@ export class MeasurementValueTable extends React.Component<Props, State> {
     }
     const maximumNumberOfMeasurements = Math.max(
       this.props.measurements.taps.length,
-      this.props.measurements.taps.length,
-      this.props.measurements.taps.length
+      this.props.measurements.voltages.length,
+      this.props.measurements.powers.length
     );
     return (
       <>
@@ -184,7 +182,8 @@ export class MeasurementValueTable extends React.Component<Props, State> {
             &&
             <td>
               {
-                powerMeasurement &&
+                powerMeasurement
+                &&
                 <>
                   {powerMeasurement.magnitude}
                   <span>&ang;</span>
