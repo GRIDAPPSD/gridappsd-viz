@@ -33,9 +33,7 @@ export class SimulationCoordinator {
     newSimulationChannel.activate();
     this._activeSimulationChannelMap.set(simulationId, newSimulationChannel);
     simulationInitiator.watchForDisconnection()
-      .then(() => {
-        this.deactivateSimulationChannel(simulationId, simulationInitiator);
-      });
+      .then(() => this.deactivateSimulationChannel(simulationId, simulationInitiator));
     // Notify all other clients that are connected to our server
     simulationInitiator.broadcast(
       SimulationSynchronizationEvent.QUERY_ACTIVE_SIMULATION_CHANNELS,
