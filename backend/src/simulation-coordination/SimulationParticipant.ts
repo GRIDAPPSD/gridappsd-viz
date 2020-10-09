@@ -6,7 +6,7 @@ import { SimulationStatus } from '@common/SimulationStatus';
 import { SimulationSynchronizationEvent } from '@common/SimulationSynchronizationEvent';
 
 /**
- * A simulation participant is a client that have joined a running simulation
+ * A simulation participant is a client that has joined a running simulation
  */
 export class SimulationParticipant {
 

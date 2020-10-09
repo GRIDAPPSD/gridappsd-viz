@@ -2,7 +2,6 @@ import * as React from 'react';
 import { select, Selection } from 'd3-selection';
 import { scaleLinear, scaleTime, ScaleTime, ScaleLinear } from 'd3-scale';
 import { axisBottom, axisLeft, Axis } from 'd3-axis';
-import { line, Line } from 'd3-shape';
 import { extent } from 'd3-array';
 import { timeFormat } from 'd3-time-format';
 import { format as numberFormat } from 'd3-format';
@@ -41,7 +40,6 @@ export class MeasurementChart extends React.Component<Props, State> {
   private readonly _yScale: ScaleLinear<number, number>;
   private readonly _xAxisGenerator: Axis<Date>;
   private readonly _yAxisGenerator: Axis<number>;
-  private readonly _lineGenerator: Line<TimeSeriesDataPoint>;
   private readonly _stateStore = StateStore.getInstance();
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -65,10 +63,6 @@ export class MeasurementChart extends React.Component<Props, State> {
       .domain([Infinity, -Infinity])
       .range([this.height - this.margin.bottom, this.margin.top]);
 
-    this._lineGenerator = line<TimeSeriesDataPoint>()
-      .x(dataPoint => this._xScale(dataPoint.timestamp))
-      .y(dataPoint => this._yScale(dataPoint.measurement));
-
     this._xAxisGenerator = axisBottom<Date>(this._xScale)
       .tickFormat(timeFormat('%H:%M:%S'));
 
@@ -78,8 +72,8 @@ export class MeasurementChart extends React.Component<Props, State> {
 
   componentDidMount() {
     this._container = select(this.svgRef.current.querySelector('.measurement-chart__canvas__container') as SVGElement);
-    this._xAxis = this._container.select('.x-axis');
-    this._yAxis = this._container.select('.y-axis');
+    this._xAxis = this._container.select('.measurement-chart__canvas__axis.x');
+    this._yAxis = this._container.select('.measurement-chart__canvas__axis.y');
 
     this._render();
   }
@@ -163,8 +157,13 @@ export class MeasurementChart extends React.Component<Props, State> {
   private _renderTimeSeriesLineCharts() {
     this._container.selectAll('.measurement-chart__canvas__time-series-line')
       .data(this.props.renderableChartModel.timeSeries)
-      .join(enter => enter.append('path').attr('class', 'measurement-chart__canvas__time-series-line'))
-      .attr('d', timeSeries => this._lineGenerator(timeSeries.points));
+      .join(enter => enter.append('polyline').attr('class', 'measurement-chart__canvas__time-series-line'))
+      .transition()
+      .attr('points', timeSeries => timeSeries.points.map(e => this._createXYPair(e)).join(' '));
+  }
+
+  private _createXYPair(point: TimeSeriesDataPoint) {
+    return `${this._xScale(point.timestamp)},${this._yScale(point.measurement)}`;
   }
 
   componentDidUpdate(prevProps: Props) {
@@ -204,10 +203,10 @@ export class MeasurementChart extends React.Component<Props, State> {
           preserveAspectRatio='xMidYMin meet'>
           <g className='measurement-chart__canvas__container'>
             <g
-              className='measurement-chart__canvas__axis x-axis'
+              className='measurement-chart__canvas__axis x'
               transform={`translate(0,${this.height - this.margin.bottom})`} />
             <g
-              className='measurement-chart__canvas__axis y-axis'
+              className='measurement-chart__canvas__axis y'
               transform={`translate(${this.margin.left},0)`} />
             <text
               className='measurement-chart__canvas__axis-label'
