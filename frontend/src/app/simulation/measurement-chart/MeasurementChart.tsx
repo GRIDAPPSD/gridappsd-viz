@@ -137,8 +137,7 @@ export class MeasurementChart extends React.Component<Props, State> {
   }
 
   private _renderXAxis(xAxisExtent: [Date, Date]) {
-    this._xScale.domain(xAxisExtent)
-      .range([this.margin.left, this.width - this.margin.right]);
+    this._xScale.domain(xAxisExtent).range([this.margin.left, this.width - this.margin.right]);
     this._xAxisGenerator.scale(this._xScale);
     this._xAxis.call(this._xAxisGenerator)
       .selectAll('text')

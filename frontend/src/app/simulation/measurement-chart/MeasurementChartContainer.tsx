@@ -157,14 +157,14 @@ export class MeasurementChartContainer extends React.Component<Props, State> {
     for (let i = 0; i < this._plotModels.length; i++) {
       const plotModel = this._plotModels[i];
       const renderableChartModel = this._createDefaultRenderableChartModel(plotModel);
-      const templateRenderableChartModel = this.state.renderableChartModels[i];
-      if (templateRenderableChartModel) {
-        if (resetAllTimeSeries) {
+      if (resetAllTimeSeries) {
+        const templateRenderableChartModel = this.state.renderableChartModels[i];
+        if (templateRenderableChartModel) {
           for (const series of templateRenderableChartModel.timeSeries) {
             series.points = [];
           }
+          renderableChartModel.yAxisLabel = templateRenderableChartModel.yAxisLabel;
         }
-        renderableChartModel.yAxisLabel = templateRenderableChartModel.yAxisLabel;
       }
       renderableChartModel.timeSeries = plotModel.components.map(e => this._findOrCreateTimeSeries(plotModel, e));
       renderableChartModels.push(renderableChartModel);
@@ -251,15 +251,18 @@ export class MeasurementChartContainer extends React.Component<Props, State> {
       let numberOfVoltageMeasurements = 0;
       measurements.forEach(measurement => {
         if (measurement.type === MeasurementType.VOLTAGE) {
-          const nominalVoltage = measurement.magnitude / this._nominalVoltageDivisorMap.get(measurement.connectivityNode);
-          if (nominalVoltage < minVoltage) {
-            minVoltage = nominalVoltage;
+          const nominalVoltage = this._nominalVoltageDivisorMap.get(measurement.connectivityNode);
+          if (nominalVoltage) {
+            const percentOfNominalVoltage = measurement.magnitude / nominalVoltage;
+            if (percentOfNominalVoltage < minVoltage) {
+              minVoltage = percentOfNominalVoltage;
+            }
+            if (percentOfNominalVoltage > maxVoltage) {
+              maxVoltage = percentOfNominalVoltage;
+            }
+            totalVoltage += percentOfNominalVoltage;
+            numberOfVoltageMeasurements++;
           }
-          if (nominalVoltage > maxVoltage) {
-            maxVoltage = nominalVoltage;
-          }
-          totalVoltage += nominalVoltage;
-          numberOfVoltageMeasurements++;
         }
         if (measurement.conductingEquipmentType === ConductingEquipmentType.EnergyConsumer) {
           const [p, q] = this._calculatePQValues(measurement);
@@ -382,14 +385,15 @@ export class MeasurementChartContainer extends React.Component<Props, State> {
           this._stompClientService.readOnceFrom<FetchLimitsFileRequestPayload>(request.replyTo)
             .subscribe({
               next: payload => {
+                const sqrt3 = Math.sqrt(3);
                 for (const limit of payload.limits.voltages) {
                   /*
                     Get the percentage of nominal voltage for each ConnectivityNode
-                    by taking the average of Alo and Blo, then divide each measured
+                    by taking the average of Alo and Ahi, then divide each measured
                     voltage value by this average, then find the min/average/max
                     voltages after applying the divisions.
                   */
-                  this._nominalVoltageDivisorMap.set(limit.ConnectivityNode, (limit.Alo + limit.Blo) / 2);
+                  this._nominalVoltageDivisorMap.set(limit.ConnectivityNode, ((limit.Alo + limit.Ahi) / 2) / sqrt3);
                 }
                 this._stateStore.update({
                   currentLimits: payload.limits.currents
