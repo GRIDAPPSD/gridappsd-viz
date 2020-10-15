@@ -1,3 +1,5 @@
+@import '@constants.common';
+
 .notification-container {
     position: fixed;
     width: 100vw;
@@ -6,7 +8,7 @@
     left: 0;
     top: 0;
     display: flex;
-    justify-content: center;
+    justify-content: flex-start;
     align-items: flex-end;
     overflow: hidden;
 
@@ -21,53 +23,53 @@
 
 .notification {
     position: relative;
+    top: -20px;
+    left: 20px;
     max-width: 90vw;
-    margin-bottom: 10px;
     display: flex;
     align-items: center;
-    font-size: 3em;
-    padding: 20px 50px;
+    font-size: 1.5em;
+    padding: 10px 20px;
     box-sizing: border-box;
-    min-height: 120px;
-    border-radius: 10px;
+    min-height: 60px;
+    border-radius: 5px;
     z-index: 10000;
-    animation-duration: 0.5s;
-    animation-timing-function: ease;
-    animation-iteration-count: 1;
+    animation: 0.5s $easing-function forwards;
 }
 
 .notification-container.visible .notification {
     animation-name: slide-in;
-    transform: translateY(0);
-    opacity: 1;
 }
 
 .notification-container.hidden .notification {
     animation-name: slide-out;
-    transform: translateY(100%);
-    opacity: 0;
 }
 
 @keyframes slide-in {
     from {
-        transform: translateY(100%);
+        transform: translateX(calc(-100% - 20px));
         opacity: 0;
     }
 
     to {
-        transform: translateY(0);
+        transform: translateX(0);
         opacity: 1;
     }
 }
 
 @keyframes slide-out {
     from {
-        transform: translateY(0);
+        transform: translateX(0);
         opacity: 1;
     }
 
     to {
-        transform: translateY(100%);
+        transform: translateX(calc(-100% - 20px));
         opacity: 0;
     }
+}
+
+.notification__close {
+    right: 0;
+    margin-left: 15px;
 }
