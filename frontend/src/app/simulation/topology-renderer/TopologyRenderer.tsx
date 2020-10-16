@@ -1201,8 +1201,8 @@ export class TopologyRenderer extends React.Component<Props, State> {
             orient='auto'
             markerWidth='20'
             markerHeight='20'
-            refX='9.9'
-            refY='7.78'>
+            refX='3.5'
+            refY='-4'>
             <path
               className='topology-renderer__canvas__arrow'
               d='M12.5,10 h-5 m1.5,-2 l-1.5,2 l1.5,2' />
@@ -1304,8 +1304,8 @@ export class TopologyRenderer extends React.Component<Props, State> {
           orient='auto'
           markerWidth='20'
           markerHeight='20'
-          refX='15'
-          refY='24'>
+          refX='4'
+          refY='13'>
           <path
             className='topology-renderer__canvas__arrow'
             d='M12.5,10 h-5 m1.5,-2 l-1.5,2 l1.5,2' />
