@@ -5,4 +5,8 @@
     border-bottom: 2px inset rgba(0, 0, 0, 0.5);
     color: $primary-color;
     padding-bottom: 5px;
+
+    .icon-button .ripple-effect {
+        background-color: rgba(0, 0, 0, 0.15);
+    }
 }

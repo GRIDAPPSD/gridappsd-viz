@@ -1,3 +1,5 @@
+@import '@constants.common';
+
 .form-group {
     position: relative;
 }
@@ -17,6 +19,7 @@
 
 .form-group__header:not(:empty)~.form-group__controls {
     padding: 0 1.5em;
+    overflow: hidden;
 }
 
 .form-group__header__button-group {
@@ -26,7 +29,7 @@
 
     &>i.material-icons {
         font-size: 1.25em;
-        transition: transform 0.25s ease;
+        transition: transition(transform);
         transform-origin: 50% 50%;
         width: 30px;
         height: 30px;
@@ -47,28 +50,20 @@
 
     i.material-icons {
         font-size: 3em;
-        transition: transform 0.25s ease;
+        transition: transition(transform);
         transform-origin: 50% 50%;
     }
 
-    &.expand i.material-icons {
+    &.expanded i.material-icons {
         transform: rotate(180deg);
     }
 
-    &.collapse i.material-icons {
+    &.collapsed i.material-icons {
         transform: rotate(0);
     }
 }
 
 .form-group__controls {
     position: relative;
-    transition: max-height 0.25s;
-}
-
-.form-group__controls.collapsed {
-    overflow: hidden;
-}
-
-.form-group__controls.expanded {
-    overflow: initial;
+    transition: transition(max-height);
 }

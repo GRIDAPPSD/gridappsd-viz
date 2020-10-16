@@ -122,6 +122,7 @@ export class Select<T, E extends boolean> extends React.Component<Props<T, E>, S
           this._defaultSelectedOptions = foundOption ? [foundOption] : [];
         } else {
           this._defaultSelectedOptions = this.props.selectionOptionBuilder.getOptions().filter((option, i) => this.props.selectedOptionFinder(option.value, i));
+          this._selectedOptionsBeforeOpening = this._defaultSelectedOptions;
         }
       } else if (this.props.optional !== true && this.props.selectionOptionBuilder.numberOfOptions() === 1) {
         this._defaultSelectedOptions = this.props.selectionOptionBuilder.getOptions();
@@ -222,6 +223,7 @@ export class Select<T, E extends boolean> extends React.Component<Props<T, E>, S
       left: rect.left,
       top: rect.top
     });
+    // see `closeOptionList` method for more information why this is here
     if (this.props.multiple) {
       this._selectedOptionsBeforeOpening = this.state.selectedOptions;
     }
@@ -231,7 +233,15 @@ export class Select<T, E extends boolean> extends React.Component<Props<T, E>, S
     this.setState({
       open: false
     });
-    if (this.state.selectedOptions !== this._selectedOptionsBeforeOpening) {
+    /*
+     * If `this.state.selectedOptions` is not the same as `this._selectedOptionsBeforeOpening`,
+     * it means that the user clicked on at least one option in a multi-select, but they did not
+     * click "Confirm" to add those selected options to the result, instead, they clicked on the
+     * backdrop to close this component, in this case, we want to reset the list of selected options
+     * to the original list before
+     */
+    if (this.props.multiple && this.state.selectedOptions !== this._selectedOptionsBeforeOpening) {
+      this._toggleAllSelectedOptionsTo(false);
       this.setState({
         selectedOptions: this._selectedOptionsBeforeOpening
       }, () => this._toggleAllSelectedOptionsTo(true));
@@ -273,7 +283,6 @@ export class Select<T, E extends boolean> extends React.Component<Props<T, E>, S
       });
     } else {
       const remainingSelectedOptions = this.state.selectedOptions.filter(e => e !== option);
-      this._updateFormControlValue(remainingSelectedOptions.map(e => e.value));
       this.setState({
         selectedOptions: remainingSelectedOptions,
         currentLabel: remainingSelectedOptions.length > 0
