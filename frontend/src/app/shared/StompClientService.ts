@@ -64,7 +64,7 @@ export class StompClientService {
     )
       .subscribe({
         next: ([host, port]) => {
-          const isLoggingEnabled = (localStorage.getItem('isLoggingEnabled') ?? String(!__PRODUCTION__)) === 'true';
+          const isLoggingEnabled = (localStorage.getItem('isLoggingEnabled') ?? String(__DEVELOPMENT__)) === 'true';
 
           this._client = new Client({
             brokerURL: port ? `ws://${host}:${port}` : `ws://${host}`,
@@ -75,9 +75,11 @@ export class StompClientService {
             debug: isLoggingEnabled ? console.log : () => { },
             logRawCommunication: isLoggingEnabled
           });
-          this._authenticationToken = sessionStorage.getItem('token');
-          if (this._authenticationToken) {
-            this.reconnect();
+          if (__DEVELOPMENT__) {
+            this._authenticationToken = sessionStorage.getItem('token');
+            if (this._authenticationToken) {
+              this.reconnect();
+            }
           }
         }
       });
@@ -138,7 +140,9 @@ export class StompClientService {
         .subscribe({
           next: token => {
             if (token !== 'authentication failed') {
-              sessionStorage.setItem('token', token);
+              if (__DEVELOPMENT__) {
+                sessionStorage.setItem('token', token);
+              }
               this._authenticationToken = token;
               resolve();
             } else {
