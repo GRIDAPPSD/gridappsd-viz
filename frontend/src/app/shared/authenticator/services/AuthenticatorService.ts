@@ -58,7 +58,7 @@ export class AuthenticatorService {
   }
 
   isAuthenticated() {
-    return this._isAuthenticated;
+    return __DEVELOPMENT__ ? this._isAuthenticated : false;
   }
 
   logout() {
