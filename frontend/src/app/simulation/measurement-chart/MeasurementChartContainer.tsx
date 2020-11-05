@@ -169,6 +169,11 @@ export class MeasurementChartContainer extends React.Component<Props, State> {
       renderableChartModel.timeSeries = plotModel.components.map(e => this._findOrCreateTimeSeries(plotModel, e));
       renderableChartModels.push(renderableChartModel);
     }
+    // If Load Demand chart has no Y-axis label
+    // we want to set it now
+    if (renderableChartModels[1].yAxisLabel === '') {
+      renderableChartModels[1].yAxisLabel = 'KVA';
+    }
     this.setState({
       renderableChartModels
     });
@@ -331,16 +336,16 @@ export class MeasurementChartContainer extends React.Component<Props, State> {
   }
 
   private _createRenderableChartModel(plotModel: PlotModel, measurements: Map<string, SimulationOutputMeasurement>): RenderableChartModel {
-    return plotModel.components.map(component => this._createTimeSeries(plotModel, component, measurements))
+    return plotModel.components.map(component => this._createTimeSeries(plotModel, component, measurements.get(component.id)))
       .reduce((renderableChartModel: RenderableChartModel, timeSeries: TimeSeries) => {
         renderableChartModel.timeSeries.push(timeSeries);
         return renderableChartModel;
       }, this._createDefaultRenderableChartModel(plotModel));
   }
 
-  private _createTimeSeries(plotModel: PlotModel, component: PlotModelComponent, measurements: Map<string, SimulationOutputMeasurement>) {
+  private _createTimeSeries(plotModel: PlotModel, component: PlotModelComponent, measurement: SimulationOutputMeasurement) {
     const timeSeries = this._findOrCreateTimeSeries(plotModel, component);
-    const nextMeasurementValue = this._getNextMeasurementValue(plotModel, measurements.get(component.id));
+    const nextMeasurementValue = this._getNextMeasurementValue(plotModel, measurement);
 
     if (nextMeasurementValue === null) {
       // eslint-disable-next-line no-console
