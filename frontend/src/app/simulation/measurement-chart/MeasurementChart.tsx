@@ -11,6 +11,8 @@ import { TimeSeriesDataPoint } from './models/TimeSeriesDataPoint';
 import { TimeSeries } from './models/TimeSeries';
 import { StateStore } from '@shared/state-store';
 import { Ripple } from '@shared/ripple';
+import { IconButton } from '@shared/buttons';
+import { Tooltip } from '@shared/tooltip';
 
 import './MeasurementChart.light.scss';
 import './MeasurementChart.dark.scss';
@@ -21,6 +23,8 @@ interface Props {
 
 interface State {
   overlappingTimeSeries: TimeSeries[];
+  disableZoomOutButton: boolean;
+  disableZoomInButton: boolean;
 }
 
 export class MeasurementChart extends React.Component<Props, State> {
@@ -33,14 +37,14 @@ export class MeasurementChart extends React.Component<Props, State> {
     left: 70,
     right: 10
   };
-
   readonly svgRef = React.createRef<SVGSVGElement>();
 
+  private readonly _stateStore = StateStore.getInstance();
   private readonly _xScale: ScaleTime<number, number>;
   private readonly _yScale: ScaleLinear<number, number>;
   private readonly _xAxisGenerator: Axis<Date>;
   private readonly _yAxisGenerator: Axis<number>;
-  private readonly _stateStore = StateStore.getInstance();
+  private readonly _xAxisSlidingWindow = [0, 20] as [number, number];
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private _container: Selection<SVGElement, any, SVGElement, any>;
@@ -53,7 +57,9 @@ export class MeasurementChart extends React.Component<Props, State> {
     super(props);
 
     this.state = {
-      overlappingTimeSeries: []
+      overlappingTimeSeries: [],
+      disableZoomOutButton: true,
+      disableZoomInButton: false
     };
 
     this._xScale = scaleTime()
@@ -64,10 +70,14 @@ export class MeasurementChart extends React.Component<Props, State> {
       .range([this.height - this.margin.bottom, this.margin.top]);
 
     this._xAxisGenerator = axisBottom<Date>(this._xScale)
+      .ticks(5)
       .tickFormat(timeFormat('%H:%M:%S'));
 
     this._yAxisGenerator = axisLeft<number>(this._yScale)
       .tickFormat(numberFormat(',.7'));
+
+    this.zoomOut = this.zoomOut.bind(this);
+    this.zoomIn = this.zoomIn.bind(this);
   }
 
   componentDidMount() {
@@ -123,10 +133,16 @@ export class MeasurementChart extends React.Component<Props, State> {
   }
 
   private _calculateXYAxisExtents(): { x: [Date, Date]; y: [number, number] } {
+    const [left, right] = this._xAxisSlidingWindow;
     const dataPoints: Array<TimeSeriesDataPoint> = this.props.renderableChartModel.timeSeries.reduce(
-      (points, series) => {
-        points.push(...series.points);
-        return points;
+      (accumulator, series) => {
+        for (let i = left; i > -1; i--) {
+          if (i in series.points) {
+            accumulator.push(...series.points.slice(i, right));
+            break;
+          }
+        }
+        return accumulator;
       },
       []
     );
@@ -137,7 +153,7 @@ export class MeasurementChart extends React.Component<Props, State> {
   }
 
   private _renderXAxis(xAxisExtent: [Date, Date]) {
-    this._xScale.domain(xAxisExtent).range([this.margin.left, this.width - this.margin.right]);
+    this._xScale.domain(xAxisExtent);
     this._xAxisGenerator.scale(this._xScale);
     this._xAxis.call(this._xAxisGenerator)
       .selectAll('text')
@@ -157,6 +173,7 @@ export class MeasurementChart extends React.Component<Props, State> {
     this._container.selectAll('.measurement-chart__canvas__time-series-line')
       .data(this.props.renderableChartModel.timeSeries)
       .join(enter => enter.append('polyline').attr('class', 'measurement-chart__canvas__time-series-line'))
+      .attr('clip-path', 'url(#clipping-area)')
       .transition()
       .attr('points', timeSeries => timeSeries.points.map(e => this._createXYPair(e)).join(' '));
   }
@@ -193,6 +210,24 @@ export class MeasurementChart extends React.Component<Props, State> {
             ))
           }
         </div>
+        <div className='measurement-chart__zoom-control-container'>
+          <Tooltip content='Zoom out'>
+            <IconButton
+              icon='remove'
+              size='small'
+              style='accent'
+              disabled={this.state.disableZoomOutButton}
+              onClick={this.zoomOut} />
+          </Tooltip>
+          <Tooltip content='Zoom in'>
+            <IconButton
+              icon='add'
+              size='small'
+              style='accent'
+              disabled={this.state.disableZoomInButton}
+              onClick={this.zoomIn} />
+          </Tooltip>
+        </div>
         <svg
           className='measurement-chart__canvas'
           ref={this.svgRef}
@@ -200,6 +235,13 @@ export class MeasurementChart extends React.Component<Props, State> {
           height={this.height}
           viewBox={`0 0 ${this.width} ${this.height}`}
           preserveAspectRatio='xMidYMin meet'>
+          <clipPath id='clipping-area'>
+            <rect
+              x={this.margin.left}
+              y='0'
+              width={this.width - this.margin.left - this.margin.right}
+              height={this.height} />
+          </clipPath>
           <g className='measurement-chart__canvas__container'>
             <g
               className='measurement-chart__canvas__axis x'
@@ -226,6 +268,27 @@ export class MeasurementChart extends React.Component<Props, State> {
     this._stateStore.update({
       nodeNameToLocate: timeSeriesName.replace(/\s*\([\s\S]+\)\s*/g, '')
     });
+  }
+
+  zoomOut() {
+    const leftEdgeOfWindow = Math.max(0, this._xAxisSlidingWindow[0] - 1);
+    this._xAxisSlidingWindow[0] = leftEdgeOfWindow;
+    this.setState({
+      disableZoomOutButton: leftEdgeOfWindow === 0,
+      disableZoomInButton: false
+    });
+    this._render();
+  }
+
+  zoomIn() {
+    const maximumLeftEdgeOfWindow = this._xAxisSlidingWindow[1] - 2;
+    const leftEdgeOfWindow = Math.min(maximumLeftEdgeOfWindow, this._xAxisSlidingWindow[0] + 1);
+    this._xAxisSlidingWindow[0] = leftEdgeOfWindow;
+    this.setState({
+      disableZoomInButton: leftEdgeOfWindow === maximumLeftEdgeOfWindow,
+      disableZoomOutButton: false
+    });
+    this._render();
   }
 
   showLabelsForOverlappingTimeSeries() {

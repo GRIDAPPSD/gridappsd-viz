@@ -1,5 +1,9 @@
 @import 'TextArea.common';
 
+.textarea .CodeMirror-linenumber {
+    background-color: #f7f7f7;
+}
+
 .textarea__input-box-container {
     border: 2px solid #ccc;
 }

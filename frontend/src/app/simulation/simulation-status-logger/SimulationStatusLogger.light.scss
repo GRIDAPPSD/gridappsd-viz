@@ -12,7 +12,7 @@
 }
 
 $logLevels: FATAL ERROR WARN INFO DEBUG TRACE;
-$logLevelColors: #B71C1C #D32F2F #FFFF00 #F0F4C3 #E1F5FE #C0CA33;
+$logLevelColors: #B71C1C #F00 #FFFF00 #F0F4C3 #E1F5FE #C0CA33;
 
 @for $index from 1 through length($logLevels) {
     .simulation-status-logger__header__legends__level.#{nth($logLevels, $index)} .simulation-status-logger__header__legends__level__color {
@@ -35,5 +35,5 @@ $logLevelColors: #B71C1C #D32F2F #FFFF00 #F0F4C3 #E1F5FE #C0CA33;
 
 .simulation-status-logger .paginator {
     background-color: $theme-color;
-    box-shadow: 0 0 3px #9a9a9a, 0 2px 2px #9a9a9a;
+    box-shadow: 0 0 3px #ac9c9c, 0 0px 2px #ac9c9c;
 }
