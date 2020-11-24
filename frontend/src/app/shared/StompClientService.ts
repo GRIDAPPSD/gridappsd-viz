@@ -46,11 +46,7 @@ export class StompClientService {
   }
 
   private constructor() {
-    this._connectionFailed = this._connectionFailed.bind(this);
-    this._connectionEstablished = this._connectionEstablished.bind(this);
-    this._connectionClosed = this._connectionClosed.bind(this);
     this.isActive = this.isActive.bind(this);
-    this.reconnect = this.reconnect.bind(this);
     this.readOnceFrom = this.readOnceFrom.bind(this);
     this.readFrom = this.readFrom.bind(this);
 
@@ -78,7 +74,7 @@ export class StompClientService {
           if (__DEVELOPMENT__) {
             this._authenticationToken = sessionStorage.getItem('token');
             if (this._authenticationToken) {
-              this.reconnect();
+              this._reconnect();
             }
           }
         }
@@ -98,7 +94,7 @@ export class StompClientService {
         this._retrieveToken(username, password)
           .then(() => {
             this._client.onDisconnect = () => {
-              this.reconnect();
+              this._reconnect();
               subject.next({
                 status: StompClientInitializationStatus.OK,
                 token: this._authenticationToken
@@ -113,6 +109,12 @@ export class StompClientService {
             } as StompClientInitializationResult);
           })
           .finally(() => {
+            /*
+             *  The previous established connection was used for the initial authentication,
+             *  when the authentication was successful, we want to close the previous connection
+             *  and create a new one, that's why we are calling `deactivate` here, so that the
+             *  `onDisconnect` callback from right above gets called which reconnects to the server
+             */
             this._client.deactivate();
           });
       },
@@ -158,7 +160,7 @@ export class StompClientService {
     });
   }
 
-  reconnect() {
+  private _reconnect() {
     timer(0, 5_000)
       .pipe(
         switchMap(() => iif(this.isActive, of(null), of(this._connect()))),
@@ -167,7 +169,9 @@ export class StompClientService {
         take(1)
       )
       .subscribe({
-        error: this._connectionFailed
+        error: () => {
+          this._notifyConnectionStatusChange(StompClientConnectionStatus.DISCONNECTED);
+        }
       });
   }
 
@@ -178,36 +182,43 @@ export class StompClientService {
   private _connect() {
     if (!this.isActive()) {
       this._client.deactivate();
-      this._status = StompClientConnectionStatus.CONNECTING;
-      this._statusChanges.next(this._status);
+      this._notifyConnectionStatusChange(StompClientConnectionStatus.CONNECTING);
       this._client.configure({
         connectHeaders: {
           login: this._authenticationToken,
           passcode: ''
         },
-        onConnect: this._connectionEstablished,
-        onWebSocketClose: this._connectionClosed
+        onStompError: () => {
+          /*
+           *  This is called when the authentication token in this session isn't valid anymore,
+           *  so when the backend tries to authenticate using the saved token, it fails the authentication
+           *  and this only happens when the backend is restarted so the token for this session is destroyed
+           */
+          sessionStorage.removeItem('token');
+          this._notifyConnectionStatusChange(StompClientConnectionStatus.DISCONNECTED);
+        },
+        onConnect: () => {
+          this._notifyConnectionStatusChange(StompClientConnectionStatus.CONNECTED);
+        },
+        onWebSocketClose: () => {
+          /*
+           *  This is true when the web socket connection times out in
+           *  which case the status is still `StompClientConnectionStatus.CONNECTED`,
+           *  so we want to recover from the timeout by reconnecting again
+           */
+          if (this._status === StompClientConnectionStatus.CONNECTED) {
+            this._reconnect();
+          }
+        }
       });
       this._client.activate();
     }
     return {};
   }
 
-  private _connectionEstablished() {
-    this._status = StompClientConnectionStatus.CONNECTED;
-    this._statusChanges.next(this._status);
-  }
-
-  private _connectionClosed() {
-    if (this._status === StompClientConnectionStatus.CONNECTED) {
-      this._status = StompClientConnectionStatus.DISCONNECTED;
-      this.reconnect();
-    }
-  }
-
-  private _connectionFailed() {
-    this._status = StompClientConnectionStatus.DISCONNECTED;
-    this._statusChanges.next(this._status);
+  private _notifyConnectionStatusChange(status: StompClientConnectionStatus) {
+    this._status = status;
+    this._statusChanges.next(status);
   }
 
   send(request: StompClientRequest) {

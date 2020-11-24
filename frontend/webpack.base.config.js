@@ -52,7 +52,7 @@ module.exports = (mode, cssHmr) => ({
         ]
       },
       {
-        test: /\.ttf$/,
+        test: /\.(?:ttf|woff2)$/,
         use: [
           {
             loader: 'file-loader',
