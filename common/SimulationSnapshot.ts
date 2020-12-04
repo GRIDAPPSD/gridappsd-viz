@@ -6,7 +6,7 @@ export interface SimulationSnapshot {
   voltageViolationTimestamp: string;
   alarms: any[];
   activeSimulation: any;
-  measurementChartModels: any[];
+  renderableChartModels: any[];
   simulationOutput: any;
 }
 
@@ -18,7 +18,7 @@ export const DEFAULT_SIMULATION_SNAPSHOT: SimulationSnapshot = {
   violationsAtZero: -1,
   voltageViolationTimestamp: '',
   alarms: [],
-  measurementChartModels: [],
+  renderableChartModels: [],
   activeSimulation: null,
   simulationOutput: null
 };

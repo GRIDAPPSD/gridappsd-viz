@@ -95,7 +95,7 @@ function _fuzzySearchWithNoHighlighting(needle: string) {
           highlight: false
         }
       ]
-    };
+    } as FuzzySearchResult;
   };
 }
 

@@ -1,9 +1,10 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable camelcase */
 import { MessageRequest } from '@shared/MessageRequest';
 
 export class SimulationVsExpectedRequest implements MessageRequest {
 
-  readonly url: string;
+  readonly url = 'goss.gridappsd.process.request.simulation';
 
   readonly requestBody = {
     power_system_config: {
@@ -16,7 +17,7 @@ export class SimulationVsExpectedRequest implements MessageRequest {
       duration: 60,
       simulation_name: 'ieee123',
       simulator: 'GridLAB-D',
-      start_time: 1248156000,
+      start_time: 1248202800,
       run_realtime: true,
       simulation_output: {},
       model_creation_config: {
@@ -48,10 +49,10 @@ export class SimulationVsExpectedRequest implements MessageRequest {
     simulation_request_type: 'NEW',
     test_config: {
       appId: 'sample_app',
-      testId: -1,
+      testId: (Math.random() * 1_000_000) | 0,
       testType: 'simulation_vs_expected',
-      expectedResults: null,
-      events: null,
+      expectedResults: null as any,
+      events: null as any,
       testInput: true,
       testOutput: true,
       matchInputTimes: true,
@@ -59,15 +60,15 @@ export class SimulationVsExpectedRequest implements MessageRequest {
     }
   };
 
-  readonly replyTo: string;
+  readonly replyTo = '/expected-result-comparison/simulation-vs-expected';
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  constructor(expectedResults: any, events: any[]) {
-    this.url = 'goss.gridappsd.process.request.simulation';
-    this.requestBody.test_config.testId = (Math.random() * 1_000_000) | 0;
+  constructor(simulationConfiguration: any | null, expectedResults: any, events: any[]) {
+    if (simulationConfiguration !== null) {
+      Object.assign(this.requestBody, simulationConfiguration);
+    }
     this.requestBody.test_config.expectedResults = expectedResults;
     this.requestBody.test_config.events = events;
-    this.replyTo = '/expected-result-comparison/simulation-vs-expected';
   }
 
 }

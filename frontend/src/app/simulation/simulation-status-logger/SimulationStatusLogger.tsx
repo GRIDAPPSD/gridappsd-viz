@@ -139,10 +139,14 @@ export class SimulationStatusLogger extends React.Component<Props, State> {
                 ))
               }
             </section>
-            <Paginator
-              items={this.logMessageTemporaryContainer}
-              pageSize={numberOfMessagesToShow}
-              onPageChange={this.onPageChange} />
+            {
+              this.props.totalLogMessageCount > 0
+              &&
+              <Paginator
+                items={this.logMessageTemporaryContainer}
+                pageSize={numberOfMessagesToShow}
+                onPageChange={this.onPageChange} />
+            }
           </div>
           {
             !this.state.showLogMessages

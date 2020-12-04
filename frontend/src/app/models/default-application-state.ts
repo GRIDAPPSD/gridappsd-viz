@@ -13,5 +13,6 @@ export const DEFAULT_APPLICATION_STATE: ApplicationState = {
   plotModels: [],
   activeSimulationIds: [],
   nodeNameToLocate: '',
-  expectedResultComparisonType: null
+  expectedResultComparisonType: null,
+  currentLimits: []
 };

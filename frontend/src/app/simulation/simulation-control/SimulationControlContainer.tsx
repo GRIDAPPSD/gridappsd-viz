@@ -6,7 +6,6 @@ import { SimulationManagementService } from '@shared/simulation';
 import { SimulationStatus } from '@common/SimulationStatus';
 import { SimulationControl } from './SimulationControl';
 import { StateStore } from '@shared/state-store';
-import { StompClientService } from '@shared/StompClientService';
 import { ModelDictionaryComponent } from '@shared/topology';
 import { PlotModel } from '@shared/plot-model/PlotModel';
 
@@ -24,7 +23,6 @@ export class SimulationControlContainer extends React.Component<Props, State> {
 
   readonly simulationManagementService = SimulationManagementService.getInstance();
 
-  private readonly _stompClientService = StompClientService.getInstance();
   private readonly _stateStore = StateStore.getInstance();
   private readonly _unsubscriber = new Subject<void>();
 

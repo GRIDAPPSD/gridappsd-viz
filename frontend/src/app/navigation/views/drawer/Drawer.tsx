@@ -23,7 +23,7 @@ export class Drawer extends React.Component<Props, State> {
     this.close = this.close.bind(this);
   }
 
-  shouldComponentUpdate(_, nextState: State) {
+  shouldComponentUpdate(_: Props, nextState: State) {
     return this.state.isOpen !== nextState.isOpen;
   }
 

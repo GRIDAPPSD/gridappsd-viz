@@ -1,6 +1,6 @@
 import { TimeSeries } from './TimeSeries';
 
-export interface MeasurementChartModel {
+export interface RenderableChartModel {
   name: string;
   timeSeries: TimeSeries[];
   yAxisLabel: string;

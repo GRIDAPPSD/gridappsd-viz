@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Route, Redirect, withRouter, RouteComponentProps } from 'react-router-dom';
+import { Route, Redirect, withRouter, RouteComponentProps, RouteChildrenProps } from 'react-router-dom';
 
 import { Application } from '@shared/Application';
 import { AvailableApplicationsAndServicesContainer } from './available-applications-and-services';
@@ -127,7 +127,7 @@ export const App = withRouter(class extends React.Component<Props, State> {
                 component={StompClientContainer} />
               <Route
                 path='/browse'
-                component={routeProps => <DataBrowser feederModel={this.props.feederModel} match={routeProps.match} />} />
+                component={(routeProps: RouteChildrenProps) => <DataBrowser feederModel={this.props.feederModel} match={routeProps.match} />} />
               <WebsocketStatusWatcher />
               {
                 this.props.stompClientConnectionStatus === StompClientConnectionStatus.CONNECTED
