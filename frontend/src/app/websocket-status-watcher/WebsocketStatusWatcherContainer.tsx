@@ -2,11 +2,7 @@ import * as React from 'react';
 import { Subscription } from 'rxjs';
 
 import { StompClientConnectionStatus, StompClientService } from '@shared/StompClientService';
-import { AuthenticatorService } from '@shared/authenticator';
 import { WebsocketStatusWatcher } from './WebsocketStatusWatcher';
-
-import './WebsocketStatusWatcher.light.scss';
-import './WebsocketStatusWatcher.dark.scss';
 
 interface Props {
 }
@@ -17,28 +13,24 @@ interface State {
 
 export class WebsocketStatusWatcherContainer extends React.Component<Props, State> {
 
-  private readonly _stompClientService = StompClientService.getInstance();
-  private readonly _authenticatorService = AuthenticatorService.getInstance();
+  readonly stompClientService = StompClientService.getInstance();
 
   private _websocketStatusStream: Subscription;
 
   constructor(props: Props) {
     super(props);
     this.state = {
-      websocketStatus: this._stompClientService.isActive() ? StompClientConnectionStatus.CONNECTED : StompClientConnectionStatus.UNINITIALIZED
+      websocketStatus: this.stompClientService.isActive() ? StompClientConnectionStatus.CONNECTED : StompClientConnectionStatus.UNINITIALIZED
     };
   }
 
   componentDidMount() {
-    this._websocketStatusStream = this._stompClientService.statusChanges()
+    this._websocketStatusStream = this.stompClientService.statusChanges()
       .subscribe({
         next: status => {
           this.setState({
             websocketStatus: status
           });
-          if (status === StompClientConnectionStatus.DISCONNECTED) {
-            setTimeout(this._authenticatorService.logout, 3000);
-          }
         }
       });
   }
@@ -49,7 +41,9 @@ export class WebsocketStatusWatcherContainer extends React.Component<Props, Stat
 
   render() {
     return (
-      <WebsocketStatusWatcher websocketStatus={this.state.websocketStatus} />
+      <WebsocketStatusWatcher
+        websocketStatus={this.state.websocketStatus}
+        onReconnect={this.stompClientService.reconnect} />
     );
   }
 

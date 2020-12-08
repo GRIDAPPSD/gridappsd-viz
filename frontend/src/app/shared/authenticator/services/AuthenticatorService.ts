@@ -28,13 +28,25 @@ export class AuthenticatorService {
     return AuthenticatorService._INSTANCE;
   }
 
+  static decodePayloadFromAuthenticationToken(token: string) {
+    return JSON.parse(atob(token.split('.')[1])) as {
+      sub: string; // username
+      nbf: number;
+      iss: string;
+      exp: number;
+      iat: number;
+      jti: string;
+      roles: string[];
+    };
+  }
+
   authenticate(username: string, password: string): Observable<AuthenticationResult> {
     return this._stompClientService.connect(username, password)
       .pipe(
         map(initializationResult => {
           this._isAuthenticated = true;
+          this._userRoles = AuthenticatorService.decodePayloadFromAuthenticationToken(initializationResult.token).roles;
           sessionStorage.setItem('isAuthenticated', 'true');
-          this._userRoles = JSON.parse(atob(initializationResult.token.split('.')[1])).roles;
           sessionStorage.setItem('userRoles', JSON.stringify(this._userRoles));
           return {
             statusCode: AuthenticationStatusCode.OK

@@ -1,6 +1,6 @@
 import { Client, Message } from '@stomp/stompjs';
-import { BehaviorSubject, Observable, using, timer, iif, of, Subject, zip } from 'rxjs';
-import { filter, switchMap, take, timeout, takeWhile } from 'rxjs/operators';
+import { BehaviorSubject, Observable, using, timer, Subject, zip } from 'rxjs';
+import { filter, switchMap, take, takeWhile, tap, timeout } from 'rxjs/operators';
 
 import { ConfigurationManager } from './ConfigurationManager';
 
@@ -40,12 +40,16 @@ export class StompClientService {
   private _statusChanges = new BehaviorSubject(StompClientConnectionStatus.UNINITIALIZED);
   private _status = StompClientConnectionStatus.UNINITIALIZED;
   private _authenticationToken = '';
+  private _username = '';
+  private _password = '';
 
   static getInstance() {
     return StompClientService._INSTANCE;
   }
 
   private constructor() {
+
+    this.reconnect = this.reconnect.bind(this);
     this.isActive = this.isActive.bind(this);
     this.readOnceFrom = this.readOnceFrom.bind(this);
     this.readFrom = this.readFrom.bind(this);
@@ -74,7 +78,7 @@ export class StompClientService {
           if (__DEVELOPMENT__) {
             this._authenticationToken = sessionStorage.getItem('token');
             if (this._authenticationToken) {
-              this._reconnect();
+              this.reconnect();
             }
           }
         }
@@ -91,16 +95,18 @@ export class StompClientService {
         passcode: password
       },
       onConnect: () => {
+        this._username = username;
+        this._password = password;
+
         this._retrieveToken(username, password)
           .then(() => {
             this._client.onDisconnect = () => {
-              this._reconnect();
+              this.reconnect();
               subject.next({
                 status: StompClientInitializationStatus.OK,
                 token: this._authenticationToken
               });
               this._client.onDisconnect = noOp;
-              this._client.onConnect = noOp;
             };
           })
           .catch(() => {
@@ -160,60 +166,76 @@ export class StompClientService {
     });
   }
 
-  private _reconnect() {
+  reconnect() {
     timer(0, 5_000)
       .pipe(
-        switchMap(() => iif(this.isActive, of(null), of(this._connect()))),
+        takeWhile(() => !this.isActive()),
+        tap(() => this._connect()),
         filter(this.isActive),
-        timeout(25_000),
-        take(1)
+        timeout(25_000)
       )
       .subscribe({
         error: () => {
-          this._notifyConnectionStatusChange(StompClientConnectionStatus.DISCONNECTED);
+          /*
+           *  A race condition could occur when as soon as the timer times out, and the platform is
+           *  successfully restarted, then when `reconnect()` is called, it will be a no-op since
+           *  `takeWhile` will always terminate the timer, because `isActive()` will always return true,
+           *  so we want to check against that before notifying connection status change to DISCONNECTED
+           */
+          if (!this.isActive()) {
+            this._authenticationToken = '';
+            this._notifyConnectionStatusChange(StompClientConnectionStatus.DISCONNECTED);
+          }
         }
       });
   }
 
-  isActive() {
-    return this._client ? this._client.connected : false;
-  }
-
   private _connect() {
-    if (!this.isActive()) {
-      this._client.deactivate();
-      this._notifyConnectionStatusChange(StompClientConnectionStatus.CONNECTING);
+    this._client.deactivate();
+    this._notifyConnectionStatusChange(StompClientConnectionStatus.CONNECTING);
+    if (this._authenticationToken !== '') {
       this._client.configure({
         connectHeaders: {
           login: this._authenticationToken,
           passcode: ''
         },
+
+        /*
+         *  This is called when the authentication token in this session isn't valid anymore,
+         *  so when the backend tries to authenticate using the saved token, it fails the authentication
+         *  and this only happens when the backend is restarted so the token for this session is destroyed.
+         */
         onStompError: () => {
-          /*
-           *  This is called when the authentication token in this session isn't valid anymore,
-           *  so when the backend tries to authenticate using the saved token, it fails the authentication
-           *  and this only happens when the backend is restarted so the token for this session is destroyed
-           */
           sessionStorage.removeItem('token');
-          this._notifyConnectionStatusChange(StompClientConnectionStatus.DISCONNECTED);
+          this._authenticationToken = '';
         },
         onConnect: () => {
           this._notifyConnectionStatusChange(StompClientConnectionStatus.CONNECTED);
         },
+
+        /*
+         *  This is called the websocket between the client and platform times out
+         *  or when the platform is stopped.
+         */
         onWebSocketClose: () => {
           /*
            *  This is true when the web socket connection times out in
            *  which case the status is still `StompClientConnectionStatus.CONNECTED`,
-           *  so we want to recover from the timeout by reconnecting again
+           *  so we want to recover from the timeout by reconnecting again.
            */
           if (this._status === StompClientConnectionStatus.CONNECTED) {
-            this._reconnect();
+            this.reconnect();
           }
         }
       });
       this._client.activate();
+    } else {
+      this.connect(this._username, this._password).subscribe();
     }
-    return {};
+  }
+
+  isActive() {
+    return this._client ? this._client.connected : false;
   }
 
   private _notifyConnectionStatusChange(status: StompClientConnectionStatus) {

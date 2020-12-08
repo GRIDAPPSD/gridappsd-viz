@@ -4,12 +4,14 @@ import { StompClientConnectionStatus } from '@shared/StompClientService';
 import { MessageBanner } from '@shared/overlay/message-banner';
 import { ThreeDots } from '@shared/three-dots';
 import { PortalRenderer } from '@shared/overlay/portal-renderer';
+import { IconButton } from '@shared/buttons';
 
 import './WebsocketStatusWatcher.light.scss';
 import './WebsocketStatusWatcher.dark.scss';
 
 interface Props {
   websocketStatus: StompClientConnectionStatus;
+  onReconnect: () => void;
 }
 
 export function WebsocketStatusWatcher(props: Props) {
@@ -19,11 +21,17 @@ export function WebsocketStatusWatcher(props: Props) {
         <PortalRenderer containerClassName='websocket-status-watcher-container'>
           <MessageBanner>
             <span>
-              <span>Connection to server was lost,</span>
-              <br />
-              <span>you will be logged out in 3 seconds</span>
-              <ThreeDots />
+              Unable to establish a connection
             </span>
+            <br />
+            <span style={{ fontSize: '30px', marginRight: 10 }}>
+              Check server or
+            </span>
+            <IconButton
+              icon='cached'
+              rounded={false}
+              onClick={props.onReconnect}
+              label='Click to reconnect' />
           </MessageBanner>
         </PortalRenderer>
       );
