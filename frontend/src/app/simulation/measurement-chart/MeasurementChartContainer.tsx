@@ -325,7 +325,7 @@ export class MeasurementChartContainer extends React.Component<Props, State> {
   private _addValueToTimeSeries(timeSeries: TimeSeries, value: number) {
     if (Number.isFinite(value)) {
       if (timeSeries.points.length === 20) {
-        timeSeries.points.pop();
+        timeSeries.points.shift();
       }
       timeSeries.points.push({
         timestamp: new Date(this._simulationManagementService.getOutputTimestamp() * 1000),
