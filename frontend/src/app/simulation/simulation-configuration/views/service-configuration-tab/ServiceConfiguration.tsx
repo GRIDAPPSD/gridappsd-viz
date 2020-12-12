@@ -86,8 +86,14 @@ export class ServiceConfiguration extends React.Component<Props, State> {
   }
 
   render() {
-    if (!('user_input' in this.props.service)) {
-      return null;
+    if (!this.props.service.user_input) {
+      return (
+        <FormGroup
+          className='service-configuration'
+          label={this.props.service.id} >
+          <div className='service-configuration__no-user-input-options-message'>No user input options</div>
+        </FormGroup>
+      );
     }
     return (
       <FormGroup

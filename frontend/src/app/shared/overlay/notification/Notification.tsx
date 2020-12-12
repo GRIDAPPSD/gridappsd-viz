@@ -1,7 +1,7 @@
 import * as React from 'react';
 
-import { Backdrop } from '@shared/overlay/backdrop';
 import { PortalRenderer } from '@shared/overlay/portal-renderer';
+import { IconButton } from '@shared/buttons';
 
 import './Notification.light.scss';
 import './Notification.dark.scss';
@@ -91,11 +91,14 @@ export class Notification extends React.Component<Props, State> {
   render() {
     return (
       <div className={`notification-container ${this.state.show ? 'visible' : 'hidden'}`}>
-        <Backdrop
-          visible={this.state.show}
-          onClick={this.hideNotification} />
         <div className='notification'>
           {this.props.children}
+          <IconButton
+            className='notification__close'
+            icon='close'
+            hasBackground={false}
+            rippleDuration={500}
+            onClick={this.hideNotification} />
         </div>
       </div>
     );

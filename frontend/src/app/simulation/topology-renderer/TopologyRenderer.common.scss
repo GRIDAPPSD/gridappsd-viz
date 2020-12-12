@@ -145,8 +145,8 @@
         marker-end: url(#normal-power-flow-indicator--edge);
     }
 
-    &.inverse-power-flow-direction:not(.no-power-flow-direction-indicator):not(.no-power) {
-        marker-start: url(#inverse-power-flow-indicator--edge);
+    &.reverse-power-flow-direction:not(.no-power-flow-direction-indicator):not(.no-power) {
+        marker-start: url(#reverse-power-flow-indicator--edge);
     }
 
     &.no-power-flow-direction-indicator {
@@ -181,8 +181,8 @@
         marker-end: url(#normal-power-flow-indicator--capacitor);
     }
 
-    &.inverse-power-flow-direction:not(.no-power-flow-direction-indicator):not(.no-power) {
-        marker-start: url(#inverse-power-flow-indicator--capacitor);
+    &.reverse-power-flow-direction:not(.no-power-flow-direction-indicator):not(.no-power) {
+        marker-start: url(#reverse-power-flow-indicator--capacitor);
     }
 }
 
@@ -192,8 +192,8 @@
         marker-end: url(#normal-power-flow-indicator--switch);
     }
 
-    &.inverse-power-flow-direction:not(.no-power-flow-direction-indicator):not(.no-power) {
-        marker-start: url(#inverse-power-flow-indicator--switch);
+    &.reverse-power-flow-direction:not(.no-power-flow-direction-indicator):not(.no-power) {
+        marker-start: url(#reverse-power-flow-indicator--switch);
     }
 }
 
@@ -203,8 +203,8 @@
         marker-end: url(#normal-power-flow-indicator--transformer);
     }
 
-    &.inverse-power-flow-direction:not(.no-power-flow-direction-indicator):not(.no-power) {
-        marker-start: url(#inverse-power-flow-indicator--transformer);
+    &.reverse-power-flow-direction:not(.no-power-flow-direction-indicator):not(.no-power) {
+        marker-start: url(#reverse-power-flow-indicator--transformer);
     }
 }
 

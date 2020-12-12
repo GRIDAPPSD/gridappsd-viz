@@ -1,0 +1,5 @@
+$easing-function: cubic-bezier(0.04, 0.54, 0.25, 1);
+
+@function transition($property, $duration: 0.25s) {
+    @return $property $duration $easing-function;
+}

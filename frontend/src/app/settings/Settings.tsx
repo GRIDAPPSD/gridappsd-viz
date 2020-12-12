@@ -56,7 +56,7 @@ export class Settings extends React.Component<Props, State> {
     // They are declared in src/webpack-injections.d.ts
     if (!__CSS_HMR_ENABLED__) {
       const styleFilename = isDarkThemeSelected ? __DARK_THEME_STYLE_FILENAME__ : __LIGHT_THEME_STYLE_FILENAME__;
-      const link = document.head.querySelector('link[rel=stylesheet]:last-of-type') as HTMLLinkElement;
+      const link = document.head.querySelector<HTMLLinkElement>('link[rel=stylesheet]:last-of-type');
       link.href = '/' + styleFilename;
     }
     localStorage.setItem('theme', isDarkThemeSelected ? 'dark' : 'light');

@@ -30,6 +30,7 @@ module.exports = (mode, cssHmr) => ({
     alias: {
       '@shared': path.resolve('./src/app/shared'),
       '@common': path.resolve('../common'),
+      '@constants.common': path.resolve('./src/constants.common.scss'),
       '@constants.light': path.resolve('./src/constants.light.scss'),
       '@constants.dark': path.resolve('./src/constants.dark.scss')
     },
