@@ -70,7 +70,7 @@ export class AuthenticatorService {
   }
 
   isAuthenticated() {
-    return __DEVELOPMENT__ ? this._isAuthenticated : false;
+    return this._isAuthenticated;
   }
 
   logout() {
