@@ -175,6 +175,7 @@ export class MeasurementChart extends React.Component<Props, State> {
       .join(enter => enter.append('polyline').attr('class', 'measurement-chart__canvas__time-series-line'))
       .attr('clip-path', 'url(#clipping-area)')
       .transition()
+      .duration(175)
       .attr('points', timeSeries => timeSeries.points.map(e => this._createXYPair(e)).join(' '));
   }
 
