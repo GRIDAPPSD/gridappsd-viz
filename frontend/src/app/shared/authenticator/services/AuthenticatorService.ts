@@ -29,14 +29,20 @@ export class AuthenticatorService {
   }
 
   static decodePayloadFromAuthenticationToken(token: string) {
-    return JSON.parse(atob(token.split('.')[1])) as {
-      sub: string; // username
-      nbf: number;
-      iss: string;
-      exp: number;
-      iat: number;
-      jti: string;
-      roles: string[];
+    if (token.includes('.')) {
+      return JSON.parse(atob(token.split('.')[1])) as {
+        sub: string; // username
+        nbf?: number;
+        iss?: string;
+        exp?: number;
+        iat?: number;
+        jti?: string;
+        roles: string[];
+      };
+    }
+    return {
+      sub: token,
+      roles: [] as string[]
     };
   }
 
