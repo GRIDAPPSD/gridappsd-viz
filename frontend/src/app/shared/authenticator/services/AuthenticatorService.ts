@@ -1,10 +1,9 @@
 import { Subject, Observable, of } from 'rxjs';
-import { map, catchError, tap } from 'rxjs/operators';
+import { map, catchError } from 'rxjs/operators';
 
-import { StompClientService, StompClientInitializationResult } from '@shared/StompClientService';
+import { StompClientService, StompClientInitializationStatus } from '@shared/StompClientService';
 import { AuthenticationResult } from '../models/AuthenticationResult';
 import { AuthenticationStatusCode } from '../models/AuthenticationStatusCode';
-import { waitUntil } from '@shared/misc';
 
 export class AuthenticatorService {
 
@@ -19,7 +18,7 @@ export class AuthenticatorService {
   private constructor() {
 
     this._isAuthenticated = Boolean(sessionStorage.getItem('isAuthenticated'));
-    this._userRoles = JSON.parse(sessionStorage.getItem('userRoles')) || [];
+    this._userRoles = JSON.parse(sessionStorage.getItem('userRoles') || '[]');
 
     this.logout = this.logout.bind(this);
     this.userHasRole = this.userHasRole.bind(this);
@@ -29,19 +28,38 @@ export class AuthenticatorService {
     return AuthenticatorService._INSTANCE;
   }
 
+  static decodePayloadFromAuthenticationToken(token: string) {
+    if (token.includes('.')) {
+      return JSON.parse(atob(token.split('.')[1])) as {
+        sub: string; // username
+        nbf?: number;
+        iss?: string;
+        exp?: number;
+        iat?: number;
+        jti?: string;
+        roles: string[];
+      };
+    }
+    return {
+      sub: token,
+      roles: [] as string[]
+    };
+  }
+
   authenticate(username: string, password: string): Observable<AuthenticationResult> {
     return this._stompClientService.connect(username, password)
       .pipe(
-        tap(() => this._fetchUserRoles()),
-        map(() => {
+        map(initializationResult => {
           this._isAuthenticated = true;
+          this._userRoles = AuthenticatorService.decodePayloadFromAuthenticationToken(initializationResult.token).roles;
           sessionStorage.setItem('isAuthenticated', 'true');
+          sessionStorage.setItem('userRoles', JSON.stringify(this._userRoles));
           return {
             statusCode: AuthenticationStatusCode.OK
           };
         }),
-        catchError(code => {
-          if (code === StompClientInitializationResult.AUTHENTICATION_FAILURE) {
+        catchError(error => {
+          if (error.status === StompClientInitializationStatus.AUTHENTICATION_FAILURE) {
             return of({
               statusCode: AuthenticationStatusCode.INCORRECT_CREDENTIALS
             });
@@ -51,25 +69,6 @@ export class AuthenticatorService {
           });
         })
       );
-  }
-
-  private _fetchUserRoles() {
-    waitUntil(() => this._stompClientService.isActive())
-      .then(() => {
-        this._stompClientService.readOnceFrom<{ roles: string[] }>('/user/roles')
-          .pipe(map(payload => payload.roles))
-          .subscribe({
-            next: userRoles => {
-              this._userRoles = userRoles;
-              sessionStorage.setItem('userRoles', JSON.stringify(userRoles));
-            }
-          });
-        this._stompClientService.send({
-          destination: 'goss.gridappsd.process.request.roles',
-          replyTo: '/user/roles',
-          body: '{}'
-        });
-      });
   }
 
   userHasRole(role: string) {

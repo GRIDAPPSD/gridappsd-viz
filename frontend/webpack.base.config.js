@@ -52,7 +52,7 @@ module.exports = (mode, cssHmr) => ({
         ]
       },
       {
-        test: /\.ttf$/,
+        test: /\.(?:ttf|woff2)$/,
         use: [
           {
             loader: 'file-loader',
@@ -87,7 +87,7 @@ module.exports = (mode, cssHmr) => ({
       chunkFilename: '[name].[hash:10].css'
     }),
     new webpack.DefinePlugin({
-      __PRODUCTION__: JSON.stringify(mode === 'production'),
+      __DEVELOPMENT__: JSON.stringify(mode === 'development'),
       __CSS_HMR_ENABLED__: JSON.stringify(cssHmr)
     })
   ],
