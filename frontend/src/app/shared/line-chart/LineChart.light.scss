@@ -1,0 +1,37 @@
+@import '@constants.light';
+@import 'LineChart.common';
+
+$time-series-colors: red green blue #b729ae orange pink magenta brown lightcoral;
+
+.line-chart {
+    border: 2px solid rgba(0, 0, 0, 0.3);
+    background-color: $theme-color;
+}
+
+
+@for $index from 1 through length($time-series-colors) {
+    .line-chart__canvas__time-series-line:nth-of-type(#{$index}) {
+        stroke: #{nth($time-series-colors, $index)};
+    }
+
+    .line-chart__legend:nth-child(#{$index}) .line-chart__legend__color {
+        background-color: #{nth($time-series-colors, $index)};
+    }
+}
+
+.line-chart__legend {
+    background-color: $theme-color;
+    border-color: #12a9b8;
+}
+
+.line-chart__legend__color {
+    border-right-color: #12a9b8;
+}
+
+.line-chart__canvas__axis-label {
+    fill: $primary-color;
+}
+
+.line-chart__legend__label {
+    color: #000;
+}
