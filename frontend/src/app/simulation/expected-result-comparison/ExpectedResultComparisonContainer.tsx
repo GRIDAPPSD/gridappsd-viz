@@ -26,7 +26,7 @@ interface Props {
 interface State {
   comparisonType: ExpectedResultComparisonType;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  comparisonResults: any[];
+  comparisonResult: any[];
   simulationIds: string[];
   isFetching: boolean;
 }
@@ -44,7 +44,7 @@ export class ExpectedResultComparisonContainer extends React.Component<Props, St
 
     this.state = {
       comparisonType: null,
-      comparisonResults: [],
+      comparisonResult: [],
       simulationIds: [],
       isFetching: false
     };
@@ -105,8 +105,9 @@ export class ExpectedResultComparisonContainer extends React.Component<Props, St
       <div className='expected-result-comparison'>
         {this.selectComponentBasedComparisonType()}
         <ResultViewer
-          results={this.state.comparisonResults}
-          showProgressIndicator={this.state.isFetching} />
+          result={this.state.comparisonResult}
+          showProgressIndicator={this.state.isFetching}
+          comparisionType={this.state.comparisonType} />
       </div>
     );
   }
@@ -161,7 +162,7 @@ export class ExpectedResultComparisonContainer extends React.Component<Props, St
       .subscribe({
         next: data => {
           this.setState({
-            comparisonResults: Array.isArray(data) ? data : data.events
+            comparisonResult: Array.isArray(data) ? data : data.events
           });
         },
         error: errorMessage => {
