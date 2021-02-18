@@ -66,10 +66,16 @@ export class Dialog extends React.Component<Props, State> {
   }
 
   private _shiftIntoViewIfOverflowScreen() {
-    const popupElementBottomEdge = this.dialogRef.current.clientHeight + this.dialogRef.current.offsetTop;
+    const dialogElement = this.dialogRef.current;
+
+    const popupElementBottomEdge = dialogElement.clientHeight + dialogElement.offsetTop;
     if (popupElementBottomEdge > document.body.clientHeight) {
       const overflowingHeight = popupElementBottomEdge - document.body.clientHeight;
-      this.dialogRef.current.style.top = `${Math.max(this.dialogRef.current.offsetTop - overflowingHeight, 0)}px`;
+      dialogElement.style.top = `${Math.max(dialogElement.offsetTop - overflowingHeight, 0)}px`;
+    }
+    const overflowingWidth = this.props.left + dialogElement.clientWidth - document.body.clientWidth;
+    if (overflowingWidth > 0) {
+      dialogElement.style.left = `${this.props.left - overflowingWidth - 5}px`;
     }
   }
 

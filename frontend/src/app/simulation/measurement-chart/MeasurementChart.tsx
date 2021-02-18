@@ -5,6 +5,7 @@ import { axisBottom, axisLeft, Axis } from 'd3-axis';
 import { extent } from 'd3-array';
 import { timeFormat } from 'd3-time-format';
 import { format as numberFormat } from 'd3-format';
+import { Subscription } from 'rxjs';
 
 import { RenderableChartModel } from './models/RenderableChartModel';
 import { TimeSeriesDataPoint } from './models/TimeSeriesDataPoint';
@@ -13,6 +14,7 @@ import { StateStore } from '@shared/state-store';
 import { Ripple } from '@shared/ripple';
 import { IconButton } from '@shared/buttons';
 import { Tooltip } from '@shared/tooltip';
+import { DateTimeService } from '@shared/DateTimeService';
 
 import './MeasurementChart.light.scss';
 import './MeasurementChart.dark.scss';
@@ -45,6 +47,7 @@ export class MeasurementChart extends React.Component<Props, State> {
   private readonly _xAxisGenerator: Axis<Date>;
   private readonly _yAxisGenerator: Axis<number>;
   private readonly _xAxisSlidingWindow = [0, 20] as [number, number];
+  private readonly _dateTimeService = DateTimeService.getInstance();
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private _container: Selection<SVGElement, any, SVGElement, any>;
@@ -52,6 +55,7 @@ export class MeasurementChart extends React.Component<Props, State> {
   private _xAxis: Selection<SVGElement, any, SVGElement, any>;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private _yAxis: Selection<SVGGElement, any, SVGElement, any>;
+  private _timeZoneChangeSubscription: Subscription;
 
   constructor(props: Props) {
     super(props);
@@ -69,9 +73,10 @@ export class MeasurementChart extends React.Component<Props, State> {
       .domain([Infinity, -Infinity])
       .range([this.height - this.margin.bottom, this.margin.top]);
 
+    const xAxisTickFormatter = timeFormat('%H:%M:%S');
     this._xAxisGenerator = axisBottom<Date>(this._xScale)
       .ticks(5)
-      .tickFormat(timeFormat('%H:%M:%S'));
+      .tickFormat(date => xAxisTickFormatter(this._dateTimeService.resolveDateTime(date)));
 
     this._yAxisGenerator = axisLeft<number>(this._yScale)
       .tickFormat(numberFormat(',.7'));
@@ -85,6 +90,12 @@ export class MeasurementChart extends React.Component<Props, State> {
     this._xAxis = this._container.select('.measurement-chart__canvas__axis.x');
     this._yAxis = this._container.select('.measurement-chart__canvas__axis.y');
 
+    this._timeZoneChangeSubscription = this._stateStore.select('timeZone')
+      .subscribe({
+        next: () => {
+          this._xAxis.call(this._xAxisGenerator);
+        }
+      });
     this._render();
   }
 
@@ -187,6 +198,10 @@ export class MeasurementChart extends React.Component<Props, State> {
     if (prevProps.renderableChartModel !== this.props.renderableChartModel) {
       this._render();
     }
+  }
+
+  componentWillUnmount() {
+    this._timeZoneChangeSubscription.unsubscribe();
   }
 
   render() {
