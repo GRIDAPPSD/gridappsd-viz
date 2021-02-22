@@ -29,7 +29,7 @@ import { StateStore } from '@shared/state-store';
 import { waitUntil } from '@shared/misc';
 import { PortalRenderer } from '@shared/overlay/portal-renderer';
 import { Dialog } from '@shared/overlay/dialog';
-import { ExpectedResultComparisonContainer } from './simulation/expected-result-comparison';
+import { ExpectedResultComparisonContainer } from './expected-result-comparison';
 
 import './App.light.scss';
 import './App.dark.scss';
