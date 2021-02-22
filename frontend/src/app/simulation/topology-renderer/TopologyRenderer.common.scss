@@ -182,7 +182,9 @@
         &._ln6255773-1_,
         &._ln6290214-1_,
         &._ln6047579-1_,
-        &._ln6411407-1_ {
+        &._ln6411407-1_,
+        &._ln5000chp-1_,
+        &._ln5002chp-1_ {
             marker-start: url(#reverse-power-flow-indicator--edge);
             marker-end: none;
         }
@@ -228,7 +230,9 @@
         &._ln6255773-1_,
         &._ln6290214-1_,
         &._ln6047579-1_,
-        &._ln6411407-1_ {
+        &._ln6411407-1_,
+        &._ln5000chp-1_,
+        &._ln5002chp-1_ {
             marker-end: url(#normal-power-flow-indicator--edge);
             marker-start: none;
         }
@@ -280,7 +284,8 @@
 
         &._ln4625876_sw_,
         &._l9191_48332_sw_,
-        &._ln0895780_sw_ {
+        &._ln0895780_sw_,
+        &._ln5001chp_sw_ {
             marker-start: url(#reverse-power-flow-indicator--switch);
             marker-end: none;
         }
@@ -292,7 +297,8 @@
 
         &._ln4625876_sw_,
         &._l9191_48332_sw_,
-        &._ln0895780_sw_ {
+        &._ln0895780_sw_,
+        &._ln5001chp_sw_ {
             marker-end: url(#normal-power-flow-indicator--switch);
             marker-start: none;
         }
