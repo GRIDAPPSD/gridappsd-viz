@@ -13,13 +13,13 @@ import { SimulationControlContainer } from './simulation/simulation-control';
 import { SimulationStatusLogContainer } from './simulation/simulation-status-logger';
 import { StompClientContainer } from './stomp-client';
 import { TopologyRendererContainer } from './simulation/topology-renderer';
-import { WebsocketStatusWatcher } from './websocket-status-watcher';
+import { WebsocketStatusWatcherContainer } from './websocket-status-watcher';
 import { TabGroup, Tab } from '@shared/tabs';
 import { EventSummary } from './simulation/event-summary/EventSummary';
 import { AvailableApplicationList } from './simulation/applications/AvailableApplicationList';
 import { VoltageViolationContainer } from './simulation/voltage-violation/VoltageViolationContainer';
 import { NavigationContainer } from './navigation';
-import { Authenticator } from '@shared/authenticator';
+import { AuthenticatorContainer } from '@shared/authenticator';
 import { AlarmsContainer, Alarm } from './simulation/alarms';
 import { Settings } from './settings';
 import { MessageBanner } from '@shared/overlay/message-banner';
@@ -75,7 +75,7 @@ export const App = withRouter(class extends React.Component<Props, State> {
         this.shouldRedirect
           ? this.redirect()
           : (
-            <Authenticator>
+            <AuthenticatorContainer>
               <NavigationContainer
                 onShowSimulationConfigForm={this.showSimulationConfigForm}
                 onLogout={this.props.onLogout}
@@ -128,7 +128,7 @@ export const App = withRouter(class extends React.Component<Props, State> {
               <Route
                 path='/browse'
                 component={(routeProps: RouteChildrenProps) => <DataBrowser feederModel={this.props.feederModel} match={routeProps.match} />} />
-              <WebsocketStatusWatcher />
+              <WebsocketStatusWatcherContainer />
               {
                 this.props.stompClientConnectionStatus === StompClientConnectionStatus.CONNECTED
                 &&
@@ -138,7 +138,7 @@ export const App = withRouter(class extends React.Component<Props, State> {
                   Initializing<ThreeDots />
                 </MessageBanner>
               }
-            </Authenticator>
+            </AuthenticatorContainer>
           )
       } />
     );

@@ -27,6 +27,10 @@
 
     .tick {
         transition: transform 0.25s ease;
+
+        text {
+            user-select: none;
+        }
     }
 }
 

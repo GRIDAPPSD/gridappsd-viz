@@ -7,6 +7,7 @@ import { Ripple } from '@shared/ripple';
 import { copyToClipboard } from '@shared/misc';
 import { DateTimeService } from '@shared/DateTimeService';
 import { MessageBanner } from '@shared/overlay/message-banner';
+import { AuthenticatorService } from '@shared/authenticator';
 
 import './Alarms.light.scss';
 import './Alarms.dark.scss';
@@ -108,7 +109,9 @@ export class Alarms extends React.Component<Props, State> {
             </td>
           </Ripple>
         </Tooltip>
-        <td className={`alarms__created-by color-${createdByIndex}`}>{alarm.created_by}</td>
+        <td className={`alarms__created-by color-${createdByIndex}`}>
+          {AuthenticatorService.decodePayloadFromAuthenticationToken(alarm.created_by).sub}
+        </td>
         <td>{alarm.value}</td>
       </tr>
     );

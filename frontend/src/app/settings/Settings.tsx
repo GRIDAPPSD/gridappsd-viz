@@ -19,7 +19,7 @@ interface State {
 export class Settings extends React.Component<Props, State> {
 
   readonly isDarkThemeSelectedFormControl = new FormControlModel((localStorage.getItem('theme') as 'light' | 'dark' || 'dark') === 'dark');
-  readonly enableLoggingFormControl = new FormControlModel((localStorage.getItem('isLoggingEnabled') ?? String(!__PRODUCTION__)) === 'true');
+  readonly enableLoggingFormControl = new FormControlModel((localStorage.getItem('isLoggingEnabled') ?? String(__DEVELOPMENT__)) === 'true');
   readonly menuOpenerRef = React.createRef<HTMLDivElement>();
 
   private _isLoggingEnabled = this.enableLoggingFormControl.getValue();

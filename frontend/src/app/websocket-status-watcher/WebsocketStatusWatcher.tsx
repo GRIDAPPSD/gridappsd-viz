@@ -1,86 +1,52 @@
 import * as React from 'react';
-import { Subscription } from 'rxjs';
 
-import { IconButton } from '@shared/buttons';
-import { StompClientConnectionStatus, StompClientService } from '@shared/StompClientService';
+import { StompClientConnectionStatus } from '@shared/StompClientService';
 import { MessageBanner } from '@shared/overlay/message-banner';
 import { ThreeDots } from '@shared/three-dots';
 import { PortalRenderer } from '@shared/overlay/portal-renderer';
+import { IconButton } from '@shared/buttons';
 
 import './WebsocketStatusWatcher.light.scss';
 import './WebsocketStatusWatcher.dark.scss';
 
 interface Props {
-}
-
-interface State {
   websocketStatus: StompClientConnectionStatus;
+  onReconnect: () => void;
 }
 
-export class WebsocketStatusWatcher extends React.Component<Props, State> {
-
-  readonly stompClientService = StompClientService.getInstance();
-
-  private _websocketStatusStream: Subscription;
-
-  constructor(props: Props) {
-    super(props);
-    this.state = {
-      websocketStatus: this.stompClientService.isActive() ? StompClientConnectionStatus.CONNECTED : StompClientConnectionStatus.UNINITIALIZED
-    };
-  }
-
-  componentDidMount() {
-    this._websocketStatusStream = this.stompClientService.statusChanges()
-      .subscribe({
-        next: state => this.setState({ websocketStatus: state })
-      });
-  }
-
-  componentWillUnmount() {
-    this._websocketStatusStream?.unsubscribe();
-  }
-
-  render() {
-    if (this.state.websocketStatus === StompClientConnectionStatus.CONNECTED || this.state.websocketStatus === StompClientConnectionStatus.UNINITIALIZED) {
-      return null;
-    }
-    return (
-      <PortalRenderer containerClassName='websocket-status-watcher-container'>
-        <MessageBanner>
-          {this._showComponentForCurrentStatus()}
-        </MessageBanner>
-      </PortalRenderer>
-    );
-  }
-
-  private _showComponentForCurrentStatus() {
-    if (this.state.websocketStatus === StompClientConnectionStatus.CONNECTING) {
+export function WebsocketStatusWatcher(props: Props) {
+  switch (props.websocketStatus) {
+    case StompClientConnectionStatus.DISCONNECTED:
       return (
-        <span>
-          <span>Trying to connect</span>
-          <ThreeDots />
-        </span>
+        <PortalRenderer containerClassName='websocket-status-watcher-container'>
+          <MessageBanner>
+            <span>
+              Unable to establish a connection
+            </span>
+            <br />
+            <span style={{ fontSize: '30px', marginRight: 10 }}>
+              Check server or
+            </span>
+            <IconButton
+              icon='cached'
+              rounded={false}
+              onClick={props.onReconnect}
+              label='Click to reconnect' />
+          </MessageBanner>
+        </PortalRenderer>
       );
-    } else if (this.state.websocketStatus !== StompClientConnectionStatus.CONNECTED) {
-      return (
-        <>
-          <span>
-            Unable to establish a connection
-          </span>
-          <br />
-          <span style={{ fontSize: '30px', marginRight: 10 }}>
-            Check server or
-          </span>
-          <IconButton
-            icon='cached'
-            rounded={false}
-            onClick={this.stompClientService.reconnect}
-            label='Click to reconnect' />
-        </>
-      );
-    }
-    return null;
-  }
 
+    case StompClientConnectionStatus.CONNECTING:
+      return (
+        <PortalRenderer containerClassName='websocket-status-watcher-container'>
+          <MessageBanner>
+            <span>
+              <span>Trying to connect to server</span>
+              <ThreeDots />
+            </span>
+          </MessageBanner>
+        </PortalRenderer>
+      );
+  }
+  return null;
 }

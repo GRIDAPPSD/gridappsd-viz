@@ -1,6 +1,6 @@
 import { Client, Message } from '@stomp/stompjs';
-import { BehaviorSubject, Observable, using, timer, iif, of, Subject, zip } from 'rxjs';
-import { filter, switchMap, take, timeout, takeWhile } from 'rxjs/operators';
+import { BehaviorSubject, Observable, using, timer, Subject, zip } from 'rxjs';
+import { filter, switchMap, take, takeWhile, tap, timeout } from 'rxjs/operators';
 
 import { ConfigurationManager } from './ConfigurationManager';
 
@@ -11,10 +11,17 @@ export const enum StompClientConnectionStatus {
   UNINITIALIZED = 'UNINITIALIZED'
 }
 
-export const enum StompClientInitializationResult {
+export const enum StompClientInitializationStatus {
   OK = '0K',
   AUTHENTICATION_FAILURE = 'AUTHENTICATION_FAILURE',
   CONNECTION_FAILURE = 'CONNECTION_FAILURE'
+}
+
+export interface StompClientInitializationResult {
+
+  readonly status: StompClientInitializationStatus;
+  readonly token?: string;
+
 }
 
 export interface StompClientRequest {
@@ -30,12 +37,10 @@ export class StompClientService {
   private readonly _configurationManager = ConfigurationManager.getInstance();
 
   private _client: Client;
-  private _statusChanges = new BehaviorSubject<StompClientConnectionStatus>(StompClientConnectionStatus.UNINITIALIZED);
+  private _statusChanges = new BehaviorSubject(StompClientConnectionStatus.UNINITIALIZED);
   private _status = StompClientConnectionStatus.UNINITIALIZED;
+  private _authenticationToken = '';
   private _username = '';
-  // Need to store the password for reconnecting after timeout,
-  // the backend should listen to hearbeat messages
-  // so that this wouldn't be neccessary
   private _password = '';
 
   static getInstance() {
@@ -43,11 +48,9 @@ export class StompClientService {
   }
 
   private constructor() {
-    this._connectionFailed = this._connectionFailed.bind(this);
-    this._connectionEstablished = this._connectionEstablished.bind(this);
-    this._connectionClosed = this._connectionClosed.bind(this);
-    this.isActive = this.isActive.bind(this);
+
     this.reconnect = this.reconnect.bind(this);
+    this.isActive = this.isActive.bind(this);
     this.readOnceFrom = this.readOnceFrom.bind(this);
     this.readFrom = this.readFrom.bind(this);
 
@@ -61,7 +64,7 @@ export class StompClientService {
     )
       .subscribe({
         next: ([host, port]) => {
-          const isLoggingEnabled = (localStorage.getItem('isLoggingEnabled') ?? String(!__PRODUCTION__)) === 'true';
+          const isLoggingEnabled = (localStorage.getItem('isLoggingEnabled') ?? String(__DEVELOPMENT__)) === 'true';
 
           this._client = new Client({
             brokerURL: port ? `ws://${host}:${port}` : `ws://${host}`,
@@ -72,16 +75,11 @@ export class StompClientService {
             debug: isLoggingEnabled ? console.log : () => { },
             logRawCommunication: isLoggingEnabled
           });
-
-          this._username = sessionStorage.getItem('username');
-          this._password = sessionStorage.getItem('password');
-
-          if (this._username && this._password) {
-            this._client.connectHeaders = {
-              login: this._username,
-              passcode: this._password
-            };
-            this.reconnect();
+          if (__DEVELOPMENT__) {
+            this._authenticationToken = sessionStorage.getItem('token');
+            if (this._authenticationToken) {
+              this.reconnect();
+            }
           }
         }
       });
@@ -91,31 +89,51 @@ export class StompClientService {
     const subject = new Subject<StompClientInitializationResult>();
     const noOp = () => { };
 
-    this._username = username;
-    this._password = password;
     this._client.configure({
       connectHeaders: {
         login: username,
         passcode: password
       },
       onConnect: () => {
-        this._client.onDisconnect = () => {
-          this.reconnect();
-          subject.next(StompClientInitializationResult.OK);
-          this._client.onDisconnect = noOp;
-          this._client.onConnect = noOp;
-        };
-        this._client.deactivate();
-        // need to reevaluate this strategy
-        sessionStorage.setItem('username', username);
-        sessionStorage.setItem('password', password);
+        this._username = username;
+        this._password = password;
+
+        this._retrieveToken(username, password)
+          .then(() => {
+            this._client.onDisconnect = () => {
+              this.reconnect();
+              subject.next({
+                status: StompClientInitializationStatus.OK,
+                token: this._authenticationToken
+              });
+              this._client.onDisconnect = noOp;
+            };
+          })
+          .catch(() => {
+            subject.error({
+              status: StompClientInitializationStatus.AUTHENTICATION_FAILURE
+            } as StompClientInitializationResult);
+          })
+          .finally(() => {
+            /*
+             *  The previous established connection was used for the initial authentication,
+             *  when the authentication was successful, we want to close the previous connection
+             *  and create a new one, that's why we are calling `deactivate` here, so that the
+             *  `onDisconnect` callback from right above gets called which reconnects to the server
+             */
+            this._client.deactivate();
+          });
       },
       onStompError: () => {
-        subject.error(StompClientInitializationResult.AUTHENTICATION_FAILURE);
+        subject.error({
+          status: StompClientInitializationStatus.AUTHENTICATION_FAILURE
+        } as StompClientInitializationResult);
         this._client.onStompError = noOp;
       },
       onWebSocketError: () => {
-        subject.error(StompClientInitializationResult.CONNECTION_FAILURE);
+        subject.error({
+          status: StompClientInitializationStatus.CONNECTION_FAILURE
+        });
         this._client.onWebSocketError = noOp;
       }
     });
@@ -123,52 +141,106 @@ export class StompClientService {
     return subject.pipe(take(1));
   }
 
+  private _retrieveToken(username: string, password: string): Promise<string> {
+    return new Promise((resolve, reject) => {
+      const destination = `/queue/temp.token_resp.${username}`;
+      this.readOnceFrom<string>(destination)
+        .subscribe({
+          next: token => {
+            if (token !== 'authentication failed') {
+              if (__DEVELOPMENT__) {
+                sessionStorage.setItem('token', token);
+              }
+              this._authenticationToken = token;
+              resolve();
+            } else {
+              reject();
+            }
+          }
+        });
+      this.send({
+        destination: '/topic/pnnl.goss.token.topic',
+        replyTo: destination,
+        body: btoa(`${username}:${password}`)
+      });
+    });
+  }
+
   reconnect() {
     timer(0, 5_000)
       .pipe(
-        switchMap(() => iif(this.isActive, of(null), of(this._connect()))),
+        takeWhile(() => !this.isActive()),
+        tap(() => this._connect()),
         filter(this.isActive),
-        timeout(25_000),
-        take(1)
+        timeout(25_000)
       )
       .subscribe({
-        error: this._connectionFailed
+        error: () => {
+          /*
+           *  A race condition could occur when as soon as the timer times out, and the platform is
+           *  successfully restarted, then when `reconnect()` is called, it will be a no-op since
+           *  `takeWhile` will always terminate the timer, because `isActive()` will always return true,
+           *  so we want to check against that before notifying connection status change to DISCONNECTED
+           */
+          if (!this.isActive()) {
+            this._authenticationToken = '';
+            this._notifyConnectionStatusChange(StompClientConnectionStatus.DISCONNECTED);
+          }
+        }
       });
+  }
+
+  private _connect() {
+    this._client.deactivate();
+    this._notifyConnectionStatusChange(StompClientConnectionStatus.CONNECTING);
+    if (this._authenticationToken !== '') {
+      this._client.configure({
+        connectHeaders: {
+          login: this._authenticationToken,
+          passcode: ''
+        },
+
+        /*
+         *  This is called when the authentication token in this session isn't valid anymore,
+         *  so when the backend tries to authenticate using the saved token, it fails the authentication
+         *  and this only happens when the backend is restarted so the token for this session is destroyed.
+         */
+        onStompError: () => {
+          sessionStorage.removeItem('token');
+          this._authenticationToken = '';
+        },
+        onConnect: () => {
+          this._notifyConnectionStatusChange(StompClientConnectionStatus.CONNECTED);
+        },
+
+        /*
+         *  This is called the websocket between the client and platform times out
+         *  or when the platform is stopped.
+         */
+        onWebSocketClose: () => {
+          /*
+           *  This is true when the web socket connection times out in
+           *  which case the status is still `StompClientConnectionStatus.CONNECTED`,
+           *  so we want to recover from the timeout by reconnecting again.
+           */
+          if (this._status === StompClientConnectionStatus.CONNECTED) {
+            this.reconnect();
+          }
+        }
+      });
+      this._client.activate();
+    } else {
+      this.connect(this._username, this._password).subscribe();
+    }
   }
 
   isActive() {
     return this._client ? this._client.connected : false;
   }
 
-  private _connect() {
-    if (!this.isActive()) {
-      this._client.deactivate();
-      this._status = StompClientConnectionStatus.CONNECTING;
-      this._statusChanges.next(this._status);
-      this._client.configure({
-        onConnect: this._connectionEstablished,
-        onWebSocketClose: this._connectionClosed
-      });
-      this._client.activate();
-    }
-    return {};
-  }
-
-  private _connectionEstablished() {
-    this._status = StompClientConnectionStatus.CONNECTED;
-    this._statusChanges.next(this._status);
-  }
-
-  private _connectionClosed() {
-    if (this._status === StompClientConnectionStatus.CONNECTED) {
-      this._status = StompClientConnectionStatus.DISCONNECTED;
-      this.reconnect();
-    }
-  }
-
-  private _connectionFailed() {
-    this._status = StompClientConnectionStatus.DISCONNECTED;
-    this._statusChanges.next(this._status);
+  private _notifyConnectionStatusChange(status: StompClientConnectionStatus) {
+    this._status = status;
+    this._statusChanges.next(status);
   }
 
   send(request: StompClientRequest) {
@@ -177,7 +249,7 @@ export class StompClientService {
         {
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           GOSS_HAS_SUBJECT: true as any,
-          GOSS_SUBJECT: this._username
+          GOSS_SUBJECT: this._authenticationToken
         },
         request.replyTo ? { 'reply-to': request.replyTo } : {}
       );
@@ -227,15 +299,20 @@ export class StompClientService {
           const source = new BehaviorSubject<T>(null);
           const id = `${destination}[${Math.random() * 1_000_000 | 0}]`;
           return using(() => this._client.subscribe(destination, (message: Message) => {
-            const payload = JSON.parse(message.body);
-            if ('error' in payload) {
-              source.error(payload.error.message);
-            } else if (!('data' in payload)) {
-              source.next(payload);
-            } else if (typeof payload.data !== 'string') {
-              source.next(payload.data);
-            } else {
-              source.next(JSON.parse(payload.data));
+            const body = message.body;
+            try {
+              const payload = JSON.parse(body);
+              if ('error' in payload) {
+                source.error(payload.error.message);
+              } else if (!('data' in payload)) {
+                source.next(payload);
+              } else if (typeof payload.data !== 'string') {
+                source.next(payload.data);
+              } else {
+                source.next(JSON.parse(payload.data));
+              }
+            } catch {
+              source.next(body as unknown as T);
             }
           }, { id }), () => source.asObservable().pipe(filter(responseBody => Boolean(responseBody))));
         })

@@ -29,7 +29,7 @@ export class OpenOrCloseCapacitorRequest implements MessageRequest {
             {
               object: inputs.componentMRID,
               attribute: 'ShuntCompensator.sections',
-              value: inputs.open ? 0 : 1
+              value: inputs.open ? 1 : 0
             }
           ],
           // eslint-disable-next-line camelcase
@@ -37,7 +37,7 @@ export class OpenOrCloseCapacitorRequest implements MessageRequest {
             {
               object: inputs.componentMRID,
               attribute: 'ShuntCompensator.sections',
-              value: inputs.open ? 1 : 0
+              value: inputs.open ? 0 : 1
             }
           ]
         }

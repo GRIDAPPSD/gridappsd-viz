@@ -84,7 +84,7 @@ export class TopologyRenderer extends React.Component<Props, State> {
   private readonly _unsubscriber = new Subject<void>();
   private readonly _htmlElements = new Map<string, NodeListOf<Element>>();
   // Keys are switches' MRID
-  private _switchMap = new Map<string, Switch>();
+  private readonly _switchMap = new Map<string, Switch>();
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private _containerSelection: Selection<SVGElement, any, any, any> = null;
@@ -232,15 +232,32 @@ export class TopologyRenderer extends React.Component<Props, State> {
   private _thickenACLineSegmentBasedOnPowerFlow(measurement: SimulationOutputMeasurement) {
     const mrid = measurement.conductingEquipmentMRID;
     const currentLimit = this.props.currentLimitMap.get(mrid);
-    if (currentLimit && Number.isFinite(measurement.magnitude)) {
+    const magnitude = measurement.magnitude;
+    if (currentLimit && Number.isFinite(magnitude)) {
+      const conductingEquipmentName = measurement.conductingEquipmentName;
       if (!this._htmlElements.has(mrid)) {
         this._htmlElements.set(
           mrid,
-          this.svgRef.current.querySelectorAll(`.topology-renderer__canvas__edge._${measurement.conductingEquipmentName}_`)
+          this.svgRef.current.querySelectorAll(`.topology-renderer__canvas__edge._${conductingEquipmentName}_`)
         );
       }
-      const powerFlow = Math.max(0.15, (measurement.magnitude / currentLimit.Normal) / 1000);
-      this._htmlElements.get(mrid).forEach((edge: SVGPathElement) => edge.style.strokeWidth = `${powerFlow}px`);
+      const powerFlow = Math.max(0.15, (magnitude / currentLimit.Normal) / 1000);
+      this._htmlElements.get(mrid).forEach((edge: SVGElement) => edge.style.strokeWidth = `${powerFlow}px`);
+
+      if (conductingEquipmentName.startsWith('hvmv69s1s2')) {
+        const strokeWidth = this.svgRef.current.querySelector<SVGElement>('.topology-renderer__canvas__edge._hvmv69s1s2-6_').style.strokeWidth;
+        this.svgRef.current.querySelectorAll<SVGElement>(
+          /*
+           *  The following lines should have the same stroke width as hvmv69s1s2-{6,7,8,9} do,
+           *  but for some reason, they don't, so we want to correct that
+           */
+          '.topology-renderer__canvas__edge._hvmv69s1s2-1_,' +
+          '.topology-renderer__canvas__edge._hvmv69s1s2-2_,' +
+          '.topology-renderer__canvas__edge._hvmv69s1s2-3_,' +
+          '.topology-renderer__canvas__edge._hvmv69s1s2-4_,' +
+          '.topology-renderer__canvas__edge._hvmv69s1s2-5_'
+        ).forEach(e => e.style.strokeWidth = strokeWidth);
+      }
     }
   }
 
