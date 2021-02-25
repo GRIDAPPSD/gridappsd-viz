@@ -6,7 +6,7 @@ import { DEFAULT_SIMULATION_CONFIGURATION } from './default-simulation-configura
 
 export class SimulationQueue {
 
-  private static readonly _INSTANCE = new SimulationQueue();
+  private static readonly _INSTANCE_ = new SimulationQueue();
 
   private readonly _activeSimulationChangeSubject = new BehaviorSubject<Simulation>(null);
   private readonly _queueChangeSubject = new Subject<Simulation[]>();
@@ -18,7 +18,7 @@ export class SimulationQueue {
   }
 
   static getInstance() {
-    return SimulationQueue._INSTANCE;
+    return SimulationQueue._INSTANCE_;
   }
 
   activeSimulationChanged(): Observable<Simulation> {

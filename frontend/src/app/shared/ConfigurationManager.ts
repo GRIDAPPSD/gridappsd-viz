@@ -10,12 +10,12 @@ export interface Configurations {
 
 export class ConfigurationManager {
 
-  private static readonly _INSTANCE = new ConfigurationManager();
+  private static readonly _INSTANCE_ = new ConfigurationManager();
 
   private _configurationChanges = new BehaviorSubject<Configurations>(null);
 
   static getInstance() {
-    return ConfigurationManager._INSTANCE;
+    return ConfigurationManager._INSTANCE_;
   }
 
   private constructor() {

@@ -32,19 +32,19 @@ export interface StompClientRequest {
 
 export class StompClientService {
 
-  private static readonly _INSTANCE = new StompClientService();
+  private static readonly _INSTANCE_ = new StompClientService();
 
   private readonly _configurationManager = ConfigurationManager.getInstance();
+  private readonly _client = new Client();
+  private readonly _statusChanges = new BehaviorSubject(StompClientConnectionStatus.UNINITIALIZED);
 
-  private _client: Client;
-  private _statusChanges = new BehaviorSubject(StompClientConnectionStatus.UNINITIALIZED);
   private _status = StompClientConnectionStatus.UNINITIALIZED;
   private _authenticationToken = '';
   private _username = '';
   private _password = '';
 
   static getInstance() {
-    return StompClientService._INSTANCE;
+    return StompClientService._INSTANCE_;
   }
 
   private constructor() {
@@ -64,9 +64,9 @@ export class StompClientService {
     )
       .subscribe({
         next: ([host, port]) => {
-          const isLoggingEnabled = (localStorage.getItem('isLoggingEnabled') ?? String(__DEVELOPMENT__)) === 'true';
+          const isLoggingEnabled = localStorage.getItem('isLoggingEnabled') === 'true' || __DEVELOPMENT__;
 
-          this._client = new Client({
+          this._client.configure({
             brokerURL: port ? `ws://${host}:${port}` : `ws://${host}`,
             heartbeatIncoming: 0,
             heartbeatOutgoing: 0,
