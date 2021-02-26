@@ -4,7 +4,7 @@ import { ApplicationState } from './ApplicationState';
 
 export class StateStore {
 
-  private static readonly _INSTANCE = new StateStore();
+  private static readonly _INSTANCE_ = new StateStore();
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private readonly _stateChangeNotifiers = new Map<string, BehaviorSubject<any>>();
@@ -15,7 +15,7 @@ export class StateStore {
   }
 
   static getInstance(): StateStore {
-    return StateStore._INSTANCE;
+    return StateStore._INSTANCE_;
   }
 
   initialize(defaultState: ApplicationState) {

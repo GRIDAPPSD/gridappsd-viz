@@ -2,14 +2,14 @@ import { timeFormat, timeParse } from 'd3-time-format';
 
 export class DateTimeService {
 
-  private static readonly _INSTANCE = new DateTimeService();
+  private static readonly _INSTANCE_ = new DateTimeService();
 
   private readonly _formatter = timeFormat('%Y-%m-%d %H:%M:%S');
   private readonly _parserRegular = timeParse('%Y-%m-%d %H:%M:%S');
   private readonly _parserWithMilliseconds = timeParse('%Y-%m-%d %H:%M:%S.%L');
 
   static getInstance() {
-    return DateTimeService._INSTANCE;
+    return DateTimeService._INSTANCE_;
   }
 
   format(date: Date | number | string) {

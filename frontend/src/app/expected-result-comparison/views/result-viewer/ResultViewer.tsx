@@ -12,7 +12,7 @@ import './ResultViewer.dark.scss';
 
 interface Props {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  result: any[];
+  result: any[] | any;
   showProgressIndicator: boolean;
   comparisionType: ExpectedResultComparisonType;
 }

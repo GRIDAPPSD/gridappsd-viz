@@ -3,12 +3,12 @@ import { switchMap, take } from 'rxjs/operators';
 
 export class FilePickerService {
 
-  private static readonly _INSTANCE = new FilePickerService();
+  private static readonly _INSTANCE_ = new FilePickerService();
 
   private _fileSelection = new Subject<File>();
 
   static getInstance() {
-    return FilePickerService._INSTANCE;
+    return FilePickerService._INSTANCE_;
   }
 
   constructor() {

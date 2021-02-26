@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { Subscription } from 'rxjs';
-import { map, finalize } from 'rxjs/operators';
+import { map, finalize, takeWhile } from 'rxjs/operators';
 
 import { ExpectedResultComparisonType } from '@shared/ExpectedResultComparisonType';
 import { StompClientService } from '@shared/StompClientService';
@@ -26,7 +26,7 @@ interface Props {
 interface State {
   comparisonType: ExpectedResultComparisonType;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  comparisonResult: any[];
+  comparisonResult: any[] | any;
   simulationIds: string[];
   isFetching: boolean;
 }
@@ -153,16 +153,19 @@ export class ExpectedResultComparisonContainer extends React.Component<Props, St
     });
     this._responseSubscription?.unsubscribe();
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    this._responseSubscription = this._stompClientService.readOnceFrom<any[] | any>(request.replyTo)
-      .pipe(finalize(() => {
-        this.setState({
-          isFetching: false
-        });
-      }))
+    this._responseSubscription = this._stompClientService.readFrom<any[] | any>(request.replyTo)
+      .pipe(
+        takeWhile(data => data.status !== 'finish'),
+        map(data => Array.isArray(data) ? data : Array.isArray(data.events) ? data.events : []),
+        finalize(() => {
+          this.setState({
+            isFetching: false
+          });
+        }))
       .subscribe({
         next: data => {
           this.setState({
-            comparisonResult: Array.isArray(data) ? data : data.events
+            comparisonResult: data
           });
         },
         error: errorMessage => {

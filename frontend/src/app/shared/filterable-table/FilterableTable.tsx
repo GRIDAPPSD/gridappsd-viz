@@ -2,10 +2,10 @@ import * as React from 'react';
 import ReactTable, { Filter } from 'react-table';
 
 import { Tooltip } from '@shared/tooltip';
+import { MessageBanner } from '@shared/overlay/message-banner';
 
 import './FilterableTable.light.scss';
 import './FilterableTable.dark.scss';
-import { MessageBanner } from '@shared/overlay/message-banner';
 
 interface Props {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

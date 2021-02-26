@@ -7,7 +7,7 @@ import { AuthenticationStatusCode } from '../models/AuthenticationStatusCode';
 
 export class AuthenticatorService {
 
-  private static readonly _INSTANCE = new AuthenticatorService();
+  private static readonly _INSTANCE_ = new AuthenticatorService();
 
   private readonly _stompClientService = StompClientService.getInstance();
   private readonly _userSessionSubject = new Subject<void>();
@@ -25,7 +25,7 @@ export class AuthenticatorService {
   }
 
   static getInstance() {
-    return AuthenticatorService._INSTANCE;
+    return AuthenticatorService._INSTANCE_;
   }
 
   static decodePayloadFromAuthenticationToken(token: string) {
