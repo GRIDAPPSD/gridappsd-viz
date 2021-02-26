@@ -4,7 +4,7 @@ Make sure that NodeJS is installed ([https://nodejs.org/en/](https://nodejs.org/
 ## Bootstrapping the front-end
 - `cd frontend`
 - `npm install`
-- `npm start` (Or `npm start enable-css-hmr` to enable CSS hot reload, theme toggle won't work with this option enabled)
+- `npm start` (Or `npm start disable-css-hmr` to disable CSS hot reload, theme toggle only works with this option disabled)
 - Go to http://localhost:4000
 
 ## Bootstrapping the back-end

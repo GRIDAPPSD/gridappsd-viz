@@ -1,18 +1,18 @@
 import * as React from 'react';
 
 import { DateTimeService } from '@shared/DateTimeService';
-import { CommandEvent, CommandEventDifference } from './CommandEvent';
+import { ScheduledCommandEvent, ScheduledCommandEventDifference } from './ScheduledCommandEvent';
 
-import './CommandEventTable.light.scss';
-import './CommandEventTable.dark.scss';
+import './ScheduledCommandEvent.light.scss';
+import './ScheduledCommandEvent.dark.scss';
 
 interface Props {
-  events: CommandEvent[];
+  events: ScheduledCommandEvent[];
 }
 
 const dateTimeService = DateTimeService.getInstance();
 
-export function CommandEventTable(props: Props) {
+export function ScheduledCommandEventTable(props: Props) {
   return (
     <table>
       <thead>
@@ -51,7 +51,7 @@ export function CommandEventTable(props: Props) {
   );
 }
 
-function renderDifferenceTable(differences: CommandEventDifference[]) {
+function renderDifferenceTable(differences: ScheduledCommandEventDifference[]) {
   return (
     <table>
       <thead>

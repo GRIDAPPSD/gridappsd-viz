@@ -2,11 +2,11 @@ import * as React from 'react';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 
-import { CommOutageEvent, FaultEvent, CommandEvent } from '@shared/test-manager';
+import { CommOutageEvent, FaultEvent, ScheduledCommandEvent } from '@shared/test-manager';
 import { StateStore } from '@shared/state-store';
 import { CommOutageEventSummary } from './comm-outage/CommOutageEventSummary';
 import { FaultEventSummary } from './fault/FaultEventSummary';
-import { CommandEventSummary } from './command/CommandEventSummary';
+import { ScheduledCommandEventSummary } from './scheduled-command/ScheduledCommandEventSummary';
 import { MessageBanner } from '@shared/overlay/message-banner';
 
 import './EventSummary.light.scss';
@@ -18,7 +18,7 @@ interface Props {
 interface State {
   outageEvents: CommOutageEvent[];
   faultEvents: FaultEvent[];
-  commandEvents: CommandEvent[];
+  commandEvents: ScheduledCommandEvent[];
   faultMRIDs: string[];
 }
 
@@ -106,8 +106,8 @@ export class EventSummary extends React.Component<Props, State> {
           this.state.commandEvents.length > 0
           &&
           <>
-            <h1 className='event-summary__table-name'>Command</h1>
-            <CommandEventSummary events={this.state.commandEvents} />
+            <h1 className='event-summary__table-name'>ScheduledCommand</h1>
+            <ScheduledCommandEventSummary events={this.state.commandEvents} />
           </>
         }
       </div>

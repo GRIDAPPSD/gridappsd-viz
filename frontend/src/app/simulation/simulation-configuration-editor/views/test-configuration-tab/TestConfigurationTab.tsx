@@ -11,10 +11,10 @@ import { IconButton } from '@shared/buttons';
 import { FilePicker, FilePickerService } from '@shared/file-picker';
 import { Tooltip } from '@shared/tooltip';
 import { FaultEventSummaryTable } from './fault/FaultEventSummaryTable';
-import { CommOutageEvent, FaultEvent, CommandEvent } from '@shared/test-manager';
+import { CommOutageEvent, FaultEvent, ScheduledCommandEvent } from '@shared/test-manager';
 import { Validators, Validator } from '@shared/form/validation';
 import { download, DownloadType, generateUniqueId } from '@shared/misc';
-import { CommandEventSummaryTable } from './command/CommandEventSummaryTable';
+import { ScheduledCommandEventSummaryTable } from './scheduled-command/ScheduledCommandEventSummaryTable';
 import { DateTimeService } from '@shared/DateTimeService';
 import { TestConfigurationModel } from '../../models/TestConfigurationModel';
 
@@ -40,7 +40,7 @@ interface State {
   selectedEventTypeToView: EventType;
   outageEvents: CommOutageEvent[];
   faultEvents: FaultEvent[];
-  commandEvents: CommandEvent[];
+  commandEvents: ScheduledCommandEvent[];
 }
 
 export class TestConfigurationTab extends React.Component<Props, State> {
@@ -192,7 +192,7 @@ export class TestConfigurationTab extends React.Component<Props, State> {
 
   showEventFilePicker() {
     this._filePicker.open()
-      .readFileAsJson<{ outageEvents: CommOutageEvent[]; faultEvents: FaultEvent[]; commandEvents: CommandEvent[] }>()
+      .readFileAsJson<{ outageEvents: CommOutageEvent[]; faultEvents: FaultEvent[]; commandEvents: ScheduledCommandEvent[] }>()
       /* File content should look like this
         {
           "outageEvents": [...],
@@ -213,7 +213,7 @@ export class TestConfigurationTab extends React.Component<Props, State> {
 
           const commandEvents = this._parseDateTimeStringsToEpochTimesWithSecondPrecision(
             this.state.commandEvents.concat(content.commandEvents || [])
-          ) as CommandEvent[];
+          ) as ScheduledCommandEvent[];
 
           this.props.parentFormGroupModel.findControl('outageEvents').setValue(outageEvents);
           this.props.parentFormGroupModel.findControl('faultEvents').setValue(faultEvents);
@@ -228,7 +228,7 @@ export class TestConfigurationTab extends React.Component<Props, State> {
       });
   }
 
-  private _parseDateTimeStringsToEpochTimesWithSecondPrecision(events: Array<FaultEvent | CommOutageEvent | CommandEvent>) {
+  private _parseDateTimeStringsToEpochTimesWithSecondPrecision(events: Array<FaultEvent | CommOutageEvent | ScheduledCommandEvent>) {
     for (const event of events) {
       if (typeof event.stopDateTime === 'string') {
         event.stopDateTime = this.dateTimeService.parse(event.stopDateTime);
@@ -304,7 +304,7 @@ export class TestConfigurationTab extends React.Component<Props, State> {
         );
       case EventType.COMMAND:
         return (
-          <CommandEventSummaryTable events={this.state.commandEvents} />
+          <ScheduledCommandEventSummaryTable events={this.state.commandEvents} />
         );
       default:
         return null;
@@ -356,10 +356,10 @@ export class TestConfigurationTab extends React.Component<Props, State> {
     );
   }
 
-  private _convertEpochTimesToDateTimeStrings(events: Array<FaultEvent | CommOutageEvent | CommandEvent>) {
+  private _convertEpochTimesToDateTimeStrings(events: Array<FaultEvent | CommOutageEvent | ScheduledCommandEvent>) {
     const resultedEvents = [];
     for (const event of events) {
-      const clonedEvent = { ...event } as FaultEvent | CommOutageEvent | CommandEvent;
+      const clonedEvent = { ...event } as FaultEvent | CommOutageEvent | ScheduledCommandEvent;
       clonedEvent.stopDateTime = this.dateTimeService.format(event.stopDateTime);
       if ('startDateTime' in event) {
         clonedEvent['startDateTime'] = this.dateTimeService.format(event.startDateTime);

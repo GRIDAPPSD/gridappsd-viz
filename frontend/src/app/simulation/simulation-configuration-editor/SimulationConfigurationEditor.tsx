@@ -14,7 +14,7 @@ import { SimulationConfigurationTab } from './views/simulation-configuration-tab
 import { ApplicationConfigurationTab } from './views/application-configuration-tab';
 import { TestConfigurationTab } from './views/test-configuration-tab';
 import { DateTimeService } from '@shared/DateTimeService';
-import { FaultEvent, CommOutageEvent, CommandEvent } from '@shared/test-manager';
+import { FaultEvent, CommOutageEvent, ScheduledCommandEvent } from '@shared/test-manager';
 import { PowerSystemConfigurationModel } from './models/PowerSystemConfigurationModel';
 import { SimulationConfigurationTabModel } from './models/SimulationConfigurationTabModel';
 import { ApplicationConfigurationModel } from './models/ApplicationConfigurationModel';
@@ -61,14 +61,14 @@ export class SimulationConfigurationEditor extends React.Component<Props, State>
     testConfig: new FormGroupModel<TestConfigurationModel>({
       outageEvents: new FormArrayModel<CommOutageEvent>(),
       faultEvents: new FormArrayModel<FaultEvent>(),
-      commandEvents: new FormArrayModel<CommandEvent>()
+      commandEvents: new FormArrayModel<ScheduledCommandEvent>()
     }),
     serviceConfig: new FormArrayModel<ServiceConfigurationModel>([])
   });
 
   outageEvents: CommOutageEvent[] = [];
   faultEvents: FaultEvent[] = [];
-  commandEvents: CommandEvent[] = [];
+  commandEvents: ScheduledCommandEvent[] = [];
 
   private readonly _simulationManagementService = SimulationManagementService.getInstance();
   private readonly _stateStore = StateStore.getInstance();
@@ -99,8 +99,9 @@ export class SimulationConfigurationEditor extends React.Component<Props, State>
       },
       // eslint-disable-next-line camelcase
       application_config: {
-        applications: original.application_config.applications.length > 0 ?
-          [{ ...original.application_config.applications[0] }] : []
+        applications: original.application_config.applications.length > 0
+          ? [{ ...original.application_config.applications[0] }]
+          : []
       },
       // eslint-disable-next-line camelcase
       simulation_config: {

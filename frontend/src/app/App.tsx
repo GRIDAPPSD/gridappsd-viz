@@ -8,7 +8,7 @@ import { FeederModel } from '@shared/topology';
 import { MeasurementValueTableContainer } from './simulation/measurement-value-table';
 import { MeasurementChartContainer } from './simulation/measurement-chart';
 import { SimulationConfiguration, DEFAULT_SIMULATION_CONFIGURATION } from '@shared/simulation';
-import { SimulationConfigurationEditor } from './simulation/simulation-configuration';
+import { SimulationConfigurationEditor } from './simulation/simulation-configuration-editor';
 import { SimulationControlContainer } from './simulation/simulation-control';
 import { SimulationStatusLogContainer } from './simulation/simulation-status-logger';
 import { StompClientContainer } from './stomp-client';
