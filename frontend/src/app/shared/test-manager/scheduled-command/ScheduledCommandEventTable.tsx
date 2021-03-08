@@ -1,13 +1,14 @@
 import * as React from 'react';
 
 import { DateTimeService } from '@shared/DateTimeService';
-import { ScheduledCommandEvent, ScheduledCommandEventDifference } from './ScheduledCommandEvent';
+import { ScheduledCommandEvent } from './ScheduledCommandEvent';
 
 import './ScheduledCommandEvent.light.scss';
 import './ScheduledCommandEvent.dark.scss';
 
 interface Props {
   events: ScheduledCommandEvent[];
+  actions: (event: ScheduledCommandEvent, index: number) => React.ReactNode;
 }
 
 const dateTimeService = DateTimeService.getInstance();
@@ -17,10 +18,13 @@ export function ScheduledCommandEventTable(props: Props) {
     <table>
       <thead>
         <tr>
-          <th>occuredDateTime</th>
-          <th>stopDateTime</th>
-          <th>forward_differences</th>
-          <th>reverse_differences</th>
+          <th>Action</th>
+          <th>Component name</th>
+          <th>Attribute</th>
+          <th>Reverse difference value</th>
+          <th>Forward difference value</th>
+          <th>Start date time</th>
+          <th>Stop date time</th>
         </tr>
       </thead>
       <tbody>
@@ -28,56 +32,38 @@ export function ScheduledCommandEventTable(props: Props) {
           props.events.map((event, i) => (
             <tr key={i}>
               <td>
+                <div className='scheduled-command-event-table__row-actions'>
+                  {props.actions(event, i)}
+                </div>
+              </td>
+              <td>
                 <div>
-                  {dateTimeService.format(event.occuredDateTime)}
+                  {event.componentName}
+                </div>
+              </td>
+              <td>
+                <div>
+                  {event.attribute}
+                </div>
+              </td>
+              <td>
+                <div>
+                  {event.reverseDifferenceValue}
+                </div>
+              </td>
+              <td>
+                <div>
+                  {event.forwardDifferenceValue}
+                </div>
+              </td>
+              <td>
+                <div>
+                  {dateTimeService.format(event.startDateTime)}
                 </div>
               </td>
               <td>
                 <div>
                   {dateTimeService.format(event.stopDateTime)}
-                </div>
-              </td>
-              <td>
-                {renderDifferenceTable(event.message.forward_differences)}
-              </td>
-              <td>
-                {renderDifferenceTable(event.message.reverse_differences)}
-              </td>
-            </tr>
-          ))
-        }
-      </tbody>
-    </table>
-  );
-}
-
-function renderDifferenceTable(differences: ScheduledCommandEventDifference[]) {
-  return (
-    <table>
-      <thead>
-        <tr>
-          <th>object</th>
-          <th>attribute</th>
-          <th>value</th>
-        </tr>
-      </thead>
-      <tbody>
-        {
-          differences.map((difference, index) => (
-            <tr key={index}>
-              <td>
-                <div>
-                  {difference.object}
-                </div>
-              </td>
-              <td>
-                <div>
-                  {difference.attribute}
-                </div>
-              </td>
-              <td>
-                <div>
-                  {difference.value}
                 </div>
               </td>
             </tr>

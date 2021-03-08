@@ -9,9 +9,9 @@ import { CurrentLimit } from '@shared/measurement-limits';
 export interface ApplicationState {
   simulationId: string;
   faultMRIDs: string[];
-  outageEvents: CommOutageEvent[];
+  commOutageEvents: CommOutageEvent[];
   faultEvents: FaultEvent[];
-  commandEvents: ScheduledCommandEvent[];
+  scheduledCommandEvents: ScheduledCommandEvent[];
   applications: Application[];
   services: Service[];
   modelDictionary: ModelDictionary;

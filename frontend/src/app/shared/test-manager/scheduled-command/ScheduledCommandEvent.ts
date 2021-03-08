@@ -1,16 +1,12 @@
-/* eslint-disable camelcase */
 export interface ScheduledCommandEvent {
-  event_type: 'ScheduledCommandEvent';
-  message: {
-    forward_differences: ScheduledCommandEventDifference[];
-    reverse_differences: ScheduledCommandEventDifference[];
-  };
-  occuredDateTime: number | string;
-  stopDateTime: number | string;
-}
-
-export interface ScheduledCommandEventDifference {
-  object: string;
+  tag: string;
+  eventType: 'ScheduledCommandEvent';
+  componentName: string;
+  mRID: string | string[];
   attribute: string;
-  value: string;
+  forwardDifferenceValue: number;
+  reverseDifferenceValue: number;
+  // Epoch time with second precision
+  startDateTime: number;
+  stopDateTime: number;
 }
