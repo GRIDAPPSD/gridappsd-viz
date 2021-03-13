@@ -108,7 +108,9 @@
 }
 
 #normal-power-flow-indicator--transformer,
-#reverse-power-flow-indicator--transformer {
+#reverse-power-flow-indicator--transformer,
+#normal-power-flow-indicator--switch,
+#reverse-power-flow-indicator--switch {
     .topology-renderer__canvas__arrow {
         fill: none;
     }
@@ -142,16 +144,106 @@
     stroke-linecap: round;
 
     &.normal-power-flow-direction:not(.no-power-flow-direction-indicator):not(.no-power) {
+
+        // Need to to flip the arrow direction of these lines
+        &._ln6044631-1_,
+        &._ln5591284-2_,
+        &._ln6260020-1_,
+        &._ln6350543-1_,
+        &._ln6380818-1_,
+        &._ln6047580-2_,
+        &._ln6108145-1_,
+        &._ln6290217-1_,
+        &._ln5865249-1_,
+        &._tpx293667a0_,
+        &._ln5472403-3_,
+        &._ln6347196-2_,
+        &._ln6108150-2_,
+        &._ln5714056-3_,
+        &._ln5895789-2_,
+        &._ln5895789-3_,
+        &._ln5835150-1_,
+        &._ln6229809-1_,
+        &._ln5534970-1_,
+        &._ln6077782-1_,
+        &._ln6290215-1_,
+        &._ln5532754-1_,
+        &._ln6108144-1_,
+        &._ln5562934-1_,
+        &._ln6073575-3_,
+        &._ln5502538-1_,
+        &._ln6047578-1_,
+        &._ln5863706-1_,
+        &._ln6047577-1_,
+        &._ln5593236-6_,
+        &._ln6108142-1_,
+        &._ln5682339-1_,
+        &._ln6290214-1_,
+        &._ln6255773-1_,
+        &._ln6290214-1_,
+        &._ln6047579-1_,
+        &._ln6411407-1_,
+        &._ln5000chp-1_,
+        &._ln5002chp-1_ {
+            marker-start: url(#reverse-power-flow-indicator--edge);
+            marker-end: none;
+        }
+
         marker-end: url(#normal-power-flow-indicator--edge);
     }
 
     &.reverse-power-flow-direction:not(.no-power-flow-direction-indicator):not(.no-power) {
+
+        &._ln6044631-1_,
+        &._ln5591284-2_,
+        &._ln6260020-1_,
+        &._ln6350543-1_,
+        &._ln6380818-1_,
+        &._ln6047580-2_,
+        &._ln6108145-1_,
+        &._ln6290217-1_,
+        &._ln5865249-1_,
+        &._tpx293667a0_,
+        &._ln5472403-3_,
+        &._ln6347196-2_,
+        &._ln6108150-2_,
+        &._ln5714056-3_,
+        &._ln5895789-2_,
+        &._ln5895789-3_,
+        &._ln5835150-1_,
+        &._ln6229809-1_,
+        &._ln5534970-1_,
+        &._ln6077782-1_,
+        &._ln6290215-1_,
+        &._ln5532754-1_,
+        &._ln6108144-1_,
+        &._ln5562934-1_,
+        &._ln6073575-3_,
+        &._ln5502538-1_,
+        &._ln6047578-1_,
+        &._ln5863706-1_,
+        &._ln6047577-1_,
+        &._ln5593236-6_,
+        &._ln6108142-1_,
+        &._ln5682339-1_,
+        &._ln6290214-1_,
+        &._ln6255773-1_,
+        &._ln6290214-1_,
+        &._ln6047579-1_,
+        &._ln6411407-1_,
+        &._ln5000chp-1_,
+        &._ln5002chp-1_ {
+            marker-end: url(#normal-power-flow-indicator--edge);
+            marker-start: none;
+        }
+
         marker-start: url(#reverse-power-flow-indicator--edge);
     }
 
     &.no-power-flow-direction-indicator {
         stroke-width: 0.2px !important;
     }
+
 }
 
 .topology-renderer__non-existing-searched-node {
@@ -189,10 +281,28 @@
 .topology-renderer__canvas__symbol.switch {
 
     &.normal-power-flow-direction:not(.no-power-flow-direction-indicator):not(.no-power) {
+
+        &._ln4625876_sw_,
+        &._l9191_48332_sw_,
+        &._ln0895780_sw_,
+        &._ln5001chp_sw_ {
+            marker-start: url(#reverse-power-flow-indicator--switch);
+            marker-end: none;
+        }
+
         marker-end: url(#normal-power-flow-indicator--switch);
     }
 
     &.reverse-power-flow-direction:not(.no-power-flow-direction-indicator):not(.no-power) {
+
+        &._ln4625876_sw_,
+        &._l9191_48332_sw_,
+        &._ln0895780_sw_,
+        &._ln5001chp_sw_ {
+            marker-end: url(#normal-power-flow-indicator--switch);
+            marker-start: none;
+        }
+
         marker-start: url(#reverse-power-flow-indicator--switch);
     }
 }
@@ -200,10 +310,42 @@
 .topology-renderer__canvas__symbol.transformer {
 
     &.normal-power-flow-direction:not(.no-power-flow-direction-indicator):not(.no-power) {
+
+        &._t5293656b_,
+        &._t21399229a_,
+        &._t5391981a_,
+        &._t5293656b_,
+        &._t5293645a_,
+        &._t21399220c_,
+        &._t21399171c_,
+        &._t21399112c_,
+        &._t5338942a_,
+        &._t21399099a_,
+        &._t5338937c_ {
+            marker-start: url(#reverse-power-flow-indicator--transformer);
+            marker-end: none;
+        }
+
         marker-end: url(#normal-power-flow-indicator--transformer);
     }
 
     &.reverse-power-flow-direction:not(.no-power-flow-direction-indicator):not(.no-power) {
+
+        &._t5293656b_,
+        &._t21399229a_,
+        &._t5391981a_,
+        &._t5293656b_,
+        &._t5293645a_,
+        &._t21399220c_,
+        &._t21399171c_,
+        &._t21399112c_,
+        &._t5338942a_,
+        &._t21399099a_,
+        &._t5338937c_ {
+            marker-end: url(#normal-power-flow-indicator--transformer);
+            marker-start: none;
+        }
+
         marker-start: url(#reverse-power-flow-indicator--transformer);
     }
 }

@@ -4,14 +4,17 @@ import { FormControlModel, RadioButtonGroup, RadioButton, Form } from '@shared/f
 import { FilterableTable } from '@shared/filterable-table';
 import { MessageBanner } from '@shared/overlay/message-banner';
 import { ProgressIndicator } from '@shared/overlay/progress-indicator';
+import { ExpectedResultComparisonType } from '@shared/ExpectedResultComparisonType';
+import { TimeSeriesVsTimeSeriesChartResult } from '../time-series-vs-time-series/TimeSeriesVsTimeSeriesChartResult';
 
 import './ResultViewer.light.scss';
 import './ResultViewer.dark.scss';
 
 interface Props {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  results: any[];
+  result: any[] | any;
   showProgressIndicator: boolean;
+  comparisionType: ExpectedResultComparisonType;
 }
 
 interface State {
@@ -68,26 +71,35 @@ export class ResultViewer extends React.Component<Props, State> {
             this.props.showProgressIndicator
               ? <ProgressIndicator show />
               : this.state.viewType === 'table'
-                ? this.showResultsAsTable()
-                : this.showResultsAsPlot()
+                ? this.showResultAsTable()
+                : this.showResultAsPlot()
           }
         </div>
       </div>
     );
   }
 
-  showResultsAsTable() {
+  showResultAsTable() {
     return (
-      <FilterableTable rows={this.props.results} />
+      <FilterableTable rows={this.props.result} />
     );
   }
 
-  showResultsAsPlot() {
-    return (
-      <MessageBanner>
-        Not yet implemented
-      </MessageBanner>
-    );
+  showResultAsPlot() {
+    switch (this.props.comparisionType) {
+      case ExpectedResultComparisonType.SIMULATION_VS_EXPECTED:
+      case ExpectedResultComparisonType.SIMULATION_VS_TIME_SERIES:
+      case ExpectedResultComparisonType.EXPECTED_VS_TIME_SERIES:
+        return (
+          <MessageBanner>
+            Not yet implemented
+          </MessageBanner>
+        );
+      case ExpectedResultComparisonType.TIME_SERIES_VS_TIME_SERIES:
+        return (
+          <TimeSeriesVsTimeSeriesChartResult result={this.props.result} />
+        );
+    }
   }
 
 }

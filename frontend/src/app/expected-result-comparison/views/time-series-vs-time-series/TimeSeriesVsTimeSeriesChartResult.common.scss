@@ -1,0 +1,13 @@
+.time-series-vs-time-series-chart-result {
+    .line-chart {
+        height: 300px;
+    }
+
+    .line-chart__zoom-control-container {
+        display: none;
+    }
+
+    .line-chart__canvas__axis.x .tick {
+        visibility: hidden;
+    }
+}

@@ -4,7 +4,7 @@ import { take } from 'rxjs/operators';
 
 import { BasicButton, IconButton } from '@shared/buttons';
 import { Form, Select, FormControlModel, SelectionOptionBuilder } from '@shared/form';
-import { FilePickerService } from '@shared/file-picker';
+import { FilePicker, FilePickerService } from '@shared/file-picker';
 import { Notification } from '@shared/overlay/notification';
 
 import './SimulationVsTimeSeries.light.scss';
@@ -88,6 +88,7 @@ export class SimulationVsTimeSeries extends React.Component<Props, State> {
           label='Submit'
           disabled={this.state.disableSubmitButton}
           onClick={this.onSubmit} />
+        <FilePicker />
       </Form>
     );
   }
