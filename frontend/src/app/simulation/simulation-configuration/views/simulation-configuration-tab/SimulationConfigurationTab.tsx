@@ -22,6 +22,7 @@ import './SimulationConfigurationTab.dark.scss';
 interface Props {
   parentFormGroupModel: FormGroupModel<SimulationConfigurationTabModel>;
   simulationConfig: SimulationConfiguration['simulation_config'];
+  simulators: string[];
 }
 
 interface State {
@@ -34,7 +35,7 @@ export class SimulationConfigurationTab extends React.Component<Props, State> {
     super(props);
 
     this.state = {
-      simulatorOptionBuilder: new SelectionOptionBuilder([props.simulationConfig.simulator || 'GridLAB-D'])
+      simulatorOptionBuilder: new SelectionOptionBuilder(props.simulators)
     };
 
     this._setupFormGroupModelForSimulationConfigurationTab();
@@ -58,7 +59,7 @@ export class SimulationConfigurationTab extends React.Component<Props, State> {
     );
     this.props.parentFormGroupModel.setControl(
       'simulator',
-      new FormControlModel('')
+      new FormControlModel(this.props.simulationConfig.simulator)
     );
     this.props.parentFormGroupModel.setControl(
       'run_realtime',
@@ -103,7 +104,7 @@ export class SimulationConfigurationTab extends React.Component<Props, State> {
             label='Simulator'
             formControlModel={this.props.parentFormGroupModel.findControl('simulator')}
             selectionOptionBuilder={this.state.simulatorOptionBuilder}
-            selectedOptionFinder={simulator => simulator === 'GridLAB-D'} />
+            selectedOptionFinder={simulator => simulator === this.props.simulationConfig.simulator} />
           <div className='accompanying-text'>
             <div>Power flow solver method</div>
             <div>NR</div>
