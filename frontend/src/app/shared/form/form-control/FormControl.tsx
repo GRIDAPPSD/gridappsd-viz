@@ -1,4 +1,6 @@
 import * as React from 'react';
+import { Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 
 import { FormControlModel } from '../models/FormControlModel';
 import { ValidationErrorMessageDisplay } from '../validation';
@@ -22,15 +24,25 @@ interface State {
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export class FormControl extends React.Component<Props<any>, State> {
 
+  private readonly _unsubscriber = new Subject<void>();
+
   componentDidMount() {
     this.props.formControlModel.validityChanges()
+      .pipe(takeUntil(this._unsubscriber))
       .subscribe({
         next: () => this.forceUpdate()
       });
+
     this.props.formControlModel.onDisableToggled()
+      .pipe(takeUntil(this._unsubscriber))
       .subscribe({
         next: () => this.forceUpdate()
       });
+  }
+
+  componentWillUnmount() {
+    this._unsubscriber.next();
+    this._unsubscriber.complete();
   }
 
   render() {

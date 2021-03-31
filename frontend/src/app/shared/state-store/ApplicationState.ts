@@ -5,6 +5,7 @@ import { ModelDictionary, ModelDictionaryComponent } from '@shared/topology';
 import { PlotModel } from '@shared/plot-model/PlotModel';
 import { ExpectedResultComparisonType } from '@shared/ExpectedResultComparisonType';
 import { CurrentLimit } from '@shared/measurement-limits';
+import { TimeZone } from '@shared/DateTimeService';
 
 export interface ApplicationState {
   simulationId: string;
@@ -21,4 +22,5 @@ export interface ApplicationState {
   nodeNameToLocate: string;
   expectedResultComparisonType: ExpectedResultComparisonType;
   currentLimits: CurrentLimit[];
+  timeZone: TimeZone;
 }

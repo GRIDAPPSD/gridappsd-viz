@@ -61,6 +61,29 @@ export class EventSummary extends React.Component<Props, State> {
       .subscribe({
         next: commandEvents => this.setState({ commandEvents })
       });
+
+    this._stateStore.select('timeZone')
+      .pipe(takeUntil(this._unsubscriber))
+      .subscribe({
+        next: () => {
+          if (this.state.outageEvents.length > 0) {
+            this.setState({
+              outageEvents: [...this.state.outageEvents]
+            });
+          }
+          if (this.state.faultEvents.length > 0) {
+            this.setState({
+              outageEvents: [...this.state.outageEvents]
+            });
+          }
+          if (this.state.commandEvents.length > 0) {
+            this.setState({
+              outageEvents: [...this.state.outageEvents]
+            });
+          }
+        }
+      });
+
   }
 
   componentWillUnmount() {
