@@ -43,6 +43,7 @@ export class AlarmsContainer extends React.Component<Props, State> {
     this._subscribeToNewAlarmsTopic();
     this._pickAlarmsFromSimulationSnapshotStream();
     this._clearAllAlarmsWhenSimulationStarts();
+    this._updateAlarmTimeStampsWhenTimeZoneChanges();
   }
 
   private _subscribeToNewAlarmsTopic() {
@@ -99,6 +100,20 @@ export class AlarmsContainer extends React.Component<Props, State> {
           this._simulationManagementService.syncSimulationSnapshotState({
             alarms: []
           });
+        }
+      });
+  }
+
+  private _updateAlarmTimeStampsWhenTimeZoneChanges() {
+    this._stateStore.select('timeZone')
+      .pipe(takeUntil(this._unsubscriber))
+      .subscribe({
+        next: () => {
+          if (this.state.alarms.length > 0) {
+            this.setState({
+              alarms: [...this.state.alarms]
+            });
+          }
         }
       });
   }

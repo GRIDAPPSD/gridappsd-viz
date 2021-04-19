@@ -1,4 +1,5 @@
 import { ApplicationState } from '@shared/state-store';
+import { TimeZone } from '@shared/DateTimeService';
 
 export const DEFAULT_APPLICATION_STATE: ApplicationState = {
   simulationId: '',
@@ -14,5 +15,6 @@ export const DEFAULT_APPLICATION_STATE: ApplicationState = {
   activeSimulationIds: [],
   nodeNameToLocate: '',
   expectedResultComparisonType: null,
-  currentLimits: []
+  currentLimits: [],
+  timeZone: TimeZone.LOCAL
 };

@@ -2,9 +2,11 @@ import * as React from 'react';
 
 import { IconButton } from '@shared/buttons';
 import { Tooltip } from '@shared/tooltip';
-import { SlideToggle, FormControlModel } from '@shared/form';
+import { SlideToggle, FormControlModel, SelectionOptionBuilder, Select } from '@shared/form';
 import { Fade } from '@shared/effects/fade';
 import { Dialog, ConfirmationDialog } from '@shared/overlay/dialog';
+import { DateTimeService, TimeZone } from '@shared/DateTimeService';
+import { StateStore } from '@shared/state-store';
 
 import './Settings.light.scss';
 import './Settings.dark.scss';
@@ -14,13 +16,18 @@ interface Props {
 
 interface State {
   showSettingsMenu: boolean;
+  timeZoneOptionBuilder: SelectionOptionBuilder<TimeZone>;
 }
 
 export class Settings extends React.Component<Props, State> {
 
   readonly isDarkThemeSelectedFormControl = new FormControlModel((localStorage.getItem('theme') as 'light' | 'dark' || 'dark') === 'dark');
   readonly enableLoggingFormControl = new FormControlModel((localStorage.getItem('isLoggingEnabled') ?? String(__DEVELOPMENT__)) === 'true');
+  readonly timeZoneFormControl = new FormControlModel(TimeZone.LOCAL);
   readonly menuOpenerRef = React.createRef<HTMLDivElement>();
+  readonly dateTimeService = DateTimeService.getInstance();
+
+  readonly _stateStore = StateStore.getInstance();
 
   private _isLoggingEnabled = this.enableLoggingFormControl.getValue();
 
@@ -28,8 +35,16 @@ export class Settings extends React.Component<Props, State> {
     super(props);
 
     this.state = {
-      showSettingsMenu: false
+      showSettingsMenu: false,
+      timeZoneOptionBuilder: new SelectionOptionBuilder([
+        TimeZone.EST,
+        TimeZone.LOCAL,
+        TimeZone.PST,
+        TimeZone.UTC
+      ])
     };
+
+    this.timeZoneFormControl.setValue(this.dateTimeService.currentTimeZone());
 
     this.showSettingsMenu = this.showSettingsMenu.bind(this);
   }
@@ -37,6 +52,7 @@ export class Settings extends React.Component<Props, State> {
   componentDidMount() {
     this._watchForThemeChanges();
     this._watchForLoggingEnablement();
+    this._watchForTimeZoneChanges();
   }
 
   private _watchForThemeChanges() {
@@ -82,9 +98,22 @@ export class Settings extends React.Component<Props, State> {
       });
   }
 
+  private _watchForTimeZoneChanges() {
+    this.timeZoneFormControl.valueChanges()
+      .subscribe({
+        next: timeZone => {
+          this.dateTimeService.setTimeZone(timeZone);
+          this._stateStore.update({
+            timeZone
+          });
+        }
+      });
+  }
+
   componentWillUnmount() {
     this.isDarkThemeSelectedFormControl.cleanup();
     this.enableLoggingFormControl.cleanup();
+    this.timeZoneFormControl.cleanup();
   }
 
   render() {
@@ -137,6 +166,18 @@ export class Settings extends React.Component<Props, State> {
                 onText='On'
                 offText='Off'
                 formControlModel={this.enableLoggingFormControl} />
+            </div>
+          </li>
+          <li className='settings__menu__item'>
+            <div className='settings__menu__item__name'>
+              Time zone
+            </div>
+            <div className='settings__menu__item__action select-time-zome'>
+              <Select
+                label=''
+                formControlModel={this.timeZoneFormControl}
+                selectionOptionBuilder={this.state.timeZoneOptionBuilder}
+                selectedOptionFinder={timeZone => timeZone === this.dateTimeService.currentTimeZone()} />
             </div>
           </li>
         </ul>

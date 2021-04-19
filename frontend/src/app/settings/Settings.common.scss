@@ -20,6 +20,7 @@
         padding: 10px;
         list-style: none;
         display: flex;
+        align-items: center;
 
         &__action {
             position: relative;
@@ -29,5 +30,13 @@
                 transform: translate(-13px, 0px);
             }
         }
+    }
+
+    .select.form-control {
+        margin: 0;
+    }
+
+    .select__option-list__opener {
+        min-width: 100px;
     }
 }
