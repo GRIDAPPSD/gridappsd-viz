@@ -271,6 +271,7 @@ export class TestConfigurationTab extends React.Component<Props, State> {
             modelDictionary={this.props.modelDictionary}
             startDateTime={this.props.simulationStartDateTime}
             stopDateTime={this.props.simulationStopDateTime}
+            modelDictionaryComponents={this.props.modelDictionaryComponents}
             onAddEvent={this.addScheduledCommandEvent} />
         );
       default:

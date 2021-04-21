@@ -13,7 +13,7 @@ export class ScheduledCommandEventFormService {
     return ScheduledCommandEventFormService._INSTANCE_;
   }
 
-  fetchAttributes(objectId: string, modelId: string) {
+  fetchAttributes(objectId: string, modelId: string, objectType: string) {
     return new Promise<string[]>((resolve, reject) => {
       const responseTopic = '/queue/object-dictionary';
 
@@ -41,7 +41,7 @@ export class ScheduledCommandEventFormService {
           modelId,
           requestType: 'QUERY_OBJECT_DICT',
           resultFormat: 'JSON',
-          objectType: 'LinearShuntCompensator',
+          objectType,
           objectId
         })
       });

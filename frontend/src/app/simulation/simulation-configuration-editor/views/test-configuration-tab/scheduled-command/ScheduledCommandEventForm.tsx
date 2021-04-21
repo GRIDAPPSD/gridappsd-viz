@@ -1,7 +1,13 @@
 import * as React from 'react';
 
 import { BasicButton } from '@shared/buttons';
-import { ModelDictionary, ModelDictionaryCapacitor, ModelDictionaryRegulator, ModelDictionarySwitch } from '@shared/topology/model-dictionary';
+import {
+  ModelDictionary,
+  ModelDictionaryCapacitor,
+  ModelDictionaryComponent,
+  ModelDictionaryRegulator,
+  ModelDictionarySwitch
+} from '@shared/topology/model-dictionary';
 import { Select, Input, SelectionOptionBuilder, FormGroupModel, FormControlModel } from '@shared/form';
 import { ScheduledCommandEvent } from '@shared/test-manager';
 import { Validators } from '@shared/form/validation';
@@ -15,6 +21,7 @@ interface Props {
   startDateTime: number;
   stopDateTime: number;
   modelDictionary: ModelDictionary;
+  modelDictionaryComponents: ModelDictionaryComponent[];
   onAddEvent: (event: ScheduledCommandEvent) => void;
 }
 
@@ -22,6 +29,7 @@ interface State {
   componentTypeOptionBuilder: SelectionOptionBuilder<{ id: string; label: string }>;
   componentOptionBuilder: SelectionOptionBuilder<ModelDictionaryRegulator | ModelDictionaryCapacitor | ModelDictionarySwitch>;
   attributeOptionBuilder: SelectionOptionBuilder<string>;
+  selectedComponentType: string;
 }
 
 export class ScheduledCommandEventForm extends React.Component<Props, State> {
@@ -30,7 +38,7 @@ export class ScheduledCommandEventForm extends React.Component<Props, State> {
   readonly selectedComponentFormControl: FormControlModel<ModelDictionaryRegulator | ModelDictionaryCapacitor | ModelDictionarySwitch>;
   readonly eventFormGroupModel: FormGroupModel<ScheduledCommandEvent>;
 
-  private readonly formService = ScheduledCommandEventFormService.getInstance();
+  private readonly _formService = ScheduledCommandEventFormService.getInstance();
 
   constructor(props: Props) {
     super(props);
@@ -53,13 +61,15 @@ export class ScheduledCommandEventForm extends React.Component<Props, State> {
         type => type.label
       ),
       componentOptionBuilder: SelectionOptionBuilder.defaultBuilder(),
-      attributeOptionBuilder: SelectionOptionBuilder.defaultBuilder()
+      attributeOptionBuilder: SelectionOptionBuilder.defaultBuilder(),
+      selectedComponentType: ''
     };
 
     this.selectedComponentFormControl = new FormControlModel(null);
     this.selectedComponentFormControl.dependsOn(this.selectedComponenTypeFormControl);
     this.eventFormGroupModel = this._createFormGroupModelForScheduledCommandEvent();
     this.eventFormGroupModel.findControl('componentName').dependsOn(this.selectedComponentFormControl);
+    this.eventFormGroupModel.findControl('attribute').dependsOn(this.selectedComponentFormControl);
 
     this.createNewEvent = this.createNewEvent.bind(this);
   }
@@ -69,7 +79,7 @@ export class ScheduledCommandEventForm extends React.Component<Props, State> {
       eventType: 'ScheduledCommandEvent',
       tag: '',
       componentName: '',
-      attribute: new FormControlModel(''),
+      attribute: new FormControlModel('', [Validators.checkNotEmpty('Attribute')]),
       forwardDifferenceValue: new FormControlModel(0, [Validators.checkNotEmpty('Value'), Validators.checkValidNumber('Value')]),
       reverseDifferenceValue: new FormControlModel(0, [Validators.checkNotEmpty('Value'), Validators.checkValidNumber('Value')]),
       mRID: null,
@@ -98,15 +108,27 @@ export class ScheduledCommandEventForm extends React.Component<Props, State> {
       .subscribe({
         next: selectedType => {
           if (selectedType) {
+            /*
+              If the new selected type is Regulator or the previous one was Regulator,
+              we want to add a new `FormControlModel` for the attribute
+            */
+            if (selectedType.label === 'Regulator' || this.state.selectedComponentType === 'Regulator') {
+              const newFormControl = new FormControlModel('', [Validators.checkNotEmpty('Attribute')]);
+
+              this.eventFormGroupModel.setControl('attribute', newFormControl);
+              newFormControl.dependsOn(this.selectedComponentFormControl);
+            }
             this.setState({
               componentOptionBuilder: new SelectionOptionBuilder(
                 this.props.modelDictionary[selectedType.id] || [],
                 e => 'name' in e ? e.name : e.bankName
               ),
+              selectedComponentType: selectedType.label
             });
           } else {
             this.setState({
-              componentOptionBuilder: SelectionOptionBuilder.defaultBuilder()
+              componentOptionBuilder: SelectionOptionBuilder.defaultBuilder(),
+              selectedComponentType: ''
             });
           }
         }
@@ -119,14 +141,17 @@ export class ScheduledCommandEventForm extends React.Component<Props, State> {
         next: selectedComponent => {
           if (selectedComponent) {
             const componentName = 'name' in selectedComponent ? selectedComponent.name : selectedComponent.bankName;
+
             this.eventFormGroupModel.setValue({
               componentName,
               mRID: selectedComponent.mRID
             });
-
-            const objectId = typeof selectedComponent.mRID === 'string' ? selectedComponent.mRID : selectedComponent.mRID[0];
-            this.formService.fetchAttributes(objectId, this.props.modelDictionary.mRID)
-              .then(attributes => {
+            if (this.state.selectedComponentType !== 'Regulator') {
+              this._formService.fetchAttributes(
+                typeof selectedComponent.mRID === 'string' ? selectedComponent.mRID : selectedComponent.mRID[0],
+                this.props.modelDictionary.mRID,
+                'LinearShuntCompensator'
+              ).then(attributes => {
                 if (attributes.length === 0) {
                   Notification.open(
                     <>
@@ -139,7 +164,12 @@ export class ScheduledCommandEventForm extends React.Component<Props, State> {
                   attributeOptionBuilder: new SelectionOptionBuilder(attributes)
                 });
               })
-              .catch(reason => Notification.open(reason));
+                .catch(reason => {
+                  if (reason) {
+                    Notification.open(reason);
+                  }
+                });
+            }
           } else {
             this.eventFormGroupModel.setValue({
               componentName: '',
@@ -170,10 +200,20 @@ export class ScheduledCommandEventForm extends React.Component<Props, State> {
           label='Component'
           selectionOptionBuilder={this.state.componentOptionBuilder}
           formControlModel={this.selectedComponentFormControl} />
-        <Select
-          label='Attribute'
-          selectionOptionBuilder={this.state.attributeOptionBuilder}
-          formControlModel={this.eventFormGroupModel.findControl('attribute')} />
+        {
+          this.state.selectedComponentType !== 'Regulator'
+            ? (
+              <Select
+                optional
+                label='Attribute'
+                selectionOptionBuilder={this.state.attributeOptionBuilder}
+                formControlModel={this.eventFormGroupModel.findControl('attribute')} />
+            ) : (
+              <Input
+                label='Attribute'
+                formControlModel={this.eventFormGroupModel.findControl('attribute')} />
+            )
+        }
         <Input
           label='Reverse difference value'
           formControlModel={this.eventFormGroupModel.findControl('reverseDifferenceValue')}
@@ -203,13 +243,9 @@ export class ScheduledCommandEventForm extends React.Component<Props, State> {
   }
 
   createNewEvent() {
-    const formValue = this.eventFormGroupModel.getValue();
-    this.props.onAddEvent(formValue);
+    this.props.onAddEvent(this.eventFormGroupModel.getValue());
     this.selectedComponentFormControl.reset();
     this.eventFormGroupModel.reset();
-    this.setState({
-      componentOptionBuilder: SelectionOptionBuilder.defaultBuilder()
-    });
   }
 
 }

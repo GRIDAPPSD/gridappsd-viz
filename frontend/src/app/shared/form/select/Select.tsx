@@ -12,6 +12,7 @@ import { fuzzySearch } from '@shared/misc';
 import { SelectionOptionBuilder } from './SelectionOptionBuilder';
 import { FormControlModel } from '../models/FormControlModel';
 import { Dialog } from '@shared/overlay/dialog';
+import { Validators } from '../validation';
 
 import './Select.light.scss';
 import './Select.dark.scss';
@@ -61,16 +62,6 @@ export class Select<T, E extends boolean> extends React.Component<Props<T, E>, S
 
     this._defaultLabel = this.state.currentLabel;
 
-    if (props.optional !== true) {
-      props.formControlModel.addValidator(control => {
-        const value = control.getValue() as T | T[] | string;
-        return {
-          isValid: !Array.isArray(value) ? value !== null && value !== undefined && value !== '' : value.length > 0,
-          errorMessage: 'Please select an option'
-        };
-      });
-    }
-
     this.closeOptionList = this.closeOptionList.bind(this);
     this.onChange = this.onChange.bind(this);
     this.onOpen = this.onOpen.bind(this);
@@ -89,6 +80,7 @@ export class Select<T, E extends boolean> extends React.Component<Props<T, E>, S
     if (this.props.selectionOptionBuilder.numberOfOptions() === 0) {
       this.props.formControlModel.disable();
     }
+    this._addValidatorForNonOptionalSelect();
   }
 
   private _reset() {
@@ -148,11 +140,20 @@ export class Select<T, E extends boolean> extends React.Component<Props<T, E>, S
     this.props.formControlModel.setValue(value as any);
   }
 
+  private _addValidatorForNonOptionalSelect() {
+    if (this.props.optional !== true) {
+      this.props.formControlModel.addValidator(Validators.checkNotEmpty('', 'Please select an option'));
+    }
+  }
+
   componentDidUpdate(prevProps: Props<T, E>) {
     if (this.props.selectionOptionBuilder !== prevProps.selectionOptionBuilder) {
       this.props.formControlModel.reset();
       this._firstPage = [];
       this._selectDefaultSelectedOptions();
+    }
+    if (this.props.formControlModel !== prevProps.formControlModel) {
+      this._addValidatorForNonOptionalSelect();
     }
   }
 
