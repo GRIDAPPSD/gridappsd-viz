@@ -1,4 +1,4 @@
-import { CommOutageEvent, FaultEvent, CommandEvent } from '@shared/test-manager';
+import { CommOutageEvent, FaultEvent, ScheduledCommandEvent } from '@shared/test-manager';
 import { Application } from '@shared/Application';
 import { Service } from '@shared/Service';
 import { ModelDictionary, ModelDictionaryComponent } from '@shared/topology';
@@ -10,9 +10,9 @@ import { TimeZone } from '@shared/DateTimeService';
 export interface ApplicationState {
   simulationId: string;
   faultMRIDs: string[];
-  outageEvents: CommOutageEvent[];
+  commOutageEvents: CommOutageEvent[];
   faultEvents: FaultEvent[];
-  commandEvents: CommandEvent[];
+  scheduledCommandEvents: ScheduledCommandEvent[];
   applications: Application[];
   services: Service[];
   modelDictionary: ModelDictionary;
