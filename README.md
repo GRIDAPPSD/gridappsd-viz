@@ -23,3 +23,7 @@ Make sure that NodeJS is installed ([https://nodejs.org/en/](https://nodejs.org/
 - `npm install`
 - `npm run build`
 - `npm start`
+
+# Running the platform
+- [Using GridAPPS-D](https://gridappsd.readthedocs.io/en/master/using_gridappsd/index.html)
+- [Using the platform remotely](https://github.com/GRIDAPPSD/gridappsd-docker/blob/main/README.md)
