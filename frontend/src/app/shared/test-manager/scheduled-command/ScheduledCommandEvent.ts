@@ -1,8 +1,11 @@
+import { Phase } from '../Phase';
+
 export interface ScheduledCommandEvent {
   tag: string;
   eventType: 'ScheduledCommandEvent';
-  componentName: string;
+  componentName: string | string[];
   mRID: string | string[];
+  phases: Phase[];
   attribute: string;
   forwardDifferenceValue: number;
   reverseDifferenceValue: number;

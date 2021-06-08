@@ -399,11 +399,11 @@ export class SimulationConfigurationEditor extends React.Component<Props, State>
       message: {
         // eslint-disable-next-line camelcase
         forward_differences: Array.isArray(scheduledCommandEvent.mRID)
-          ? scheduledCommandEvent.mRID.map(mrid => ({
-            object: mrid,
+          ? unique(scheduledCommandEvent.phases.map(e => ({
+            object: scheduledCommandEvent.mRID[e.phaseIndex],
             attribute: scheduledCommandEvent.attribute,
             value: scheduledCommandEvent.forwardDifferenceValue
-          }))
+          })).filter(e => e.object !== undefined))
           : [{
             object: scheduledCommandEvent.mRID,
             attribute: scheduledCommandEvent.attribute,
@@ -411,11 +411,11 @@ export class SimulationConfigurationEditor extends React.Component<Props, State>
           }],
         // eslint-disable-next-line camelcase
         reverse_differences: Array.isArray(scheduledCommandEvent.mRID)
-          ? scheduledCommandEvent.mRID.map(mrid => ({
-            object: mrid,
+          ? unique(scheduledCommandEvent.phases.map(e => ({
+            object: scheduledCommandEvent.mRID[e.phaseIndex],
             attribute: scheduledCommandEvent.attribute,
-            value: scheduledCommandEvent.reverseDifferenceValue
-          }))
+            value: scheduledCommandEvent.forwardDifferenceValue
+          })).filter(e => e.object !== undefined))
           : [{
             object: scheduledCommandEvent.mRID,
             attribute: scheduledCommandEvent.attribute,

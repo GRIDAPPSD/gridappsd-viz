@@ -10,13 +10,14 @@ import {
 } from '@shared/topology/model-dictionary';
 import { SCHEDULED_COMMAND_EVENT_ATTRIBUTES } from '../../../models/scheduled-command-event-attribute';
 import { Select, Input, SelectionOptionBuilder, FormGroupModel, FormControlModel } from '@shared/form';
-import { ScheduledCommandEvent } from '@shared/test-manager';
+import { ScheduledCommandEvent, Phase } from '@shared/test-manager';
 import { Validators } from '@shared/form/validation';
 // import { ScheduledCommandEventFormService } from '../../../services/ScheduledCommandEventFormService';
 // import { Notification } from '@shared/overlay/notification';
 
 import './ScheduledCommandEventForm.light.scss';
 import './ScheduledCommandEventForm.dark.scss';
+import { unique } from '@shared/misc';
 
 interface Props {
   startDateTime: number;
@@ -28,15 +29,16 @@ interface Props {
 
 interface State {
   componentTypeOptionBuilder: SelectionOptionBuilder<{ id: string; label: string }>;
-  componentOptionBuilder: SelectionOptionBuilder<ModelDictionaryRegulator | ModelDictionaryCapacitor | ModelDictionarySwitch>;
+  componentOptionBuilder: SelectionOptionBuilder<ModelDictionaryComponent | ModelDictionaryRegulator | ModelDictionaryCapacitor | ModelDictionarySwitch>;
   attributeOptionBuilder: SelectionOptionBuilder<string>;
+  phaseOptionBuilder: SelectionOptionBuilder<Phase>;
   selectedComponentType: string;
 }
 
 export class ScheduledCommandEventForm extends React.Component<Props, State> {
 
   readonly selectedComponenTypeFormControl = new FormControlModel<{ id: string; label: string }>(null);
-  readonly selectedComponentFormControl: FormControlModel<ModelDictionaryRegulator | ModelDictionaryCapacitor | ModelDictionarySwitch>;
+  readonly selectedComponentFormControl: FormControlModel<ModelDictionaryComponent | ModelDictionaryRegulator | ModelDictionaryCapacitor | ModelDictionarySwitch>;
   readonly eventFormGroupModel: FormGroupModel<ScheduledCommandEvent>;
 
   // private readonly _formService = ScheduledCommandEventFormService.getInstance();
@@ -63,6 +65,7 @@ export class ScheduledCommandEventForm extends React.Component<Props, State> {
       ),
       componentOptionBuilder: SelectionOptionBuilder.defaultBuilder(),
       attributeOptionBuilder: SelectionOptionBuilder.defaultBuilder(),
+      phaseOptionBuilder: SelectionOptionBuilder.defaultBuilder(),
       selectedComponentType: ''
     };
 
@@ -71,6 +74,7 @@ export class ScheduledCommandEventForm extends React.Component<Props, State> {
     this.eventFormGroupModel = this._createFormGroupModelForScheduledCommandEvent();
     this.eventFormGroupModel.findControl('componentName').dependsOn(this.selectedComponentFormControl);
     this.eventFormGroupModel.findControl('attribute').dependsOn(this.selectedComponentFormControl);
+    this.eventFormGroupModel.findControl('phases').dependsOn(this.selectedComponentFormControl);
 
     this.createNewEvent = this.createNewEvent.bind(this);
   }
@@ -84,6 +88,7 @@ export class ScheduledCommandEventForm extends React.Component<Props, State> {
       forwardDifferenceValue: new FormControlModel(0, [Validators.checkNotEmpty('Value'), Validators.checkValidNumber('Value')]),
       reverseDifferenceValue: new FormControlModel(0, [Validators.checkNotEmpty('Value'), Validators.checkValidNumber('Value')]),
       mRID: null,
+      phases: new FormControlModel([]),
       startDateTime: new FormControlModel(
         this.props.startDateTime,
         [Validators.checkNotEmpty('Start date time'), Validators.checkValidDateTime('Start date time')]
@@ -122,16 +127,18 @@ export class ScheduledCommandEventForm extends React.Component<Props, State> {
             this.setState({
               componentOptionBuilder: new SelectionOptionBuilder(
                 this.props.modelDictionary[selectedType.id] || [],
-                e => 'name' in e ? e.name : e.bankName
+                e => `${'name' in e ? e.name : e.bankName} (${'phases' in e ? e.phases : e.bankPhases})`
               ),
               attributeOptionBuilder: new SelectionOptionBuilder(
                 SCHEDULED_COMMAND_EVENT_ATTRIBUTES[selectedType.id] || []
               ),
+              phaseOptionBuilder: SelectionOptionBuilder.defaultBuilder(),
               selectedComponentType: selectedType.label
             });
           } else {
             this.setState({
               componentOptionBuilder: SelectionOptionBuilder.defaultBuilder(),
+              phaseOptionBuilder: SelectionOptionBuilder.defaultBuilder(),
               selectedComponentType: ''
             });
           }
@@ -144,11 +151,21 @@ export class ScheduledCommandEventForm extends React.Component<Props, State> {
       .subscribe({
         next: selectedComponent => {
           if (selectedComponent) {
+            this.setState({
+              phaseOptionBuilder: new SelectionOptionBuilder(
+                unique(this._normalizePhases('phases' in selectedComponent ? selectedComponent.phases : selectedComponent.bankPhases))
+                  .sort((a, b) => a.localeCompare(b))
+                  .map((phase, i) => ({ phaseLabel: phase, phaseIndex: i })),
+                phase => phase.phaseLabel
+              )
+            });
             const componentName = 'name' in selectedComponent ? selectedComponent.name : selectedComponent.bankName;
 
             this.eventFormGroupModel.setValue({
               componentName,
-              mRID: selectedComponent.mRID
+              mRID: 'conductingEquipmentMRIDs' in selectedComponent
+                ? selectedComponent.conductingEquipmentMRIDs
+                : selectedComponent.mRID
             });
             /* if (this.state.selectedComponentType !== 'Regulator') {
                this._formService.fetchAttributes(
@@ -175,6 +192,9 @@ export class ScheduledCommandEventForm extends React.Component<Props, State> {
                  });
              }*/
           } else {
+            this.setState({
+              phaseOptionBuilder: SelectionOptionBuilder.defaultBuilder()
+            });
             this.eventFormGroupModel.setValue({
               componentName: '',
               mRID: ''
@@ -185,6 +205,15 @@ export class ScheduledCommandEventForm extends React.Component<Props, State> {
           }
         }
       });
+  }
+
+  private _normalizePhases(phases: string | string[]) {
+    if (Array.isArray(phases)) {
+      return phases;
+    }
+    // If phases is a string containing either A or B or C,
+    // then this string needs to be split up
+    return /^[abc]+$/i.test(phases) ? [...new Set(phases)] : [phases];
   }
 
   componentWillUnmount() {
@@ -204,6 +233,11 @@ export class ScheduledCommandEventForm extends React.Component<Props, State> {
           label='Component'
           selectionOptionBuilder={this.state.componentOptionBuilder}
           formControlModel={this.selectedComponentFormControl} />
+        <Select
+          label='Phases'
+          multiple
+          selectionOptionBuilder={this.state.phaseOptionBuilder}
+          formControlModel={this.eventFormGroupModel.findControl('phases')} />
         <Select
           optional
           label='Attribute'
@@ -241,6 +275,10 @@ export class ScheduledCommandEventForm extends React.Component<Props, State> {
     this.props.onAddEvent(this.eventFormGroupModel.getValue());
     this.selectedComponentFormControl.reset();
     this.eventFormGroupModel.reset();
+    this.setState({
+      componentOptionBuilder: SelectionOptionBuilder.defaultBuilder(),
+      phaseOptionBuilder: SelectionOptionBuilder.defaultBuilder()
+    });
   }
 
 }
