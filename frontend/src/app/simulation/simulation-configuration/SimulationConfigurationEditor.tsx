@@ -47,6 +47,7 @@ interface State {
   lineName: string;
   modelDictionaryComponents: ModelDictionaryComponent[];
   services: Service[];
+  simulators: string[];
 }
 
 export class SimulationConfigurationEditor extends React.Component<Props, State> {
@@ -82,7 +83,8 @@ export class SimulationConfigurationEditor extends React.Component<Props, State>
       disableSubmitButton: true,
       lineName: props.initialConfig.power_system_config.Line_name,
       modelDictionaryComponents: [],
-      services: []
+      services: [],
+      simulators: ['GridLAB-D', 'OpenDSS']
     };
 
     this.currentConfig = this._cloneConfigObject(props.initialConfig);
@@ -214,7 +216,8 @@ export class SimulationConfigurationEditor extends React.Component<Props, State>
               <Tab label='Simulation Configuration'>
                 <SimulationConfigurationTab
                   parentFormGroupModel={this.formGroupModel.findControl('simulationConfig')}
-                  simulationConfig={this.currentConfig.simulation_config} />
+                  simulationConfig={this.currentConfig.simulation_config}
+                  simulators={this.state.simulators} />
               </Tab>
               <Tab label='Application Configuration'>
                 <ApplicationConfigurationTab
