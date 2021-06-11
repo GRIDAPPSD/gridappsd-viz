@@ -84,7 +84,7 @@ export class SimulationConfigurationEditor extends React.Component<Props, State>
       lineName: props.initialConfig.power_system_config.Line_name,
       modelDictionaryComponents: [],
       services: [],
-      simulators: ['GridLAB-D', 'OpenDSS']
+      simulators: ['GridLAB-D', 'OCHRE']
     };
 
     this.currentConfig = this._cloneConfigObject(props.initialConfig);
