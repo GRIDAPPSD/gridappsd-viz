@@ -151,22 +151,32 @@ export class ScheduledCommandEventForm extends React.Component<Props, State> {
       .subscribe({
         next: selectedComponent => {
           if (selectedComponent) {
-            this.setState({
-              phaseOptionBuilder: new SelectionOptionBuilder(
-                unique(this._normalizePhases('phases' in selectedComponent ? selectedComponent.phases : selectedComponent.bankPhases))
-                  .sort((a, b) => a.localeCompare(b))
-                  .map((phase, i) => ({ phaseLabel: phase, phaseIndex: i })),
-                phase => phase.phaseLabel
-              )
-            });
-            const componentName = 'name' in selectedComponent ? selectedComponent.name : selectedComponent.bankName;
+            const jj = 'conductingEquipmentMRIDs' in selectedComponent
+              ? selectedComponent.conductingEquipmentMRIDs
+              : selectedComponent.mRID;
 
+            if (Array.isArray(jj) && (jj.length > 1)) {
+              this.setState({
+                phaseOptionBuilder: new SelectionOptionBuilder(
+                  unique(this._normalizePhases('phases' in selectedComponent ? selectedComponent.phases : selectedComponent.bankPhases))
+                    .sort((a, b) => a.localeCompare(b))
+                    .map((phase, i) => ({ phaseLabel: phase, phaseIndex: i })),
+                  phase => phase.phaseLabel
+                )
+              });
+            } else {
+              this.setState({
+                phaseOptionBuilder: SelectionOptionBuilder.defaultBuilder()
+              });
+            }
+            const componentName = 'name' in selectedComponent ? selectedComponent.name : selectedComponent.bankName;
             this.eventFormGroupModel.setValue({
               componentName,
               mRID: 'conductingEquipmentMRIDs' in selectedComponent
                 ? selectedComponent.conductingEquipmentMRIDs
                 : selectedComponent.mRID
             });
+
             /* if (this.state.selectedComponentType !== 'Regulator') {
                this._formService.fetchAttributes(
                  typeof selectedComponent.mRID === 'string' ? selectedComponent.mRID : selectedComponent.mRID[0],
