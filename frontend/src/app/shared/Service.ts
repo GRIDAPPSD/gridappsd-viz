@@ -16,6 +16,7 @@ export interface Service {
   user_input: {
     [inputName: string]: ServiceConfigUserInputSpec;
   };
+  category: string;
 }
 
 export interface ServiceConfigUserInputSpec {
