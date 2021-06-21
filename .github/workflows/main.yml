@@ -7,6 +7,15 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
+      - name: Checking environment
+        env:
+          DOCKER_IMAGE_NAME: ${{ secrets.DOCKER_IMAGE_NAME }}
+        run: |
+          if [ "x${{ env.DOCKER_IMAGE_NAME }}" == "x" ]; then
+            echo "Error: missing DOCKER_IMAGE_NAME"
+            exit 1
+          fi
+
       - name: Log in to docker
         run: |
           if [ -n "${{ secrets.DOCKER_USERNAME }}" -a -n "${{ secrets.DOCKER_TOKEN }}" ]; then
