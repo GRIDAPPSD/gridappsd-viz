@@ -8,8 +8,8 @@ services:
 
 # prepare the machine before any code
 # installation scripts
-before_install:
-  - './.travis/main.sh'
-  
-script:
-  - './.travis/build-docker.sh'
+#before_install:
+#  - './.travis/main.sh'
+#  
+#script:
+#  - './.travis/build-docker.sh'
