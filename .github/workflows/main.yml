@@ -4,9 +4,6 @@ jobs:
   push:
     runs-on: ubuntu-latest
     name: Build and push the docker container
-    env:
-      DOCKER_IMAGE_NAME: ${{ secrets.DOCKER_IMAGE_NAME }}
-    if: env.DOCKER_IMAGE_NAME != null
     steps:
       - uses: actions/checkout@v2
 
@@ -25,6 +22,9 @@ jobs:
           fi
           
       - name: Build the image
+        env:
+          DOCKER_IMAGE_NAME: ${{ secrets.DOCKER_IMAGE_NAME }}
+        if: env.DOCKER_IMAGE_NAME != null
         run: |
           TAG="${GITHUB_REF##*/}"
           ORG=`echo "${{ secrets.DOCKER_PROJECT }}" | tr '[:upper:]' '[:lower:]'`
@@ -44,6 +44,9 @@ jobs:
           fi
 
       - name: Push the image
+        env:
+          DOCKER_IMAGE_NAME: ${{ secrets.DOCKER_IMAGE_NAME }}
+        if: env.DOCKER_IMAGE_NAME != null
         run: |
           TAG="${GITHUB_REF##*/}"
           ORG=`echo "${{ secrets.DOCKER_PROJECT }}" | tr '[:upper:]' '[:lower:]'`
