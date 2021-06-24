@@ -395,38 +395,76 @@ export class SimulationConfigurationEditor extends React.Component<Props, State>
   }
 
   private _transformScheduledCommandEventForSubmission(scheduledCommandEvent: ScheduledCommandEvent) {
-    return {
-      message: {
+    
+    if (scheduledCommandEvent.phases.length) {
+      return {
+        message: {
+          // eslint-disable-next-line camelcase
+          forward_differences: Array.isArray(scheduledCommandEvent.mRID) && (scheduledCommandEvent.mRID.length > 1)
+            ? unique(scheduledCommandEvent.phases.map(e => ({
+              object: scheduledCommandEvent.mRID[e.phaseIndex],
+              attribute: scheduledCommandEvent.attribute,
+              value: scheduledCommandEvent.forwardDifferenceValue
+            })).filter(e => e.object !== undefined))
+            : [{
+              object: scheduledCommandEvent.mRID[0],
+              attribute: scheduledCommandEvent.attribute,
+              value: scheduledCommandEvent.forwardDifferenceValue
+            }],
+
+          // eslint-disable-next-line camelcase
+          reverse_differences: Array.isArray(scheduledCommandEvent.mRID) && (scheduledCommandEvent.mRID.length > 1)
+            ? unique(scheduledCommandEvent.phases.map(e => ({
+              object: scheduledCommandEvent.mRID[e.phaseIndex],
+              attribute: scheduledCommandEvent.attribute,
+              value: scheduledCommandEvent.forwardDifferenceValue
+            })).filter(e => e.object !== undefined))
+            : [{
+              object: scheduledCommandEvent.mRID[0],
+              attribute: scheduledCommandEvent.attribute,
+              value: scheduledCommandEvent.reverseDifferenceValue
+            }]
+        },
         // eslint-disable-next-line camelcase
-        forward_differences: Array.isArray(scheduledCommandEvent.mRID)
-          ? unique(scheduledCommandEvent.phases.map(e => ({
-            object: scheduledCommandEvent.mRID[e.phaseIndex],
-            attribute: scheduledCommandEvent.attribute,
-            value: scheduledCommandEvent.forwardDifferenceValue
-          })).filter(e => e.object !== undefined))
-          : [{
-            object: scheduledCommandEvent.mRID,
-            attribute: scheduledCommandEvent.attribute,
-            value: scheduledCommandEvent.forwardDifferenceValue
-          }],
+        event_type: 'ScheduledCommandEvent',
+        occuredDateTime: scheduledCommandEvent.startDateTime,
+        stopDateTime: scheduledCommandEvent.stopDateTime
+      };
+    } else {
+      return {
+        message: {
+          // eslint-disable-next-line camelcase
+          forward_differences: Array.isArray(scheduledCommandEvent.mRID)
+            ? scheduledCommandEvent.mRID.map(mrid => ({
+              object: mrid,
+              attribute: scheduledCommandEvent.attribute,
+              value: scheduledCommandEvent.forwardDifferenceValue
+            }))
+            : [{
+              object: scheduledCommandEvent.mRID,
+              attribute: scheduledCommandEvent.attribute,
+              value: scheduledCommandEvent.forwardDifferenceValue
+            }],
+
+          // eslint-disable-next-line camelcase
+          reverse_differences: Array.isArray(scheduledCommandEvent.mRID) 
+            ? scheduledCommandEvent.mRID.map(mrid => ({
+              object: mrid,
+              attribute: scheduledCommandEvent.attribute,
+              value: scheduledCommandEvent.forwardDifferenceValue
+            }))
+            : [{
+              object: scheduledCommandEvent.mRID,
+              attribute: scheduledCommandEvent.attribute,
+              value: scheduledCommandEvent.reverseDifferenceValue
+            }]
+        },
         // eslint-disable-next-line camelcase
-        reverse_differences: Array.isArray(scheduledCommandEvent.mRID)
-          ? unique(scheduledCommandEvent.phases.map(e => ({
-            object: scheduledCommandEvent.mRID[e.phaseIndex],
-            attribute: scheduledCommandEvent.attribute,
-            value: scheduledCommandEvent.forwardDifferenceValue
-          })).filter(e => e.object !== undefined))
-          : [{
-            object: scheduledCommandEvent.mRID,
-            attribute: scheduledCommandEvent.attribute,
-            value: scheduledCommandEvent.reverseDifferenceValue
-          }]
-      },
-      // eslint-disable-next-line camelcase
-      event_type: 'ScheduledCommandEvent',
-      occuredDateTime: scheduledCommandEvent.startDateTime,
-      stopDateTime: scheduledCommandEvent.stopDateTime
-    };
+        event_type: 'ScheduledCommandEvent',
+        occuredDateTime: scheduledCommandEvent.startDateTime,
+        stopDateTime: scheduledCommandEvent.stopDateTime
+      };
+    }
   }
 
   private _populateServiceConfigSection() {

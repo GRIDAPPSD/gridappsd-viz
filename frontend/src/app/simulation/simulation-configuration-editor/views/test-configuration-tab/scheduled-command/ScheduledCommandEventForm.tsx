@@ -154,8 +154,7 @@ export class ScheduledCommandEventForm extends React.Component<Props, State> {
             const jj = 'conductingEquipmentMRIDs' in selectedComponent
               ? selectedComponent.conductingEquipmentMRIDs
               : selectedComponent.mRID;
-            
-            // User can select the phase if there is mrid corresponding to each pahse 
+              // User can select the phase if there is mrid corresponding to each pahse 
             if (Array.isArray(jj) && (jj.length > 1)) {
               this.setState({
                 phaseOptionBuilder: new SelectionOptionBuilder(
@@ -165,8 +164,8 @@ export class ScheduledCommandEventForm extends React.Component<Props, State> {
                   phase => phase.phaseLabel
                 )
               });
-            // Phase selection is disabled if there is only one mrid for all the phases
-            // each phase cannot be controlled individually as the component only have one mrid for all the phases
+              // Phase selection is disabled if there is only one mrid for all the phases
+              // each phase cannot be controlled individually as the component only have one mrid for all the phases
             } else {
               this.setState({
                 phaseOptionBuilder: SelectionOptionBuilder.defaultBuilder()
@@ -247,6 +246,7 @@ export class ScheduledCommandEventForm extends React.Component<Props, State> {
           selectionOptionBuilder={this.state.componentOptionBuilder}
           formControlModel={this.selectedComponentFormControl} />
         <Select
+          optional
           label='Phases'
           multiple
           selectionOptionBuilder={this.state.phaseOptionBuilder}
@@ -288,6 +288,7 @@ export class ScheduledCommandEventForm extends React.Component<Props, State> {
     this.props.onAddEvent(this.eventFormGroupModel.getValue());
     this.selectedComponentFormControl.reset();
     this.eventFormGroupModel.reset();
+    this.selectedComponenTypeFormControl.reset();
     this.setState({
       componentOptionBuilder: SelectionOptionBuilder.defaultBuilder(),
       phaseOptionBuilder: SelectionOptionBuilder.defaultBuilder()

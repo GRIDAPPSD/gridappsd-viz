@@ -20,6 +20,7 @@ export function ScheduledCommandEventTable(props: Props) {
         <tr>
           <th>Action</th>
           <th>Component name</th>
+          <th>Phase</th>
           <th>Attribute</th>
           <th>Reverse difference value</th>
           <th>Forward difference value</th>
@@ -40,6 +41,9 @@ export function ScheduledCommandEventTable(props: Props) {
                 <div>
                   {event.componentName}
                 </div>
+              </td>
+              <td>
+                <div>{event.phases.map(phase => phase.phaseLabel).join(', ')}</div>
               </td>
               <td>
                 <div>
