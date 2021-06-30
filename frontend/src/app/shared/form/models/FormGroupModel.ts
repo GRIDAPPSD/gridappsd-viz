@@ -2,6 +2,20 @@
 import { AbstractControlModel } from './AbstractControlModel';
 import { FormControlModel } from './FormControlModel';
 
+/**
+ * This class represents a form group (form section) where there can be
+ * one or more form fields, for example, a form section for a login screen
+ * can be described using this class as followed:
+ *
+ * ```
+ *    new FormGroupModel<{username: string; password: string;}>({
+ *      username: new FormControlModel('', [Validators.checkNotEmpty('Username')]),
+ *      password: new FormControlModel('', [Validators.checkNotEmpty('Password')])
+ *    });
+ * ```
+ * <T> represents the type of data that form group describes, in the above
+ * example of a login screen, <T> is `{username: string; password: string;}`
+ */
 export class FormGroupModel<T> extends AbstractControlModel<T> {
 
   private readonly _invalidFormControls = new Set<AbstractControlModel<any>>();
@@ -108,6 +122,7 @@ export class FormGroupModel<T> extends AbstractControlModel<T> {
     const existingControl = this._controls.get(controlName);
     if (existingControl) {
       existingControl.cleanup();
+      this._invalidFormControls.delete(existingControl);
     }
     this._bindToControl(controlName, control);
     if (control.isInvalid()) {

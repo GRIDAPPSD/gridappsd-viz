@@ -16,22 +16,22 @@ const dateTimeService = DateTimeService.getInstance();
 
 export class Validators {
 
-  static checkNotEmpty(subjectDisplayName: string): Validator {
+  static checkNotEmpty(controlLabel: string, errorMessage = `${controlLabel} must not be empty`): Validator {
     return control => {
       const value = control.getValue();
       return {
         isValid: value !== null && value !== undefined && String(value).trim() !== '',
-        errorMessage: `${subjectDisplayName} must not be empty`
+        errorMessage
       };
     };
   }
 
-  static checkValidJSON(subjectDisplayName: string): Validator {
+  static checkValidJSON(controlLabel: string, errorMessage = `${controlLabel} is not a valid JSON`): Validator {
     return (control: FormControlModel<string> | FormControlModel<object>) => {
       const value = control.getValue();
       if (value === null || value === undefined) {
         return {
-          errorMessage: `${subjectDisplayName} is not a valid JSON`,
+          errorMessage,
           isValid: false
         };
       }
@@ -49,15 +49,15 @@ export class Validators {
         };
       } catch {
         return {
-          errorMessage: `${subjectDisplayName} is not a valid JSON`,
+          errorMessage,
           isValid: false
         };
       }
     };
   }
 
-  static checkValidNumber(subjectDisplayName: string): Validator {
-    return Validators._checkPattern(`${subjectDisplayName} must be a number`, numberRegex);
+  static checkValidNumber(controlLabel: string, errorMessage = `${controlLabel} must be a number`): Validator {
+    return Validators._checkPattern(errorMessage, numberRegex);
   }
 
   private static _checkPattern(errorMessage: string, pattern: RegExp): Validator {
@@ -67,34 +67,34 @@ export class Validators {
     });
   }
 
-  static checkValidDateTime(subjectDisplayName: string): Validator {
+  static checkValidDateTime(controlLabel: string, errorMessage = `${controlLabel} must have format YYYY-MM-DD HH:MM:SS`): Validator {
     return (control: FormControlModel<number> | FormControlModel<string> | FormControlModel<Date>) => ({
       isValid: dateTimePattern.test(dateTimeService.format(control.getValue())),
-      errorMessage: `${subjectDisplayName} must have format YYYY-MM-DD HH:MM:SS`
+      errorMessage
     });
   }
 
-  static checkBetween(subjectDisplayName: string, min: number, max: number): Validator {
+  static checkBetween(controlLabel: string, min: number, max: number, errorMessage = `${controlLabel} must be between ${min} and ${max}`): Validator {
     return (control: FormControlModel<number>) => {
       const value = control.getValue();
       return {
         isValid: min <= value && value <= max,
-        errorMessage: `${subjectDisplayName} must be between ${min} and ${max}`
+        errorMessage
       };
     };
   }
 
-  static checkMin(subjectDisplayName: string, min: number): Validator {
+  static checkMin(controlLabel: string, min: number, errorMessage = `${controlLabel} must be greater than or equal to ${min}`): Validator {
     return (control: FormControlModel<number>) => ({
       isValid: control.getValue() >= min,
-      errorMessage: `${subjectDisplayName} must be greater than or equal to ${min}`
+      errorMessage
     });
   }
 
-  static checkMax(subjectDisplayName: string, max: number): Validator {
+  static checkMax(controlLabel: string, max: number, errorMessage = `${controlLabel} must be less than or equal to ${max}`): Validator {
     return (control: FormControlModel<number>) => ({
       isValid: control.getValue() <= max,
-      errorMessage: `${subjectDisplayName} must be less than or equal to ${max}`
+      errorMessage
     });
   }
 

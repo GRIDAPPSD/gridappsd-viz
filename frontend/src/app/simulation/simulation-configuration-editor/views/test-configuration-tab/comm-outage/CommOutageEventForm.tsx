@@ -22,22 +22,6 @@ import './CommOutageEventForm.dark.scss';
 
 let outputEquipmentTypeOptionBuilder: SelectionOptionBuilder<string>;
 let previousModelDictionary: ModelDictionary;
-const inputEquipmentTypeOptionBuilder = new SelectionOptionBuilder(
-  [
-    { id: 'batteries', label: 'Battery' },
-    { id: 'breakers', label: 'Breaker' },
-    { id: 'capacitors', label: 'Capacitor' },
-    { id: 'disconnectors', label: 'Disconnector' },
-    { id: 'fuses', label: 'Fuse' },
-    { id: 'reclosers', label: 'Recloser' },
-    { id: 'regulators', label: 'Regulator' },
-    { id: 'sectionalisers', label: 'Sectionaliser' },
-    { id: 'solarpanels', label: 'Solar Panel' },
-    { id: 'switches', label: 'Switch' },
-    { id: 'synchronousmachines', label: 'Synchronous Machine' }
-  ],
-  type => type.label
-);
 
 interface Props {
   modelDictionary: ModelDictionary;
@@ -81,7 +65,22 @@ export class CommOutageEventForm extends React.Component<Props, State> {
     }
 
     this.state = {
-      inputEquipmentTypeOptionBuilder: inputEquipmentTypeOptionBuilder,
+      inputEquipmentTypeOptionBuilder: new SelectionOptionBuilder(
+        [
+          { id: 'batteries', label: 'Battery' },
+          { id: 'breakers', label: 'Breaker' },
+          { id: 'capacitors', label: 'Capacitor' },
+          { id: 'disconnectors', label: 'Disconnector' },
+          { id: 'fuses', label: 'Fuse' },
+          { id: 'reclosers', label: 'Recloser' },
+          { id: 'regulators', label: 'Regulator' },
+          { id: 'sectionalisers', label: 'Sectionaliser' },
+          { id: 'solarpanels', label: 'Solar Panel' },
+          { id: 'switches', label: 'Switch' },
+          { id: 'synchronousmachines', label: 'Synchronous Machine' }
+        ],
+        type => type.label
+      ),
       inputComponentOptionBuilder: SelectionOptionBuilder.defaultBuilder(),
       inputPhaseOptionBuilder: SelectionOptionBuilder.defaultBuilder(),
       inputAttributeOptionBuilder: SelectionOptionBuilder.defaultBuilder(),

@@ -8,6 +8,20 @@
         overflow: auto auto;
         width: 40%;
         box-sizing: border-box;
+
+        .radio-button-group {
+            margin-top: 0;
+
+            .form-control__label {
+                align-self: flex-start;
+                transform: translateY(10px);
+            }
+        }
+
+        .radio-button-group__radio-buttons {
+            flex-flow: column;
+            align-items: flex-start;
+        }
     }
 }
 

@@ -11,20 +11,21 @@ import { IconButton } from '@shared/buttons';
 import { FilePicker, FilePickerService } from '@shared/file-picker';
 import { Tooltip } from '@shared/tooltip';
 import { FaultEventSummaryTable } from './fault/FaultEventSummaryTable';
-import { CommOutageEvent, FaultEvent, CommandEvent } from '@shared/test-manager';
+import { CommOutageEvent, FaultEvent, ScheduledCommandEvent } from '@shared/test-manager';
 import { Validators, Validator } from '@shared/form/validation';
 import { download, DownloadType, generateUniqueId } from '@shared/misc';
-import { CommandEventSummaryTable } from './command/CommandEventSummaryTable';
+import { ScheduledCommandEventSummaryTable } from './scheduled-command/ScheduledCommandEventSummaryTable';
 import { DateTimeService } from '@shared/DateTimeService';
 import { TestConfigurationModel } from '../../models/TestConfigurationModel';
+import { ScheduledCommandEventForm } from './scheduled-command/ScheduledCommandEventForm';
 
 import './TestConfigurationTab.light.scss';
 import './TestConfigurationTab.dark.scss';
 
 const enum EventType {
-  OUTAGE,
+  COMM_OUTAGE,
   FAULT,
-  COMMAND
+  SCHEDULED_COMMAND
 }
 
 interface Props {
@@ -38,9 +39,9 @@ interface Props {
 interface State {
   selectedEventTypeToEdit: EventType;
   selectedEventTypeToView: EventType;
-  outageEvents: CommOutageEvent[];
+  commOutageEvents: CommOutageEvent[];
   faultEvents: FaultEvent[];
-  commandEvents: CommandEvent[];
+  scheduledCommandEvents: ScheduledCommandEvent[];
 }
 
 export class TestConfigurationTab extends React.Component<Props, State> {
@@ -58,9 +59,9 @@ export class TestConfigurationTab extends React.Component<Props, State> {
     this.state = {
       selectedEventTypeToEdit: null,
       selectedEventTypeToView: null,
-      outageEvents: [],
+      commOutageEvents: [],
       faultEvents: [],
-      commandEvents: []
+      scheduledCommandEvents: []
     };
 
     this.currentEventTagFormControlModel = new FormControlModel(
@@ -73,10 +74,12 @@ export class TestConfigurationTab extends React.Component<Props, State> {
     this.selectedEventTypeToEditFormControlModel = new FormControlModel<EventType>(null);
     this.selectedEventTypeToViewFormControlModel = new FormControlModel<EventType>(null);
 
-    this.addOutageEvent = this.addOutageEvent.bind(this);
+    this.addCommonOutageEvent = this.addCommonOutageEvent.bind(this);
     this.addFaultEvent = this.addFaultEvent.bind(this);
+    this.addScheduledCommandEvent = this.addScheduledCommandEvent.bind(this);
     this.deleteOutageEvent = this.deleteOutageEvent.bind(this);
     this.deleteFaultEvent = this.deleteFaultEvent.bind(this);
+    this.deleteScheduledCommandEvent = this.deleteScheduledCommandEvent.bind(this);
     this.showEventFilePicker = this.showEventFilePicker.bind(this);
     this.saveEventsIntoFile = this.saveEventsIntoFile.bind(this);
   }
@@ -85,7 +88,7 @@ export class TestConfigurationTab extends React.Component<Props, State> {
     return (control: FormControlModel<string>) => {
       const enteredEventTag = control.getValue();
       if (
-        this.state.outageEvents.find(e => e.tag === enteredEventTag) !== undefined
+        this.state.commOutageEvents.find(e => e.tag === enteredEventTag) !== undefined
         ||
         this.state.faultEvents.find(e => e.tag === enteredEventTag) !== undefined
       ) {
@@ -143,10 +146,13 @@ export class TestConfigurationTab extends React.Component<Props, State> {
             formControlModel={this.selectedEventTypeToEditFormControlModel}>
             <RadioButton
               label='CommOutage'
-              value={EventType.OUTAGE} />
+              value={EventType.COMM_OUTAGE} />
             <RadioButton
               label='Fault'
               value={EventType.FAULT} />
+            <RadioButton
+              label='ScheduledCommand'
+              value={EventType.SCHEDULED_COMMAND} />
           </RadioButtonGroup>
           <Tooltip
             content='Upload event file'
@@ -161,7 +167,7 @@ export class TestConfigurationTab extends React.Component<Props, State> {
           {this.showFormForSelectedEventType()}
         </FormGroup>
         {
-          (this.state.faultEvents.length > 0 || this.state.outageEvents.length > 0 || this.state.commandEvents.length > 0)
+          (this.state.faultEvents.length > 0 || this.state.commOutageEvents.length > 0 || this.state.scheduledCommandEvents.length > 0)
           &&
           <div className='test-configuration-tab__event-summary'>
             <RadioButtonGroup
@@ -171,16 +177,16 @@ export class TestConfigurationTab extends React.Component<Props, State> {
               formControlModel={this.selectedEventTypeToViewFormControlModel}>
               <RadioButton
                 label='CommOutage'
-                value={EventType.OUTAGE}
-                selected={this.state.selectedEventTypeToView === EventType.OUTAGE} />
+                value={EventType.COMM_OUTAGE}
+                selected={this.state.selectedEventTypeToView === EventType.COMM_OUTAGE} />
               <RadioButton
                 label='Fault'
                 value={EventType.FAULT}
                 selected={this.state.selectedEventTypeToView === EventType.FAULT} />
               <RadioButton
                 label='Command'
-                value={EventType.COMMAND}
-                selected={this.state.selectedEventTypeToView === EventType.COMMAND} />
+                value={EventType.SCHEDULED_COMMAND}
+                selected={this.state.selectedEventTypeToView === EventType.SCHEDULED_COMMAND} />
             </RadioButtonGroup>
             {this.showEventSummaryTable()}
           </div>
@@ -192,12 +198,12 @@ export class TestConfigurationTab extends React.Component<Props, State> {
 
   showEventFilePicker() {
     this._filePicker.open()
-      .readFileAsJson<{ outageEvents: CommOutageEvent[]; faultEvents: FaultEvent[]; commandEvents: CommandEvent[] }>()
+      .readFileAsJson<{ commOutageEvents: CommOutageEvent[]; faultEvents: FaultEvent[]; scheduledCommandEvents: ScheduledCommandEvent[] }>()
       /* File content should look like this
         {
-          "outageEvents": [...],
+          "commOutageEvents": [...],
           "faultEvents": [...],
-          "commandEvents": [...]
+          "scheduledCommandEvents": [...]
         }
       */
       .pipe(filter(content => Boolean(content)))
@@ -207,36 +213,34 @@ export class TestConfigurationTab extends React.Component<Props, State> {
             this.state.faultEvents.concat(content.faultEvents || [])
           ) as FaultEvent[];
 
-          const outageEvents = this._parseDateTimeStringsToEpochTimesWithSecondPrecision(
-            this.state.outageEvents.concat(content.outageEvents || [])
+          const commOutageEvents = this._parseDateTimeStringsToEpochTimesWithSecondPrecision(
+            this.state.commOutageEvents.concat(content.commOutageEvents || [])
           ) as CommOutageEvent[];
 
-          const commandEvents = this._parseDateTimeStringsToEpochTimesWithSecondPrecision(
-            this.state.commandEvents.concat(content.commandEvents || [])
-          ) as CommandEvent[];
+          const scheduledCommandEvents = this._parseDateTimeStringsToEpochTimesWithSecondPrecision(
+            this.state.scheduledCommandEvents.concat(content.scheduledCommandEvents || [])
+          ) as ScheduledCommandEvent[];
 
-          this.props.parentFormGroupModel.findControl('outageEvents').setValue(outageEvents);
+          this.props.parentFormGroupModel.findControl('commOutageEvents').setValue(commOutageEvents);
           this.props.parentFormGroupModel.findControl('faultEvents').setValue(faultEvents);
-          this.props.parentFormGroupModel.findControl('commandEvents').setValue(commandEvents);
+          this.props.parentFormGroupModel.findControl('scheduledCommandEvents').setValue(scheduledCommandEvents);
 
           this.setState({
             faultEvents,
-            outageEvents,
-            commandEvents
+            commOutageEvents: commOutageEvents,
+            scheduledCommandEvents: scheduledCommandEvents
           });
         }
       });
   }
 
-  private _parseDateTimeStringsToEpochTimesWithSecondPrecision(events: Array<FaultEvent | CommOutageEvent | CommandEvent>) {
+  private _parseDateTimeStringsToEpochTimesWithSecondPrecision(events: Array<FaultEvent | CommOutageEvent | ScheduledCommandEvent>) {
     for (const event of events) {
+      if (typeof event.startDateTime === 'string') {
+        event.startDateTime = this.dateTimeService.parse(event.startDateTime);
+      }
       if (typeof event.stopDateTime === 'string') {
         event.stopDateTime = this.dateTimeService.parse(event.stopDateTime);
-      }
-      if ('startDateTime' in event && typeof event.startDateTime === 'string') {
-        event.startDateTime = this.dateTimeService.parse(event.startDateTime);
-      } else if ('occuredDateTime' in event && typeof event.occuredDateTime === 'string') {
-        event.occuredDateTime = this.dateTimeService.parse(event.occuredDateTime);
       }
     }
     return events;
@@ -244,13 +248,13 @@ export class TestConfigurationTab extends React.Component<Props, State> {
 
   showFormForSelectedEventType() {
     switch (this.state.selectedEventTypeToEdit) {
-      case EventType.OUTAGE:
+      case EventType.COMM_OUTAGE:
         return (
           <CommOutageEventForm
             modelDictionary={this.props.modelDictionary}
             startDateTime={this.props.simulationStartDateTime}
             stopDateTime={this.props.simulationStopDateTime}
-            onAddEvent={this.addOutageEvent} />
+            onAddEvent={this.addCommonOutageEvent} />
         );
       case EventType.FAULT:
         return (
@@ -261,20 +265,29 @@ export class TestConfigurationTab extends React.Component<Props, State> {
             modelDictionaryComponents={this.props.modelDictionaryComponents}
             onAddEvent={this.addFaultEvent} />
         );
+      case EventType.SCHEDULED_COMMAND:
+        return (
+          <ScheduledCommandEventForm
+            modelDictionary={this.props.modelDictionary}
+            startDateTime={this.props.simulationStartDateTime}
+            stopDateTime={this.props.simulationStopDateTime}
+            modelDictionaryComponents={this.props.modelDictionaryComponents}
+            onAddEvent={this.addScheduledCommandEvent} />
+        );
       default:
         return null;
     }
   }
 
-  addOutageEvent(commOutageEvent: CommOutageEvent) {
+  addCommonOutageEvent(commOutageEvent: CommOutageEvent) {
     commOutageEvent.tag = this.currentEventTagFormControlModel.getValue();
-    const outageEvents = [...this.state.outageEvents, commOutageEvent];
-    this.selectedEventTypeToViewFormControlModel.setValue(EventType.OUTAGE);
+    const commOutageEvents = [...this.state.commOutageEvents, commOutageEvent];
+    this.selectedEventTypeToViewFormControlModel.setValue(EventType.COMM_OUTAGE);
     this.currentEventTagFormControlModel.setValue(generateUniqueId());
     this.setState({
-      outageEvents
+      commOutageEvents
     });
-    this.props.parentFormGroupModel.findControl('outageEvents').setValue(outageEvents);
+    this.props.parentFormGroupModel.findControl('commOutageEvents').setValue(commOutageEvents);
   }
 
   addFaultEvent(faultEvent: FaultEvent) {
@@ -288,12 +301,23 @@ export class TestConfigurationTab extends React.Component<Props, State> {
     this.props.parentFormGroupModel.findControl('faultEvents').setValue(faultEvents);
   }
 
+  addScheduledCommandEvent(scheduledCommandEvent: ScheduledCommandEvent) {
+    scheduledCommandEvent.tag = this.currentEventTagFormControlModel.getValue();
+    const scheduledCommandEvents = [...this.state.scheduledCommandEvents, scheduledCommandEvent];
+    this.selectedEventTypeToViewFormControlModel.setValue(EventType.SCHEDULED_COMMAND);
+    this.currentEventTagFormControlModel.setValue(generateUniqueId());
+    this.setState({
+      scheduledCommandEvents
+    });
+    this.props.parentFormGroupModel.findControl('scheduledCommandEvents').setValue(scheduledCommandEvents);
+  }
+
   showEventSummaryTable() {
     switch (this.state.selectedEventTypeToView) {
-      case EventType.OUTAGE:
+      case EventType.COMM_OUTAGE:
         return (
           <CommOutageEventSummaryTable
-            events={this.state.outageEvents}
+            events={this.state.commOutageEvents}
             onDeleteEvent={this.deleteOutageEvent} />
         );
       case EventType.FAULT:
@@ -302,9 +326,11 @@ export class TestConfigurationTab extends React.Component<Props, State> {
             events={this.state.faultEvents}
             onDeleteEvent={this.deleteFaultEvent} />
         );
-      case EventType.COMMAND:
+      case EventType.SCHEDULED_COMMAND:
         return (
-          <CommandEventSummaryTable events={this.state.commandEvents} />
+          <ScheduledCommandEventSummaryTable
+            events={this.state.scheduledCommandEvents}
+            onDeleteEvent={this.deleteScheduledCommandEvent} />
         );
       default:
         return null;
@@ -312,10 +338,10 @@ export class TestConfigurationTab extends React.Component<Props, State> {
   }
 
   deleteOutageEvent(index: number) {
-    const formArrayModel = this.props.parentFormGroupModel.findControl<'outageEvents', FormArrayModel<CommOutageEvent>>('outageEvents');
+    const formArrayModel = this.props.parentFormGroupModel.findControl<'commOutageEvents', FormArrayModel<CommOutageEvent>>('commOutageEvents');
     formArrayModel.removeControl(index);
     this.setState({
-      outageEvents: [...formArrayModel.getValue()]
+      commOutageEvents: [...formArrayModel.getValue()]
     });
   }
 
@@ -327,8 +353,16 @@ export class TestConfigurationTab extends React.Component<Props, State> {
     });
   }
 
+  deleteScheduledCommandEvent(index: number) {
+    const formArrayModel = this.props.parentFormGroupModel.findControl<'scheduledCommandEvents', FormArrayModel<ScheduledCommandEvent>>('scheduledCommandEvents');
+    formArrayModel.removeControl(index);
+    this.setState({
+      scheduledCommandEvents: [...formArrayModel.getValue()]
+    });
+  }
+
   showSaveEventsButton() {
-    if (this.state.faultEvents.length > 0 || this.state.outageEvents.length > 0) {
+    if (this.state.faultEvents.length > 0 || this.state.commOutageEvents.length > 0 || this.state.scheduledCommandEvents.length > 0) {
       return (
         <Tooltip
           content='Save created events'
@@ -348,23 +382,21 @@ export class TestConfigurationTab extends React.Component<Props, State> {
     download(
       'events',
       JSON.stringify({
-        outageEvents: this._convertEpochTimesToDateTimeStrings(this.state.outageEvents),
+        commOutageEvents: this._convertEpochTimesToDateTimeStrings(this.state.commOutageEvents),
         faultEvents: this._convertEpochTimesToDateTimeStrings(this.state.faultEvents),
-        commandEvents: this._convertEpochTimesToDateTimeStrings(this.state.commandEvents)
+        scheduledCommandEvents: this._convertEpochTimesToDateTimeStrings(this.state.scheduledCommandEvents)
       }, null, 4),
       DownloadType.JSON
     );
   }
 
-  private _convertEpochTimesToDateTimeStrings(events: Array<FaultEvent | CommOutageEvent | CommandEvent>) {
+  private _convertEpochTimesToDateTimeStrings(events: Array<FaultEvent | CommOutageEvent | ScheduledCommandEvent>) {
     const resultedEvents = [];
     for (const event of events) {
-      const clonedEvent = { ...event } as FaultEvent | CommOutageEvent | CommandEvent;
+      const clonedEvent = { ...event } as FaultEvent | CommOutageEvent | ScheduledCommandEvent;
       clonedEvent.stopDateTime = this.dateTimeService.format(event.stopDateTime);
       if ('startDateTime' in event) {
-        clonedEvent['startDateTime'] = this.dateTimeService.format(event.startDateTime);
-      } else if ('occuredDateTime' in event) {
-        clonedEvent['occuredDateTime'] = this.dateTimeService.format(event.occuredDateTime);
+        clonedEvent.startDateTime = this.dateTimeService.format(event.startDateTime);
       }
       resultedEvents.push(clonedEvent);
     }
