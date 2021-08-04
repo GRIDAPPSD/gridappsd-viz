@@ -14,7 +14,7 @@ import { SimulationConfigurationTab } from './views/simulation-configuration-tab
 import { ApplicationConfigurationTab } from './views/application-configuration-tab';
 import { TestConfigurationTab } from './views/test-configuration-tab';
 import { DateTimeService } from '@shared/DateTimeService';
-import { FaultEvent, CommOutageEvent, CommandEvent } from '@shared/test-manager';
+import { FaultEvent, CommOutageEvent, ScheduledCommandEvent } from '@shared/test-manager';
 import { PowerSystemConfigurationModel } from './models/PowerSystemConfigurationModel';
 import { SimulationConfigurationTabModel } from './models/SimulationConfigurationTabModel';
 import { ApplicationConfigurationModel } from './models/ApplicationConfigurationModel';
@@ -60,16 +60,16 @@ export class SimulationConfigurationEditor extends React.Component<Props, State>
     simulationConfig: new FormGroupModel<SimulationConfigurationTabModel>(),
     applicationConfig: new FormGroupModel<ApplicationConfigurationModel>(),
     testConfig: new FormGroupModel<TestConfigurationModel>({
-      outageEvents: new FormArrayModel<CommOutageEvent>(),
+      commOutageEvents: new FormArrayModel<CommOutageEvent>(),
       faultEvents: new FormArrayModel<FaultEvent>(),
-      commandEvents: new FormArrayModel<CommandEvent>()
+      scheduledCommandEvents: new FormArrayModel<ScheduledCommandEvent>()
     }),
     serviceConfig: new FormArrayModel<ServiceConfigurationModel>([])
   });
 
-  outageEvents: CommOutageEvent[] = [];
+  commOutageEvents: CommOutageEvent[] = [];
   faultEvents: FaultEvent[] = [];
-  commandEvents: CommandEvent[] = [];
+  scheduledCommandEvents: ScheduledCommandEvent[] = [];
 
   private readonly _simulationManagementService = SimulationManagementService.getInstance();
   private readonly _stateStore = StateStore.getInstance();
@@ -101,8 +101,9 @@ export class SimulationConfigurationEditor extends React.Component<Props, State>
       },
       // eslint-disable-next-line camelcase
       application_config: {
-        applications: original.application_config.applications.length > 0 ?
-          [{ ...original.application_config.applications[0] }] : []
+        applications: original.application_config.applications.length > 0
+          ? [{ ...original.application_config.applications[0] }]
+          : []
       },
       // eslint-disable-next-line camelcase
       simulation_config: {
@@ -335,19 +336,19 @@ export class SimulationConfigurationEditor extends React.Component<Props, State>
     const testConfigFormValue = this.formGroupModel.findControl('testConfig').getValue();
 
     this.currentConfig.test_config.appId = selectedApplication?.name || '';
-    for (const outageEvent of testConfigFormValue.outageEvents) {
+    for (const outageEvent of testConfigFormValue.commOutageEvents) {
       this.currentConfig.test_config.events.push(this._transformOutageEventForSubmission(outageEvent));
     }
     for (const faultEvent of testConfigFormValue.faultEvents) {
       this.currentConfig.test_config.events.push(this._transformFaultEventForSubmission(faultEvent));
     }
-    for (const commandEvent of testConfigFormValue.commandEvents) {
-      this.currentConfig.test_config.events.push(commandEvent);
+    for (const scheduledCommandEvent of testConfigFormValue.scheduledCommandEvents) {
+      this.currentConfig.test_config.events.push(this._transformScheduledCommandEventForSubmission(scheduledCommandEvent));
     }
     this._stateStore.update({
       faultEvents: testConfigFormValue.faultEvents,
-      outageEvents: testConfigFormValue.outageEvents,
-      commandEvents: testConfigFormValue.commandEvents
+      commOutageEvents: testConfigFormValue.commOutageEvents,
+      scheduledCommandEvents: testConfigFormValue.scheduledCommandEvents
     });
   }
 
@@ -400,6 +401,41 @@ export class SimulationConfigurationEditor extends React.Component<Props, State>
       event_type: faultEvent.event_type,
       occuredDateTime: faultEvent.startDateTime,
       stopDateTime: faultEvent.stopDateTime
+    };
+  }
+
+  private _transformScheduledCommandEventForSubmission(scheduledCommandEvent: ScheduledCommandEvent) {
+    return {
+      message: {
+        // eslint-disable-next-line camelcase
+        forward_differences: Array.isArray(scheduledCommandEvent.mRID)
+          ? scheduledCommandEvent.mRID.map(mrid => ({
+            object: mrid,
+            attribute: scheduledCommandEvent.attribute,
+            value: scheduledCommandEvent.forwardDifferenceValue
+          }))
+          : [{
+            object: scheduledCommandEvent.mRID,
+            attribute: scheduledCommandEvent.attribute,
+            value: scheduledCommandEvent.forwardDifferenceValue
+          }],
+        // eslint-disable-next-line camelcase
+        reverse_differences: Array.isArray(scheduledCommandEvent.mRID)
+          ? scheduledCommandEvent.mRID.map(mrid => ({
+            object: mrid,
+            attribute: scheduledCommandEvent.attribute,
+            value: scheduledCommandEvent.reverseDifferenceValue
+          }))
+          : [{
+            object: scheduledCommandEvent.mRID,
+            attribute: scheduledCommandEvent.attribute,
+            value: scheduledCommandEvent.reverseDifferenceValue
+          }]
+      },
+      // eslint-disable-next-line camelcase
+      event_type: 'ScheduledCommandEvent',
+      occuredDateTime: scheduledCommandEvent.startDateTime,
+      stopDateTime: scheduledCommandEvent.stopDateTime
     };
   }
 
