@@ -9,7 +9,7 @@ COPY . /gridappsd/viz/
 
 WORKDIR /gridappsd/viz/frontend
 RUN npm install \
-    && npm run build $VERSION
+    && npm run build --env buildVersion=$VERSION
 
 WORKDIR /gridappsd/viz/backend
 RUN npm install \

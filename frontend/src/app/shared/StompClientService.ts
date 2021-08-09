@@ -99,7 +99,8 @@ export class StompClientService {
         this._password = password;
 
         this._retrieveToken(username, password)
-          .then(() => {
+          .then(token => {
+            this._authenticationToken = token;
             this._client.onDisconnect = () => {
               this.reconnect();
               subject.next({
@@ -151,8 +152,7 @@ export class StompClientService {
               if (__DEVELOPMENT__) {
                 sessionStorage.setItem('token', token);
               }
-              this._authenticationToken = token;
-              resolve();
+              resolve(token);
             } else {
               reject();
             }
