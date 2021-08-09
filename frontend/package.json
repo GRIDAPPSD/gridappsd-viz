@@ -17,7 +17,7 @@
         "react-router-dom": "^5.2.0",
         "react-table": "^6.8.6",
         "rxjs": "^6.6.0",
-        "socket.io-client": "^2.3.0"
+        "socket.io-client": "^4.1.3"
     },
     "devDependencies": {
         "@babel/core": "^7.10.5",
@@ -30,7 +30,6 @@
         "@types/react-dom": "^16.8.5",
         "@types/react-router-dom": "^5.1.3",
         "@types/react-table": "^6.7.21",
-        "@types/socket.io-client": "^1.4.33",
         "@types/stompjs": "^2.3.4",
         "@typescript-eslint/eslint-plugin": "^4.28.5",
         "@typescript-eslint/parser": "^4.28.5",
