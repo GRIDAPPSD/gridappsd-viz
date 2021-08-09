@@ -47,7 +47,7 @@ export class AvailableApplicationList extends React.Component<Props, State> {
   componentDidMount() {
     this._applicationsStateStoreSubscription = this._stateStore.select('applications')
       .subscribe({
-        next: applications => this.setState({ applications: applications })
+        next: applications => this.setState({ applications })
       });
     this._simulationIdStateChangeSubscription = this._stateStore.select('simulationId')
       .subscribe({

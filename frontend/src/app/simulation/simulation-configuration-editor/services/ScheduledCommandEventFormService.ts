@@ -6,6 +6,7 @@ export class ScheduledCommandEventFormService {
 
   private readonly _stompClientService = StompClientService.getInstance();
 
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
   private constructor() {
   }
 

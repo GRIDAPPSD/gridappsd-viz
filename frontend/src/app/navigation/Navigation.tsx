@@ -27,7 +27,11 @@ interface Props {
   onSelectExpectedResultComparisonType: (selectedType: ExpectedResultComparisonType) => void;
 }
 
-export class Navigation extends React.Component<Props, {}> {
+interface State {
+
+}
+
+export class Navigation extends React.Component<Props, State> {
 
   readonly drawerRef = React.createRef<Drawer>();
 

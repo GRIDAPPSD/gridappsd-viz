@@ -48,7 +48,7 @@ export class SimulationVsTimeSeriesRequest implements MessageRequest {
     simulation_request_type: 'NEW',
     test_config: {
       appId: 'sample_app',
-      testId: (Math.random() * 1_000_000) | 0,
+      testId: Math.trunc(Math.random() * 1_000_000),
       compareWithSimId: -1,
       testType: 'simulation_vs_timeseries'
     }

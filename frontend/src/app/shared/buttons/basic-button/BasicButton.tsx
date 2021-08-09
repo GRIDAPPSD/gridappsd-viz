@@ -12,8 +12,8 @@ interface Props {
   label: string;
 
   /**
-   *  Type `positive` is used for buttons such as "Confirm", "Submit", "Apply", etc.
-   *  Type `negative` is used for buttons such as "Cancel", "Dismiss", "Close", etc.
+   * Type `positive` is used for buttons such as "Confirm", "Submit", "Apply", etc.
+   * Type `negative` is used for buttons such as "Cancel", "Dismiss", "Close", etc.
    */
   type: 'positive' | 'negative';
   onClick: (event: React.MouseEvent) => void;
@@ -23,6 +23,7 @@ interface Props {
 
 /**
  * Basic buttons are buttons with a rectangular shape and rounded corners
+ *
  * @param props
  */
 export function BasicButton(props: Props) {

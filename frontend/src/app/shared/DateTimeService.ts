@@ -69,6 +69,7 @@ export class DateTimeService {
 
   /**
    * Parse the given date time string and return epoch time in second precision
+   *
    * @param str Date time string in YYYY-MM-DD HH:MM:SS or YYYY-MM-DD HH:MM:SS.LLL format
    */
   parse(str: string) {

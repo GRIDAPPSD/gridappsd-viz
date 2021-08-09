@@ -9,7 +9,6 @@ import {
 import { StompClientService, StompClientConnectionStatus } from '@shared/StompClientService';
 import { FeederModelLine } from '@shared/topology';
 
-
 interface Props {
   feederModelLines: FeederModelLine[];
 }

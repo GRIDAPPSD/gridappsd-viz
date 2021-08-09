@@ -9,7 +9,11 @@ interface Props {
   duration?: number;
 }
 
-export class Ripple extends React.Component<Props, {}> {
+interface State {
+
+}
+
+export class Ripple extends React.Component<Props, State> {
 
   static defaultProps: Props = {
     fixed: false,
