@@ -47,6 +47,7 @@ interface State {
   lineName: string;
   modelDictionaryComponents: ModelDictionaryComponent[];
   services: Service[];
+  simulators: string[];
 }
 
 export class SimulationConfigurationEditor extends React.Component<Props, State> {
@@ -82,7 +83,8 @@ export class SimulationConfigurationEditor extends React.Component<Props, State>
       disableSubmitButton: true,
       lineName: props.initialConfig.power_system_config.Line_name,
       modelDictionaryComponents: [],
-      services: []
+      services: [],
+      simulators: []
     };
 
     this.currentConfig = this._cloneConfigObject(props.initialConfig);
@@ -149,9 +151,15 @@ export class SimulationConfigurationEditor extends React.Component<Props, State>
       .subscribe({
         next: services => this.setState({
           services
+
         })
       });
 
+    const servicesAsSimulator = this.state.services.filter(service => 'category' as 'SIMULATOR' in service);
+    this.setState({
+      simulators: servicesAsSimulator.map(service => service.id)
+    });
+    
     this.formGroupModel.validityChanges()
       .subscribe({
         next: isValid => {
@@ -215,7 +223,9 @@ export class SimulationConfigurationEditor extends React.Component<Props, State>
               <Tab label='Simulation Configuration'>
                 <SimulationConfigurationTab
                   parentFormGroupModel={this.formGroupModel.findControl('simulationConfig')}
-                  simulationConfig={this.currentConfig.simulation_config} />
+                  simulationConfig={this.currentConfig.simulation_config}
+                  simulators={this.state.simulators}
+                  services={this.state.services} />
               </Tab>
               <Tab label='Application Configuration'>
                 <ApplicationConfigurationTab
