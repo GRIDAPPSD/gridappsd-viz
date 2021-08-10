@@ -27,7 +27,7 @@ export class Validators {
   }
 
   static checkValidJSON(controlLabel: string, errorMessage = `${controlLabel} is not a valid JSON`): Validator {
-    return (control: FormControlModel<string> | FormControlModel<object>) => {
+    return (control: FormControlModel<string> | FormControlModel<Record<string, unknown>>) => {
       const value = control.getValue();
       if (value === null || value === undefined) {
         return {

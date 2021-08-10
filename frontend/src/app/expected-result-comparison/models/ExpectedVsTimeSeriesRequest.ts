@@ -17,7 +17,7 @@ export class ExpectedVsTimeSeriesRequest implements MessageRequest {
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   constructor(expectedResults: any, simulationId: number) {
-    const testId = (Math.random() * 1_000_000) | 0;
+    const testId = Math.trunc(Math.random() * 1_000_000);
     this.url = `/topic/goss.gridappsd.simulation.test.input.${testId}`;
     this.requestBody.testId = testId;
     this.requestBody.expectedResults = expectedResults;

@@ -250,7 +250,7 @@ export class FaultEventForm extends React.Component<Props, State> {
                 }
               });
             this.setState({
-              selectedFaultKind: selectedFaultKind
+              selectedFaultKind
             });
           }
         }

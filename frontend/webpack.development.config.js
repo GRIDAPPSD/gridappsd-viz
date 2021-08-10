@@ -17,7 +17,7 @@ module.exports = (env) => {
           ]
         }
       },
-      'awesome-typescript-loader'
+      'ts-loader'
     ]
   });
 
@@ -50,6 +50,5 @@ module.exports = (env) => {
       },
       hot: true
     }
-
   };
 };

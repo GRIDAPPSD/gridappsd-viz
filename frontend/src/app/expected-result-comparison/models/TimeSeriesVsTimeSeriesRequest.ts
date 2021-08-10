@@ -15,7 +15,7 @@ export class TimeSeriesVsTimeSeriesRequest implements MessageRequest {
   readonly replyTo: string;
 
   constructor(firstSimulationId: number, secondSimulationId: number) {
-    const testId = (Math.random() * 1_000_000) | 0;
+    const testId = Math.trunc(Math.random() * 1_000_000);
 
     this.url = `/topic/goss.gridappsd.simulation.test.input.${testId}`;
     this.requestBody.testId = testId;

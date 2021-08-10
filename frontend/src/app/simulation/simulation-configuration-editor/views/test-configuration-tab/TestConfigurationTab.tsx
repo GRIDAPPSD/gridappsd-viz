@@ -227,8 +227,8 @@ export class TestConfigurationTab extends React.Component<Props, State> {
 
           this.setState({
             faultEvents,
-            commOutageEvents: commOutageEvents,
-            scheduledCommandEvents: scheduledCommandEvents
+            commOutageEvents,
+            scheduledCommandEvents
           });
         }
       });

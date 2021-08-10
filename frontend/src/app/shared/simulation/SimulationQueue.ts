@@ -14,6 +14,7 @@ export class SimulationQueue {
   private _simulations: Simulation[] = [];
   private _activeSimulation: Simulation = new Simulation(DEFAULT_SIMULATION_CONFIGURATION);
 
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
   private constructor() {
   }
 

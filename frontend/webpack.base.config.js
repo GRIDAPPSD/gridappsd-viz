@@ -3,11 +3,11 @@ const fs = require('fs');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const TsConfigPathsPlugin = require('tsconfig-paths-webpack-plugin');
-const ExcludeAssetsPlugin = require('@ianwalter/exclude-assets-plugin');
+const ExcludeAssetsInHtmlPlugin = require('@ianwalter/exclude-assets-plugin');
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 const webpack = require('webpack');
 
-const { RefReplacerPlugin, NoOpPlugin } = require('./webpack.plugins');
+const { RefReplacerPlugin, NoOpPlugin, DeleteAssetsPlugin } = require('./webpack.plugins');
 
 /**
  *
@@ -21,8 +21,8 @@ module.exports = (mode, cssHmr) => ({
 
   output: {
     path: path.resolve(__dirname, '..', 'backend', 'dist', 'public'),
-    filename: '[name].[hash:10].js',
-    chunkFilename: '[name].[hash:10].js',
+    filename: `[name]${mode === 'development' ? '' : '.[contenthash]'}.js`,
+    chunkFilename: `[id]${mode === 'development' ? '' : '.[contenthash]'}.js`,
     publicPath: '/'
   },
 
@@ -53,38 +53,55 @@ module.exports = (mode, cssHmr) => ({
       },
       {
         test: /\.(?:ttf|woff2)$/,
-        use: [
-          {
-            loader: 'file-loader',
-            options: {
-              outputPath: (filename, fullPath, context) => {
-                const containingFolderPath = path.resolve(fullPath, '..');
-                const containingFolderName = containingFolderPath.substring(containingFolderPath.lastIndexOf('/') + 1);
-                return `assets/${containingFolderName}/${filename}`;
-              }
-            }
-          }
-        ]
+        type: 'asset/resource',
+        generator: {
+          filename: `assets/fonts/[name]${mode === 'development' ? '' : '.[hash]'}[ext]`
+        }
       }
     ]
   },
 
+  optimization: {
+    splitChunks: {
+      cacheGroups: {
+        light: {
+          type: 'css/mini-extract',
+          test: /light\.css$/,
+          chunks: 'all',
+          enforce: true
+        },
+        dark: {
+          type: 'css/mini-extract',
+          test: /dark\.css$/,
+          chunks: 'all',
+          enforce: true
+        }
+      }
+    },
+    minimize: false
+  },
+
   plugins: [
     new CleanWebpackPlugin(),
+    new DeleteAssetsPlugin([
+      /light(?:\.[\w\d]+)?\.js/,
+      /dark(?:\.[\w\d]+)?\.js/,
+      /main(?:\.[\w\d]+)?\.css/
+    ]),
     cssHmr ? new NoOpPlugin() : new RefReplacerPlugin(),
     new HtmlWebpackPlugin({
       template: './template.html',
+      minify: mode === 'production',
       excludeAssets: [
-        /light\.[\w\d]+\.(?:css|js)/,
-        /dark\.[\w\d]+\.js/,
-        /main\.[\w\d]+\.css/
-      ],
-      minify: mode === 'production'
+        /light(?:\.[\w\d]+)?\.(?:css|js)/,
+        /dark(?:\.[\w\d]+)?\.js/,
+        /main(?:\.[\w\d]+)?\.css/
+      ]
     }),
-    new ExcludeAssetsPlugin(),
+    new ExcludeAssetsInHtmlPlugin(),
     new MiniCssExtractPlugin({
-      filename: '[name].[hash:10].css',
-      chunkFilename: '[name].[hash:10].css'
+      filename: `[name]${mode === 'development' ? '' : '.[contenthash]'}.css`,
+      chunkFilename: `[id]${mode === 'development' ? '' : '.[contenthash]'}.css`
     }),
     new webpack.DefinePlugin({
       __DEVELOPMENT__: JSON.stringify(mode === 'development'),

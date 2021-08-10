@@ -84,7 +84,7 @@ export class CommOutageEventForm extends React.Component<Props, State> {
       inputComponentOptionBuilder: SelectionOptionBuilder.defaultBuilder(),
       inputPhaseOptionBuilder: SelectionOptionBuilder.defaultBuilder(),
       inputAttributeOptionBuilder: SelectionOptionBuilder.defaultBuilder(),
-      outputEquipmentTypeOptionBuilder: outputEquipmentTypeOptionBuilder,
+      outputEquipmentTypeOptionBuilder,
       outputComponentOptionBuilder: SelectionOptionBuilder.defaultBuilder(),
       outputPhaseOptionBuilder: SelectionOptionBuilder.defaultBuilder(),
       outputMeasurementTypeOptionBuilder: SelectionOptionBuilder.defaultBuilder(),
