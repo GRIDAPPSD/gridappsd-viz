@@ -1,4 +1,4 @@
-FROM node:10.17.0-buster-slim
+FROM node:14.17-buster-slim
 
 ARG TIMESTAMP
 ARG VERSION
