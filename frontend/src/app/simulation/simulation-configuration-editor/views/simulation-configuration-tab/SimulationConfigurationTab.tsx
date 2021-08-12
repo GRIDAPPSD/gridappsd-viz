@@ -15,6 +15,7 @@ import { IconButton } from '@shared/buttons';
 import { SimulationConfigurationTabModel } from '../../models/SimulationConfigurationTabModel';
 import { SimulationConfiguration } from '@shared/simulation';
 import { Validators } from '@shared/form/validation';
+import { Service } from '@shared/Service';
 
 import './SimulationConfigurationTab.light.scss';
 import './SimulationConfigurationTab.dark.scss';
@@ -22,6 +23,8 @@ import './SimulationConfigurationTab.dark.scss';
 interface Props {
   parentFormGroupModel: FormGroupModel<SimulationConfigurationTabModel>;
   simulationConfig: SimulationConfiguration['simulation_config'];
+  simulators: string[];
+  services: Service[];
 }
 
 interface State {
@@ -34,11 +37,23 @@ export class SimulationConfigurationTab extends React.Component<Props, State> {
     super(props);
 
     this.state = {
-      simulatorOptionBuilder: new SelectionOptionBuilder([props.simulationConfig.simulator || 'GridLAB-D'])
+      // simulatorOptionBuilder: new SelectionOptionBuilder([props.simulationConfig.simulator || 'GridLAB-D'])
+      simulatorOptionBuilder: new SelectionOptionBuilder(props.simulators)
     };
 
     this._setupFormGroupModelForSimulationConfigurationTab();
 
+  }
+
+  componentDidUpdate(prevProps: Props) {
+
+    const servicesAsSimulator = this.props.services.filter(service => service.category === 'SIMULATOR');
+    // const servicesAsSimulator = this.props.services.filter(service => 'category' as "SIMULATOR" in service);
+    if (this.props.services !== prevProps.services) {
+      this.setState({
+        simulatorOptionBuilder: new SelectionOptionBuilder(servicesAsSimulator.map(service => service.id))
+      });
+    }
   }
 
   private _setupFormGroupModelForSimulationConfigurationTab() {
@@ -58,7 +73,8 @@ export class SimulationConfigurationTab extends React.Component<Props, State> {
     );
     this.props.parentFormGroupModel.setControl(
       'simulator',
-      new FormControlModel('')
+      // new FormControlModel('')
+      new FormControlModel(this.props.simulationConfig.simulator)
     );
     this.props.parentFormGroupModel.setControl(
       'run_realtime',
@@ -103,7 +119,8 @@ export class SimulationConfigurationTab extends React.Component<Props, State> {
             label='Simulator'
             formControlModel={this.props.parentFormGroupModel.findControl('simulator')}
             selectionOptionBuilder={this.state.simulatorOptionBuilder}
-            selectedOptionFinder={simulator => simulator === 'GridLAB-D'} />
+            // selectedOptionFinder={simulator => simulator === 'GridLAB-D'} />
+            selectedOptionFinder={simulator => simulator === this.props.simulationConfig.simulator} />
           <div className='accompanying-text'>
             <div>Power flow solver method</div>
             <div>NR</div>
