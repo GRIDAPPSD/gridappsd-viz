@@ -66,19 +66,19 @@ export class EventSummary extends React.Component<Props, State> {
       .pipe(takeUntil(this._unsubscriber))
       .subscribe({
         next: () => {
-          if (this.state.outageEvents.length > 0) {
+          if (this.state.commOutageEvents.length > 0) {
             this.setState({
-              outageEvents: [...this.state.outageEvents]
+              commOutageEvents: [...this.state.commOutageEvents]
             });
           }
           if (this.state.faultEvents.length > 0) {
             this.setState({
-              outageEvents: [...this.state.outageEvents]
+              faultEvents: [...this.state.faultEvents]
             });
           }
-          if (this.state.commandEvents.length > 0) {
+          if (this.state.scheduledCommandEvents.length > 0) {
             this.setState({
-              outageEvents: [...this.state.outageEvents]
+              scheduledCommandEvents: [...this.state.scheduledCommandEvents]
             });
           }
         }
