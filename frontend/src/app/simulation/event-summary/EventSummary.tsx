@@ -73,12 +73,12 @@ export class EventSummary extends React.Component<Props, State> {
           }
           if (this.state.faultEvents.length > 0) {
             this.setState({
-              commOutageEvents: [...this.state.commOutageEvents]
+              faultEvents: [...this.state.faultEvents]
             });
           }
-          if (this.state.commOutageEvents.length > 0) {
+          if (this.state.scheduledCommandEvents.length > 0) {
             this.setState({
-              commOutageEvents: [...this.state.commOutageEvents]
+              scheduledCommandEvents: [...this.state.scheduledCommandEvents]
             });
           }
         }
