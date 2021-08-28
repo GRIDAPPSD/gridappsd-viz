@@ -55,11 +55,6 @@ export abstract class AbstractControlModel<T> {
     anotherControl.validityChanges()
       .subscribe({
         next: isValid => {
-          if (!isValid) {
-            this.reset();
-            this._isValid = false;
-            this._validityChangeNotifier.next(false);
-          }
           this._isDisabled = !isValid;
           this._disableStatusNotifier.next(this._isDisabled);
         }

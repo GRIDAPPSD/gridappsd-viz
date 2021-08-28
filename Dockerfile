@@ -1,4 +1,4 @@
-FROM node:10.17.0-buster-slim
+FROM node:14.17-buster-slim
 
 ARG TIMESTAMP
 ARG VERSION
@@ -9,7 +9,7 @@ COPY . /gridappsd/viz/
 
 WORKDIR /gridappsd/viz/frontend
 RUN npm install \
-    && npm run build $VERSION
+    && npm run build --env buildVersion=$VERSION
 
 WORKDIR /gridappsd/viz/backend
 RUN npm install \

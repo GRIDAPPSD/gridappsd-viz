@@ -18,3 +18,11 @@
         background-color: red;
     }
 }
+
+.form-control.disabled {
+    .input-field__input {
+        color: #cdcdcd;
+        border-bottom-color: #cdcdcd;
+        pointer-events: none;
+    }
+}

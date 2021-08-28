@@ -11,7 +11,8 @@ export class FilePickerService {
     return FilePickerService._INSTANCE_;
   }
 
-  constructor() {
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
+  private constructor() {
   }
 
   selectFile(file: File) {

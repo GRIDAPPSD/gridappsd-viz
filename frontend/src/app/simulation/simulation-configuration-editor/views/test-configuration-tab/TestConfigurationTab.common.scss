@@ -1,0 +1,46 @@
+.test-configuration-tab {
+    position: relative;
+    display: flex;
+    height: 100%;
+    overflow: hidden;
+
+    .test-configuration-tab__form {
+        overflow: auto auto;
+        width: 40%;
+        box-sizing: border-box;
+
+        .radio-button-group {
+            margin-top: 0;
+
+            .form-control__label {
+                align-self: flex-start;
+                transform: translateY(10px);
+            }
+        }
+
+        .radio-button-group__radio-buttons {
+            flex-flow: column;
+            align-items: flex-start;
+        }
+    }
+}
+
+.test-configuration-tab__form__upload-file {
+    margin-left: 20px;
+}
+
+.test-configuration-tab__event-summary {
+    margin-top: 10px;
+    display: flex;
+    flex-flow: column nowrap;
+    width: 60%;
+    padding: 2px;
+    box-sizing: border-box;
+}
+
+.test-configuration-tab__save-events {
+    position: absolute;
+    left: 94.5%;
+    top: 88%;
+    z-index: 10;
+}

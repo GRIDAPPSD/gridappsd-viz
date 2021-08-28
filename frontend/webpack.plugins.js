@@ -1,3 +1,5 @@
+const { RawSource } = require('webpack-sources');
+
 module.exports = {
   RefReplacerPlugin: class {
 
@@ -6,46 +8,38 @@ module.exports = {
       this.previousDarkThemeFilename = '';
     }
 
+    /**
+     * @param {import('webpack').Compiler} compiler
+     */
     apply(compiler) {
       const lightThemeStyleFilenameRef = '__LIGHT_THEME_STYLE_FILENAME__';
       const darkThemeStyleFilenameRef = '__DARK_THEME_STYLE_FILENAME__';
 
-      compiler.hooks.emit.tap('RefReplacerPlugin', compilation => {
+      compiler.hooks.afterCompile.tap('RefReplacerPlugin', compilation /** @type {import('webpack').Compilation} */ => {
         const assetNames = compilation.getAssets().map(e => e.name);
         const mainChunkName = assetNames.find(e => e.startsWith('main') && e.endsWith('.js'));
-        const hash = mainChunkName.split('.')[1];
-        const newLightThemeFilename = `light.${hash}.css`;
-        const newDarkThemeFilename = `dark.${hash}.css`;
-        const sourceCode = compilation.assets[mainChunkName].source();
-        let modifiedSourceCode = sourceCode;
+        const newLightThemeFilename = assetNames.find(e => e.startsWith('light') && e.endsWith('.css'));
+        const newDarkThemeFilename = assetNames.find(e => e.startsWith('dark') && e.endsWith('.css'));
 
-        if (sourceCode.includes(lightThemeStyleFilenameRef)) {
-          modifiedSourceCode = sourceCode
-            .replace(lightThemeStyleFilenameRef, `"${newLightThemeFilename}"`)
-            .replace(darkThemeStyleFilenameRef, `"${newDarkThemeFilename}"`);
-        } else {
-          modifiedSourceCode = sourceCode
-            .replace(this.previousLightThemeFilename, newLightThemeFilename)
-            .replace(this.previousDarkThemeFilename, newDarkThemeFilename);
-        }
-
-        delete compilation.assets[`dark.${hash}.js`];
-        delete compilation.assets[`dark.${hash}.js.map`];
-        delete compilation.assets[`light.${hash}.js`];
-        delete compilation.assets[`light.${hash}.js.map`];
-        delete compilation.assets[`main.${hash}.css`];
-        delete compilation.assets[`main.${hash}.css.map`];
-
-        compilation.getAsset(mainChunkName).source.children = [
-          {
-            source() {
-              return modifiedSourceCode;
-            },
-            size() {
-              return modifiedSourceCode.length;
-            }
+        const mainAsset = compilation.getAsset(mainChunkName);
+        if (mainAsset) {
+          const sourceCode = mainAsset.source.source();
+          let modifiedSourceCode = sourceCode;
+          if (sourceCode.includes(lightThemeStyleFilenameRef)) {
+            modifiedSourceCode = sourceCode
+              .replace(lightThemeStyleFilenameRef, `"${newLightThemeFilename}"`)
+              .replace(darkThemeStyleFilenameRef, `"${newDarkThemeFilename}"`);
+          } else {
+            modifiedSourceCode = sourceCode
+              .replace(this.previousLightThemeFilename, newLightThemeFilename)
+              .replace(this.previousDarkThemeFilename, newDarkThemeFilename);
           }
-        ];
+          compilation.updateAsset(
+            mainAsset.name,
+            new RawSource(modifiedSourceCode),
+            mainAsset.info
+          );
+        }
 
         this.previousLightThemeFilename = newLightThemeFilename;
         this.previousDarkThemeFilename = newDarkThemeFilename;
@@ -57,5 +51,27 @@ module.exports = {
     apply() {
 
     }
+  },
+
+  DeleteAssetsPlugin: class {
+
+    /**
+     *
+     * @param {Array<RegExp>} patterns
+     */
+    constructor(patterns = []) {
+      if (!patterns) {
+        throw new Error('ExcludeAssetsPlugin requires one boolean-returning functionargument')
+      }
+      this._patterns = patterns;
+    }
+
+    apply(compiler) {
+      compiler.hooks.afterCompile.tap('ExcludeAssetsPlugin', compilation => {
+        const assetNames = compilation.getAssets().map(e => e.name);
+        assetNames.filter(e => this._patterns.some(pattern => pattern.test(e))).forEach(e => compilation.deleteAsset(e));
+      });
+    }
   }
+
 };

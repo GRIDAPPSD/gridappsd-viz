@@ -72,7 +72,7 @@ export class TopologyRendererContainer extends React.Component<Props, State> {
       topology: {
         name: this.activeSimulationConfig.simulation_config.simulation_name,
         nodeMap: new Map(),
-        edgeMap: new Map,
+        edgeMap: new Map(),
         inverted: false
       },
       isFetching: true,

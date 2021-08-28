@@ -1,6 +1,6 @@
 import * as express from 'express';
-import * as http from 'http';
-import * as socketIo from 'socket.io';
+import { createServer } from 'http';
+import { Server } from 'socket.io';
 
 import { App } from './App';
 import { SimulationCoordinator } from './simulation-coordination/SimulationCoordinator';
@@ -8,8 +8,8 @@ import { SimulationStatus } from '@common/SimulationStatus';
 
 const port = process.env.PORT || '8092';
 const expressInstance = express();
-const expressServer = http.createServer(expressInstance);
-const socketServer = socketIo(expressServer);
+const expressServer = createServer(expressInstance);
+const socketServer = new Server(expressServer);
 const app = new App(expressInstance);
 const simulationCoordinator = new SimulationCoordinator();
 

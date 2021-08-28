@@ -1,8 +1,8 @@
 const childProcess = require('child_process');
 const path = require('path');
 const fs = require('fs');
-const TerserJSPlugin = require('terser-webpack-plugin');
-const OptimizeCSSAssetsPlugin = require('optimize-css-assets-webpack-plugin');
+const TerserPlugin = require('terser-webpack-plugin');
+const CssMinimizerPlugin = require('css-minimizer-webpack-plugin');
 
 /**
  *
@@ -13,7 +13,7 @@ module.exports = (env) => {
   const baseConfig = require('./webpack.base.config')('production', false);
   baseConfig.module.rules.push({
     test: /(\.tsx?)$/,
-    use: 'awesome-typescript-loader'
+    use: 'ts-loader'
   });
 
   return {
@@ -22,6 +22,7 @@ module.exports = (env) => {
     optimization: {
       splitChunks: {
         cacheGroups: {
+          ...baseConfig.optimization.splitChunks.cacheGroups,
           default: false,
           vendors: false,
           dependencies: {
@@ -34,20 +35,18 @@ module.exports = (env) => {
       },
       minimize: true,
       minimizer: [
-        new TerserJSPlugin({
-          sourceMap: true,
+        new TerserPlugin({
           terserOptions: {
             compress: {
               drop_console: true
             }
           }
         }),
-        new OptimizeCSSAssetsPlugin({})
+        new CssMinimizerPlugin()
       ]
     },
 
     stats: 'errors-only'
-
   };
 };
 
@@ -58,7 +57,7 @@ module.exports = (env) => {
  *                                               branch name as the build version
  */
 function updateVersion(env) {
-  if (env.buildVersion !== true) {
+  if (env.buildVersion !== undefined) {
     writeVersionNumber(env.buildVersion);
   } else {
     childProcess.exec('git rev-parse --abbrev-ref HEAD', {}, (error, stdout) => {

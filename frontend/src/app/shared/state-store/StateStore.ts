@@ -11,6 +11,7 @@ export class StateStore {
 
   private _isInitialized = false;
 
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
   private constructor() {
   }
 
@@ -23,7 +24,7 @@ export class StateStore {
       throw new Error('Store has been initialized');
     }
     for (const [key, value] of Object.entries(defaultState)) {
-      const notifier = new BehaviorSubject<{}>(value);
+      const notifier = new BehaviorSubject<any>(value);
       this._stateChangeNotifiers.set(key, notifier);
       notifier.next(value);
     }

@@ -4,6 +4,12 @@
         "es6": true,
         "node": true
     },
+    "parserOptions": {
+        "project": [
+            "tsconfig.*?.json"
+        ],
+        "createDefaultProgram": true
+    },
     "extends": [
         "eslint:recommended",
         "plugin:@typescript-eslint/eslint-recommended",
@@ -14,7 +20,7 @@
     "parser": "@typescript-eslint/parser",
     "plugins": [
         "@typescript-eslint",
-        "@typescript-eslint/tslint"
+        "eslint-plugin-jsdoc"
     ],
     "settings": {
         "react": {

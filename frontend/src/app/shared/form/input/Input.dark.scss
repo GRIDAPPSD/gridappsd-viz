@@ -20,3 +20,11 @@
         background-color: red;
     }
 }
+
+.form-control.disabled {
+    .input-field__input {
+        color: rgba($primary-text-color, 0.1);
+        border-bottom-color: rgba($primary-text-color, 0.1);
+        pointer-events: none;
+    }
+}

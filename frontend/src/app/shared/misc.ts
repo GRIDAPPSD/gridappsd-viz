@@ -23,6 +23,7 @@ export const enum DownloadType {
 
 /**
  * Download the content into a file with the provided MIME type
+ *
  * @param filename The name of the file to be downloaded
  * @param fileContent The content of the file to be downloaded
  * @param contentType The content type of the downloaded file
@@ -159,7 +160,8 @@ function _fuzzySearchWithHighlighting(needle: string) {
 }
 
 /**
- * Returns a promise that resolves when the predicate returns true
+ * Returns a promise that resolves when the predicate returns `true`
+ *
  * @param predicate A function that determines when to stop waiting
  * @param waitDelay How often to check if the predicate function returns true
  */

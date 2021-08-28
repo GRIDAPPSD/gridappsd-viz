@@ -6,7 +6,14 @@ import { Backdrop } from '@shared/overlay/backdrop';
 import './MessageBanner.light.scss';
 import './MessageBanner.dark.scss';
 
-export class MessageBanner extends React.Component<{}, {}> {
+interface Props {
+
+}
+
+interface State {
+
+}
+export class MessageBanner extends React.Component<Props, State> {
 
   render() {
     return (

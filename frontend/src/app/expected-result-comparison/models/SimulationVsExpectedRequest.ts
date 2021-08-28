@@ -49,7 +49,7 @@ export class SimulationVsExpectedRequest implements MessageRequest {
     simulation_request_type: 'NEW',
     test_config: {
       appId: 'sample_app',
-      testId: (Math.random() * 1_000_000) | 0,
+      testId: Math.trunc(Math.random() * 1_000_000),
       testType: 'simulation_vs_expected',
       expectedResults: null as any,
       events: null as any,

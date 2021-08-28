@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-empty-function */
 import { Client, Message } from '@stomp/stompjs';
 import { BehaviorSubject, Observable, using, timer, Subject, zip } from 'rxjs';
 import { filter, switchMap, take, takeWhile, tap, timeout } from 'rxjs/operators';
@@ -99,7 +100,8 @@ export class StompClientService {
         this._password = password;
 
         this._retrieveToken(username, password)
-          .then(() => {
+          .then(token => {
+            this._authenticationToken = token;
             this._client.onDisconnect = () => {
               this.reconnect();
               subject.next({
@@ -151,8 +153,7 @@ export class StompClientService {
               if (__DEVELOPMENT__) {
                 sessionStorage.setItem('token', token);
               }
-              this._authenticationToken = token;
-              resolve();
+              resolve(token);
             } else {
               reject();
             }
@@ -277,6 +278,7 @@ export class StompClientService {
 
   /**
    * Subscribe to destination, then unsubscribe right away after a response arrives
+   *
    * @param destination The topic to subscribe to from which to get the response
    */
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -287,6 +289,7 @@ export class StompClientService {
 
   /**
    * Subscribe to destination, and continuously watch for responses from the server
+   *
    * @param destination The topic to subscribe to from which to get the response
    */
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -297,7 +300,7 @@ export class StompClientService {
         take(1),
         switchMap(() => {
           const source = new BehaviorSubject<T>(null);
-          const id = `${destination}[${Math.random() * 1_000_000 | 0}]`;
+          const id = `${destination}[${Math.trunc(Math.random() * 1_000_000)}]`;
           return using(() => this._client.subscribe(destination, (message: Message) => {
             const body = message.body;
             try {
