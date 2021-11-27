@@ -1,25 +1,25 @@
 Make sure that NodeJS is installed ([https://nodejs.org/en/](https://nodejs.org/en/))
 
 # For development
-## Bootstrapping the front-end
-- `cd frontend`
+## Bootstrapping the client
+- `cd client`
 - `npm install`
 - `npm start` (Or `npm start disable-css-hmr` to disable CSS hot reload, theme toggle only works with this option disabled)
-- Go to http://localhost:4000
+- Go to http://localhost:3000
 
-## Bootstrapping the back-end
-- `cd backend`
+## Bootstrapping the server
+- `cd server`
 - `npm install`
 - `npm run nodemon` to start an HTTP server with hot-loading and TypeScript server in watch mode
 
 # For deployment
 ## Building the front-end code
-- `cd frontend`
+- `cd client`
 - `npm install`
 - `npm run build`
 
-## Building the back-end code
-- `cd backend`
+## Building the server code
+- `cd server`
 - `npm install`
 - `npm run build`
 - `npm start`

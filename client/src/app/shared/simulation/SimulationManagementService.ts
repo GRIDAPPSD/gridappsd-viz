@@ -1,6 +1,6 @@
 import { Subject, Observable, Subscription, BehaviorSubject, timer } from 'rxjs';
 import { filter, pluck, debounce, takeWhile, switchMap } from 'rxjs/operators';
-import * as socketIo from 'socket.io-client';
+import { io } from 'socket.io-client';
 
 import { StompClientService, StompClientConnectionStatus } from '@shared/StompClientService';
 import { SimulationStatus } from '@common/SimulationStatus';
@@ -48,7 +48,7 @@ export class SimulationManagementService {
   private readonly _stateStore = StateStore.getInstance();
   private readonly _stompClientService = StompClientService.getInstance();
   private readonly _currentSimulationStatusNotifer = new BehaviorSubject<SimulationStatus>(SimulationStatus.STOPPED);
-  private readonly _socket = socketIo();
+  private readonly _socket = io();
   private readonly _simulationSnapshot: SimulationSnapshot = DEFAULT_SIMULATION_SNAPSHOT;
   private readonly _simulationSnapshotReceivedNotifier = new BehaviorSubject<SimulationSnapshot>({} as SimulationSnapshot);
   private readonly _simulationOutputMeasurementMapStream = new Subject<Map<string, SimulationOutputMeasurement>>();
