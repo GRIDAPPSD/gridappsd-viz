@@ -12,3 +12,5 @@ node_modules/*
 pull.sh
 
 tsconfig.tsbuildinfo
+
+.eslintcache
