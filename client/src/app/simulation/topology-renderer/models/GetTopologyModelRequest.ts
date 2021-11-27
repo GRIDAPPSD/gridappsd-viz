@@ -1,5 +1,5 @@
-import { TopologyModel } from '@shared/topology';
-import { MessageRequest, RequestConfigurationType } from '@shared/MessageRequest';
+import { TopologyModel } from '@client:common/topology';
+import { MessageRequest, RequestConfigurationType } from '@client:common/MessageRequest';
 
 export class GetTopologyModelRequest implements MessageRequest {
 

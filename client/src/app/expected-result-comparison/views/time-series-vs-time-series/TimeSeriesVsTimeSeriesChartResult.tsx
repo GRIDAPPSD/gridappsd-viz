@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { LineChart, LineChartModel, TimeSeries } from '@shared/line-chart';
+import { LineChart, LineChartModel, TimeSeries } from '@client:common/line-chart';
 
 import './TimeSeriesVsTimeSeriesChartResult.light.scss';
 import './TimeSeriesVsTimeSeriesChartResult.dark.scss';

@@ -1,4 +1,4 @@
-import { SimulationStatusLogMessage } from '@shared/simulation';
+import { SimulationStatusLogMessage } from '@client:common/simulation';
 
 export interface LogMessage {
   id: number;

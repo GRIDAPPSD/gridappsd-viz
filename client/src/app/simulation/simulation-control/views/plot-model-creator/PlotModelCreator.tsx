@@ -1,8 +1,8 @@
 import * as React from 'react';
 import { map } from 'rxjs/operators';
 
-import { Dialog, DialogContent, DialogActionGroup } from '@shared/overlay/dialog';
-import { BasicButton } from '@shared/buttons';
+import { Dialog, DialogContent, DialogActionGroup } from '@client:common/overlay/dialog';
+import { BasicButton } from '@client:common/buttons';
 import {
   Input,
   Select,
@@ -11,10 +11,10 @@ import {
   FormGroupModel,
   FormControlModel,
   Form
-} from '@shared/form';
-import { MeasurementType, ModelDictionaryComponent } from '@shared/topology';
-import { PlotModel, PlotModelComponent } from '@shared/plot-model';
-import { Validators } from '@shared/form/validation';
+} from '@client:common/form';
+import { MeasurementType, ModelDictionaryComponent } from '@client:common/topology';
+import { Validators } from '@client:common/form/validation';
+import { PlotModel, PlotModelComponent } from '@client:common/plot-model';
 
 import { PlotModelSummary } from './PlotModelSummary';
 

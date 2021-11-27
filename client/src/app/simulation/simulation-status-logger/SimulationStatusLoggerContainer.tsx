@@ -2,11 +2,11 @@ import * as React from 'react';
 import { Subject } from 'rxjs';
 import { filter, switchMap, takeWhile, finalize, takeUntil } from 'rxjs/operators';
 
-import { SIMULATION_STATUS_LOG_TOPIC, SimulationManagementService, SimulationStatusLogMessage } from '@shared/simulation';
-import { StompClientService, StompClientConnectionStatus } from '@shared/StompClientService';
-import { StateStore } from '@shared/state-store';
-import { SimulationStatus } from '@common/SimulationStatus';
-import { waitUntil } from '@shared/misc';
+import { StateStore } from '@client:common/state-store';
+import { waitUntil } from '@client:common/misc';
+import { SIMULATION_STATUS_LOG_TOPIC, SimulationManagementService, SimulationStatusLogMessage } from '@client:common/simulation';
+import { StompClientService, StompClientConnectionStatus } from '@client:common/StompClientService';
+import { SimulationStatus } from '@project:common/SimulationStatus';
 
 import { Deque } from './models/Deque';
 import { SimulationStatusLogger } from './SimulationStatusLogger';

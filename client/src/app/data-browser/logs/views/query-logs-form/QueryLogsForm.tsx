@@ -1,9 +1,9 @@
 import * as React from 'react';
 
-import { Input, Select, SelectionOptionBuilder, Form, FormGroupModel, FormControlModel } from '@shared/form';
-import { BasicButton } from '@shared/buttons';
-import { Validators } from '@shared/form/validation';
-import { DateTimeService } from '@shared/DateTimeService';
+import { Input, Select, SelectionOptionBuilder, Form, FormGroupModel, FormControlModel } from '@client:common/form';
+import { BasicButton } from '@client:common/buttons';
+import { Validators } from '@client:common/form/validation';
+import { DateTimeService } from '@client:common/DateTimeService';
 
 import { QueryLogsRequestBody } from '../../models/QueryLogsRequestBody';
 import { SimulationId } from '../../models/SimulationId';

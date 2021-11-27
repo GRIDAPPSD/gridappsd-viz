@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { StompClientConnectionStatus } from '@shared/StompClientService';
+import { StompClientConnectionStatus } from '@client:common/StompClientService';
 
 import './WebSocketConnectedIndicator.light.scss';
 import './WebSocketConnectedIndicator.dark.scss';

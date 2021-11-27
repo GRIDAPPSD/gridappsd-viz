@@ -2,13 +2,17 @@ import * as React from 'react';
 import { Subject, Subscription } from 'rxjs';
 import { takeUntil, takeWhile } from 'rxjs/operators';
 
+import { waitUntil } from '@client:common/misc';
+import { ProgressIndicator } from '@client:common/overlay/progress-indicator';
+import { StateStore } from '@client:common/state-store';
+import { CurrentLimit } from '@client:common/measurement-limits';
 import {
   SimulationQueue,
   SimulationConfiguration,
   DEFAULT_SIMULATION_CONFIGURATION,
   SimulationOutputMeasurement
-} from '@shared/simulation';
-import { StompClientService } from '@shared/StompClientService';
+} from '@client:common/simulation';
+import { StompClientService } from '@client:common/StompClientService';
 import {
   Node,
   Regulator,
@@ -19,12 +23,9 @@ import {
   CapacitorControlMode,
   NodeType,
   Edge
-} from '@shared/topology';
-import { waitUntil } from '@shared/misc';
-import { ProgressIndicator } from '@shared/overlay/progress-indicator';
-import { SimulationManagementService } from '@shared/simulation';
-import { StateStore } from '@shared/state-store';
-import { CurrentLimit } from '@shared/measurement-limits';
+} from '@client:common/topology';
+import { SimulationManagementService } from '@client:common/simulation';
+
 
 import { TopologyRenderer } from './TopologyRenderer';
 import { OpenOrCloseCapacitorRequest } from './models/OpenOrCloseCapacitorRequest';

@@ -1,4 +1,4 @@
-import { FeederModelRegion, FeederModelSubregion, FeederModelLine } from '@shared/topology';
+import { FeederModelRegion, FeederModelSubregion, FeederModelLine } from '@client:common/topology';
 
 export interface PowerSystemConfigurationModel {
   region: FeederModelRegion;

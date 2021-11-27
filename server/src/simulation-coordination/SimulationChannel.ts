@@ -1,8 +1,8 @@
 import { Subscription } from 'rxjs';
 
-import { SimulationStatus } from '@common/SimulationStatus';
-import { SimulationSnapshot } from '@common/SimulationSnapshot';
-import { SimulationSynchronizationEvent } from '@common/SimulationSynchronizationEvent';
+import { SimulationStatus } from '@project:common/SimulationStatus';
+import { SimulationSnapshot } from '@project:common/SimulationSnapshot';
+import { SimulationSynchronizationEvent } from '@project:common/SimulationSynchronizationEvent';
 
 import { SimulationParticipant } from './SimulationParticipant';
 

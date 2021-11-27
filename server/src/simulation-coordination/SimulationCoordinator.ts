@@ -1,6 +1,6 @@
 import { Socket } from 'socket.io';
 
-import { SimulationSynchronizationEvent } from '@common/SimulationSynchronizationEvent';
+import { SimulationSynchronizationEvent } from '@project:common/SimulationSynchronizationEvent';
 
 import { SimulationParticipant } from './SimulationParticipant';
 import { SimulationChannel } from './SimulationChannel';

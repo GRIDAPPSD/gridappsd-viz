@@ -2,11 +2,11 @@ import * as React from 'react';
 import { zip, Subject } from 'rxjs';
 import { switchMap, filter, takeWhile, takeUntil } from 'rxjs/operators';
 
-import { StompClientService } from '@shared/StompClientService';
-import { StateStore } from '@shared/state-store';
-import { SimulationManagementService } from '@shared/simulation';
-import { SimulationStatus } from '@common/SimulationStatus';
-import { DateTimeService } from '@shared/DateTimeService';
+import { StompClientService } from '@client:common/StompClientService';
+import { StateStore } from '@client:common/state-store';
+import { SimulationManagementService } from '@client:common/simulation';
+import { DateTimeService } from '@client:common/DateTimeService';
+import { SimulationStatus } from '@project:common/SimulationStatus';
 
 import { VoltageViolation } from './VoltageViolation';
 

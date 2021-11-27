@@ -1,5 +1,5 @@
-import { MessageRequest } from '@shared/MessageRequest';
-import { Application } from '@shared/Application';
+import { Application } from '@client:common/Application';
+import { MessageRequest } from '@client:common/MessageRequest';
 
 export class EnableApplicationRequest implements MessageRequest {
 

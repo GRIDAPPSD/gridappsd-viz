@@ -1,8 +1,8 @@
 import * as React from 'react';
 
-import { PortalRenderer } from '@shared/overlay/portal-renderer';
-import { Backdrop } from '@shared/overlay/backdrop';
-import { Fade } from '@shared/effects/fade';
+import { PortalRenderer } from '@client:common/overlay/portal-renderer';
+import { Backdrop } from '@client:common/overlay/backdrop';
+import { Fade } from '@client:common/effects/fade';
 
 import './MatchedNodeLocator.light.scss';
 import './MatchedNodeLocator.dark.scss';

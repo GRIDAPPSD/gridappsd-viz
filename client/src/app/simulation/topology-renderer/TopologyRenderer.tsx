@@ -5,7 +5,6 @@ import { scaleLinear, ScaleLinear, selectAll } from 'd3';
 import { Subject } from 'rxjs';
 import { takeUntil, filter } from 'rxjs/operators';
 
-import { CanvasTransformService } from '@shared/CanvasTransformService';
 import {
   Switch,
   Capacitor,
@@ -19,14 +18,15 @@ import {
   NodeType,
   Substation,
   Battery
-} from '@shared/topology';
-import { Tooltip, showTooltipAt, hideTooltip } from '@shared/tooltip';
-import { IconButton } from '@shared/buttons';
-import { Notification } from '@shared/overlay/notification';
-import { StateStore } from '@shared/state-store';
-import { PortalRenderer } from '@shared/overlay/portal-renderer';
-import { SimulationOutputMeasurement } from '@shared/simulation';
-import { CurrentLimit } from '@shared/measurement-limits';
+} from '@client:common/topology';
+import { Tooltip, showTooltipAt, hideTooltip } from '@client:common/tooltip';
+import { IconButton } from '@client:common/buttons';
+import { Notification } from '@client:common/overlay/notification';
+import { StateStore } from '@client:common/state-store';
+import { PortalRenderer } from '@client:common/overlay/portal-renderer';
+import { SimulationOutputMeasurement } from '@client:common/simulation';
+import { CurrentLimit } from '@client:common/measurement-limits';
+import { CanvasTransformService } from '@client:common/CanvasTransformService';
 
 import { SwitchControlMenu } from './views/switch-control-menu/SwitchControlMenu';
 import { CapacitorControlMenu } from './views/capacitor-control-menu/CapacitorControlMenu';

@@ -1,11 +1,11 @@
 /* eslint-disable @typescript-eslint/indent */
 import * as React from 'react';
 
-import { TextArea, Select, SelectionOptionBuilder, FormGroupModel, FormControlModel, Form } from '@shared/form';
-import { BasicButton } from '@shared/buttons';
-import { ProgressIndicator } from '@shared/overlay/progress-indicator';
-import { FeederModelLine } from '@shared/topology';
-import { Validators } from '@shared/form/validation';
+import { TextArea, Select, SelectionOptionBuilder, FormGroupModel, FormControlModel, Form } from '@client:common/form';
+import { BasicButton } from '@client:common/buttons';
+import { ProgressIndicator } from '@client:common/overlay/progress-indicator';
+import { FeederModelLine } from '@client:common/topology';
+import { Validators } from '@client:common/form/validation';
 
 import { RequestEditor, Response } from '../DataBrowser';
 

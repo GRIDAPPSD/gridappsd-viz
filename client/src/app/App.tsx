@@ -1,18 +1,18 @@
 import * as React from 'react';
 import { Route, Redirect, withRouter, RouteComponentProps, RouteChildrenProps } from 'react-router-dom';
 
-import { Application } from '@shared/Application';
-import { FeederModel } from '@shared/topology';
-import { SimulationConfiguration, DEFAULT_SIMULATION_CONFIGURATION } from '@shared/simulation';
-import { TabGroup, Tab } from '@shared/tabs';
-import { AuthenticatorContainer } from '@shared/authenticator';
-import { MessageBanner } from '@shared/overlay/message-banner';
-import { ThreeDots } from '@shared/three-dots';
-import { StompClientConnectionStatus } from '@shared/StompClientService';
-import { StateStore } from '@shared/state-store';
-import { waitUntil } from '@shared/misc';
-import { PortalRenderer } from '@shared/overlay/portal-renderer';
-import { Dialog } from '@shared/overlay/dialog';
+import { Application } from '@client:common/Application';
+import { MessageBanner } from '@client:common/overlay/message-banner';
+import { StateStore } from '@client:common/state-store';
+import { PortalRenderer } from '@client:common/overlay/portal-renderer';
+import { waitUntil } from '@client:common/misc';
+import { Dialog } from '@client:common/overlay/dialog';
+import { StompClientConnectionStatus } from '@client:common/StompClientService';
+import { SimulationConfiguration, DEFAULT_SIMULATION_CONFIGURATION } from '@client:common/simulation';
+import { FeederModel } from '@client:common/topology';
+import { ThreeDots } from '@client:common/three-dots';
+import { AuthenticatorContainer } from '@client:common/authenticator';
+import { TabGroup, Tab } from '@client:common/tabs';
 
 import { AvailableApplicationsAndServicesContainer } from './available-applications-and-services';
 import { DataBrowser } from './data-browser';

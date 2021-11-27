@@ -1,9 +1,9 @@
 import * as React from 'react';
 
-import { PlotModel } from '@shared/plot-model/PlotModel';
-import { IconButton } from '@shared/buttons';
-import { PlotModelComponent } from '@shared/plot-model';
-import { Tooltip } from '@shared/tooltip';
+import { PlotModel } from '@client:common/plot-model/PlotModel';
+import { IconButton } from '@client:common/buttons';
+import { Tooltip } from '@client:common/tooltip';
+import { PlotModelComponent } from '@client:common/plot-model';
 
 import './PlotModelSummary.light.scss';
 import './PlotModelSummary.dark.scss';

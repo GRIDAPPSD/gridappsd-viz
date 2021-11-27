@@ -2,11 +2,11 @@ import * as React from 'react';
 import { Subscription } from 'rxjs';
 import { map, finalize, takeWhile } from 'rxjs/operators';
 
-import { ExpectedResultComparisonType } from '@shared/ExpectedResultComparisonType';
-import { StompClientService } from '@shared/StompClientService';
-import { StateStore } from '@shared/state-store';
-import { MessageRequest } from '@shared/MessageRequest';
-import { Notification } from '@shared/overlay/notification';
+import { ExpectedResultComparisonType } from '@client:common/ExpectedResultComparisonType';
+import { StateStore } from '@client:common/state-store';
+import { Notification } from '@client:common/overlay/notification';
+import { StompClientService } from '@client:common/StompClientService';
+import { MessageRequest } from '@client:common/MessageRequest';
 
 import { TimeSeriesVsTimeSeries } from './views/time-series-vs-time-series/TimeSeriesVsTimeSeries';
 import { ResultViewer } from './views/result-viewer/ResultViewer';

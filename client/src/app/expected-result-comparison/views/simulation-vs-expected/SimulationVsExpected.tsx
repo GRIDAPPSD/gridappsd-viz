@@ -2,9 +2,9 @@
 import * as React from 'react';
 import { take } from 'rxjs/operators';
 
-import { BasicButton, IconButton } from '@shared/buttons';
-import { FilePickerService, FilePicker } from '@shared/file-picker';
-import { Notification } from '@shared/overlay/notification';
+import { BasicButton, IconButton } from '@client:common/buttons';
+import { Notification } from '@client:common/overlay/notification';
+import { FilePickerService, FilePicker } from '@client:common/file-picker';
 
 import './SimulationVsExpected.light.scss';
 import './SimulationVsExpected.dark.scss';

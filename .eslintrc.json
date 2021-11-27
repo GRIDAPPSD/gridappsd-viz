@@ -213,11 +213,7 @@
                         "group": "internal"
                     },
                     {
-                        "pattern": "@shared/**",
-                        "group": "internal"
-                    },
-                    {
-                        "pattern": "@common/**",
+                        "pattern": "@project:common/**",
                         "group": "internal"
                     }
                 ],

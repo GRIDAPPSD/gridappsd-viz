@@ -1,9 +1,9 @@
 import * as React from 'react';
 import { Subscription } from 'rxjs';
 
-import { CanvasTransformService } from '@shared/CanvasTransformService';
-import { waitUntil } from '@shared/misc';
-import { SimulationOutputMeasurement } from '@shared/simulation';
+import { waitUntil } from '@client:common/misc';
+import { SimulationOutputMeasurement } from '@client:common/simulation';
+import { CanvasTransformService } from '@client:common/CanvasTransformService';
 
 import './MeasurementValueTable.light.scss';
 import './MeasurementValueTable.dark.scss';

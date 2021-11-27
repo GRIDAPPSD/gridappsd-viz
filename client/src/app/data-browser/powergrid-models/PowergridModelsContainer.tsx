@@ -2,8 +2,8 @@ import * as React from 'react';
 import { Subscription, of } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
 
-import { StompClientService, StompClientConnectionStatus } from '@shared/StompClientService';
-import { FeederModelLine } from '@shared/topology';
+import { StompClientService, StompClientConnectionStatus } from '@client:common/StompClientService';
+import { FeederModelLine } from '@client:common/topology';
 
 import { PowerGridModels } from './PowergridModels';
 import {

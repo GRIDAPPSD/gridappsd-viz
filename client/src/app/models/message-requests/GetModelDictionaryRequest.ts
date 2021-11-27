@@ -1,5 +1,5 @@
-import { MessageRequest, RequestConfigurationType } from '@shared/MessageRequest';
-import { ModelDictionary } from '@shared/topology';
+import { ModelDictionary } from '@client:common/topology';
+import { MessageRequest, RequestConfigurationType } from '@client:common/MessageRequest';
 
 export interface GetModelDictionaryRequestBody {
   configurationType: string;

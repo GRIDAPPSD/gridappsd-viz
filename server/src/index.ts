@@ -3,7 +3,7 @@ import * as http from 'http';
 import * as express from 'express';
 import { Server } from 'socket.io';
 
-import { SimulationStatus } from '@common/SimulationStatus';
+import { SimulationStatus } from '@project:common/SimulationStatus';
 
 import { App } from './App';
 import { SimulationCoordinator } from './simulation-coordination/SimulationCoordinator';

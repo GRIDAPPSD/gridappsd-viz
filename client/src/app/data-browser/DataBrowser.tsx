@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { NavLink, Route, Redirect } from 'react-router-dom';
 
-import { FeederModel, FeederModelLine } from '@shared/topology';
+import { FeederModel, FeederModelLine } from '@client:common/topology';
 
 import { PowergridModelsContainer } from './powergrid-models';
 import { LogsContainer } from './logs';
@@ -106,8 +106,8 @@ interface RequestProps {
 export function RequestEditor(props: RequestProps) {
   return (
     <div
-className='data-browser__request'
-style={props.style}>
+      className='data-browser__request'
+      style={props.style}>
       {props.children}
     </div>
   );
@@ -122,8 +122,8 @@ interface ResponseProps {
 export function Response(props: ResponseProps) {
   return (
     <div
-className='data-browser__response'
-style={props.style}>
+      className='data-browser__response'
+      style={props.style}>
       {props.children}
     </div>
   );

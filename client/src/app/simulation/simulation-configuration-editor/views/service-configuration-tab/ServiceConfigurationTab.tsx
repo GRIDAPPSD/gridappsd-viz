@@ -1,11 +1,11 @@
 import * as React from 'react';
 import { filter } from 'rxjs/operators';
 
-import { Service, ServiceConfigUserInputSpec } from '@shared/Service';
-import { BasicButton } from '@shared/buttons';
-import { MessageBanner } from '@shared/overlay/message-banner';
-import { Notification } from '@shared/overlay/notification';
-import { FormArrayModel, SelectionOptionBuilder, FormControlModel, Select } from '@shared/form';
+import { Service, ServiceConfigUserInputSpec } from '@client:common/Service';
+import { BasicButton } from '@client:common/buttons';
+import { MessageBanner } from '@client:common/overlay/message-banner';
+import { Notification } from '@client:common/overlay/notification';
+import { FormArrayModel, SelectionOptionBuilder, FormControlModel, Select } from '@client:common/form';
 
 import { ServiceConfigurationModel } from '../../models/ServiceConfigurationModel';
 

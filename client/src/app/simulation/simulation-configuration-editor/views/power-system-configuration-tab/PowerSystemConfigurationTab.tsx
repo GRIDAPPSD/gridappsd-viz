@@ -1,8 +1,8 @@
 import * as React from 'react';
 
-import { FormGroup, Select, SelectionOptionBuilder, FormGroupModel, FormControlModel } from '@shared/form';
-import { FeederModel, FeederModelRegion, FeederModelLine, FeederModelSubregion } from '@shared/topology';
-import { SimulationConfiguration } from '@shared/simulation';
+import { FormGroup, Select, SelectionOptionBuilder, FormGroupModel, FormControlModel } from '@client:common/form';
+import { FeederModel, FeederModelRegion, FeederModelLine, FeederModelSubregion } from '@client:common/topology';
+import { SimulationConfiguration } from '@client:common/simulation';
 
 import { PowerSystemConfigurationModel } from '../../models/PowerSystemConfigurationModel';
 

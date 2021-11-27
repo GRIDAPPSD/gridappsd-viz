@@ -1,7 +1,7 @@
 import * as React from 'react';
 
-import { TabGroup, Tab } from '@shared/tabs';
-import { ProgressIndicator } from '@shared/overlay/progress-indicator';
+import { ProgressIndicator } from '@client:common/overlay/progress-indicator';
+import { TabGroup, Tab } from '@client:common/tabs';
 
 import { ResponseBody } from './models/ResponseBody';
 import { ApplicationsTab } from './views/applications-tab/ApplicationsTab';

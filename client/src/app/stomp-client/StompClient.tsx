@@ -1,12 +1,12 @@
 import * as React from 'react';
 import { filter } from 'rxjs/operators';
 
-import { Input, TextArea, FormControlModel, Form, FormGroupModel } from '@shared/form';
-import { BasicButton, IconButton } from '@shared/buttons';
-import { ProgressIndicator } from '@shared/overlay/progress-indicator';
-import { Tooltip } from '@shared/tooltip';
-import { DownloadType } from '@shared/misc';
-import { Validators } from '@shared/form/validation';
+import { Input, TextArea, FormControlModel, Form, FormGroupModel } from '@client:common/form';
+import { BasicButton, IconButton } from '@client:common/buttons';
+import { ProgressIndicator } from '@client:common/overlay/progress-indicator';
+import { Tooltip } from '@client:common/tooltip';
+import { Validators } from '@client:common/form/validation';
+import { DownloadType } from '@client:common/misc';
 
 import './StompClient.light.scss';
 import './StompClient.dark.scss';

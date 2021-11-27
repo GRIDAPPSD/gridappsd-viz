@@ -10,7 +10,7 @@
             "ES2017"
         ],
         "paths": {
-            "@common/*": [
+            "@project:common/*": [
                 "../common/*"
             ]
         },

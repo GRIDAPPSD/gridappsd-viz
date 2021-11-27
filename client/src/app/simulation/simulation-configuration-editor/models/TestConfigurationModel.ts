@@ -1,4 +1,4 @@
-import { CommOutageEvent, FaultEvent, ScheduledCommandEvent } from '@shared/test-manager';
+import { CommOutageEvent, FaultEvent, ScheduledCommandEvent } from '@client:common/test-manager';
 
 export interface TestConfigurationModel {
   commOutageEvents: CommOutageEvent[];

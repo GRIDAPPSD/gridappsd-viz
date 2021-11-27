@@ -2,9 +2,9 @@ import * as React from 'react';
 import { Subscription } from 'rxjs';
 import { map } from 'rxjs/operators';
 
-import { StompClientService, StompClientConnectionStatus } from '@shared/StompClientService';
-import { ProgressIndicator } from '@shared/overlay/progress-indicator';
-import { FilterableTable } from '@shared/filterable-table';
+import { ProgressIndicator } from '@client:common/overlay/progress-indicator';
+import { StompClientService, StompClientConnectionStatus } from '@client:common/StompClientService';
+import { FilterableTable } from '@client:common/filterable-table';
 
 import { Response } from '../DataBrowser';
 import { RequestEditor } from '../DataBrowser';

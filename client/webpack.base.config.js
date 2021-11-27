@@ -21,7 +21,7 @@ module.exports = (mode, cssHmr, theme) => ({
   entry: createEntry(path.resolve(__dirname, 'src'), { main: `./src/main.${mode}.tsx`, dark: [], light: [] }),
 
   output: {
-    path: path.resolve(__dirname, '..', 'backend', 'dist', 'public'),
+    path: path.resolve(__dirname, '..', 'server', 'dist', 'public'),
     filename: '[name].[fullhash:10].js',
     chunkFilename: '[name].[fullhash:10].js',
     publicPath: '/'
@@ -29,8 +29,8 @@ module.exports = (mode, cssHmr, theme) => ({
 
   resolve: {
     alias: {
-      '@shared': path.resolve('./src/app/shared'),
-      '@common': path.resolve('../common'),
+      '@client:common': path.resolve('./src/app/shared'),
+      '@project:common': path.resolve('../common'),
       '@constants.common': path.resolve('./src/constants.common.scss'),
       '@constants.light': path.resolve('./src/constants.light.scss'),
       '@constants.dark': path.resolve('./src/constants.dark.scss')

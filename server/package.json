@@ -1,13 +1,12 @@
 {
-    "name": "gridappsd-viz-backend",
+    "name": "gridappsd-viz-server",
     "version": "1.0.0",
     "main": "dist/index.js",
     "scripts": {
-        "build": "cd ../common && tsc && cd ../backend && tsc",
+        "build": "cd ../common && tsc && cd ../server && tsc",
         "start": "node dist/src/index.js",
         "nodemon": "tsc --watch & nodemon dist/src/index.js",
-        "debug": "node --inspect dist/src/index.js",
-        "lint": "eslint . --ext .ts && cd ../frontend && npm run lint"
+        "debug": "node --inspect dist/src/index.js"
     },
     "husky": {
         "hooks": {

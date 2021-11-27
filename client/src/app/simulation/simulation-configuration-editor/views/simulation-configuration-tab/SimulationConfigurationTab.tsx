@@ -9,11 +9,11 @@ import {
   SelectionOptionBuilder,
   FormGroupModel,
   FormControlModel
-} from '@shared/form';
-import { Tooltip } from '@shared/tooltip';
-import { IconButton } from '@shared/buttons';
-import { SimulationConfiguration } from '@shared/simulation';
-import { Validators } from '@shared/form/validation';
+} from '@client:common/form';
+import { Tooltip } from '@client:common/tooltip';
+import { IconButton } from '@client:common/buttons';
+import { Validators } from '@client:common/form/validation';
+import { SimulationConfiguration } from '@client:common/simulation';
 
 import { SimulationConfigurationTabModel } from '../../models/SimulationConfigurationTabModel';
 

@@ -1,6 +1,6 @@
-import { MessageRequest } from '@shared/MessageRequest';
-import { Application } from '@shared/Application';
-import { Service } from '@shared/Service';
+import { Application } from '@client:common/Application';
+import { Service } from '@client:common/Service';
+import { MessageRequest } from '@client:common/MessageRequest';
 
 interface RequestBody {
   applications: boolean;

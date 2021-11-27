@@ -1,16 +1,16 @@
 import * as React from 'react';
 import { filter } from 'rxjs/operators';
 
-import { FormGroup, Input, FormGroupModel, FormControlModel, FormArrayModel } from '@shared/form';
-import { RadioButtonGroup, RadioButton } from '@shared/form/radio';
-import { ModelDictionary, ModelDictionaryComponent } from '@shared/topology';
-import { IconButton } from '@shared/buttons';
-import { FilePicker, FilePickerService } from '@shared/file-picker';
-import { Tooltip } from '@shared/tooltip';
-import { CommOutageEvent, FaultEvent, ScheduledCommandEvent } from '@shared/test-manager';
-import { Validators, Validator } from '@shared/form/validation';
-import { download, DownloadType, generateUniqueId } from '@shared/misc';
-import { DateTimeService } from '@shared/DateTimeService';
+import { FormGroup, Input, FormGroupModel, FormControlModel, FormArrayModel } from '@client:common/form';
+import { IconButton } from '@client:common/buttons';
+import { Tooltip } from '@client:common/tooltip';
+import { CommOutageEvent, FaultEvent, ScheduledCommandEvent } from '@client:common/test-manager';
+import { Validators, Validator } from '@client:common/form/validation';
+import { download, DownloadType, generateUniqueId } from '@client:common/misc';
+import { DateTimeService } from '@client:common/DateTimeService';
+import { ModelDictionary, ModelDictionaryComponent } from '@client:common/topology';
+import { FilePicker, FilePickerService } from '@client:common/file-picker';
+import { RadioButtonGroup, RadioButton } from '@client:common/form/radio';
 
 import { TestConfigurationModel } from '../../models/TestConfigurationModel';
 

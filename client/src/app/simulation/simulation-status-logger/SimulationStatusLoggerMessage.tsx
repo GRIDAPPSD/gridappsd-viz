@@ -1,7 +1,7 @@
 import * as React from 'react';
 
-import { IconButton } from '@shared/buttons';
-import { SimulationStatusLogMessage } from '@shared/simulation';
+import { IconButton } from '@client:common/buttons';
+import { SimulationStatusLogMessage } from '@client:common/simulation';
 
 import './SimulationStatusLoggerMessage.light.scss';
 import './SimulationStatusLoggerMessage.dark.scss';

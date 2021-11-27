@@ -1,5 +1,5 @@
 /* eslint-disable camelcase */
-import { MessageRequest } from '@shared/MessageRequest';
+import { MessageRequest } from '@client:common/MessageRequest';
 
 export class SimulationVsTimeSeriesRequest implements MessageRequest {
 

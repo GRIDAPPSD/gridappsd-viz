@@ -1,6 +1,6 @@
 /* eslint-disable camelcase */
-import { CurrentLimit, VoltageLimit } from '@shared/measurement-limits';
-import { MessageRequest, RequestConfigurationType } from '@shared/MessageRequest';
+import { CurrentLimit, VoltageLimit } from '@client:common/measurement-limits';
+import { MessageRequest, RequestConfigurationType } from '@client:common/MessageRequest';
 
 export class FetchLimitsFileRequest implements MessageRequest {
 

@@ -1,10 +1,10 @@
 import * as React from 'react';
 
-import { StompClientConnectionStatus } from '@shared/StompClientService';
-import { MessageBanner } from '@shared/overlay/message-banner';
-import { ThreeDots } from '@shared/three-dots';
-import { PortalRenderer } from '@shared/overlay/portal-renderer';
-import { IconButton } from '@shared/buttons';
+import { MessageBanner } from '@client:common/overlay/message-banner';
+import { PortalRenderer } from '@client:common/overlay/portal-renderer';
+import { IconButton } from '@client:common/buttons';
+import { StompClientConnectionStatus } from '@client:common/StompClientService';
+import { ThreeDots } from '@client:common/three-dots';
 
 import './WebsocketStatusWatcher.light.scss';
 import './WebsocketStatusWatcher.dark.scss';

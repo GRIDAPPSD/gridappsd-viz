@@ -1,9 +1,9 @@
 import * as React from 'react';
 
-import { FormGroup, Select, TextArea, SelectionOptionBuilder, FormGroupModel, FormControlModel, FormArrayModel } from '@shared/form';
-import { SimulationConfiguration } from '@shared/simulation';
-import { Application } from '@shared/Application';
-import { Validators } from '@shared/form/validation';
+import { FormGroup, Select, TextArea, SelectionOptionBuilder, FormGroupModel, FormControlModel, FormArrayModel } from '@client:common/form';
+import { Application } from '@client:common/Application';
+import { Validators } from '@client:common/form/validation';
+import { SimulationConfiguration } from '@client:common/simulation';
 
 import { ApplicationConfigurationModel } from '../../models/ApplicationConfigurationModel';
 

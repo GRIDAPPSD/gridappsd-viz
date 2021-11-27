@@ -1,17 +1,17 @@
 import * as React from 'react';
 
-import { BasicButton } from '@shared/buttons';
+import { BasicButton } from '@client:common/buttons';
+import { Select, Input, SelectionOptionBuilder, FormGroupModel, FormControlModel } from '@client:common/form';
+import { ScheduledCommandEvent } from '@client:common/test-manager';
+import { Validators } from '@client:common/form/validation';
+import { Notification } from '@client:common/overlay/notification';
 import {
   ModelDictionary,
   ModelDictionaryCapacitor,
   ModelDictionaryComponent,
   ModelDictionaryRegulator,
   ModelDictionarySwitch
-} from '@shared/topology/model-dictionary';
-import { Select, Input, SelectionOptionBuilder, FormGroupModel, FormControlModel } from '@shared/form';
-import { ScheduledCommandEvent } from '@shared/test-manager';
-import { Validators } from '@shared/form/validation';
-import { Notification } from '@shared/overlay/notification';
+} from '@client:common/topology/model-dictionary';
 
 import { ScheduledCommandEventFormService } from '../../../services/ScheduledCommandEventFormService';
 

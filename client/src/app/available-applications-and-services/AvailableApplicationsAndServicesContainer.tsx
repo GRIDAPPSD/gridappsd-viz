@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { StompClientService } from '@shared/StompClientService';
+import { StompClientService } from '@client:common/StompClientService';
 
 import { GetAvailableApplicationsAndServicesRequest } from './models/GetAvailableApplicationsAndServicesRequest';
 import { ResponseBody } from './models/ResponseBody';

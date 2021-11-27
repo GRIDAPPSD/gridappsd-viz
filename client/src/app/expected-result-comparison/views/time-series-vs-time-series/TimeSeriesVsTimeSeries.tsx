@@ -1,7 +1,7 @@
 import * as React from 'react';
 
-import { Form, SelectionOptionBuilder, FormGroupModel, FormControlModel, Select } from '@shared/form';
-import { BasicButton } from '@shared/buttons';
+import { Form, SelectionOptionBuilder, FormGroupModel, FormControlModel, Select } from '@client:common/form';
+import { BasicButton } from '@client:common/buttons';
 
 import './TimeSeriesVsTimeSeries.light.scss';
 import './TimeSeriesVsTimeSeries.dark.scss';

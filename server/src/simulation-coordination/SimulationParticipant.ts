@@ -2,8 +2,8 @@ import { Socket } from 'socket.io';
 import { Subject } from 'rxjs';
 import { take, finalize, takeUntil } from 'rxjs/operators';
 
-import { SimulationStatus } from '@common/SimulationStatus';
-import { SimulationSynchronizationEvent } from '@common/SimulationSynchronizationEvent';
+import { SimulationStatus } from '@project:common/SimulationStatus';
+import { SimulationSynchronizationEvent } from '@project:common/SimulationSynchronizationEvent';
 
 /**
  * A simulation participant is a client that has joined a running simulation

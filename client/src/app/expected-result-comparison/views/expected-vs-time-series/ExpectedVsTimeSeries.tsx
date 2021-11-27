@@ -2,10 +2,10 @@
 import * as React from 'react';
 import { take } from 'rxjs/operators';
 
-import { BasicButton, IconButton } from '@shared/buttons';
-import { FilePickerService, FilePicker } from '@shared/file-picker';
-import { Notification } from '@shared/overlay/notification';
-import { Select, SelectionOptionBuilder, FormControlModel } from '@shared/form';
+import { BasicButton, IconButton } from '@client:common/buttons';
+import { Select, SelectionOptionBuilder, FormControlModel } from '@client:common/form';
+import { Notification } from '@client:common/overlay/notification';
+import { FilePickerService, FilePicker } from '@client:common/file-picker';
 
 import './ExpectedVsTimeSeries.light.scss';
 import './ExpectedVsTimeSeries.dark.scss';

@@ -2,10 +2,10 @@ import * as React from 'react';
 import { Subject } from 'rxjs';
 import { filter, switchMap, takeUntil } from 'rxjs/operators';
 
-import { StateStore } from '@shared/state-store';
-import { StompClientService } from '@shared/StompClientService';
-import { SimulationManagementService } from '@shared/simulation';
-import { SimulationStatus } from '@common/SimulationStatus';
+import { StateStore } from '@client:common/state-store';
+import { StompClientService } from '@client:common/StompClientService';
+import { SimulationManagementService } from '@client:common/simulation';
+import { SimulationStatus } from '@project:common/SimulationStatus';
 
 import { Alarm } from './models/Alarm';
 import { NewAlarmNotification } from './views/new-alarm-notification/NewAlarmNotification';

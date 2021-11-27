@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { Backdrop } from '@shared/overlay/backdrop';
+import { Backdrop } from '@client:common/overlay/backdrop';
 
 import './Drawer.light.scss';
 import './Drawer.dark.scss';
@@ -31,11 +31,11 @@ export class Drawer extends React.Component<Props, State> {
     return (
       <div className={`drawer ${this.state.isOpen ? 'open' : 'closed'}`}>
         <Backdrop
-visible={this.state.isOpen}
-onClick={this.close} />
+          visible={this.state.isOpen}
+          onClick={this.close} />
         <ul
-className='drawer-items'
-onClick={this.close}>
+          className='drawer-items'
+          onClick={this.close}>
           {this.props.children}
         </ul>
       </div>

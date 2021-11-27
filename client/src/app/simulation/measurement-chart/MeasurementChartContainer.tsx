@@ -2,12 +2,12 @@ import * as React from 'react';
 import { Subscription, Subject } from 'rxjs';
 import { filter, takeUntil, map } from 'rxjs/operators';
 
-import { SimulationOutputMeasurement, SimulationManagementService } from '@shared/simulation';
-import { SimulationStatus } from '@common/SimulationStatus';
-import { StateStore } from '@shared/state-store';
-import { MeasurementType, ConductingEquipmentType } from '@shared/topology';
-import { PlotModel, PlotModelComponent } from '@shared/plot-model';
-import { StompClientService } from '@shared/StompClientService';
+import { StateStore } from '@client:common/state-store';
+import { SimulationOutputMeasurement, SimulationManagementService } from '@client:common/simulation';
+import { MeasurementType, ConductingEquipmentType } from '@client:common/topology';
+import { StompClientService } from '@client:common/StompClientService';
+import { PlotModel, PlotModelComponent } from '@client:common/plot-model';
+import { SimulationStatus } from '@project:common/SimulationStatus';
 
 import { TimeSeriesDataPoint } from './models/TimeSeriesDataPoint';
 import { TimeSeries } from './models/TimeSeries';
@@ -424,8 +424,8 @@ export class MeasurementChartContainer extends React.Component<Props, State> {
     return (
       this.state.renderableChartModels.map(
         renderableChartModel => <MeasurementChart
-key={renderableChartModel.name}
-renderableChartModel={renderableChartModel} />
+          key={renderableChartModel.name}
+          renderableChartModel={renderableChartModel} />
       )
     );
   }

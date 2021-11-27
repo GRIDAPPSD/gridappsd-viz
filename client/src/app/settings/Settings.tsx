@@ -1,12 +1,12 @@
 import * as React from 'react';
 
-import { IconButton } from '@shared/buttons';
-import { Tooltip } from '@shared/tooltip';
-import { SlideToggle, FormControlModel, SelectionOptionBuilder, Select } from '@shared/form';
-import { Fade } from '@shared/effects/fade';
-import { Dialog, ConfirmationDialog } from '@shared/overlay/dialog';
-import { DateTimeService, TimeZone } from '@shared/DateTimeService';
-import { StateStore } from '@shared/state-store';
+import { IconButton } from '@client:common/buttons';
+import { Tooltip } from '@client:common/tooltip';
+import { SlideToggle, FormControlModel, SelectionOptionBuilder, Select } from '@client:common/form';
+import { Fade } from '@client:common/effects/fade';
+import { Dialog, ConfirmationDialog } from '@client:common/overlay/dialog';
+import { DateTimeService, TimeZone } from '@client:common/DateTimeService';
+import { StateStore } from '@client:common/state-store';
 
 import './Settings.light.scss';
 import './Settings.dark.scss';

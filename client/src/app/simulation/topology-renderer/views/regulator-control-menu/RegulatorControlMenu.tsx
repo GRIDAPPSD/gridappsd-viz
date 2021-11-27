@@ -1,11 +1,11 @@
 import * as React from 'react';
 
-import { Dialog, DialogContent, DialogActionGroup } from '@shared/overlay/dialog';
-import { Select, Input, SelectionOptionBuilder, FormGroupModel, FormControlModel } from '@shared/form';
-import { BasicButton } from '@shared/buttons';
-import { RegulatorControlMode } from '@shared/topology/RegulatorControlMode';
-import { Regulator } from '@shared/topology';
-import { Validators } from '@shared/form/validation';
+import { Dialog, DialogContent, DialogActionGroup } from '@client:common/overlay/dialog';
+import { Select, Input, SelectionOptionBuilder, FormGroupModel, FormControlModel } from '@client:common/form';
+import { BasicButton } from '@client:common/buttons';
+import { Validators } from '@client:common/form/validation';
+import { Regulator } from '@client:common/topology';
+import { RegulatorControlMode } from '@client:common/topology/RegulatorControlMode';
 
 import './RegulatorControlMenu.light.scss';
 import './RegulatorControlMenu.dark.scss';

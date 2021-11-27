@@ -1,10 +1,10 @@
 import * as React from 'react';
 
-import { ProgressIndicator } from '@shared/overlay/progress-indicator';
-import { Tooltip } from '@shared/tooltip';
-import { IconButton } from '@shared/buttons';
-import { MessageBanner } from '@shared/overlay/message-banner';
-import { Paginator, PageChangeEvent } from '@shared/paginator';
+import { ProgressIndicator } from '@client:common/overlay/progress-indicator';
+import { Tooltip } from '@client:common/tooltip';
+import { IconButton } from '@client:common/buttons';
+import { MessageBanner } from '@client:common/overlay/message-banner';
+import { Paginator, PageChangeEvent } from '@client:common/paginator';
 
 import { Deque } from './models/Deque';
 import { LogMessage } from './models/LogMessage';
@@ -137,8 +137,8 @@ export class SimulationStatusLogger extends React.Component<Props, State> {
               {
                 this.props.visibleLogMessageDeque.toArray(message => (
                   <SimulationStatusLoggerMessage
-key={message.id}
-message={message.content} />
+                    key={message.id}
+                    message={message.content} />
                 ))
               }
             </section>

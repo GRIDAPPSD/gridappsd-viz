@@ -2,11 +2,11 @@ import * as React from 'react';
 import { Subject } from 'rxjs';
 import { filter, takeUntil, switchMap, tap } from 'rxjs/operators';
 
-import { SimulationManagementService } from '@shared/simulation';
-import { SimulationStatus } from '@common/SimulationStatus';
-import { StateStore } from '@shared/state-store';
-import { ModelDictionaryComponent } from '@shared/topology';
-import { PlotModel } from '@shared/plot-model/PlotModel';
+import { SimulationManagementService } from '@client:common/simulation';
+import { StateStore } from '@client:common/state-store';
+import { ModelDictionaryComponent } from '@client:common/topology';
+import { PlotModel } from '@client:common/plot-model/PlotModel';
+import { SimulationStatus } from '@project:common/SimulationStatus';
 
 import { SimulationControl } from './SimulationControl';
 

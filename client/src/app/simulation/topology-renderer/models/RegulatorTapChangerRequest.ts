@@ -1,4 +1,4 @@
-import { MessageRequest } from '@shared/MessageRequest';
+import { MessageRequest } from '@client:common/MessageRequest';
 
 interface Inputs {
   mRID: string;

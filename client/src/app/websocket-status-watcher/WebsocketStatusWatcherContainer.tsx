@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { Subscription } from 'rxjs';
 
-import { StompClientConnectionStatus, StompClientService } from '@shared/StompClientService';
+import { StompClientConnectionStatus, StompClientService } from '@client:common/StompClientService';
 
 import { WebsocketStatusWatcher } from './WebsocketStatusWatcher';
 

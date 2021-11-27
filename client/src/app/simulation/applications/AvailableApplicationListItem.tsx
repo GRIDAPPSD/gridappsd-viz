@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { Application } from '@shared/Application';
+import { Application } from '@client:common/Application';
 
 import './AvailableApplicationListItem.light.scss';
 import './AvailableApplicationListItem.dark.scss';

@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { IconButton } from '@shared/buttons';
+import { IconButton } from '@client:common/buttons';
 
 import './VoltageViolation.light.scss';
 import './VoltageViolation.dark.scss';

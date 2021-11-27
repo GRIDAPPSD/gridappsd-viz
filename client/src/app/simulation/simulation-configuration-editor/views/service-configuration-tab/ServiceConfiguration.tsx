@@ -1,11 +1,11 @@
 import * as React from 'react';
 
-import { FormGroup, Input, Checkbox, TextArea, FormArrayModel, FormGroupModel, FormControlModel } from '@shared/form';
-import { Service, ServiceConfigUserInputSpec } from '@shared/Service';
-import { IconButton } from '@shared/buttons';
-import { Tooltip } from '@shared/tooltip';
-import { Validators, Validator } from '@shared/form/validation';
-import { copyToClipboard } from '@shared/misc';
+import { FormGroup, Input, Checkbox, TextArea, FormArrayModel, FormGroupModel, FormControlModel } from '@client:common/form';
+import { Service, ServiceConfigUserInputSpec } from '@client:common/Service';
+import { IconButton } from '@client:common/buttons';
+import { Tooltip } from '@client:common/tooltip';
+import { Validators, Validator } from '@client:common/form/validation';
+import { copyToClipboard } from '@client:common/misc';
 
 import { ServiceConfigurationModel } from '../../models/ServiceConfigurationModel';
 

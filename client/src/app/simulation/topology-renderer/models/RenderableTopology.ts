@@ -1,4 +1,4 @@
-import { Edge, Node } from '@shared/topology';
+import { Edge, Node } from '@client:common/topology';
 
 export interface RenderableTopology {
   name: string;

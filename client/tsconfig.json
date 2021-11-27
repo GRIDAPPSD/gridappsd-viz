@@ -9,10 +9,10 @@
             "../common"
         ],
         "paths": {
-            "@shared/*": [
-                "src/app/shared/*"
+            "@client:common/*": [
+                "src/app/common/*"
             ],
-            "@common/*": [
+            "@project:common/*": [
                 "../common/*"
             ]
         },

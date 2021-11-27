@@ -2,9 +2,9 @@ import * as React from 'react';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 
-import { CommOutageEvent, FaultEvent, ScheduledCommandEvent } from '@shared/test-manager';
-import { StateStore } from '@shared/state-store';
-import { MessageBanner } from '@shared/overlay/message-banner';
+import { CommOutageEvent, FaultEvent, ScheduledCommandEvent } from '@client:common/test-manager';
+import { StateStore } from '@client:common/state-store';
+import { MessageBanner } from '@client:common/overlay/message-banner';
 
 import { CommOutageEventSummary } from './comm-outage/CommOutageEventSummary';
 import { FaultEventSummary } from './fault/FaultEventSummary';

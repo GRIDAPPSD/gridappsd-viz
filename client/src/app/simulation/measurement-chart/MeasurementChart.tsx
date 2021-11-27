@@ -7,11 +7,11 @@ import { timeFormat } from 'd3-time-format';
 import { format as numberFormat } from 'd3-format';
 import { Subscription } from 'rxjs';
 
-import { StateStore } from '@shared/state-store';
-import { Ripple } from '@shared/ripple';
-import { IconButton } from '@shared/buttons';
-import { Tooltip } from '@shared/tooltip';
-import { DateTimeService } from '@shared/DateTimeService';
+import { StateStore } from '@client:common/state-store';
+import { Ripple } from '@client:common/ripple';
+import { IconButton } from '@client:common/buttons';
+import { Tooltip } from '@client:common/tooltip';
+import { DateTimeService } from '@client:common/DateTimeService';
 
 import { TimeSeries } from './models/TimeSeries';
 import { TimeSeriesDataPoint } from './models/TimeSeriesDataPoint';

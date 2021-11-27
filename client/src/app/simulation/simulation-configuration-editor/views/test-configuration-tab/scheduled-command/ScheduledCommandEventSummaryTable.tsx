@@ -1,8 +1,8 @@
 import * as React from 'react';
 
-import { ScheduledCommandEvent, ScheduledCommandEventTable } from '@shared/test-manager';
-import { IconButton } from '@shared/buttons';
-import { Tooltip } from '@shared/tooltip';
+import { ScheduledCommandEvent, ScheduledCommandEventTable } from '@client:common/test-manager';
+import { IconButton } from '@client:common/buttons';
+import { Tooltip } from '@client:common/tooltip';
 
 import './ScheduledCommandEventSummaryTable.light.scss';
 import './ScheduledCommandEventSummaryTable.dark.scss';

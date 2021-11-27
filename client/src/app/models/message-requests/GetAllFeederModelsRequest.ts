@@ -1,4 +1,4 @@
-import { MessageRequest } from '@shared/MessageRequest';
+import { MessageRequest } from '@client:common/MessageRequest';
 
 export class GetAllFeederModelsRequest implements MessageRequest {
   readonly url = 'goss.gridappsd.process.request.data.powergridmodel';

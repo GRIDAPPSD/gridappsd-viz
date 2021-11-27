@@ -1,7 +1,6 @@
 import * as React from 'react';
 
-import { BasicButton, IconButton } from '@shared/buttons';
-import { ModelDictionary, ModelDictionaryMeasurement, ModelDictionaryRegulator, ModelDictionaryCapacitor, ModelDictionarySwitch, MeasurementType } from '@shared/topology/model-dictionary';
+import { BasicButton, IconButton } from '@client:common/buttons';
 import {
   FormGroup,
   Checkbox,
@@ -10,11 +9,12 @@ import {
   SelectionOptionBuilder,
   FormGroupModel,
   FormControlModel
-} from '@shared/form';
-import { Tooltip } from '@shared/tooltip';
-import { CommOutageEvent, Phase, CommOutageEventInputListItem, CommOutageEventOutputListItem } from '@shared/test-manager';
-import { Validators } from '@shared/form/validation';
-import { unique } from '@shared/misc';
+} from '@client:common/form';
+import { Tooltip } from '@client:common/tooltip';
+import { CommOutageEvent, Phase, CommOutageEventInputListItem, CommOutageEventOutputListItem } from '@client:common/test-manager';
+import { Validators } from '@client:common/form/validation';
+import { unique } from '@client:common/misc';
+import { ModelDictionary, ModelDictionaryMeasurement, ModelDictionaryRegulator, ModelDictionaryCapacitor, ModelDictionarySwitch, MeasurementType } from '@client:common/topology/model-dictionary';
 
 import { COMPONENT_ATTRIBUTES } from '../../../models/component-attributes';
 

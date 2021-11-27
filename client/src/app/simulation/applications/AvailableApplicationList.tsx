@@ -1,12 +1,12 @@
 import * as React from 'react';
 import { Subscription } from 'rxjs';
 
-import { Application } from '@shared/Application';
-import { StompClientService } from '@shared/StompClientService';
-import { StateStore } from '@shared/state-store';
-import { Tooltip } from '@shared/tooltip';
-import { IconButton } from '@shared/buttons';
-import { MessageBanner } from '@shared/overlay/message-banner';
+import { Application } from '@client:common/Application';
+import { StateStore } from '@client:common/state-store';
+import { Tooltip } from '@client:common/tooltip';
+import { IconButton } from '@client:common/buttons';
+import { MessageBanner } from '@client:common/overlay/message-banner';
+import { StompClientService } from '@client:common/StompClientService';
 
 import { DisableApplicationRequest } from './models/DisableApplicationRequest';
 import { EnableApplicationRequest } from './models/EnableApplicationRequest';

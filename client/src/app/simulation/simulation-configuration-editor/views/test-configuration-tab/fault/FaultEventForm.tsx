@@ -1,12 +1,12 @@
 import * as React from 'react';
 
-import { BasicButton } from '@shared/buttons';
-import { ModelDictionary, ModelDictionaryRegulator, ModelDictionaryCapacitor, ModelDictionarySwitch } from '@shared/topology/model-dictionary';
-import { FormGroup, Select, Input, SelectionOptionBuilder, FormGroupModel, FormControlModel } from '@shared/form';
-import { FaultEvent, Phase, FaultKind, FaultImpedanceType, FaultImpedance } from '@shared/test-manager';
-import { Validators } from '@shared/form/validation';
-import { ModelDictionaryComponent } from '@shared/topology/model-dictionary/ModelDictionaryComponent';
-import { unique } from '@shared/misc';
+import { BasicButton } from '@client:common/buttons';
+import { FormGroup, Select, Input, SelectionOptionBuilder, FormGroupModel, FormControlModel } from '@client:common/form';
+import { FaultEvent, Phase, FaultKind, FaultImpedanceType, FaultImpedance } from '@client:common/test-manager';
+import { Validators } from '@client:common/form/validation';
+import { unique } from '@client:common/misc';
+import { ModelDictionary, ModelDictionaryRegulator, ModelDictionaryCapacitor, ModelDictionarySwitch } from '@client:common/topology/model-dictionary';
+import { ModelDictionaryComponent } from '@client:common/topology/model-dictionary/ModelDictionaryComponent';
 
 import './FaultEventForm.light.scss';
 import './FaultEventForm.dark.scss';

@@ -2,11 +2,11 @@ import * as React from 'react';
 import { Subject, Subscription } from 'rxjs';
 import { takeUntil, map } from 'rxjs/operators';
 
-import { Simulation, SimulationQueue, SimulationConfiguration } from '@shared/simulation';
-import { StompClientConnectionStatus, StompClientService } from '@shared/StompClientService';
-import { ConfigurationManager } from '@shared/ConfigurationManager';
-import { StateStore } from '@shared/state-store';
-import { ExpectedResultComparisonType } from '@shared/ExpectedResultComparisonType';
+import { StateStore } from '@client:common/state-store';
+import { ExpectedResultComparisonType } from '@client:common/ExpectedResultComparisonType';
+import { StompClientConnectionStatus, StompClientService } from '@client:common/StompClientService';
+import { Simulation, SimulationQueue, SimulationConfiguration } from '@client:common/simulation';
+import { ConfigurationManager } from '@client:common/ConfigurationManager';
 
 import { Navigation } from './Navigation';
 

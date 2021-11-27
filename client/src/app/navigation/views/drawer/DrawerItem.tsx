@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { Ripple } from '@shared/ripple';
+import { Ripple } from '@client:common/ripple';
 
 import './DrawerItem.light.scss';
 import './DrawerItem.dark.scss';

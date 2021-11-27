@@ -1,8 +1,8 @@
 import * as React from 'react';
 
-import { IconButton } from '@shared/buttons';
-import { Tooltip } from '@shared/tooltip';
-import { FaultEventTable, FaultEvent } from '@shared/test-manager';
+import { IconButton } from '@client:common/buttons';
+import { Tooltip } from '@client:common/tooltip';
+import { FaultEventTable, FaultEvent } from '@client:common/test-manager';
 
 import './FaultEventSummaryTable.light.scss';
 import './FaultEventSummaryTable.dark.scss';

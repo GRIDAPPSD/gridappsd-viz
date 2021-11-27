@@ -2,9 +2,9 @@ import * as React from 'react';
 import { Subscription } from 'rxjs';
 import { map, finalize } from 'rxjs/operators';
 
-import { StompClientService } from '@shared/StompClientService';
-import { download, DownloadType } from '@shared/misc';
-import { Notification } from '@shared/overlay/notification';
+import { download, DownloadType } from '@client:common/misc';
+import { Notification } from '@client:common/overlay/notification';
+import { StompClientService } from '@client:common/StompClientService';
 
 import { StompClient } from './StompClient';
 

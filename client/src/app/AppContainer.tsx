@@ -2,24 +2,24 @@ import * as React from 'react';
 import { zip } from 'rxjs';
 import { take, filter } from 'rxjs/operators';
 
-import { Application } from '@shared/Application';
-import { FeederModel, TopologyModel } from '@shared/topology';
+import { Application } from '@client:common/Application';
+import { StateStore, ApplicationState } from '@client:common/state-store';
+import { StompClientService, StompClientConnectionStatus } from '@client:common/StompClientService';
+import { FeederModel, TopologyModel } from '@client:common/topology';
 import {
   ModelDictionary,
   MeasurementType,
   ModelDictionaryMeasurement,
   ModelDictionaryComponent
-} from '@shared/topology/model-dictionary';
+} from '@client:common/topology/model-dictionary';
 import {
   SimulationConfiguration,
   Simulation,
   SimulationQueue,
   SimulationManagementService
-} from '@shared/simulation';
-import { StompClientService, StompClientConnectionStatus } from '@shared/StompClientService';
-import { StateStore, ApplicationState } from '@shared/state-store';
-import { AuthenticatorService } from '@shared/authenticator';
-import { ConductingEquipmentType } from '@shared/topology/model-dictionary';
+} from '@client:common/simulation';
+import { ConductingEquipmentType } from '@client:common/topology/model-dictionary';
+import { AuthenticatorService } from '@client:common/authenticator';
 
 import { GetModelDictionaryRequest, GetModelDictionaryResponsePayload } from './models/message-requests/GetModelDictionaryRequest';
 import {

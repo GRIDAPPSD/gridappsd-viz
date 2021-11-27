@@ -1,7 +1,7 @@
 import * as React from 'react';
 
-import { Application } from '@shared/Application';
-import { MessageBanner } from '@shared/overlay/message-banner';
+import { Application } from '@client:common/Application';
+import { MessageBanner } from '@client:common/overlay/message-banner';
 
 import './ApplicationsTab.light.scss';
 import './ApplicationsTab.dark.scss';

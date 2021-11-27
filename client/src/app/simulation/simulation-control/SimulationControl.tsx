@@ -1,18 +1,18 @@
 import * as React from 'react';
 
-import { IconButton, BasicButton } from '@shared/buttons';
-import { SimulationStatus } from '@common/SimulationStatus';
-import { Tooltip } from '@shared/tooltip';
-import { Ripple } from '@shared/ripple';
-import { PlotModel } from '@shared/plot-model/PlotModel';
-import { ModelDictionaryComponent } from '@shared/topology';
-import { copyToClipboard } from '@shared/misc';
-import { Restricted } from '@shared/authenticator';
-import { PortalRenderer } from '@shared/overlay/portal-renderer';
-import { Input, FormControlModel } from '@shared/form';
-import { Backdrop } from '@shared/overlay/backdrop';
-import { Validators } from '@shared/form/validation';
-import { ThreeDots } from '@shared/three-dots';
+import { IconButton, BasicButton } from '@client:common/buttons';
+import { Tooltip } from '@client:common/tooltip';
+import { Ripple } from '@client:common/ripple';
+import { PlotModel } from '@client:common/plot-model/PlotModel';
+import { ModelDictionaryComponent } from '@client:common/topology';
+import { copyToClipboard } from '@client:common/misc';
+import { PortalRenderer } from '@client:common/overlay/portal-renderer';
+import { Input, FormControlModel } from '@client:common/form';
+import { Backdrop } from '@client:common/overlay/backdrop';
+import { Validators } from '@client:common/form/validation';
+import { Restricted } from '@client:common/authenticator';
+import { SimulationStatus } from '@project:common/SimulationStatus';
+import { ThreeDots } from '@client:common/three-dots';
 
 import { PlotModelCreator } from './views/plot-model-creator/PlotModelCreator';
 

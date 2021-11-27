@@ -1,12 +1,12 @@
 import * as React from 'react';
 
-import { IconButton } from '@shared/buttons';
-import { Tooltip } from '@shared/tooltip';
-import { Ripple } from '@shared/ripple';
-import { copyToClipboard } from '@shared/misc';
-import { DateTimeService } from '@shared/DateTimeService';
-import { MessageBanner } from '@shared/overlay/message-banner';
-import { AuthenticatorService } from '@shared/authenticator';
+import { IconButton } from '@client:common/buttons';
+import { Tooltip } from '@client:common/tooltip';
+import { Ripple } from '@client:common/ripple';
+import { copyToClipboard } from '@client:common/misc';
+import { DateTimeService } from '@client:common/DateTimeService';
+import { MessageBanner } from '@client:common/overlay/message-banner';
+import { AuthenticatorService } from '@client:common/authenticator';
 
 import { Alarm } from './models/Alarm';
 

@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { PortalRenderer } from '@shared/overlay/portal-renderer';
+import { PortalRenderer } from '@client:common/overlay/portal-renderer';
 
 import './NewAlarmNotification.light.scss';
 import './NewAlarmNotification.dark.scss';

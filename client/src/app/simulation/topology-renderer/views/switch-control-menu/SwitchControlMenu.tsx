@@ -1,9 +1,9 @@
 import * as React from 'react';
 
-import { Dialog, DialogContent, DialogActionGroup } from '@shared/overlay/dialog';
-import { Select, SelectionOptionBuilder, FormControlModel } from '@shared/form';
-import { BasicButton } from '@shared/buttons';
-import { Switch } from '@shared/topology';
+import { Dialog, DialogContent, DialogActionGroup } from '@client:common/overlay/dialog';
+import { Select, SelectionOptionBuilder, FormControlModel } from '@client:common/form';
+import { BasicButton } from '@client:common/buttons';
+import { Switch } from '@client:common/topology';
 
 import './SwitchControlMenu.light.scss';
 import './SwitchControlMenu.dark.scss';

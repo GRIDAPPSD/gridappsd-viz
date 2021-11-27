@@ -2,9 +2,9 @@ import * as React from 'react';
 import { Subject } from 'rxjs';
 import { takeUntil, filter } from 'rxjs/operators';
 
-import { SimulationQueue, SimulationManagementService, SimulationOutputMeasurement } from '@shared/simulation';
-import { SimulationStatus } from '@common/SimulationStatus';
-import { MeasurementType } from '@shared/topology';
+import { SimulationQueue, SimulationManagementService, SimulationOutputMeasurement } from '@client:common/simulation';
+import { MeasurementType } from '@client:common/topology';
+import { SimulationStatus } from '@project:common/SimulationStatus';
 
 import { MeasurementValueTable } from './MeasurementValueTable';
 

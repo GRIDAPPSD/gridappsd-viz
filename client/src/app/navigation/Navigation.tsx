@@ -1,11 +1,11 @@
 import * as React from 'react';
 import { Link } from 'react-router-dom';
 
-import { SimulationConfiguration, Simulation } from '@shared/simulation';
-import { StompClientConnectionStatus } from '@shared/StompClientService';
-import { IconButton } from '@shared/buttons';
-import { Restricted } from '@shared/authenticator';
-import { ExpectedResultComparisonType } from '@shared/ExpectedResultComparisonType';
+import { IconButton } from '@client:common/buttons';
+import { ExpectedResultComparisonType } from '@client:common/ExpectedResultComparisonType';
+import { StompClientConnectionStatus } from '@client:common/StompClientService';
+import { SimulationConfiguration, Simulation } from '@client:common/simulation';
+import { Restricted } from '@client:common/authenticator';
 
 import { Drawer } from './views/drawer/Drawer';
 import { ToolBar } from './views/tool-bar/ToolBar';

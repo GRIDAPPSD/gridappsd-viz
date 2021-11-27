@@ -1,4 +1,4 @@
-import { StompClientService } from '@shared/StompClientService';
+import { StompClientService } from '@client:common/StompClientService';
 
 export class ScheduledCommandEventFormService {
 

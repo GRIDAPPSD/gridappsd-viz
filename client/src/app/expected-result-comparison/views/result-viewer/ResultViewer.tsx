@@ -1,10 +1,10 @@
 import * as React from 'react';
 
-import { FormControlModel, RadioButtonGroup, RadioButton, Form } from '@shared/form';
-import { FilterableTable } from '@shared/filterable-table';
-import { MessageBanner } from '@shared/overlay/message-banner';
-import { ProgressIndicator } from '@shared/overlay/progress-indicator';
-import { ExpectedResultComparisonType } from '@shared/ExpectedResultComparisonType';
+import { FormControlModel, RadioButtonGroup, RadioButton, Form } from '@client:common/form';
+import { MessageBanner } from '@client:common/overlay/message-banner';
+import { ProgressIndicator } from '@client:common/overlay/progress-indicator';
+import { ExpectedResultComparisonType } from '@client:common/ExpectedResultComparisonType';
+import { FilterableTable } from '@client:common/filterable-table';
 
 import { TimeSeriesVsTimeSeriesChartResult } from '../time-series-vs-time-series/TimeSeriesVsTimeSeriesChartResult';
 

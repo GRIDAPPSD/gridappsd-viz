@@ -1,5 +1,5 @@
-import { Application } from '@shared/Application';
-import { Service } from '@shared/Service';
+import { Application } from '@client:common/Application';
+import { Service } from '@client:common/Service';
 
 export interface ResponseBody {
   applications: Application[];

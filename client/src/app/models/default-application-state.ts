@@ -1,5 +1,5 @@
-import { ApplicationState } from '@shared/state-store';
-import { TimeZone } from '@shared/DateTimeService';
+import { ApplicationState } from '@client:common/state-store';
+import { TimeZone } from '@client:common/DateTimeService';
 
 export const DEFAULT_APPLICATION_STATE: ApplicationState = {
   simulationId: '',

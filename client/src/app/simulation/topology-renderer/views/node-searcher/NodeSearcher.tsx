@@ -1,15 +1,15 @@
 import * as React from 'react';
 
-import { Backdrop } from '@shared/overlay/backdrop';
-import { PortalRenderer } from '@shared/overlay/portal-renderer';
-import { Fade } from '@shared/effects/fade';
-import { Input, FormControlModel } from '@shared/form';
-import { IconButton } from '@shared/buttons';
-import { Tooltip } from '@shared/tooltip';
-import { Node } from '@shared/topology';
-import { fuzzySearch, FuzzySearchResult } from '@shared/misc';
-import { Ripple } from '@shared/ripple';
-import { Paginator } from '@shared/paginator';
+import { Backdrop } from '@client:common/overlay/backdrop';
+import { PortalRenderer } from '@client:common/overlay/portal-renderer';
+import { Fade } from '@client:common/effects/fade';
+import { Input, FormControlModel } from '@client:common/form';
+import { IconButton } from '@client:common/buttons';
+import { Tooltip } from '@client:common/tooltip';
+import { fuzzySearch, FuzzySearchResult } from '@client:common/misc';
+import { Ripple } from '@client:common/ripple';
+import { Paginator } from '@client:common/paginator';
+import { Node } from '@client:common/topology';
 
 import './NodeSearcher.light.scss';
 import './NodeSearcher.dark.scss';

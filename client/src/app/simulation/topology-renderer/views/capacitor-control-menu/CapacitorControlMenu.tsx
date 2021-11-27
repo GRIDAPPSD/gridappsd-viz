@@ -1,11 +1,11 @@
 import * as React from 'react';
 
-import { Dialog, DialogContent, DialogActionGroup } from '@shared/overlay/dialog';
-import { Select, Input, SelectionOptionBuilder, FormGroupModel, FormControlModel } from '@shared/form';
-import { BasicButton } from '@shared/buttons';
-import { CapacitorControlMode } from '@shared/topology/CapacitorControlMode';
-import { Capacitor } from '@shared/topology';
-import { Validators } from '@shared/form/validation';
+import { Dialog, DialogContent, DialogActionGroup } from '@client:common/overlay/dialog';
+import { Select, Input, SelectionOptionBuilder, FormGroupModel, FormControlModel } from '@client:common/form';
+import { BasicButton } from '@client:common/buttons';
+import { Validators } from '@client:common/form/validation';
+import { Capacitor } from '@client:common/topology';
+import { CapacitorControlMode } from '@client:common/topology/CapacitorControlMode';
 
 import './CapacitorControlMenu.light.scss';
 import './CapacitorControlMenu.dark.scss';
