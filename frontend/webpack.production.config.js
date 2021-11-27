@@ -13,7 +13,7 @@ module.exports = (env) => {
   const baseConfig = require('./webpack.base.config')('production', false);
   baseConfig.module.rules.push({
     test: /(\.tsx?)$/,
-    use: 'awesome-typescript-loader'
+    use: 'ts-loader'
   });
 
   return {
@@ -35,8 +35,8 @@ module.exports = (env) => {
       minimize: true,
       minimizer: [
         new TerserJSPlugin({
-          sourceMap: true,
           terserOptions: {
+            sourceMap: true,
             compress: {
               drop_console: true
             }
@@ -58,8 +58,10 @@ module.exports = (env) => {
  *                                               branch name as the build version
  */
 function updateVersion(env) {
-  if (env.buildVersion !== true) {
-    writeVersionNumber(env.buildVersion);
+  const buildVersion = env.buildVersion || env['build-version'];
+
+  if (buildVersion !== true) {
+    writeVersionNumber(buildVersion);
   } else {
     childProcess.exec('git rev-parse --abbrev-ref HEAD', {}, (error, stdout) => {
       if (error)

@@ -6,15 +6,15 @@ import { extent } from 'd3-array';
 import { timeFormat } from 'd3-time-format';
 import { format as numberFormat } from 'd3-format';
 import { Subscription } from 'rxjs';
-
-import { RenderableChartModel } from './models/RenderableChartModel';
-import { TimeSeriesDataPoint } from './models/TimeSeriesDataPoint';
-import { TimeSeries } from './models/TimeSeries';
 import { StateStore } from '@shared/state-store';
 import { Ripple } from '@shared/ripple';
 import { IconButton } from '@shared/buttons';
 import { Tooltip } from '@shared/tooltip';
 import { DateTimeService } from '@shared/DateTimeService';
+
+import { TimeSeries } from './models/TimeSeries';
+import { TimeSeriesDataPoint } from './models/TimeSeriesDataPoint';
+import { RenderableChartModel } from './models/RenderableChartModel';
 
 import './MeasurementChart.light.scss';
 import './MeasurementChart.dark.scss';
@@ -39,6 +39,7 @@ export class MeasurementChart extends React.Component<Props, State> {
     left: 70,
     right: 10
   };
+
   readonly svgRef = React.createRef<SVGSVGElement>();
 
   private readonly _stateStore = StateStore.getInstance();
@@ -93,7 +94,7 @@ export class MeasurementChart extends React.Component<Props, State> {
     this._timeZoneChangeSubscription = this._stateStore.select('timeZone')
       .subscribe({
         next: () => {
-          this._xAxis.call(this._xAxisGenerator);
+          this._xAxis.call(this._xAxisGenerator as any);
         }
       });
     this._render();
@@ -166,7 +167,7 @@ export class MeasurementChart extends React.Component<Props, State> {
   private _renderXAxis(xAxisExtent: [Date, Date]) {
     this._xScale.domain(xAxisExtent);
     this._xAxisGenerator.scale(this._xScale);
-    this._xAxis.call(this._xAxisGenerator)
+    this._xAxis.call(this._xAxisGenerator as any)
       .selectAll('text')
       .style('text-anchor', 'end')
       .attr('dx', '-.4em')

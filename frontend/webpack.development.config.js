@@ -5,7 +5,10 @@ const { resolve } = require('path');
  * @param {{action: 'disable-css-hmr'}} env
  */
 module.exports = (env) => {
-  const baseConfig = require('./webpack.base.config')('development', env.action !== 'disable-css-hmr');
+  if (env.theme === undefined) {
+    env.theme = 'dark';
+  }
+  const baseConfig = require('./webpack.base.config')('development', env.action !== 'disable-css-hmr', env.theme);
   baseConfig.module.rules.push({
     test: /(\.tsx?)$/,
     use: [
@@ -17,7 +20,7 @@ module.exports = (env) => {
           ]
         }
       },
-      'awesome-typescript-loader'
+      'ts-loader'
     ]
   });
 
@@ -33,12 +36,11 @@ module.exports = (env) => {
     },
 
     devServer: {
-      port: 4000,
-      contentBase: [
+      port: 3000,
+      static: [
         resolve(__dirname, 'assets'),
         resolve(__dirname, 'dist')
       ],
-      overlay: true,
       historyApiFallback: {
         disableDotRule: true,
         htmlAcceptHeaders: ['text/html', 'application/xhtml+xml']

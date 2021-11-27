@@ -1,13 +1,13 @@
 import * as React from 'react';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
-
 import { CommOutageEvent, FaultEvent, ScheduledCommandEvent } from '@shared/test-manager';
 import { StateStore } from '@shared/state-store';
+import { MessageBanner } from '@shared/overlay/message-banner';
+
 import { CommOutageEventSummary } from './comm-outage/CommOutageEventSummary';
 import { FaultEventSummary } from './fault/FaultEventSummary';
 import { ScheduledCommandEventSummary } from './scheduled-command/ScheduledCommandEventSummary';
-import { MessageBanner } from '@shared/overlay/message-banner';
 
 import './EventSummary.light.scss';
 import './EventSummary.dark.scss';
@@ -66,19 +66,19 @@ export class EventSummary extends React.Component<Props, State> {
       .pipe(takeUntil(this._unsubscriber))
       .subscribe({
         next: () => {
-          if (this.state.outageEvents.length > 0) {
+          if (this.state.commOutageEvents.length > 0) {
             this.setState({
-              outageEvents: [...this.state.outageEvents]
+              commOutageEvents: [...this.state.commOutageEvents]
             });
           }
           if (this.state.faultEvents.length > 0) {
             this.setState({
-              outageEvents: [...this.state.outageEvents]
+              faultEvents: [...this.state.faultEvents]
             });
           }
-          if (this.state.commandEvents.length > 0) {
+          if (this.state.scheduledCommandEvents.length > 0) {
             this.setState({
-              outageEvents: [...this.state.outageEvents]
+              scheduledCommandEvents: [...this.state.scheduledCommandEvents]
             });
           }
         }

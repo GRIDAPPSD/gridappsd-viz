@@ -71,8 +71,11 @@ export class StompClientService {
             heartbeatIncoming: 0,
             heartbeatOutgoing: 0,
             reconnectDelay: 0,
-            // eslint-disable-next-line no-console
-            debug: isLoggingEnabled ? console.log : () => { },
+            debug: isLoggingEnabled
+              // eslint-disable-next-line no-console
+              ? console.log
+              // eslint-disable-next-line @typescript-eslint/no-empty-function
+              : () => { },
             logRawCommunication: isLoggingEnabled
           });
           if (__DEVELOPMENT__) {
@@ -87,6 +90,7 @@ export class StompClientService {
 
   connect(username: string, password: string): Observable<StompClientInitializationResult> {
     const subject = new Subject<StompClientInitializationResult>();
+    // eslint-disable-next-line @typescript-eslint/no-empty-function
     const noOp = () => { };
 
     this._client.configure({
@@ -99,7 +103,11 @@ export class StompClientService {
         this._password = password;
 
         this._retrieveToken(username, password)
-          .then(() => {
+          .then(token => {
+            if (__DEVELOPMENT__) {
+              sessionStorage.setItem('token', token);
+            }
+            this._authenticationToken = token;
             this._client.onDisconnect = () => {
               this.reconnect();
               subject.next({
@@ -148,11 +156,7 @@ export class StompClientService {
         .subscribe({
           next: token => {
             if (token !== 'authentication failed') {
-              if (__DEVELOPMENT__) {
-                sessionStorage.setItem('token', token);
-              }
-              this._authenticationToken = token;
-              resolve();
+              resolve(token);
             } else {
               reject();
             }
@@ -257,7 +261,7 @@ export class StompClientService {
         .pipe(
           takeWhile(() => this._status !== StompClientConnectionStatus.DISCONNECTED),
           filter(this.isActive),
-          take(1),
+          take(1)
         )
         .subscribe({
           next: () => {
@@ -277,6 +281,7 @@ export class StompClientService {
 
   /**
    * Subscribe to destination, then unsubscribe right away after a response arrives
+   *
    * @param destination The topic to subscribe to from which to get the response
    */
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -287,6 +292,7 @@ export class StompClientService {
 
   /**
    * Subscribe to destination, and continuously watch for responses from the server
+   *
    * @param destination The topic to subscribe to from which to get the response
    */
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -297,7 +303,7 @@ export class StompClientService {
         take(1),
         switchMap(() => {
           const source = new BehaviorSubject<T>(null);
-          const id = `${destination}[${Math.random() * 1_000_000 | 0}]`;
+          const id = `${destination}[${Math.trunc(Math.random() * 1_000_000)}]`;
           return using(() => this._client.subscribe(destination, (message: Message) => {
             const body = message.body;
             try {

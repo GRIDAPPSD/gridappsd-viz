@@ -1,6 +1,5 @@
 import { Subject, Observable } from 'rxjs';
-import { select, zoom, Selection, zoomIdentity, ZoomTransform, zoomTransform } from 'd3';
-import { event as currentEvent } from 'd3-selection';
+import { select, zoom, Selection, zoomIdentity, ZoomTransform, zoomTransform, D3ZoomEvent } from 'd3';
 
 export class CanvasTransformService {
 
@@ -26,8 +25,8 @@ export class CanvasTransformService {
     this._svgSelection = select(svg);
     this._svgSelection.call(this._zoomer);
     this._currentTransform = zoomTransform(svg);
-    this._zoomer.on('zoom', () => {
-      this._currentTransform = currentEvent.transform;
+    this._zoomer.on('zoom', (event: D3ZoomEvent<SVGSVGElement, unknown>) => {
+      this._currentTransform = event.transform;
       this._notifier.next(this._currentTransform);
     });
     return this._svgSelection;

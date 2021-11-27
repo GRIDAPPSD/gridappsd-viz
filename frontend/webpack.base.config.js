@@ -13,16 +13,17 @@ const { RefReplacerPlugin, NoOpPlugin } = require('./webpack.plugins');
  *
  * @param {'production' | 'development'} mode
  * @param {boolean} cssHmr Whether to enable CSS hot module reload
+ * @param {'dark' | 'light'} theme Dark theme or light theme? This option is ignored when mode is "production"
  */
-module.exports = (mode, cssHmr) => ({
+module.exports = (mode, cssHmr, theme) => ({
   mode,
 
   entry: createEntry(path.resolve(__dirname, 'src'), { main: `./src/main.${mode}.tsx`, dark: [], light: [] }),
 
   output: {
     path: path.resolve(__dirname, '..', 'backend', 'dist', 'public'),
-    filename: '[name].[hash:10].js',
-    chunkFilename: '[name].[hash:10].js',
+    filename: '[name].[fullhash:10].js',
+    chunkFilename: '[name].[fullhash:10].js',
     publicPath: '/'
   },
 
@@ -53,18 +54,7 @@ module.exports = (mode, cssHmr) => ({
       },
       {
         test: /\.(?:ttf|woff2)$/,
-        use: [
-          {
-            loader: 'file-loader',
-            options: {
-              outputPath: (filename, fullPath, context) => {
-                const containingFolderPath = path.resolve(fullPath, '..');
-                const containingFolderName = containingFolderPath.substring(containingFolderPath.lastIndexOf('/') + 1);
-                return `assets/${containingFolderName}/${filename}`;
-              }
-            }
-          }
-        ]
+        type: 'asset/resource'
       }
     ]
   },
@@ -83,12 +73,13 @@ module.exports = (mode, cssHmr) => ({
     }),
     new ExcludeAssetsPlugin(),
     new MiniCssExtractPlugin({
-      filename: '[name].[hash:10].css',
-      chunkFilename: '[name].[hash:10].css'
+      filename: '[name].[fullhash:10].css',
+      chunkFilename: '[name].[fullhash:10].css'
     }),
     new webpack.DefinePlugin({
       __DEVELOPMENT__: JSON.stringify(mode === 'development'),
-      __CSS_HMR_ENABLED__: JSON.stringify(cssHmr)
+      __CSS_HMR_ENABLED__: JSON.stringify(cssHmr),
+      __THEME__: JSON.stringify(theme),
     })
   ],
 
