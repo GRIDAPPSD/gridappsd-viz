@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import * as React from 'react';
+import { Component } from 'react';
 import { take } from 'rxjs/operators';
 
 import { BasicButton, IconButton } from '@client:common/buttons';
@@ -21,7 +21,7 @@ interface State {
   disableSubmitButton: boolean;
 }
 
-export class SimulationVsTimeSeries extends React.Component<Props, State> {
+export class SimulationVsTimeSeries extends Component<Props, State> {
 
   readonly simulationFormControl = new FormControlModel('');
 

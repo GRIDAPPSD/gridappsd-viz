@@ -1,4 +1,4 @@
-import * as React from 'react';
+import { Component, createRef } from 'react';
 import { select, Selection } from 'd3-selection';
 import { scaleLinear, scaleTime, ScaleTime, ScaleLinear } from 'd3-scale';
 import { axisBottom, axisLeft, Axis } from 'd3-axis';
@@ -27,7 +27,7 @@ interface State {
   disableZoomInButton: boolean;
 }
 
-export class LineChart extends React.Component<Props, State> {
+export class LineChart extends Component<Props, State> {
 
   readonly margin = {
     top: 20,
@@ -36,7 +36,7 @@ export class LineChart extends React.Component<Props, State> {
     right: 10
   };
 
-  readonly svgRef = React.createRef<SVGSVGElement>();
+  readonly svgRef = createRef<SVGSVGElement>();
 
   width = 370;
   height = 280;

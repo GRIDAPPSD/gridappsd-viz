@@ -1,4 +1,4 @@
-import * as React from 'react';
+import { Component } from 'react';
 import { Subject } from 'rxjs';
 import { filter, switchMap, takeUntil } from 'rxjs/operators';
 
@@ -21,7 +21,7 @@ interface State {
   newAlarmCounts: number;
 }
 
-export class AlarmsContainer extends React.Component<Props, State> {
+export class AlarmsContainer extends Component<Props, State> {
 
   private readonly _stateStore = StateStore.getInstance();
   private readonly _stompClientService = StompClientService.getInstance();

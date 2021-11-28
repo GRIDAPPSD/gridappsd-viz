@@ -1,4 +1,4 @@
-import * as React from 'react';
+import { Component, createRef } from 'react';
 
 import { Backdrop } from '@client:common/overlay/backdrop';
 
@@ -13,9 +13,9 @@ interface State {
   height: number;
 }
 
-export class ProgressIndicator extends React.Component<Props, State> {
+export class ProgressIndicator extends Component<Props, State> {
 
-  readonly waitElementRef = React.createRef<HTMLDivElement>();
+  readonly waitElementRef = createRef<HTMLDivElement>();
 
   constructor(props: Props) {
     super(props);

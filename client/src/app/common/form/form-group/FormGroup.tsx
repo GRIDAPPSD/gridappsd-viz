@@ -1,4 +1,4 @@
-import * as React from 'react';
+import { Component, createRef } from 'react';
 
 import { Tooltip } from '@client:common/tooltip';
 import { IconButton } from '@client:common/buttons';
@@ -18,14 +18,14 @@ interface State {
   maxHeight: number;
 }
 
-export class FormGroup extends React.Component<Props, State> {
+export class FormGroup extends Component<Props, State> {
 
   static defaultProps = {
     collapsible: true,
     collapsed: false
   };
 
-  readonly formControlContainerRef = React.createRef<HTMLDivElement>();
+  readonly formControlContainerRef = createRef<HTMLDivElement>();
 
   private _maxHeight = 0;
 

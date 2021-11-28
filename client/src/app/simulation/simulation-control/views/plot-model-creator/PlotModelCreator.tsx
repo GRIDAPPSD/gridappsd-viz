@@ -1,4 +1,4 @@
-import * as React from 'react';
+import { Component } from 'react';
 import { map } from 'rxjs/operators';
 
 import { Dialog, DialogContent, DialogActionGroup } from '@client:common/overlay/dialog';
@@ -39,7 +39,7 @@ interface State {
   disableSubmitButton: boolean;
 }
 
-export class PlotModelCreator extends React.Component<Props, State> {
+export class PlotModelCreator extends Component<Props, State> {
 
   // FormControlModel bound to the component selected in the "Created plots" dropdown
   readonly selectedPlotModelFormControl = new FormControlModel<PlotModel>(null);

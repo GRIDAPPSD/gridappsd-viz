@@ -1,4 +1,4 @@
-import * as React from 'react';
+import { Component } from 'react';
 
 import { DrawerItemIcon, DrawerItemLabel } from './DrawerItem';
 
@@ -15,7 +15,7 @@ interface State {
   maxHeight: number;
 }
 
-export class DrawerItemGroup extends React.Component<Props, State> {
+export class DrawerItemGroup extends Component<Props, State> {
 
   constructor(props: Props) {
     super(props);

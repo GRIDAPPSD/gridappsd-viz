@@ -1,5 +1,3 @@
-import * as React from 'react';
-
 import { Fade } from '@client:common/effects/fade';
 
 import './Backdrop.light.scss';

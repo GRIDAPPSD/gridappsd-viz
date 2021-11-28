@@ -1,4 +1,3 @@
-import * as React from 'react';
 
 import './ToolBar.light.scss';
 import './ToolBar.dark.scss';

@@ -1,4 +1,3 @@
-import * as React from 'react';
 
 import { PortalRenderer } from '@client:common/overlay/portal-renderer';
 

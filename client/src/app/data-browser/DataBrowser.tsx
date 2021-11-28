@@ -1,101 +1,80 @@
-import * as React from 'react';
-import { NavLink, Route, Redirect } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { NavLink, Route, Outlet, Routes } from 'react-router-dom';
 
 import { FeederModel, FeederModelLine } from '@client:common/topology';
 
-import { PowergridModelsContainer } from './powergrid-models';
 import { LogsContainer } from './logs';
+import { PowergridModelsContainer } from './powergrid-models';
 import { SimulationsContainer } from './simulations';
 
 import './DataBrowser.light.scss';
 import './DataBrowser.dark.scss';
 
 interface Props {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  match: any;
   feederModel: FeederModel;
 }
 
-interface State {
-  hasError: boolean;
-  feederModelLines: FeederModelLine[];
-}
+export function DataBrowser(props: Props) {
+  const [feederModelLines, setFeederModelLines] = useState<FeederModelLine[]>([]);
 
-export class DataBrowser extends React.Component<Props, State> {
+  useEffect(() => {
+    const updatedFeederModelLines = Object.values(props.feederModel)
+      .reduce((accumulator, region) => {
+        accumulator.push(...region.lines);
+        return accumulator;
+      }, []);
+    setFeederModelLines(updatedFeederModelLines);
+  }, [props.feederModel]);
 
-  constructor(props: Props) {
-    super(props);
-
-    this.state = {
-      hasError: false,
-      feederModelLines: Object.values(props.feederModel)
-        .reduce((accumulator, region) => {
-          accumulator.push(...region.lines);
-          return accumulator;
-        }, [])
-    };
-  }
-
-  componentDidCatch() {
-    this.setState({ hasError: true });
-  }
-
-  render() {
-    if (this.state.hasError) {
-      this.setState({
-        hasError: false
-      });
-      return <Redirect to='/' />;
-    }
-
-    const props = this.props;
-    return (
-      <div className='data-browser'>
-        <ul className='data-browser__selection'>
-          <li>
-            <NavLink
-              activeClassName='selected'
-              className='data-browser__selection__item'
-              to={`${props.match.url}/powergrid-models`}>
-              Powergrid Models
-            </NavLink>
-          </li>
-          <li>
-            <NavLink
-              activeClassName='selected'
-              className='data-browser__selection__item'
-              to={`${props.match.url}/logs`}>
-              Logs
-            </NavLink>
-          </li>
-          <li>
-            <NavLink
-              activeClassName='selected'
-              className='data-browser__selection__item'
-              to={`${props.match.url}/simulations`}>
-              Simulations
-            </NavLink>
-          </li>
-        </ul>
-        <div className='data-browser__body'>
-          <Route
-            exact
-            path={`${props.match.path}`}
-            render={() => <div className='vertical-divider' />} />
-          <Route
-            path={`${props.match.path}/powergrid-models`}
-            component={() => <PowergridModelsContainer feederModelLines={this.state.feederModelLines} />} />
-          <Route
-            path={`${props.match.path}/logs`}
-            component={LogsContainer} />
-          <Route
-            path={`${props.match.path}/simulations`}
-            component={SimulationsContainer} />
-        </div>
-      </div>
-    );
-  }
-
+  return (
+    <Routes>
+      <Route
+        path='/*'
+        element={
+          <div className='data-browser'>
+            <ul className='data-browser__selection'>
+              <li>
+                <NavLink
+                  className={({ isActive }) => `data-browser__selection__item${isActive ? ' selected' : ''}`}
+                  to='powergrid-models'>
+                  Powergrid Models
+                </NavLink>
+              </li>
+              <li>
+                <NavLink
+                  className={({ isActive }) => `data-browser__selection__item${isActive ? ' selected' : ''}`}
+                  to='logs'>
+                  Logs
+                </NavLink>
+              </li>
+              <li>
+                <NavLink
+                  className={({ isActive }) => `data-browser__selection__item${isActive ? ' selected' : ''}`}
+                  to='simulations'>
+                  Simulations
+                </NavLink>
+              </li>
+            </ul>
+            <div className='data-browser__body'>
+              <Outlet />
+            </div>
+          </div>
+        }>
+        <Route
+          path='powergrid-models'
+          element={<PowergridModelsContainer feederModelLines={feederModelLines} />} />
+        <Route
+          path='logs'
+          element={<LogsContainer />} />
+        <Route
+          path='simulations'
+          element={<SimulationsContainer />} />
+        <Route
+          path='*'
+          element={<div className='vertical-divider' />} />
+      </Route>
+    </Routes>
+  );
 }
 
 interface RequestProps {

@@ -1,4 +1,4 @@
-import * as React from 'react';
+import { Component, createRef } from 'react';
 import { Subscription } from 'rxjs';
 
 import { waitUntil } from '@client:common/misc';
@@ -22,9 +22,9 @@ interface State {
   top: number;
 }
 
-export class MeasurementValueTable extends React.Component<Props, State> {
+export class MeasurementValueTable extends Component<Props, State> {
 
-  readonly simulationLabelRef = React.createRef<HTMLDivElement>();
+  readonly simulationLabelRef = createRef<HTMLDivElement>();
 
   private readonly _canvasTransformService = CanvasTransformService.getInstance();
   private _anchorNodeTransformWatcher: Subscription;

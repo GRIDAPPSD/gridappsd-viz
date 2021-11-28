@@ -1,5 +1,3 @@
-import * as React from 'react';
-
 import './ValidationErrorMessageDisplay.light.scss';
 import './ValidationErrorMessageDisplay.dark.scss';
 
@@ -14,8 +12,8 @@ export function ValidationErrorMessageDisplay(props: Props) {
   return (
     <ul className='validation-error-message-display'>
       {props.messages.map((message, i) => <li
-key={i}
-className='validation-error-message-display__message'>{message}</li>)}
+        key={i}
+        className='validation-error-message-display__message'>{message}</li>)}
     </ul>
   );
 }

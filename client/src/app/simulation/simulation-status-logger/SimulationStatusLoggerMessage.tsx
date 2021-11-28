@@ -1,4 +1,4 @@
-import * as React from 'react';
+import { Component } from 'react';
 
 import { IconButton } from '@client:common/buttons';
 import { SimulationStatusLogMessage } from '@client:common/simulation';
@@ -14,7 +14,7 @@ interface State {
   showFormattedMessage: boolean;
 }
 
-export class SimulationStatusLoggerMessage extends React.Component<Props, State> {
+export class SimulationStatusLoggerMessage extends Component<Props, State> {
 
   constructor(props: Props) {
     super(props);

@@ -1,4 +1,4 @@
-import * as React from 'react';
+import { Component } from 'react';
 import { Subscription, Subject } from 'rxjs';
 import { filter, takeUntil, map } from 'rxjs/operators';
 
@@ -22,7 +22,7 @@ interface State {
   renderableChartModels: RenderableChartModel[];
 }
 
-export class MeasurementChartContainer extends React.Component<Props, State> {
+export class MeasurementChartContainer extends Component<Props, State> {
 
   private readonly _stateStore = StateStore.getInstance();
   private readonly _simulationManagementService = SimulationManagementService.getInstance();

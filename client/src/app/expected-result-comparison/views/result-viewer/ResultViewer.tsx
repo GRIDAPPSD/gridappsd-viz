@@ -1,4 +1,4 @@
-import * as React from 'react';
+import { Component } from 'react';
 
 import { FormControlModel, RadioButtonGroup, RadioButton, Form } from '@client:common/form';
 import { MessageBanner } from '@client:common/overlay/message-banner';
@@ -22,7 +22,7 @@ interface State {
   viewType: 'table' | 'plot';
 }
 
-export class ResultViewer extends React.Component<Props, State> {
+export class ResultViewer extends Component<Props, State> {
 
   readonly viewTypeFormControlModel = new FormControlModel<'table' | 'plot'>('table');
 

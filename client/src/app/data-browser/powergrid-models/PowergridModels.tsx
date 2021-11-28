@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/indent */
-import * as React from 'react';
+import { Component } from 'react';
 
 import { TextArea, Select, SelectionOptionBuilder, FormGroupModel, FormControlModel, Form } from '@client:common/form';
 import { BasicButton } from '@client:common/buttons';
@@ -31,7 +31,7 @@ interface State {
   disableSubmitButton: boolean;
 }
 
-export class PowerGridModels extends React.Component<Props, State> {
+export class PowerGridModels extends Component<Props, State> {
 
   readonly formGroupModel = new FormGroupModel({
     requestType: new FormControlModel<QueryPowerGridModelsRequestType>(null),

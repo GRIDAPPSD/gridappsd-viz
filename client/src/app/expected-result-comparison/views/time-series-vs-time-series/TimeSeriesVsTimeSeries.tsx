@@ -1,4 +1,4 @@
-import * as React from 'react';
+import { Component } from 'react';
 
 import { Form, SelectionOptionBuilder, FormGroupModel, FormControlModel, Select } from '@client:common/form';
 import { BasicButton } from '@client:common/buttons';
@@ -17,7 +17,7 @@ interface State {
   disableSubmitButton: boolean;
 }
 
-export class TimeSeriesVsTimeSeries extends React.Component<Props, State> {
+export class TimeSeriesVsTimeSeries extends Component<Props, State> {
 
   readonly formGroup = new FormGroupModel({
     firstSimulationId: new FormControlModel(''),

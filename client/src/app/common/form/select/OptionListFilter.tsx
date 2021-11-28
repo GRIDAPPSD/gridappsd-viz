@@ -1,4 +1,4 @@
-import * as React from 'react';
+import { Component, createRef } from 'react';
 import { Subject } from 'rxjs';
 import { distinctUntilChanged, debounceTime } from 'rxjs/operators';
 
@@ -15,9 +15,9 @@ interface State {
   filterValue: string;
 }
 
-export class OptionListFilter extends React.Component<Props, State> {
+export class OptionListFilter extends Component<Props, State> {
 
-  readonly inputRef = React.createRef<HTMLInputElement>();
+  readonly inputRef = createRef<HTMLInputElement>();
 
   private readonly _valueChanger = new Subject<[string, string]>();
 

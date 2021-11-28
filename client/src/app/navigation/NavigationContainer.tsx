@@ -1,4 +1,4 @@
-import * as React from 'react';
+import { Component } from 'react';
 import { Subject, Subscription } from 'rxjs';
 import { takeUntil, map } from 'rxjs/operators';
 
@@ -25,7 +25,7 @@ interface State {
 
 }
 
-export class NavigationContainer extends React.Component<Props, State> {
+export class NavigationContainer extends Component<Props, State> {
 
   private readonly _stateStore = StateStore.getInstance();
   private readonly _simulationQueue = SimulationQueue.getInstance();

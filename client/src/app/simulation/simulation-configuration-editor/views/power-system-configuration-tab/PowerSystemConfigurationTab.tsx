@@ -1,4 +1,4 @@
-import * as React from 'react';
+import { Component } from 'react';
 
 import { FormGroup, Select, SelectionOptionBuilder, FormGroupModel, FormControlModel } from '@client:common/form';
 import { FeederModel, FeederModelRegion, FeederModelLine, FeederModelSubregion } from '@client:common/topology';
@@ -21,7 +21,7 @@ interface State {
   lineOptionBuilder: SelectionOptionBuilder<FeederModelLine>;
 }
 
-export class PowerSystemConfigurationTab extends React.Component<Props, State> {
+export class PowerSystemConfigurationTab extends Component<Props, State> {
 
   readonly regionFormControlModel = new FormControlModel<FeederModelRegion>(null);
   readonly subregionFormControlModel = new FormControlModel<FeederModelSubregion>(null);

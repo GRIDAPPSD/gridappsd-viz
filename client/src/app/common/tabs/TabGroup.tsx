@@ -1,4 +1,4 @@
-import * as React from 'react';
+import { Component, createRef } from 'react';
 
 import { Tab } from './Tab';
 import { ActiveTabIndicator } from './ActiveTabIndicator';
@@ -16,13 +16,13 @@ interface State {
   activeTab: HTMLElement;
 }
 
-export class TabGroup extends React.Component<Props, State> {
+export class TabGroup extends Component<Props, State> {
 
   static defaultProps = {
     selectedTabIndex: 0
   };
 
-  readonly tabGroupRef = React.createRef<HTMLDivElement>();
+  readonly tabGroupRef = createRef<HTMLDivElement>();
 
   tabs: Tab[] = [];
   tabLabels: NodeListOf<HTMLElement>;
@@ -67,7 +67,7 @@ export class TabGroup extends React.Component<Props, State> {
           {
             tabs.map((tab, index) => (
               <div
-key={index}
+                key={index}
                 className={`tab-group__header__label tab-label-${index}${activeTabIndex === index ? ' active' : ''}`}
                 onClick={() => this.setSelectedTabIndex(index)}>
                 {tab.props.label}

@@ -1,4 +1,4 @@
-import * as React from 'react';
+import { Component } from 'react';
 import { filter } from 'rxjs/operators';
 
 import { FormGroup, Input, FormGroupModel, FormControlModel, FormArrayModel } from '@client:common/form';
@@ -46,7 +46,7 @@ interface State {
   scheduledCommandEvents: ScheduledCommandEvent[];
 }
 
-export class TestConfigurationTab extends React.Component<Props, State> {
+export class TestConfigurationTab extends Component<Props, State> {
 
   readonly currentEventTagFormControlModel: FormControlModel<string>;
   readonly selectedEventTypeToEditFormControlModel: FormControlModel<EventType>;

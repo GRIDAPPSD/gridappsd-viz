@@ -1,5 +1,3 @@
-import * as React from 'react';
-
 import './ActiveTabIndicator.light.scss';
 import './ActiveTabIndicator.dark.scss';
 
@@ -19,7 +17,7 @@ export function ActiveTabIndicator(props: Props) {
   const offset = props.activeTab.parentElement ? props.activeTab.parentElement.scrollLeft : 0;
   return (
     <div
-className='tab-group__active-tab-indicator'
+      className='tab-group__active-tab-indicator'
       style={{
         // minus 2 because it has 2px border
         transform: `translateX(${leftEdgeOfActiveTab - offset - 2}px)`,

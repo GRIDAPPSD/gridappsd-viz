@@ -1,5 +1,5 @@
-import * as React from 'react';
 import { Observable } from 'rxjs';
+import { Component } from 'react';
 
 import { Notification } from '@client:common/overlay/notification';
 
@@ -15,7 +15,7 @@ interface Props {
 interface State {
 }
 
-export class Authenticator extends React.Component<Props, State> {
+export class Authenticator extends Component<Props, State> {
 
   componentDidUpdate(prevProps: Props) {
     if (

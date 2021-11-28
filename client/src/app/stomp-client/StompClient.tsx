@@ -1,4 +1,4 @@
-import * as React from 'react';
+import { Component } from 'react';
 import { filter } from 'rxjs/operators';
 
 import { Input, TextArea, FormControlModel, Form, FormGroupModel } from '@client:common/form';
@@ -23,7 +23,7 @@ interface State {
   disableSubmitButton: boolean;
 }
 
-export class StompClient extends React.Component<Props, State> {
+export class StompClient extends Component<Props, State> {
 
   readonly formGroupModel = new FormGroupModel({
     destinationTopic: new FormControlModel(

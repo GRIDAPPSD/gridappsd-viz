@@ -1,4 +1,4 @@
-import * as React from 'react';
+import { Component } from 'react';
 
 import { Dialog, DialogContent, DialogActionGroup } from '@client:common/overlay/dialog';
 import { Select, SelectionOptionBuilder, FormControlModel } from '@client:common/form';
@@ -22,7 +22,7 @@ interface State {
   disableApplyButton: boolean;
 }
 
-export class SwitchControlMenu extends React.Component<Props, State> {
+export class SwitchControlMenu extends Component<Props, State> {
 
   readonly openStateFormControlModel = new FormControlModel(this.props.switch.open);
 

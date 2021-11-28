@@ -8,11 +8,6 @@
         "nodemon": "tsc --watch & nodemon dist/src/index.js",
         "debug": "node --inspect dist/src/index.js"
     },
-    "husky": {
-        "hooks": {
-            "pre-commit": "npm run lint"
-        }
-    },
     "author": "Nhuy Van",
     "license": "ISC",
     "dependencies": {
@@ -30,6 +25,7 @@
         "eslint-plugin-import": "^2.25.3",
         "eslint-plugin-jsdoc": "^37.0.3",
         "eslint-plugin-prefer-arrow": "^1.2.3",
+        "eslint-plugin-unused-imports": "^2.0.0",
         "lint-staged": "^12.1.2",
         "nodemon": "^2.0.4",
         "typescript": "^4.5.2"

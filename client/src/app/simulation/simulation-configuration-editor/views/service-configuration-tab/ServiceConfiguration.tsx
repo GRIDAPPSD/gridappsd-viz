@@ -1,4 +1,4 @@
-import * as React from 'react';
+import { Component } from 'react';
 
 import { FormGroup, Input, Checkbox, TextArea, FormArrayModel, FormGroupModel, FormControlModel } from '@client:common/form';
 import { Service, ServiceConfigUserInputSpec } from '@client:common/Service';
@@ -20,7 +20,7 @@ interface Props {
 interface State {
 }
 
-export class ServiceConfiguration extends React.Component<Props, State> {
+export class ServiceConfiguration extends Component<Props, State> {
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   readonly userInputOptionsFormGroupModel = new FormGroupModel<{ [optionLabel: string]: any }>();

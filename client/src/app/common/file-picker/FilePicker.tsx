@@ -1,4 +1,4 @@
-import * as React from 'react';
+import { Component } from 'react';
 
 import { PortalRenderer } from '@client:common/overlay/portal-renderer';
 
@@ -13,7 +13,7 @@ interface Props {
 interface State {
 }
 
-export class FilePicker extends React.Component<Props, State> {
+export class FilePicker extends Component<Props, State> {
 
   private readonly _filePickerService = FilePickerService.getInstance();
 

@@ -1,5 +1,3 @@
-import * as React from 'react';
-
 import { IconButton } from '@client:common/buttons';
 import { Tooltip } from '@client:common/tooltip';
 import { CommOutageEventTable, CommOutageEvent } from '@client:common/test-manager';

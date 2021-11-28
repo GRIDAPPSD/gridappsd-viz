@@ -1,4 +1,4 @@
-import * as React from 'react';
+import { Component } from 'react';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 
@@ -22,7 +22,7 @@ interface State {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export class FormControl extends React.Component<Props<any>, State> {
+export class FormControl extends Component<Props<any>, State> {
 
   private readonly _unsubscriber = new Subject<void>();
 

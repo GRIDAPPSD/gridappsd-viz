@@ -1,4 +1,4 @@
-import * as React from 'react';
+import { Component } from 'react';
 import { zip } from 'rxjs';
 import { take, filter } from 'rxjs/operators';
 
@@ -41,7 +41,7 @@ interface State {
   stompClientConnectionStatus: StompClientConnectionStatus;
 }
 
-export class AppContainer extends React.Component<Props, State> {
+export class AppContainer extends Component<Props, State> {
 
   readonly componentMRIDs = new Map<string, string | string[]>();
   readonly componentPhases = new Map<string, string[]>();

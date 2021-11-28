@@ -1,6 +1,6 @@
-import * as React from 'react';
 import { Subscription } from 'rxjs';
 import { map } from 'rxjs/operators';
+import { Component } from 'react';
 
 import { ProgressIndicator } from '@client:common/overlay/progress-indicator';
 import { StompClientService, StompClientConnectionStatus } from '@client:common/StompClientService';
@@ -12,7 +12,6 @@ import { RequestEditor } from '../DataBrowser';
 import { QueryLogsRequestBody } from './models/QueryLogsRequestBody';
 import { SimulationId } from './models/SimulationId';
 import { QueryLogsForm } from './views/query-logs-form/QueryLogsForm';
-
 
 import './Logs.light.scss';
 import './Logs.dark.scss';
@@ -28,7 +27,7 @@ interface State {
   showSpinner: boolean;
 }
 
-export class LogsContainer extends React.Component<Props, State> {
+export class LogsContainer extends Component<Props, State> {
 
   private readonly _stompClientService = StompClientService.getInstance();
 

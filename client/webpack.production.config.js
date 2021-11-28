@@ -6,11 +6,11 @@ const OptimizeCSSAssetsPlugin = require('optimize-css-assets-webpack-plugin');
 
 /**
  *
- * @param {{ buildVersion: string | true; }} env
+ * @param {{ version: string }} env
  */
 module.exports = (env) => {
-  updateVersion(env);
-  const baseConfig = require('./webpack.base.config')('production', false);
+  updateBuildVersion(env.version);
+  const baseConfig = require('./webpack.base.config')('production');
   baseConfig.module.rules.push({
     test: /(\.tsx?)$/,
     use: 'ts-loader'
@@ -57,25 +57,23 @@ module.exports = (env) => {
  *                                               was provided, none provided otherwise, in that case, use current
  *                                               branch name as the build version
  */
-function updateVersion(env) {
-  const buildVersion = env.buildVersion || env['build-version'];
-
-  if (buildVersion !== true) {
-    writeVersionNumber(buildVersion);
+function updateBuildVersion(version) {
+  if (version !== undefined) {
+    writeBuildVersion(version);
   } else {
     childProcess.exec('git rev-parse --abbrev-ref HEAD', {}, (error, stdout) => {
       if (error)
         console.error(`An error occured trying to 'git rev-parse --abbrev-ref HEAD'`);
       else {
-        writeVersionNumber(stdout);
+        writeBuildVersion(stdout);
       }
     });
   }
 }
 
-function writeVersionNumber(versionNumber) {
+function writeBuildVersion(version) {
   const configFilePath = path.resolve(__dirname, '..', 'assets', 'config.json')
   const config = JSON.parse(fs.readFileSync(configFilePath).toString());
-  config.version = versionNumber.trim();
+  config.version = version.trim();
   fs.writeFileSync(configFilePath, JSON.stringify(config, null, 4));
 }

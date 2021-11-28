@@ -1,4 +1,4 @@
-import * as React from 'react';
+import { Component, createRef } from 'react';
 
 import { IconButton, BasicButton } from '@client:common/buttons';
 import { Tooltip } from '@client:common/tooltip';
@@ -37,7 +37,7 @@ interface State {
   showStartSimulationButton: boolean;
 }
 
-export class SimulationControl extends React.Component<Props, State> {
+export class SimulationControl extends Component<Props, State> {
 
   constructor(props: Props) {
     super(props);
@@ -171,7 +171,7 @@ export class SimulationControl extends React.Component<Props, State> {
     const portalRenderer = new PortalRenderer({
       containerClassName: 'simulation-control__delayed-pause-duration-input-container'
     });
-    const inputBoxRef = React.createRef<HTMLDivElement>();
+    const inputBoxRef = createRef<HTMLDivElement>();
     const hideDelayedPauseDurationInputBox = () => {
       inputBoxRef.current.classList.remove('visible');
       inputBoxRef.current.classList.add('hidden');

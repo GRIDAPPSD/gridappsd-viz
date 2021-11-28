@@ -1,5 +1,3 @@
-import * as React from 'react';
-
 import { Service, ServiceConfigUserInputSpec } from '@client:common/Service';
 import { MessageBanner } from '@client:common/overlay/message-banner';
 

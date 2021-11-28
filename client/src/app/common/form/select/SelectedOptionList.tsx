@@ -1,4 +1,4 @@
-import * as React from 'react';
+import { Component } from 'react';
 
 import { IconButton } from '@client:common/buttons';
 
@@ -16,7 +16,7 @@ interface State {
   show: boolean;
 }
 
-export class SelectedOptionList<T> extends React.Component<Props<T>, State> {
+export class SelectedOptionList<T> extends Component<Props<T>, State> {
 
   constructor(props: Props<T>) {
     super(props);

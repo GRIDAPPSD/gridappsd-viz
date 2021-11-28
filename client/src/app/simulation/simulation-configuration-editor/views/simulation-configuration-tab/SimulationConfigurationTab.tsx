@@ -1,4 +1,4 @@
-import * as React from 'react';
+import { Component } from 'react';
 
 import {
   FormGroup,
@@ -29,7 +29,7 @@ interface State {
   simulatorOptionBuilder: SelectionOptionBuilder<string>;
 }
 
-export class SimulationConfigurationTab extends React.Component<Props, State> {
+export class SimulationConfigurationTab extends Component<Props, State> {
 
   constructor(props: Props) {
     super(props);

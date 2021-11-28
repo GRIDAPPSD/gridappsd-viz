@@ -1,4 +1,4 @@
-import * as React from 'react';
+import { Component } from 'react';
 import { Subject } from 'rxjs';
 import { filter, takeUntil, switchMap, tap } from 'rxjs/operators';
 
@@ -20,7 +20,7 @@ interface State {
   modelDictionaryComponents: ModelDictionaryComponent[];
 }
 
-export class SimulationControlContainer extends React.Component<Props, State> {
+export class SimulationControlContainer extends Component<Props, State> {
 
   readonly simulationManagementService = SimulationManagementService.getInstance();
 

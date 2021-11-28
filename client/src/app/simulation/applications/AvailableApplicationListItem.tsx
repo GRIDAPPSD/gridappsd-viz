@@ -1,5 +1,3 @@
-import * as React from 'react';
-
 import { Application } from '@client:common/Application';
 
 import './AvailableApplicationListItem.light.scss';

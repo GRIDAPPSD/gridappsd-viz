@@ -1,4 +1,4 @@
-import * as React from 'react';
+import { Component } from 'react';
 
 import { PortalRenderer } from '@client:common/overlay/portal-renderer';
 import { IconButton } from '@client:common/buttons';
@@ -15,7 +15,7 @@ interface State {
   show: boolean;
 }
 
-export class Notification extends React.Component<Props, State> {
+export class Notification extends Component<Props, State> {
 
   static defaultProps = {
     show: true

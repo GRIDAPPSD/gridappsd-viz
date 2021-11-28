@@ -1,4 +1,4 @@
-import * as React from 'react';
+import { Component } from 'react';
 
 import { IconButton } from '@client:common/buttons';
 import { Tooltip } from '@client:common/tooltip';
@@ -22,7 +22,7 @@ interface Props {
 interface State {
 }
 
-export class Alarms extends React.Component<Props, State> {
+export class Alarms extends Component<Props, State> {
 
   readonly existingCreatedByMap = new Map<string, number>();
   readonly dateTimeFormatter = DateTimeService.getInstance();

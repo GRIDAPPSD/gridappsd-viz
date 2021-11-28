@@ -1,5 +1,5 @@
-import * as React from 'react';
-import { Route, Redirect, withRouter, RouteComponentProps, RouteChildrenProps } from 'react-router-dom';
+import { useRef } from 'react';
+import { Outlet, Route, Routes, useNavigate } from 'react-router-dom';
 
 import { Application } from '@client:common/Application';
 import { MessageBanner } from '@client:common/overlay/message-banner';
@@ -24,7 +24,7 @@ import { SimulationStatusLogContainer } from './simulation/simulation-status-log
 import { StompClientContainer } from './stomp-client';
 import { TopologyRendererContainer } from './simulation/topology-renderer';
 import { WebsocketStatusWatcherContainer } from './websocket-status-watcher';
-import { EventSummary } from './simulation/event-summary/EventSummary';
+import { EventSummary } from './simulation/event-summary';
 import { AvailableApplicationList } from './simulation/applications/AvailableApplicationList';
 import { VoltageViolationContainer } from './simulation/voltage-violation/VoltageViolationContainer';
 import { NavigationContainer } from './navigation';
@@ -35,7 +35,7 @@ import { ExpectedResultComparisonContainer } from './expected-result-comparison'
 import './App.light.scss';
 import './App.dark.scss';
 
-interface Props extends RouteComponentProps {
+interface Props {
   feederModel: FeederModel;
   availableApplications: Application[];
   componentMRIDs: Map<string, string | string[]>;
@@ -47,149 +47,119 @@ interface Props extends RouteComponentProps {
   onJoinActiveSimulation: (simulationId: string) => void;
 }
 
-interface State {
-}
+export function App(props: Props) {
+  const tabGroupRef = useRef<TabGroup>(null);
+  const stateStore = StateStore.getInstance();
+  const navigate = useNavigate();
 
-export const App = withRouter(class extends React.Component<Props, State> {
-
-  readonly tabGroupRef = React.createRef<TabGroup>();
-
-  shouldRedirect = false;
-
-  private readonly _stateStore = StateStore.getInstance();
-
-  constructor(props: Props) {
-    super(props);
-
-    this.showSimulationConfigForm = this.showSimulationConfigForm.bind(this);
-    this.onJoinActiveSimulation = this.onJoinActiveSimulation.bind(this);
-    this.onLocateNodeForAlarm = this.onLocateNodeForAlarm.bind(this);
-  }
-
-  componentDidCatch() {
-    this.shouldRedirect = true;
-  }
-
-  render() {
-    return (
-      <Route
-        path='/'
-        component={() =>
-          this.shouldRedirect
-            ? this.redirect()
-            : (
-              <AuthenticatorContainer>
-                <NavigationContainer
-                  onShowSimulationConfigForm={this.showSimulationConfigForm}
-                  onLogout={this.props.onLogout}
-                  onJoinActiveSimulation={this.onJoinActiveSimulation}
-                  onShowExpectedResultViewer={this.onShowExpectedResultViewer}>
-                  <Settings />
-                </NavigationContainer>
-                <Route
-                  exact
-                  path='/simulation'
-                  component={() => (
-                    <div className='topology-renderer-simulation-status-logger-measurement-graphs'>
-                      <div>
-                        <SimulationControlContainer />
-                        <TabGroup ref={this.tabGroupRef}>
-                          <Tab label='Simulation'>
-                            <TopologyRendererContainer
-                              mRIDs={this.props.componentMRIDs}
-                              phases={this.props.componentPhases} />
-                            <SimulationStatusLogContainer />
-                            <MeasurementValueTableContainer />
-                            <VoltageViolationContainer />
-                          </Tab>
-                          <Tab label='Events'>
-                            <EventSummary />
-                          </Tab>
-                          <Tab label='Applications'>
-                            <AvailableApplicationList />
-                          </Tab>
-                          <Tab label='Alarms'>
-                            <AlarmsContainer
-                              onNewAlarmsConfirmed={() => this.tabGroupRef.current.setSelectedTabIndex(3)}
-                              onLocateNodeForAlarm={this.onLocateNodeForAlarm} />
-                          </Tab>
-                        </TabGroup>
-                      </div>
-                      <div className='measurement-charts'>
-                        <MeasurementChartContainer />
-                      </div>
-                    </div>
-                  )} />
-                <Route
-                  exact
-                  path='/applications-and-services'
-                  component={AvailableApplicationsAndServicesContainer} />
-                <Route
-                  exact
-                  path='/stomp-client'
-                  component={StompClientContainer} />
-                <Route
-                  path='/browse'
-                  component={(routeProps: RouteChildrenProps) => <DataBrowser
-                    feederModel={this.props.feederModel}
-                    match={routeProps.match} />} />
-                <WebsocketStatusWatcherContainer />
-                {
-                  this.props.stompClientConnectionStatus === StompClientConnectionStatus.CONNECTED
-                  &&
-                  (this.props.availableApplications === null || this.props.feederModel === null)
-                  &&
-                  <MessageBanner>
-                    Initializing<ThreeDots />
-                  </MessageBanner>
-                }
-              </AuthenticatorContainer>
-            )
-        } />
-    );
-  }
-
-  redirect() {
-    this.shouldRedirect = false;
-    return <Redirect to='/' />;
-  }
-
-  showSimulationConfigForm(config: SimulationConfiguration) {
+  const onShowSimulationConfigForm = (config: SimulationConfiguration) => {
     const portalRenderer = new PortalRenderer();
     portalRenderer.mount(
       <SimulationConfigurationEditor
-        feederModel={this.props.feederModel}
+        feederModel={props.feederModel}
         onSubmit={updatedConfig => {
-          this.props.onSimulationConfigFormSubmitted(updatedConfig);
-          setTimeout(() => this.props['history'].push('/simulation'), 500);
+          props.onSimulationConfigFormSubmitted(updatedConfig);
+          setTimeout(() => props['history'].push('/simulation'), 500);
         }}
         onClose={portalRenderer.unmount}
-        onMRIDChanged={this.props.onMRIDChanged}
-        availableApplications={this.props.availableApplications}
+        onMRIDChanged={props.onMRIDChanged}
+        availableApplications={props.availableApplications}
         initialConfig={config || DEFAULT_SIMULATION_CONFIGURATION} />
     );
-  }
+  };
 
-  onJoinActiveSimulation(simulationId: string) {
-    this.props['history'].push('/simulation');
-    this.props.onJoinActiveSimulation(simulationId);
-  }
+  const onJoinActiveSimulation = (simulationId: string) => {
+    navigate('/simulation');
+    props.onJoinActiveSimulation(simulationId);
+  };
 
-  onShowExpectedResultViewer() {
+  const onShowExpectedResultViewer = () => {
     Dialog.create(<ExpectedResultComparisonContainer />)
       .addClassName('expected-result-comparison-container')
       .addNegativeButton('Close')
       .open();
-  }
+  };
 
-  onLocateNodeForAlarm(alarm: Alarm) {
-    this.tabGroupRef.current.setSelectedTabIndex(0);
-    waitUntil(() => this.tabGroupRef.current.isTabVisible(0))
+  const onLocateNodeForAlarm = (alarm: Alarm) => {
+    tabGroupRef.current.setSelectedTabIndex(0);
+    waitUntil(() => tabGroupRef.current.isTabVisible(0))
       .then(() => {
-        this._stateStore.update({
+        stateStore.update({
           nodeNameToLocate: alarm.equipment_name
         });
       });
-  }
+  };
 
-});
+  return (
+    <Routes>
+      <Route
+        path='/'
+        element={
+          <AuthenticatorContainer>
+            <NavigationContainer
+              onShowSimulationConfigForm={onShowSimulationConfigForm}
+              onLogout={props.onLogout}
+              onJoinActiveSimulation={onJoinActiveSimulation}
+              onShowExpectedResultViewer={onShowExpectedResultViewer}>
+              <Settings />
+            </NavigationContainer>
+            <Outlet />
+            <WebsocketStatusWatcherContainer />
+            {
+              props.stompClientConnectionStatus === StompClientConnectionStatus.CONNECTED
+              &&
+              (props.availableApplications === null || props.feederModel === null)
+              &&
+              <MessageBanner>
+                Initializing<ThreeDots />
+              </MessageBanner>
+            }
+          </AuthenticatorContainer>
+        }>
+        <Route
+          path='simulation'
+          element={
+            <div className='topology-renderer-simulation-status-logger-measurement-graphs'>
+              <div>
+                <SimulationControlContainer />
+                <TabGroup ref={tabGroupRef}>
+                  <Tab label='Simulation'>
+                    <TopologyRendererContainer
+                      mRIDs={props.componentMRIDs}
+                      phases={props.componentPhases} />
+                    <SimulationStatusLogContainer />
+                    <MeasurementValueTableContainer />
+                    <VoltageViolationContainer />
+                  </Tab>
+                  <Tab label='Events'>
+                    <EventSummary />
+                  </Tab>
+                  <Tab label='Applications'>
+                    <AvailableApplicationList />
+                  </Tab>
+                  <Tab label='Alarms'>
+                    <AlarmsContainer
+                      onNewAlarmsConfirmed={() => tabGroupRef.current.setSelectedTabIndex(3)}
+                      onLocateNodeForAlarm={onLocateNodeForAlarm} />
+                  </Tab>
+                </TabGroup>
+              </div>
+              <div className='measurement-charts'>
+                <MeasurementChartContainer />
+              </div>
+            </div>} />
+        <Route
+          path='applications-and-services'
+          element={<AvailableApplicationsAndServicesContainer />} />
+        <Route
+          path='stomp-client'
+          element={<StompClientContainer />} />
+        <Route
+          path='browse/*'
+          element={<DataBrowser feederModel={props.feederModel} />} />
+      </Route>
+    </Routes>
+  );
+
+
+}

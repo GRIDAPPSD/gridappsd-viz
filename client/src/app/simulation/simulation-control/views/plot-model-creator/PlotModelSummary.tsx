@@ -1,4 +1,4 @@
-import * as React from 'react';
+import { Component, createRef } from 'react';
 
 import { PlotModel } from '@client:common/plot-model/PlotModel';
 import { IconButton } from '@client:common/buttons';
@@ -18,9 +18,9 @@ interface State {
   components: PlotModelComponent[];
 }
 
-export class PlotModelSummary extends React.Component<Props, State> {
+export class PlotModelSummary extends Component<Props, State> {
 
-  readonly plotNameElementRef = React.createRef<HTMLDivElement>();
+  readonly plotNameElementRef = createRef<HTMLDivElement>();
 
   constructor(props: Props) {
     super(props);

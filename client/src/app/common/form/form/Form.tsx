@@ -1,4 +1,4 @@
-import * as React from 'react';
+import { Component } from 'react';
 
 import { FormGroupModel } from '../models/FormGroupModel';
 
@@ -15,7 +15,7 @@ interface Props {
 interface State {
 }
 
-export class Form extends React.Component<Props, State> {
+export class Form extends Component<Props, State> {
 
   constructor(props: Props) {
     super(props);

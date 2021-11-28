@@ -1,4 +1,4 @@
-import * as React from 'react';
+import { Component, createRef } from 'react';
 import { Subject } from 'rxjs';
 import { debounceTime, filter, takeUntil } from 'rxjs/operators';
 import * as CodeMirror from 'codemirror';
@@ -21,9 +21,9 @@ interface Props<T extends 'plaintext' | 'json' = 'json'> {
 interface State {
 }
 
-export class TextArea<T extends 'plaintext' | 'json' = 'json'> extends React.Component<Props<T>, State> {
+export class TextArea<T extends 'plaintext' | 'json' = 'json'> extends Component<Props<T>, State> {
 
-  readonly inputBoxContainerRef = React.createRef<HTMLDivElement>();
+  readonly inputBoxContainerRef = createRef<HTMLDivElement>();
   readonly internalFormControl = new FormControlModel('', this.props.formControlModel.validators);
 
   // Hold the text value currently in the text box

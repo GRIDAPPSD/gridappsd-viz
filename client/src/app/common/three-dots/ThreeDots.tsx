@@ -1,4 +1,4 @@
-import * as React from 'react';
+import { Component } from 'react';
 import { timer, Subscription } from 'rxjs';
 
 import './ThreeDots.light.scss';
@@ -11,7 +11,7 @@ interface State {
   dots: number;
 }
 
-export class ThreeDots extends React.Component<Props, State> {
+export class ThreeDots extends Component<Props, State> {
 
   private _subscription: Subscription;
   private _direction: 1 | -1 = 1;

@@ -1,5 +1,5 @@
-import * as React from 'react';
 import { Subscription } from 'rxjs';
+import { Component, createRef } from 'react';
 
 import { BasicButton } from '@client:common/buttons';
 import { Paginator, PageChangeEvent } from '@client:common/paginator';
@@ -15,9 +15,6 @@ import { OptionList } from './OptionList';
 import { OptionListFilter } from './OptionListFilter';
 import { SelectedOptionList } from './SelectedOptionList';
 import { SelectionOptionBuilder } from './SelectionOptionBuilder';
-
-
-
 
 import './Select.light.scss';
 import './Select.dark.scss';
@@ -42,9 +39,9 @@ interface State<T> {
   filteredOptions: Option<T>[];
 }
 
-export class Select<T, E extends boolean> extends React.Component<Props<T, E>, State<T>> {
+export class Select<T, E extends boolean> extends Component<Props<T, E>, State<T>> {
 
-  readonly optionListOpenerRef = React.createRef<HTMLButtonElement>();
+  readonly optionListOpenerRef = createRef<HTMLButtonElement>();
 
   private readonly _defaultLabel: string;
 

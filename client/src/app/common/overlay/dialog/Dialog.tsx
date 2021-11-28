@@ -1,4 +1,4 @@
-import * as React from 'react';
+import { Component, createRef } from 'react';
 import { Subject } from 'rxjs';
 
 import { PortalRenderer } from '@client:common/overlay/portal-renderer';
@@ -25,9 +25,9 @@ interface State {
   open: boolean;
 }
 
-export class Dialog extends React.Component<Props, State> {
+export class Dialog extends Component<Props, State> {
 
-  readonly dialogRef = React.createRef<HTMLDivElement>();
+  readonly dialogRef = createRef<HTMLDivElement>();
 
   constructor(props: Props) {
     super(props);
@@ -171,7 +171,7 @@ export class DialogBuilder {
   }
 
   open(left?: number, top?: number) {
-    const dialogRef = React.createRef<Dialog>();
+    const dialogRef = createRef<Dialog>();
     const portalRenderer = new PortalRenderer();
     const afterClosed = new Subject<void>();
 

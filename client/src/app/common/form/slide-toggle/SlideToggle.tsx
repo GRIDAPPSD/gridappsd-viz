@@ -1,4 +1,4 @@
-import * as React from 'react';
+import { Component } from 'react';
 import { Subscription } from 'rxjs';
 
 import { Ripple } from '@client:common/ripple';
@@ -20,7 +20,7 @@ interface State {
   isOn: boolean;
 }
 
-export class SlideToggle extends React.Component<Props, State> {
+export class SlideToggle extends Component<Props, State> {
 
   private _subscription: Subscription;
 

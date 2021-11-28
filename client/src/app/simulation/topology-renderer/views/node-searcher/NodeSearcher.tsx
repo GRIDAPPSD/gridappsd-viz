@@ -1,4 +1,4 @@
-import * as React from 'react';
+import { Component, createRef, Fragment } from 'react';
 
 import { Backdrop } from '@client:common/overlay/backdrop';
 import { PortalRenderer } from '@client:common/overlay/portal-renderer';
@@ -32,10 +32,10 @@ interface Match {
   result: FuzzySearchResult;
 }
 
-export class NodeSearcher extends React.Component<Props, State> {
+export class NodeSearcher extends Component<Props, State> {
 
   readonly searchTermFormControlModel = new FormControlModel('');
-  readonly nodeSearcherElementRef = React.createRef<HTMLDivElement>();
+  readonly nodeSearcherElementRef = createRef<HTMLDivElement>();
 
   private _matchedNodes: Map<string, Node>;
   private _previousSearchTerm = '';
@@ -237,9 +237,9 @@ export class NodeSearcher extends React.Component<Props, State> {
         );
       }
       return (
-        <React.Fragment key={i}>
+        <Fragment key={i}>
           {matchedNode.result.input.substring(boundary.start, boundary.end)}
-        </React.Fragment>
+        </Fragment>
       );
     });
     // The match was for node name

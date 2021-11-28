@@ -1,4 +1,4 @@
-import * as React from 'react';
+import { Component } from 'react';
 import { Observable, Subscription } from 'rxjs';
 
 import { Input, Form, FormGroupModel, FormControlModel } from '@client:common/form';
@@ -20,7 +20,7 @@ interface State {
   showSpinner: boolean;
 }
 
-export class LoginScreen extends React.Component<Props, State> {
+export class LoginScreen extends Component<Props, State> {
 
   readonly formGroupModel = new FormGroupModel({
     username: new FormControlModel('system', [Validators.checkNotEmpty('Username')]),

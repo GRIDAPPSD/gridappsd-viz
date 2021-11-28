@@ -1,4 +1,3 @@
-import * as React from 'react';
 
 import { DateTimeService } from '@client:common/DateTimeService';
 

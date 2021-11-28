@@ -1,4 +1,4 @@
-import * as React from 'react';
+import { Component, createRef } from 'react';
 import { line } from 'd3-shape';
 import { select, Selection, create } from 'd3-selection';
 import { scaleLinear, ScaleLinear, selectAll } from 'd3';
@@ -57,10 +57,10 @@ interface State {
 
 const symbolSize = 35;
 
-export class TopologyRenderer extends React.Component<Props, State> {
+export class TopologyRenderer extends Component<Props, State> {
 
   readonly canvasTransformService = CanvasTransformService.getInstance();
-  readonly svgRef = React.createRef<SVGSVGElement>();
+  readonly svgRef = createRef<SVGSVGElement>();
 
   private readonly _scalingFactorPerSymbolTable = {
     [NodeType.CAPACITOR]: 1,

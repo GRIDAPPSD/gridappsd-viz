@@ -1,4 +1,4 @@
-import * as React from 'react';
+import { Component } from 'react';
 
 import { FormGroup, Select, TextArea, SelectionOptionBuilder, FormGroupModel, FormControlModel, FormArrayModel } from '@client:common/form';
 import { Application } from '@client:common/Application';
@@ -20,7 +20,7 @@ interface State {
   availableApplicationOptionBuilder: SelectionOptionBuilder<string>;
 }
 
-export class ApplicationConfigurationTab extends React.Component<Props, State> {
+export class ApplicationConfigurationTab extends Component<Props, State> {
 
   readonly nameFormControlModel = new FormControlModel('');
   readonly configStringFormControlModel = new FormControlModel(

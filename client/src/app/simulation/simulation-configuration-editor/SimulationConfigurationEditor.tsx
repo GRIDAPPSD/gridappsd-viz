@@ -1,4 +1,4 @@
-import * as React from 'react';
+import { Component } from 'react';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 
@@ -51,7 +51,7 @@ interface State {
   services: Service[];
 }
 
-export class SimulationConfigurationEditor extends React.Component<Props, State> {
+export class SimulationConfigurationEditor extends Component<Props, State> {
 
   readonly currentConfig: SimulationConfiguration;
   readonly simulationStartDate = Date.now() / 1000;

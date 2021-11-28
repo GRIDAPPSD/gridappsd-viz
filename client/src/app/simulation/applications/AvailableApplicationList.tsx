@@ -1,4 +1,4 @@
-import * as React from 'react';
+import { Component } from 'react';
 import { Subscription } from 'rxjs';
 
 import { Application } from '@client:common/Application';
@@ -23,7 +23,7 @@ interface State {
   action: 'enable' | 'disable';
 }
 
-export class AvailableApplicationList extends React.Component<Props, State> {
+export class AvailableApplicationList extends Component<Props, State> {
 
   private readonly _stompClientService = StompClientService.getInstance();
   private readonly _stateStore = StateStore.getInstance();

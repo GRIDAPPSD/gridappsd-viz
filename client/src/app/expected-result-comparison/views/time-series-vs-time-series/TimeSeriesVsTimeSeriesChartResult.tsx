@@ -1,4 +1,4 @@
-import * as React from 'react';
+import { Component } from 'react';
 
 import { LineChart, LineChartModel, TimeSeries } from '@client:common/line-chart';
 
@@ -24,7 +24,7 @@ interface State {
   chartModels: LineChartModel[];
 }
 
-export class TimeSeriesVsTimeSeriesChartResult extends React.Component<Props, State> {
+export class TimeSeriesVsTimeSeriesChartResult extends Component<Props, State> {
 
   constructor(props: Props) {
     super(props);

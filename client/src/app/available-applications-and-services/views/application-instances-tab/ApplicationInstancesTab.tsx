@@ -1,16 +1,14 @@
-import * as React from 'react';
-
 import { MessageBanner } from '@client:common/overlay/message-banner';
 
-import './ServiceIntancesTab.light.scss';
-import './ServiceIntancesTab.dark.scss';
+import './ApplicationInstancesTab.light.scss';
+import './ApplicationInstancesTab.dark.scss';
 
 interface Props {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   instances: any[];
 }
 
-export function ServiceIntancesTab(props: Props) {
+export function ApplicationInstancesTab(props: Props) {
   if (!props.instances || props.instances.length === 0) {
     return (
       <MessageBanner>
@@ -19,8 +17,8 @@ export function ServiceIntancesTab(props: Props) {
     );
   }
   return (
-    <div className='service-instances-tab-container'>
-      <div className='service-instances-tab'>
+    <div className='application-instances-tab-container'>
+      <div className='application-instances-tab'>
         {JSON.stringify(props.instances, null, 4)}
       </div>
     </div>

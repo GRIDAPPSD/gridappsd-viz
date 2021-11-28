@@ -1,4 +1,4 @@
-import * as React from 'react';
+import { Component } from 'react';
 
 import { Ripple } from '@client:common/ripple';
 
@@ -18,7 +18,7 @@ interface Props<T> {
 interface State {
 }
 
-export class RadioButton<T> extends React.Component<Props<T>, State> {
+export class RadioButton<T> extends Component<Props<T>, State> {
 
   formControlModel: FormControlModel<T>;
 

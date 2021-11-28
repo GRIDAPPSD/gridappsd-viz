@@ -1,4 +1,4 @@
-import * as React from 'react';
+import { Component } from 'react';
 import { Subject, Subscription } from 'rxjs';
 import { takeUntil, takeWhile } from 'rxjs/operators';
 
@@ -53,7 +53,7 @@ interface State {
 
 const topologyModelCache = new Map<string, TopologyModel>();
 
-export class TopologyRendererContainer extends React.Component<Props, State> {
+export class TopologyRendererContainer extends Component<Props, State> {
 
   // Keys are conducting equipment MRID's
   readonly currentLimitMap = new Map<string, CurrentLimit>();

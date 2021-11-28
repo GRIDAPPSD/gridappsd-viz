@@ -1,4 +1,4 @@
-import * as React from 'react';
+import { Component } from 'react';
 
 import { BasicButton, IconButton } from '@client:common/buttons';
 import {
@@ -46,7 +46,7 @@ interface State {
   outputList: CommOutageEventOutputListItem[];
 }
 
-export class CommOutageEventForm extends React.Component<Props, State> {
+export class CommOutageEventForm extends Component<Props, State> {
 
   readonly selectedTypeForCurrentInputItemFormControl = new FormControlModel<{ id: string; label: string }>(null);
   readonly selectedComponentForCurrentInputItemFormControl = new FormControlModel<ModelDictionaryCapacitor | ModelDictionaryRegulator | ModelDictionarySwitch>(null);

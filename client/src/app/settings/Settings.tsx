@@ -1,4 +1,4 @@
-import * as React from 'react';
+import { Component, createRef } from 'react';
 
 import { IconButton } from '@client:common/buttons';
 import { Tooltip } from '@client:common/tooltip';
@@ -19,12 +19,12 @@ interface State {
   timeZoneOptionBuilder: SelectionOptionBuilder<TimeZone>;
 }
 
-export class Settings extends React.Component<Props, State> {
+export class Settings extends Component<Props, State> {
 
   readonly isDarkThemeSelectedFormControl = new FormControlModel((localStorage.getItem('theme') as 'light' | 'dark' || 'dark') === 'dark');
   readonly enableLoggingFormControl = new FormControlModel((localStorage.getItem('isLoggingEnabled') ?? String(__DEVELOPMENT__)) === 'true');
   readonly timeZoneFormControl = new FormControlModel(TimeZone.LOCAL);
-  readonly menuOpenerRef = React.createRef<HTMLDivElement>();
+  readonly menuOpenerRef = createRef<HTMLDivElement>();
   readonly dateTimeService = DateTimeService.getInstance();
 
   readonly _stateStore = StateStore.getInstance();
@@ -70,11 +70,10 @@ export class Settings extends React.Component<Props, State> {
   private _toggleTheme(isDarkThemeSelected: boolean) {
     // These variables are injected by webpack
     // They are declared in src/webpack-injections.d.ts
-    if (!__CSS_HMR_ENABLED__) {
-      const styleFilename = isDarkThemeSelected ? __DARK_THEME_STYLE_FILENAME__ : __LIGHT_THEME_STYLE_FILENAME__;
-      const link = document.head.querySelector<HTMLLinkElement>('link[rel=stylesheet]:last-of-type');
-      link.href = '/' + styleFilename;
-    }
+    const styleFilename = isDarkThemeSelected ? __DARK_THEME_STYLE_FILENAME__ : __LIGHT_THEME_STYLE_FILENAME__;
+    const link = document.head.querySelector<HTMLLinkElement>('link[rel=stylesheet]:last-of-type');
+
+    link.href = '/' + styleFilename;
     localStorage.setItem('theme', isDarkThemeSelected ? 'dark' : 'light');
   }
 

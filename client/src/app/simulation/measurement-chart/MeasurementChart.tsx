@@ -1,4 +1,4 @@
-import * as React from 'react';
+import { Component, createRef } from 'react';
 import { select, Selection } from 'd3-selection';
 import { scaleLinear, scaleTime, ScaleTime, ScaleLinear } from 'd3-scale';
 import { axisBottom, axisLeft, Axis } from 'd3-axis';
@@ -30,7 +30,7 @@ interface State {
   disableZoomInButton: boolean;
 }
 
-export class MeasurementChart extends React.Component<Props, State> {
+export class MeasurementChart extends Component<Props, State> {
 
   readonly width = 370;
   readonly height = 280;
@@ -41,7 +41,7 @@ export class MeasurementChart extends React.Component<Props, State> {
     right: 10
   };
 
-  readonly svgRef = React.createRef<SVGSVGElement>();
+  readonly svgRef = createRef<SVGSVGElement>();
 
   private readonly _stateStore = StateStore.getInstance();
   private readonly _xScale: ScaleTime<number, number>;

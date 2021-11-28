@@ -1,4 +1,4 @@
-import * as React from 'react';
+import { Component } from 'react';
 import { filter } from 'rxjs/operators';
 
 import { Service, ServiceConfigUserInputSpec } from '@client:common/Service';
@@ -25,7 +25,7 @@ interface State {
   serviceOptionBuilder: SelectionOptionBuilder<Service>;
 }
 
-export class ServiceConfigurationTab extends React.Component<Props, State> {
+export class ServiceConfigurationTab extends Component<Props, State> {
 
   readonly internalFormArrayModel = new FormArrayModel<ServiceConfigurationModel>();
   readonly availableServicesFormControl = new FormControlModel<Service[]>([]);

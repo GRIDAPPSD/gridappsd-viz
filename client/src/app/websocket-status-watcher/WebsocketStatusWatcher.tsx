@@ -1,5 +1,3 @@
-import * as React from 'react';
-
 import { MessageBanner } from '@client:common/overlay/message-banner';
 import { PortalRenderer } from '@client:common/overlay/portal-renderer';
 import { IconButton } from '@client:common/buttons';

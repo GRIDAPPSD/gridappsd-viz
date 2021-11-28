@@ -1,5 +1,5 @@
-import * as React from 'react';
-import * as ReactDOM from 'react-dom';
+import { Children, Component } from 'react';
+import { findDOMNode } from 'react-dom';
 
 import './Fade.light.scss';
 import './Fade.dark.scss';
@@ -21,7 +21,7 @@ interface State {
  *    </Fade>
  * ```
  */
-export class Fade extends React.Component<Props, State> {
+export class Fade extends Component<Props, State> {
 
   // The child component's first DOM element to apply the animation to
   private _element: HTMLElement;
@@ -31,11 +31,11 @@ export class Fade extends React.Component<Props, State> {
   }
 
   componentDidMount() {
-    if (React.Children.count(this.props.children) !== 1) {
+    if (Children.count(this.props.children) !== 1) {
       throw new Error('<Fade /> component can only accept one child component with an enclosing DOM element');
     }
     // eslint-disable-next-line react/no-find-dom-node
-    this._element = ReactDOM.findDOMNode(this) as HTMLElement;
+    this._element = findDOMNode(this) as HTMLElement;
     if (this.props.in) {
       this._element.classList.add('fade-in');
     }

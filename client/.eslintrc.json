@@ -21,7 +21,8 @@
     "plugins": [
         "@typescript-eslint",
         "eslint-plugin-jsdoc",
-        "eslint-plugin-import"
+        "eslint-plugin-import",
+        "unused-imports"
     ],
     "settings": {
         "react": {

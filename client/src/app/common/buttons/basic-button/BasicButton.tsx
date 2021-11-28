@@ -1,5 +1,3 @@
-import * as React from 'react';
-
 import { Ripple } from '../../ripple/Ripple';
 
 import './BasicButton.light.scss';

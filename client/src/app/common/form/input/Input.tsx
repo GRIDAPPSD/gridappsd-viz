@@ -1,4 +1,4 @@
-import * as React from 'react';
+import { Component } from 'react';
 import { Subject } from 'rxjs';
 import { debounceTime, map, takeUntil } from 'rxjs/operators';
 
@@ -22,7 +22,7 @@ interface State {
   value: string;
 }
 
-export class Input<T extends 'text' | 'number' | 'datetime' | 'password' = 'text'> extends React.Component<Props<T>, State> {
+export class Input<T extends 'text' | 'number' | 'datetime' | 'password' = 'text'> extends Component<Props<T>, State> {
 
   private readonly _valueChanges = new Subject<string>();
   private readonly _dateTimeService = DateTimeService.getInstance();

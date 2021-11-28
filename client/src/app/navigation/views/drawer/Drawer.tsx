@@ -1,4 +1,4 @@
-import * as React from 'react';
+import { Component } from 'react';
 
 import { Backdrop } from '@client:common/overlay/backdrop';
 
@@ -11,7 +11,7 @@ interface Props {
 interface State {
   isOpen: boolean;
 }
-export class Drawer extends React.Component<Props, State> {
+export class Drawer extends Component<Props, State> {
 
   constructor(props: Props) {
     super(props);

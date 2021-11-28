@@ -1,4 +1,4 @@
-import * as React from 'react';
+import { Component } from 'react';
 
 import { Dialog, DialogContent, DialogActionGroup } from '@client:common/overlay/dialog';
 import { Select, Input, SelectionOptionBuilder, FormGroupModel, FormControlModel } from '@client:common/form';
@@ -26,7 +26,7 @@ interface State {
   disableSubmitButton: boolean;
 }
 
-export class CapacitorControlMenu extends React.Component<Props, State> {
+export class CapacitorControlMenu extends Component<Props, State> {
 
   readonly capacitorControlFormGroupModel: FormGroupModel<Capacitor>;
 

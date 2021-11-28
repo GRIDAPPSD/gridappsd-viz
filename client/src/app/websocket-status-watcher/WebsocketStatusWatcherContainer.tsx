@@ -1,4 +1,4 @@
-import * as React from 'react';
+import { Component } from 'react';
 import { Subscription } from 'rxjs';
 
 import { StompClientConnectionStatus, StompClientService } from '@client:common/StompClientService';
@@ -12,7 +12,7 @@ interface State {
   websocketStatus: StompClientConnectionStatus;
 }
 
-export class WebsocketStatusWatcherContainer extends React.Component<Props, State> {
+export class WebsocketStatusWatcherContainer extends Component<Props, State> {
 
   readonly stompClientService = StompClientService.getInstance();
 

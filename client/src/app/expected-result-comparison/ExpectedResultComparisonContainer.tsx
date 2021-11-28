@@ -1,4 +1,4 @@
-import * as React from 'react';
+import { Component } from 'react';
 import { Subscription } from 'rxjs';
 import { map, finalize, takeWhile } from 'rxjs/operators';
 
@@ -32,7 +32,7 @@ interface State {
   isFetching: boolean;
 }
 
-export class ExpectedResultComparisonContainer extends React.Component<Props, State> {
+export class ExpectedResultComparisonContainer extends Component<Props, State> {
 
   private readonly _stompClientService = StompClientService.getInstance();
   private readonly _stateStore = StateStore.getInstance();

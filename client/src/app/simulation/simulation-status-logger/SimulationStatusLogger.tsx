@@ -1,4 +1,4 @@
-import * as React from 'react';
+import { Component, createRef } from 'react';
 
 import { ProgressIndicator } from '@client:common/overlay/progress-indicator';
 import { Tooltip } from '@client:common/tooltip';
@@ -29,9 +29,9 @@ const numberOfMessagesToShow = 30;
 const dragHandleMinPosition = 30;
 const dragHandleDefaultPosition = 430;
 const dragHandleMaxPosition = (document.body.clientHeight || document.documentElement.clientHeight) - 110;
-export class SimulationStatusLogger extends React.Component<Props, State> {
+export class SimulationStatusLogger extends Component<Props, State> {
 
-  readonly logMessageContainerRef = React.createRef<HTMLElement>();
+  readonly logMessageContainerRef = createRef<HTMLElement>();
   readonly logMessageTemporaryContainer = {
     length: 0,
     slice() {

@@ -1,4 +1,4 @@
-import * as React from 'react';
+import { Component } from 'react';
 import { findDOMNode } from 'react-dom';
 
 import './Ripple.light.scss';
@@ -9,7 +9,7 @@ interface Props {
   duration?: number;
 }
 
-export class Ripple extends React.Component<Props, unknown> {
+export class Ripple extends Component<Props, unknown> {
 
   static defaultProps: Props = {
     fixed: false,

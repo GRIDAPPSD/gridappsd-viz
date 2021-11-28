@@ -1,4 +1,4 @@
-import * as React from 'react';
+import { Component } from 'react';
 
 import { IconButton } from '@client:common/buttons';
 
@@ -18,7 +18,7 @@ interface State {
   currentPageNumberDisplay: string;
 }
 
-export class Paginator<T> extends React.Component<Props<T>, State> {
+export class Paginator<T> extends Component<Props<T>, State> {
 
   totalPages = 0;
 

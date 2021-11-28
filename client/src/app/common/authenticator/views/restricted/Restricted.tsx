@@ -1,4 +1,4 @@
-import * as React from 'react';
+import { Component } from 'react';
 
 import { AuthenticatorService } from '@client:common/authenticator';
 
@@ -9,7 +9,7 @@ interface Props {
 interface State {
 }
 
-export class Restricted extends React.Component<Props, State> {
+export class Restricted extends Component<Props, State> {
 
   readonly authenticatorService = AuthenticatorService.getInstance();
 

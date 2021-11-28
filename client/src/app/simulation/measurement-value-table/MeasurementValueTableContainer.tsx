@@ -1,4 +1,4 @@
-import * as React from 'react';
+import { Component } from 'react';
 import { Subject } from 'rxjs';
 import { takeUntil, filter } from 'rxjs/operators';
 
@@ -56,7 +56,7 @@ const NODES_PER_TOPOLOGY = {
   }
 };
 
-export class MeasurementValueTableContainer extends React.Component<Props, State> {
+export class MeasurementValueTableContainer extends Component<Props, State> {
 
   private readonly _simulationQueue = SimulationQueue.getInstance();
   private readonly _simulationManagementService = SimulationManagementService.getInstance();

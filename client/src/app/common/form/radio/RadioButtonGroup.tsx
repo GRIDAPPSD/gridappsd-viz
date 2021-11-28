@@ -1,4 +1,4 @@
-import * as React from 'react';
+import { Component, createContext } from 'react';
 import { findDOMNode } from 'react-dom';
 
 import { FormControl } from '../form-control/FormControl';
@@ -7,7 +7,7 @@ import { FormControlModel } from '../models/FormControlModel';
 import './RadioButtonGroup.light.scss';
 import './RadioButtonGroup.dark.scss';
 
-export const IdContextProvider = React.createContext({
+export const IdContextProvider = createContext({
   id: '',
   formControlModel: null
 });
@@ -22,7 +22,7 @@ interface Props<T> {
 interface State {
 }
 
-export class RadioButtonGroup<T> extends React.Component<Props<T>, State> {
+export class RadioButtonGroup<T> extends Component<Props<T>, State> {
 
   componentDidMount() {
     if (this.props.style === 'switches') {

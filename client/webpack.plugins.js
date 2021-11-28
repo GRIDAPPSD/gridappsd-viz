@@ -9,46 +9,51 @@ module.exports = {
     apply(compiler) {
       const lightThemeStyleFilenameRef = '__LIGHT_THEME_STYLE_FILENAME__';
       const darkThemeStyleFilenameRef = '__DARK_THEME_STYLE_FILENAME__';
+      const { webpack } = compiler;
+      const { Compilation } = webpack;
+      const { RawSource } = webpack.sources;
 
-      compiler.hooks.emit.tap('RefReplacerPlugin', compilation => {
-        const assetNames = compilation.getAssets().map(e => e.name);
-        const mainChunkName = assetNames.find(e => e.startsWith('main') && e.endsWith('.js'));
-        const hash = mainChunkName.split('.')[1];
-        const newLightThemeFilename = `light.${hash}.css`;
-        const newDarkThemeFilename = `dark.${hash}.css`;
-        const sourceCode = compilation.assets[mainChunkName].source();
-        let modifiedSourceCode = sourceCode;
-
-        if (sourceCode.includes(lightThemeStyleFilenameRef)) {
-          modifiedSourceCode = sourceCode
-            .replace(lightThemeStyleFilenameRef, `"${newLightThemeFilename}"`)
-            .replace(darkThemeStyleFilenameRef, `"${newDarkThemeFilename}"`);
-        } else {
-          modifiedSourceCode = sourceCode
-            .replace(this.previousLightThemeFilename, newLightThemeFilename)
-            .replace(this.previousDarkThemeFilename, newDarkThemeFilename);
-        }
-
-        delete compilation.assets[`dark.${hash}.js`];
-        delete compilation.assets[`dark.${hash}.js.map`];
-        delete compilation.assets[`light.${hash}.js`];
-        delete compilation.assets[`light.${hash}.js.map`];
-        delete compilation.assets[`main.${hash}.css`];
-        delete compilation.assets[`main.${hash}.css.map`];
-
-        compilation.getAsset(mainChunkName).source.children = [
+      compiler.hooks.thisCompilation.tap('RefReplacerPlugin', compilation => {
+        compilation.hooks.processAssets.tap(
           {
-            source() {
-              return modifiedSourceCode;
-            },
-            size() {
-              return modifiedSourceCode.length;
+            name: 'RefReplacerPlugin',
+            stage: Compilation.PROCESS_ASSETS_STAGE_SUMMARIZE,
+          },
+          () => {
+            const assetNames = compilation.getAssets().map(e => e.name);
+            if (assetNames.length > 0) {
+              const mainChunkName = assetNames.find(e => e.startsWith('main') && e.endsWith('.js'));
+              const hash = mainChunkName.split('.')[1];
+              const newLightThemeFilename = `light.${hash}.css`;
+              const newDarkThemeFilename = `dark.${hash}.css`;
+
+              const sourceCode = compilation.getAsset(mainChunkName).source.source();
+              let modifiedSourceCode = sourceCode;
+
+              if (sourceCode.includes(lightThemeStyleFilenameRef)) {
+                modifiedSourceCode = sourceCode
+                  .replace(lightThemeStyleFilenameRef, `"${newLightThemeFilename}"`)
+                  .replace(darkThemeStyleFilenameRef, `"${newDarkThemeFilename}"`);
+              } else {
+                modifiedSourceCode = sourceCode
+                  .replace(this.previousLightThemeFilename, newLightThemeFilename)
+                  .replace(this.previousDarkThemeFilename, newDarkThemeFilename);
+              }
+
+              compilation.deleteAsset(`dark.${hash}.js`);
+              compilation.deleteAsset(`dark.${hash}.js.map`);
+              compilation.deleteAsset(`light.${hash}.js`);
+              compilation.deleteAsset(`light.${hash}.js.map`);
+              compilation.deleteAsset(`main.${hash}.css`);
+              compilation.deleteAsset(`main.${hash}.css.map`);
+
+              compilation.updateAsset(mainChunkName, new RawSource(modifiedSourceCode));
+
+              this.previousLightThemeFilename = newLightThemeFilename;
+              this.previousDarkThemeFilename = newDarkThemeFilename;
             }
           }
-        ];
-
-        this.previousLightThemeFilename = newLightThemeFilename;
-        this.previousDarkThemeFilename = newDarkThemeFilename;
+        );
       });
     }
   },

@@ -1,4 +1,4 @@
-import * as React from 'react';
+import { Component } from 'react';
 import { Subscription, of } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
 
@@ -21,7 +21,7 @@ interface State {
 }
 
 
-export class PowergridModelsContainer extends React.Component<Props, State> {
+export class PowergridModelsContainer extends Component<Props, State> {
 
   private readonly _stompClientService = StompClientService.getInstance();
   private readonly _queryPowerGridModelsRequest = new QueryPowerGridModelsRequest();

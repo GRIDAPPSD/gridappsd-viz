@@ -1,4 +1,4 @@
-import * as React from 'react';
+import { Component } from 'react';
 import { Subscription } from 'rxjs';
 import { map, finalize } from 'rxjs/operators';
 
@@ -17,7 +17,7 @@ interface State {
 }
 
 
-export class StompClientContainer extends React.Component<Props, State> {
+export class StompClientContainer extends Component<Props, State> {
 
   private readonly _stompClientService = StompClientService.getInstance();
 

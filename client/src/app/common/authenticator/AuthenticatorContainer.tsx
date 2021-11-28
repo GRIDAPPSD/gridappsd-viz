@@ -1,4 +1,4 @@
-import * as React from 'react';
+import { Component } from 'react';
 import { Subscription } from 'rxjs';
 import { tap } from 'rxjs/operators';
 
@@ -14,7 +14,7 @@ interface State {
   authenticationResult: AuthenticationResult;
 }
 
-export class AuthenticatorContainer extends React.Component<Props, State> {
+export class AuthenticatorContainer extends Component<Props, State> {
 
   private readonly _authenticatorService = AuthenticatorService.getInstance();
 

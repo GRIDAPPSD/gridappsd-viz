@@ -1,14 +1,11 @@
-import * as React from 'react';
-
 import { ProgressIndicator } from '@client:common/overlay/progress-indicator';
 import { TabGroup, Tab } from '@client:common/tabs';
 
 import { ResponseBody } from './models/ResponseBody';
 import { ApplicationsTab } from './views/applications-tab/ApplicationsTab';
 import { ServicesTab } from './views/services-tab/ServicesTab';
-import { ApplicationInstancesTab } from './views/application-instaces-tab/ApplicationInstancesTab';
-import { ServiceIntancesTab } from './views/service-instaces-tab/ServiceIntancesTab';
-
+import { ApplicationInstancesTab } from './views/application-instances-tab/ApplicationInstancesTab';
+import { ServiceInstancesTab } from './views/service-instances-tab/ServiceInstancesTab';
 
 import './AvailableApplicationsAndServices.light.scss';
 import './AvailableApplicationsAndServices.dark.scss';
@@ -37,7 +34,7 @@ export function AvailableApplicationsAndServices(props: Props) {
           <ApplicationInstancesTab instances={props.responseBody.appInstances} />
         </Tab>
         <Tab label='Service Instances'>
-          <ServiceIntancesTab instances={props.responseBody.serviceInstances} />
+          <ServiceInstancesTab instances={props.responseBody.serviceInstances} />
         </Tab>
       </TabGroup>
     </section>

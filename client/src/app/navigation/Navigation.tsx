@@ -1,4 +1,4 @@
-import * as React from 'react';
+import { Component, createRef } from 'react';
 import { Link } from 'react-router-dom';
 
 import { IconButton } from '@client:common/buttons';
@@ -28,9 +28,9 @@ interface Props {
   onSelectExpectedResultComparisonType: (selectedType: ExpectedResultComparisonType) => void;
 }
 
-export class Navigation extends React.Component<Props, unknown> {
+export class Navigation extends Component<Props, unknown> {
 
-  readonly drawerRef = React.createRef<Drawer>();
+  readonly drawerRef = createRef<Drawer>();
 
   constructor(props: Props) {
     super(props);

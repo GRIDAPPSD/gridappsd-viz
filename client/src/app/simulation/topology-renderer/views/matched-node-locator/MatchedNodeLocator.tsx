@@ -1,5 +1,3 @@
-import * as React from 'react';
-
 import { PortalRenderer } from '@client:common/overlay/portal-renderer';
 import { Backdrop } from '@client:common/overlay/backdrop';
 import { Fade } from '@client:common/effects/fade';

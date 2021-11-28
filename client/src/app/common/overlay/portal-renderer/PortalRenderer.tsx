@@ -1,4 +1,4 @@
-import * as React from 'react';
+import { Component } from 'react';
 import { createPortal, render, unmountComponentAtNode } from 'react-dom';
 
 import './PortalRenderer.light.scss';
@@ -15,7 +15,7 @@ interface State {
 /**
  * Render props.children into a portal
  */
-export class PortalRenderer extends React.Component<Props, State> {
+export class PortalRenderer extends Component<Props, State> {
 
   static defaultProps = {
     portal: document.body

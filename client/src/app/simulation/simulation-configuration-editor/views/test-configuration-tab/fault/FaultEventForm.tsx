@@ -1,4 +1,4 @@
-import * as React from 'react';
+import { Component } from 'react';
 
 import { BasicButton } from '@client:common/buttons';
 import { FormGroup, Select, Input, SelectionOptionBuilder, FormGroupModel, FormControlModel } from '@client:common/form';
@@ -27,7 +27,7 @@ interface State {
   selectedFaultKind: FaultKind;
 }
 
-export class FaultEventForm extends React.Component<Props, State> {
+export class FaultEventForm extends Component<Props, State> {
 
   readonly equipmentTypeFormControl: FormControlModel<{ id: string; label: string }>;
   readonly componentFormControl: FormControlModel<ModelDictionaryComponent | ModelDictionaryRegulator | ModelDictionaryCapacitor | ModelDictionarySwitch>;

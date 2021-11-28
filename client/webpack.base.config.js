@@ -7,18 +7,16 @@ const ExcludeAssetsPlugin = require('@ianwalter/exclude-assets-plugin');
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 const webpack = require('webpack');
 
-const { RefReplacerPlugin, NoOpPlugin } = require('./webpack.plugins');
+const { RefReplacerPlugin } = require('./webpack.plugins');
 
 /**
  *
  * @param {'production' | 'development'} mode
- * @param {boolean} cssHmr Whether to enable CSS hot module reload
- * @param {'dark' | 'light'} theme Dark theme or light theme? This option is ignored when mode is "production"
  */
-module.exports = (mode, cssHmr, theme) => ({
+module.exports = (mode) => ({
   mode,
 
-  entry: createEntry(path.resolve(__dirname, 'src'), { main: `./src/main.${mode}.tsx`, dark: [], light: [] }),
+  entry: createEntry(path.resolve(__dirname, 'src'), { main: './src/main.tsx', dark: [], light: [] }),
 
   output: {
     path: path.resolve(__dirname, '..', 'server', 'dist', 'public'),
@@ -29,7 +27,7 @@ module.exports = (mode, cssHmr, theme) => ({
 
   resolve: {
     alias: {
-      '@client:common': path.resolve('./src/app/shared'),
+      '@client:common': path.resolve('./src/app/common'),
       '@project:common': path.resolve('../common'),
       '@constants.common': path.resolve('./src/constants.common.scss'),
       '@constants.light': path.resolve('./src/constants.light.scss'),
@@ -47,7 +45,7 @@ module.exports = (mode, cssHmr, theme) => ({
       {
         test: /\.scss/,
         use: [
-          cssHmr ? 'style-loader' : MiniCssExtractPlugin.loader,
+          MiniCssExtractPlugin.loader,
           'css-loader',
           'sass-loader',
         ]
@@ -61,7 +59,7 @@ module.exports = (mode, cssHmr, theme) => ({
 
   plugins: [
     new CleanWebpackPlugin(),
-    cssHmr ? new NoOpPlugin() : new RefReplacerPlugin(),
+    new RefReplacerPlugin(),
     new HtmlWebpackPlugin({
       template: './template.html',
       excludeAssets: [
@@ -77,9 +75,7 @@ module.exports = (mode, cssHmr, theme) => ({
       chunkFilename: '[name].[fullhash:10].css'
     }),
     new webpack.DefinePlugin({
-      __DEVELOPMENT__: JSON.stringify(mode === 'development'),
-      __CSS_HMR_ENABLED__: JSON.stringify(cssHmr),
-      __THEME__: JSON.stringify(theme),
+      __DEVELOPMENT__: JSON.stringify(mode === 'development')
     })
   ],
 

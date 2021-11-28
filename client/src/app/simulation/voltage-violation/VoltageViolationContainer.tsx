@@ -1,4 +1,4 @@
-import * as React from 'react';
+import { Component } from 'react';
 import { zip, Subject } from 'rxjs';
 import { switchMap, filter, takeWhile, takeUntil } from 'rxjs/operators';
 
@@ -19,7 +19,7 @@ interface State {
   voltageViolationTimestamp: string;
 }
 
-export class VoltageViolationContainer extends React.Component<Props, State> {
+export class VoltageViolationContainer extends Component<Props, State> {
 
   private readonly _stompClientService = StompClientService.getInstance();
   private readonly _simulationManagementService = SimulationManagementService.getInstance();

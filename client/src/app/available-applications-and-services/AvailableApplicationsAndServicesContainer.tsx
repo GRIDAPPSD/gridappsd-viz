@@ -1,4 +1,4 @@
-import * as React from 'react';
+import { Component } from 'react';
 
 import { StompClientService } from '@client:common/StompClientService';
 
@@ -13,7 +13,7 @@ interface Props {
 interface State {
   responseBody: ResponseBody;
 }
-export class AvailableApplicationsAndServicesContainer extends React.Component<Props, State> {
+export class AvailableApplicationsAndServicesContainer extends Component<Props, State> {
 
   private readonly _stompClientService = StompClientService.getInstance();
 

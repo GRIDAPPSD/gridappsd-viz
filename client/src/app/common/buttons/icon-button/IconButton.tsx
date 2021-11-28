@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/indent */
-import * as React from 'react';
+import { Component, createRef } from 'react';
 
 import { Ripple } from '@client:common/ripple';
 
@@ -30,7 +30,7 @@ interface Props {
  * They have a circular shape by default which can be turned off by setting the `rounded` boolean prop
  * to `false`
  */
-export class IconButton extends React.Component<Props, unknown> {
+export class IconButton extends Component<Props, unknown> {
 
   static defaultProps = {
     size: 'normal',
@@ -40,7 +40,7 @@ export class IconButton extends React.Component<Props, unknown> {
     rippleDuration: 1250
   };
 
-  readonly buttonRef = React.createRef<HTMLButtonElement>();
+  readonly buttonRef = createRef<HTMLButtonElement>();
 
   componentDidUpdate(prevProps: Props) {
     if (this.props.disabled !== prevProps.disabled && this.props.disabled) {

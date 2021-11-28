@@ -1,4 +1,4 @@
-import * as React from 'react';
+import { Component } from 'react';
 
 import { Input, Select, SelectionOptionBuilder, Form, FormGroupModel, FormControlModel } from '@client:common/form';
 import { BasicButton } from '@client:common/buttons';
@@ -27,7 +27,7 @@ interface State {
   disableSubmitButton: boolean;
 }
 
-export class QueryLogsForm extends React.Component<Props, State> {
+export class QueryLogsForm extends Component<Props, State> {
 
   readonly formGroupModel = new FormGroupModel({
     startTime: new FormControlModel(

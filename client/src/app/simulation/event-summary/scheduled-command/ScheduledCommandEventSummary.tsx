@@ -1,5 +1,3 @@
-import * as React from 'react';
-
 import { ScheduledCommandEventTable, ScheduledCommandEvent } from '@client:common/test-manager';
 import { IconButton } from '@client:common/buttons';
 import { Tooltip } from '@client:common/tooltip';

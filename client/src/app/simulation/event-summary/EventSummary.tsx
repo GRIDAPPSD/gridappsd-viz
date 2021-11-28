@@ -1,4 +1,4 @@
-import * as React from 'react';
+import { Component } from 'react';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 
@@ -23,7 +23,7 @@ interface State {
   faultMRIDs: string[];
 }
 
-export class EventSummary extends React.Component<Props, State> {
+export class EventSummary extends Component<Props, State> {
 
   private readonly _stateStore = StateStore.getInstance();
   private readonly _unsubscriber = new Subject<void>();

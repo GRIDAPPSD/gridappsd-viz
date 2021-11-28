@@ -1,4 +1,5 @@
-import * as React from 'react';
+
+import { Component } from 'react';
 
 import { MessageBanner } from '@client:common/overlay/message-banner';
 
@@ -13,7 +14,7 @@ interface Props {
 interface State {
 }
 
-export class Simulations extends React.Component<Props, State> {
+export class Simulations extends Component<Props, State> {
 
   constructor(props: Props) {
     super(props);

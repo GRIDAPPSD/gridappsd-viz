@@ -1,4 +1,4 @@
-import * as React from 'react';
+import { Component } from 'react';
 
 import { BasicButton } from '@client:common/buttons';
 import { Select, Input, SelectionOptionBuilder, FormGroupModel, FormControlModel } from '@client:common/form';
@@ -33,7 +33,7 @@ interface State {
   selectedComponentType: string;
 }
 
-export class ScheduledCommandEventForm extends React.Component<Props, State> {
+export class ScheduledCommandEventForm extends Component<Props, State> {
 
   readonly selectedComponenTypeFormControl = new FormControlModel<{ id: string; label: string }>(null);
   readonly selectedComponentFormControl: FormControlModel<ModelDictionaryRegulator | ModelDictionaryCapacitor | ModelDictionarySwitch>;

@@ -1,4 +1,4 @@
-import * as React from 'react';
+import { Component } from 'react';
 import { Subscription } from 'rxjs';
 
 import { Ripple } from '@client:common/ripple';
@@ -23,7 +23,7 @@ interface State {
   checked: boolean;
 }
 
-export class Checkbox extends React.Component<Props, State> {
+export class Checkbox extends Component<Props, State> {
 
   readonly id = generateUniqueId();
 

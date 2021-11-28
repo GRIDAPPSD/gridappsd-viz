@@ -1,4 +1,4 @@
-import * as React from 'react';
+import { Component } from 'react';
 
 import { IconButton } from '@client:common/buttons';
 
@@ -15,7 +15,7 @@ interface State {
   tableVisible: boolean;
 }
 
-export class VoltageViolation extends React.Component<Props, State> {
+export class VoltageViolation extends Component<Props, State> {
 
   constructor(props: Props) {
     super(props);

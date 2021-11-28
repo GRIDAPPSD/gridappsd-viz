@@ -1,4 +1,3 @@
-import * as React from 'react';
 
 import './DialogContent.light.scss';
 import './DialogContent.dark.scss';
@@ -11,8 +10,8 @@ interface Props {
 export function DialogContent(props: Props) {
   return (
     <div
-className='dialog-content'
-style={{ ...(props.style || {}) }}>
+      className='dialog-content'
+      style={{ ...(props.style || {}) }}>
       {props.children}
     </div>
   );

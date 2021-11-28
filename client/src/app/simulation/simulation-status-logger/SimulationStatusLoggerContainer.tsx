@@ -1,4 +1,4 @@
-import * as React from 'react';
+import { Component } from 'react';
 import { Subject } from 'rxjs';
 import { filter, switchMap, takeWhile, finalize, takeUntil } from 'rxjs/operators';
 
@@ -27,7 +27,7 @@ const logMessageStoreName = 'SimulationStatusLogMessageStore';
 const numberOfMessagesToShow = 30;
 const lowestLogMessageId = 0;
 
-export class SimulationStatusLogContainer extends React.Component<Props, State> {
+export class SimulationStatusLogContainer extends Component<Props, State> {
 
   visibleLogMessageDeque = new Deque<LogMessage>();
 

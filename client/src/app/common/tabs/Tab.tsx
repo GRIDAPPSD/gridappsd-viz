@@ -1,4 +1,5 @@
-import * as React from 'react';
+
+import { Component } from 'react';
 
 import './Tab.light.scss';
 import './Tab.dark.scss';
@@ -10,7 +11,7 @@ interface Props {
 interface State {
 }
 
-export class Tab extends React.Component<Props, State> {
+export class Tab extends Component<Props, State> {
 
   constructor(props: Props) {
     super(props);

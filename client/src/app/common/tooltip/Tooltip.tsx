@@ -1,4 +1,4 @@
-import * as React from 'react';
+import { Component, createRef } from 'react';
 import * as ReactDOM from 'react-dom';
 
 import './Tooltip.light.scss';
@@ -13,13 +13,13 @@ interface Props {
 interface State {
 }
 
-export class Tooltip extends React.Component<Props, State> {
+export class Tooltip extends Component<Props, State> {
 
   static defaultProps = {
     position: 'bottom'
   };
 
-  readonly tooltipRef = React.createRef<HTMLDivElement>();
+  readonly tooltipRef = createRef<HTMLDivElement>();
 
   private _tooltipContainer: HTMLElement;
   private _tooltipRect: ClientRect;
