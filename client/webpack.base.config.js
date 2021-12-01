@@ -60,15 +60,6 @@ module.exports = (mode) => ({
   plugins: [
     new CleanWebpackPlugin(),
     new RefReplacerPlugin(),
-    new HtmlWebpackPlugin({
-      template: './template.html',
-      excludeAssets: [
-        /light\.[\w\d]+\.(?:css|js)/,
-        /dark\.[\w\d]+\.js/,
-        /main\.[\w\d]+\.css/
-      ],
-      minify: mode === 'production'
-    }),
     new ExcludeAssetsPlugin(),
     new MiniCssExtractPlugin({
       filename: '[name].[fullhash:10].css',
@@ -76,6 +67,16 @@ module.exports = (mode) => ({
     }),
     new webpack.DefinePlugin({
       __DEVELOPMENT__: JSON.stringify(mode === 'development')
+    }),
+    new HtmlWebpackPlugin({
+      template: './template.html',
+      excludeAssets: [
+        /light\.[\w\d]+\.(?:css|js)/,
+        /dark\.[\w\d]+\.js/,
+        /main\.[\w\d]+\.css/
+      ],
+      minify: mode === 'production',
+      publicPath: '/'
     })
   ],
 

@@ -62,45 +62,12 @@ export interface FuzzySearchResult {
 /**
  *
  * @param needle The string to search for in {@see haystack}
- * @param hightlightMatches Whether or not the matched boundaries should be highlighted
  */
-export function fuzzySearch(needle: string, hightlightMatches = false): (haystack?: string) => null | FuzzySearchResult {
+export function fuzzySearch(needle: string): (haystack?: string) => null | FuzzySearchResult {
   if (needle === '' || needle === undefined) {
     return () => null;
   }
 
-  if (!hightlightMatches) {
-    return _fuzzySearchWithNoHighlighting(needle);
-  }
-
-  return _fuzzySearchWithHighlighting(needle);
-}
-
-function _fuzzySearchWithNoHighlighting(needle: string) {
-  const specialTokens = ['(', ')', '[', ']', '{', '}', '?', '\\', '/', '*', '+', '-', '.', '^', '$'];
-  const tokens = needle.split('')
-    .map(token => specialTokens.includes(token) ? `\\${token}` : token);
-  const pattern = new RegExp(tokens.join('[\\s\\S]*'), 'i');
-  return (haystack: string) => {
-    const matches = pattern.test(haystack);
-    if (!matches) {
-      return null;
-    }
-    return {
-      inaccuracy: Infinity,
-      input: haystack,
-      boundaries: [
-        {
-          start: 0,
-          end: undefined,
-          highlight: false
-        }
-      ]
-    } as FuzzySearchResult;
-  };
-}
-
-function _fuzzySearchWithHighlighting(needle: string) {
   return (haystack: string) => {
     if (!haystack) {
       return null;

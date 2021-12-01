@@ -85,7 +85,7 @@ export class NodeSearcher extends Component<Props, State> {
 
   private _onSearchTermChange(searchTerm: string) {
     const matches: Match[] = [];
-    const searcher = fuzzySearch(searchTerm, true);
+    const searcher = fuzzySearch(searchTerm);
 
     if (searchTerm.length < this._previousSearchTerm.length || this._matchedNodes.size === 0) {
       this._matchedNodes = new Map(this.props.nodeMap);

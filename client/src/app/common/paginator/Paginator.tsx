@@ -42,7 +42,7 @@ export class Paginator<T> extends Component<Props<T>, State> {
   componentDidUpdate(prevProps: Props<T>) {
     if (this.props.items !== prevProps.items) {
       this.totalPages = Math.ceil(this.props.items.length / this.props.pageSize);
-      this._goToPage(this.state.currentPageNumber);
+      this._goToPage(this.state.currentPageNumber < this.totalPages ? this.state.currentPageNumber : 0);
     }
   }
 
@@ -51,7 +51,7 @@ export class Paginator<T> extends Component<Props<T>, State> {
       this.totalPages = Math.ceil(this.props.items.length / this.props.pageSize);
 
       return (
-        <section className='paginator'>
+        <div className='paginator'>
           <IconButton
             disabled={this.state.currentPageNumber === 0}
             icon='navigate_before'
@@ -73,7 +73,7 @@ export class Paginator<T> extends Component<Props<T>, State> {
             icon='navigate_next'
             style='accent'
             onClick={this.navigateToNextPage} />
-        </section>
+        </div>
       );
     }
     return null;

@@ -13,6 +13,8 @@ module.exports = () => {
 
     devServer: {
       port: 3000,
+      open: true,
+      hot: false,
       static: [
         resolve(__dirname, 'assets'),
         resolve(__dirname, 'dist')

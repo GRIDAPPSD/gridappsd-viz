@@ -13,20 +13,18 @@ module.exports = {
       const { Compilation } = webpack;
       const { RawSource } = webpack.sources;
 
-      compiler.hooks.thisCompilation.tap('RefReplacerPlugin', compilation => {
+      compiler.hooks.compilation.tap('RefReplacerPlugin', compilation => {
         compilation.hooks.processAssets.tap(
           {
             name: 'RefReplacerPlugin',
-            stage: Compilation.PROCESS_ASSETS_STAGE_SUMMARIZE,
+            stage: Compilation.PROCESS_ASSETS_STAGE_SUMMARIZE
           },
           () => {
             const assetNames = compilation.getAssets().map(e => e.name);
             if (assetNames.length > 0) {
               const mainChunkName = assetNames.find(e => e.startsWith('main') && e.endsWith('.js'));
-              const hash = mainChunkName.split('.')[1];
-              const newLightThemeFilename = `light.${hash}.css`;
-              const newDarkThemeFilename = `dark.${hash}.css`;
-
+              const newLightThemeFilename = assetNames.find(e => e.startsWith('light') && e.endsWith('.css'));
+              const newDarkThemeFilename = assetNames.find(e => e.startsWith('dark') && e.endsWith('.css'));
               const sourceCode = compilation.getAsset(mainChunkName).source.source();
               let modifiedSourceCode = sourceCode;
 
@@ -39,13 +37,6 @@ module.exports = {
                   .replace(this.previousLightThemeFilename, newLightThemeFilename)
                   .replace(this.previousDarkThemeFilename, newDarkThemeFilename);
               }
-
-              compilation.deleteAsset(`dark.${hash}.js`);
-              compilation.deleteAsset(`dark.${hash}.js.map`);
-              compilation.deleteAsset(`light.${hash}.js`);
-              compilation.deleteAsset(`light.${hash}.js.map`);
-              compilation.deleteAsset(`main.${hash}.css`);
-              compilation.deleteAsset(`main.${hash}.css.map`);
 
               compilation.updateAsset(mainChunkName, new RawSource(modifiedSourceCode));
 

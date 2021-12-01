@@ -1,102 +1,179 @@
-// import ReactTable, { Filter } from 'react-table';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { useBlockLayout, useResizeColumns, useTable } from 'react-table';
 
+import { PageChangeEvent, Paginator } from '@client:common/paginator';
+import { FormControlModel, Input } from '@client:common/form';
+import { fuzzySearch } from '@client:common/misc';
+import { Tooltip } from '@client:common/tooltip';
 
 import './FilterableTable.light.scss';
 import './FilterableTable.dark.scss';
 
-interface Props {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  rows: any[];
+interface Props<T = Record<string, string | number | boolean>> {
+  rows: Array<T>;
   headers?: Array<{ accessor: string; label: string }>;
 }
 
 export function FilterableTable(props: Props) {
+  if (props.rows.length === 0) {
+    return null;
+  }
+  /**
+   * Hold the rows that were filtered down by the search box
+   */
+  const [filteredRows, setFilteredRows] = useState(props.rows);
+
+  /**
+   * Hold the rows in the current page created by the paginator
+   */
+  const [currentPage, setCurrentPage] = useState(props.rows);
+  const columns = useMemo(() => {
+    if (!props.headers) {
+      return Object.keys(props.rows[0])
+        .map(columnName => ({
+          accessor: columnName,
+          Header: columnName
+        }));
+    }
+    return props.headers.map(header => ({
+      accessor: header.accessor,
+      Header: header.label
+    }));
+  }, [props.rows[0], props.headers]);
+
+  const defaultColumn = useMemo(() => ({
+    minWidth: 30,
+    width: 1120 / columns.length
+  }), [columns]);
+  const {
+    getTableProps,
+    getTableBodyProps,
+    headerGroups,
+    rows,
+    prepareRow
+  } = useTable(
+    {
+      columns,
+      data: currentPage,
+      defaultColumn
+    },
+    useBlockLayout,
+    useResizeColumns
+  );
+  const searchBoxFormControlRef = useRef(new FormControlModel(''));
+  const onCurrentPageChange = (event: PageChangeEvent<any>) => {
+    setCurrentPage(event.currentPage);
+  };
+
+  useEffect(() => {
+    const subscription = searchBoxFormControlRef.current.valueChanges()
+      .subscribe({
+        next: keyword => {
+          if (keyword === '') {
+            setFilteredRows(props.rows);
+          } else {
+            const matchFinder = fuzzySearch(keyword);
+            const searchResults = props.rows.map(row => {
+              const match = Object.values(row)
+                .map(value => matchFinder(String(value)))
+                .filter(result => result !== null)
+                .reduce((a, b) => a === null ? b : (a.inaccuracy < b.inaccuracy ? a : b), null);
+              return {
+                row,
+                inaccuracy: match !== null ? match.inaccuracy : Infinity
+              };
+            });
+            const foundRows = searchResults
+              .filter(e => e.inaccuracy !== Infinity)
+              .sort((a, b) => a.inaccuracy < b.inaccuracy ? -1 : 1)
+              .map(e => e.row);
+            setFilteredRows(foundRows);
+          }
+        }
+      });
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [props.rows]);
 
   return (
-    <div>{props.rows}</div>
+    <div
+      className='filterable-table'
+      {...getTableProps()}>
+      <div className='thead'>
+        {
+          headerGroups.map(headerGroup => (
+            <div
+              key={headerGroup.id}
+              className='tr'
+              {...headerGroup.getHeaderGroupProps()}>
+              {
+                headerGroup.headers.map(column => (
+                  <div
+                    key={column.id}
+                    className='th'
+                    {...column.getHeaderProps()}>
+                    {column.render('Header')}
+                    <div
+                      className='resizer'
+                      {...column['getResizerProps']()} />
+                  </div>
+                ))
+              }
+            </div>
+          ))
+        }
+      </div>
+
+      <div
+        className='tbody'
+        {...getTableBodyProps()}>
+        {rows.map(row => {
+          prepareRow(row);
+          return (
+            <div
+              key={row.id}
+              className='tr'
+              {...row.getRowProps()}>
+              {row.cells.map((cell, i) => {
+                const cellValue = String(cell.value);
+                if (cellValue.length > 0) {
+                  return (
+                    <Tooltip
+                      key={i}
+                      content={cell.value}>
+                      <div
+                        className='td'
+                        {...cell.getCellProps()}>
+                        {cell.render('Cell')}
+                      </div>
+                    </Tooltip>
+                  );
+                }
+                return (
+                  <div
+                    key={i}
+                    className='td'
+                    {...cell.getCellProps()}>
+                    {cell.render('Cell')}
+                  </div>
+                );
+              })}
+            </div>
+          );
+        })}
+      </div>
+
+      <div className='tfoot'>
+        <Input
+          label='Search'
+          type='text'
+          className='filterable-table__search-box'
+          formControlModel={searchBoxFormControlRef.current} />
+        <Paginator
+          items={filteredRows}
+          onPageChange={onCurrentPageChange} />
+      </div>
+    </div>
   );
-  // private readonly _cellContentWidthCalculator = document.createElement('div');
-
-  // constructor(props: Props) {
-  //   super(props);
-
-  //   this._cellContentWidthCalculator.classList.add('filterable-table__cell-content-width-calculator');
-  //   document.body.appendChild(this._cellContentWidthCalculator);
-
-  //   this._createTableCell = this._createTableCell.bind(this);
-  // }
-
-  // componentWillUnmount() {
-  //   document.body.removeChild(this._cellContentWidthCalculator);
-  // }
-
-  // render() {
-  //   if (this.props.rows.length === 0) {
-  //     return (
-  //       <MessageBanner>
-  //         No data available
-  //       </MessageBanner>
-  //     );
-  //   }
-  //   return (
-  //     <ReactTable
-  //       filterable
-  //       className='filterable-table'
-  //       defaultFilterMethod={this.filterMethod}
-  //       defaultPageSize={5}
-  //       data={this.props.rows}
-  //       columns={this.generateColumns()} />
-  //   );
-  // }
-
-  // // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  // filterMethod(filter: Filter, row: any) {
-  //   if (row[filter.id] !== undefined) {
-  //     return String(row[filter.id]).toLowerCase().includes(filter.value.toLowerCase());
-  //   }
-  //   return true;
-  // }
-
-  // generateColumns() {
-  //   if (!this.props.headers) {
-  //     return Object.keys(this.props.rows[0])
-  //       .map(columnName => ({
-  //         accessor: columnName,
-  //         Header: columnName,
-  //         Cell: this._createTableCell
-  //       }));
-  //   }
-  //   return this.props.headers.map(header => ({
-  //     accessor: header.accessor,
-  //     Header: header.label,
-  //     Cell: this._createTableCell
-  //   }));
-  // }
-
-  // // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  // private _createTableCell(row: any) {
-  //   if (this._isRowOverflowing(row)) {
-  //     return (
-  //       <Tooltip content={row.value}>
-  //         <span className='filterable-table__cell-content overflowing'>
-  //           <div>
-  //             {String(row.value)}
-  //           </div>
-  //         </span>
-  //       </Tooltip>
-  //     );
-  //   }
-  //   return (
-  //     <span className='filterable-table__cell-content'>
-  //       {String(row.value)}
-  //     </span>
-  //   );
-  // }
-
-  // // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  // private _isRowOverflowing(row: any) {
-  //   this._cellContentWidthCalculator.textContent = row.value;
-  //   return this._cellContentWidthCalculator.scrollWidth > row.width;
-  // }
-
 }

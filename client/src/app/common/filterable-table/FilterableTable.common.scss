@@ -1,41 +1,80 @@
-// @import '~react-table/react-table.css';
+@import '@constants.dark';
+@import '@constants.dark';
 
-.filterable-table.ReactTable {
+.filterable-table {
+    display: flex;
+    flex-flow: column;
     height: 100%;
-    max-height: 100%;
-    border-radius: 10px;
+    position: relative;
+    width: 100%;
+    border-spacing: 0;
     box-sizing: border-box;
+    text-align: center;
+    overflow: hidden;
+    border-radius: 5px;
 
-    .rt-thead.-filters input,
-    .rt-noData {
-        border-radius: 50px;
-    }
-
-    .-previous button,
-    .-next button {
-        border-radius: 50px;
-    }
-
-    .filterable-table__cell-content {
-        display: inline-flex;
-        justify-content: center;
-        align-items: center;
-        width: 100%;
+    .tbody {
+        position: relative;
         height: 100%;
-        cursor: text;
+        overflow-x: hidden;
+        overflow-y: auto;
+        box-sizing: border-box;
+    }
 
-        &.overflowing div {
-            text-overflow: ellipsis;
-            overflow: hidden;
-            pointer-events: none;
+    .tr,
+    .th,
+    .td {
+        box-sizing: border-box;
+    }
+
+    .th,
+    .td {
+        margin: 0;
+        padding: 0.5rem;
+        position: relative;
+
+        &:last-child {
+            border-right: 0;
+        }
+
+        .resizer {
+            display: inline-block;
+            width: 10px;
+            height: 100%;
+            position: absolute;
+            right: 0;
+            top: 0;
+            transform: translateX(50%);
+            z-index: 1;
+            touch-action: none;
         }
     }
 
-}
+    .td {
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+    }
 
-.filterable-table__cell-content-width-calculator {
-    font-family: 'Roboto', sans-serif;
-    white-space: nowrap;
-    position: fixed;
-    opacity: 0;
+    .tfoot {
+        display: flex;
+        padding: 10px 20px;
+        flex-shrink: 0;
+        height: 60px;
+        box-sizing: border-box;
+
+        .filterable-table__search-box {
+            margin: 0;
+            transform: translateY(5px);
+
+            .form-control__label {
+                width: initial;
+                margin-right: 10px;
+            }
+        }
+    }
+
+    .paginator {
+        margin-left: auto;
+    }
 }
