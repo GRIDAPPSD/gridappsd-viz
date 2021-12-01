@@ -1,8 +1,8 @@
 const childProcess = require('child_process');
 const path = require('path');
 const fs = require('fs');
-const TerserJSPlugin = require('terser-webpack-plugin');
-const OptimizeCSSAssetsPlugin = require('optimize-css-assets-webpack-plugin');
+const TerserPlugin = require('terser-webpack-plugin');
+const CssMinimizerPlugin = require('css-minimizer-webpack-plugin');
 
 /**
  *
@@ -22,6 +22,7 @@ module.exports = (env) => {
     optimization: {
       splitChunks: {
         cacheGroups: {
+          ...baseConfig.optimization.splitChunks.cacheGroups,
           default: false,
           vendors: false,
           dependencies: {
@@ -34,7 +35,7 @@ module.exports = (env) => {
       },
       minimize: true,
       minimizer: [
-        new TerserJSPlugin({
+        new TerserPlugin({
           terserOptions: {
             sourceMap: true,
             compress: {
@@ -42,12 +43,11 @@ module.exports = (env) => {
             }
           }
         }),
-        new OptimizeCSSAssetsPlugin({})
+        new CssMinimizerPlugin()
       ]
     },
 
     stats: 'errors-only'
-
   };
 };
 

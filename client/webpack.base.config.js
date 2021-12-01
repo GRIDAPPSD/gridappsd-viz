@@ -57,6 +57,26 @@ module.exports = (mode) => ({
     ]
   },
 
+  optimization: {
+    splitChunks: {
+      cacheGroups: {
+        light: {
+          type: 'css/mini-extract',
+          test: /light\.css$/,
+          chunks: 'all',
+          enforce: true
+        },
+        dark: {
+          type: 'css/mini-extract',
+          test: /dark\.css$/,
+          chunks: 'all',
+          enforce: true
+        }
+      }
+    },
+    minimize: false
+  },
+
   plugins: [
     new CleanWebpackPlugin(),
     new RefReplacerPlugin(),
@@ -70,6 +90,7 @@ module.exports = (mode) => ({
     }),
     new HtmlWebpackPlugin({
       template: './template.html',
+      minify: mode === 'production',
       excludeAssets: [
         /light\.[\w\d]+\.(?:css|js)/,
         /dark\.[\w\d]+\.js/,

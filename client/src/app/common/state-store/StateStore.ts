@@ -11,6 +11,7 @@ export class StateStore {
 
   private _isInitialized = false;
 
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
   private constructor() {
   }
 

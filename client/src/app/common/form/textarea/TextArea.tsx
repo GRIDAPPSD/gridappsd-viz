@@ -11,7 +11,7 @@ import './TextArea.dark.scss';
 
 interface Props<T extends 'plaintext' | 'json' = 'json'> {
   label: string;
-  formControlModel: T extends 'json' ? FormControlModel<object> : FormControlModel<string>;
+  formControlModel: T extends 'json' ? FormControlModel<Record<string, unknown>> : FormControlModel<string>;
   className?: string;
   readonly?: boolean;
   hint?: string;
@@ -42,7 +42,7 @@ export class TextArea<T extends 'plaintext' | 'json' = 'json'> extends Component
   // Hold an object or a string that is used to compare whether the form control model's value was
   // changed from outside of this component, if it was, then we need to sync up this component
   // with the new value
-  private _currentValueToCompare: string | object;
+  private _currentValueToCompare: string | Record<string, unknown>;
 
   constructor(props: Props<T>) {
     super(props);
@@ -59,7 +59,7 @@ export class TextArea<T extends 'plaintext' | 'json' = 'json'> extends Component
     this._onCodeMirrorEditorFocusLost = this._onCodeMirrorEditorFocusLost.bind(this);
   }
 
-  private _stringifyValue(value: string | object) {
+  private _stringifyValue(value: string | Record<string, unknown>) {
     if (this.props.type === 'json') {
       return JSON.stringify(value, null, 4);
     }
@@ -67,7 +67,7 @@ export class TextArea<T extends 'plaintext' | 'json' = 'json'> extends Component
   }
 
   componentDidMount() {
-    const formControlProp = this.props.formControlModel as FormControlModel<string | object>;
+    const formControlProp = this.props.formControlModel as FormControlModel<string | Record<string, unknown>>;
     this._inputBoxBoundingBox = this.inputBoxContainerRef.current.getBoundingClientRect();
 
     this._textBoxValueStream.pipe(

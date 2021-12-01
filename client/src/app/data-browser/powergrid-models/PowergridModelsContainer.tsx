@@ -10,7 +10,6 @@ import {
   QueryPowerGridModelsRequestBody, QueryPowerGridModelsRequestType, QueryPowerGridModelsRequest
 } from './models/QueryPowerGridModelsRequest';
 
-
 interface Props {
   feederModelLines: FeederModelLine[];
 }

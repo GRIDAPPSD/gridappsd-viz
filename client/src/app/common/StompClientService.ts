@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-empty-function */
 import { Client, Message } from '@stomp/stompjs';
 import { BehaviorSubject, Observable, using, timer, Subject, zip } from 'rxjs';
 import { filter, switchMap, take, takeWhile, tap, timeout } from 'rxjs/operators';
