@@ -86,6 +86,10 @@ export class SimulationManagementService {
     this.resumeThenPauseSimulationAfter = this.resumeThenPauseSimulationAfter.bind(this);
   }
 
+  /**
+   * Because the user can join simulations started by someone else, we check the server here to see
+   * if there are any existing simulations currently
+   */
   private _onActiveSimulationIdsReceived() {
     this._socket.on(SimulationSynchronizationEvent.QUERY_ACTIVE_SIMULATION_CHANNELS, (activeSimulationIds: string[]) => {
       this._stateStore.update({
@@ -94,6 +98,10 @@ export class SimulationManagementService {
     });
   }
 
+  /**
+   * Check if the current simulation that this user is in had its simulation status updated
+   * by someone else
+   */
   private _onSimulationStatusChangedUpstream() {
     this._socket.on(SimulationSynchronizationEvent.QUERY_SIMULATION_STATUS, (status: SimulationStatus) => {
       this._currentSimulationStatus = status;
@@ -104,6 +112,11 @@ export class SimulationManagementService {
     });
   }
 
+  /**
+   * When some other user requests to join a currently running simulation, we want to sync the current
+   * state of the simulation when that other user joins so that they can see the state of the simulation
+   * up until that point
+   */
   private _onSendFirstSimulationSnapshot() {
     this._socket.on(SimulationSynchronizationEvent.INIT_SIMULATION_SNAPSHOT, () => {
       this._syncingEnabled = true;
@@ -113,6 +126,10 @@ export class SimulationManagementService {
     });
   }
 
+  /**
+   * Watch for new simulation snapshots. When the user joins a simulation, if there is new update to simulation
+   * states, they are packaged into a snapshot and are then broadcast to every simulation participant over websocket
+   */
   private _onSimulationSnapshotReceived() {
     this._socket.on(SimulationSynchronizationEvent.RECEIVE_SIMULATION_SNAPSHOT, (snapshot: SimulationSnapshot) => {
       this._simulationSnapshotReceivedNotifier.next(snapshot);
@@ -133,6 +150,10 @@ export class SimulationManagementService {
       });
   }
 
+  /**
+   * If there is a change in the current `activeSimulation` object,
+   * then we want to retrieve it and store it into the queue of existing simulations
+   */
   private _onActiveSimulationSnapshotStateReceived() {
     this.selectSimulationSnapshotState('activeSimulation')
       .pipe(filter(value => value !== null))
@@ -141,6 +162,9 @@ export class SimulationManagementService {
       });
   }
 
+  /**
+   * Get the simulation output from the simulation snapshot
+   */
   private _onSimulationOutputSnapshotStateReceived() {
     this.selectSimulationSnapshotState('simulationOutput')
       .pipe(

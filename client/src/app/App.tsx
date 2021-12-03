@@ -59,7 +59,7 @@ export function App(props: Props) {
         feederModel={props.feederModel}
         onSubmit={updatedConfig => {
           props.onSimulationConfigFormSubmitted(updatedConfig);
-          setTimeout(() => props['history'].push('/simulation'), 500);
+          setTimeout(() => navigate('/simulation'), 500);
         }}
         onClose={portalRenderer.unmount}
         onMRIDChanged={props.onMRIDChanged}

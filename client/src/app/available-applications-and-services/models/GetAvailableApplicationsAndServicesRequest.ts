@@ -1,5 +1,8 @@
 import { MessageRequest } from '@client:common/MessageRequest';
 
+/**
+ * Represents the request to retrieve all the available applications and services.
+ */
 export class GetAvailableApplicationsAndServicesRequest implements MessageRequest {
 
   private readonly _requestBody = {

@@ -27,6 +27,10 @@ interface State {
   disableSubmitButton: boolean;
 }
 
+/**
+ * Represents the form that is displayed after selecting "Browse Data" in the drawer menu,
+ * then selecting "LOGS" tab
+ */
 export class QueryLogsForm extends Component<Props, State> {
 
   readonly formGroupModel = new FormGroupModel({

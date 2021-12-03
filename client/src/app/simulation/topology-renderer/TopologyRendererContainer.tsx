@@ -98,7 +98,6 @@ export class TopologyRendererContainer extends Component<Props, State> {
 
   private _observeActiveSimulationChangeEvent() {
     this._activeSimulationStream = this._simulationQueue.activeSimulationChanged()
-      .pipe(takeWhile(() => this._activeSimulationStream === null))
       .subscribe({
         next: simulation => {
           this.activeSimulationConfig = simulation.config;
@@ -124,6 +123,9 @@ export class TopologyRendererContainer extends Component<Props, State> {
 
   private _fetchTopologyModel(lineName: string) {
     const getTopologyModelRequest = new GetTopologyModelRequest(lineName);
+    this.setState({
+      isFetching: true
+    });
     this._subscribeToTopologyModelTopic(getTopologyModelRequest.replyTo);
     this._stompClientService.send({
       destination: getTopologyModelRequest.url,

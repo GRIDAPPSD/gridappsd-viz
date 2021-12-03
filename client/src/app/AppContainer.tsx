@@ -20,6 +20,7 @@ import {
 } from '@client:common/simulation';
 import { ConductingEquipmentType } from '@client:common/topology/model-dictionary';
 import { AuthenticatorService } from '@client:common/authenticator';
+import { Notification } from '@client:common/overlay/notification';
 
 import { GetModelDictionaryRequest, GetModelDictionaryResponsePayload } from './models/message-requests/GetModelDictionaryRequest';
 import {
@@ -170,6 +171,9 @@ export class AppContainer extends Component<Props, State> {
           this.setState({
             feederModel
           });
+        },
+        error: reason => {
+          Notification.open(reason);
         }
       });
   }

@@ -15,9 +15,8 @@ interface Props<T = Record<string, string | number | boolean>> {
 }
 
 export function FilterableTable(props: Props) {
-  if (props.rows.length === 0) {
-    return null;
-  }
+  const tableElementRef = useRef<HTMLDivElement>(null);
+  const tableElement = tableElementRef.current;
   /**
    * Hold the rows that were filtered down by the search box
    */
@@ -29,22 +28,22 @@ export function FilterableTable(props: Props) {
   const [currentPage, setCurrentPage] = useState(props.rows);
   const columns = useMemo(() => {
     if (!props.headers) {
-      return Object.keys(props.rows[0])
-        .map(columnName => ({
+      if (props.rows.length > 0) {
+        const keys = Object.keys(props.rows[0]);
+        return keys.map(columnName => ({
           accessor: columnName,
-          Header: columnName
+          Header: columnName,
+          width: tableElement ? tableElement.clientWidth / keys.length : 120
         }));
+      }
+      return [];
     }
     return props.headers.map(header => ({
       accessor: header.accessor,
       Header: header.label
     }));
-  }, [props.rows[0], props.headers]);
+  }, [props.rows, props.headers, tableElement]);
 
-  const defaultColumn = useMemo(() => ({
-    minWidth: 30,
-    width: 1120 / columns.length
-  }), [columns]);
   const {
     getTableProps,
     getTableBodyProps,
@@ -54,8 +53,7 @@ export function FilterableTable(props: Props) {
   } = useTable(
     {
       columns,
-      data: currentPage,
-      defaultColumn
+      data: currentPage
     },
     useBlockLayout,
     useResizeColumns
@@ -96,8 +94,13 @@ export function FilterableTable(props: Props) {
     };
   }, [props.rows]);
 
+  if (props.rows.length === 0) {
+    return null;
+  }
+
   return (
     <div
+      ref={tableElementRef}
       className='filterable-table'
       {...getTableProps()}>
       <div className='thead'>

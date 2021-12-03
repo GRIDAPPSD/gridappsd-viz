@@ -13,6 +13,12 @@ interface Props {
 interface State {
   responseBody: ResponseBody;
 }
+
+/**
+ * This container component is responsible for any data modeling/fetching. It is the topmost
+ * level parent component that ties together different components and data when the menu item
+ * "Applications & Services" in the drawer is selected.
+ */
 export class AvailableApplicationsAndServicesContainer extends Component<Props, State> {
 
   private readonly _stompClientService = StompClientService.getInstance();

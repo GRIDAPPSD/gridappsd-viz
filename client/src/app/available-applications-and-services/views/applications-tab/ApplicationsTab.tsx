@@ -8,6 +8,12 @@ interface Props {
   applications: Application[];
 }
 
+/**
+ * Functional component for the "Applications" tab which is shown
+ * when the menu item "Applications & Services" is selected.
+ *
+ * @param props
+ */
 export function ApplicationsTab(props: Props) {
   if (!props.applications || props.applications.length === 0) {
     return (

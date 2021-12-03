@@ -1,12 +1,12 @@
 /* eslint-disable camelcase */
 import { CurrentLimit, VoltageLimit } from '@client:common/measurement-limits';
-import { MessageRequest, RequestConfigurationType } from '@client:common/MessageRequest';
+import { MessageRequest } from '@client:common/MessageRequest';
 
 export class FetchLimitsFileRequest implements MessageRequest {
 
   readonly url = 'goss.gridappsd.process.request.config';
   readonly requestBody = {
-    configurationType: RequestConfigurationType.GRID_LAB_D_LIMITS,
+    configurationType: 'GridLAB-D Limits',
     parameters: {
       simulation_id: ''
     }
