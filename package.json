@@ -1,10 +1,14 @@
 {
     "name": "gridappsd-viz",
     "version": "1.0.0",
-    "devDependencies": {
-        "husky": "^7.0.0"
-    },
     "scripts": {
-        "prepare": "husky install"
+        "prepare": "husky install",
+        "build:client": "cd client && npm run build && cd ..",
+        "build:server": "cd server && npm run build && cd ..",
+        "package": "cp server/package.json server/package-lock.json server/dist",
+        "build": "npm run build:client && npm run build:server && npm run package"
+    },
+    "devDependencies": {
+        "husky": "^7.0.4"
     }
 }

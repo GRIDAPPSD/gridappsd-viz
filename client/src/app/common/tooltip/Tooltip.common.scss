@@ -1,0 +1,83 @@
+.tooltip-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    z-index: 1000;
+    pointer-events: none;
+}
+
+.td-tooltip {
+    position: absolute;
+    border-radius: 8px;
+    z-index: 15;
+    white-space: pre-wrap;
+    font-family: 'Roboto', sans-serif;
+    font-size: 0.7em;
+    opacity: 0;
+    visibility: hidden;
+    max-width: 100vw;
+    pointer-events: all;
+}
+
+.td-tooltip__arrow {
+    overflow: hidden;
+    position: absolute;
+    width: 20px;
+    height: 20px;
+
+    &::after {
+        content: '';
+        position: relative;
+        width: inherit;
+        height: inherit;
+        display: inline-block;
+        border-radius: 3px;
+    }
+}
+
+.td-tooltip__content {
+    line-height: 1.5em;
+    padding: 10px;
+}
+
+.td-tooltip.top .td-tooltip__arrow {
+    transform: translateX(-50%);
+    top: 100%;
+    left: 50%;
+
+    &::after {
+        transform: translateY(-18px) rotate(45deg);
+    }
+}
+
+.td-tooltip.right .td-tooltip__arrow {
+    transform: translateY(-55%) translateX(-20px);
+    top: 50%;
+    left: 0;
+
+    &::after {
+        transform: translateX(65%) rotate(45deg);
+    }
+}
+
+.td-tooltip.bottom .td-tooltip__arrow {
+    transform: translateX(-50%);
+    top: -20px;
+    left: 50%;
+
+    &::after {
+        transform: translateY(16px) rotate(45deg);
+    }
+}
+
+.td-tooltip.left .td-tooltip__arrow {
+    transform: translateY(-51%);
+    top: 50%;
+    left: 100%;
+
+    &::after {
+        transform: translateX(-85%) rotate(45deg);
+    }
+}
