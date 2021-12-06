@@ -108,7 +108,7 @@ export class ExpectedResultComparisonContainer extends Component<Props, State> {
         <ResultViewer
           result={this.state.comparisonResult}
           showProgressIndicator={this.state.isFetching}
-          comparisionType={this.state.comparisonType} />
+          comparisonType={this.state.comparisonType} />
       </div>
     );
   }
@@ -149,6 +149,8 @@ export class ExpectedResultComparisonContainer extends Component<Props, State> {
   }
 
   private _fetchResponse(request: MessageRequest) {
+    const payload = [] as unknown[];
+
     this.setState({
       isFetching: true
     });
@@ -157,7 +159,6 @@ export class ExpectedResultComparisonContainer extends Component<Props, State> {
     this._responseSubscription = this._stompClientService.readFrom<any[] | any>(request.replyTo)
       .pipe(
         takeWhile(data => data.status !== 'finish'),
-        map(data => Array.isArray(data) ? data : Array.isArray(data.events) ? data.events : []),
         finalize(() => {
           this.setState({
             isFetching: false
@@ -165,12 +166,17 @@ export class ExpectedResultComparisonContainer extends Component<Props, State> {
         }))
       .subscribe({
         next: data => {
-          this.setState({
-            comparisonResult: data
-          });
+          if (data.status !== 'start') {
+            payload.push(data);
+          }
         },
         error: errorMessage => {
           Notification.open(errorMessage);
+        },
+        complete: () => {
+          this.setState({
+            comparisonResult: payload
+          });
         }
       });
     this._stompClientService.send({

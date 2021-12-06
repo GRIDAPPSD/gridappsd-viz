@@ -22,6 +22,9 @@ interface State {
   renderableChartModels: RenderableChartModel[];
 }
 
+/**
+ * The smart component for the plots shown on the right say during a simulation
+ */
 export class MeasurementChartContainer extends Component<Props, State> {
 
   private readonly _stateStore = StateStore.getInstance();
@@ -422,11 +425,11 @@ export class MeasurementChartContainer extends Component<Props, State> {
 
   render() {
     return (
-      this.state.renderableChartModels.map(
-        renderableChartModel => <MeasurementChart
+      this.state.renderableChartModels.map(renderableChartModel => (
+        <MeasurementChart
           key={renderableChartModel.name}
           renderableChartModel={renderableChartModel} />
-      )
+      ))
     );
   }
 

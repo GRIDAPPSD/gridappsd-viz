@@ -1,7 +1,7 @@
 import { Subject, Observable, of } from 'rxjs';
-import { map, catchError } from 'rxjs/operators';
+import { map, catchError, filter } from 'rxjs/operators';
 
-import { StompClientService, StompClientInitializationStatus } from '@client:common/StompClientService';
+import { StompClientService, StompClientInitializationStatus, StompClientConnectionStatus } from '@client:common/StompClientService';
 
 import { AuthenticationResult } from '../models/AuthenticationResult';
 import { AuthenticationStatusCode } from '../models/AuthenticationStatusCode';
@@ -20,9 +20,20 @@ export class AuthenticatorService {
 
     this._isAuthenticated = Boolean(sessionStorage.getItem('isAuthenticated'));
     this._userRoles = JSON.parse(sessionStorage.getItem('userRoles') || '[]');
+    this._watchForStompClientDisconnection();
 
     this.logout = this.logout.bind(this);
     this.userHasRole = this.userHasRole.bind(this);
+  }
+
+  private _watchForStompClientDisconnection() {
+    this._stompClientService.statusChanges()
+      .pipe(filter(status => status === StompClientConnectionStatus.DISCONNECTED))
+      .subscribe({
+        next: () => {
+          this.logout();
+        }
+      });
   }
 
   static getInstance() {

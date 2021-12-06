@@ -1,5 +1,5 @@
 import { ModelDictionary } from '@client:common/topology';
-import { MessageRequest, RequestConfigurationType } from '@client:common/MessageRequest';
+import { MessageRequest } from '@client:common/MessageRequest';
 
 export interface GetModelDictionaryRequestBody {
   configurationType: string;
@@ -17,7 +17,7 @@ export class GetModelDictionaryRequest implements MessageRequest {
 
   constructor() {
     this._requestBody = {
-      configurationType: RequestConfigurationType.CIM_DICTIONARY,
+      configurationType: 'CIM Dictionary',
       parameters: {
         // eslint-disable-next-line camelcase
         model_id: '_4F76A5F9-271D-9EB8-5E31-AA362D86F2C3'

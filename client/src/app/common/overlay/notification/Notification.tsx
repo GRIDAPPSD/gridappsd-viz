@@ -21,7 +21,7 @@ export class Notification extends Component<Props, State> {
     show: true
   } as Props;
 
-  static readonly LIFE_TIME = 5_000;
+  static readonly LIFE_TIME = 30_000;
   static readonly ANIMATION_DURATION = 500;
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

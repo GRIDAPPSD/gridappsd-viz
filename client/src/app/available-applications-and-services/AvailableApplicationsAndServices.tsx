@@ -14,6 +14,12 @@ export interface Props {
   responseBody: ResponseBody;
 }
 
+/**
+ * Functional component that is rendered when the menu item
+ * "Applications and Services" in the drawer is selected.
+ *
+ * @param props
+ */
 export function AvailableApplicationsAndServices(props: Props) {
   if (!props.responseBody) {
     return (

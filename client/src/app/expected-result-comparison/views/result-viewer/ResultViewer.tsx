@@ -15,7 +15,7 @@ interface Props {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   result: any[] | any;
   showProgressIndicator: boolean;
-  comparisionType: ExpectedResultComparisonType;
+  comparisonType: ExpectedResultComparisonType;
 }
 
 interface State {
@@ -87,7 +87,7 @@ export class ResultViewer extends Component<Props, State> {
   }
 
   showResultAsPlot() {
-    switch (this.props.comparisionType) {
+    switch (this.props.comparisonType) {
       case ExpectedResultComparisonType.SIMULATION_VS_EXPECTED:
       case ExpectedResultComparisonType.SIMULATION_VS_TIME_SERIES:
       case ExpectedResultComparisonType.EXPECTED_VS_TIME_SERIES:

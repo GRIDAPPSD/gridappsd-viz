@@ -8,6 +8,12 @@ interface Props {
   instances: any[];
 }
 
+/**
+ * Functional component for the "Application Instances" tab
+ * which is shown when the menu item "Applications & Services" is selected.
+ *
+ * @param props
+ */
 export function ApplicationInstancesTab(props: Props) {
   if (!props.instances || props.instances.length === 0) {
     return (

@@ -8,6 +8,12 @@ interface Props {
   services: Service[];
 }
 
+/**
+ * Functional component for the "Services" tab which is shown
+ * when the menu item "Applications & Services" is selected.
+ *
+ * @param props
+ */
 export function ServicesTab(props: Props) {
   if (!props.services || props.services.length === 0) {
     return (

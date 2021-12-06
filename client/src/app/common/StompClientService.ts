@@ -31,6 +31,10 @@ export interface StompClientRequest {
   body: string;
 }
 
+/**
+ * An abstraction around StompJS client that makes use of RxJS to enable
+ * more convenient data transformation
+ */
 export class StompClientService {
 
   private static readonly _INSTANCE_ = new StompClientService();
@@ -89,6 +93,12 @@ export class StompClientService {
       });
   }
 
+  /**
+   * Try to establish a connection to the message broker using the provided username and password.
+   *
+   * @param username
+   * @param password
+   */
   connect(username: string, password: string): Observable<StompClientInitializationResult> {
     const subject = new Subject<StompClientInitializationResult>();
     // eslint-disable-next-line @typescript-eslint/no-empty-function
@@ -150,6 +160,12 @@ export class StompClientService {
     return subject.pipe(take(1));
   }
 
+  /**
+   * Read the authentication token from a previously agreed-upon topic
+   *
+   * @param username
+   * @param password
+   */
   private _retrieveToken(username: string, password: string): Promise<string> {
     return new Promise((resolve, reject) => {
       const destination = `/queue/temp.token_resp.${username}`;
@@ -171,6 +187,9 @@ export class StompClientService {
     });
   }
 
+  /**
+   * Attempt to reconnect the message broker every 5 seconds, will time out after trying for 25 seconds
+   */
   reconnect() {
     timer(0, 5_000)
       .pipe(
@@ -213,6 +232,7 @@ export class StompClientService {
         onStompError: () => {
           sessionStorage.removeItem('token');
           this._authenticationToken = '';
+          this._notifyConnectionStatusChange(StompClientConnectionStatus.DISCONNECTED);
         },
         onConnect: () => {
           this._notifyConnectionStatusChange(StompClientConnectionStatus.CONNECTED);
@@ -310,7 +330,8 @@ export class StompClientService {
             try {
               const payload = JSON.parse(body);
               if ('error' in payload) {
-                source.error(payload.error.message);
+                const errorMessageLines = payload.error.message.split('\n');
+                source.error(errorMessageLines[0]);
               } else if (!('data' in payload)) {
                 source.next(payload);
               } else if (typeof payload.data !== 'string') {

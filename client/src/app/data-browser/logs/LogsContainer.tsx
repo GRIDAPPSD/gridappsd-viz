@@ -27,6 +27,10 @@ interface State {
   showSpinner: boolean;
 }
 
+/**
+ * The smart component that handles data fetching from the platform when selecting
+ * "Browse Data" in the drawer menu, then "LOGS" tab
+ */
 export class LogsContainer extends Component<Props, State> {
 
   private readonly _stompClientService = StompClientService.getInstance();
