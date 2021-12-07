@@ -1,0 +1,26 @@
+@import '@constants.dark';
+@import './FilterableTable.common';
+
+.filterable-table {
+    border: 2px solid $table-border-color;
+
+    .thead {
+        background-color: $primary-color;
+        color: $primary-text-color;
+    }
+
+    .th {
+        border-right: 2px solid $table-border-color;
+        border-bottom: 2px solid $table-border-color;
+    }
+
+    .td {
+        border-right: 2px solid $table-border-color;
+        border-bottom: 2px solid $table-border-color;
+        color: $primary-text-color;
+    }
+
+    .tfoot {
+        border-top: 2px solid $table-border-color;
+    }
+}

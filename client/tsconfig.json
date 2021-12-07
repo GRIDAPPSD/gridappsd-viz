@@ -1,0 +1,42 @@
+{
+    "compilerOptions": {
+        "outDir": "./dist",
+        "module": "esnext",
+        "target": "es2017",
+        "baseUrl": "./",
+        "rootDirs": [
+            "src",
+            "../common"
+        ],
+        "paths": {
+            "@client:common/*": [
+                "src/app/common/*"
+            ],
+            "@project:common/*": [
+                "../common/*"
+            ]
+        },
+        "lib": [
+            "es2017",
+            "dom"
+        ],
+        "sourceMap": true,
+        "allowJs": true,
+        "jsx": "react-jsx",
+        "moduleResolution": "node",
+        "forceConsistentCasingInFileNames": true,
+        "noImplicitReturns": true,
+        "noImplicitThis": true,
+        "noImplicitAny": true,
+        "noUnusedLocals": false,
+        "noUnusedParameters": false,
+        "strictNullChecks": false,
+        "suppressImplicitAnyIndexErrors": true,
+        "resolveJsonModule": true,
+        "isolatedModules": true
+    },
+    "exclude": [
+        "node_modules",
+        "dist"
+    ]
+}

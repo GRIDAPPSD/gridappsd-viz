@@ -1,0 +1,23 @@
+{
+    "root": true,
+    "parserOptions": {
+        "project": "tsconfig.*?.json"
+    },
+    "env": {
+        "node": true,
+        "jest": true
+    },
+    "parser": "@typescript-eslint/parser",
+    "plugins": [
+        "@typescript-eslint",
+        "eslint-plugin-jsdoc",
+        "eslint-plugin-import",
+        "unused-imports"
+    ],
+    "extends": [
+        "eslint:recommended",
+        "plugin:@typescript-eslint/eslint-recommended",
+        "plugin:@typescript-eslint/recommended",
+        "../.eslintrc.json"
+    ]
+}

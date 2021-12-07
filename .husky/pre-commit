@@ -1,16 +1,8 @@
 #!/bin/sh
 . "$(dirname "$0")/_/husky.sh"
 
-rootDir=$(pwd)
+cd client
+npx lint-staged
 
-if  git status | grep 'backend/' &> /dev/null
-then
-    cd backend
-    npm run lint
-fi
-
-if  git status | grep 'frontend/' &> /dev/null
-then
-    cd "$rootDir/frontend"
-    npm run lint
-fi
+cd ../server
+npx lint-staged

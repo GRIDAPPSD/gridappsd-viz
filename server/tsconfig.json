@@ -1,0 +1,47 @@
+{
+    "compilerOptions": {
+        "composite": true,
+        "declaration": true,
+        "outDir": "dist",
+        "baseUrl": "./",
+        "module": "commonjs",
+        "target": "ES2017",
+        "lib": [
+            "ES2017"
+        ],
+        "paths": {
+            "@project:common/*": [
+                "../common/*"
+            ]
+        },
+        "typeRoots": [
+            "node_modules/@types"
+        ],
+        "types": [
+            "node"
+        ],
+        "rootDirs": [
+            "src"
+        ],
+        "sourceMap": true,
+        "allowJs": true,
+        "moduleResolution": "node",
+        "forceConsistentCasingInFileNames": true,
+        "noImplicitReturns": true,
+        "noImplicitThis": true,
+        "noImplicitAny": false,
+        "strictNullChecks": false,
+        "suppressImplicitAnyIndexErrors": true,
+        "noUnusedLocals": true,
+        "noUnusedParameters": true
+    },
+    "references": [
+        {
+            "path": "../common"
+        }
+    ],
+    "exclude": [
+        "node_modules",
+        "dist"
+    ]
+}

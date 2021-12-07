@@ -1,0 +1,24 @@
+@import '@constants.light';
+@import './FilterableTable.common';
+
+.filterable-table {
+    border: 2px solid $table-border-color;
+
+    .thead {
+        background-color: #ff879c;
+    }
+
+    .th {
+        border-right: 2px solid $table-border-color;
+        border-bottom: 2px solid $table-border-color;
+    }
+
+    .td {
+        border-right: 2px solid $table-border-color;
+        border-bottom: 2px solid $table-border-color;
+    }
+
+    .tfoot {
+        border-top: 2px solid $table-border-color;
+    }
+}

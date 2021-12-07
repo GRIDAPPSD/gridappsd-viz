@@ -1,0 +1,54 @@
+{
+    "env": {
+        "browser": true,
+        "es6": true,
+        "node": true
+    },
+    "parserOptions": {
+        "project": [
+            "tsconfig.*?.json"
+        ],
+        "createDefaultProgram": true
+    },
+    "extends": [
+        "eslint:recommended",
+        "plugin:@typescript-eslint/eslint-recommended",
+        "plugin:@typescript-eslint/recommended",
+        "plugin:react/recommended",
+        "plugin:react-hooks/recommended",
+        "../.eslintrc.json"
+    ],
+    "parser": "@typescript-eslint/parser",
+    "plugins": [
+        "@typescript-eslint",
+        "eslint-plugin-jsdoc",
+        "eslint-plugin-import",
+        "unused-imports"
+    ],
+    "settings": {
+        "react": {
+            "version": "detect"
+        }
+    },
+    "rules": {
+        "react/display-name": "off",
+        "react/prop-types": "off",
+        "react/jsx-uses-react": "off",
+        "react/react-in-jsx-scope": "off",
+        "react/jsx-first-prop-new-line": [
+            "error",
+            "multiline-multiprop"
+        ],
+        "react/jsx-max-props-per-line": [
+            1,
+            {
+                "maximum": 1,
+                "when": "always"
+            }
+        ],
+        "jsx-quotes": [
+            "error",
+            "prefer-single"
+        ]
+    }
+}
