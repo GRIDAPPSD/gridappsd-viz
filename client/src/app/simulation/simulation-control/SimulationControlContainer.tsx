@@ -11,6 +11,7 @@ import { SimulationStatus } from '@project:common/SimulationStatus';
 import { SimulationControl } from './SimulationControl';
 
 interface Props {
+  exportSimulationConfiguration: () => void;
 }
 
 interface State {
@@ -107,6 +108,7 @@ export class SimulationControlContainer extends Component<Props, State> {
         simulationStatus={this.state.simulationStatus}
         existingPlotModels={this.state.existingPlotModels}
         onStartSimulation={this.simulationManagementService.startSimulation}
+        onExportSimulationConfiguration={this.props.exportSimulationConfiguration}
         modelDictionaryComponents={this.state.modelDictionaryComponents}
         onStopSimulation={this.simulationManagementService.stopSimulation}
         onPauseSimulation={this.simulationManagementService.pauseSimulation}

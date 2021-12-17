@@ -1,11 +1,11 @@
-import { useRef } from 'react';
+import { useRef, useState } from 'react';
 import { Outlet, Route, Routes, useNavigate } from 'react-router-dom';
 
 import { Application } from '@client:common/Application';
 import { MessageBanner } from '@client:common/overlay/message-banner';
 import { StateStore } from '@client:common/state-store';
 import { PortalRenderer } from '@client:common/overlay/portal-renderer';
-import { waitUntil } from '@client:common/misc';
+import { waitUntil, download, DownloadType } from '@client:common/misc';
 import { Dialog } from '@client:common/overlay/dialog';
 import { StompClientConnectionStatus } from '@client:common/StompClientService';
 import { SimulationConfiguration, DEFAULT_SIMULATION_CONFIGURATION } from '@client:common/simulation';
@@ -51,6 +51,7 @@ export function App(props: Props) {
   const tabGroupRef = useRef<TabGroup>(null);
   const stateStore = StateStore.getInstance();
   const navigate = useNavigate();
+  const [simulationRequest, setSimulationRequest] = useState(null);
 
   const onShowSimulationConfigForm = (config: SimulationConfiguration) => {
     const portalRenderer = new PortalRenderer();
@@ -58,6 +59,7 @@ export function App(props: Props) {
       <SimulationConfigurationEditor
         feederModel={props.feederModel}
         onSubmit={updatedConfig => {
+          setSimulationRequest(updatedConfig);
           props.onSimulationConfigFormSubmitted(updatedConfig);
           setTimeout(() => navigate('/simulation'), 500);
         }}
@@ -88,6 +90,10 @@ export function App(props: Props) {
           nodeNameToLocate: alarm.equipment_name
         });
       });
+  };
+
+  const downloadSimulationConfiguration = () => {
+    download('simulationRequestConfig', JSON.stringify(simulationRequest), DownloadType.JSON);
   };
 
   return (
@@ -121,7 +127,7 @@ export function App(props: Props) {
           element={
             <div className='topology-renderer-simulation-status-logger-measurement-graphs'>
               <div>
-                <SimulationControlContainer />
+                <SimulationControlContainer exportSimulationConfiguration={downloadSimulationConfiguration}/>
                 <TabGroup ref={tabGroupRef}>
                   <Tab label='Simulation'>
                     <TopologyRendererContainer
