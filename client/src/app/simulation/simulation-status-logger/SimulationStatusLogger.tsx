@@ -85,7 +85,9 @@ export class SimulationStatusLogger extends Component<Props, State> {
         <header className='simulation-status-logger__header'>
           <span
             className='simulation-status-logger__header__label'
-            onMouseDown={this.mouseDown}>
+            onMouseDown={this.mouseDown}
+            style={{visibility: this.props.visibleLogMessageDeque.size() > 0 ? 'visible' : 'hidden'}}
+          >
             Simulation Status
             <Tooltip content={this.state.showLogMessages ? 'Hide logs' : 'Show logs'}>
               <IconButton
@@ -127,7 +129,10 @@ export class SimulationStatusLogger extends Component<Props, State> {
             </div>
           </div>
         </header>
-        <section className='simulation-status-logger__body'>
+        <section
+          className='simulation-status-logger__body'
+          style={{visibility: this.props.visibleLogMessageDeque.size() > 0 ? 'visible' : 'hidden'}}
+        >
           <div
             className='simulation-status-logger__body-wrapper'
             style={{ display: this.state.showLogMessages ? 'flex' : 'none' }}>
