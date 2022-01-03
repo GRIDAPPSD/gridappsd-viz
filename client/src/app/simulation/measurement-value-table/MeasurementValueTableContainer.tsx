@@ -1,5 +1,5 @@
 import { Component } from 'react';
-import { Subject } from 'rxjs';
+import { Subscription, Subject } from 'rxjs';
 import { takeUntil, filter } from 'rxjs/operators';
 
 import { SimulationQueue, SimulationManagementService, SimulationOutputMeasurement } from '@client:common/simulation';
@@ -62,6 +62,8 @@ export class MeasurementValueTableContainer extends Component<Props, State> {
   private readonly _simulationManagementService = SimulationManagementService.getInstance();
   private readonly _unsubscriber = new Subject<void>();
 
+  private _activeSimulationStream: Subscription = null;
+
   constructor(props: Props) {
     super(props);
 
@@ -72,8 +74,24 @@ export class MeasurementValueTableContainer extends Component<Props, State> {
   }
 
   componentDidMount() {
+    this._observeActiveSimulationChangeEvent();
     this._subscribeToSimulationOutputMeasurementMapStream();
     this._resetLabelsWhenSimulationStarts();
+  }
+
+  private _observeActiveSimulationChangeEvent() {
+    this._activeSimulationStream = this._simulationQueue.queueChanges()
+      .subscribe({
+        next: () => {
+          this._clearMeasurementValueTable();
+        }
+      });
+  }
+
+  private _clearMeasurementValueTable() {
+    this.setState({
+      measurementValueTables: []
+    });
   }
 
   private _resetLabelsWhenSimulationStarts() {
@@ -94,6 +112,7 @@ export class MeasurementValueTableContainer extends Component<Props, State> {
   componentWillUnmount() {
     this._unsubscriber.next();
     this._unsubscriber.complete();
+    this._activeSimulationStream.unsubscribe();
   }
 
   render() {
