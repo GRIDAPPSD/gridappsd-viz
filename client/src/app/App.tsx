@@ -93,6 +93,9 @@ export function App(props: Props) {
   };
 
   const downloadSimulationConfiguration = () => {
+    const reformatStartTime = new Date(simulationRequest.simulation_config.start_time).getTime() / 1000;
+    // eslint-disable-next-line camelcase
+    simulationRequest.simulation_config.start_time = reformatStartTime;
     download('simulationRequestConfig', JSON.stringify(simulationRequest), DownloadType.JSON);
   };
 
