@@ -93,10 +93,10 @@ export function App(props: Props) {
   };
 
   const downloadSimulationConfiguration = () => {
-    const reformatStartTime = new Date(simulationRequest.simulation_config.start_time).getTime() / 1000;
+    const reshapedStartTime = new Date(simulationRequest.simulation_config.start_time).getTime() / 1000;
     // eslint-disable-next-line camelcase
-    simulationRequest.simulation_config.start_time = reformatStartTime;
-    download('simulationRequestConfig', JSON.stringify(simulationRequest), DownloadType.JSON);
+    const simulationConfigRequestToDownload = {...simulationRequest, simulation_config:{...simulationRequest.simulation_config, start_time: reshapedStartTime}};
+    download('simulationRequestConfig', JSON.stringify(simulationConfigRequestToDownload), DownloadType.JSON);
   };
 
   return (
