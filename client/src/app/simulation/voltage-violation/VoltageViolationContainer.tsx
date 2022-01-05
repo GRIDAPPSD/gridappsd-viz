@@ -1,5 +1,5 @@
 import { Component } from 'react';
-import { zip, Subject } from 'rxjs';
+import { zip, Subscription, Subject } from 'rxjs';
 import { switchMap, filter, takeWhile, takeUntil } from 'rxjs/operators';
 
 import { StompClientService } from '@client:common/StompClientService';
@@ -7,6 +7,7 @@ import { StateStore } from '@client:common/state-store';
 import { SimulationManagementService } from '@client:common/simulation';
 import { DateTimeService } from '@client:common/DateTimeService';
 import { SimulationStatus } from '@project:common/SimulationStatus';
+import { SimulationQueue } from '@client:common/simulation';
 
 import { VoltageViolation } from './VoltageViolation';
 
@@ -26,6 +27,9 @@ export class VoltageViolationContainer extends Component<Props, State> {
   private readonly _dateTimeService = DateTimeService.getInstance();
   private readonly _stateStore = StateStore.getInstance();
   private readonly _unsubscriber = new Subject<void>();
+  private readonly _simulationQueue = SimulationQueue.getInstance();
+
+  private _activeSimulationStream: Subscription = null;
 
   constructor(props: Props) {
     super(props);
@@ -38,9 +42,28 @@ export class VoltageViolationContainer extends Component<Props, State> {
   }
 
   componentDidMount() {
+    this._observeActiveSimulationChangeEvent();
     this._observeVoltageViolationChanges();
     this._readViolationsOnSimulationSnapshotReceived();
     this._clearAllViolationCountsWhenSimulationStarts();
+  }
+
+  private _observeActiveSimulationChangeEvent() {
+    this._activeSimulationStream = this._simulationQueue.queueChanges()
+      .subscribe({
+        next: () => {
+          this._clearVoltageViolationTable();
+        }
+      });
+  }
+
+  private _clearVoltageViolationTable() {
+    const state = {
+      totalVoltageViolations: -1,
+      violationsAtZero: 0,
+      voltageViolationTimestamp: ''
+    };
+    this.setState(state);
   }
 
   private _observeVoltageViolationChanges() {
@@ -109,6 +132,7 @@ export class VoltageViolationContainer extends Component<Props, State> {
   componentWillUnmount() {
     this._unsubscriber.next();
     this._unsubscriber.complete();
+    this._activeSimulationStream.unsubscribe();
   }
 
   render() {

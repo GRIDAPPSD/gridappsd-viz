@@ -1,11 +1,12 @@
 import { Component } from 'react';
-import { Subject } from 'rxjs';
+import { Subscription, Subject } from 'rxjs';
 import { filter, switchMap, takeUntil } from 'rxjs/operators';
 
 import { StateStore } from '@client:common/state-store';
 import { StompClientService } from '@client:common/StompClientService';
 import { SimulationManagementService } from '@client:common/simulation';
 import { SimulationStatus } from '@project:common/SimulationStatus';
+import { SimulationQueue } from '@client:common/simulation';
 
 import { Alarm } from './models/Alarm';
 import { NewAlarmNotification } from './views/new-alarm-notification/NewAlarmNotification';
@@ -27,6 +28,10 @@ export class AlarmsContainer extends Component<Props, State> {
   private readonly _stompClientService = StompClientService.getInstance();
   private readonly _simulationManagementService = SimulationManagementService.getInstance();
   private readonly _unsubscriber = new Subject<void>();
+  private readonly _simulationQueue = SimulationQueue.getInstance();
+
+
+  private _activeSimulationStream: Subscription = null;
 
   constructor(props: Props) {
     super(props);
@@ -41,10 +46,30 @@ export class AlarmsContainer extends Component<Props, State> {
   }
 
   componentDidMount() {
+    this._observeActiveSimulationChangeEvent();
     this._subscribeToNewAlarmsTopic();
     this._pickAlarmsFromSimulationSnapshotStream();
     this._clearAllAlarmsWhenSimulationStarts();
     this._updateAlarmTimeStampsWhenTimeZoneChanges();
+  }
+
+  private _observeActiveSimulationChangeEvent() {
+    this._activeSimulationStream = this._simulationQueue.queueChanges()
+      .subscribe({
+        next: () => {
+          this._clearAlarms();
+        }
+      });
+  }
+
+  private _clearAlarms() {
+    this.setState({
+      alarms: [],
+      newAlarmCounts: 0
+    });
+    this._simulationManagementService.syncSimulationSnapshotState({
+      alarms: []
+    });
   }
 
   private _subscribeToNewAlarmsTopic() {
@@ -122,6 +147,7 @@ export class AlarmsContainer extends Component<Props, State> {
   componentWillUnmount() {
     this._unsubscriber.next();
     this._unsubscriber.complete();
+    this._activeSimulationStream.unsubscribe();
   }
 
   render() {
