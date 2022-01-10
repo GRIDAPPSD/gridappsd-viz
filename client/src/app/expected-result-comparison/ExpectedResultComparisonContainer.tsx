@@ -200,7 +200,7 @@ export class ExpectedResultComparisonContainer extends Component<Props, State> {
         }
       },
       complete: () => {
-        Notification.open('Fetching Comparison Result Table is Done.');
+        Notification.open('Fetching Comparison Result is Done.');
       },
       error: errorMessage => {
         Notification.open(errorMessage);

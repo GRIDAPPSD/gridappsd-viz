@@ -35,16 +35,16 @@ export class TimeSeriesVsTimeSeriesChartResult extends Component<Props, State> {
   }
 
   componentDidMount() {
-      this._buildDefaultChart();
+      this._buildChart();
   }
 
   componentDidUpdate(prevProps: Readonly<Props>): void {
       if(prevProps.result.length !== this.props.result.length) {
-        this._buildDefaultChart();
+        this._buildChart();
       }
   }
 
-  private _buildDefaultChart() {
+  private _buildChart() {
     const chartModelMap = new Map<string, LineChartModel>();
     const anchorTimeStamp = Date.now();
     if(this.props.result.length > 1) {
