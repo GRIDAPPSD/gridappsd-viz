@@ -25,6 +25,7 @@ interface Props {
   existingPlotModels: PlotModel[];
   modelDictionaryComponents: ModelDictionaryComponent[];
   onStartSimulation: () => void;
+  onExportSimulationConfiguration: () => void;
   onStopSimulation: () => void;
   onPauseSimulation: () => void;
   onResumeSimulation: () => void;
@@ -151,13 +152,23 @@ export class SimulationControl extends Component<Props, State> {
         );
       default:
         return (
-          <Tooltip content='Start simulation'>
-            <IconButton
-              icon='play_arrow'
-              disabled={this.props.modelDictionaryComponents.length === 0}
-              className='simulation-control__action start'
-              onClick={this.props.onStartSimulation} />
-          </Tooltip>
+          <>
+            <Tooltip content='Export simulation request configuration'>
+              <IconButton
+                icon='save'
+                disabled={this.props.modelDictionaryComponents.length === 0}
+                className='simulation-control__action save'
+                onClick={this.props.onExportSimulationConfiguration}
+                />
+            </Tooltip>
+            <Tooltip content='Start simulation'>
+              <IconButton
+                icon='play_arrow'
+                disabled={this.props.modelDictionaryComponents.length === 0}
+                className='simulation-control__action start'
+                onClick={this.props.onStartSimulation} />
+            </Tooltip>
+          </>
         );
     }
   }

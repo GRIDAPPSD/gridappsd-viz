@@ -1,5 +1,5 @@
 import { Component } from 'react';
-import { Subject } from 'rxjs';
+import { Subscription, Subject } from 'rxjs';
 import { filter, switchMap, takeWhile, finalize, takeUntil } from 'rxjs/operators';
 
 import { StateStore } from '@client:common/state-store';
@@ -7,6 +7,7 @@ import { waitUntil } from '@client:common/misc';
 import { SIMULATION_STATUS_LOG_TOPIC, SimulationManagementService, SimulationStatusLogMessage } from '@client:common/simulation';
 import { StompClientService, StompClientConnectionStatus } from '@client:common/StompClientService';
 import { SimulationStatus } from '@project:common/SimulationStatus';
+import { SimulationQueue } from '@client:common/simulation';
 
 import { Deque } from './models/Deque';
 import { SimulationStatusLogger } from './SimulationStatusLogger';
@@ -35,10 +36,12 @@ export class SimulationStatusLogContainer extends Component<Props, State> {
   private readonly _simulationManagementService = SimulationManagementService.getInstance();
   private readonly _stateStore = StateStore.getInstance();
   private readonly _unsubscriber = new Subject<void>();
+  private readonly _simulationQueue = SimulationQueue.getInstance();
 
   private _logMessageBuffer = new Buffer<LogMessage>();
   private _nextLogMessageId = lowestLogMessageId;
   private _db: IDBDatabase = null;
+  private _activeSimulationStream: Subscription = null;
 
   constructor(props: Props) {
     super(props);
@@ -54,9 +57,31 @@ export class SimulationStatusLogContainer extends Component<Props, State> {
   }
 
   componentDidMount() {
+    this._observeActiveSimulationChangeEvent();
     this._initializeLogMessageStore();
     this._subscribeToSimulationStatusLogMessageStream();
     this._clearAllLogMessagesWhenSimulationStarts();
+  }
+
+  private _observeActiveSimulationChangeEvent() {
+    this._activeSimulationStream = this._simulationQueue.queueChanges()
+      .subscribe({
+        next: () => {
+          this._clearMessageLogger();
+        }
+      });
+  }
+
+  private _clearMessageLogger() {
+    this._transaction('readwrite').then(store => store.clear());
+    this.visibleLogMessageDeque.clear();
+    this._logMessageBuffer.clear();
+    this._nextLogMessageId = lowestLogMessageId;
+    this.setState({
+      totalLogMessageCount: 0,
+      isFetching: false,
+      visibleLogMessageDeque: this.visibleLogMessageDeque
+    });
   }
 
   private _initializeLogMessageStore() {
@@ -156,6 +181,7 @@ export class SimulationStatusLogContainer extends Component<Props, State> {
     this._transaction('readwrite').then(store => store.clear());
     this._unsubscriber.next();
     this._unsubscriber.complete();
+    this._activeSimulationStream.unsubscribe();
   }
 
   render() {

@@ -8,6 +8,7 @@ import { MeasurementType, ConductingEquipmentType } from '@client:common/topolog
 import { StompClientService } from '@client:common/StompClientService';
 import { PlotModel, PlotModelComponent } from '@client:common/plot-model';
 import { SimulationStatus } from '@project:common/SimulationStatus';
+import { SimulationQueue } from '@client:common/simulation';
 
 import { TimeSeriesDataPoint } from './models/TimeSeriesDataPoint';
 import { TimeSeries } from './models/TimeSeries';
@@ -33,8 +34,10 @@ export class MeasurementChartContainer extends Component<Props, State> {
   private readonly _timeSeries = new Map<string, TimeSeries>();
   private readonly _unsubscriber = new Subject<void>();
   private readonly _nominalVoltageDivisorMap = new Map<string, number>();
+  private readonly _simulationQueue = SimulationQueue.getInstance();
 
   private _plotModels: PlotModel[] = [];
+  private _activeSimulationStream: Subscription = null;
 
   constructor(props: Props) {
     super(props);
@@ -44,11 +47,44 @@ export class MeasurementChartContainer extends Component<Props, State> {
   }
 
   componentDidMount() {
+    this._observeActiveSimulationChangeEvent();
     this._pickRenderableChartModelsFromSimulationSnapshotStream();
     this._subscribeToPlotModelsStateStore();
     this._subscribeToSimulationOutputMeasurementMapStream();
-    this._resetRenderableChartModelsWhenSimulationStarts();
     this._fetchLimitsFileWhenSimulationIdChanges();
+    this._resetRenderableChartModelsWhenSimulationStarts();
+  }
+
+  private _observeActiveSimulationChangeEvent() {
+    this._activeSimulationStream = this._simulationQueue.queueChanges()
+      .subscribe({
+        next: () => {
+          this._resetChartToDefault();
+        }
+      });
+  }
+
+  private _resetChartToDefault() {
+    const finalChartModels: RenderableChartModel[] = [];
+    for (let i = 0; i < this._plotModels.length; i++) {
+      const plotModel = this._plotModels[i];
+      const renderableChartModel = this._createDefaultRenderableChartModel(plotModel);
+      const templateRenderableChartModel = this.state.renderableChartModels[i];
+      if (templateRenderableChartModel) {
+        for (const series of templateRenderableChartModel.timeSeries) {
+          series.points = [];
+        }
+        renderableChartModel.yAxisLabel = this.state.renderableChartModels[i].yAxisLabel;
+      }
+      renderableChartModel.timeSeries = plotModel.components.map(e => this._findOrCreateTimeSeries(plotModel, e));
+      finalChartModels.push(renderableChartModel);
+    }
+    if (finalChartModels[1].yAxisLabel === '') {
+      finalChartModels[1].yAxisLabel = 'KVA';
+    }
+    this.setState({
+      renderableChartModels: finalChartModels
+    });
   }
 
   private _pickRenderableChartModelsFromSimulationSnapshotStream() {
@@ -421,11 +457,13 @@ export class MeasurementChartContainer extends Component<Props, State> {
   componentWillUnmount() {
     this._unsubscriber.next();
     this._unsubscriber.complete();
+    this._activeSimulationStream.unsubscribe();
   }
 
   render() {
+    const { renderableChartModels } = this.state;
     return (
-      this.state.renderableChartModels.map(renderableChartModel => (
+      renderableChartModels.map(renderableChartModel => (
         <MeasurementChart
           key={renderableChartModel.name}
           renderableChartModel={renderableChartModel} />
