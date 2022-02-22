@@ -1,12 +1,13 @@
 import { Component } from 'react';
 
 import { FormControlModel, RadioButtonGroup, RadioButton, Form } from '@client:common/form';
-import { MessageBanner } from '@client:common/overlay/message-banner';
+// import { MessageBanner } from '@client:common/overlay/message-banner';
 import { ProgressIndicator } from '@client:common/overlay/progress-indicator';
 import { ExpectedResultComparisonType } from '@client:common/ExpectedResultComparisonType';
 import { FilterableTable } from '@client:common/filterable-table';
 
 import { TimeSeriesVsTimeSeriesChartResult } from '../time-series-vs-time-series/TimeSeriesVsTimeSeriesChartResult';
+import { ExpectedVsTimeSeriesChartResult } from '../expected-vs-time-series/ExpectedVsTimeSeriesChartResult';
 
 import './ResultViewer.light.scss';
 import './ResultViewer.dark.scss';
@@ -91,10 +92,13 @@ export class ResultViewer extends Component<Props, State> {
       case ExpectedResultComparisonType.SIMULATION_VS_EXPECTED:
       case ExpectedResultComparisonType.SIMULATION_VS_TIME_SERIES:
       case ExpectedResultComparisonType.EXPECTED_VS_TIME_SERIES:
+        // return (
+        //   <MessageBanner>
+        //     Not yet implemented
+        //   </MessageBanner>
+        // );
         return (
-          <MessageBanner>
-            Not yet implemented
-          </MessageBanner>
+          <ExpectedVsTimeSeriesChartResult result={this.props.result} />
         );
       case ExpectedResultComparisonType.TIME_SERIES_VS_TIME_SERIES:
         return (

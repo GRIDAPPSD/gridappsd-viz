@@ -4,10 +4,11 @@
     }
 
     .line-chart__zoom-control-container {
-        display: none;
+        display: inline-block;
+        // display: none;
     }
 
     .line-chart__canvas__axis.x .tick {
-        visibility: hidden;
+        visibility: visible;
     }
 }

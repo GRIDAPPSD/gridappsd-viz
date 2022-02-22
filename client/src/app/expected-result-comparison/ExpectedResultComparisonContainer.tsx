@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import { Component } from 'react';
 import { Subscription } from 'rxjs';
 import { map, finalize, takeWhile } from 'rxjs/operators';
@@ -81,7 +82,11 @@ export class ExpectedResultComparisonContainer extends Component<Props, State> {
 
     // eslint-disable-next-line camelcase
     this._stompClientService.readOnceFrom<Array<{ process_id: string; timestamp: string }>>(responseTopic)
-      .pipe(map(payload => payload.map(e => e.process_id)))
+      // .pipe(map(payload => payload.map(e => e.process_id)))
+      .pipe(map(payload => payload.map(e => {
+        console.log('e.process_id =====> ', e.process_id);
+        return e.process_id;
+      })))
       .subscribe({
         next: simulationIds => {
           this.setState({
@@ -145,7 +150,8 @@ export class ExpectedResultComparisonContainer extends Component<Props, State> {
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   onSimulationVsExpectedFormSubmited(simulationConfiguration: any, expectedResults: any, events: any[]) {
-    this._fetchResponse(new SimulationVsExpectedRequest(simulationConfiguration, expectedResults, events));
+    // this._fetchResponse(new SimulationVsExpectedRequest(simulationConfiguration, expectedResults, events));
+    this._dynamicallyFetchResponse(new SimulationVsExpectedRequest(simulationConfiguration, expectedResults, events));
   }
 
   private _fetchResponse(request: MessageRequest) {
@@ -220,11 +226,13 @@ export class ExpectedResultComparisonContainer extends Component<Props, State> {
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   onExpectedVsTimeSeriesFormSubmit(expectedResults: any, simulationId: number) {
-    this._fetchResponse(new ExpectedVsTimeSeriesRequest(expectedResults, simulationId));
+    // this._fetchResponse(new ExpectedVsTimeSeriesRequest(expectedResults, simulationId));
+    this._dynamicallyFetchResponse(new ExpectedVsTimeSeriesRequest(expectedResults, simulationId));
   }
 
   onTimeSeriesVsTimeSeriesFormSubmit(firstSimulationId: number, secondSimulationId: number) {
     this._dynamicallyFetchResponse(new TimeSeriesVsTimeSeriesRequest(firstSimulationId, secondSimulationId));
+    // this._fetchResponse(new TimeSeriesVsTimeSeriesRequest(firstSimulationId, secondSimulationId));
   }
 
 }

@@ -21,6 +21,22 @@ export function FilterableTable(props: Props) {
    * Hold the rows that were filtered down by the search box
    */
   const [filteredRows, setFilteredRows] = useState(props.rows);
+  // eslint-disable-next-line no-console
+  // console.log('🚀 ~ file: FilterableTable.tsx ~ line 24 ~ FilterableTable ~ filteredRows', filteredRows);
+  // [{...}, {...}, {...}, ...] (8)
+  // 0: {object: 'NA', attribute: 'NA', indexOne: 1642182915, indexTwo: 1642182915, simulationTimestamp: 0, …}
+  // {
+  // actual: "NA",
+  // attribute: "NA",
+  // diffMrid: "NA"
+  // diffType: "NA"
+  // expected: "NA"
+  // indexOne: 1642182915
+  // indexTwo: 1642182915
+  // match: false
+  // object: "NA"
+  // simulationTimestamp: 0
+  // }
 
   /**
    * Hold the rows in the current page created by the paginator
