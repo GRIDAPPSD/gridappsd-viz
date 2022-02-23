@@ -8,6 +8,7 @@ import { StateStore } from '@client:common/state-store';
 import { Notification } from '@client:common/overlay/notification';
 import { StompClientService } from '@client:common/StompClientService';
 import { MessageRequest } from '@client:common/MessageRequest';
+import { FeederModel } from '@client:common/topology';
 
 import { TimeSeriesVsTimeSeries } from './views/time-series-vs-time-series/TimeSeriesVsTimeSeries';
 import { ResultViewer } from './views/result-viewer/ResultViewer';
@@ -23,12 +24,14 @@ import './ExpectedResultComparison.light.scss';
 import './ExpectedResultComparison.dark.scss';
 
 interface Props {
+  feederModel: FeederModel;
 }
 
 interface State {
   comparisonType: ExpectedResultComparisonType;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   comparisonResult: any[] | any;
+  lineNames: string[];
   simulationIds: string[];
   isFetching: boolean;
 }
@@ -47,6 +50,7 @@ export class ExpectedResultComparisonContainer extends Component<Props, State> {
     this.state = {
       comparisonType: null,
       comparisonResult: [],
+      lineNames: this._setAllLineNames(props.feederModel),
       simulationIds: [],
       isFetching: false
     };
@@ -75,6 +79,15 @@ export class ExpectedResultComparisonContainer extends Component<Props, State> {
       });
   }
 
+  private _setAllLineNames(feederModel: FeederModel) {
+    const lineNames: string[] = [];
+    // eslint-disable-next-line guard-for-in
+    for (const feeder in feederModel) {
+      feederModel[feeder].lines.forEach((value) => lineNames.push(value.name));
+    }
+    return lineNames;
+  }
+
   private _fetchAllSimulationIds() {
     const destinationTopic = 'goss.gridappsd.process.request.data.log';
     const responseTopic = '/simulation-ids';
@@ -82,9 +95,7 @@ export class ExpectedResultComparisonContainer extends Component<Props, State> {
 
     // eslint-disable-next-line camelcase
     this._stompClientService.readOnceFrom<Array<{ process_id: string; timestamp: string }>>(responseTopic)
-      // .pipe(map(payload => payload.map(e => e.process_id)))
       .pipe(map(payload => payload.map(e => {
-        console.log('e.process_id =====> ', e.process_id);
         return e.process_id;
       })))
       .subscribe({
@@ -142,6 +153,7 @@ export class ExpectedResultComparisonContainer extends Component<Props, State> {
       case ExpectedResultComparisonType.TIME_SERIES_VS_TIME_SERIES:
         return (
           <TimeSeriesVsTimeSeries
+            lineNames={this.state.lineNames}
             simulationIds={this.state.simulationIds}
             onSubmit={this.onTimeSeriesVsTimeSeriesFormSubmit} />
         );
