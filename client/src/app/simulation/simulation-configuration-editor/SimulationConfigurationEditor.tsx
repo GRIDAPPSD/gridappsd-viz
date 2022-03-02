@@ -129,7 +129,9 @@ export class SimulationConfigurationEditor extends Component<Props, State> {
     this._stateStore.select('modelDictionary')
       .pipe(takeUntil(this._unsubscriber))
       .subscribe({
-        next: modelDictionary => this.setState({ modelDictionary })
+        next: modelDictionary => {
+          this.setState({ modelDictionary });
+        }
       });
 
     this._simulationManagementService.simulationStatusChanges()
@@ -143,9 +145,11 @@ export class SimulationConfigurationEditor extends Component<Props, State> {
     this._stateStore.select('modelDictionaryComponents')
       .pipe(takeUntil(this._unsubscriber))
       .subscribe({
-        next: components => this.setState({
-          modelDictionaryComponents: components
-        })
+        next: components => {
+          this.setState({
+            modelDictionaryComponents: components
+          });
+        }
       });
 
     this._stateStore.select('services')

@@ -76,7 +76,9 @@ export function App(props: Props) {
   };
 
   const onShowExpectedResultViewer = () => {
-    Dialog.create(<ExpectedResultComparisonContainer feederModel={props.feederModel} />)
+    Dialog.create(<ExpectedResultComparisonContainer
+                    feederModel={props.feederModel}
+                    onMRIDChanged={props.onMRIDChanged} />)
       .addClassName('expected-result-comparison-container')
       .addNegativeButton('Close')
       .open();

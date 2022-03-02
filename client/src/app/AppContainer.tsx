@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import { Component } from 'react';
 import { zip } from 'rxjs';
 import { take, filter } from 'rxjs/operators';
@@ -225,12 +226,12 @@ export class AppContainer extends Component<Props, State> {
     this._stompClientService.readOnceFrom<GetModelDictionaryResponsePayload>(getModelDictionaryRequest.replyTo)
       .subscribe({
         next: payload => {
-          const modelDictionary = payload.feeders[0];
-          this._availableModelDictionaries.set(
-            getModelDictionaryRequest.requestBody.parameters.model_id,
-            modelDictionary
-          );
-          this._processModelDictionary(modelDictionary);
+            const modelDictionary = payload.feeders[0];
+            this._availableModelDictionaries.set(
+              getModelDictionaryRequest.requestBody.parameters.model_id,
+              modelDictionary
+            );
+            this._processModelDictionary(modelDictionary);
         }
       });
   }

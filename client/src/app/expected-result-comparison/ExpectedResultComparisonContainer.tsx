@@ -8,7 +8,7 @@ import { StateStore } from '@client:common/state-store';
 import { Notification } from '@client:common/overlay/notification';
 import { StompClientService } from '@client:common/StompClientService';
 import { MessageRequest } from '@client:common/MessageRequest';
-import { FeederModel } from '@client:common/topology';
+import { FeederModel, ModelDictionaryComponent } from '@client:common/topology';
 
 import { TimeSeriesVsTimeSeries } from './views/time-series-vs-time-series/TimeSeriesVsTimeSeries';
 import { ResultViewer } from './views/result-viewer/ResultViewer';
@@ -25,6 +25,7 @@ import './ExpectedResultComparison.dark.scss';
 
 interface Props {
   feederModel: FeederModel;
+  onMRIDChanged: (mRID: string) => void;
 }
 
 interface State {
@@ -32,8 +33,12 @@ interface State {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   comparisonResult: any[] | any;
   lineNames: string[];
+  lineNamesAndMRIDMap: Map<string, string>;
+  mRIDAndSimulationIdsMapping: Map<string, number[]>; // key: mRID, value: simulationIds
+  componentType: string[];
   simulationIds: string[];
   isFetching: boolean;
+  modelDictionaryComponents: ModelDictionaryComponent[];
 }
 
 export class ExpectedResultComparisonContainer extends Component<Props, State> {
@@ -50,7 +55,11 @@ export class ExpectedResultComparisonContainer extends Component<Props, State> {
     this.state = {
       comparisonType: null,
       comparisonResult: [],
-      lineNames: this._setAllLineNames(props.feederModel),
+      lineNames: [],
+      lineNamesAndMRIDMap: this._setLineNamesAndMRIDMap(props.feederModel),
+      mRIDAndSimulationIdsMapping: null,
+      modelDictionaryComponents: [],
+      componentType: [],
       simulationIds: [],
       isFetching: false
     };
@@ -77,15 +86,24 @@ export class ExpectedResultComparisonContainer extends Component<Props, State> {
           }
         }
       });
+      this._setLineNamesAndExistingSimulationIdsMap();
+
   }
 
-  private _setAllLineNames(feederModel: FeederModel) {
-    const lineNames: string[] = [];
-    // eslint-disable-next-line guard-for-in
-    for (const feeder in feederModel) {
-      feederModel[feeder].lines.forEach((value) => lineNames.push(value.name));
+  private _setLineNamesAndMRIDMap(feederModels: FeederModel) {
+    const resultMap = new Map<string, string>();
+    for (const feeder in feederModels) {
+      if(Object.prototype.hasOwnProperty.call(feederModels, feeder)) {
+        if(feederModels[feeder]['lines'].length > 1) {
+          feederModels[feeder]['lines'].forEach((f) => {
+            resultMap.set(f.name, f.id);
+          });
+        } else {
+          resultMap.set(feederModels[feeder]['lines'][0].name, feederModels[feeder]['lines'][0].id);
+        }
+      }
     }
-    return lineNames;
+    return resultMap;
   }
 
   private _fetchAllSimulationIds() {
@@ -95,9 +113,7 @@ export class ExpectedResultComparisonContainer extends Component<Props, State> {
 
     // eslint-disable-next-line camelcase
     this._stompClientService.readOnceFrom<Array<{ process_id: string; timestamp: string }>>(responseTopic)
-      .pipe(map(payload => payload.map(e => {
-        return e.process_id;
-      })))
+      .pipe(map(payload => payload.map(e => e.process_id)))
       .subscribe({
         next: simulationIds => {
           this.setState({
@@ -110,6 +126,73 @@ export class ExpectedResultComparisonContainer extends Component<Props, State> {
       body: requestBody,
       replyTo: responseTopic
     });
+  }
+
+  private _setLineNamesAndExistingSimulationIdsMap() { // 🔥🔥🔥
+    const destinationTopic = 'goss.gridappsd.process.request.data.log';
+    const responseTopic = '/simulation-ids';
+    const requestBody = '{"query": "select process_id, substring(log_message, locate(\'_\', log_message, locate(\'Line_name\', log_message)+9),37) as model_id from log where source like \'%ProcessNewSimulationRequest%\' and log_message like \'%Line_name%\'"}';
+    this._responseSubscription = this._stompClientService.readFrom<any>(responseTopic)
+      .pipe(payload => payload)
+      .subscribe({
+        next: existingSimulationIdsAndMRIDs => {
+      // get lineName and mRID from this.props.feederModel
+          const allLineNameAndmMRIDsMap = new Map<string, string>();
+          for (const feeder in this.props.feederModel) {
+            if(Object.prototype.hasOwnProperty.call(this.props.feederModel, feeder)) {
+              if(this.props.feederModel[feeder]['lines'].length > 1) {
+                this.props.feederModel[feeder]['lines'].forEach((f) => {
+                  allLineNameAndmMRIDsMap.set(f.name, f.id);
+                });
+              } else {
+                allLineNameAndmMRIDsMap.set(this.props.feederModel[feeder]['lines'][0].name, this.props.feederModel[feeder]['lines'][0].id);
+              }
+            }
+          }
+      // end of get lineName and mRID from this.props.feederModel
+      // filter out the existing LineName by allLineNameAndmMRIDsMap and existingSimulationIdsAndMRIDs
+          const uniqueMRIDS = Array.from(new Set(existingSimulationIdsAndMRIDs.map((item: { model_id: string })=>item.model_id)));
+          const existingLineNames = [];
+          for(const mrid of uniqueMRIDS) {
+            if(Array.from(allLineNameAndmMRIDsMap.values()).includes(mrid as string)){
+              for(const[key,value] of allLineNameAndmMRIDsMap.entries()){
+                if(value === mrid){
+                  existingLineNames.push(key);
+                }
+              }
+            }
+          }
+      // end of filter out the existing LineName by allLineNameAndmMRIDsMap and existingSimulationIdsAndMRIDs
+          const result = this._processExistingLineNamesAndSimulationIds(existingSimulationIdsAndMRIDs); // result contains only the existing mRIDs
+          this.setState({
+            mRIDAndSimulationIdsMapping: result,
+            lineNames: existingLineNames
+          });
+        }
+      });
+    this._stompClientService.send({
+      destination: destinationTopic,
+      body: requestBody,
+      replyTo: responseTopic
+    });
+  }
+
+  private _processExistingLineNamesAndSimulationIds(values: any) {
+    // =======================model_id, process_id[]
+    const resultMap = new Map<string, number[]>(null);
+    // eslint-disable-next-line guard-for-in
+    if(values && values.length > 0) {
+      values.forEach((value: { model_id: string; process_id: number }) => {
+        if(!resultMap.has(value.model_id)) {
+          resultMap.set(value.model_id, [+value.process_id]);
+        } else {
+          const existingIds = resultMap.get(value.model_id);
+          existingIds.push(+value.process_id);
+          resultMap.set(value.model_id, existingIds);
+        }
+      });
+    }
+    return resultMap;
   }
 
   componentWillUnmount() {
@@ -153,8 +236,11 @@ export class ExpectedResultComparisonContainer extends Component<Props, State> {
       case ExpectedResultComparisonType.TIME_SERIES_VS_TIME_SERIES:
         return (
           <TimeSeriesVsTimeSeries
-            lineNames={this.state.lineNames}
+            lineName={this.state.lineNames}
             simulationIds={this.state.simulationIds}
+            onMRIDChanged={this.props.onMRIDChanged}
+            lineNamesAndMRIDMap={this.state.lineNamesAndMRIDMap}
+            mRIDAndSimulationIdsMapping={this.state.mRIDAndSimulationIdsMapping}
             onSubmit={this.onTimeSeriesVsTimeSeriesFormSubmit} />
         );
     }
@@ -242,7 +328,7 @@ export class ExpectedResultComparisonContainer extends Component<Props, State> {
     this._dynamicallyFetchResponse(new ExpectedVsTimeSeriesRequest(expectedResults, simulationId));
   }
 
-  onTimeSeriesVsTimeSeriesFormSubmit(firstSimulationId: number, secondSimulationId: number) {
+  onTimeSeriesVsTimeSeriesFormSubmit(lineName: string, componentType: string, firstSimulationId: number, secondSimulationId: number) {
     this._dynamicallyFetchResponse(new TimeSeriesVsTimeSeriesRequest(firstSimulationId, secondSimulationId));
     // this._fetchResponse(new TimeSeriesVsTimeSeriesRequest(firstSimulationId, secondSimulationId));
   }
