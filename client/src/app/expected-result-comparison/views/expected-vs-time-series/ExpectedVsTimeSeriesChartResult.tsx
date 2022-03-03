@@ -1,7 +1,5 @@
-/* eslint-disable no-console */
 import { Component } from 'react';
 
-// import { LineChart, LineChartModel, TimeSeries } from '@client:common/line-chart';
 import { LineChartModel, TimeSeries } from '@client:common/line-chart';
 
 
@@ -41,10 +39,6 @@ export class ExpectedVsTimeSeriesChartResult extends Component<Props, State> {
 
   componentDidUpdate(prevProps: Readonly<Props>): void {
     if(prevProps.result.length !== this.props.result.length) {
-    // if(prevProps.result.length !== this.props.result.length && this.props.result.length > 1) {
-    // if(prevProps.result.length !== this.props.result.length) {
-      // eslint-disable-next-line no-console
-      // console.log('this.props.result====>', this.props.result);
       this._buildChart();
     }
   }
@@ -52,7 +46,6 @@ export class ExpectedVsTimeSeriesChartResult extends Component<Props, State> {
   private _buildChart() {
     const chartModelMap = new Map<string, LineChartModel>();
     const anchorTimeStamp = Date.now();
-    console.log('this.props.result->>>>>>', this.props.result);
     if(this.props.result.length > 1) {
       for(const datum of this.props.result) {
         if(!chartModelMap.has(datum.attribute)) {
