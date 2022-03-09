@@ -128,7 +128,7 @@ export class ExpectedResultComparisonContainer extends Component<Props, State> {
     });
   }
 
-  private _setLineNamesAndExistingSimulationIdsMap() { // 🔥🔥🔥
+  private _setLineNamesAndExistingSimulationIdsMap() {
     const destinationTopic = 'goss.gridappsd.process.request.data.log';
     const responseTopic = '/simulation-ids';
     const requestBody = '{"query": "select process_id, substring(log_message, locate(\'_\', log_message, locate(\'Line_name\', log_message)+9),37) as model_id from log where source like \'%ProcessNewSimulationRequest%\' and log_message like \'%Line_name%\'"}';
@@ -136,7 +136,6 @@ export class ExpectedResultComparisonContainer extends Component<Props, State> {
       .pipe(payload => payload)
       .subscribe({
         next: existingSimulationIdsAndMRIDs => {
-      // get lineName and mRID from this.props.feederModel
           const allLineNameAndmMRIDsMap = new Map<string, string>();
           for (const feeder in this.props.feederModel) {
             if(Object.prototype.hasOwnProperty.call(this.props.feederModel, feeder)) {
@@ -149,8 +148,7 @@ export class ExpectedResultComparisonContainer extends Component<Props, State> {
               }
             }
           }
-      // end of get lineName and mRID from this.props.feederModel
-      // filter out the existing LineName by allLineNameAndmMRIDsMap and existingSimulationIdsAndMRIDs
+          // filter out the existing LineName by allLineNameAndmMRIDsMap and existingSimulationIdsAndMRIDs
           const uniqueMRIDS = Array.from(new Set(existingSimulationIdsAndMRIDs.map((item: { model_id: string })=>item.model_id)));
           const existingLineNames = [];
           for(const mrid of uniqueMRIDS) {
@@ -162,8 +160,7 @@ export class ExpectedResultComparisonContainer extends Component<Props, State> {
               }
             }
           }
-      // end of filter out the existing LineName by allLineNameAndmMRIDsMap and existingSimulationIdsAndMRIDs
-          const result = this._processExistingLineNamesAndSimulationIds(existingSimulationIdsAndMRIDs); // result contains only the existing mRIDs
+          const result = this._processExistingLineNamesAndSimulationIds(existingSimulationIdsAndMRIDs);
           this.setState({
             mRIDAndSimulationIdsMapping: result,
             lineNames: existingLineNames
@@ -178,7 +175,6 @@ export class ExpectedResultComparisonContainer extends Component<Props, State> {
   }
 
   private _processExistingLineNamesAndSimulationIds(values: any) {
-    // =======================model_id, process_id[]
     const resultMap = new Map<string, number[]>(null);
     // eslint-disable-next-line guard-for-in
     if(values && values.length > 0) {
@@ -328,9 +324,50 @@ export class ExpectedResultComparisonContainer extends Component<Props, State> {
     this._dynamicallyFetchResponse(new ExpectedVsTimeSeriesRequest(expectedResults, simulationId));
   }
 
-  onTimeSeriesVsTimeSeriesFormSubmit(lineName: string, componentType: string, firstSimulationId: number, secondSimulationId: number) {
-    this._dynamicallyFetchResponse(new TimeSeriesVsTimeSeriesRequest(firstSimulationId, secondSimulationId));
+  onTimeSeriesVsTimeSeriesFormSubmit(lineName: string, componentType: string, useMagnitude: boolean, useAngle: boolean, component: any, firstSimulationId: number, secondSimulationId: number) {
     // this._fetchResponse(new TimeSeriesVsTimeSeriesRequest(firstSimulationId, secondSimulationId));
+    this._dynamicallyFetchResponseForTimeSeriesVsTimeSeries(new TimeSeriesVsTimeSeriesRequest(firstSimulationId, secondSimulationId), lineName, componentType, useMagnitude, useAngle, component);
+  }
+
+  private _dynamicallyFetchResponseForTimeSeriesVsTimeSeries(request: MessageRequest, lineName: string, componentType: string, useMagnitude: boolean, useAngle: boolean, component: any) {
+    this._responseSubscription = this._stompClientService.readFrom<any[] | any>(request.replyTo)
+    .pipe(
+      takeWhile(data => data.status !== 'finish')
+    )
+    .subscribe({
+      next: data => {
+        if (data.status !== 'start' && component.measurementMRIDs.includes(data.object)) {
+          if (!useMagnitude && !useAngle && data.attribute !== 'magnitude' && data.attribute !== 'angle') {
+            this.setState({
+              comparisonResult: [...this.state.comparisonResult, data]
+            });
+          } else if(useMagnitude && !useAngle && data.attribute === 'magnitude') {
+            this.setState({
+              comparisonResult: [...this.state.comparisonResult, data]
+            });
+          } else if (!useMagnitude && useAngle && data.attribute === 'angle') {
+            this.setState({
+              comparisonResult: [...this.state.comparisonResult, data]
+            });
+          } else if (useMagnitude && useAngle) {
+            this.setState({
+              comparisonResult: [...this.state.comparisonResult, data]
+            });
+          }
+        }
+      },
+      complete: () => {
+        Notification.open('Fetching Comparison Result is Done.');
+      },
+      error: errorMessage => {
+        Notification.open(errorMessage);
+      }
+    });
+    this._stompClientService.send({
+      destination: request.url,
+      body: JSON.stringify(request.requestBody),
+      replyTo: request.replyTo
+    });
   }
 
 }

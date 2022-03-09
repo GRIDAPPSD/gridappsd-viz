@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import { Component } from 'react';
 import { Subject, takeUntil } from 'rxjs';
 
@@ -5,6 +6,8 @@ import { StateStore } from '@client:common/state-store';
 import { Form, SelectionOptionBuilder, FormGroupModel, FormControlModel, Select, Checkbox } from '@client:common/form';
 import { MeasurementType, ModelDictionaryComponent } from '@client:common/topology';
 import { BasicButton } from '@client:common/buttons';
+
+import { TimeSeriesVsTimeSeriesRequestConfigModel } from '../../models/TimeSeriesVsTimeSeriesRequestConfigModel';
 
 import './TimeSeriesVsTimeSeries.light.scss';
 import './TimeSeriesVsTimeSeries.dark.scss';
@@ -14,18 +17,19 @@ interface Props {
   lineNamesAndMRIDMap: Map<string, string>;
   mRIDAndSimulationIdsMapping: Map<string, number[]>;
   simulationIds: string[];
-  onSubmit: (lineName: string, componentType: string, firstSimulationId: number, secondSimulationId: number) => void;
+  onSubmit: (lineName: string, componentType: string, useMagnitude: boolean, useAngle: boolean, component: string, firstSimulationId: number, secondSimulationId: number) => void;
   onMRIDChanged: (mRID: string) => void;
 }
 
 interface State {
   modelDictionaryComponents: ModelDictionaryComponent[];
-  lineNameOptionBuilder: SelectionOptionBuilder<string>; // line name
-  measurementTypeOptionBuilder: SelectionOptionBuilder<MeasurementType>; // componentType
-  modelDictionaryComponentOptionBuilder: SelectionOptionBuilder<ModelDictionaryComponent>; // component
-  firstSimulationIdOptionBuilder: SelectionOptionBuilder<number>; // first simulation id
-  secondSimulationIdOptionBuilder: SelectionOptionBuilder<number>; // second simulation id
+  lineNameOptionBuilder: SelectionOptionBuilder<string>;
+  measurementTypeOptionBuilder: SelectionOptionBuilder<MeasurementType>;
+  modelDictionaryComponentOptionBuilder: SelectionOptionBuilder<ModelDictionaryComponent>;
+  firstSimulationIdOptionBuilder: SelectionOptionBuilder<number>;
+  secondSimulationIdOptionBuilder: SelectionOptionBuilder<number>;
   disableSubmitButton: boolean;
+  selectedMenuOptions: TimeSeriesVsTimeSeriesRequestConfigModel;
 }
 
 export class TimeSeriesVsTimeSeries extends Component<Props, State> {
@@ -51,8 +55,18 @@ export class TimeSeriesVsTimeSeries extends Component<Props, State> {
       modelDictionaryComponentOptionBuilder: SelectionOptionBuilder.defaultBuilder(),
       firstSimulationIdOptionBuilder: SelectionOptionBuilder.defaultBuilder(),
       secondSimulationIdOptionBuilder: SelectionOptionBuilder.defaultBuilder(),
-      disableSubmitButton: true
+      disableSubmitButton: true,
+      selectedMenuOptions: {
+        lineName: '',
+        componentType: '',
+        useMagnitude: false,
+        useAngle: false,
+        component: '',
+        firstSimulationId: null,
+        secondSimulationId: null
+      }
     };
+    this.onSubmit = this.onSubmit.bind(this);
   }
 
   private _createCurrentComparisonConfigFormGroupModel() {
@@ -88,6 +102,10 @@ export class TimeSeriesVsTimeSeries extends Component<Props, State> {
       this._onLineNameChange();
       this._processLineNameChanges();
       this._onComponentSelectionChange();
+      this._onUseMagnitudeSelectionChange();
+      this._onUseAngleSelectionChange();
+      this._onFirstSimulationSelectionChange();
+      this._onSecondSimulationSelectionChange();
   }
 
   private _onLineNameChange() {
@@ -139,10 +157,11 @@ export class TimeSeriesVsTimeSeries extends Component<Props, State> {
               this._stateStore.select('modelDictionaryComponents')
                 .pipe(takeUntil(this._unsubscriber))
                 .subscribe({
-                  next: selectedModelDictionaryComponents => {
-                    if(selectedModelDictionaryComponents.length > 0){
+                  next: componentDropdownMenuOptions => {
+                    if(componentDropdownMenuOptions.length > 0){
                       this.setState({
-                        modelDictionaryComponents: selectedModelDictionaryComponents
+                        modelDictionaryComponents: componentDropdownMenuOptions,
+                        selectedMenuOptions:{...this.state.selectedMenuOptions, lineName: selectedLineName}
                       }, ()=> this._onComponentTypeSelectionChange());
                     }
                   }
@@ -156,17 +175,18 @@ export class TimeSeriesVsTimeSeries extends Component<Props, State> {
   private _onComponentTypeSelectionChange() {
     this.selectedComponentTypeFormControl.valueChanges()
       .subscribe({
-        next: selectedType => {
+        next: selectedComponentType => {
           this.useMagnitudeFormControl.reset();
           this.useAngleFormControl.reset();
           if (this.selectedComponentTypeFormControl.isValid()) {
             this.setState({
               modelDictionaryComponentOptionBuilder: new SelectionOptionBuilder(
-                this.state.modelDictionaryComponents.filter(e => e.type === selectedType),
+                this.state.modelDictionaryComponents.filter(e => e.type === selectedComponentType),
                 e => e.displayName
-              )
+              ),
+              selectedMenuOptions:{...this.state.selectedMenuOptions, componentType: selectedComponentType}
             });
-            if (selectedType === MeasurementType.TAP) {
+            if (selectedComponentType === MeasurementType.TAP) {
               this.useMagnitudeFormControl.disable();
               this.useAngleFormControl.disable();
             } else {
@@ -187,14 +207,15 @@ export class TimeSeriesVsTimeSeries extends Component<Props, State> {
   private _onComponentSelectionChange() {
     this.selectedComponentFormControl.valueChanges()
       .subscribe({
-        next: () => {
+        next: (selectedComponent) => {
           if(this.selectedComponentFormControl.isValid()) {
             const selectedLineName = this.selectedLineNameFormControl.getValue();
             const theSelectedLineNameMRID = this.props.lineNamesAndMRIDMap.get(selectedLineName);
             const matchingSimulationIds = this.props.mRIDAndSimulationIdsMapping.get(theSelectedLineNameMRID);
             this.setState({
               firstSimulationIdOptionBuilder: new SelectionOptionBuilder(matchingSimulationIds),
-              secondSimulationIdOptionBuilder: new SelectionOptionBuilder(matchingSimulationIds)
+              secondSimulationIdOptionBuilder: new SelectionOptionBuilder(matchingSimulationIds),
+              selectedMenuOptions:{...this.state.selectedMenuOptions, component: selectedComponent}
             });
           } else {
             this.setState({
@@ -202,6 +223,50 @@ export class TimeSeriesVsTimeSeries extends Component<Props, State> {
               secondSimulationIdOptionBuilder: SelectionOptionBuilder.defaultBuilder()
             });
           }
+        }
+      });
+  }
+
+  private _onUseMagnitudeSelectionChange() {
+    this.useMagnitudeFormControl.valueChanges()
+      .subscribe({
+        next: selectedCheckBoxValue => {
+          this.setState({
+            selectedMenuOptions: {...this.state.selectedMenuOptions, useMagnitude: selectedCheckBoxValue}
+          });
+        }
+      });
+  }
+
+  private _onUseAngleSelectionChange() {
+    this.useAngleFormControl.valueChanges()
+      .subscribe({
+        next: selectedCheckBoxValue => {
+          this.setState({
+            selectedMenuOptions: {...this.state.selectedMenuOptions, useAngle: selectedCheckBoxValue}
+          });
+        }
+      });
+  }
+
+  private _onFirstSimulationSelectionChange() {
+    this.selectedFirstSimulationIdFormControl.valueChanges()
+      .subscribe({
+        next: selectedFirstSimulationId => {
+          this.setState({
+            selectedMenuOptions: {...this.state.selectedMenuOptions, firstSimulationId: selectedFirstSimulationId}
+          });
+        }
+      });
+  }
+
+  private _onSecondSimulationSelectionChange() {
+    this.selectedSecondSimulationIdFormControl.valueChanges()
+      .subscribe({
+        next: selectedSecondSimulationId => {
+          this.setState({
+            selectedMenuOptions: {...this.state.selectedMenuOptions, secondSimulationId: selectedSecondSimulationId}
+          });
         }
       });
   }
@@ -267,8 +332,8 @@ export class TimeSeriesVsTimeSeries extends Component<Props, State> {
   }
 
   onSubmit() {
-    const formValue = this.currentComparisonConfigFormGroup.getValue();
-    this.props.onSubmit(formValue.lineName, formValue.componentType, formValue.firstSimulationId, formValue.secondSimulationId);
+    const {lineName, componentType, useMagnitude, useAngle, component, firstSimulationId, secondSimulationId} = this.state.selectedMenuOptions;
+    this.props.onSubmit(lineName, componentType, useMagnitude, useAngle, component, firstSimulationId, secondSimulationId);
     this.setState({
       disableSubmitButton: true
     });
