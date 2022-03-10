@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 import { Component } from 'react';
 import { Subscription } from 'rxjs';
 import { map, finalize, takeWhile } from 'rxjs/operators';
@@ -34,7 +33,7 @@ interface State {
   comparisonResult: any[] | any;
   lineNames: string[];
   lineNamesAndMRIDMap: Map<string, string>;
-  mRIDAndSimulationIdsMapping: Map<string, number[]>; // key: mRID, value: simulationIds
+  mRIDAndSimulationIdsMapping: Map<string, number[]>;
   componentType: string[];
   simulationIds: string[];
   isFetching: boolean;
@@ -176,7 +175,6 @@ export class ExpectedResultComparisonContainer extends Component<Props, State> {
 
   private _processExistingLineNamesAndSimulationIds(values: any) {
     const resultMap = new Map<string, number[]>(null);
-    // eslint-disable-next-line guard-for-in
     if(values && values.length > 0) {
       values.forEach((value: { model_id: string; process_id: number }) => {
         if(!resultMap.has(value.model_id)) {
@@ -354,6 +352,10 @@ export class ExpectedResultComparisonContainer extends Component<Props, State> {
               comparisonResult: [...this.state.comparisonResult, data]
             });
           }
+        } else if(data.status === 'start'){
+          this.setState({
+            comparisonResult: []
+          });
         }
       },
       complete: () => {
