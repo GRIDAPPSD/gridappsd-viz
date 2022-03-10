@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 import { Component } from 'react';
 import { zip } from 'rxjs';
 import { take, filter } from 'rxjs/operators';

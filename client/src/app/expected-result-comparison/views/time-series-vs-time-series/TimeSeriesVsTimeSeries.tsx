@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 import { Component } from 'react';
 import { Subject, takeUntil } from 'rxjs';
 
@@ -6,6 +5,7 @@ import { StateStore } from '@client:common/state-store';
 import { Form, SelectionOptionBuilder, FormGroupModel, FormControlModel, Select, Checkbox } from '@client:common/form';
 import { MeasurementType, ModelDictionaryComponent } from '@client:common/topology';
 import { BasicButton } from '@client:common/buttons';
+import { ProgressIndicator } from '@client:common/overlay/progress-indicator';
 
 import { TimeSeriesVsTimeSeriesRequestConfigModel } from '../../models/TimeSeriesVsTimeSeriesRequestConfigModel';
 
@@ -30,6 +30,7 @@ interface State {
   secondSimulationIdOptionBuilder: SelectionOptionBuilder<number>;
   disableSubmitButton: boolean;
   selectedMenuOptions: TimeSeriesVsTimeSeriesRequestConfigModel;
+  showProgressIndicator: boolean;
 }
 
 export class TimeSeriesVsTimeSeries extends Component<Props, State> {
@@ -64,7 +65,8 @@ export class TimeSeriesVsTimeSeries extends Component<Props, State> {
         component: '',
         firstSimulationId: null,
         secondSimulationId: null
-      }
+      },
+      showProgressIndicator: false
     };
     this.onSubmit = this.onSubmit.bind(this);
   }
@@ -99,13 +101,13 @@ export class TimeSeriesVsTimeSeries extends Component<Props, State> {
           });
         }
       });
-      this._onLineNameChange();
-      this._processLineNameChanges();
-      this._onComponentSelectionChange();
-      this._onUseMagnitudeSelectionChange();
-      this._onUseAngleSelectionChange();
-      this._onFirstSimulationSelectionChange();
-      this._onSecondSimulationSelectionChange();
+    this._onLineNameChange();
+    this._processLineNameChanges();
+    this._onComponentSelectionChange();
+    this._onUseMagnitudeSelectionChange();
+    this._onUseAngleSelectionChange();
+    this._onFirstSimulationSelectionChange();
+    this._onSecondSimulationSelectionChange();
   }
 
   private _onLineNameChange() {
@@ -153,13 +155,21 @@ export class TimeSeriesVsTimeSeries extends Component<Props, State> {
            const theSelectedLineNameMRID = this.props.lineNamesAndMRIDMap.get(selectedLineName);
            const matchingSimulationIds = this.props.mRIDAndSimulationIdsMapping.get(theSelectedLineNameMRID);
             if(this.props.lineNamesAndMRIDMap.has(selectedLineName) && matchingSimulationIds) {
-              this.props.onMRIDChanged(this.props.lineNamesAndMRIDMap.get(selectedLineName));
+              this.setState({
+                showProgressIndicator: true
+              });
+              this._stateStore.update({
+                modelDictionaryComponents: [],
+                modelDictionary: null
+              });
+              this.props.onMRIDChanged(theSelectedLineNameMRID);
               this._stateStore.select('modelDictionaryComponents')
                 .pipe(takeUntil(this._unsubscriber))
                 .subscribe({
                   next: componentDropdownMenuOptions => {
                     if(componentDropdownMenuOptions.length > 0){
                       this.setState({
+                        showProgressIndicator: false,
                         modelDictionaryComponents: componentDropdownMenuOptions,
                         selectedMenuOptions:{...this.state.selectedMenuOptions, lineName: selectedLineName}
                       }, ()=> this._onComponentTypeSelectionChange());
@@ -271,11 +281,16 @@ export class TimeSeriesVsTimeSeries extends Component<Props, State> {
       });
   }
 
-  componentDidUpdate(prevProps: Props) {
+  componentDidUpdate(prevProps: Props, prevState: State) {
     if(prevProps.simulationIds !== this.props.simulationIds || prevProps.lineName !== this.props.lineName) {
       this.setState({
         lineNameOptionBuilder: new SelectionOptionBuilder(this.props.lineName)
       });
+    }
+    if(prevState.modelDictionaryComponents.length === 0 || this.state.modelDictionaryComponents.length === 0) {
+      this.selectedComponentFormControl.disable();
+      this.useMagnitudeFormControl.disable();
+      this.useAngleFormControl.disable();
     }
   }
 
@@ -327,6 +342,9 @@ export class TimeSeriesVsTimeSeries extends Component<Props, State> {
           label='Submit'
           disabled={this.state.disableSubmitButton}
           onClick={this.onSubmit} />
+        {
+          this.state.showProgressIndicator ? <ProgressIndicator show /> : null
+        }
       </Form>
     );
   }
