@@ -1,7 +1,6 @@
 import { Component } from 'react';
 
 import { FormControlModel, RadioButtonGroup, RadioButton, Form } from '@client:common/form';
-// import { MessageBanner } from '@client:common/overlay/message-banner';
 import { ProgressIndicator } from '@client:common/overlay/progress-indicator';
 import { ExpectedResultComparisonType } from '@client:common/ExpectedResultComparisonType';
 import { FilterableTable } from '@client:common/filterable-table';
@@ -14,6 +13,8 @@ import './ResultViewer.dark.scss';
 
 interface Props {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  noSufficientData: boolean;
+  startFetchingAfterSubmit: boolean;
   result: any[] | any;
   showProgressIndicator: boolean;
   comparisonType: ExpectedResultComparisonType;
@@ -102,7 +103,10 @@ export class ResultViewer extends Component<Props, State> {
         );
       case ExpectedResultComparisonType.TIME_SERIES_VS_TIME_SERIES:
         return (
-          <TimeSeriesVsTimeSeriesChartResult result={this.props.result} />
+          <TimeSeriesVsTimeSeriesChartResult
+           startFetchingAfterSubmit={this.props.startFetchingAfterSubmit}
+           noSufficientData={this.props.noSufficientData}
+           result={this.props.result} />
         );
     }
   }

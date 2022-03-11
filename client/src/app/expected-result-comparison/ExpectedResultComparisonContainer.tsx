@@ -37,6 +37,8 @@ interface State {
   componentType: string[];
   simulationIds: string[];
   isFetching: boolean;
+  startFetchingAfterSubmit: boolean;
+  noSufficientData: boolean;
   modelDictionaryComponents: ModelDictionaryComponent[];
 }
 
@@ -60,7 +62,9 @@ export class ExpectedResultComparisonContainer extends Component<Props, State> {
       modelDictionaryComponents: [],
       componentType: [],
       simulationIds: [],
-      isFetching: false
+      isFetching: false,
+      startFetchingAfterSubmit: false,
+      noSufficientData: false
     };
 
     this.onSimulationVsExpectedFormSubmited = this.onSimulationVsExpectedFormSubmited.bind(this);
@@ -199,6 +203,8 @@ export class ExpectedResultComparisonContainer extends Component<Props, State> {
       <div className='expected-result-comparison'>
         {this.selectComponentBasedComparisonType()}
         <ResultViewer
+          startFetchingAfterSubmit={this.state.startFetchingAfterSubmit}
+          noSufficientData={this.state.noSufficientData}
           result={this.state.comparisonResult}
           showProgressIndicator={this.state.isFetching}
           comparisonType={this.state.comparisonType} />
@@ -328,38 +334,55 @@ export class ExpectedResultComparisonContainer extends Component<Props, State> {
   }
 
   private _dynamicallyFetchResponseForTimeSeriesVsTimeSeries(request: MessageRequest, lineName: string, componentType: string, useMagnitude: boolean, useAngle: boolean, component: any) {
+    // Clear any existing/previous comparison result.
+    this.setState({
+      comparisonResult:[],
+      startFetchingAfterSubmit: true
+    });
     this._responseSubscription = this._stompClientService.readFrom<any[] | any>(request.replyTo)
     .pipe(
       takeWhile(data => data.status !== 'finish')
     )
     .subscribe({
       next: data => {
+        this.setState({
+          noSufficientData: false
+        });
         if (data.status !== 'start' && component.measurementMRIDs.includes(data.object)) {
           if (!useMagnitude && !useAngle && data.attribute !== 'magnitude' && data.attribute !== 'angle') {
             this.setState({
-              comparisonResult: [...this.state.comparisonResult, data]
+              comparisonResult: [...this.state.comparisonResult, data],
+              startFetchingAfterSubmit: false
             });
           } else if(useMagnitude && !useAngle && data.attribute === 'magnitude') {
             this.setState({
-              comparisonResult: [...this.state.comparisonResult, data]
+              comparisonResult: [...this.state.comparisonResult, data],
+              startFetchingAfterSubmit: false
             });
           } else if (!useMagnitude && useAngle && data.attribute === 'angle') {
             this.setState({
-              comparisonResult: [...this.state.comparisonResult, data]
+              comparisonResult: [...this.state.comparisonResult, data],
+              startFetchingAfterSubmit: false
             });
           } else if (useMagnitude && useAngle) {
             this.setState({
-              comparisonResult: [...this.state.comparisonResult, data]
+              comparisonResult: [...this.state.comparisonResult, data],
+              startFetchingAfterSubmit: false
             });
           }
-        } else if(data.status === 'start'){
-          this.setState({
-            comparisonResult: []
-          });
         }
       },
       complete: () => {
         Notification.open('Fetching Comparison Result is Done.');
+        if(this.state.comparisonResult.length < 2) {
+          this.setState({
+            noSufficientData: true
+          });
+        } else {
+          this.setState({
+            noSufficientData: false
+          });
+        }
       },
       error: errorMessage => {
         Notification.open(errorMessage);
