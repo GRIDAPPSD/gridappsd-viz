@@ -39,7 +39,7 @@ interface State {
   isFetching: boolean;
   startFetchingAfterSubmit: boolean;
   noSufficientData: boolean;
-  modelDictionaryComponents: ModelDictionaryComponent[];
+  modelDictionaryComponentsCaches: ModelDictionaryComponent[];
 }
 
 export class ExpectedResultComparisonContainer extends Component<Props, State> {
@@ -59,12 +59,12 @@ export class ExpectedResultComparisonContainer extends Component<Props, State> {
       lineNames: [],
       lineNamesAndMRIDMap: this._setLineNamesAndMRIDMap(props.feederModel),
       mRIDAndSimulationIdsMapping: null,
-      modelDictionaryComponents: [],
       componentType: [],
       simulationIds: [],
       isFetching: false,
       startFetchingAfterSubmit: false,
-      noSufficientData: false
+      noSufficientData: false,
+      modelDictionaryComponentsCaches: []
     };
 
     this.onSimulationVsExpectedFormSubmited = this.onSimulationVsExpectedFormSubmited.bind(this);
@@ -90,7 +90,14 @@ export class ExpectedResultComparisonContainer extends Component<Props, State> {
         }
       });
       this._setLineNamesAndExistingSimulationIdsMap();
-
+    this._stateStoreSubscription = this._stateStore.select('modelDictionaryComponents')
+    .subscribe({
+      next: modelDicts => {
+        this.setState({
+          modelDictionaryComponentsCaches: modelDicts
+        });
+      }
+    });
   }
 
   private _setLineNamesAndMRIDMap(feederModels: FeederModel) {
@@ -207,7 +214,8 @@ export class ExpectedResultComparisonContainer extends Component<Props, State> {
           noSufficientData={this.state.noSufficientData}
           result={this.state.comparisonResult}
           showProgressIndicator={this.state.isFetching}
-          comparisonType={this.state.comparisonType} />
+          comparisonType={this.state.comparisonType}
+          modelDictionaryComponentsCaches={this.state.modelDictionaryComponentsCaches} />
       </div>
     );
   }

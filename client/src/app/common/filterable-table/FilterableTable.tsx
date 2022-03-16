@@ -5,6 +5,7 @@ import { PageChangeEvent, Paginator } from '@client:common/paginator';
 import { FormControlModel, Input } from '@client:common/form';
 import { fuzzySearch } from '@client:common/misc';
 import { Tooltip } from '@client:common/tooltip';
+import { ModelDictionaryComponent } from '@client:common/topology';
 
 import './FilterableTable.light.scss';
 import './FilterableTable.dark.scss';
@@ -12,6 +13,7 @@ import './FilterableTable.dark.scss';
 interface Props<T = Record<string, string | number | boolean>> {
   rows: Array<T>;
   headers?: Array<{ accessor: string; label: string }>;
+  modelDictionaryComponentsCaches?: ModelDictionaryComponent[];
 }
 
 export function FilterableTable(props: Props) {
@@ -29,7 +31,8 @@ export function FilterableTable(props: Props) {
   const columns = useMemo(() => {
     if (!props.headers) {
       if (props.rows.length > 0) {
-        const keys = Object.keys(props.rows[0]);
+        const updatedRows = addComponentPhase(props.modelDictionaryComponentsCaches, props.rows);
+        const keys = Object.keys(updatedRows[0]);
         return keys.map(columnName => ({
           accessor: columnName,
           Header: columnName,
@@ -42,7 +45,30 @@ export function FilterableTable(props: Props) {
       accessor: header.accessor,
       Header: header.label
     }));
-  }, [props.rows, props.headers, tableElement]);
+  }, [props.headers, props.rows, props.modelDictionaryComponentsCaches, tableElement]);
+
+  function addComponentPhase(incomingModelDictionaryComponentsCaches: any[], incomingRows: any[]) {
+    const componentMeasurementMRIDMapping = new Map<string[], string[]>();
+    if(incomingModelDictionaryComponentsCaches && incomingRows.length > 0) {
+      for(const modelDict in incomingModelDictionaryComponentsCaches) {
+        if(Object.prototype.hasOwnProperty.call(incomingModelDictionaryComponentsCaches, modelDict)) {
+          if(incomingModelDictionaryComponentsCaches[modelDict]['measurementMRIDs'].length > 0) {
+            componentMeasurementMRIDMapping.set(incomingModelDictionaryComponentsCaches[modelDict].phases, incomingModelDictionaryComponentsCaches[modelDict].measurementMRIDs);
+          }
+        }
+      }
+      incomingRows.forEach((row) => {
+        for (const [key, value] of componentMeasurementMRIDMapping.entries()) {
+          if (value.includes(row.object)) {
+            const index = value.indexOf(row.object);
+            row['phase'] = key[index];
+          }
+        }
+      });
+    }
+    return incomingRows;
+  }
+
 
   const {
     getTableProps,

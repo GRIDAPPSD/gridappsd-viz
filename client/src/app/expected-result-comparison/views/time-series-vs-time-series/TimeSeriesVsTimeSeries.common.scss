@@ -1,10 +1,11 @@
 .time-series-vs-time-series-form {
     display: flex;
+    flex-wrap: wrap;
     align-items: center;
     margin-bottom: 30px;
 
     .form-control.select {
-        margin-top: 0;
+        margin-top: 1;
         margin-bottom: 0;
 
         .form-control__label {

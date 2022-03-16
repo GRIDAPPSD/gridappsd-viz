@@ -4,6 +4,7 @@ import { FormControlModel, RadioButtonGroup, RadioButton, Form } from '@client:c
 import { ProgressIndicator } from '@client:common/overlay/progress-indicator';
 import { ExpectedResultComparisonType } from '@client:common/ExpectedResultComparisonType';
 import { FilterableTable } from '@client:common/filterable-table';
+import { ModelDictionaryComponent } from '@client:common/topology';
 
 import { TimeSeriesVsTimeSeriesChartResult } from '../time-series-vs-time-series/TimeSeriesVsTimeSeriesChartResult';
 import { ExpectedVsTimeSeriesChartResult } from '../expected-vs-time-series/ExpectedVsTimeSeriesChartResult';
@@ -18,6 +19,7 @@ interface Props {
   result: any[] | any;
   showProgressIndicator: boolean;
   comparisonType: ExpectedResultComparisonType;
+  modelDictionaryComponentsCaches: ModelDictionaryComponent[];
 }
 
 interface State {
@@ -84,7 +86,9 @@ export class ResultViewer extends Component<Props, State> {
 
   showResultAsTable() {
     return (
-      <FilterableTable rows={this.props.result} />
+      <FilterableTable
+        rows={this.props.result}
+        modelDictionaryComponentsCaches={this.props.modelDictionaryComponentsCaches} />
     );
   }
 
