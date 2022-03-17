@@ -260,6 +260,22 @@ export class ExpectedResultComparisonContainer extends Component<Props, State> {
     this._dynamicallyFetchResponse(new SimulationVsExpectedRequest(simulationConfiguration, expectedResults, events));
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  onSimulationVsTimeSeriesFormSubmit(simulationId: number, simulationConfiguration: any) {
+    this._fetchResponse(new SimulationVsTimeSeriesRequest(simulationConfiguration, simulationId));
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  onExpectedVsTimeSeriesFormSubmit(expectedResults: any, simulationId: number) {
+    // this._fetchResponse(new ExpectedVsTimeSeriesRequest(expectedResults, simulationId));
+    this._dynamicallyFetchResponse(new ExpectedVsTimeSeriesRequest(expectedResults, simulationId));
+  }
+
+  onTimeSeriesVsTimeSeriesFormSubmit(lineName: string, componentType: string, useMagnitude: boolean, useAngle: boolean, component: any, firstSimulationId: number, secondSimulationId: number) {
+    // this._fetchResponse(new TimeSeriesVsTimeSeriesRequest(firstSimulationId, secondSimulationId));
+    this._dynamicallyFetchResponseForTimeSeriesVsTimeSeries(new TimeSeriesVsTimeSeriesRequest(firstSimulationId, secondSimulationId), lineName, componentType, useMagnitude, useAngle, component);
+  }
+
   private _fetchResponse(request: MessageRequest) {
     const payload = [] as unknown[];
 
@@ -323,22 +339,6 @@ export class ExpectedResultComparisonContainer extends Component<Props, State> {
       body: JSON.stringify(request.requestBody),
       replyTo: request.replyTo
     });
-  }
-
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  onSimulationVsTimeSeriesFormSubmit(simulationId: number, simulationConfiguration: any) {
-    this._fetchResponse(new SimulationVsTimeSeriesRequest(simulationConfiguration, simulationId));
-  }
-
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  onExpectedVsTimeSeriesFormSubmit(expectedResults: any, simulationId: number) {
-    // this._fetchResponse(new ExpectedVsTimeSeriesRequest(expectedResults, simulationId));
-    this._dynamicallyFetchResponse(new ExpectedVsTimeSeriesRequest(expectedResults, simulationId));
-  }
-
-  onTimeSeriesVsTimeSeriesFormSubmit(lineName: string, componentType: string, useMagnitude: boolean, useAngle: boolean, component: any, firstSimulationId: number, secondSimulationId: number) {
-    // this._fetchResponse(new TimeSeriesVsTimeSeriesRequest(firstSimulationId, secondSimulationId));
-    this._dynamicallyFetchResponseForTimeSeriesVsTimeSeries(new TimeSeriesVsTimeSeriesRequest(firstSimulationId, secondSimulationId), lineName, componentType, useMagnitude, useAngle, component);
   }
 
   private _dynamicallyFetchResponseForTimeSeriesVsTimeSeries(request: MessageRequest, lineName: string, componentType: string, useMagnitude: boolean, useAngle: boolean, component: any) {

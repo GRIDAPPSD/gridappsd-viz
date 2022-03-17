@@ -60,24 +60,18 @@ export class TimeSeriesVsTimeSeriesChartResult extends Component<Props, State> {
     const anchorTimeStamp = Date.now();
     if(this.props.result.length > 1) {
       for(const datum of this.props.result) {
+        // datum = this._matchPhaseToMeasurementMRID(datum);
         this._matchPhaseToMeasurementMRID(datum);
-        // console.log('after setPhases the datum is####');
-        // console.log(datum);
-        // actual: "1130014.134401547"
-        // attribute: "magnitude"
-        // diffMrid: "NA"
-        // diffType: "NA"
-        // expected: "1209751.9802748081"
-        // indexOne: 1646924476
-        // indexTwo: 1646924476
-        // match: false
-        // object: "_c16593db-3c64-4504-9387-17f19f558549"
-        // phase: "A"
-        // simulationTimestamp: 0
-        if(!chartModelMap.has(datum.attribute)) {
-          chartModelMap.set(datum.attribute, this._createLineChartModelForAttribute(datum.attribute));
+        let chartTitle = '';
+        if(datum.phase !== 'none' && datum.phase !== '') {
+          chartTitle = datum.attribute + ' - phase ' + datum.phase;
+        } else {
+          chartTitle = datum.attribute;
         }
-        const chartModel = chartModelMap.get(datum.attribute);
+        if(!chartModelMap.has(chartTitle)) {
+          chartModelMap.set(chartTitle, this._createLineChartModelForAttribute(chartTitle));
+        }
+        const chartModel = chartModelMap.get(chartTitle);
         const nextTimeStamp = new Date(anchorTimeStamp + chartModel.timeSeries[0].points.length + 1);
         chartModel.timeSeries[0].points.push({
           timestamp: nextTimeStamp,
@@ -119,20 +113,20 @@ export class TimeSeriesVsTimeSeriesChartResult extends Component<Props, State> {
   }
 
   private _matchPhaseToMeasurementMRID(datum: any) {
-    if(this.props.modelDictionaryComponentsCaches && datum) {
-        for (const [key, value] of this.state.phaseAndMeasurementMRIDMapping.entries()) {
-          if (value.includes(datum.object)) {
-            const index = value.indexOf(datum.object);
-            datum['phase'] = key[index];
-          }
+    if(this.props.modelDictionaryComponentsCaches !== null && datum && this.state.phaseAndMeasurementMRIDMapping !== null) {
+      for (const [key, value] of this.state.phaseAndMeasurementMRIDMapping.entries()) {
+        if (value.includes(datum.object)) {
+          const index = value.indexOf(datum.object);
+          datum['phase'] = key[index];
         }
+      }
     }
     return datum;
   }
 
-  private _createLineChartModelForAttribute(attribute: string): LineChartModel {
+  private _createLineChartModelForAttribute(chartTitle: string): LineChartModel {
     return {
-      name: attribute,
+      name: chartTitle,
       yAxisLabel: '',
       timeSeries: [
         this._createTimeSeries('expected'),
