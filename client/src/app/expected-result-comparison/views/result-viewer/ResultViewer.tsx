@@ -110,6 +110,7 @@ export class ResultViewer extends Component<Props, State> {
           <TimeSeriesVsTimeSeriesChartResult
            startFetchingAfterSubmit={this.props.startFetchingAfterSubmit}
            noSufficientData={this.props.noSufficientData}
+           modelDictionaryComponentsCaches={this.props.modelDictionaryComponentsCaches}
            result={this.props.result} />
         );
     }

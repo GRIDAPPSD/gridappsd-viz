@@ -53,7 +53,10 @@ export function FilterableTable(props: Props) {
       for(const modelDict in incomingModelDictionaryComponentsCaches) {
         if(Object.prototype.hasOwnProperty.call(incomingModelDictionaryComponentsCaches, modelDict)) {
           if(incomingModelDictionaryComponentsCaches[modelDict]['measurementMRIDs'].length > 0) {
-            componentMeasurementMRIDMapping.set(incomingModelDictionaryComponentsCaches[modelDict].phases, incomingModelDictionaryComponentsCaches[modelDict].measurementMRIDs);
+            componentMeasurementMRIDMapping.set(
+              incomingModelDictionaryComponentsCaches[modelDict].phases,
+              incomingModelDictionaryComponentsCaches[modelDict].measurementMRIDs
+            );
           }
         }
       }
