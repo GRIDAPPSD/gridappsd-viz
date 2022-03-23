@@ -60,7 +60,6 @@ export class TimeSeriesVsTimeSeriesChartResult extends Component<Props, State> {
     const anchorTimeStamp = Date.now();
     if(this.props.result.length > 1) {
       for(const datum of this.props.result) {
-        // datum = this._matchPhaseToMeasurementMRID(datum);
         this._matchPhaseToMeasurementMRID(datum);
         let chartTitle = '';
         if(datum.phase !== 'none' && datum.phase !== '') {
@@ -72,7 +71,7 @@ export class TimeSeriesVsTimeSeriesChartResult extends Component<Props, State> {
           chartModelMap.set(chartTitle, this._createLineChartModelForAttribute(chartTitle));
         }
         const chartModel = chartModelMap.get(chartTitle);
-        const nextTimeStamp = new Date(anchorTimeStamp + chartModel.timeSeries[0].points.length + 1);
+        const nextTimeStamp = new Date(anchorTimeStamp + chartModel.timeSeries[0].points.length * 1000);
         chartModel.timeSeries[0].points.push({
           timestamp: nextTimeStamp,
           measurement: +datum.expected
