@@ -49,8 +49,8 @@ export class TimeSeriesVsTimeSeriesChartResult extends Component<Props, State> {
   }
 
   componentDidUpdate(prevProps: Readonly<Props>): void {
-      // if(prevProps.result.length !== this.props.result.length && this.props.result.length >= 4) {
-      if(prevProps.result.length !== this.props.result.length && this.props.result.length >= 1) {
+      if(prevProps.result !== this.props.result) {
+      // if(prevProps.result.length !== this.props.result.length && this.props.result.length >= 1) {
         this._buildChart();
       }
   }
@@ -62,7 +62,7 @@ export class TimeSeriesVsTimeSeriesChartResult extends Component<Props, State> {
       for(const datum of this.props.result) {
         this._matchPhaseToMeasurementMRID(datum);
         let chartTitle = '';
-        if(datum.phase !== 'none' && datum.phase !== '') {
+        if(datum.phase && datum.phase !== 'none' && datum.phase !== '') {
           chartTitle = datum.attribute + ' - phase ' + datum.phase;
         } else {
           chartTitle = datum.attribute;
@@ -152,7 +152,7 @@ export class TimeSeriesVsTimeSeriesChartResult extends Component<Props, State> {
               key={model.name}
               lineChartModel={model} />
             );
-          }) : <MessageBanner>No sufficient data, please view results in table.</MessageBanner>
+          }) : <MessageBanner>No sufficient data.</MessageBanner>
         }
       </div>
     );

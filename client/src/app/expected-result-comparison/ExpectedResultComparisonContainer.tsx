@@ -372,7 +372,7 @@ export class ExpectedResultComparisonContainer extends Component<Props, State> {
               comparisonResult: [...this.state.comparisonResult, data],
               startFetchingAfterSubmit: false
             });
-          } else if (useMagnitude && useAngle) {
+          } else if (useMagnitude && useAngle && (data.attribute === 'magnitude' || data.attribute === 'angle')) {
             this.setState({
               comparisonResult: [...this.state.comparisonResult, data],
               startFetchingAfterSubmit: false
