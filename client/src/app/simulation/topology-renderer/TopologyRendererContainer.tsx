@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import { Component } from 'react';
 import { Subject, Subscription } from 'rxjs';
 import { takeUntil, takeWhile } from 'rxjs/operators';
@@ -151,6 +152,23 @@ export class TopologyRendererContainer extends Component<Props, State> {
   private _processModelForRendering(topologyModel: TopologyModel) {
     waitUntil(() => this.props.mRIDs.size > 0)
       .then(() => {
+        // console.log('#####topologyModel.feeders####');
+        // console.log(topologyModel.feeders); // [{...}]
+        // 0:
+        //   mRID: "_EE71F6C9-56F0-4167-A14E-7F4C71F10EAA"
+        //   name: "final9500node"
+        //   batteries:[{...}, {...}]
+        //   transformers: Array(1304)
+        //     2:
+        //       configuration: "Yy"
+        //       from: "hvmv69sub3_hsb"
+        //       name: "hvmv69_11sub3"
+        //       phases: "ABC"
+        //       to: "regxfmr_hvmv11sub3_lsb"
+        //       x1: -119.2404194
+        //       x2: -119.2406805
+        //       y1: 46.6799782
+        //       y2: 46.68084938
         this.setState({
           topology: this._transformModelForRendering(topologyModel),
           isFetching: false
