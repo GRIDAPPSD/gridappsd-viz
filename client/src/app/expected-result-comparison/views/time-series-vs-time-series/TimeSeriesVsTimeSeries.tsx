@@ -86,8 +86,8 @@ export class TimeSeriesVsTimeSeries extends Component<Props, State> {
     this.useMagnitudeFormControl.dependsOn(this.selectedComponentTypeFormControl);
     this.useAngleFormControl.dependsOn(this.selectedComponentTypeFormControl);
     this.selectedComponentFormControl.dependsOn(this.selectedComponentTypeFormControl);
-    this.selectedFirstSimulationIdFormControl.dependsOn(this.selectedComponentFormControl);
-    this.selectedSecondSimulationIdFormControl.dependsOn(this.selectedFirstSimulationIdFormControl);
+    this.selectedFirstSimulationIdFormControl.dependsOn(this.selectedLineNameFormControl);
+    this.selectedSecondSimulationIdFormControl.dependsOn(this.selectedLineNameFormControl);
 
     return formGroupModel;
   }
@@ -156,7 +156,9 @@ export class TimeSeriesVsTimeSeries extends Component<Props, State> {
            const matchingSimulationIds = this.props.mRIDAndSimulationIdsMapping.get(theSelectedLineNameMRID);
             if(this.props.lineNamesAndMRIDMap.has(selectedLineName) && matchingSimulationIds) {
               this.setState({
-                showProgressIndicator: true
+                showProgressIndicator: true,
+                firstSimulationIdOptionBuilder: new SelectionOptionBuilder(matchingSimulationIds),
+                secondSimulationIdOptionBuilder: new SelectionOptionBuilder(matchingSimulationIds)
               });
               this._stateStore.update({
                 modelDictionaryComponents: [],
@@ -219,18 +221,8 @@ export class TimeSeriesVsTimeSeries extends Component<Props, State> {
       .subscribe({
         next: (selectedComponent) => {
           if(this.selectedComponentFormControl.isValid()) {
-            const selectedLineName = this.selectedLineNameFormControl.getValue();
-            const theSelectedLineNameMRID = this.props.lineNamesAndMRIDMap.get(selectedLineName);
-            const matchingSimulationIds = this.props.mRIDAndSimulationIdsMapping.get(theSelectedLineNameMRID);
             this.setState({
-              firstSimulationIdOptionBuilder: new SelectionOptionBuilder(matchingSimulationIds),
-              secondSimulationIdOptionBuilder: new SelectionOptionBuilder(matchingSimulationIds),
               selectedMenuOptions:{...this.state.selectedMenuOptions, component: selectedComponent}
-            });
-          } else {
-            this.setState({
-              firstSimulationIdOptionBuilder: SelectionOptionBuilder.defaultBuilder(),
-              secondSimulationIdOptionBuilder: SelectionOptionBuilder.defaultBuilder()
             });
           }
         }
@@ -311,6 +303,14 @@ export class TimeSeriesVsTimeSeries extends Component<Props, State> {
           formControlModel={this.selectedLineNameFormControl}
            />
         <Select
+          label='First simulation ID'
+          selectionOptionBuilder={this.state.firstSimulationIdOptionBuilder}
+          formControlModel={this.selectedFirstSimulationIdFormControl} />
+        <Select
+          label='Second simulation ID'
+          selectionOptionBuilder={this.state.secondSimulationIdOptionBuilder}
+          formControlModel={this.selectedSecondSimulationIdFormControl} />
+        <Select
           label='Component type'
           selectedOptionFinder={type => type === this.currentComparisonConfigFormGroup.findControl('componentType').getValue()}
           selectionOptionBuilder={this.state.measurementTypeOptionBuilder}
@@ -329,14 +329,6 @@ export class TimeSeriesVsTimeSeries extends Component<Props, State> {
           label='Component'
           selectionOptionBuilder={this.state.modelDictionaryComponentOptionBuilder}
           formControlModel={this.selectedComponentFormControl} />
-        <Select
-          label='First simulation ID'
-          selectionOptionBuilder={this.state.firstSimulationIdOptionBuilder}
-          formControlModel={this.selectedFirstSimulationIdFormControl} />
-        <Select
-          label='Second simulation ID'
-          selectionOptionBuilder={this.state.secondSimulationIdOptionBuilder}
-          formControlModel={this.selectedSecondSimulationIdFormControl} />
         <BasicButton
           type='positive'
           label='Submit'
