@@ -40,6 +40,7 @@ interface State {
   startFetchingAfterSubmit: boolean;
   noSufficientData: boolean;
   modelDictionaryComponentsCaches: ModelDictionaryComponent[];
+  phaseAndMeasurementMRIDMapping: Map<string[], string[]>;
 }
 
 export class ExpectedResultComparisonContainer extends Component<Props, State> {
@@ -64,7 +65,8 @@ export class ExpectedResultComparisonContainer extends Component<Props, State> {
       isFetching: false,
       startFetchingAfterSubmit: false,
       noSufficientData: false,
-      modelDictionaryComponentsCaches: []
+      modelDictionaryComponentsCaches: [],
+      phaseAndMeasurementMRIDMapping: null
     };
 
     this.onSimulationVsExpectedFormSubmited = this.onSimulationVsExpectedFormSubmited.bind(this);
@@ -93,9 +95,21 @@ export class ExpectedResultComparisonContainer extends Component<Props, State> {
     this._stateStoreSubscription = this._stateStore.select('modelDictionaryComponents')
     .subscribe({
       next: modelDicts => {
-        this.setState({
-          modelDictionaryComponentsCaches: modelDicts
-        });
+        if(modelDicts) {
+          const componentMeasurementMRIDMapping = new Map<string[], string[]>();
+          for(const modelDict in modelDicts) {
+            if(Object.prototype.hasOwnProperty.call(modelDicts, modelDict)) {
+              componentMeasurementMRIDMapping.set(
+                modelDicts[modelDict].phases,
+                modelDicts[modelDict].measurementMRIDs
+              );
+            }
+          }
+          this.setState({
+            modelDictionaryComponentsCaches: modelDicts,
+            phaseAndMeasurementMRIDMapping: componentMeasurementMRIDMapping
+          });
+        }
       }
     });
   }
@@ -215,6 +229,7 @@ export class ExpectedResultComparisonContainer extends Component<Props, State> {
           result={this.state.comparisonResult}
           showProgressIndicator={this.state.isFetching}
           comparisonType={this.state.comparisonType}
+          phaseAndMeasurementMRIDMapping={this.state.phaseAndMeasurementMRIDMapping}
           modelDictionaryComponentsCaches={this.state.modelDictionaryComponentsCaches} />
       </div>
     );

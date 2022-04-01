@@ -3,7 +3,6 @@ import { Component } from 'react';
 import { LineChart, LineChartModel, TimeSeries } from '@client:common/line-chart';
 import { ProgressIndicator } from '@client:common/overlay/progress-indicator';
 import { MessageBanner } from '@client:common/overlay/message-banner';
-import { ModelDictionaryComponent } from '@client:common/topology';
 
 import './TimeSeriesVsTimeSeriesChartResult.light.scss';
 import './TimeSeriesVsTimeSeriesChartResult.dark.scss';
@@ -24,12 +23,11 @@ interface Props {
   }>;
   noSufficientData: boolean;
   startFetchingAfterSubmit: boolean;
-  modelDictionaryComponentsCaches: ModelDictionaryComponent[];
+  phaseAndMeasurementMRIDMapping: Map<string[], string[]>;
 }
 
 interface State {
   chartModels: LineChartModel[];
-  phaseAndMeasurementMRIDMapping: Map<string[], string[]>;
 }
 
 export class TimeSeriesVsTimeSeriesChartResult extends Component<Props, State> {
@@ -38,13 +36,11 @@ export class TimeSeriesVsTimeSeriesChartResult extends Component<Props, State> {
     super(props);
 
     this.state={
-      chartModels: [],
-      phaseAndMeasurementMRIDMapping: null
+      chartModels: []
     };
   }
 
   componentDidMount() {
-    this._createComponentMeasurementMRIDMapping(this.props.modelDictionaryComponentsCaches);
     this._buildChart();
   }
 
@@ -92,28 +88,9 @@ export class TimeSeriesVsTimeSeriesChartResult extends Component<Props, State> {
     }
   }
 
-  private _createComponentMeasurementMRIDMapping(incomingModelDictionaryComponentsCaches: any[]) {
-    const componentMeasurementMRIDMapping = new Map<string[], string[]>();
-    if(incomingModelDictionaryComponentsCaches) {
-      for(const modelDict in incomingModelDictionaryComponentsCaches) {
-        if(Object.prototype.hasOwnProperty.call(incomingModelDictionaryComponentsCaches, modelDict)) {
-          if(incomingModelDictionaryComponentsCaches[modelDict]['measurementMRIDs'].length > 0) {
-            componentMeasurementMRIDMapping.set(
-              incomingModelDictionaryComponentsCaches[modelDict].phases,
-              incomingModelDictionaryComponentsCaches[modelDict].measurementMRIDs
-            );
-          }
-        }
-      }
-    }
-    this.setState({
-      phaseAndMeasurementMRIDMapping: componentMeasurementMRIDMapping
-    });
-  }
-
   private _matchPhaseToMeasurementMRID(datum: any) {
-    if(this.props.modelDictionaryComponentsCaches !== null && datum && this.state.phaseAndMeasurementMRIDMapping !== null) {
-      for (const [key, value] of this.state.phaseAndMeasurementMRIDMapping.entries()) {
+    if(datum && this.props.phaseAndMeasurementMRIDMapping !== null) {
+      for (const [key, value] of this.props.phaseAndMeasurementMRIDMapping.entries()) {
         if (value.includes(datum.object)) {
           const index = value.indexOf(datum.object);
           datum['phase'] = key[index];

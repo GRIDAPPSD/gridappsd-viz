@@ -20,6 +20,7 @@ interface Props {
   showProgressIndicator: boolean;
   comparisonType: ExpectedResultComparisonType;
   modelDictionaryComponentsCaches: ModelDictionaryComponent[];
+  phaseAndMeasurementMRIDMapping: Map<string[], string[]>;
 }
 
 interface State {
@@ -110,7 +111,7 @@ export class ResultViewer extends Component<Props, State> {
           <TimeSeriesVsTimeSeriesChartResult
            startFetchingAfterSubmit={this.props.startFetchingAfterSubmit}
            noSufficientData={this.props.noSufficientData}
-           modelDictionaryComponentsCaches={this.props.modelDictionaryComponentsCaches}
+           phaseAndMeasurementMRIDMapping={this.props.phaseAndMeasurementMRIDMapping}
            result={this.props.result} />
         );
     }
