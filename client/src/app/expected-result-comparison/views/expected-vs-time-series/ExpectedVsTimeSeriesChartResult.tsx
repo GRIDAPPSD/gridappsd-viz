@@ -1,6 +1,6 @@
 import { Component } from 'react';
 
-import { LineChartModel, TimeSeries } from '@client:common/line-chart';
+import { LineChart, LineChartModel, TimeSeries } from '@client:common/line-chart';
 
 
 import './ExpectedVsTimeSeriesChartResult.light.scss';
@@ -92,19 +92,16 @@ export class ExpectedVsTimeSeriesChartResult extends Component<Props, State> {
 
   render() {
     return (
-      // <div className='expected-vs-time-series-chart-result'>
-      //   {
-      //     this.state.chartModels.map(model => {
-      //       return (
-      //         <LineChart
-      //         key={model.name}
-      //         lineChartModel={model} />
-      //       );
-      //     })
-      //   }
-      // </div>
       <div className='expected-vs-time-series-chart-result'>
-        <p>In the process of implementation...</p>
+        {
+          this.state.chartModels.map(model => {
+            return (
+              <LineChart
+              key={model.name}
+              lineChartModel={model} />
+            );
+          })
+        }
       </div>
     );
   }

@@ -19,6 +19,7 @@ interface State {
   expectedResultsFileName: string;
   simulationIdOptionBuilder: SelectionOptionBuilder<string>;
   disableSubmitButton: boolean;
+  selectedSimulationId: number;
 }
 
 export class ExpectedVsTimeSeries extends Component<Props, State> {
@@ -35,7 +36,8 @@ export class ExpectedVsTimeSeries extends Component<Props, State> {
     this.state = {
       expectedResultsFileName: '',
       simulationIdOptionBuilder: new SelectionOptionBuilder(props.simulationIds),
-      disableSubmitButton: true
+      disableSubmitButton: true,
+      selectedSimulationId: null
     };
 
     this.onUploadExpectedResultsFile = this.onUploadExpectedResultsFile.bind(this);
@@ -50,6 +52,16 @@ export class ExpectedVsTimeSeries extends Component<Props, State> {
           if (!isValid !== this.state.disableSubmitButton) {
             this.setState({
               disableSubmitButton: !isValid
+            });
+          }
+        }
+      });
+    this.simulationFormControl.valueChanges()
+      .subscribe({
+        next: selectedId => {
+          if(selectedId) {
+            this.setState({
+              selectedSimulationId: +selectedId
             });
           }
         }
@@ -71,8 +83,13 @@ export class ExpectedVsTimeSeries extends Component<Props, State> {
   render() {
     return (
       <div className='expected-vs-time-series'>
+        <Select
+          label='Simulation ID'
+          selectionOptionBuilder={this.state.simulationIdOptionBuilder}
+          formControlModel={this.simulationFormControl} />
         <div className='expected-vs-time-series__file-upload'>
           <IconButton
+            disabled={this.state.selectedSimulationId === null}
             icon='cloud_upload'
             label='Upload expected results file'
             onClick={this.onUploadExpectedResultsFile} />
@@ -80,10 +97,6 @@ export class ExpectedVsTimeSeries extends Component<Props, State> {
             {this.state.expectedResultsFileName ? 'File uploaded: ' + this.state.expectedResultsFileName : ''}
           </div>
         </div>
-        <Select
-          label='Simulation ID'
-          selectionOptionBuilder={this.state.simulationIdOptionBuilder}
-          formControlModel={this.simulationFormControl} />
         <BasicButton
           type='positive'
           label='Submit'
@@ -110,6 +123,7 @@ export class ExpectedVsTimeSeries extends Component<Props, State> {
       .readFileAsJson<any>()
       .subscribe({
         next: fileContent => {
+          fileContent.compareWithSimId = this.state.selectedSimulationId;
           this._expectedResults = fileContent.expectedResults;
         },
         error: errorMessage => {
