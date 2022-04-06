@@ -4,8 +4,10 @@ import { MessageRequest } from '@client:common/MessageRequest';
 
 export class SimulationVsExpectedRequest implements MessageRequest {
 
-  readonly url = 'goss.gridappsd.process.request.simulation';
-
+  //readonly url = 'goss.gridappsd.process.request.simulation';
+  readonly testId = Math.trunc(Math.random() * 1_000_000);
+  
+  //readonly url: string;
   readonly requestBody = {
     power_system_config: {
       SubGeographicalRegion_name: '_1CD7D2EE-3C91-3248-5662-A43EFEFAC224',
@@ -59,15 +61,20 @@ export class SimulationVsExpectedRequest implements MessageRequest {
       storeMatches: false
     }
   };
-
-  readonly replyTo = '/expected-result-comparison/simulation-vs-expected';
-
+  //readonly replyTo: string;
+  //readonly replyTo = '/expected-result-comparison/simulation-vs-expected';
+  readonly url = `/topic/goss.gridappsd.simulation.test.input.${this.requestBody.test_config.testId}`;
+  readonly replyTo = `/topic/goss.gridappsd.simulation.test.output.${this.requestBody.test_config.testId}`
   constructor(simulationConfiguration: unknown | null, expectedResults: unknown, events: unknown[]) {
+    const testId = Math.trunc(Math.random() * 1_000_000);
+   // this.url = `/topic/goss.gridappsd.simulation.test.input.${testId}`;
     if (simulationConfiguration !== null) {
       Object.assign(this.requestBody, simulationConfiguration);
     }
+    this.requestBody.test_config.testId = testId;
     this.requestBody.test_config.expectedResults = expectedResults;
     this.requestBody.test_config.events = events;
+    //this.replyTo = `/topic/goss.gridappsd.simulation.test.output.${testId}`;
   }
 
 }

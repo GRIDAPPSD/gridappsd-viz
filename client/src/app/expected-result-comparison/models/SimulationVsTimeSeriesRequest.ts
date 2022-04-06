@@ -3,7 +3,7 @@ import { MessageRequest } from '@client:common/MessageRequest';
 
 export class SimulationVsTimeSeriesRequest implements MessageRequest {
 
-  readonly url = 'goss.gridappsd.process.request.simulation';
+  //readonly url = 'goss.gridappsd.process.request.simulation';
 
   readonly requestBody = {
     power_system_config: {
@@ -16,7 +16,7 @@ export class SimulationVsTimeSeriesRequest implements MessageRequest {
       duration: 60,
       simulation_name: 'ieee123',
       simulator: 'GridLAB-D',
-      start_time: 1248156000,
+      start_time: 1649183536,
       run_realtime: true,
       simulation_output: {},
       model_creation_config: {
@@ -48,19 +48,24 @@ export class SimulationVsTimeSeriesRequest implements MessageRequest {
     simulation_request_type: 'NEW',
     test_config: {
       appId: 'sample_app',
-      testId: Math.trunc(Math.random() * 1_000_000),
+      testId: -1,
       compareWithSimId: -1,
       testType: 'simulation_vs_timeseries'
     }
   };
 
-  readonly replyTo = '/expected-result-comparison/simulation-vs-time-series';
-
+  //readonly replyTo = '/expected-result-comparison/simulation-vs-time-series';
+  readonly url: string;
+  readonly replyTo: string;
   constructor(simulationConfiguration: unknown | null, simulationId: number) {
-    if (simulationConfiguration !== null) {
-      Object.assign(this.requestBody, simulationConfiguration);
-    }
+    const testId = Math.trunc(Math.random() * 1_000_000);
+    this.url = 'goss.gridappsd.process.request.simulation';
+    //if (simulationConfiguration !== null) {
+      //Object.assign(this.requestBody, simulationConfiguration);
+   // }
+    this.requestBody.test_config.testId =  testId;
     this.requestBody.test_config.compareWithSimId = simulationId;
+    this.replyTo = `/topic/goss.gridappsd.simulation.test.output.${testId}`;
   }
 
 }
