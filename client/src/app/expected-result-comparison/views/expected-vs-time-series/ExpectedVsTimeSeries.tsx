@@ -1,5 +1,6 @@
+/* eslint-disable no-console */
 import { Component } from 'react';
-import { Subject, take, takeUntil } from 'rxjs';
+import { Subject, take } from 'rxjs';
 
 import { StateStore } from '@client:common/state-store';
 import { BasicButton, IconButton } from '@client:common/buttons';
@@ -15,6 +16,7 @@ import './ExpectedVsTimeSeries.light.scss';
 import './ExpectedVsTimeSeries.dark.scss';
 
 interface Props {
+  modelDictionaryComponentsCaches: ModelDictionaryComponent[];
   lineName: string[];
   lineNamesAndMRIDMap: Map<string, string>;
   mRIDAndSimulationIdsMapping: Map<string, number[]>;
@@ -24,7 +26,7 @@ interface Props {
 }
 
 interface State {
-  modelDictionaryComponents: ModelDictionaryComponent[];
+  fileOutputDataMapInState: Map<string, ModelDictionaryComponent>;
   lineNameOptionBuilder: SelectionOptionBuilder<string>;
   measurementTypeOptionBuilder: SelectionOptionBuilder<MeasurementType>;
   modelDictionaryComponentOptionBuilder: SelectionOptionBuilder<ModelDictionaryComponent>;
@@ -49,6 +51,8 @@ export class ExpectedVsTimeSeries extends Component<Props, State> {
   readonly selectedFirstSimulationIdFormControl = new FormControlModel<number>(null);
   readonly currentComparisonConfigFormGroup = this._createCurrentComparisonConfigFormGroupModel();
 
+  readonly fileOutputDataMap = new Map<string, ModelDictionaryComponent>();
+
   private readonly _filePickerService = FilePickerService.getInstance();
   private readonly _stateStore = StateStore.getInstance();
   private readonly _unsubscriber = new Subject<void>();
@@ -56,7 +60,7 @@ export class ExpectedVsTimeSeries extends Component<Props, State> {
   constructor(props: Props) {
     super(props);
     this.state = {
-      modelDictionaryComponents: [],
+      fileOutputDataMapInState: null,
       lineNameOptionBuilder: new SelectionOptionBuilder(props.lineName),
       measurementTypeOptionBuilder: SelectionOptionBuilder.defaultBuilder(),
       modelDictionaryComponentOptionBuilder: SelectionOptionBuilder.defaultBuilder(),
@@ -127,37 +131,69 @@ export class ExpectedVsTimeSeries extends Component<Props, State> {
            const matchingSimulationIds = this.props.mRIDAndSimulationIdsMapping.get(theSelectedLineNameMRID);
             if(this.props.lineNamesAndMRIDMap.has(selectedLineName) && matchingSimulationIds) {
               this.setState({
-                showProgressIndicator: true,
+                // showProgressIndicator: true,
                 firstSimulationIdOptionBuilder: new SelectionOptionBuilder(matchingSimulationIds),
-                modelDictionaryComponentOptionBuilder: SelectionOptionBuilder.defaultBuilder()
+                modelDictionaryComponentOptionBuilder: SelectionOptionBuilder.defaultBuilder(),
+                selectedMenuOptions:{...this.state.selectedMenuOptions, lineName: selectedLineName}
               });
               this._stateStore.update({
                 modelDictionaryComponents: [],
                 modelDictionary: null
               });
               this.props.onMRIDChanged(theSelectedLineNameMRID);
-              this._stateStore.select('modelDictionaryComponents')
-                .pipe(takeUntil(this._unsubscriber))
-                .subscribe({
-                  next: componentDropdownMenuOptions => {
-                    if(componentDropdownMenuOptions.length > 0){
-                      this.setState({
-                        showProgressIndicator: false,
-                        modelDictionaryComponents: componentDropdownMenuOptions,
-                        selectedMenuOptions:{...this.state.selectedMenuOptions, lineName: selectedLineName}
-                      });
-                    }
-                  }
-                });
+            } else {
+              this.setState({
+                measurementTypeOptionBuilder: SelectionOptionBuilder.defaultBuilder()
+              });
             }
-          } else {
-            this.setState({
-              measurementTypeOptionBuilder: SelectionOptionBuilder.defaultBuilder()
-            });
           }
         }
       });
   }
+  // private _processLineNameChanges() {
+  //   this.selectedLineNameFormControl.valueChanges()
+  //     .subscribe({
+  //       next: selectedLineName => {
+  //         if(selectedLineName) {
+  //          const theSelectedLineNameMRID = this.props.lineNamesAndMRIDMap.get(selectedLineName);
+  //          const matchingSimulationIds = this.props.mRIDAndSimulationIdsMapping.get(theSelectedLineNameMRID);
+  //           if(this.props.lineNamesAndMRIDMap.has(selectedLineName) && matchingSimulationIds) {
+  //             this.setState({
+  //               showProgressIndicator: true,
+  //               firstSimulationIdOptionBuilder: new SelectionOptionBuilder(matchingSimulationIds),
+  //               modelDictionaryComponentOptionBuilder: SelectionOptionBuilder.defaultBuilder()
+  //             });
+  //             this._stateStore.update({
+  //               modelDictionaryComponents: [],
+  //               modelDictionary: null
+  //             });
+  //             this.props.onMRIDChanged(theSelectedLineNameMRID);
+  //             this._stateStore.select('modelDictionaryComponents')
+  //               .pipe(takeUntil(this._unsubscriber))
+  //               .subscribe({
+  //                 next: componentDropdownMenuOptions => {
+  //                   if(componentDropdownMenuOptions.length > 0){
+  //                     // console.log('componentDropdownMenuOptions==>',componentDropdownMenuOptions);
+  //                     // console.log('@@@@', Array.from(this.fileOutputDataMap.values()));
+  //                     this.setState({
+  //                       showProgressIndicator: false,
+  //                       // modelDictionaryComponents: componentDropdownMenuOptions,
+  //                       // modelDictionaryComponents: Array.from(this.fileOutputDataMap.values()),
+  //                       modelDictionaryComponents: Array.from(this.state.fileOutputDataMapInState.values()),
+  //                       selectedMenuOptions:{...this.state.selectedMenuOptions, lineName: selectedLineName}
+  //                     });
+  //                   }
+  //                 }
+  //               });
+  //           }
+  //         } else {
+  //           this.setState({
+  //             measurementTypeOptionBuilder: SelectionOptionBuilder.defaultBuilder()
+  //           });
+  //         }
+  //       }
+  //     });
+  // }
 
   private _onFirstSimulationSelectionChange() {
     this.selectedFirstSimulationIdFormControl.valueChanges()
@@ -200,8 +236,9 @@ export class ExpectedVsTimeSeries extends Component<Props, State> {
           this.useAngleFormControl.reset();
           if (this.selectedComponentTypeFormControl.isValid()) {
             this.setState({
+              showProgressIndicator: false,
               modelDictionaryComponentOptionBuilder: new SelectionOptionBuilder(
-                this.state.modelDictionaryComponents.filter(e => e.type === selectedComponentType),
+                Array.from(this.state.fileOutputDataMapInState.values()).filter(e => e.type === selectedComponentType),
                 e => e.displayName
               ),
               selectedMenuOptions: {...this.state.selectedMenuOptions, componentType: selectedComponentType}
@@ -265,11 +302,16 @@ export class ExpectedVsTimeSeries extends Component<Props, State> {
         lineNameOptionBuilder: new SelectionOptionBuilder(this.props.lineName)
       });
     }
-    if(prevState.modelDictionaryComponents.length === 0 || this.state.modelDictionaryComponents.length === 0) {
+    if(prevState.fileOutputDataMapInState === null || this.state.fileOutputDataMapInState === null) {
       this.selectedComponentFormControl.disable();
       this.useMagnitudeFormControl.disable();
       this.useAngleFormControl.disable();
     }
+    // if(prevState.modelDictionaryComponents.length === 0 || this.state.modelDictionaryComponents.length === 0) {
+    //   this.selectedComponentFormControl.disable();
+    //   this.useMagnitudeFormControl.disable();
+    //   this.useAngleFormControl.disable();
+    // }
   }
 
   componentWillUnmount() {
@@ -298,7 +340,8 @@ export class ExpectedVsTimeSeries extends Component<Props, State> {
         next: fileContent => {
           fileContent.compareWithSimId = this.state.simIdFlag;
           this.setState({
-            expectedResultsInState: this._processUploadedFile(fileContent)
+            expectedResultsInState: fileContent.expectedResults,
+            fileOutputDataMapInState: this._populateFileOutputDataMap(fileContent)
           });
         },
         error: errorMessage => {
@@ -310,8 +353,7 @@ export class ExpectedVsTimeSeries extends Component<Props, State> {
       });
   }
 
-  private _processUploadedFile(fileContent: any) {
-    const expectedResults = fileContent.expectedResults;
+  private _populateFileOutputDataMap(fileContent: any) {
     const outputResults = fileContent.expectedResults.output;
     const inputResults = fileContent.expectedResults.input;
     let outputMeasurementMRIDs: string[] = [];
@@ -332,7 +374,17 @@ export class ExpectedVsTimeSeries extends Component<Props, State> {
       }
     }
     inputMeasurementObjects = [...new Set(inputMeasurementObjects)];
-    return expectedResults;
+    const modelDictionaryComponentsCaches = this.props.modelDictionaryComponentsCaches;
+    for(const modelDict of modelDictionaryComponentsCaches) {
+      modelDict.measurementMRIDs.forEach(element => {
+        for(const mrid of outputMeasurementMRIDs) {
+          if(element === mrid) {
+            this.fileOutputDataMap.set(mrid, modelDict);
+          }
+        }
+      });
+    }
+    return this.fileOutputDataMap;
   }
 
   onSubmit() {

@@ -252,6 +252,7 @@ export class ExpectedResultComparisonContainer extends Component<Props, State> {
       case ExpectedResultComparisonType.EXPECTED_VS_TIME_SERIES:
         return (
           <ExpectedVsTimeSeries
+            modelDictionaryComponentsCaches={this.state.modelDictionaryComponentsCaches}
             lineName={this.state.lineNames}
             simulationIds={this.state.simulationIds}
             onMRIDChanged={this.props.onMRIDChanged}
