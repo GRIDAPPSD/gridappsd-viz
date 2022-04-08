@@ -98,11 +98,6 @@ export class ResultViewer extends Component<Props, State> {
       case ExpectedResultComparisonType.SIMULATION_VS_EXPECTED:
       case ExpectedResultComparisonType.SIMULATION_VS_TIME_SERIES:
       case ExpectedResultComparisonType.EXPECTED_VS_TIME_SERIES:
-        // return (
-        //   <MessageBanner>
-        //     Not yet implemented
-        //   </MessageBanner>
-        // );
         return (
           <ExpectedVsTimeSeriesChartResult result={this.props.result} />
         );

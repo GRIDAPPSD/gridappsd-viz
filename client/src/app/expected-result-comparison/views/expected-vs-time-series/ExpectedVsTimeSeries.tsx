@@ -35,11 +35,14 @@ interface State {
 
   expectedResultsFileName: string;
   showProgressIndicator: boolean;
+  fileNotUploaded: boolean;
+
+  expectedResultsInState: any;
 }
 
 export class ExpectedVsTimeSeries extends Component<Props, State> {
   readonly selectedLineNameFormControl = new FormControlModel<string>(null);
-  readonly selectedComponentTypeFormControl = new FormControlModel(MeasurementType.NONE);
+  readonly selectedComponentTypeFormControl = new FormControlModel<string>(null);
   readonly useMagnitudeFormControl = new FormControlModel(false);
   readonly useAngleFormControl = new FormControlModel(false);
   readonly selectedComponentFormControl = new FormControlModel<ModelDictionaryComponent>(null);
@@ -49,8 +52,6 @@ export class ExpectedVsTimeSeries extends Component<Props, State> {
   private readonly _filePickerService = FilePickerService.getInstance();
   private readonly _stateStore = StateStore.getInstance();
   private readonly _unsubscriber = new Subject<void>();
-
-  private _expectedResults: any = {};
 
   constructor(props: Props) {
     super(props);
@@ -72,7 +73,9 @@ export class ExpectedVsTimeSeries extends Component<Props, State> {
       },
       simIdFlag: null,
       expectedResultsFileName: '',
-      showProgressIndicator: false
+      showProgressIndicator: false,
+      fileNotUploaded: true,
+      expectedResultsInState: {}
     };
 
     this.onUploadExpectedResultsFile = this.onUploadExpectedResultsFile.bind(this);
@@ -107,53 +110,16 @@ export class ExpectedVsTimeSeries extends Component<Props, State> {
           });
         }
       });
-    this._onLineNameChange();
     this._processLineNameChanges();
+    this._onFirstSimulationSelectionChange();
+    this._onComponentTypeSelectionChange();
     this._onComponentSelectionChange();
     this._onUseMagnitudeSelectionChange();
     this._onUseAngleSelectionChange();
-    this._onFirstSimulationSelectionChange();
-  }
-
-  private _onLineNameChange() {
-    this.selectedLineNameFormControl.valueChanges()
-      .subscribe({
-        next: () => {
-          if(this.selectedLineNameFormControl.isValid()) {
-            this.setState({
-              measurementTypeOptionBuilder: new SelectionOptionBuilder (
-                [
-                  MeasurementType.POWER,
-                  MeasurementType.TAP,
-                  MeasurementType.VOLTAGE
-                ],
-                type => {
-                  switch (type) {
-                    case MeasurementType.POWER:
-                      return 'Power';
-                    case MeasurementType.TAP:
-                      return 'Tap';
-                    case MeasurementType.VOLTAGE:
-                      return 'Voltage';
-                    default:
-                      return '';
-                  }
-                }
-              ),
-              modelDictionaryComponentOptionBuilder: SelectionOptionBuilder.defaultBuilder()
-            });
-          } else {
-            this.setState({
-              measurementTypeOptionBuilder: SelectionOptionBuilder.defaultBuilder()
-            });
-          }
-        }
-      });
   }
 
   private _processLineNameChanges() {
-    this.currentComparisonConfigFormGroup.findControl('lineName')
-      .valueChanges()
+    this.selectedLineNameFormControl.valueChanges()
       .subscribe({
         next: selectedLineName => {
           if(selectedLineName) {
@@ -162,7 +128,8 @@ export class ExpectedVsTimeSeries extends Component<Props, State> {
             if(this.props.lineNamesAndMRIDMap.has(selectedLineName) && matchingSimulationIds) {
               this.setState({
                 showProgressIndicator: true,
-                firstSimulationIdOptionBuilder: new SelectionOptionBuilder(matchingSimulationIds)
+                firstSimulationIdOptionBuilder: new SelectionOptionBuilder(matchingSimulationIds),
+                modelDictionaryComponentOptionBuilder: SelectionOptionBuilder.defaultBuilder()
               });
               this._stateStore.update({
                 modelDictionaryComponents: [],
@@ -178,11 +145,48 @@ export class ExpectedVsTimeSeries extends Component<Props, State> {
                         showProgressIndicator: false,
                         modelDictionaryComponents: componentDropdownMenuOptions,
                         selectedMenuOptions:{...this.state.selectedMenuOptions, lineName: selectedLineName}
-                      }, ()=> this._onComponentTypeSelectionChange());
+                      });
                     }
                   }
                 });
             }
+          } else {
+            this.setState({
+              measurementTypeOptionBuilder: SelectionOptionBuilder.defaultBuilder()
+            });
+          }
+        }
+      });
+  }
+
+  private _onFirstSimulationSelectionChange() {
+    this.selectedFirstSimulationIdFormControl.valueChanges()
+      .subscribe({
+        next: selectedFirstSimulationId => {
+          if(selectedFirstSimulationId) {
+            this.setState({
+              simIdFlag: selectedFirstSimulationId,
+              selectedMenuOptions: {...this.state.selectedMenuOptions, firstSimulationId: selectedFirstSimulationId},
+              measurementTypeOptionBuilder: new SelectionOptionBuilder (
+                [
+                  MeasurementType.POWER,
+                  MeasurementType.TAP,
+                  MeasurementType.VOLTAGE
+                ],
+                type => {
+                  switch (type) {
+                    case MeasurementType.POWER:
+                      return 'Power';
+                  case MeasurementType.TAP:
+                      return 'Tap';
+                  case MeasurementType.VOLTAGE:
+                      return 'Voltage';
+                  default:
+                      return '';
+                  }
+                }
+              )
+            });
           }
         }
       });
@@ -255,18 +259,6 @@ export class ExpectedVsTimeSeries extends Component<Props, State> {
       });
   }
 
-  private _onFirstSimulationSelectionChange() {
-    this.selectedFirstSimulationIdFormControl.valueChanges()
-      .subscribe({
-        next: selectedFirstSimulationId => {
-          this.setState({
-            simIdFlag: selectedFirstSimulationId,
-            selectedMenuOptions: {...this.state.selectedMenuOptions, firstSimulationId: selectedFirstSimulationId}
-          });
-        }
-      });
-  }
-
   componentDidUpdate(prevProps: Props, prevState: State) {
     if(prevProps.simulationIds !== this.props.simulationIds || prevProps.lineName !== this.props.lineName) {
       this.setState({
@@ -292,7 +284,9 @@ export class ExpectedVsTimeSeries extends Component<Props, State> {
       .subscribe({
         next: file => {
           this.setState({
-            expectedResultsFileName: file.name
+            expectedResultsFileName: file.name,
+            fileNotUploaded: false,
+            expectedResultsInState: {}
           });
           this._filePickerService.clearSelection();
         }
@@ -303,7 +297,9 @@ export class ExpectedVsTimeSeries extends Component<Props, State> {
       .subscribe({
         next: fileContent => {
           fileContent.compareWithSimId = this.state.simIdFlag;
-          this._expectedResults = this._processUploadedFile(fileContent);
+          this.setState({
+            expectedResultsInState: this._processUploadedFile(fileContent)
+          });
         },
         error: errorMessage => {
           Notification.open(errorMessage);
@@ -341,7 +337,7 @@ export class ExpectedVsTimeSeries extends Component<Props, State> {
 
   onSubmit() {
     const { lineName, componentType, useMagnitude, useAngle, component, firstSimulationId } = this.state.selectedMenuOptions;
-    this.props.onSubmit(this._expectedResults, firstSimulationId, lineName, componentType, useMagnitude, useAngle, component);
+    this.props.onSubmit(this.state.expectedResultsInState, firstSimulationId, lineName, componentType, useMagnitude, useAngle, component);
     this.setState({
       disableSubmitButton: true
     });
@@ -375,31 +371,40 @@ export class ExpectedVsTimeSeries extends Component<Props, State> {
             selectedOptionFinder={type => type === this.currentComparisonConfigFormGroup.findControl('componentType').getValue()}
             selectionOptionBuilder={this.state.measurementTypeOptionBuilder}
             formControlModel={this.selectedComponentTypeFormControl} />
-          <Checkbox
-            label='Magnitude'
-            name='useMagnitude'
-            labelPosition='right'
-            formControlModel={this.useMagnitudeFormControl} />
-          <Checkbox
-            label='Angle'
-            name='useAngle'
-            labelPosition='right'
-            formControlModel={this.useAngleFormControl} />
-          <Select
-            label='Component'
-            selectionOptionBuilder={this.state.modelDictionaryComponentOptionBuilder}
-            formControlModel={this.selectedComponentFormControl} />
-          <BasicButton
-            type='positive'
-            label='Submit'
-            disabled={this.state.disableSubmitButton}
-            onClick={this.onSubmit} />
-            {
+        <Checkbox
+          label='Magnitude'
+          name='useMagnitude'
+          labelPosition='right'
+          formControlModel={this.useMagnitudeFormControl} />
+        <Checkbox
+          label='Angle'
+          name='useAngle'
+          labelPosition='right'
+          formControlModel={this.useAngleFormControl} />
+        <Select
+          label='Component'
+          selectionOptionBuilder={this.state.modelDictionaryComponentOptionBuilder}
+          formControlModel={this.selectedComponentFormControl} />
+        <BasicButton
+          type='positive'
+          label='Submit'
+          disabled={this._checkDisableBtn(this.state.fileNotUploaded, this.state.disableSubmitButton)}
+          onClick={this.onSubmit} />
+        {
           this.state.showProgressIndicator ? <ProgressIndicator show /> : null
         }
-          <FilePicker />
+        <FilePicker />
       </Form>
     );
+
+  }
+
+  private _checkDisableBtn(fileNotUploaded: boolean, disableSubmitButton: boolean) {
+    if(!fileNotUploaded && !disableSubmitButton) {
+      return false;
+    } else {
+      return true;
+    }
   }
 
 }
