@@ -92,26 +92,26 @@ export class ExpectedResultComparisonContainer extends Component<Props, State> {
         }
       });
       this._setLineNamesAndExistingSimulationIdsMap();
-    this._stateStoreSubscription = this._stateStore.select('modelDictionaryComponents')
-    .subscribe({
-      next: modelDicts => {
-        if(modelDicts) {
-          const componentMeasurementMRIDMapping = new Map<string[], string[]>();
-          for(const modelDict in modelDicts) {
-            if(Object.prototype.hasOwnProperty.call(modelDicts, modelDict)) {
-              componentMeasurementMRIDMapping.set(
-                modelDicts[modelDict].phases,
-                modelDicts[modelDict].measurementMRIDs
-              );
+      this._stateStoreSubscription = this._stateStore.select('modelDictionaryComponents')
+        .subscribe({
+          next: modelDicts => {
+            if(modelDicts) {
+              const componentMeasurementMRIDMapping = new Map<string[], string[]>();
+              for(const modelDict in modelDicts) {
+                if(Object.prototype.hasOwnProperty.call(modelDicts, modelDict)) {
+                  componentMeasurementMRIDMapping.set(
+                    modelDicts[modelDict].phases,
+                    modelDicts[modelDict].measurementMRIDs
+                  );
+                }
+              }
+              this.setState({
+                modelDictionaryComponentsCaches: modelDicts,
+                phaseAndMeasurementMRIDMapping: componentMeasurementMRIDMapping
+              });
             }
           }
-          this.setState({
-            modelDictionaryComponentsCaches: modelDicts,
-            phaseAndMeasurementMRIDMapping: componentMeasurementMRIDMapping
-          });
-        }
-      }
-    });
+        });
   }
 
   private _setLineNamesAndMRIDMap(feederModels: FeederModel) {
@@ -252,7 +252,11 @@ export class ExpectedResultComparisonContainer extends Component<Props, State> {
       case ExpectedResultComparisonType.EXPECTED_VS_TIME_SERIES:
         return (
           <ExpectedVsTimeSeries
+            lineName={this.state.lineNames}
             simulationIds={this.state.simulationIds}
+            onMRIDChanged={this.props.onMRIDChanged}
+            lineNamesAndMRIDMap={this.state.lineNamesAndMRIDMap}
+            mRIDAndSimulationIdsMapping={this.state.mRIDAndSimulationIdsMapping}
             onSubmit={this.onExpectedVsTimeSeriesFormSubmit} />
         );
 
@@ -281,9 +285,8 @@ export class ExpectedResultComparisonContainer extends Component<Props, State> {
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  onExpectedVsTimeSeriesFormSubmit(expectedResults: any, simulationId: number) {
-    // this._fetchResponse(new ExpectedVsTimeSeriesRequest(expectedResults, simulationId));
-    this._dynamicallyFetchResponse(new ExpectedVsTimeSeriesRequest(expectedResults, simulationId));
+  onExpectedVsTimeSeriesFormSubmit(expectedResults: any, simulationId: number, lineName: string, componentType: string, useMagnitude: boolean, useAngle: boolean, component: any) {
+    this._dynamicallyFetchResponseForExpectedVsTimeSeries(new ExpectedVsTimeSeriesRequest(expectedResults, simulationId), lineName, componentType, useMagnitude, useAngle, component);
   }
 
   onTimeSeriesVsTimeSeriesFormSubmit(lineName: string, componentType: string, useMagnitude: boolean, useAngle: boolean, component: any, firstSimulationId: number, secondSimulationId: number) {
@@ -357,6 +360,68 @@ export class ExpectedResultComparisonContainer extends Component<Props, State> {
   }
 
   private _dynamicallyFetchResponseForTimeSeriesVsTimeSeries(request: MessageRequest, lineName: string, componentType: string, useMagnitude: boolean, useAngle: boolean, component: any) {
+    // Clear any existing/previous comparison result.
+    this.setState({
+      comparisonResult:[],
+      startFetchingAfterSubmit: true
+    });
+    this._responseSubscription = this._stompClientService.readFrom<any[] | any>(request.replyTo)
+    .pipe(
+      takeWhile(data => data.status !== 'finish')
+    )
+    .subscribe({
+      next: data => {
+        this.setState({
+          noSufficientData: false
+        });
+        if (data.status !== 'start' && component.measurementMRIDs.includes(data.object)) {
+          if (!useMagnitude && !useAngle && data.attribute !== 'magnitude' && data.attribute !== 'angle') {
+            this.setState({
+              comparisonResult: [...this.state.comparisonResult, data],
+              startFetchingAfterSubmit: false
+            });
+          } else if(useMagnitude && !useAngle && data.attribute === 'magnitude') {
+            this.setState({
+              comparisonResult: [...this.state.comparisonResult, data],
+              startFetchingAfterSubmit: false
+            });
+          } else if (!useMagnitude && useAngle && data.attribute === 'angle') {
+            this.setState({
+              comparisonResult: [...this.state.comparisonResult, data],
+              startFetchingAfterSubmit: false
+            });
+          } else if (useMagnitude && useAngle && (data.attribute === 'magnitude' || data.attribute === 'angle')) {
+            this.setState({
+              comparisonResult: [...this.state.comparisonResult, data],
+              startFetchingAfterSubmit: false
+            });
+          }
+        }
+      },
+      complete: () => {
+        Notification.open('Fetching Comparison Result is Done.');
+        if(this.state.comparisonResult.length < 2) {
+          this.setState({
+            noSufficientData: true
+          });
+        } else {
+          this.setState({
+            noSufficientData: false
+          });
+        }
+      },
+      error: errorMessage => {
+        Notification.open(errorMessage);
+      }
+    });
+    this._stompClientService.send({
+      destination: request.url,
+      body: JSON.stringify(request.requestBody),
+      replyTo: request.replyTo
+    });
+  }
+
+  private _dynamicallyFetchResponseForExpectedVsTimeSeries(request: MessageRequest, lineName: string, componentType: string, useMagnitude: boolean, useAngle: boolean, component: any) {
     // Clear any existing/previous comparison result.
     this.setState({
       comparisonResult:[],
