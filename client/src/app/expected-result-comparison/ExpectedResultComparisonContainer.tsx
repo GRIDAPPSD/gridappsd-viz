@@ -276,8 +276,7 @@ export class ExpectedResultComparisonContainer extends Component<Props, State> {
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   onSimulationVsExpectedFormSubmited(simulationConfiguration: any, expectedResults: any, events: any[]) {
-    // this._fetchResponse(new SimulationVsExpectedRequest(simulationConfiguration, expectedResults, events));
-    this._dynamicallyFetchResponse(new SimulationVsExpectedRequest(simulationConfiguration, expectedResults, events));
+    this._fetchResponse(new SimulationVsExpectedRequest(simulationConfiguration, expectedResults, events));
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -287,12 +286,11 @@ export class ExpectedResultComparisonContainer extends Component<Props, State> {
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   onExpectedVsTimeSeriesFormSubmit(expectedResults: any, simulationId: number, lineName: string, componentType: string, useMagnitude: boolean, useAngle: boolean, component: any) {
-    this._dynamicallyFetchResponseForExpectedVsTimeSeries(new ExpectedVsTimeSeriesRequest(expectedResults, simulationId), lineName, componentType, useMagnitude, useAngle, component);
+    this._dynamicallyFetchComparisonResponse(new ExpectedVsTimeSeriesRequest(expectedResults, simulationId), lineName, componentType, useMagnitude, useAngle, component);
   }
 
   onTimeSeriesVsTimeSeriesFormSubmit(lineName: string, componentType: string, useMagnitude: boolean, useAngle: boolean, component: any, firstSimulationId: number, secondSimulationId: number) {
-    // this._fetchResponse(new TimeSeriesVsTimeSeriesRequest(firstSimulationId, secondSimulationId));
-    this._dynamicallyFetchResponseForTimeSeriesVsTimeSeries(new TimeSeriesVsTimeSeriesRequest(firstSimulationId, secondSimulationId), lineName, componentType, useMagnitude, useAngle, component);
+    this._dynamicallyFetchComparisonResponse(new TimeSeriesVsTimeSeriesRequest(firstSimulationId, secondSimulationId), lineName, componentType, useMagnitude, useAngle, component);
   }
 
   private _fetchResponse(request: MessageRequest) {
@@ -333,34 +331,7 @@ export class ExpectedResultComparisonContainer extends Component<Props, State> {
     });
   }
 
-  private _dynamicallyFetchResponse(request: MessageRequest) {
-    this._responseSubscription = this._stompClientService.readFrom<any[] | any>(request.replyTo)
-    .pipe(
-      takeWhile(data => data.status !== 'finish')
-    )
-    .subscribe({
-      next: data => {
-        if (data.status !== 'start') {
-          this.setState({
-            comparisonResult: [...this.state.comparisonResult, data]
-          });
-        }
-      },
-      complete: () => {
-        Notification.open('Fetching Comparison Result is Done.');
-      },
-      error: errorMessage => {
-        Notification.open(errorMessage);
-      }
-    });
-    this._stompClientService.send({
-      destination: request.url,
-      body: JSON.stringify(request.requestBody),
-      replyTo: request.replyTo
-    });
-  }
-
-  private _dynamicallyFetchResponseForTimeSeriesVsTimeSeries(request: MessageRequest, lineName: string, componentType: string, useMagnitude: boolean, useAngle: boolean, component: any) {
+  private _dynamicallyFetchComparisonResponse(request: MessageRequest, lineName: string, componentType: string, useMagnitude: boolean, useAngle: boolean, component: any) {
     // Clear any existing/previous comparison result.
     this.setState({
       comparisonResult:[],
@@ -401,69 +372,7 @@ export class ExpectedResultComparisonContainer extends Component<Props, State> {
       },
       complete: () => {
         Notification.open('Fetching Comparison Result is Done.');
-        if(this.state.comparisonResult.length < 2) {
-          this.setState({
-            noSufficientData: true
-          });
-        } else {
-          this.setState({
-            noSufficientData: false
-          });
-        }
-      },
-      error: errorMessage => {
-        Notification.open(errorMessage);
-      }
-    });
-    this._stompClientService.send({
-      destination: request.url,
-      body: JSON.stringify(request.requestBody),
-      replyTo: request.replyTo
-    });
-  }
-
-  private _dynamicallyFetchResponseForExpectedVsTimeSeries(request: MessageRequest, lineName: string, componentType: string, useMagnitude: boolean, useAngle: boolean, component: any) {
-    // Clear any existing/previous comparison result.
-    this.setState({
-      comparisonResult:[],
-      startFetchingAfterSubmit: true
-    });
-    this._responseSubscription = this._stompClientService.readFrom<any[] | any>(request.replyTo)
-    .pipe(
-      takeWhile(data => data.status !== 'finish')
-    )
-    .subscribe({
-      next: data => {
-        this.setState({
-          noSufficientData: false
-        });
-        if (data.status !== 'start' && component.measurementMRIDs.includes(data.object)) {
-          if (!useMagnitude && !useAngle && data.attribute !== 'magnitude' && data.attribute !== 'angle') {
-            this.setState({
-              comparisonResult: [...this.state.comparisonResult, data],
-              startFetchingAfterSubmit: false
-            });
-          } else if(useMagnitude && !useAngle && data.attribute === 'magnitude') {
-            this.setState({
-              comparisonResult: [...this.state.comparisonResult, data],
-              startFetchingAfterSubmit: false
-            });
-          } else if (!useMagnitude && useAngle && data.attribute === 'angle') {
-            this.setState({
-              comparisonResult: [...this.state.comparisonResult, data],
-              startFetchingAfterSubmit: false
-            });
-          } else if (useMagnitude && useAngle && (data.attribute === 'magnitude' || data.attribute === 'angle')) {
-            this.setState({
-              comparisonResult: [...this.state.comparisonResult, data],
-              startFetchingAfterSubmit: false
-            });
-          }
-        }
-      },
-      complete: () => {
-        Notification.open('Fetching Comparison Result is Done.');
-        if(this.state.comparisonResult.length < 2) {
+        if(this.state.comparisonResult.length <= 2) {
           this.setState({
             noSufficientData: true
           });

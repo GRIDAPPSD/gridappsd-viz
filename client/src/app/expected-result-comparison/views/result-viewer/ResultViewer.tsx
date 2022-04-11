@@ -99,7 +99,11 @@ export class ResultViewer extends Component<Props, State> {
       case ExpectedResultComparisonType.SIMULATION_VS_TIME_SERIES:
       case ExpectedResultComparisonType.EXPECTED_VS_TIME_SERIES:
         return (
-          <ExpectedVsTimeSeriesChartResult result={this.props.result} />
+          <ExpectedVsTimeSeriesChartResult
+          startFetchingAfterSubmit={this.props.startFetchingAfterSubmit}
+          noSufficientData={this.props.noSufficientData}
+          phaseAndMeasurementMRIDMapping={this.props.phaseAndMeasurementMRIDMapping}
+          result={this.props.result} />
         );
       case ExpectedResultComparisonType.TIME_SERIES_VS_TIME_SERIES:
         return (
