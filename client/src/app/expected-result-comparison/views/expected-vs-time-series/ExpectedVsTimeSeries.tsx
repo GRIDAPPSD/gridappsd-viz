@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 import { Component } from 'react';
 import { Subject, take } from 'rxjs';
 
@@ -8,7 +7,6 @@ import { Form, SelectionOptionBuilder, FormGroupModel, FormControlModel, Select,
 import { MeasurementType, ModelDictionaryComponent } from '@client:common/topology';
 import { Notification } from '@client:common/overlay/notification';
 import { FilePickerService, FilePicker } from '@client:common/file-picker';
-import { ProgressIndicator } from '@client:common/overlay/progress-indicator';
 
 import { ExpectedVsTimeSeriesRequestConfigModel } from '../../models/ExpectedVsTimeSeriesRequestConfigModel';
 
@@ -36,7 +34,8 @@ interface State {
   simIdFlag: number;
 
   expectedResultsFileName: string;
-  showProgressIndicator: boolean;
+  // comment out showProgressIndicator because we are populating component options from the uploaded file
+  // showProgressIndicator: boolean;
   fileNotUploaded: boolean;
 
   expectedResultsInState: any;
@@ -77,7 +76,7 @@ export class ExpectedVsTimeSeries extends Component<Props, State> {
       },
       simIdFlag: null,
       expectedResultsFileName: '',
-      showProgressIndicator: false,
+      // showProgressIndicator: false,
       fileNotUploaded: true,
       expectedResultsInState: {}
     };
@@ -150,50 +149,6 @@ export class ExpectedVsTimeSeries extends Component<Props, State> {
         }
       });
   }
-  // private _processLineNameChanges() {
-  //   this.selectedLineNameFormControl.valueChanges()
-  //     .subscribe({
-  //       next: selectedLineName => {
-  //         if(selectedLineName) {
-  //          const theSelectedLineNameMRID = this.props.lineNamesAndMRIDMap.get(selectedLineName);
-  //          const matchingSimulationIds = this.props.mRIDAndSimulationIdsMapping.get(theSelectedLineNameMRID);
-  //           if(this.props.lineNamesAndMRIDMap.has(selectedLineName) && matchingSimulationIds) {
-  //             this.setState({
-  //               showProgressIndicator: true,
-  //               firstSimulationIdOptionBuilder: new SelectionOptionBuilder(matchingSimulationIds),
-  //               modelDictionaryComponentOptionBuilder: SelectionOptionBuilder.defaultBuilder()
-  //             });
-  //             this._stateStore.update({
-  //               modelDictionaryComponents: [],
-  //               modelDictionary: null
-  //             });
-  //             this.props.onMRIDChanged(theSelectedLineNameMRID);
-  //             this._stateStore.select('modelDictionaryComponents')
-  //               .pipe(takeUntil(this._unsubscriber))
-  //               .subscribe({
-  //                 next: componentDropdownMenuOptions => {
-  //                   if(componentDropdownMenuOptions.length > 0){
-  //                     // console.log('componentDropdownMenuOptions==>',componentDropdownMenuOptions);
-  //                     // console.log('@@@@', Array.from(this.fileOutputDataMap.values()));
-  //                     this.setState({
-  //                       showProgressIndicator: false,
-  //                       // modelDictionaryComponents: componentDropdownMenuOptions,
-  //                       // modelDictionaryComponents: Array.from(this.fileOutputDataMap.values()),
-  //                       modelDictionaryComponents: Array.from(this.state.fileOutputDataMapInState.values()),
-  //                       selectedMenuOptions:{...this.state.selectedMenuOptions, lineName: selectedLineName}
-  //                     });
-  //                   }
-  //                 }
-  //               });
-  //           }
-  //         } else {
-  //           this.setState({
-  //             measurementTypeOptionBuilder: SelectionOptionBuilder.defaultBuilder()
-  //           });
-  //         }
-  //       }
-  //     });
-  // }
 
   private _onFirstSimulationSelectionChange() {
     this.selectedFirstSimulationIdFormControl.valueChanges()
@@ -236,7 +191,7 @@ export class ExpectedVsTimeSeries extends Component<Props, State> {
           this.useAngleFormControl.reset();
           if (this.selectedComponentTypeFormControl.isValid()) {
             this.setState({
-              showProgressIndicator: false,
+              // showProgressIndicator: true,
               modelDictionaryComponentOptionBuilder: new SelectionOptionBuilder(
                 Array.from(this.state.fileOutputDataMapInState.values()).filter(e => e.type === selectedComponentType),
                 e => e.displayName
@@ -307,11 +262,6 @@ export class ExpectedVsTimeSeries extends Component<Props, State> {
       this.useMagnitudeFormControl.disable();
       this.useAngleFormControl.disable();
     }
-    // if(prevState.modelDictionaryComponents.length === 0 || this.state.modelDictionaryComponents.length === 0) {
-    //   this.selectedComponentFormControl.disable();
-    //   this.useMagnitudeFormControl.disable();
-    //   this.useAngleFormControl.disable();
-    // }
   }
 
   componentWillUnmount() {
@@ -443,7 +393,7 @@ export class ExpectedVsTimeSeries extends Component<Props, State> {
           disabled={this._checkDisableBtn(this.state.fileNotUploaded, this.state.disableSubmitButton)}
           onClick={this.onSubmit} />
         {
-          this.state.showProgressIndicator ? <ProgressIndicator show /> : null
+          // this.state.showProgressIndicator ? <ProgressIndicator show /> : null
         }
         <FilePicker />
       </Form>
