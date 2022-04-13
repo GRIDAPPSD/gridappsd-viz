@@ -8,6 +8,7 @@ import { ModelDictionaryComponent } from '@client:common/topology';
 
 import { TimeSeriesVsTimeSeriesChartResult } from '../time-series-vs-time-series/TimeSeriesVsTimeSeriesChartResult';
 import { ExpectedVsTimeSeriesChartResult } from '../expected-vs-time-series/ExpectedVsTimeSeriesChartResult';
+import { SimulationVsTimeSeriesChartResult } from '../simulation-vs-time-series/SimulationVsTimeSeriesChartResult';
 
 import './ResultViewer.light.scss';
 import './ResultViewer.dark.scss';
@@ -97,6 +98,13 @@ export class ResultViewer extends Component<Props, State> {
     switch (this.props.comparisonType) {
       case ExpectedResultComparisonType.SIMULATION_VS_EXPECTED:
       case ExpectedResultComparisonType.SIMULATION_VS_TIME_SERIES:
+        return (
+          <SimulationVsTimeSeriesChartResult
+          startFetchingAfterSubmit={this.props.startFetchingAfterSubmit}
+          noSufficientData={this.props.noSufficientData}
+          phaseAndMeasurementMRIDMapping={this.props.phaseAndMeasurementMRIDMapping}
+          result={this.props.result} />
+        );
       case ExpectedResultComparisonType.EXPECTED_VS_TIME_SERIES:
         return (
           <ExpectedVsTimeSeriesChartResult

@@ -1,10 +1,13 @@
 .simulation-vs-time-series-form {
     display: flex;
-    align-items: center;
+    flex-wrap: wrap;
+    margin-left: 15px;
     margin-bottom: 30px;
+    margin-top: 5px;
+    align-items: baseline;
 
     .form-control.select {
-        margin-top: 0;
+        margin-top: 1;
         margin-bottom: 0;
 
         .form-control__label {
@@ -18,6 +21,7 @@
     display: flex;
     flex-flow: column nowrap;
     margin-right: 20px;
+    margin-top: 5px;
     align-items: flex-start;
 }
 

@@ -110,6 +110,25 @@ export class TimeSeriesVsTimeSeries extends Component<Props, State> {
     this._onSecondSimulationSelectionChange();
   }
 
+  componentDidUpdate(prevProps: Props, prevState: State) {
+    if(prevProps.simulationIds !== this.props.simulationIds || prevProps.lineName !== this.props.lineName) {
+      this.setState({
+        lineNameOptionBuilder: new SelectionOptionBuilder(this.props.lineName)
+      });
+    }
+    if(prevState.modelDictionaryComponents.length === 0 || this.state.modelDictionaryComponents.length === 0) {
+      this.selectedComponentFormControl.disable();
+      this.useMagnitudeFormControl.disable();
+      this.useAngleFormControl.disable();
+    }
+  }
+
+  componentWillUnmount() {
+    this.currentComparisonConfigFormGroup.cleanup();
+    this._unsubscriber.next();
+    this._unsubscriber.complete();
+  }
+
   private _onLineNameChange() {
     this.selectedLineNameFormControl.valueChanges()
       .subscribe({
@@ -271,25 +290,6 @@ export class TimeSeriesVsTimeSeries extends Component<Props, State> {
           });
         }
       });
-  }
-
-  componentDidUpdate(prevProps: Props, prevState: State) {
-    if(prevProps.simulationIds !== this.props.simulationIds || prevProps.lineName !== this.props.lineName) {
-      this.setState({
-        lineNameOptionBuilder: new SelectionOptionBuilder(this.props.lineName)
-      });
-    }
-    if(prevState.modelDictionaryComponents.length === 0 || this.state.modelDictionaryComponents.length === 0) {
-      this.selectedComponentFormControl.disable();
-      this.useMagnitudeFormControl.disable();
-      this.useAngleFormControl.disable();
-    }
-  }
-
-  componentWillUnmount() {
-    this.currentComparisonConfigFormGroup.cleanup();
-    this._unsubscriber.next();
-    this._unsubscriber.complete();
   }
 
   render() {

@@ -245,7 +245,11 @@ export class ExpectedResultComparisonContainer extends Component<Props, State> {
       case ExpectedResultComparisonType.SIMULATION_VS_TIME_SERIES:
         return (
           <SimulationVsTimeSeries
+            lineName={this.state.lineNames}
             simulationIds={this.state.simulationIds}
+            onMRIDChanged={this.props.onMRIDChanged}
+            lineNamesAndMRIDMap={this.state.lineNamesAndMRIDMap}
+            mRIDAndSimulationIdsMapping={this.state.mRIDAndSimulationIdsMapping}
             onSubmit={this.onSimulationVsTimeSeriesFormSubmit} />
         );
 
@@ -280,8 +284,8 @@ export class ExpectedResultComparisonContainer extends Component<Props, State> {
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  onSimulationVsTimeSeriesFormSubmit(simulationId: number, simulationConfiguration: any) {
-    this._fetchResponse(new SimulationVsTimeSeriesRequest(simulationConfiguration, simulationId));
+  onSimulationVsTimeSeriesFormSubmit(simulationConfiguration: any, simulationId: number, lineName: string, componentType: string, useMagnitude: boolean, useAngle: boolean, component: any) {
+    this._dynamicallyFetchComparisonResponse(new SimulationVsTimeSeriesRequest(simulationConfiguration, simulationId), lineName, componentType, useMagnitude, useAngle, component);
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

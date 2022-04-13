@@ -3,20 +3,18 @@ import { MessageRequest } from '@client:common/MessageRequest';
 
 export class SimulationVsTimeSeriesRequest implements MessageRequest {
 
-  readonly url = 'goss.gridappsd.process.request.simulation';
-
   readonly requestBody = {
     power_system_config: {
       SubGeographicalRegion_name: '_1CD7D2EE-3C91-3248-5662-A43EFEFAC224',
       GeographicalRegion_name: '_24809814-4EC6-29D2-B509-7F8BFB646437',
-      Line_name: '_C1C3E687-6FFD-C753-582B-632A27E28507' // IEEE123
+      Line_name: '_C1C3E687-6FFD-C753-582B-632A27E28507'
     },
     simulation_config: {
       power_flow_solver_method: 'NR',
       duration: 60,
       simulation_name: 'ieee123',
       simulator: 'GridLAB-D',
-      start_time: 1248156000,
+      start_time: 1649796703,
       run_realtime: true,
       simulation_output: {},
       model_creation_config: {
@@ -48,19 +46,23 @@ export class SimulationVsTimeSeriesRequest implements MessageRequest {
     simulation_request_type: 'NEW',
     test_config: {
       appId: 'sample_app',
-      testId: Math.trunc(Math.random() * 1_000_000),
-      compareWithSimId: -1,
+      testId: '',
+      compareWithSimId: '',
       testType: 'simulation_vs_timeseries'
     }
   };
 
-  readonly replyTo = '/expected-result-comparison/simulation-vs-time-series';
-
+  readonly url: string;
+  readonly replyTo: string;
   constructor(simulationConfiguration: unknown | null, simulationId: number) {
-    if (simulationConfiguration !== null) {
+    if(simulationConfiguration !== null) {
       Object.assign(this.requestBody, simulationConfiguration);
     }
-    this.requestBody.test_config.compareWithSimId = simulationId;
+    const testId = Math.trunc(Math.random() * 1_000_000);
+    this.url = 'goss.gridappsd.process.request.simulation';
+    this.requestBody.test_config.testId = `${testId}`;
+    this.requestBody.test_config.compareWithSimId = `${simulationId}`;
+    this.replyTo = `/topic/goss.gridappsd.simulation.test.output.${testId}`;
   }
 
 }

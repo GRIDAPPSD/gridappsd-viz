@@ -4,13 +4,13 @@ import { MessageRequest } from '@client:common/MessageRequest';
 
 export class SimulationVsExpectedRequest implements MessageRequest {
 
-  readonly url = 'goss.gridappsd.process.request.simulation';
+  readonly testId = Math.trunc(Math.random() * 1_000_000);
 
   readonly requestBody = {
     power_system_config: {
       SubGeographicalRegion_name: '_1CD7D2EE-3C91-3248-5662-A43EFEFAC224',
       GeographicalRegion_name: '_24809814-4EC6-29D2-B509-7F8BFB646437',
-      Line_name: '_C1C3E687-6FFD-C753-582B-632A27E28507' // IEEE123
+      Line_name: '_C1C3E687-6FFD-C753-582B-632A27E28507'
     },
     simulation_config: {
       power_flow_solver_method: 'NR',
@@ -60,14 +60,15 @@ export class SimulationVsExpectedRequest implements MessageRequest {
     }
   };
 
-  readonly replyTo = '/expected-result-comparison/simulation-vs-expected';
-
+  readonly url = `/topic/goss.gridappsd.simulation.test.input.${this.requestBody.test_config.testId}`;
+  readonly replyTo = `/topic/goss.gridappsd.simulation.test.output.${this.requestBody.test_config.testId}`;
   constructor(simulationConfiguration: unknown | null, expectedResults: unknown, events: unknown[]) {
+    const testId = Math.trunc(Math.random() * 1_000_000);
     if (simulationConfiguration !== null) {
       Object.assign(this.requestBody, simulationConfiguration);
     }
+    this.requestBody.test_config.testId = testId;
     this.requestBody.test_config.expectedResults = expectedResults;
     this.requestBody.test_config.events = events;
   }
-
 }
