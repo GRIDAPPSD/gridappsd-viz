@@ -121,6 +121,25 @@ export class ExpectedVsTimeSeries extends Component<Props, State> {
     this._onUseAngleSelectionChange();
   }
 
+  componentDidUpdate(prevProps: Props, prevState: State) {
+    if(prevProps.simulationIds !== this.props.simulationIds || prevProps.lineName !== this.props.lineName) {
+      this.setState({
+        lineNameOptionBuilder: new SelectionOptionBuilder(this.props.lineName)
+      });
+    }
+    if(prevState.fileOutputDataMapInState === null || this.state.fileOutputDataMapInState === null) {
+      this.selectedComponentFormControl.disable();
+      this.useMagnitudeFormControl.disable();
+      this.useAngleFormControl.disable();
+    }
+  }
+
+  componentWillUnmount() {
+    this.currentComparisonConfigFormGroup.cleanup();
+    this._unsubscriber.next();
+    this._unsubscriber.complete();
+  }
+
   private _processLineNameChanges() {
     this.selectedLineNameFormControl.valueChanges()
       .subscribe({
@@ -251,25 +270,6 @@ export class ExpectedVsTimeSeries extends Component<Props, State> {
       });
   }
 
-  componentDidUpdate(prevProps: Props, prevState: State) {
-    if(prevProps.simulationIds !== this.props.simulationIds || prevProps.lineName !== this.props.lineName) {
-      this.setState({
-        lineNameOptionBuilder: new SelectionOptionBuilder(this.props.lineName)
-      });
-    }
-    if(prevState.fileOutputDataMapInState === null || this.state.fileOutputDataMapInState === null) {
-      this.selectedComponentFormControl.disable();
-      this.useMagnitudeFormControl.disable();
-      this.useAngleFormControl.disable();
-    }
-  }
-
-  componentWillUnmount() {
-    this.currentComparisonConfigFormGroup.cleanup();
-    this._unsubscriber.next();
-    this._unsubscriber.complete();
-  }
-
   onUploadExpectedResultsFile() {
     this._filePickerService.fileSelectionChanges()
       .pipe(take(1))
@@ -369,10 +369,10 @@ export class ExpectedVsTimeSeries extends Component<Props, State> {
           </div>
         </div>
         <Select
-            label='Component type'
-            selectedOptionFinder={type => type === this.currentComparisonConfigFormGroup.findControl('componentType').getValue()}
-            selectionOptionBuilder={this.state.measurementTypeOptionBuilder}
-            formControlModel={this.selectedComponentTypeFormControl} />
+          label='Component type'
+          selectedOptionFinder={type => type === this.currentComparisonConfigFormGroup.findControl('componentType').getValue()}
+          selectionOptionBuilder={this.state.measurementTypeOptionBuilder}
+          formControlModel={this.selectedComponentTypeFormControl} />
         <Checkbox
           label='Magnitude'
           name='useMagnitude'

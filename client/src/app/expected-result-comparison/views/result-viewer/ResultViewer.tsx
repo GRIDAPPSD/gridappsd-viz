@@ -9,12 +9,12 @@ import { ModelDictionaryComponent } from '@client:common/topology';
 import { TimeSeriesVsTimeSeriesChartResult } from '../time-series-vs-time-series/TimeSeriesVsTimeSeriesChartResult';
 import { ExpectedVsTimeSeriesChartResult } from '../expected-vs-time-series/ExpectedVsTimeSeriesChartResult';
 import { SimulationVsTimeSeriesChartResult } from '../simulation-vs-time-series/SimulationVsTimeSeriesChartResult';
+import { SimulationVsExpectedChartResult } from '../simulation-vs-expected/SimulationVsExpectedChartResult';
 
 import './ResultViewer.light.scss';
 import './ResultViewer.dark.scss';
 
 interface Props {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   noSufficientData: boolean;
   startFetchingAfterSubmit: boolean;
   result: any[] | any;
@@ -87,16 +87,38 @@ export class ResultViewer extends Component<Props, State> {
   }
 
   showResultAsTable() {
-    return (
-      <FilterableTable
-        rows={this.props.result}
-        modelDictionaryComponentsCaches={this.props.modelDictionaryComponentsCaches} />
-    );
+    switch (this.props.comparisonType) {
+      // * Without events in the result:
+      case ExpectedResultComparisonType.SIMULATION_VS_EXPECTED:
+        return (
+          // filter out the result objects that does not contain events type
+          <FilterableTable
+            rows={this.props.result.filter(function(value: string) {
+              return !Object.prototype.hasOwnProperty.call(value, 'events');
+            })}
+            modelDictionaryComponentsCaches={this.props.modelDictionaryComponentsCaches} />
+        );
+      case ExpectedResultComparisonType.SIMULATION_VS_TIME_SERIES:
+      case ExpectedResultComparisonType.EXPECTED_VS_TIME_SERIES:
+      case ExpectedResultComparisonType.TIME_SERIES_VS_TIME_SERIES:
+        return (
+          <FilterableTable
+          rows={this.props.result}
+          modelDictionaryComponentsCaches={this.props.modelDictionaryComponentsCaches} />
+        );
+    }
   }
 
   showResultAsPlot() {
     switch (this.props.comparisonType) {
       case ExpectedResultComparisonType.SIMULATION_VS_EXPECTED:
+        return (
+          <SimulationVsExpectedChartResult
+          result={this.props.result}
+          noSufficientData={this.props.noSufficientData}
+          startFetchingAfterSubmit={this.props.startFetchingAfterSubmit}
+          phaseAndMeasurementMRIDMapping={this.props.phaseAndMeasurementMRIDMapping} />
+        );
       case ExpectedResultComparisonType.SIMULATION_VS_TIME_SERIES:
         return (
           <SimulationVsTimeSeriesChartResult

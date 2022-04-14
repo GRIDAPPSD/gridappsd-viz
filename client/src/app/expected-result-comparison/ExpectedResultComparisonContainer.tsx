@@ -1,6 +1,6 @@
 import { Component } from 'react';
 import { Subscription } from 'rxjs';
-import { map, finalize, takeWhile } from 'rxjs/operators';
+import { map, takeWhile } from 'rxjs/operators';
 
 import { ExpectedResultComparisonType } from '@client:common/ExpectedResultComparisonType';
 import { StateStore } from '@client:common/state-store';
@@ -239,7 +239,14 @@ export class ExpectedResultComparisonContainer extends Component<Props, State> {
     switch (this.state.comparisonType) {
       case ExpectedResultComparisonType.SIMULATION_VS_EXPECTED:
         return (
-          <SimulationVsExpected onSubmit={this.onSimulationVsExpectedFormSubmited} />
+          <SimulationVsExpected
+          lineName={this.state.lineNames}
+          simulationIds={this.state.simulationIds}
+          onMRIDChanged={this.props.onMRIDChanged}
+          lineNamesAndMRIDMap={this.state.lineNamesAndMRIDMap}
+          mRIDAndSimulationIdsMapping={this.state.mRIDAndSimulationIdsMapping}
+          onSubmit={this.onSimulationVsExpectedFormSubmited}
+          modelDictionaryComponentsCaches={this.state.modelDictionaryComponentsCaches} />
         );
 
       case ExpectedResultComparisonType.SIMULATION_VS_TIME_SERIES:
@@ -278,61 +285,24 @@ export class ExpectedResultComparisonContainer extends Component<Props, State> {
     }
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  onSimulationVsExpectedFormSubmited(simulationConfiguration: any, expectedResults: any, events: any[]) {
-    this._fetchResponse(new SimulationVsExpectedRequest(simulationConfiguration, expectedResults, events));
+  // onSimulationVsExpectedFormSubmited(simulationConfiguration: any, expectedResults: any, events: any[]) {
+  //   this._fetchResponse(new SimulationVsExpectedRequest(simulationConfiguration, expectedResults, events));
+  // }
+  // No events parameter for now
+  onSimulationVsExpectedFormSubmited(simulationConfiguration: any, expectedResults: any, lineName: string, componentType: string, useMagnitude: boolean, useAngle: boolean, component: any) {
+    this._dynamicallyFetchComparisonResponse(new SimulationVsExpectedRequest(simulationConfiguration, expectedResults), lineName, componentType, useMagnitude, useAngle, component);
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   onSimulationVsTimeSeriesFormSubmit(simulationConfiguration: any, simulationId: number, lineName: string, componentType: string, useMagnitude: boolean, useAngle: boolean, component: any) {
     this._dynamicallyFetchComparisonResponse(new SimulationVsTimeSeriesRequest(simulationConfiguration, simulationId), lineName, componentType, useMagnitude, useAngle, component);
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   onExpectedVsTimeSeriesFormSubmit(expectedResults: any, simulationId: number, lineName: string, componentType: string, useMagnitude: boolean, useAngle: boolean, component: any) {
     this._dynamicallyFetchComparisonResponse(new ExpectedVsTimeSeriesRequest(expectedResults, simulationId), lineName, componentType, useMagnitude, useAngle, component);
   }
 
   onTimeSeriesVsTimeSeriesFormSubmit(lineName: string, componentType: string, useMagnitude: boolean, useAngle: boolean, component: any, firstSimulationId: number, secondSimulationId: number) {
     this._dynamicallyFetchComparisonResponse(new TimeSeriesVsTimeSeriesRequest(firstSimulationId, secondSimulationId), lineName, componentType, useMagnitude, useAngle, component);
-  }
-
-  private _fetchResponse(request: MessageRequest) {
-    const payload = [] as unknown[];
-
-    this.setState({
-      isFetching: true
-    });
-    this._responseSubscription?.unsubscribe();
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    this._responseSubscription = this._stompClientService.readFrom<any[] | any>(request.replyTo)
-      .pipe(
-        takeWhile(data => data.status !== 'finish'),
-        finalize(() => {
-          this.setState({
-            isFetching: false
-          });
-        }))
-      .subscribe({
-        next: data => {
-          if (data.status !== 'start') {
-            payload.push(data);
-          }
-        },
-        error: errorMessage => {
-          Notification.open(errorMessage);
-        },
-        complete: () => {
-          this.setState({
-            comparisonResult: payload
-          });
-        }
-      });
-    this._stompClientService.send({
-      destination: request.url,
-      body: JSON.stringify(request.requestBody),
-      replyTo: request.replyTo
-    });
   }
 
   private _dynamicallyFetchComparisonResponse(request: MessageRequest, lineName: string, componentType: string, useMagnitude: boolean, useAngle: boolean, component: any) {
@@ -396,5 +366,44 @@ export class ExpectedResultComparisonContainer extends Component<Props, State> {
       replyTo: request.replyTo
     });
   }
+
+  // Archive _fetchResponse() method
+  // private _fetchResponse(request: MessageRequest) {
+  //   const payload = [] as unknown[];
+
+  //   this.setState({
+  //     isFetching: true
+  //   });
+  //   this._responseSubscription?.unsubscribe();
+  //   // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  //   this._responseSubscription = this._stompClientService.readFrom<any[] | any>(request.replyTo)
+  //     .pipe(
+  //       takeWhile(data => data.status !== 'finish'),
+  //       finalize(() => {
+  //         this.setState({
+  //           isFetching: false
+  //         });
+  //       }))
+  //     .subscribe({
+  //       next: data => {
+  //         if (data.status !== 'start') {
+  //           payload.push(data);
+  //         }
+  //       },
+  //       error: errorMessage => {
+  //         Notification.open(errorMessage);
+  //       },
+  //       complete: () => {
+  //         this.setState({
+  //           comparisonResult: payload
+  //         });
+  //       }
+  //     });
+  //   this._stompClientService.send({
+  //     destination: request.url,
+  //     body: JSON.stringify(request.requestBody),
+  //     replyTo: request.replyTo
+  //   });
+  // }
 
 }

@@ -4,8 +4,6 @@ import { MessageRequest } from '@client:common/MessageRequest';
 
 export class SimulationVsExpectedRequest implements MessageRequest {
 
-  readonly testId = Math.trunc(Math.random() * 1_000_000);
-
   readonly requestBody = {
     power_system_config: {
       SubGeographicalRegion_name: '_1CD7D2EE-3C91-3248-5662-A43EFEFAC224',
@@ -17,7 +15,7 @@ export class SimulationVsExpectedRequest implements MessageRequest {
       duration: 60,
       simulation_name: 'ieee123',
       simulator: 'GridLAB-D',
-      start_time: 1248202800,
+      start_time: 1649865569,
       run_realtime: true,
       simulation_output: {},
       model_creation_config: {
@@ -60,15 +58,22 @@ export class SimulationVsExpectedRequest implements MessageRequest {
     }
   };
 
-  readonly url = `/topic/goss.gridappsd.simulation.test.input.${this.requestBody.test_config.testId}`;
-  readonly replyTo = `/topic/goss.gridappsd.simulation.test.output.${this.requestBody.test_config.testId}`;
-  constructor(simulationConfiguration: unknown | null, expectedResults: unknown, events: unknown[]) {
-    const testId = Math.trunc(Math.random() * 1_000_000);
+  readonly url: string;
+  readonly replyTo: string;
+  // * Ignore events for now, needs to bring it back once hear back from Poorva.
+  // constructor(simulationConfiguration: unknown | null, expectedResults: unknown, events: unknown[]) {
+  constructor(simulationConfiguration: unknown | null, expectedResults: unknown) {
     if (simulationConfiguration !== null) {
       Object.assign(this.requestBody, simulationConfiguration);
     }
+    if (expectedResults !== null) {
+      Object.assign(this.requestBody, expectedResults);
+    }
+    const testId = Math.trunc(Math.random() * 1_000_000);
+    this.url = 'goss.gridappsd.process.request.simulation';
+    this.replyTo = `/topic/goss.gridappsd.simulation.test.output.${testId}`;
     this.requestBody.test_config.testId = testId;
     this.requestBody.test_config.expectedResults = expectedResults;
-    this.requestBody.test_config.events = events;
+    // this.requestBody.test_config.events = events;
   }
 }

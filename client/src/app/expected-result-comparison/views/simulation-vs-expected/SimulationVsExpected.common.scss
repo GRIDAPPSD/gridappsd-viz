@@ -1,14 +1,26 @@
 .simulation-vs-expected {
     display: flex;
+    flex-wrap: wrap;
     margin-left: 15px;
     margin-bottom: 15px;
     margin-top: 5px;
-    align-items: flex-start;
+    align-items: baseline;
+
+    .form-control.select {
+        margin-top: 1;
+        margin-bottom: 0;
+
+        .form-control__label {
+            width: initial;
+            margin-right: 5px;
+        }
+    }
 }
 
 .simulation-vs-expected__file-upload {
     display: flex;
     flex-flow: column nowrap;
+    margin-top: 10px;
     margin-right: 20px;
     align-items: flex-start;
 }
