@@ -35,16 +35,12 @@ interface State {
   lineNameOptionBuilder: SelectionOptionBuilder<string>;
   measurementTypeOptionBuilder: SelectionOptionBuilder<MeasurementType>;
   modelDictionaryComponentOptionBuilder: SelectionOptionBuilder<ModelDictionaryComponent>;
-  firstSimulationIdOptionBuilder: SelectionOptionBuilder<number>;
-
   selectedMenuOptions: SimulationVsExpectedRequestConfigModel;
 
   expectedResultsFileName: string;
   eventsFileName: string;
   simulationConfigurationFileName: string;
   disableSubmitButton: boolean;
-
-  simIdFlag: number;
 }
 
 export class SimulationVsExpected extends Component<Props, State> {
@@ -74,7 +70,6 @@ export class SimulationVsExpected extends Component<Props, State> {
       lineNameOptionBuilder: new SelectionOptionBuilder(props.lineName),
       measurementTypeOptionBuilder: SelectionOptionBuilder.defaultBuilder(),
       modelDictionaryComponentOptionBuilder: SelectionOptionBuilder.defaultBuilder(),
-      firstSimulationIdOptionBuilder: SelectionOptionBuilder.defaultBuilder(),
       expectedResultsFileName: '',
       eventsFileName: '',
       simulationConfigurationFileName: '',
@@ -85,10 +80,8 @@ export class SimulationVsExpected extends Component<Props, State> {
         componentType: '',
         useMagnitude: false,
         useAngle: false,
-        component: '',
-        firstSimulationId: null
-      },
-      simIdFlag: null
+        component: ''
+      }
     };
 
     this.onUploadExpectedResultsFile = this.onUploadExpectedResultsFile.bind(this);
@@ -127,7 +120,6 @@ export class SimulationVsExpected extends Component<Props, State> {
         }
       });
     this._processLineNameChanges();
-    this._onFirstSimulationSelectionChange();
     this._onComponentTypeSelectionChange();
     this._onComponentSelectionChange();
     this._onUseMagnitudeSelectionChange();
@@ -162,9 +154,27 @@ export class SimulationVsExpected extends Component<Props, State> {
            const matchingSimulationIds = this.props.mRIDAndSimulationIdsMapping.get(theSelectedLineNameMRID);
             if(this.props.lineNamesAndMRIDMap.has(selectedLineName) && matchingSimulationIds) {
               this.setState({
-                firstSimulationIdOptionBuilder: new SelectionOptionBuilder(matchingSimulationIds),
                 modelDictionaryComponentOptionBuilder: SelectionOptionBuilder.defaultBuilder(),
-                selectedMenuOptions:{...this.state.selectedMenuOptions, lineName: selectedLineName}
+                selectedMenuOptions:{...this.state.selectedMenuOptions, lineName: selectedLineName},
+                measurementTypeOptionBuilder: new SelectionOptionBuilder (
+                  [
+                    MeasurementType.POWER,
+                    MeasurementType.TAP,
+                    MeasurementType.VOLTAGE
+                  ],
+                  type => {
+                    switch (type) {
+                      case MeasurementType.POWER:
+                        return 'Power';
+                    case MeasurementType.TAP:
+                        return 'Tap';
+                    case MeasurementType.VOLTAGE:
+                        return 'Voltage';
+                    default:
+                        return '';
+                    }
+                  }
+                )
               });
               this._stateStore.update({
                 modelDictionaryComponents: [],
@@ -176,39 +186,6 @@ export class SimulationVsExpected extends Component<Props, State> {
                 measurementTypeOptionBuilder: SelectionOptionBuilder.defaultBuilder()
               });
             }
-          }
-        }
-      });
-  }
-
-  private _onFirstSimulationSelectionChange() {
-    this.selectedFirstSimulationIdFormControl.valueChanges()
-      .subscribe({
-        next: selectedFirstSimulationId => {
-          if(selectedFirstSimulationId) {
-            this.setState({
-              simIdFlag: selectedFirstSimulationId,
-              selectedMenuOptions: {...this.state.selectedMenuOptions, firstSimulationId: selectedFirstSimulationId},
-              measurementTypeOptionBuilder: new SelectionOptionBuilder (
-                [
-                  MeasurementType.POWER,
-                  MeasurementType.TAP,
-                  MeasurementType.VOLTAGE
-                ],
-                type => {
-                  switch (type) {
-                    case MeasurementType.POWER:
-                      return 'Power';
-                  case MeasurementType.TAP:
-                      return 'Tap';
-                  case MeasurementType.VOLTAGE:
-                      return 'Voltage';
-                  default:
-                      return '';
-                  }
-                }
-              )
-            });
           }
         }
       });
@@ -419,13 +396,8 @@ export class SimulationVsExpected extends Component<Props, State> {
             selectionOptionBuilder={this.state.lineNameOptionBuilder}
             formControlModel={this.selectedLineNameFormControl}
           />
-          <Select
-            label='First simulation ID'
-            selectionOptionBuilder={this.state.firstSimulationIdOptionBuilder}
-            formControlModel={this.selectedFirstSimulationIdFormControl} />
           <div className='simulation-vs-expected__file-upload'>
             <IconButton
-              disabled={this.state.simIdFlag === null}
               icon='cloud_upload'
               label='Upload expected results file'
               onClick={this.onUploadExpectedResultsFile} />
@@ -435,7 +407,6 @@ export class SimulationVsExpected extends Component<Props, State> {
           </div>
           <div className='simulation-vs-expected__file-upload'>
             <IconButton
-              disabled={this.state.simIdFlag === null}
               icon='cloud_upload'
               label='Upload events file'
               onClick={this.onUploadEventsFile} />
@@ -445,7 +416,6 @@ export class SimulationVsExpected extends Component<Props, State> {
           </div>
           <div className='simulation-vs-expected__file-upload'>
             <IconButton
-              disabled={this.state.simIdFlag === null}
               icon='cloud_upload'
               label='Upload simulation configuration file'
               onClick={this.onUploadSimulationConfigurationFile} />

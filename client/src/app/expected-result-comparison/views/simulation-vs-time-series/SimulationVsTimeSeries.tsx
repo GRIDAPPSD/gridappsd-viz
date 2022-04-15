@@ -317,7 +317,7 @@ export class SimulationVsTimeSeries extends Component<Props, State> {
           selectionOptionBuilder={this.state.lineNameOptionBuilder}
           formControlModel={this.selectedLineNameFormControl} />
         <Select
-          label='First simulation ID'
+          label='Simulation ID'
           selectionOptionBuilder={this.state.firstSimulationIdOptionBuilder}
           formControlModel={this.selectedFirstSimulationIdFormControl} />
         <div className='simulation-vs-time-series__file-upload'>

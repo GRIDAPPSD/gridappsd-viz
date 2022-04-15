@@ -367,43 +367,4 @@ export class ExpectedResultComparisonContainer extends Component<Props, State> {
     });
   }
 
-  // Archive _fetchResponse() method
-  // private _fetchResponse(request: MessageRequest) {
-  //   const payload = [] as unknown[];
-
-  //   this.setState({
-  //     isFetching: true
-  //   });
-  //   this._responseSubscription?.unsubscribe();
-  //   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  //   this._responseSubscription = this._stompClientService.readFrom<any[] | any>(request.replyTo)
-  //     .pipe(
-  //       takeWhile(data => data.status !== 'finish'),
-  //       finalize(() => {
-  //         this.setState({
-  //           isFetching: false
-  //         });
-  //       }))
-  //     .subscribe({
-  //       next: data => {
-  //         if (data.status !== 'start') {
-  //           payload.push(data);
-  //         }
-  //       },
-  //       error: errorMessage => {
-  //         Notification.open(errorMessage);
-  //       },
-  //       complete: () => {
-  //         this.setState({
-  //           comparisonResult: payload
-  //         });
-  //       }
-  //     });
-  //   this._stompClientService.send({
-  //     destination: request.url,
-  //     body: JSON.stringify(request.requestBody),
-  //     replyTo: request.replyTo
-  //   });
-  // }
-
 }
