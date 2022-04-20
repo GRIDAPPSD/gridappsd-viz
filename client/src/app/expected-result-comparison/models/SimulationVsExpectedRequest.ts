@@ -47,9 +47,9 @@ export class SimulationVsExpectedRequest implements MessageRequest {
     simulation_request_type: 'NEW',
     test_config: {
       appId: 'sample_app',
-      testId: Math.trunc(Math.random() * 1_000_000),
+      testId: null as number,
       testType: 'simulation_vs_expected',
-      expectedResults: null as any,
+      expectedResults: {},
       events: null as any,
       testInput: true,
       testOutput: true,
@@ -60,20 +60,20 @@ export class SimulationVsExpectedRequest implements MessageRequest {
 
   readonly url: string;
   readonly replyTo: string;
+
   // * Ignore events for now, needs to bring it back once hear back from Poorva.
   // constructor(simulationConfiguration: unknown | null, expectedResults: unknown, events: unknown[]) {
   constructor(simulationConfiguration: unknown | null, expectedResults: unknown) {
     if (simulationConfiguration !== null) {
-      Object.assign(this.requestBody, simulationConfiguration);
+      Object.assign(this.requestBody.simulation_config, simulationConfiguration);
     }
     if (expectedResults !== null) {
-      Object.assign(this.requestBody, expectedResults);
+      this.requestBody.test_config.expectedResults = expectedResults;
     }
     const testId = Math.trunc(Math.random() * 1_000_000);
     this.url = 'goss.gridappsd.process.request.simulation';
     this.replyTo = `/topic/goss.gridappsd.simulation.test.output.${testId}`;
     this.requestBody.test_config.testId = testId;
-    this.requestBody.test_config.expectedResults = expectedResults;
     // this.requestBody.test_config.events = events;
   }
 }

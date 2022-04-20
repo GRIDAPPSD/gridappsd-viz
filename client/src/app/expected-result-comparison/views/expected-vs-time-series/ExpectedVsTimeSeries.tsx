@@ -34,8 +34,6 @@ interface State {
   simIdFlag: number;
 
   expectedResultsFileName: string;
-  // comment out showProgressIndicator because we are populating component options from the uploaded file
-  // showProgressIndicator: boolean;
   fileNotUploaded: boolean;
 
   expectedResultsInState: any;
@@ -76,9 +74,8 @@ export class ExpectedVsTimeSeries extends Component<Props, State> {
       },
       simIdFlag: null,
       expectedResultsFileName: '',
-      // showProgressIndicator: false,
       fileNotUploaded: true,
-      expectedResultsInState: {}
+      expectedResultsInState: null
     };
 
     this.onUploadExpectedResultsFile = this.onUploadExpectedResultsFile.bind(this);
@@ -149,7 +146,6 @@ export class ExpectedVsTimeSeries extends Component<Props, State> {
            const matchingSimulationIds = this.props.mRIDAndSimulationIdsMapping.get(theSelectedLineNameMRID);
             if(this.props.lineNamesAndMRIDMap.has(selectedLineName) && matchingSimulationIds) {
               this.setState({
-                // showProgressIndicator: true,
                 firstSimulationIdOptionBuilder: new SelectionOptionBuilder(matchingSimulationIds),
                 modelDictionaryComponentOptionBuilder: SelectionOptionBuilder.defaultBuilder(),
                 selectedMenuOptions:{...this.state.selectedMenuOptions, lineName: selectedLineName}
@@ -208,9 +204,8 @@ export class ExpectedVsTimeSeries extends Component<Props, State> {
         next: selectedComponentType => {
           this.useMagnitudeFormControl.reset();
           this.useAngleFormControl.reset();
-          if (this.selectedComponentTypeFormControl.isValid()) {
+          if (this.selectedComponentTypeFormControl.isValid() && this.state.fileOutputDataMapInState) {
             this.setState({
-              // showProgressIndicator: true,
               modelDictionaryComponentOptionBuilder: new SelectionOptionBuilder(
                 Array.from(this.state.fileOutputDataMapInState.values()).filter(e => e.type === selectedComponentType),
                 e => e.displayName
@@ -337,6 +332,40 @@ export class ExpectedVsTimeSeries extends Component<Props, State> {
     return this.fileOutputDataMap;
   }
 
+  renderAdditionalMenus = () => {
+    if(this.state.expectedResultsInState) {
+      return (
+        <>
+        <Select
+          label='Component type'
+          selectedOptionFinder={type => type === this.currentComparisonConfigFormGroup.findControl('componentType').getValue()}
+          selectionOptionBuilder={this.state.measurementTypeOptionBuilder}
+          formControlModel={this.selectedComponentTypeFormControl} />
+        <Checkbox
+          label='Magnitude'
+          name='useMagnitude'
+          labelPosition='right'
+          formControlModel={this.useMagnitudeFormControl} />
+        <Checkbox
+          label='Angle'
+          name='useAngle'
+          labelPosition='right'
+          formControlModel={this.useAngleFormControl} />
+        <Select
+          label='Component'
+          selectionOptionBuilder={this.state.modelDictionaryComponentOptionBuilder}
+          formControlModel={this.selectedComponentFormControl} />
+        <BasicButton
+          type='positive'
+          label='Submit'
+          disabled={this._checkDisableBtn(this.state.fileNotUploaded, this.state.disableSubmitButton)}
+          onClick={this.onSubmit} />
+          </>
+      );
+    }
+    return null;
+  };
+
   onSubmit() {
     const { lineName, componentType, useMagnitude, useAngle, component, firstSimulationId } = this.state.selectedMenuOptions;
     this.props.onSubmit(this.state.expectedResultsInState, firstSimulationId, lineName, componentType, useMagnitude, useAngle, component);
@@ -368,33 +397,7 @@ export class ExpectedVsTimeSeries extends Component<Props, State> {
             {this.state.expectedResultsFileName ? 'File uploaded: ' + this.state.expectedResultsFileName : ''}
           </div>
         </div>
-        <Select
-          label='Component type'
-          selectedOptionFinder={type => type === this.currentComparisonConfigFormGroup.findControl('componentType').getValue()}
-          selectionOptionBuilder={this.state.measurementTypeOptionBuilder}
-          formControlModel={this.selectedComponentTypeFormControl} />
-        <Checkbox
-          label='Magnitude'
-          name='useMagnitude'
-          labelPosition='right'
-          formControlModel={this.useMagnitudeFormControl} />
-        <Checkbox
-          label='Angle'
-          name='useAngle'
-          labelPosition='right'
-          formControlModel={this.useAngleFormControl} />
-        <Select
-          label='Component'
-          selectionOptionBuilder={this.state.modelDictionaryComponentOptionBuilder}
-          formControlModel={this.selectedComponentFormControl} />
-        <BasicButton
-          type='positive'
-          label='Submit'
-          disabled={this._checkDisableBtn(this.state.fileNotUploaded, this.state.disableSubmitButton)}
-          onClick={this.onSubmit} />
-        {
-          // this.state.showProgressIndicator ? <ProgressIndicator show /> : null
-        }
+        {this.renderAdditionalMenus()}
         <FilePicker />
       </Form>
     );

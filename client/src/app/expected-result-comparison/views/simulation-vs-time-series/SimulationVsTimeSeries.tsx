@@ -37,7 +37,7 @@ interface State {
 
   simulationConfigurationFileName: string;
   userSelectedSimulationIdFromDropDownMenu: number;
-  fileNotUploaded: boolean;
+  fileUploaded: boolean;
 }
 export class SimulationVsTimeSeries extends Component<Props, State> {
   readonly selectedLineNameFormControl = new FormControlModel<string>(null);
@@ -73,7 +73,7 @@ export class SimulationVsTimeSeries extends Component<Props, State> {
         firstSimulationId: null
       },
       simulationConfigurationFileContentInState: {},
-      fileNotUploaded: true,
+      fileUploaded: false,
       simulationConfigurationFileName: '',
       userSelectedSimulationIdFromDropDownMenu: null,
       showProgressIndicator: false
@@ -284,8 +284,7 @@ export class SimulationVsTimeSeries extends Component<Props, State> {
         next: file => {
           this.setState({
             simulationConfigurationFileContentInState: {},
-            simulationConfigurationFileName: file.name,
-            fileNotUploaded: false
+            simulationConfigurationFileName: file.name
           });
           this._filePickerService.clearSelection();
         }
@@ -295,10 +294,16 @@ export class SimulationVsTimeSeries extends Component<Props, State> {
       .readFileAsJson<any>()
       .subscribe({
         next: fileContent => {
-          fileContent.test_config.compareWithSimId = this.state.userSelectedSimulationIdFromDropDownMenu;
-          this.setState({
-            simulationConfigurationFileContentInState: fileContent
-          });
+          if(!fileContent.test_config){
+            Notification.open('Incorrect file structure, please refer to the documentation and edit file accordingly.');
+          } else {
+            fileContent.test_config['compareWithSimId'] = this.state.userSelectedSimulationIdFromDropDownMenu;
+            fileContent.test_config['testType'] = 'simulation_vs_timeseries';
+            this.setState({
+              simulationConfigurationFileContentInState: fileContent,
+              fileUploaded: true
+            });
+          }
         },
         error: errorMessage => {
           Notification.open(errorMessage);
@@ -308,6 +313,40 @@ export class SimulationVsTimeSeries extends Component<Props, State> {
         }
       });
   }
+
+  renderAdditionalMenus = () => {
+    if(this.state.fileUploaded) {
+      return (
+        <>
+          <Select
+            label='Component type'
+            selectedOptionFinder={type => type === this.currentComparisonConfigFormGroup.findControl('componentType').getValue()}
+            selectionOptionBuilder={this.state.measurementTypeOptionBuilder}
+            formControlModel={this.selectedComponentTypeFormControl} />
+          <Checkbox
+            label='Magnitude'
+            name='useMagnitude'
+            labelPosition='right'
+            formControlModel={this.useMagnitudeFormControl} />
+          <Checkbox
+            label='Angle'
+            name='useAngle'
+            labelPosition='right'
+            formControlModel={this.useAngleFormControl} />
+          <Select
+            label='Component'
+            selectionOptionBuilder={this.state.modelDictionaryComponentOptionBuilder}
+            formControlModel={this.selectedComponentFormControl} />
+          <BasicButton
+            type='positive'
+            label='Submit'
+            disabled={this.state.disableSubmitButton}
+            onClick={this.onSubmit} />
+        </>
+      );
+    }
+    return null;
+  };
 
   render() {
     return (
@@ -322,6 +361,7 @@ export class SimulationVsTimeSeries extends Component<Props, State> {
           formControlModel={this.selectedFirstSimulationIdFormControl} />
         <div className='simulation-vs-time-series__file-upload'>
           <IconButton
+            disabled={this.state.userSelectedSimulationIdFromDropDownMenu === null}
             icon='cloud_upload'
             label='Upload simulation configuration file'
             onClick={this.onUploadSimulationConfigurationFile} />
@@ -329,33 +369,8 @@ export class SimulationVsTimeSeries extends Component<Props, State> {
             {this.state.simulationConfigurationFileName ? 'File uploaded: ' + this.state.simulationConfigurationFileName : ''}
           </div>
         </div>
-        <Select
-            label='Component type'
-            selectedOptionFinder={type => type === this.currentComparisonConfigFormGroup.findControl('componentType').getValue()}
-            selectionOptionBuilder={this.state.measurementTypeOptionBuilder}
-            formControlModel={this.selectedComponentTypeFormControl} />
-        <Checkbox
-          label='Magnitude'
-          name='useMagnitude'
-          labelPosition='right'
-          formControlModel={this.useMagnitudeFormControl} />
-        <Checkbox
-          label='Angle'
-          name='useAngle'
-          labelPosition='right'
-          formControlModel={this.useAngleFormControl} />
-        <Select
-          label='Component'
-          selectionOptionBuilder={this.state.modelDictionaryComponentOptionBuilder}
-          formControlModel={this.selectedComponentFormControl} />
-        <BasicButton
-          type='positive'
-          label='Submit'
-          disabled={this.state.disableSubmitButton}
-          onClick={this.onSubmit} />
-          {
-          this.state.showProgressIndicator ? <ProgressIndicator show /> : null
-        }
+        { this.renderAdditionalMenus() }
+        { this.state.showProgressIndicator ? <ProgressIndicator show /> : null }
         <FilePicker />
       </Form>
     );

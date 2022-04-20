@@ -41,6 +41,9 @@ interface State {
   eventsFileName: string;
   simulationConfigurationFileName: string;
   disableSubmitButton: boolean;
+
+  expectedResultsFileUploaded: boolean;
+  simConfigFileUploaded: boolean;
 }
 
 export class SimulationVsExpected extends Component<Props, State> {
@@ -49,7 +52,6 @@ export class SimulationVsExpected extends Component<Props, State> {
   readonly useMagnitudeFormControl = new FormControlModel(false);
   readonly useAngleFormControl = new FormControlModel(false);
   readonly selectedComponentFormControl = new FormControlModel<ModelDictionaryComponent>(null);
-  readonly selectedFirstSimulationIdFormControl = new FormControlModel<number>(null);
   readonly currentComparisonConfigFormGroup = this._createCurrentComparisonConfigFormGroupModel();
 
   readonly fileOutputDataMap = new Map<string, ModelDictionaryComponent>();
@@ -81,7 +83,9 @@ export class SimulationVsExpected extends Component<Props, State> {
         useMagnitude: false,
         useAngle: false,
         component: ''
-      }
+      },
+      expectedResultsFileUploaded: false,
+      simConfigFileUploaded: false
     };
 
     this.onUploadExpectedResultsFile = this.onUploadExpectedResultsFile.bind(this);
@@ -94,15 +98,13 @@ export class SimulationVsExpected extends Component<Props, State> {
   private _createCurrentComparisonConfigFormGroupModel() {
     const formGroupModel = new FormGroupModel({
       lineName: this.selectedLineNameFormControl,
-      firstSimulationId: this.selectedFirstSimulationIdFormControl,
       componentType: this.selectedComponentTypeFormControl,
       useMagnitude: this.useMagnitudeFormControl,
       useAngle: this.useAngleFormControl,
       component: this.selectedComponentFormControl
     });
 
-    this.selectedFirstSimulationIdFormControl.dependsOn(this.selectedLineNameFormControl);
-    this.selectedComponentTypeFormControl.dependsOn(this.selectedFirstSimulationIdFormControl);
+    this.selectedComponentTypeFormControl.dependsOn(this.selectedLineNameFormControl);
     this.useMagnitudeFormControl.dependsOn(this.selectedComponentTypeFormControl);
     this.useAngleFormControl.dependsOn(this.selectedComponentTypeFormControl);
     this.selectedComponentFormControl.dependsOn(this.selectedComponentTypeFormControl);
@@ -197,7 +199,7 @@ export class SimulationVsExpected extends Component<Props, State> {
         next: selectedComponentType => {
           this.useMagnitudeFormControl.reset();
           this.useAngleFormControl.reset();
-          if (this.selectedComponentTypeFormControl.isValid()) {
+          if (this.selectedComponentTypeFormControl.isValid() && this.state.fileOutputDataMapInState) {
             this.setState({
               modelDictionaryComponentOptionBuilder: new SelectionOptionBuilder(
                 Array.from(this.state.fileOutputDataMapInState.values()).filter(e => e.type === selectedComponentType),
@@ -274,15 +276,21 @@ export class SimulationVsExpected extends Component<Props, State> {
       .readFileAsJson<any>()
       .subscribe({
         next: fileContent => {
-          this._expectedResults = fileContent.test_config.expectedResults;
-          this.setState({
-            fileOutputDataMapInState: this._populateFileOutputDataMap(fileContent)
-          });
+          if(!fileContent.test_config.expectedResults) {
+            Notification.open('Incorrect file structure, please refer to the documentation and edit file accordingly.');
+          } else {
+            this._expectedResults = fileContent.test_config.expectedResults;
+            this.setState({
+              fileOutputDataMapInState: this._populateFileOutputDataMap(fileContent),
+              expectedResultsFileUploaded: true
+            });
+          }
         },
         error: errorMessage => {
           Notification.open(errorMessage);
           this.setState({
-            disableSubmitButton: true
+            disableSubmitButton: true,
+            expectedResultsFileUploaded: false
           });
         }
       });
@@ -368,11 +376,22 @@ export class SimulationVsExpected extends Component<Props, State> {
       .readFileAsJson<any>()
       .subscribe({
         next: (fileContent) => {
-          this._simulationConfiguration = fileContent.simulation_config;
+          if(!fileContent.simulation_config) {
+            Notification.open('Incorrect file structure, please refer to the documentation and edit file accordingly.');
+          } else {
+            fileContent['test_config']['testType'] = 'simulation-vs-expected';
+            this._simulationConfiguration = fileContent.simulation_config;
+            this.setState({
+              simConfigFileUploaded: true
+            });
+          }
         },
         error: errorMessage => {
           Notification.open(errorMessage);
           this._simulationConfiguration = null;
+          this.setState({
+            simConfigFileUploaded: false
+          });
         }
       });
   }
@@ -384,6 +403,40 @@ export class SimulationVsExpected extends Component<Props, State> {
       disableSubmitButton: true
     });
   }
+
+  renderAdditionalMenus = () => {
+    if(this.state.expectedResultsFileUploaded && this.state.simConfigFileUploaded) {
+      return (
+        <>
+          <Select
+            label='Component type'
+            selectedOptionFinder={type => type === this.currentComparisonConfigFormGroup.findControl('componentType').getValue()}
+            selectionOptionBuilder={this.state.measurementTypeOptionBuilder}
+            formControlModel={this.selectedComponentTypeFormControl} />
+          <Checkbox
+            label='Magnitude'
+            name='useMagnitude'
+            labelPosition='right'
+            formControlModel={this.useMagnitudeFormControl} />
+          <Checkbox
+            label='Angle'
+            name='useAngle'
+            labelPosition='right'
+            formControlModel={this.useAngleFormControl} />
+          <Select
+            label='Component'
+            selectionOptionBuilder={this.state.modelDictionaryComponentOptionBuilder}
+            formControlModel={this.selectedComponentFormControl} />
+          <BasicButton
+            type='positive'
+            label='Submit'
+            disabled={this.state.disableSubmitButton}
+            onClick={this.onSubmit} />
+        </>
+      );
+    }
+    return null;
+  };
 
 
   render() {
@@ -423,30 +476,7 @@ export class SimulationVsExpected extends Component<Props, State> {
               {this.state.simulationConfigurationFileName ? 'File uploaded: ' + this.state.simulationConfigurationFileName : ''}
             </div>
           </div>
-          <Select
-            label='Component type'
-            selectedOptionFinder={type => type === this.currentComparisonConfigFormGroup.findControl('componentType').getValue()}
-            selectionOptionBuilder={this.state.measurementTypeOptionBuilder}
-            formControlModel={this.selectedComponentTypeFormControl} />
-          <Checkbox
-            label='Magnitude'
-            name='useMagnitude'
-            labelPosition='right'
-            formControlModel={this.useMagnitudeFormControl} />
-          <Checkbox
-            label='Angle'
-            name='useAngle'
-            labelPosition='right'
-            formControlModel={this.useAngleFormControl} />
-          <Select
-            label='Component'
-            selectionOptionBuilder={this.state.modelDictionaryComponentOptionBuilder}
-            formControlModel={this.selectedComponentFormControl} />
-          <BasicButton
-            type='positive'
-            label='Submit'
-            disabled={this.state.disableSubmitButton}
-            onClick={this.onSubmit} />
+          {this.renderAdditionalMenus()}
         <FilePicker />
       </Form>
     );

@@ -48,7 +48,9 @@ export class SimulationVsTimeSeriesRequest implements MessageRequest {
       appId: 'sample_app',
       testId: '',
       compareWithSimId: '',
-      testType: 'simulation_vs_timeseries'
+      testType: 'simulation_vs_timeseries',
+      expectedResults: {},
+      events: [] as any
     }
   };
 

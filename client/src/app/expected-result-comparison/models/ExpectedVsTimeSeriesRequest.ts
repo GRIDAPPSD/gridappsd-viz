@@ -10,7 +10,8 @@ export class ExpectedVsTimeSeriesRequest implements MessageRequest {
     compareWithSimId: '',
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     expectedResults: null as any,
-    testType: 'expected_vs_timeseries'
+    testType: 'expected_vs_timeseries',
+    events: [] as any
   };
 
   readonly replyTo: string;
