@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Component } from 'react';
 import { Subject, take } from 'rxjs';
@@ -276,10 +277,10 @@ export class SimulationVsExpected extends Component<Props, State> {
       .readFileAsJson<any>()
       .subscribe({
         next: fileContent => {
-          if(!fileContent.test_config.expectedResults) {
+          if(!fileContent.expectedResults) {
             Notification.open('Incorrect file structure, please refer to the documentation and edit file accordingly.');
           } else {
-            this._expectedResults = fileContent.test_config.expectedResults;
+            this._expectedResults = fileContent.expectedResults;
             this.setState({
               fileOutputDataMapInState: this._populateFileOutputDataMap(fileContent),
               expectedResultsFileUploaded: true
@@ -297,8 +298,8 @@ export class SimulationVsExpected extends Component<Props, State> {
   }
 
   private _populateFileOutputDataMap(fileContent: any) {
-    const outputResults = fileContent.test_config.expectedResults.output;
-    const inputResults = fileContent.test_config.expectedResults.input;
+    const outputResults = fileContent.expectedResults.output;
+    const inputResults = fileContent.expectedResults.input;
     let outputMeasurementMRIDs: string[] = [];
     let inputMeasurementObjects: string[] = [];
     for(const timestamp in outputResults) {
@@ -376,11 +377,11 @@ export class SimulationVsExpected extends Component<Props, State> {
       .readFileAsJson<any>()
       .subscribe({
         next: (fileContent) => {
-          if(!fileContent.simulation_config) {
+          if(!fileContent.simulation_config || !fileContent.power_system_config) {
             Notification.open('Incorrect file structure, please refer to the documentation and edit file accordingly.');
           } else {
             fileContent['test_config']['testType'] = 'simulation-vs-expected';
-            this._simulationConfiguration = fileContent.simulation_config;
+            this._simulationConfiguration = fileContent;
             this.setState({
               simConfigFileUploaded: true
             });

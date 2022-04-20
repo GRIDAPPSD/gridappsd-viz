@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable camelcase */
 import { MessageRequest } from '@client:common/MessageRequest';
@@ -65,7 +66,10 @@ export class SimulationVsExpectedRequest implements MessageRequest {
   // constructor(simulationConfiguration: unknown | null, expectedResults: unknown, events: unknown[]) {
   constructor(simulationConfiguration: unknown | null, expectedResults: unknown) {
     if (simulationConfiguration !== null) {
-      Object.assign(this.requestBody.simulation_config, simulationConfiguration);
+      Object.assign(this.requestBody.simulation_config, simulationConfiguration['simulation_config']);
+      Object.assign(this.requestBody.power_system_config, simulationConfiguration['power_system_config']);
+      Object.assign(this.requestBody.application_config, simulationConfiguration['application_config']);
+      this.requestBody.simulation_request_type = simulationConfiguration['simulation_request_type'];
     }
     if (expectedResults !== null) {
       this.requestBody.test_config.expectedResults = expectedResults;
