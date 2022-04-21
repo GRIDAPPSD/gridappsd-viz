@@ -41,6 +41,12 @@ interface State {
   noSufficientData: boolean;
   modelDictionaryComponentsCaches: ModelDictionaryComponent[];
   phaseAndMeasurementMRIDMapping: Map<string[], string[]>;
+  selectedMenuValues: {
+    componentType: string;
+    useMagnitude: boolean;
+    useAngle: boolean;
+    componentDisplayName: string;
+  };
 }
 
 export class ExpectedResultComparisonContainer extends Component<Props, State> {
@@ -66,7 +72,13 @@ export class ExpectedResultComparisonContainer extends Component<Props, State> {
       startFetchingAfterSubmit: false,
       noSufficientData: false,
       modelDictionaryComponentsCaches: [],
-      phaseAndMeasurementMRIDMapping: null
+      phaseAndMeasurementMRIDMapping: null,
+      selectedMenuValues: {
+        componentType: '',
+        useMagnitude: false,
+        useAngle: false,
+        componentDisplayName: ''
+      }
     };
 
     this.onSimulationVsExpectedFormSubmited = this.onSimulationVsExpectedFormSubmited.bind(this);
@@ -302,8 +314,32 @@ export class ExpectedResultComparisonContainer extends Component<Props, State> {
   }
 
   onTimeSeriesVsTimeSeriesFormSubmit(lineName: string, componentType: string, useMagnitude: boolean, useAngle: boolean, component: any, firstSimulationId: number, secondSimulationId: number) {
-    this._dynamicallyFetchComparisonResponse(new TimeSeriesVsTimeSeriesRequest(firstSimulationId, secondSimulationId), lineName, componentType, useMagnitude, useAngle, component);
+    if(!this.state.comparisonResult || this.state.comparisonResult.length < 1) {
+      this._dynamicallyFetchComparisonResponse(new TimeSeriesVsTimeSeriesRequest(firstSimulationId, secondSimulationId), lineName, componentType, useMagnitude, useAngle, component);
+      this.setState(prevState => {
+        const selectedMenuValues ={ ...prevState.selectedMenuValues };
+        selectedMenuValues.componentType = componentType;
+        selectedMenuValues.componentDisplayName = component.displayName;
+        selectedMenuValues.useMagnitude = useMagnitude;
+        selectedMenuValues.useAngle = useAngle;
+        return { selectedMenuValues };
+      });
+    } else {
+      //* Filter this.state.comparisonResult by the new selectionMenuValues here
+      // this._filterExistingComparisonResult();
+      this.setState(prevState => {
+        const selectedMenuValues ={ ...prevState.selectedMenuValues };
+        selectedMenuValues.componentType = componentType;
+        selectedMenuValues.componentDisplayName = component.displayName;
+        selectedMenuValues.useMagnitude = useMagnitude;
+        selectedMenuValues.useAngle = useAngle;
+        return { selectedMenuValues };
+      });
+    }
   }
+
+  // Filter this.state.comparisonResult by the new selectionMenuValues here
+  // private _filterExistingComparisonResult() {};
 
   private _dynamicallyFetchComparisonResponse(request: MessageRequest, lineName: string, componentType: string, useMagnitude: boolean, useAngle: boolean, component: any) {
     // Clear any existing/previous comparison result.
