@@ -7,8 +7,10 @@ import { StateStore } from '@client:common/state-store';
 import { Notification } from '@client:common/overlay/notification';
 import { StompClientService } from '@client:common/StompClientService';
 import { MessageRequest } from '@client:common/MessageRequest';
-import { FeederModel, ModelDictionaryComponent } from '@client:common/topology';
+import { FeederModel, MeasurementType, ModelDictionaryComponent } from '@client:common/topology';
 
+import { ComponentModel } from './models/ComponentModel';
+import { ComparisonResult } from './models/ComparisonResult';
 import { TimeSeriesVsTimeSeries } from './views/time-series-vs-time-series/TimeSeriesVsTimeSeries';
 import { ResultViewer } from './views/result-viewer/ResultViewer';
 import { TimeSeriesVsTimeSeriesRequest } from './models/TimeSeriesVsTimeSeriesRequest';
@@ -29,12 +31,11 @@ interface Props {
 
 interface State {
   comparisonType: ExpectedResultComparisonType;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  comparisonResult: any[] | any;
+  comparisonResult: ComparisonResult[];
+  allComparisonResult: ComparisonResult[];
   lineNames: string[];
   lineNamesAndMRIDMap: Map<string, string>;
   mRIDAndSimulationIdsMapping: Map<string, number[]>;
-  componentType: string[];
   simulationIds: string[];
   isFetching: boolean;
   startFetchingAfterSubmit: boolean;
@@ -45,7 +46,7 @@ interface State {
     componentType: string;
     useMagnitude: boolean;
     useAngle: boolean;
-    componentDisplayName: string;
+    component: ComponentModel;
   };
 }
 
@@ -57,16 +58,21 @@ export class ExpectedResultComparisonContainer extends Component<Props, State> {
   private _responseSubscription: Subscription;
   private _stateStoreSubscription: Subscription;
 
+  // TimeSeriesVsTimeSeries
+  private _selectedTTLineName = '';
+  private _selectedTTFirstSimulationId = '';
+  private _selectedTTSecondSimulationId = '';
+
   constructor(props: Props) {
     super(props);
 
     this.state = {
       comparisonType: null,
       comparisonResult: [],
+      allComparisonResult: [],
       lineNames: [],
       lineNamesAndMRIDMap: this._setLineNamesAndMRIDMap(props.feederModel),
       mRIDAndSimulationIdsMapping: null,
-      componentType: [],
       simulationIds: [],
       isFetching: false,
       startFetchingAfterSubmit: false,
@@ -77,7 +83,7 @@ export class ExpectedResultComparisonContainer extends Component<Props, State> {
         componentType: '',
         useMagnitude: false,
         useAngle: false,
-        componentDisplayName: ''
+        component: null
       }
     };
 
@@ -107,10 +113,10 @@ export class ExpectedResultComparisonContainer extends Component<Props, State> {
       this._stateStoreSubscription = this._stateStore.select('modelDictionaryComponents')
         .subscribe({
           next: modelDicts => {
-            if(modelDicts) {
+            if (modelDicts) {
               const componentMeasurementMRIDMapping = new Map<string[], string[]>();
               for(const modelDict in modelDicts) {
-                if(Object.prototype.hasOwnProperty.call(modelDicts, modelDict)) {
+                if (Object.prototype.hasOwnProperty.call(modelDicts, modelDict)) {
                   componentMeasurementMRIDMapping.set(
                     modelDicts[modelDict].phases,
                     modelDicts[modelDict].measurementMRIDs
@@ -126,11 +132,17 @@ export class ExpectedResultComparisonContainer extends Component<Props, State> {
         });
   }
 
+  componentDidUpdate(prevProps: Readonly<Props>, prevState: Readonly<State>): void {
+    if (prevState.selectedMenuValues !== this.state.selectedMenuValues) {
+      this._filterExistingComparisonResult();
+    }
+  }
+
   private _setLineNamesAndMRIDMap(feederModels: FeederModel) {
     const resultMap = new Map<string, string>();
     for (const feeder in feederModels) {
-      if(Object.prototype.hasOwnProperty.call(feederModels, feeder)) {
-        if(feederModels[feeder]['lines'].length > 1) {
+      if (Object.prototype.hasOwnProperty.call(feederModels, feeder)) {
+        if (feederModels[feeder]['lines'].length > 1) {
           feederModels[feeder]['lines'].forEach((f) => {
             resultMap.set(f.name, f.id);
           });
@@ -174,8 +186,8 @@ export class ExpectedResultComparisonContainer extends Component<Props, State> {
         next: existingSimulationIdsAndMRIDs => {
           const allLineNameAndmMRIDsMap = new Map<string, string>();
           for (const feeder in this.props.feederModel) {
-            if(Object.prototype.hasOwnProperty.call(this.props.feederModel, feeder)) {
-              if(this.props.feederModel[feeder]['lines'].length > 1) {
+            if (Object.prototype.hasOwnProperty.call(this.props.feederModel, feeder)) {
+              if (this.props.feederModel[feeder]['lines'].length > 1) {
                 this.props.feederModel[feeder]['lines'].forEach((f) => {
                   allLineNameAndmMRIDsMap.set(f.name, f.id);
                 });
@@ -185,12 +197,12 @@ export class ExpectedResultComparisonContainer extends Component<Props, State> {
             }
           }
           // filter out the existing LineName by allLineNameAndmMRIDsMap and existingSimulationIdsAndMRIDs
-          const uniqueMRIDS = Array.from(new Set(existingSimulationIdsAndMRIDs.map((item: { model_id: string })=>item.model_id)));
+          const uniqueMRIDS = Array.from(new Set(existingSimulationIdsAndMRIDs.map((item: { model_id: string })=> item.model_id)));
           const existingLineNames = [];
           for(const mrid of uniqueMRIDS) {
-            if(Array.from(allLineNameAndmMRIDsMap.values()).includes(mrid as string)){
+            if (Array.from(allLineNameAndmMRIDsMap.values()).includes(mrid as string)){
               for(const[key,value] of allLineNameAndmMRIDsMap.entries()){
-                if(value === mrid){
+                if (value === mrid){
                   existingLineNames.push(key);
                 }
               }
@@ -212,9 +224,9 @@ export class ExpectedResultComparisonContainer extends Component<Props, State> {
 
   private _processExistingLineNamesAndSimulationIds(values: any) {
     const resultMap = new Map<string, number[]>(null);
-    if(values && values.length > 0) {
+    if (values && values.length > 0) {
       values.forEach((value: { model_id: string; process_id: number }) => {
-        if(!resultMap.has(value.model_id)) {
+        if (!resultMap.has(value.model_id)) {
           resultMap.set(value.model_id, [+value.process_id]);
         } else {
           const existingIds = resultMap.get(value.model_id);
@@ -314,34 +326,25 @@ export class ExpectedResultComparisonContainer extends Component<Props, State> {
   }
 
   onTimeSeriesVsTimeSeriesFormSubmit(lineName: string, componentType: string, useMagnitude: boolean, useAngle: boolean, component: any, firstSimulationId: number, secondSimulationId: number) {
-    if(!this.state.comparisonResult || this.state.comparisonResult.length < 1) {
+    if (lineName !== this._selectedTTLineName || firstSimulationId !== +this._selectedTTFirstSimulationId || secondSimulationId !== +this._selectedTTSecondSimulationId) {
       this._dynamicallyFetchComparisonResponse(new TimeSeriesVsTimeSeriesRequest(firstSimulationId, secondSimulationId), lineName, componentType, useMagnitude, useAngle, component);
-      this.setState(prevState => {
-        const selectedMenuValues ={ ...prevState.selectedMenuValues };
-        selectedMenuValues.componentType = componentType;
-        selectedMenuValues.componentDisplayName = component.displayName;
-        selectedMenuValues.useMagnitude = useMagnitude;
-        selectedMenuValues.useAngle = useAngle;
-        return { selectedMenuValues };
-      });
     } else {
-      //* Filter this.state.comparisonResult by the new selectionMenuValues here
-      // this._filterExistingComparisonResult();
       this.setState(prevState => {
         const selectedMenuValues ={ ...prevState.selectedMenuValues };
         selectedMenuValues.componentType = componentType;
-        selectedMenuValues.componentDisplayName = component.displayName;
+        selectedMenuValues.component = component;
         selectedMenuValues.useMagnitude = useMagnitude;
         selectedMenuValues.useAngle = useAngle;
         return { selectedMenuValues };
       });
     }
+    this._selectedTTLineName = lineName;
+    this._selectedTTFirstSimulationId = firstSimulationId.toString();
+    this._selectedTTSecondSimulationId = secondSimulationId.toString();
   }
 
-  // Filter this.state.comparisonResult by the new selectionMenuValues here
-  // private _filterExistingComparisonResult() {};
-
   private _dynamicallyFetchComparisonResponse(request: MessageRequest, lineName: string, componentType: string, useMagnitude: boolean, useAngle: boolean, component: any) {
+    const payload = [] as ComparisonResult[];
     // Clear any existing/previous comparison result.
     this.setState({
       comparisonResult:[],
@@ -356,33 +359,41 @@ export class ExpectedResultComparisonContainer extends Component<Props, State> {
         this.setState({
           noSufficientData: false
         });
-        if (data.status !== 'start' && component.measurementMRIDs.includes(data.object)) {
-          if (!useMagnitude && !useAngle && data.attribute !== 'magnitude' && data.attribute !== 'angle') {
-            this.setState({
-              comparisonResult: [...this.state.comparisonResult, data],
-              startFetchingAfterSubmit: false
-            });
-          } else if(useMagnitude && !useAngle && data.attribute === 'magnitude') {
-            this.setState({
-              comparisonResult: [...this.state.comparisonResult, data],
-              startFetchingAfterSubmit: false
-            });
-          } else if (!useMagnitude && useAngle && data.attribute === 'angle') {
-            this.setState({
-              comparisonResult: [...this.state.comparisonResult, data],
-              startFetchingAfterSubmit: false
-            });
-          } else if (useMagnitude && useAngle && (data.attribute === 'magnitude' || data.attribute === 'angle')) {
-            this.setState({
-              comparisonResult: [...this.state.comparisonResult, data],
-              startFetchingAfterSubmit: false
-            });
+        if (data.status !== 'start') {
+          payload.push(data);
+          if (component.measurementMRIDs.includes(data.object)) {
+            if(componentType === MeasurementType.TAP && data.attribute === 'value') {
+              this.setState({
+                comparisonResult: [...this.state.comparisonResult, data],
+                startFetchingAfterSubmit: false
+              });
+            } else if (!useMagnitude && !useAngle && data.attribute !== 'magnitude' && data.attribute !== 'angle') {
+              this.setState({
+                comparisonResult: [...this.state.comparisonResult, data],
+                startFetchingAfterSubmit: false
+              });
+            } else if (useMagnitude && !useAngle && data.attribute === 'magnitude') {
+              this.setState({
+                comparisonResult: [...this.state.comparisonResult, data],
+                startFetchingAfterSubmit: false
+              });
+            } else if (!useMagnitude && useAngle && data.attribute === 'angle') {
+              this.setState({
+                comparisonResult: [...this.state.comparisonResult, data],
+                startFetchingAfterSubmit: false
+              });
+            } else if (useMagnitude && useAngle && (data.attribute === 'magnitude' || data.attribute === 'angle')) {
+              this.setState({
+                comparisonResult: [...this.state.comparisonResult, data],
+                startFetchingAfterSubmit: false
+              });
+            }
           }
         }
       },
       complete: () => {
         Notification.open('Fetching Comparison Result is Done.');
-        if(this.state.comparisonResult.length <= 2) {
+        if (this.state.comparisonResult.length <= 2) {
           this.setState({
             noSufficientData: true
           });
@@ -391,6 +402,10 @@ export class ExpectedResultComparisonContainer extends Component<Props, State> {
             noSufficientData: false
           });
         }
+        this.setState({
+          startFetchingAfterSubmit: false,
+          allComparisonResult: payload
+        });
       },
       error: errorMessage => {
         Notification.open(errorMessage);
@@ -400,6 +415,31 @@ export class ExpectedResultComparisonContainer extends Component<Props, State> {
       destination: request.url,
       body: JSON.stringify(request.requestBody),
       replyTo: request.replyTo
+    });
+  }
+
+  private _filterExistingComparisonResult() {
+    const { useMagnitude, useAngle, component, componentType } = this.state.selectedMenuValues;
+    const existingComparisonResult = this.state.allComparisonResult;
+    const selectedComponentMeasurementMRIDs = component.measurementMRIDs;
+    const foundResult: ComparisonResult[] = [];
+    existingComparisonResult.forEach((result) => {
+      if (selectedComponentMeasurementMRIDs.includes(result.object)) {
+        if(componentType === MeasurementType.TAP && result.attribute === 'value') {
+          foundResult.push(result);
+        } else if (!useMagnitude && !useAngle && result.attribute !== 'magnitude' && result.attribute !== 'angle') {
+          foundResult.push(result);
+        } else if (useMagnitude && !useAngle && result.attribute === 'magnitude') {
+          foundResult.push(result);
+        } else if (!useMagnitude && useAngle && result.attribute === 'angle') {
+          foundResult.push(result);
+        } else if (useMagnitude && useAngle && (result.attribute === 'magnitude' || result.attribute === 'angle')) {
+          foundResult.push(result);
+        }
+      }
+      this.setState({
+        comparisonResult: foundResult
+      });
     });
   }
 

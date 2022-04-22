@@ -131,6 +131,7 @@ export class TimeSeriesVsTimeSeriesChartResult extends Component<Props, State> {
             );
           }) : <MessageBanner>No sufficient data.</MessageBanner>
         }
+        {this.state.chartModels.length < 1 ? <MessageBanner>No available data.</MessageBanner> : null}
       </div>
     );
   }

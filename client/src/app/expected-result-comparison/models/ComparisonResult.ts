@@ -9,4 +9,5 @@ export interface ComparisonResult {
   diffMrid: string;
   diffType: string;
   match: boolean;
+  phase?: string;
 }
