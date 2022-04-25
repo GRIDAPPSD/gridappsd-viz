@@ -1,6 +1,7 @@
 import { Component } from 'react';
 import { Subscription } from 'rxjs';
 import { map, takeWhile } from 'rxjs/operators';
+import { isEqual } from 'lodash';
 
 import { ExpectedResultComparisonType } from '@client:common/ExpectedResultComparisonType';
 import { StateStore } from '@client:common/state-store';
@@ -48,6 +49,7 @@ interface State {
     useAngle: boolean;
     component: ComponentModel;
   };
+  ETEexpectedResults: any;
 }
 
 export class ExpectedResultComparisonContainer extends Component<Props, State> {
@@ -88,7 +90,8 @@ export class ExpectedResultComparisonContainer extends Component<Props, State> {
         useMagnitude: false,
         useAngle: false,
         component: null
-      }
+      },
+      ETEexpectedResults: null
     };
 
     this.onSimulationVsExpectedFormSubmited = this.onSimulationVsExpectedFormSubmited.bind(this);
@@ -326,24 +329,17 @@ export class ExpectedResultComparisonContainer extends Component<Props, State> {
   }
 
   onExpectedVsTimeSeriesFormSubmit(expectedResults: any, simulationId: number, lineName: string, componentType: string, useMagnitude: boolean, useAngle: boolean, component: any) {
-    if (lineName !== this._selectedETLineName || simulationId !== +this._selectedETSimulationId) {
+    if (!isEqual(expectedResults, this.state.ETEexpectedResults) || lineName !== this._selectedETLineName || simulationId !== +this._selectedETSimulationId) {
       this._dynamicallyFetchComparisonResponse(new ExpectedVsTimeSeriesRequest(expectedResults, simulationId), lineName, componentType, useMagnitude, useAngle, component);
     } else {
-      // this.setState(prevState => {
-      //   const selectedMenuValues ={ ...prevState.selectedMenuValues };
-      //   selectedMenuValues.componentType = componentType;
-      //   selectedMenuValues.component = component;
-      //   selectedMenuValues.useMagnitude = useMagnitude;
-      //   selectedMenuValues.useAngle = useAngle;
-      //   return { selectedMenuValues };
-      // });
       this.setState({
         selectedMenuValues: {
           componentType,
           useMagnitude,
           useAngle,
           component
-        }
+        },
+        ETEexpectedResults: expectedResults
       });
     }
     this._selectedETLineName = lineName;
@@ -354,14 +350,6 @@ export class ExpectedResultComparisonContainer extends Component<Props, State> {
     if (lineName !== this._selectedTTLineName || firstSimulationId !== +this._selectedTTFirstSimulationId || secondSimulationId !== +this._selectedTTSecondSimulationId) {
       this._dynamicallyFetchComparisonResponse(new TimeSeriesVsTimeSeriesRequest(firstSimulationId, secondSimulationId), lineName, componentType, useMagnitude, useAngle, component);
     } else {
-      // this.setState(prevState => {
-      //   const selectedMenuValues ={ ...prevState.selectedMenuValues };
-      //   selectedMenuValues.componentType = componentType;
-      //   selectedMenuValues.component = component;
-      //   selectedMenuValues.useMagnitude = useMagnitude;
-      //   selectedMenuValues.useAngle = useAngle;
-      //   return { selectedMenuValues };
-      // });
       this.setState({
         selectedMenuValues: {
           componentType,
