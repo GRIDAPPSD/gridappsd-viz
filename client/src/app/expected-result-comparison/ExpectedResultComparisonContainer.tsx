@@ -59,6 +59,11 @@ export class ExpectedResultComparisonContainer extends Component<Props, State> {
   private _responseSubscription: Subscription;
   private _stateStoreSubscription: Subscription;
 
+  // SimulationVsExpected
+  private _sELineName = '';
+  private _sEExpectedResults: any = null;
+  private _sESimulationConfiguration: any = null;
+
   // SimulationVsTimeSeries
   private _selectedSTLineName = '';
   private _selectedSTSimulationId = '';
@@ -325,7 +330,21 @@ export class ExpectedResultComparisonContainer extends Component<Props, State> {
   // }
   // No events parameter for now
   onSimulationVsExpectedFormSubmited(simulationConfiguration: any, expectedResults: any, lineName: string, componentType: string, useMagnitude: boolean, useAngle: boolean, component: any) {
-    this._dynamicallyFetchComparisonResponse(new SimulationVsExpectedRequest(simulationConfiguration, expectedResults), lineName, componentType, useMagnitude, useAngle, component);
+    if(!isEqual(simulationConfiguration, this._sESimulationConfiguration) || !isEqual(expectedResults, this._sEExpectedResults) || lineName !== this._sELineName ) {
+      this._dynamicallyFetchComparisonResponse(new SimulationVsExpectedRequest(simulationConfiguration, expectedResults), lineName, componentType, useMagnitude, useAngle, component);
+    } else {
+      this.setState({
+        selectedMenuValues: {
+          componentType,
+          useMagnitude,
+          useAngle,
+          component
+        }
+      });
+    }
+    this._sELineName = lineName;
+    this._sEExpectedResults = expectedResults;
+    this._sESimulationConfiguration = simulationConfiguration;
   }
 
   onSimulationVsTimeSeriesFormSubmit(simulationConfiguration: any, simulationId: number, lineName: string, componentType: string, useMagnitude: boolean, useAngle: boolean, component: any) {

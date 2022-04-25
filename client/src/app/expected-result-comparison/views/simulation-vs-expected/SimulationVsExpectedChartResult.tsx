@@ -127,8 +127,9 @@ export class SimulationVsExpectedChartResult extends Component<Props, State> {
               key={model.name}
               lineChartModel={model} />
             );
-          }) :  <MessageBanner>No sufficient data.</MessageBanner>
+          }) : this.state.chartModels.length > 0 ? <MessageBanner>No sufficient data.</MessageBanner> : null
         }
+        {!this.props.startFetchingAfterSubmit && this.state.chartModels.length < 1 ? <MessageBanner>No available data.</MessageBanner> : null}
       </div>
     );
   }

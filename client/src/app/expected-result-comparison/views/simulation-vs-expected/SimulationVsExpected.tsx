@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Component } from 'react';
 import { Subject, take } from 'rxjs';
