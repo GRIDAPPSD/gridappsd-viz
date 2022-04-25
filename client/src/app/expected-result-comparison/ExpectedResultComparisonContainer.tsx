@@ -49,7 +49,6 @@ interface State {
     useAngle: boolean;
     component: ComponentModel;
   };
-  ETEexpectedResults: any;
 }
 
 export class ExpectedResultComparisonContainer extends Component<Props, State> {
@@ -60,14 +59,20 @@ export class ExpectedResultComparisonContainer extends Component<Props, State> {
   private _responseSubscription: Subscription;
   private _stateStoreSubscription: Subscription;
 
-  // TimeSeriesVsTimeSeries
-  private _selectedTTLineName = '';
-  private _selectedTTFirstSimulationId = '';
-  private _selectedTTSecondSimulationId = '';
+  // SimulationVsTimeSeries
+  private _selectedSTLineName = '';
+  private _selectedSTSimulationId = '';
+  private _sTSimulationConfiguration: any = null;
 
   // ExpectedVsTimeSeries
   private _selectedETLineName = '';
   private _selectedETSimulationId = '';
+  private _eTEexpectedResults: any = null;
+
+  // TimeSeriesVsTimeSeries
+  private _selectedTTLineName = '';
+  private _selectedTTFirstSimulationId = '';
+  private _selectedTTSecondSimulationId = '';
 
   constructor(props: Props) {
     super(props);
@@ -90,8 +95,7 @@ export class ExpectedResultComparisonContainer extends Component<Props, State> {
         useMagnitude: false,
         useAngle: false,
         component: null
-      },
-      ETEexpectedResults: null
+      }
     };
 
     this.onSimulationVsExpectedFormSubmited = this.onSimulationVsExpectedFormSubmited.bind(this);
@@ -325,11 +329,25 @@ export class ExpectedResultComparisonContainer extends Component<Props, State> {
   }
 
   onSimulationVsTimeSeriesFormSubmit(simulationConfiguration: any, simulationId: number, lineName: string, componentType: string, useMagnitude: boolean, useAngle: boolean, component: any) {
-    this._dynamicallyFetchComparisonResponse(new SimulationVsTimeSeriesRequest(simulationConfiguration, simulationId), lineName, componentType, useMagnitude, useAngle, component);
+    if(!isEqual(simulationConfiguration, this._sTSimulationConfiguration) || lineName !== this._selectedSTLineName || simulationId !== +this._selectedSTSimulationId) {
+      this._dynamicallyFetchComparisonResponse(new SimulationVsTimeSeriesRequest(simulationConfiguration, simulationId), lineName, componentType, useMagnitude, useAngle, component);
+    } else {
+      this.setState({
+        selectedMenuValues: {
+          componentType,
+          useMagnitude,
+          useAngle,
+          component
+        }
+      });
+    }
+    this._selectedSTLineName = lineName;
+    this._selectedSTSimulationId = simulationId.toString();
+    this._sTSimulationConfiguration = simulationConfiguration;
   }
 
   onExpectedVsTimeSeriesFormSubmit(expectedResults: any, simulationId: number, lineName: string, componentType: string, useMagnitude: boolean, useAngle: boolean, component: any) {
-    if (!isEqual(expectedResults, this.state.ETEexpectedResults) || lineName !== this._selectedETLineName || simulationId !== +this._selectedETSimulationId) {
+    if (!isEqual(expectedResults, this._eTEexpectedResults) || lineName !== this._selectedETLineName || simulationId !== +this._selectedETSimulationId) {
       this._dynamicallyFetchComparisonResponse(new ExpectedVsTimeSeriesRequest(expectedResults, simulationId), lineName, componentType, useMagnitude, useAngle, component);
     } else {
       this.setState({
@@ -338,12 +356,12 @@ export class ExpectedResultComparisonContainer extends Component<Props, State> {
           useMagnitude,
           useAngle,
           component
-        },
-        ETEexpectedResults: expectedResults
+        }
       });
     }
     this._selectedETLineName = lineName;
     this._selectedETSimulationId = simulationId.toString();
+    this._eTEexpectedResults = expectedResults;
   }
 
   onTimeSeriesVsTimeSeriesFormSubmit(lineName: string, componentType: string, useMagnitude: boolean, useAngle: boolean, component: any, firstSimulationId: number, secondSimulationId: number) {

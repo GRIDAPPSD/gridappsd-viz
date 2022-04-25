@@ -129,7 +129,7 @@ export class ExpectedVsTimeSeriesChartResult extends Component<Props, State> {
             );
           }) : this.state.chartModels.length > 0 ? <MessageBanner>No sufficient data.</MessageBanner> : null
         }
-         {!this.props.startFetchingAfterSubmit && this.state.chartModels.length < 1 ? <MessageBanner>No available data.</MessageBanner> : null}
+        {!this.props.startFetchingAfterSubmit && this.state.chartModels.length < 1 ? <MessageBanner>No available data.</MessageBanner> : null}
       </div>
     );
   }
