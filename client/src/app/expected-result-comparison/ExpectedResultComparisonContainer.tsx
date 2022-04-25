@@ -63,6 +63,10 @@ export class ExpectedResultComparisonContainer extends Component<Props, State> {
   private _selectedTTFirstSimulationId = '';
   private _selectedTTSecondSimulationId = '';
 
+  // ExpectedVsTimeSeries
+  private _selectedETLineName = '';
+  private _selectedETSimulationId = '';
+
   constructor(props: Props) {
     super(props);
 
@@ -322,20 +326,49 @@ export class ExpectedResultComparisonContainer extends Component<Props, State> {
   }
 
   onExpectedVsTimeSeriesFormSubmit(expectedResults: any, simulationId: number, lineName: string, componentType: string, useMagnitude: boolean, useAngle: boolean, component: any) {
-    this._dynamicallyFetchComparisonResponse(new ExpectedVsTimeSeriesRequest(expectedResults, simulationId), lineName, componentType, useMagnitude, useAngle, component);
+    if (lineName !== this._selectedETLineName || simulationId !== +this._selectedETSimulationId) {
+      this._dynamicallyFetchComparisonResponse(new ExpectedVsTimeSeriesRequest(expectedResults, simulationId), lineName, componentType, useMagnitude, useAngle, component);
+    } else {
+      // this.setState(prevState => {
+      //   const selectedMenuValues ={ ...prevState.selectedMenuValues };
+      //   selectedMenuValues.componentType = componentType;
+      //   selectedMenuValues.component = component;
+      //   selectedMenuValues.useMagnitude = useMagnitude;
+      //   selectedMenuValues.useAngle = useAngle;
+      //   return { selectedMenuValues };
+      // });
+      this.setState({
+        selectedMenuValues: {
+          componentType,
+          useMagnitude,
+          useAngle,
+          component
+        }
+      });
+    }
+    this._selectedETLineName = lineName;
+    this._selectedETSimulationId = simulationId.toString();
   }
 
   onTimeSeriesVsTimeSeriesFormSubmit(lineName: string, componentType: string, useMagnitude: boolean, useAngle: boolean, component: any, firstSimulationId: number, secondSimulationId: number) {
     if (lineName !== this._selectedTTLineName || firstSimulationId !== +this._selectedTTFirstSimulationId || secondSimulationId !== +this._selectedTTSecondSimulationId) {
       this._dynamicallyFetchComparisonResponse(new TimeSeriesVsTimeSeriesRequest(firstSimulationId, secondSimulationId), lineName, componentType, useMagnitude, useAngle, component);
     } else {
-      this.setState(prevState => {
-        const selectedMenuValues ={ ...prevState.selectedMenuValues };
-        selectedMenuValues.componentType = componentType;
-        selectedMenuValues.component = component;
-        selectedMenuValues.useMagnitude = useMagnitude;
-        selectedMenuValues.useAngle = useAngle;
-        return { selectedMenuValues };
+      // this.setState(prevState => {
+      //   const selectedMenuValues ={ ...prevState.selectedMenuValues };
+      //   selectedMenuValues.componentType = componentType;
+      //   selectedMenuValues.component = component;
+      //   selectedMenuValues.useMagnitude = useMagnitude;
+      //   selectedMenuValues.useAngle = useAngle;
+      //   return { selectedMenuValues };
+      // });
+      this.setState({
+        selectedMenuValues: {
+          componentType,
+          useMagnitude,
+          useAngle,
+          component
+        }
       });
     }
     this._selectedTTLineName = lineName;
