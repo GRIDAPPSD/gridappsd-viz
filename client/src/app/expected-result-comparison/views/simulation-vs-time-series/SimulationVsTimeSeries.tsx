@@ -44,7 +44,8 @@ export class SimulationVsTimeSeries extends Component<Props, State> {
   readonly selectedComponentTypeFormControl = new FormControlModel<string>(null);
   readonly useMagnitudeFormControl = new FormControlModel(false);
   readonly useAngleFormControl = new FormControlModel(false);
-  readonly selectedComponentFormControl = new FormControlModel<ModelDictionaryComponent>(null);
+  // readonly selectedComponentFormControl = new FormControlModel<ModelDictionaryComponent>(null); // Need to update selectedComponentFormControl
+  readonly selectedComponentFormControl = new FormControlModel([]);
   readonly selectedFirstSimulationIdFormControl = new FormControlModel<number>(null);
   readonly currentComparisonConfigFormGroup = this._createCurrentComparisonConfigFormGroupModel();
 
@@ -69,7 +70,8 @@ export class SimulationVsTimeSeries extends Component<Props, State> {
         componentType: '',
         useMagnitude: false,
         useAngle: false,
-        component: '',
+        // component: '',
+        component: [], // Need to update component: []
         firstSimulationId: null
       },
       simulationConfigurationFileContentInState: {},
@@ -334,6 +336,8 @@ export class SimulationVsTimeSeries extends Component<Props, State> {
             labelPosition='right'
             formControlModel={this.useAngleFormControl} />
           <Select
+            multiple={true}
+            maxNumOfSelection={5}
             label='Component'
             selectionOptionBuilder={this.state.modelDictionaryComponentOptionBuilder}
             formControlModel={this.selectedComponentFormControl} />

@@ -24,6 +24,7 @@ interface Props<T, E extends boolean = false> {
   selectionOptionBuilder: SelectionOptionBuilder<T>;
   formControlModel: E extends true ? FormControlModel<T[]> : FormControlModel<T>;
   multiple?: E;
+  maxNumOfSelection?: number;
   defaultLabel?: string;
   optional?: boolean;
   selectedOptionFinder?: (value: T, index: number) => boolean;
@@ -50,10 +51,16 @@ export class Select<T, E extends boolean> extends Component<Props<T, E>, State<T
   private _selectedOptionsBeforeOpening: Option<T>[] = [];
   private _subscription: Subscription;
 
+  private _clickedOptionStore: any[] = [];
+
   constructor(props: Props<T, E>) {
     super(props);
     this.state = {
-      currentLabel: props.defaultLabel || props.multiple ? 'Select one or more' : 'Select an option',
+      currentLabel: props.defaultLabel || (props.multiple && !this.props.maxNumOfSelection)
+        ? 'Select one or more'
+        : props.defaultLabel || (props.multiple && this.props.maxNumOfSelection)
+        ? `Select up to ${this.props.maxNumOfSelection} options`
+        : 'Select an option',
       open: false,
       selectedOptions: [],
       left: 0,
@@ -100,6 +107,7 @@ export class Select<T, E extends boolean> extends Component<Props<T, E>, State<T
       filteredOptions: this.props.selectionOptionBuilder.getOptions(),
       currentPage: this._firstPage
     }, () => this._toggleAllSelectedOptionsTo(true));
+    this._clickedOptionStore = [];
   }
 
   private _toggleAllSelectedOptionsTo(isSelected: boolean) {
@@ -286,18 +294,47 @@ export class Select<T, E extends boolean> extends Component<Props<T, E>, State<T
       });
     } else {
       const remainingSelectedOptions = this.state.selectedOptions.filter(e => e !== option);
+      this._removeFromClickedOptionStore(option);
       this.setState({
         selectedOptions: remainingSelectedOptions,
         currentLabel: remainingSelectedOptions.length > 0
           ? remainingSelectedOptions.map(e => e.label).join(', ')
           : this._defaultLabel
       });
+      this._clickedOptionStore = remainingSelectedOptions;
     }
     option.isSelected = false;
   }
 
+  private _removeFromClickedOptionStore(option: Option<T>) {
+    const index = this._clickedOptionStore.indexOf(option);
+    if(index > -1) {
+      this._clickedOptionStore.splice(index, 1);
+    }
+  }
+
+  private _handleClickedOptionStore(clickedOption: Option<T>) {
+    if(!clickedOption.isSelected) {
+      if(this._clickedOptionStore.length < this.props.maxNumOfSelection) {
+        this._clickedOptionStore.push(clickedOption);
+      } else if (this._clickedOptionStore.length >= this.props.maxNumOfSelection) {
+        this.deselectOption(this._clickedOptionStore[0]);
+        this._clickedOptionStore.push(clickedOption);
+      }
+      this.setState({
+        selectedOptions: [...this._clickedOptionStore]
+      });
+      clickedOption.isSelected = !clickedOption.isSelected;
+      this._selectedOptionsBeforeOpening = this._clickedOptionStore;
+    } else {
+      this.deselectOption(clickedOption);
+    }
+  }
+
   onChange(clickedOption: Option<T>) {
-    if (this.props.multiple) {
+    if (this.props.multiple && this.props.maxNumOfSelection) {
+      this._handleClickedOptionStore(clickedOption);
+    } else if (this.props.multiple) {
       if (clickedOption.isSelected) {
         this.setState({
           selectedOptions: this.state.selectedOptions.filter(option => option.label !== clickedOption.label)
