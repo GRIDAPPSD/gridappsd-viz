@@ -47,7 +47,7 @@ interface State {
     componentType: string;
     useMagnitude: boolean;
     useAngle: boolean;
-    component: ComponentModel;
+    component: ComponentModel[] | ComponentModel;
   };
 }
 
@@ -402,6 +402,10 @@ export class ExpectedResultComparisonContainer extends Component<Props, State> {
   }
 
   private _dynamicallyFetchComparisonResponse(request: MessageRequest, lineName: string, componentType: string, useMagnitude: boolean, useAngle: boolean, component: any) {
+    let allMeasurementMRIDs: string | string[] = [];
+    if (Array.isArray(component)) {
+      allMeasurementMRIDs = this._extractComponentMeasurementMRIDs(component);
+    }
     const payload = [] as ComparisonResult[];
     // Clear any existing/previous comparison result.
     this.setState({
@@ -419,32 +423,13 @@ export class ExpectedResultComparisonContainer extends Component<Props, State> {
         });
         if (data.status !== 'start') {
           payload.push(data);
-          if (component.measurementMRIDs.includes(data.object)) {
-            if(componentType === MeasurementType.TAP && data.attribute === 'value') {
-              this.setState({
-                comparisonResult: [...this.state.comparisonResult, data],
-                startFetchingAfterSubmit: false
-              });
-            } else if (!useMagnitude && !useAngle && data.attribute !== 'magnitude' && data.attribute !== 'angle') {
-              this.setState({
-                comparisonResult: [...this.state.comparisonResult, data],
-                startFetchingAfterSubmit: false
-              });
-            } else if (useMagnitude && !useAngle && data.attribute === 'magnitude') {
-              this.setState({
-                comparisonResult: [...this.state.comparisonResult, data],
-                startFetchingAfterSubmit: false
-              });
-            } else if (!useMagnitude && useAngle && data.attribute === 'angle') {
-              this.setState({
-                comparisonResult: [...this.state.comparisonResult, data],
-                startFetchingAfterSubmit: false
-              });
-            } else if (useMagnitude && useAngle && (data.attribute === 'magnitude' || data.attribute === 'angle')) {
-              this.setState({
-                comparisonResult: [...this.state.comparisonResult, data],
-                startFetchingAfterSubmit: false
-              });
+          if (allMeasurementMRIDs && allMeasurementMRIDs.length > 0) {
+            if (allMeasurementMRIDs.includes(data.object)) {
+              this._responseFilter(componentType, useMagnitude, useAngle, data);
+            }
+          } else {
+            if (component.measurementMRIDs.includes(data.object)) {
+              this._responseFilter(componentType, useMagnitude, useAngle, data);
             }
           }
         }
@@ -476,14 +461,25 @@ export class ExpectedResultComparisonContainer extends Component<Props, State> {
     });
   }
 
+  private _extractComponentMeasurementMRIDs(component: any) {
+    let selectedComponentMeasurementMRIDs: any[] = [];
+    if (Array.isArray(component)) {
+      selectedComponentMeasurementMRIDs = [].concat(...component.map((c) => c.measurementMRIDs));
+    }
+    return selectedComponentMeasurementMRIDs;
+  }
+
   private _filterExistingComparisonResult() {
     const { useMagnitude, useAngle, component, componentType } = this.state.selectedMenuValues;
     const existingComparisonResult = this.state.allComparisonResult;
-    const selectedComponentMeasurementMRIDs = component.measurementMRIDs;
+    let allMeasurementMRIDs: string | string[] = [];
+    if (Array.isArray(component)) {
+      allMeasurementMRIDs = this._extractComponentMeasurementMRIDs(component);
+    }
     const foundResult: ComparisonResult[] = [];
     existingComparisonResult.forEach((result) => {
-      if (selectedComponentMeasurementMRIDs.includes(result.object)) {
-        if(componentType === MeasurementType.TAP && result.attribute === 'value') {
+      if (allMeasurementMRIDs.includes(result.object)) {
+        if (componentType === MeasurementType.TAP && result.attribute === 'value') {
           foundResult.push(result);
         } else if (!useMagnitude && !useAngle && result.attribute !== 'magnitude' && result.attribute !== 'angle') {
           foundResult.push(result);
@@ -499,6 +495,35 @@ export class ExpectedResultComparisonContainer extends Component<Props, State> {
         comparisonResult: foundResult
       });
     });
+  }
+
+  private _responseFilter(componentType: string, useMagnitude: boolean, useAngle: boolean, data: any) {
+    if (componentType === MeasurementType.TAP && data.attribute === 'value') {
+      this.setState({
+        comparisonResult: [...this.state.comparisonResult, data],
+        startFetchingAfterSubmit: false
+      });
+    } else if (!useMagnitude && !useAngle && data.attribute !== 'magnitude' && data.attribute !== 'angle') {
+      this.setState({
+        comparisonResult: [...this.state.comparisonResult, data],
+        startFetchingAfterSubmit: false
+      });
+    } else if (useMagnitude && !useAngle && data.attribute === 'magnitude') {
+      this.setState({
+        comparisonResult: [...this.state.comparisonResult, data],
+        startFetchingAfterSubmit: false
+      });
+    } else if (!useMagnitude && useAngle && data.attribute === 'angle') {
+      this.setState({
+        comparisonResult: [...this.state.comparisonResult, data],
+        startFetchingAfterSubmit: false
+      });
+    } else if (useMagnitude && useAngle && (data.attribute === 'magnitude' || data.attribute === 'angle')) {
+      this.setState({
+        comparisonResult: [...this.state.comparisonResult, data],
+        startFetchingAfterSubmit: false
+      });
+    }
   }
 
 }

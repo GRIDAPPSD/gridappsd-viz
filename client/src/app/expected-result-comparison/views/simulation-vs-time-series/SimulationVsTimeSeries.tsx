@@ -20,7 +20,7 @@ interface Props {
   lineNamesAndMRIDMap: Map<string, string>;
   mRIDAndSimulationIdsMapping: Map<string, number[]>;
   simulationIds: string[];
-  onSubmit: (simulationConfiguration: any | null, simulationId: number, lineName: string, componentType: string, useMagnitude: boolean, useAngle: boolean, component: string) => void;
+  onSubmit: (simulationConfiguration: any | null, simulationId: number, lineName: string, componentType: string, useMagnitude: boolean, useAngle: boolean, component: any) => void;
   onMRIDChanged: (mRID: string) => void;
 }
 
@@ -44,7 +44,6 @@ export class SimulationVsTimeSeries extends Component<Props, State> {
   readonly selectedComponentTypeFormControl = new FormControlModel<string>(null);
   readonly useMagnitudeFormControl = new FormControlModel(false);
   readonly useAngleFormControl = new FormControlModel(false);
-  // readonly selectedComponentFormControl = new FormControlModel<ModelDictionaryComponent>(null); // Need to update selectedComponentFormControl
   readonly selectedComponentFormControl = new FormControlModel([]);
   readonly selectedFirstSimulationIdFormControl = new FormControlModel<number>(null);
   readonly currentComparisonConfigFormGroup = this._createCurrentComparisonConfigFormGroupModel();
@@ -70,8 +69,7 @@ export class SimulationVsTimeSeries extends Component<Props, State> {
         componentType: '',
         useMagnitude: false,
         useAngle: false,
-        // component: '',
-        component: [], // Need to update component: []
+        component: [],
         firstSimulationId: null
       },
       simulationConfigurationFileContentInState: {},
