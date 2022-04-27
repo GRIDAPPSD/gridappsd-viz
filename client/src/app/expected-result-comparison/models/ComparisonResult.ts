@@ -10,4 +10,5 @@ export interface ComparisonResult {
   diffType: string;
   match: boolean;
   phase?: string;
+  componentName?: string;
 }

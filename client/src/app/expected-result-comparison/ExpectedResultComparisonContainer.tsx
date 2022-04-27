@@ -47,7 +47,7 @@ interface State {
     componentType: string;
     useMagnitude: boolean;
     useAngle: boolean;
-    component: ComponentModel[] | ComponentModel;
+    component: ComponentModel[];
   };
 }
 
@@ -325,9 +325,6 @@ export class ExpectedResultComparisonContainer extends Component<Props, State> {
     }
   }
 
-  // onSimulationVsExpectedFormSubmited(simulationConfiguration: any, expectedResults: any, events: any[]) {
-  //   this._fetchResponse(new SimulationVsExpectedRequest(simulationConfiguration, expectedResults, events));
-  // }
   // No events parameter for now
   onSimulationVsExpectedFormSubmited(simulationConfiguration: any, expectedResults: any, lineName: string, componentType: string, useMagnitude: boolean, useAngle: boolean, component: any) {
     if(!isEqual(simulationConfiguration, this._sESimulationConfiguration) || !isEqual(expectedResults, this._sEExpectedResults) || lineName !== this._sELineName ) {
@@ -401,12 +398,15 @@ export class ExpectedResultComparisonContainer extends Component<Props, State> {
     this._selectedTTSecondSimulationId = secondSimulationId.toString();
   }
 
-  private _dynamicallyFetchComparisonResponse(request: MessageRequest, lineName: string, componentType: string, useMagnitude: boolean, useAngle: boolean, component: any) {
-    let allMeasurementMRIDs: string | string[] = [];
-    if (Array.isArray(component)) {
-      allMeasurementMRIDs = this._extractComponentMeasurementMRIDs(component);
-    }
+  private _dynamicallyFetchComparisonResponse(request: MessageRequest, lineName: string, componentType: string, useMagnitude: boolean, useAngle: boolean, component: ComponentModel[]) {
+
     const payload = [] as ComparisonResult[];
+    let allMeasurementMRIDs: string | string[] = [];
+    let modelComponentDictNameAndMeasurementMRIDsMap = new Map<string, string>(null);
+
+    allMeasurementMRIDs = this._extractComponentMeasurementMRIDs(component);
+    modelComponentDictNameAndMeasurementMRIDsMap = this._createResultObjectAndComponentNameMapping(this.state.modelDictionaryComponentsCaches);
+
     // Clear any existing/previous comparison result.
     this.setState({
       comparisonResult:[],
@@ -422,13 +422,10 @@ export class ExpectedResultComparisonContainer extends Component<Props, State> {
           noSufficientData: false
         });
         if (data.status !== 'start') {
+          this._addComponentNameToResultData(data, modelComponentDictNameAndMeasurementMRIDsMap);
           payload.push(data);
           if (allMeasurementMRIDs && allMeasurementMRIDs.length > 0) {
             if (allMeasurementMRIDs.includes(data.object)) {
-              this._responseFilter(componentType, useMagnitude, useAngle, data);
-            }
-          } else {
-            if (component.measurementMRIDs.includes(data.object)) {
               this._responseFilter(componentType, useMagnitude, useAngle, data);
             }
           }
@@ -461,21 +458,35 @@ export class ExpectedResultComparisonContainer extends Component<Props, State> {
     });
   }
 
-  private _extractComponentMeasurementMRIDs(component: any) {
+  private _extractComponentMeasurementMRIDs(component: ComponentModel[]) {
     let selectedComponentMeasurementMRIDs: any[] = [];
-    if (Array.isArray(component)) {
-      selectedComponentMeasurementMRIDs = [].concat(...component.map((c) => c.measurementMRIDs));
-    }
+    selectedComponentMeasurementMRIDs = [].concat(...component.map((c) => c.measurementMRIDs));
     return selectedComponentMeasurementMRIDs;
+  }
+
+  private _createResultObjectAndComponentNameMapping(components: ModelDictionaryComponent[]) {
+    const modelComponentDictNameAndMeasurementMRIDs = new Map<string, string>();
+    for(const component in components) {
+      if (Object.prototype.hasOwnProperty.call(components, component)) {
+        components[component].measurementMRIDs.forEach((mrid) => {
+          modelComponentDictNameAndMeasurementMRIDs.set(mrid, components[component].name);
+        });
+      }
+    }
+    return modelComponentDictNameAndMeasurementMRIDs;
+  }
+
+  private _addComponentNameToResultData(data: any, modelComponentDictNameAndMeasurementMRIDsMap: Map<string, string>) { // 1. data -> result, 2. allMeasurementMRIDs -> selected components mrids
+    if(modelComponentDictNameAndMeasurementMRIDsMap.get(data.object)) {
+      data['componentName'] = modelComponentDictNameAndMeasurementMRIDsMap.get(data.object);
+    }
   }
 
   private _filterExistingComparisonResult() {
     const { useMagnitude, useAngle, component, componentType } = this.state.selectedMenuValues;
     const existingComparisonResult = this.state.allComparisonResult;
     let allMeasurementMRIDs: string | string[] = [];
-    if (Array.isArray(component)) {
-      allMeasurementMRIDs = this._extractComponentMeasurementMRIDs(component);
-    }
+    allMeasurementMRIDs = this._extractComponentMeasurementMRIDs(component);
     const foundResult: ComparisonResult[] = [];
     existingComparisonResult.forEach((result) => {
       if (allMeasurementMRIDs.includes(result.object)) {
