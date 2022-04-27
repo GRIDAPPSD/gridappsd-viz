@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Component } from 'react';
 import { Subject, take } from 'rxjs';
 
@@ -26,7 +25,7 @@ interface Props {
               componentType: string,
               useMagnitude: boolean,
               useAngle: boolean,
-              component: string ) => void;
+              component: any ) => void;
   onMRIDChanged: (mRID: string) => void;
 }
 
@@ -51,7 +50,7 @@ export class SimulationVsExpected extends Component<Props, State> {
   readonly selectedComponentTypeFormControl = new FormControlModel<string>(null);
   readonly useMagnitudeFormControl = new FormControlModel(false);
   readonly useAngleFormControl = new FormControlModel(false);
-  readonly selectedComponentFormControl = new FormControlModel<ModelDictionaryComponent>(null);
+  readonly selectedComponentFormControl = new FormControlModel([]);
   readonly currentComparisonConfigFormGroup = this._createCurrentComparisonConfigFormGroupModel();
 
   readonly fileOutputDataMap = new Map<string, ModelDictionaryComponent>();
@@ -82,7 +81,7 @@ export class SimulationVsExpected extends Component<Props, State> {
         componentType: '',
         useMagnitude: false,
         useAngle: false,
-        component: ''
+        component: []
       },
       expectedResultsFileUploaded: false,
       simConfigFileUploaded: false
@@ -425,6 +424,8 @@ export class SimulationVsExpected extends Component<Props, State> {
             formControlModel={this.useAngleFormControl} />
           <Select
             label='Component'
+            multiple={true}
+            maxNumOfSelection={5}
             selectionOptionBuilder={this.state.modelDictionaryComponentOptionBuilder}
             formControlModel={this.selectedComponentFormControl} />
           <BasicButton

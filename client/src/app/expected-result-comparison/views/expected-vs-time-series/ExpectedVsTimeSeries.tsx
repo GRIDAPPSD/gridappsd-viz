@@ -19,7 +19,14 @@ interface Props {
   lineNamesAndMRIDMap: Map<string, string>;
   mRIDAndSimulationIdsMapping: Map<string, number[]>;
   simulationIds: string[];
-  onSubmit: (expectedResults: any, simulationId: number, lineName: string, componentType: string, useMagnitude: boolean, useAngle: boolean, component: string) => void;
+  onSubmit: (
+    expectedResults: any,
+    simulationId: number,
+    lineName: string,
+    componentType: string,
+    useMagnitude: boolean,
+    useAngle: boolean,
+    component: any ) => void;
   onMRIDChanged: (mRID: string) => void;
 }
 
@@ -44,7 +51,7 @@ export class ExpectedVsTimeSeries extends Component<Props, State> {
   readonly selectedComponentTypeFormControl = new FormControlModel<string>(null);
   readonly useMagnitudeFormControl = new FormControlModel(false);
   readonly useAngleFormControl = new FormControlModel(false);
-  readonly selectedComponentFormControl = new FormControlModel<ModelDictionaryComponent>(null);
+  readonly selectedComponentFormControl = new FormControlModel([]);
   readonly selectedFirstSimulationIdFormControl = new FormControlModel<number>(null);
   readonly currentComparisonConfigFormGroup = this._createCurrentComparisonConfigFormGroupModel();
 
@@ -69,7 +76,7 @@ export class ExpectedVsTimeSeries extends Component<Props, State> {
         componentType: '',
         useMagnitude: false,
         useAngle: false,
-        component: '',
+        component: [],
         firstSimulationId: null
       },
       simIdFlag: null,
@@ -353,6 +360,8 @@ export class ExpectedVsTimeSeries extends Component<Props, State> {
           formControlModel={this.useAngleFormControl} />
         <Select
           label='Component'
+          multiple={true}
+          maxNumOfSelection={5}
           selectionOptionBuilder={this.state.modelDictionaryComponentOptionBuilder}
           formControlModel={this.selectedComponentFormControl} />
         <BasicButton

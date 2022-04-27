@@ -17,7 +17,14 @@ interface Props {
   lineNamesAndMRIDMap: Map<string, string>;
   mRIDAndSimulationIdsMapping: Map<string, number[]>;
   simulationIds: string[];
-  onSubmit: (lineName: string, componentType: string, useMagnitude: boolean, useAngle: boolean, component: string, firstSimulationId: number, secondSimulationId: number) => void;
+  onSubmit: (
+    lineName: string,
+    componentType: string,
+    useMagnitude: boolean,
+    useAngle: boolean,
+    component: any,
+    firstSimulationId: number,
+    secondSimulationId: number ) => void;
   onMRIDChanged: (mRID: string) => void;
 }
 
@@ -39,7 +46,7 @@ export class TimeSeriesVsTimeSeries extends Component<Props, State> {
   readonly selectedComponentTypeFormControl = new FormControlModel(MeasurementType.NONE);
   readonly useMagnitudeFormControl = new FormControlModel(false);
   readonly useAngleFormControl = new FormControlModel(false);
-  readonly selectedComponentFormControl = new FormControlModel<ModelDictionaryComponent>(null);
+  readonly selectedComponentFormControl = new FormControlModel([]);
   readonly selectedFirstSimulationIdFormControl = new FormControlModel<number>(null);
   readonly selectedSecondSimulationIdFormControl = new FormControlModel<number>(null);
   readonly currentComparisonConfigFormGroup = this._createCurrentComparisonConfigFormGroupModel();
@@ -62,7 +69,7 @@ export class TimeSeriesVsTimeSeries extends Component<Props, State> {
         componentType: '',
         useMagnitude: false,
         useAngle: false,
-        component: '',
+        component: [],
         firstSimulationId: null,
         secondSimulationId: null
       },
@@ -327,6 +334,8 @@ export class TimeSeriesVsTimeSeries extends Component<Props, State> {
           formControlModel={this.useAngleFormControl} />
         <Select
           label='Component'
+          multiple={true}
+          maxNumOfSelection={5}
           selectionOptionBuilder={this.state.modelDictionaryComponentOptionBuilder}
           formControlModel={this.selectedComponentFormControl} />
         <BasicButton

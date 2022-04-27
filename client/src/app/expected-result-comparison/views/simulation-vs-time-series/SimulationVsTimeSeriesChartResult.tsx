@@ -60,7 +60,7 @@ export class SimulationVsTimeSeriesChartResult extends Component<Props, State> {
         if (datum.componentName && datum.componentName !== '') {
           chartTitle += datum.componentName + ' ';
         }
-        if(datum.phase && datum.phase !== 'none' && datum.phase !== '') {
+        if(datum.phase && datum.phase !== '') {
           chartTitle += datum.attribute + ' - phase ' + datum.phase;
         } else {
           chartTitle += datum.attribute;

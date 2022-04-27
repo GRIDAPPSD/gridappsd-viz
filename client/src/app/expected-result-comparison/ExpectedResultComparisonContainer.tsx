@@ -326,7 +326,7 @@ export class ExpectedResultComparisonContainer extends Component<Props, State> {
   }
 
   // No events parameter for now
-  onSimulationVsExpectedFormSubmited(simulationConfiguration: any, expectedResults: any, lineName: string, componentType: string, useMagnitude: boolean, useAngle: boolean, component: any) {
+  onSimulationVsExpectedFormSubmited(simulationConfiguration: any, expectedResults: any, lineName: string, componentType: string, useMagnitude: boolean, useAngle: boolean, component: ComponentModel[]) {
     if(!isEqual(simulationConfiguration, this._sESimulationConfiguration) || !isEqual(expectedResults, this._sEExpectedResults) || lineName !== this._sELineName ) {
       this._dynamicallyFetchComparisonResponse(new SimulationVsExpectedRequest(simulationConfiguration, expectedResults), lineName, componentType, useMagnitude, useAngle, component);
     } else {

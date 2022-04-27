@@ -21,6 +21,7 @@ interface Props {
     diffType: string;
     match: boolean;
     phase: string;
+    componentName: string;
   }>;
   noSufficientData: boolean;
   startFetchingAfterSubmit: boolean;
@@ -56,10 +57,13 @@ export class ExpectedVsTimeSeriesChartResult extends Component<Props, State> {
       for(const datum of this.props.result) {
         this._matchPhaseToMeasurementMRID(datum);
         let chartTitle = '';
-        if(datum.phase && datum.phase !== 'none' && datum.phase !== '') {
-          chartTitle = datum.attribute + ' - phase ' + datum.phase;
+        if (datum.componentName && datum.componentName !== '') {
+          chartTitle += datum.componentName + ' ';
+        }
+        if(datum.phase && datum.phase !== '') {
+          chartTitle += datum.attribute + ' - phase ' + datum.phase;
         } else {
-          chartTitle = datum.attribute;
+          chartTitle += datum.attribute;
         }
         if(!chartModelMap.has(chartTitle)) {
           chartModelMap.set(chartTitle, this._createLineChartModelForAttribute(chartTitle));
@@ -121,7 +125,7 @@ export class ExpectedVsTimeSeriesChartResult extends Component<Props, State> {
       <div className='expected-vs-time-series-chart-result'>
         {(this.props.startFetchingAfterSubmit && !this.props.noSufficientData) ? <ProgressIndicator show /> : null}
         {
-          !this.props.noSufficientData ? this.state.chartModels.map(model => {
+          !this.props.noSufficientData ? this.state.chartModels.sort((a, b) => a.name.localeCompare(b.name)).map(model => {
             return (
               <LineChart
               key={model.name}

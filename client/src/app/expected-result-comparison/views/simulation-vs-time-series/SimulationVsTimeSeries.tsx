@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Component } from 'react';
 import { Subject, take, takeUntil } from 'rxjs';
 
@@ -20,7 +19,13 @@ interface Props {
   lineNamesAndMRIDMap: Map<string, string>;
   mRIDAndSimulationIdsMapping: Map<string, number[]>;
   simulationIds: string[];
-  onSubmit: (simulationConfiguration: any | null, simulationId: number, lineName: string, componentType: string, useMagnitude: boolean, useAngle: boolean, component: any) => void;
+  onSubmit: (
+    simulationConfiguration: any | null,
+    simulationId: number, lineName: string,
+    componentType: string,
+    useMagnitude: boolean,
+    useAngle: boolean,
+    component: any ) => void;
   onMRIDChanged: (mRID: string) => void;
 }
 
