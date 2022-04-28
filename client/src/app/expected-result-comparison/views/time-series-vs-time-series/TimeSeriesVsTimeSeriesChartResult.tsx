@@ -22,13 +22,13 @@ interface Props {
     phase: string;
     componentName: string;
   }>;
-  noSufficientData: boolean;
   startFetchingAfterSubmit: boolean;
   phaseAndMeasurementMRIDMapping: Map<string[], string[]>;
 }
 
 interface State {
   chartModels: LineChartModel[];
+  dataIsSufficient: boolean;
 }
 
 export class TimeSeriesVsTimeSeriesChartResult extends Component<Props, State> {
@@ -37,7 +37,8 @@ export class TimeSeriesVsTimeSeriesChartResult extends Component<Props, State> {
     super(props);
 
     this.state={
-      chartModels: []
+      chartModels: [],
+      dataIsSufficient: false
     };
   }
 
@@ -55,7 +56,7 @@ export class TimeSeriesVsTimeSeriesChartResult extends Component<Props, State> {
   private _buildChart() {
     const chartModelMap = new Map<string, LineChartModel>();
     const anchorTimeStamp = Date.now();
-    if(this.props.result.length > 1) {
+    if(this.props.result.length > 0) {
       for(const datum of this.props.result) {
         this._matchPhaseToMeasurementMRID(datum);
         let chartTitle = '';
@@ -72,6 +73,7 @@ export class TimeSeriesVsTimeSeriesChartResult extends Component<Props, State> {
         }
         const chartModel = chartModelMap.get(chartTitle);
         const nextTimeStamp = new Date(anchorTimeStamp + chartModel.timeSeries[0].points.length * 1000);
+
         chartModel.timeSeries[0].points.push({
           timestamp: nextTimeStamp,
           measurement: +datum.expected
@@ -81,6 +83,12 @@ export class TimeSeriesVsTimeSeriesChartResult extends Component<Props, State> {
           timestamp: nextTimeStamp,
           measurement: +datum.actual
         });
+
+        if (chartModel.timeSeries[0].points.length > 1 || chartModel.timeSeries[1].points.length > 1) {
+          this.setState({
+            dataIsSufficient: true
+          });
+        }
       }
       this.setState({
         chartModels: [...chartModelMap.values()]
@@ -124,18 +132,22 @@ export class TimeSeriesVsTimeSeriesChartResult extends Component<Props, State> {
 
   render() {
     return (
-      <div className='time-series-vs-time-series-chart-result'>
-        {(this.props.startFetchingAfterSubmit && !this.props.noSufficientData) ? <ProgressIndicator show /> : null}
+      <div className='simulation-vs-expected-chart-result'>
         {
-          !this.props.noSufficientData ? this.state.chartModels.sort((a, b) => a.name.localeCompare(b.name)).map(model => {
-            return (
-              <LineChart
-              key={model.name}
-              lineChartModel={model} />
-            );
-          }) : this.state.chartModels.length > 0 ? <MessageBanner>No sufficient data.</MessageBanner> : null
+          this.state.chartModels.length === 0 && !this.props.startFetchingAfterSubmit
+          ? <MessageBanner>No available data.</MessageBanner>
+          : (this.props.startFetchingAfterSubmit && !this.state.dataIsSufficient)
+            ? <ProgressIndicator show />
+            : this.state.dataIsSufficient
+              ? this.state.chartModels.sort((a, b) => a.name.localeCompare(b.name)).map(model => {
+                return (
+                  <LineChart
+                  key={model.name}
+                  lineChartModel={model} />
+                );
+              })
+              : <MessageBanner>No sufficient data for rendering charts.</MessageBanner>
         }
-        {!this.props.startFetchingAfterSubmit && this.state.chartModels.length < 1 ? <MessageBanner>No available data.</MessageBanner> : null}
       </div>
     );
   }

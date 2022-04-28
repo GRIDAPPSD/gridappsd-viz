@@ -40,7 +40,6 @@ interface State {
   simulationIds: string[];
   isFetching: boolean;
   startFetchingAfterSubmit: boolean;
-  noSufficientData: boolean;
   modelDictionaryComponentsCaches: ModelDictionaryComponent[];
   phaseAndMeasurementMRIDMapping: Map<string[], string[]>;
   selectedMenuValues: {
@@ -92,7 +91,6 @@ export class ExpectedResultComparisonContainer extends Component<Props, State> {
       simulationIds: [],
       isFetching: false,
       startFetchingAfterSubmit: false,
-      noSufficientData: false,
       modelDictionaryComponentsCaches: [],
       phaseAndMeasurementMRIDMapping: null,
       selectedMenuValues: {
@@ -265,7 +263,6 @@ export class ExpectedResultComparisonContainer extends Component<Props, State> {
         {this.selectComponentBasedComparisonType()}
         <ResultViewer
           startFetchingAfterSubmit={this.state.startFetchingAfterSubmit}
-          noSufficientData={this.state.noSufficientData}
           result={this.state.comparisonResult}
           showProgressIndicator={this.state.isFetching}
           comparisonType={this.state.comparisonType}
@@ -418,9 +415,6 @@ export class ExpectedResultComparisonContainer extends Component<Props, State> {
     )
     .subscribe({
       next: data => {
-        this.setState({
-          noSufficientData: false
-        });
         if (data.status !== 'start') {
           this._addComponentNameToResultData(data, modelComponentDictNameAndMeasurementMRIDsMap);
           payload.push(data);
@@ -433,15 +427,6 @@ export class ExpectedResultComparisonContainer extends Component<Props, State> {
       },
       complete: () => {
         Notification.open('Fetching Comparison Result is Done.');
-        if (this.state.comparisonResult.length <= 2) {
-          this.setState({
-            noSufficientData: true
-          });
-        } else {
-          this.setState({
-            noSufficientData: false
-          });
-        }
         this.setState({
           startFetchingAfterSubmit: false,
           allComparisonResult: payload
@@ -511,28 +496,23 @@ export class ExpectedResultComparisonContainer extends Component<Props, State> {
   private _responseFilter(componentType: string, useMagnitude: boolean, useAngle: boolean, data: any) {
     if (componentType === MeasurementType.TAP && data.attribute === 'value') {
       this.setState({
-        comparisonResult: [...this.state.comparisonResult, data],
-        startFetchingAfterSubmit: false
+        comparisonResult: [...this.state.comparisonResult, data]
       });
     } else if (!useMagnitude && !useAngle && data.attribute !== 'magnitude' && data.attribute !== 'angle') {
       this.setState({
-        comparisonResult: [...this.state.comparisonResult, data],
-        startFetchingAfterSubmit: false
+        comparisonResult: [...this.state.comparisonResult, data]
       });
     } else if (useMagnitude && !useAngle && data.attribute === 'magnitude') {
       this.setState({
-        comparisonResult: [...this.state.comparisonResult, data],
-        startFetchingAfterSubmit: false
+        comparisonResult: [...this.state.comparisonResult, data]
       });
     } else if (!useMagnitude && useAngle && data.attribute === 'angle') {
       this.setState({
-        comparisonResult: [...this.state.comparisonResult, data],
-        startFetchingAfterSubmit: false
+        comparisonResult: [...this.state.comparisonResult, data]
       });
     } else if (useMagnitude && useAngle && (data.attribute === 'magnitude' || data.attribute === 'angle')) {
       this.setState({
-        comparisonResult: [...this.state.comparisonResult, data],
-        startFetchingAfterSubmit: false
+        comparisonResult: [...this.state.comparisonResult, data]
       });
     }
   }

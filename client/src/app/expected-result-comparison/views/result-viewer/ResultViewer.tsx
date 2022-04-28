@@ -15,7 +15,6 @@ import './ResultViewer.light.scss';
 import './ResultViewer.dark.scss';
 
 interface Props {
-  noSufficientData: boolean;
   startFetchingAfterSubmit: boolean;
   result: any[] | any;
   showProgressIndicator: boolean;
@@ -115,7 +114,6 @@ export class ResultViewer extends Component<Props, State> {
         return (
           <SimulationVsExpectedChartResult
           result={this.props.result}
-          noSufficientData={this.props.noSufficientData}
           startFetchingAfterSubmit={this.props.startFetchingAfterSubmit}
           phaseAndMeasurementMRIDMapping={this.props.phaseAndMeasurementMRIDMapping} />
         );
@@ -123,7 +121,6 @@ export class ResultViewer extends Component<Props, State> {
         return (
           <SimulationVsTimeSeriesChartResult
           startFetchingAfterSubmit={this.props.startFetchingAfterSubmit}
-          noSufficientData={this.props.noSufficientData}
           phaseAndMeasurementMRIDMapping={this.props.phaseAndMeasurementMRIDMapping}
           result={this.props.result} />
         );
@@ -131,7 +128,6 @@ export class ResultViewer extends Component<Props, State> {
         return (
           <ExpectedVsTimeSeriesChartResult
           startFetchingAfterSubmit={this.props.startFetchingAfterSubmit}
-          noSufficientData={this.props.noSufficientData}
           phaseAndMeasurementMRIDMapping={this.props.phaseAndMeasurementMRIDMapping}
           result={this.props.result} />
         );
@@ -139,7 +135,6 @@ export class ResultViewer extends Component<Props, State> {
         return (
           <TimeSeriesVsTimeSeriesChartResult
            startFetchingAfterSubmit={this.props.startFetchingAfterSubmit}
-           noSufficientData={this.props.noSufficientData}
            phaseAndMeasurementMRIDMapping={this.props.phaseAndMeasurementMRIDMapping}
            result={this.props.result} />
         );
