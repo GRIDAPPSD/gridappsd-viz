@@ -56,7 +56,6 @@ export class ExpectedResultComparisonContainer extends Component<Props, State> {
   private readonly _stateStore = StateStore.getInstance();
 
   private _responseSubscription: Subscription;
-  private _stateStoreSubscription: Subscription;
   private _unsubscriber = new Subject<void>();
 
   // SimulationVsExpected
@@ -109,7 +108,8 @@ export class ExpectedResultComparisonContainer extends Component<Props, State> {
   }
 
   componentDidMount() {
-    this._stateStoreSubscription = this._stateStore.select('expectedResultComparisonType')
+    this._stateStore.select('expectedResultComparisonType')
+      .pipe(takeUntil(this._unsubscriber))
       .subscribe({
         next: selectedType => {
           this.setState({
@@ -117,27 +117,28 @@ export class ExpectedResultComparisonContainer extends Component<Props, State> {
           });
         }
       });
-      this._setLineNamesAndExistingSimulationIdsMap();
-      this._stateStoreSubscription = this._stateStore.select('modelDictionaryComponents')
-        .subscribe({
-          next: modelDicts => {
-            if (modelDicts) {
-              const componentMeasurementMRIDMapping = new Map<string[], string[]>();
-              for(const modelDict in modelDicts) {
-                if (Object.prototype.hasOwnProperty.call(modelDicts, modelDict)) {
-                  componentMeasurementMRIDMapping.set(
-                    modelDicts[modelDict].phases,
-                    modelDicts[modelDict].measurementMRIDs
-                  );
-                }
+    this._setLineNamesAndExistingSimulationIdsMap();
+    this._stateStore.select('modelDictionaryComponents')
+      .pipe(takeUntil(this._unsubscriber))
+      .subscribe({
+        next: modelDicts => {
+          if (modelDicts) {
+            const componentMeasurementMRIDMapping = new Map<string[], string[]>();
+            for(const modelDict in modelDicts) {
+              if (Object.prototype.hasOwnProperty.call(modelDicts, modelDict)) {
+                componentMeasurementMRIDMapping.set(
+                  modelDicts[modelDict].phases,
+                  modelDicts[modelDict].measurementMRIDs
+                );
               }
-              this.setState({
-                modelDictionaryComponentsCaches: modelDicts,
-                phaseAndMeasurementMRIDMapping: componentMeasurementMRIDMapping
-              });
             }
+            this.setState({
+              modelDictionaryComponentsCaches: modelDicts,
+              phaseAndMeasurementMRIDMapping: componentMeasurementMRIDMapping
+            });
           }
-        });
+        }
+      });
   }
 
   componentDidUpdate(prevProps: Readonly<Props>, prevState: Readonly<State>): void {
@@ -227,7 +228,6 @@ export class ExpectedResultComparisonContainer extends Component<Props, State> {
   }
 
   componentWillUnmount() {
-    this._stateStoreSubscription.unsubscribe();
     this._responseSubscription?.unsubscribe();
     this._unsubscriber.next();
     this._unsubscriber.complete();
