@@ -1,6 +1,6 @@
 import { Component } from 'react';
-import { Subscription } from 'rxjs';
-import { map, takeWhile } from 'rxjs/operators';
+import { Subject, Subscription } from 'rxjs';
+import { takeWhile, takeUntil } from 'rxjs/operators';
 import { isEqual } from 'lodash';
 
 import { ExpectedResultComparisonType } from '@client:common/ExpectedResultComparisonType';
@@ -32,7 +32,7 @@ interface Props {
 
 interface State {
   comparisonType: ExpectedResultComparisonType;
-  comparisonResult: ComparisonResult[];
+  filteredComparisonResult: ComparisonResult[];
   allComparisonResult: ComparisonResult[];
   lineNames: string[];
   lineNamesAndMRIDMap: Map<string, string>;
@@ -57,6 +57,7 @@ export class ExpectedResultComparisonContainer extends Component<Props, State> {
 
   private _responseSubscription: Subscription;
   private _stateStoreSubscription: Subscription;
+  private _unsubscriber = new Subject<void>();
 
   // SimulationVsExpected
   private _sELineName = '';
@@ -83,7 +84,7 @@ export class ExpectedResultComparisonContainer extends Component<Props, State> {
 
     this.state = {
       comparisonType: null,
-      comparisonResult: [],
+      filteredComparisonResult: [],
       allComparisonResult: [],
       lineNames: [],
       lineNamesAndMRIDMap: this._setLineNamesAndMRIDMap(props.feederModel),
@@ -114,13 +115,6 @@ export class ExpectedResultComparisonContainer extends Component<Props, State> {
           this.setState({
             comparisonType: selectedType
           });
-          switch (selectedType) {
-            case ExpectedResultComparisonType.SIMULATION_VS_TIME_SERIES:
-            case ExpectedResultComparisonType.EXPECTED_VS_TIME_SERIES:
-            case ExpectedResultComparisonType.TIME_SERIES_VS_TIME_SERIES:
-              this._fetchAllSimulationIds();
-              break;
-          }
         }
       });
       this._setLineNamesAndExistingSimulationIdsMap();
@@ -168,54 +162,33 @@ export class ExpectedResultComparisonContainer extends Component<Props, State> {
     return resultMap;
   }
 
-  private _fetchAllSimulationIds() {
-    const destinationTopic = 'goss.gridappsd.process.request.data.log';
-    const responseTopic = '/simulation-ids';
-    const requestBody = '{"query": "select distinct(process_id), max(timestamp) as timestamp from log where process_id is not null and process_type=\'/queue/goss.gridappsd.process.request.simulation\' group by process_id order by timestamp desc"}';
-
-    // eslint-disable-next-line camelcase
-    this._stompClientService.readOnceFrom<Array<{ process_id: string; timestamp: string }>>(responseTopic)
-      .pipe(map(payload => payload.map(e => e.process_id)))
-      .subscribe({
-        next: simulationIds => {
-          this.setState({
-            simulationIds
-          });
-        }
-      });
-    this._stompClientService.send({
-      destination: destinationTopic,
-      body: requestBody,
-      replyTo: responseTopic
-    });
-  }
-
   private _setLineNamesAndExistingSimulationIdsMap() {
     const destinationTopic = 'goss.gridappsd.process.request.data.log';
     const responseTopic = '/simulation-ids';
     const requestBody = '{"query": "select process_id, substring(log_message, locate(\'_\', log_message, locate(\'Line_name\', log_message)+9),37) as model_id from log where source like \'%ProcessNewSimulationRequest%\' and log_message like \'%Line_name%\'"}';
-    this._responseSubscription = this._stompClientService.readFrom<any>(responseTopic)
-      .pipe(payload => payload)
+    this._stompClientService.readFrom<any>(responseTopic)
+      .pipe(takeUntil(this._unsubscriber))
       .subscribe({
         next: existingSimulationIdsAndMRIDs => {
-          const allLineNameAndmMRIDsMap = new Map<string, string>();
+          const allLineNameAndMRIDsMap = new Map<string, string>();
           for (const feeder in this.props.feederModel) {
             if (Object.prototype.hasOwnProperty.call(this.props.feederModel, feeder)) {
               if (this.props.feederModel[feeder]['lines'].length > 1) {
                 this.props.feederModel[feeder]['lines'].forEach((f) => {
-                  allLineNameAndmMRIDsMap.set(f.name, f.id);
+                  allLineNameAndMRIDsMap.set(f.name, f.id);
                 });
               } else {
-                allLineNameAndmMRIDsMap.set(this.props.feederModel[feeder]['lines'][0].name, this.props.feederModel[feeder]['lines'][0].id);
+                allLineNameAndMRIDsMap.set(this.props.feederModel[feeder]['lines'][0].name, this.props.feederModel[feeder]['lines'][0].id);
               }
             }
           }
-          // filter out the existing LineName by allLineNameAndmMRIDsMap and existingSimulationIdsAndMRIDs
+          // filter out the existing LineName by allLineNameAndMRIDsMap and existingSimulationIdsAndMRIDs
           const uniqueMRIDS = Array.from(new Set(existingSimulationIdsAndMRIDs.map((item: { model_id: string })=> item.model_id)));
+          const uniqueSimulationIds = Array.from(new Set(existingSimulationIdsAndMRIDs.map((item: {process_id: string}) => item.process_id)));
           const existingLineNames = [];
           for(const mrid of uniqueMRIDS) {
-            if (Array.from(allLineNameAndmMRIDsMap.values()).includes(mrid as string)){
-              for(const[key,value] of allLineNameAndmMRIDsMap.entries()){
+            if (Array.from(allLineNameAndMRIDsMap.values()).includes(mrid as string)){
+              for(const[key,value] of allLineNameAndMRIDsMap.entries()){
                 if (value === mrid){
                   existingLineNames.push(key);
                 }
@@ -225,7 +198,8 @@ export class ExpectedResultComparisonContainer extends Component<Props, State> {
           const result = this._processExistingLineNamesAndSimulationIds(existingSimulationIdsAndMRIDs);
           this.setState({
             mRIDAndSimulationIdsMapping: result,
-            lineNames: existingLineNames
+            lineNames: existingLineNames,
+            simulationIds: uniqueSimulationIds as string[]
           });
         }
       });
@@ -255,6 +229,8 @@ export class ExpectedResultComparisonContainer extends Component<Props, State> {
   componentWillUnmount() {
     this._stateStoreSubscription.unsubscribe();
     this._responseSubscription?.unsubscribe();
+    this._unsubscriber.next();
+    this._unsubscriber.complete();
   }
 
   render() {
@@ -263,7 +239,7 @@ export class ExpectedResultComparisonContainer extends Component<Props, State> {
         {this.selectComponentBasedComparisonType()}
         <ResultViewer
           startFetchingAfterSubmit={this.state.startFetchingAfterSubmit}
-          result={this.state.comparisonResult}
+          result={this.state.filteredComparisonResult}
           showProgressIndicator={this.state.isFetching}
           comparisonType={this.state.comparisonType}
           phaseAndMeasurementMRIDMapping={this.state.phaseAndMeasurementMRIDMapping}
@@ -406,7 +382,7 @@ export class ExpectedResultComparisonContainer extends Component<Props, State> {
 
     // Clear any existing/previous comparison result.
     this.setState({
-      comparisonResult:[],
+      filteredComparisonResult:[],
       startFetchingAfterSubmit: true
     });
     this._responseSubscription = this._stompClientService.readFrom<any[] | any>(request.replyTo)
@@ -461,7 +437,7 @@ export class ExpectedResultComparisonContainer extends Component<Props, State> {
     return modelComponentDictNameAndMeasurementMRIDs;
   }
 
-  private _addComponentNameToResultData(data: any, modelComponentDictNameAndMeasurementMRIDsMap: Map<string, string>) { // 1. data -> result, 2. allMeasurementMRIDs -> selected components mrids
+  private _addComponentNameToResultData(data: any, modelComponentDictNameAndMeasurementMRIDsMap: Map<string, string>) {
     if(modelComponentDictNameAndMeasurementMRIDsMap.get(data.object)) {
       data['componentName'] = modelComponentDictNameAndMeasurementMRIDsMap.get(data.object);
     }
@@ -488,7 +464,7 @@ export class ExpectedResultComparisonContainer extends Component<Props, State> {
         }
       }
       this.setState({
-        comparisonResult: foundResult
+        filteredComparisonResult: foundResult
       });
     });
   }
@@ -496,23 +472,23 @@ export class ExpectedResultComparisonContainer extends Component<Props, State> {
   private _responseFilter(componentType: string, useMagnitude: boolean, useAngle: boolean, data: any) {
     if (componentType === MeasurementType.TAP && data.attribute === 'value') {
       this.setState({
-        comparisonResult: [...this.state.comparisonResult, data]
+        filteredComparisonResult: [...this.state.filteredComparisonResult, data]
       });
     } else if (!useMagnitude && !useAngle && data.attribute !== 'magnitude' && data.attribute !== 'angle') {
       this.setState({
-        comparisonResult: [...this.state.comparisonResult, data]
+        filteredComparisonResult: [...this.state.filteredComparisonResult, data]
       });
     } else if (useMagnitude && !useAngle && data.attribute === 'magnitude') {
       this.setState({
-        comparisonResult: [...this.state.comparisonResult, data]
+        filteredComparisonResult: [...this.state.filteredComparisonResult, data]
       });
     } else if (!useMagnitude && useAngle && data.attribute === 'angle') {
       this.setState({
-        comparisonResult: [...this.state.comparisonResult, data]
+        filteredComparisonResult: [...this.state.filteredComparisonResult, data]
       });
     } else if (useMagnitude && useAngle && (data.attribute === 'magnitude' || data.attribute === 'angle')) {
       this.setState({
-        comparisonResult: [...this.state.comparisonResult, data]
+        filteredComparisonResult: [...this.state.filteredComparisonResult, data]
       });
     }
   }
