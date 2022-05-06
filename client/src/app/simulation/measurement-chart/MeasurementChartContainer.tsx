@@ -293,7 +293,7 @@ export class MeasurementChartContainer extends Component<Props, State> {
 
     if (measurements) {
       let totalVoltage = 0;
-      let numberOfVoltageMeasurements = 0;
+      let numberOfVoltageMeasurements = 0;  
       measurements.forEach(measurement => {
         if (measurement.type === MeasurementType.VOLTAGE) {
           const nominalVoltage = this._nominalVoltageDivisorMap.get(measurement.connectivityNode);
@@ -309,10 +309,10 @@ export class MeasurementChartContainer extends Component<Props, State> {
             numberOfVoltageMeasurements++;
           }
         }
-        if (measurement.conductingEquipmentType === ConductingEquipmentType.EnergyConsumer) {
+        else if ((measurement.conductingEquipmentType === ConductingEquipmentType.EnergyConsumer) && measurement.type === MeasurementType.POWER) {
           const [p, q] = this._calculatePQValues(measurement);
           energyConsumerP += p;
-          energyConsumerQ += q;
+          energyConsumerQ += q; 
         } else if (measurement.name.startsWith('PowerElectronicsConnection_BatteryUnit')) {
           const [p, q] = this._calculatePQValues(measurement);
           batteryP += p;
