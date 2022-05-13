@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import { Component } from 'react';
 import { zip } from 'rxjs';
 import { take, filter } from 'rxjs/operators';
@@ -249,6 +250,7 @@ export class AppContainer extends Component<Props, State> {
   }
 
   private _collectMRIDsAndPhasesForComponents(modelDictionary: ModelDictionary) {
+    console.log('modelDictionary:', modelDictionary);
     this.componentMRIDs.clear();
     this.componentPhases.clear();
     for (const swjtch of modelDictionary.switches) {
@@ -262,6 +264,7 @@ export class AppContainer extends Component<Props, State> {
       // Only interested in regulators' phases for now, need phases for regulator menus
       this.componentPhases.set(regulator.bankName, (regulator.bankPhases || '').split(''));
     }
+    console.log('this.componentMRIDs', this.componentMRIDs);
   }
 
   private _findAllPhasesForEachComponentThenGroupThem(modelDictionary: ModelDictionary) {
