@@ -1,7 +1,6 @@
-/* eslint-disable no-console */
 import { Component } from 'react';
 import { Subject, Subscription } from 'rxjs';
-import { filter, switchMap, takeUntil, takeWhile } from 'rxjs/operators';
+import { takeUntil, takeWhile } from 'rxjs/operators';
 
 import { waitUntil } from '@client:common/misc';
 import { ProgressIndicator } from '@client:common/overlay/progress-indicator';
@@ -39,7 +38,6 @@ import { CapacitorVoltUpdateRequest } from './models/CapacitorVoltUpdateRequest'
 import { RegulatorLineDropUpdateRequest } from './models/RegulatorLineDropUpdateRequest';
 import { RegulatorTapChangerRequest } from './models/RegulatorTapChangerRequest';
 import { RenderableTopology } from './models/RenderableTopology';
-import { TopologyProcessorOutputMessage } from './models/TopologyProcessorOutputMessage';
 
 
 interface Props {
@@ -51,7 +49,6 @@ interface State {
   topology: RenderableTopology;
   isFetching: boolean;
   simulationOutputMeasurements: SimulationOutputMeasurement[];
-  topologyProcessorOutputMessage: TopologyProcessorOutputMessage;
 }
 
 const topologyModelCache = new Map<string, TopologyModel>();
@@ -82,8 +79,7 @@ export class TopologyRendererContainer extends Component<Props, State> {
         inverted: false
       },
       isFetching: true,
-      simulationOutputMeasurements: [],
-      topologyProcessorOutputMessage: null
+      simulationOutputMeasurements: []
     };
 
     this.activeSimulationConfig = this._simulationQueue.getActiveSimulation()?.config || DEFAULT_SIMULATION_CONFIGURATION;
@@ -95,7 +91,6 @@ export class TopologyRendererContainer extends Component<Props, State> {
 
   componentDidMount() {
     this._observeActiveSimulationChangeEvent();
-    this._observeTopologyServiceOutputMessage();
     this._subscribeToSimulationOutputMeasurementMapStream();
     this._updateRenderableTopologyOnSimulationSnapshotReceived();
     this._fetchCurrentLimitsFromStateStore();
@@ -126,22 +121,6 @@ export class TopologyRendererContainer extends Component<Props, State> {
       });
   }
 
-  private _observeTopologyServiceOutputMessage() {
-    return this._stateStore.select('simulationId')
-      .pipe(
-        filter(id => id !== '' && this._simulationManagementService.didUserStartActiveSimulation()),
-        switchMap(id => this._stompClientService.readFrom<any>(`/topic/goss.gridappsd.simulation.gridappsd-topology-processor.${id}.output`)),
-        takeUntil(this._unsubscriber)
-      )
-      .subscribe({
-        next: payload => {
-          this.setState({
-            topologyProcessorOutputMessage: payload
-          }, () => console.log('this.state.topologyProcessorOutputMessage###', this.state.topologyProcessorOutputMessage));
-        }
-      });
-  }
-
   private _fetchTopologyModel(lineName: string) {
     const getTopologyModelRequest = new GetTopologyModelRequest(lineName);
     this.setState({
@@ -160,7 +139,6 @@ export class TopologyRendererContainer extends Component<Props, State> {
       .pipe(takeWhile(() => !this._activeSimulationStream.closed))
       .subscribe({
         next: (topologyModel: TopologyModel) => {
-          console.log('topologyModel-->', JSON.stringify(topologyModel));
           this._processModelForRendering(topologyModel);
           this._simulationManagementService.syncSimulationSnapshotState({
             topologyModel
@@ -196,7 +174,6 @@ export class TopologyRendererContainer extends Component<Props, State> {
       for (const datum of feeder[group]) {
         const mRIDs = this.props.mRIDs.get(datum.name) || [];
         const resolvedMRIDs = Array.isArray(mRIDs) ? mRIDs : [mRIDs];
-        console.log('resovledMRIDs:', resolvedMRIDs);
         let node: Node;
 
         switch (group) {
@@ -427,7 +404,6 @@ export class TopologyRendererContainer extends Component<Props, State> {
       <>
         <TopologyRenderer
           topology={this.state.topology}
-          topologyProcessorOutputMessage={this.state.topologyProcessorOutputMessage}
           simulationOutputMeasurements={this.state.simulationOutputMeasurements}
           currentLimitMap={this.currentLimitMap}
           onToggleSwitch={this.onToggleSwitchState}

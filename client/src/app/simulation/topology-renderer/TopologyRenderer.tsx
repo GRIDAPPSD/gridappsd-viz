@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 import { Component, createRef } from 'react';
 import { line } from 'd3-shape';
 import { select, Selection, create } from 'd3-selection';
@@ -35,7 +34,6 @@ import { RegulatorControlMenu } from './views/regulator-control-menu/RegulatorCo
 import { RenderableTopology } from './models/RenderableTopology';
 import { NodeSearcher } from './views/node-searcher/NodeSearcher';
 import { MatchedNodeLocator } from './views/matched-node-locator/MatchedNodeLocator';
-import { TopologyProcessorOutputMessage } from './models/TopologyProcessorOutputMessage';
 
 
 import './TopologyRenderer.light.scss';
@@ -43,7 +41,6 @@ import './TopologyRenderer.dark.scss';
 
 interface Props {
   topology: RenderableTopology;
-  topologyProcessorOutputMessage: TopologyProcessorOutputMessage;
   simulationOutputMeasurements: SimulationOutputMeasurement[];
   // keys are conducting equipment MRID's
   currentLimitMap: Map<string, CurrentLimit>;
@@ -56,7 +53,6 @@ interface State {
   showNodeSearcher: boolean;
   nodeToLocate: SVGCircleElement;
   showPowerFlowDirectionIndicator: boolean;
-  showColorizedFeederSectionIndicator: boolean;
 }
 
 const symbolSize = 35;
@@ -106,8 +102,7 @@ export class TopologyRenderer extends Component<Props, State> {
     this.state = {
       showNodeSearcher: false,
       nodeToLocate: null,
-      showPowerFlowDirectionIndicator: false,
-      showColorizedFeederSectionIndicator: false
+      showPowerFlowDirectionIndicator: false
     };
 
 
@@ -115,7 +110,6 @@ export class TopologyRenderer extends Component<Props, State> {
     this.showTooltip = this.showTooltip.bind(this);
     this.showNodeSearcher = this.showNodeSearcher.bind(this);
     this.togglePowerFlowDirectionIndicator = this.togglePowerFlowDirectionIndicator.bind(this);
-    this.toggleColorizedFeederSectionIndicator = this.toggleColorizedFeederSectionIndicator.bind(this);
     this.onNodeSearcherClosed = this.onNodeSearcherClosed.bind(this);
     this.locateNode = this.locateNode.bind(this);
 
@@ -349,8 +343,7 @@ export class TopologyRenderer extends Component<Props, State> {
     if (this.props.topology !== prevProps.topology) {
       this._htmlElements.clear();
       this.setState({
-        showPowerFlowDirectionIndicator: false,
-        showColorizedFeederSectionIndicator: false
+        showPowerFlowDirectionIndicator: false
       });
       this._render();
     }
@@ -378,9 +371,8 @@ export class TopologyRenderer extends Component<Props, State> {
     const categories = this._categorizeNodes(topology.nodeMap);
 
     this._containerSelection.selectAll('g').remove();
-    console.log('@@topology', topology);
+
     this._renderEdges(topology.edgeMap);
-    // this._renderColorizedEdges(topology.edgeMap);
 
     if (!this.isModelLarge()) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -625,7 +617,6 @@ export class TopologyRenderer extends Component<Props, State> {
     edgeMap.forEach(edge => {
       const path = create('svg:path').node();
       path.setAttribute('class', `topology-renderer__canvas__edge _${edge.name}_`);
-      path.setAttribute('style','stroke: red; stroke-width: 10px');
       path.setAttribute('d', edgeGenerator([edge.from, edge.to]));
       documentFragment.appendChild(path);
     });
@@ -635,25 +626,6 @@ export class TopologyRenderer extends Component<Props, State> {
       .node()
       .appendChild(documentFragment);
   }
-
-  // private _renderColorizedEdges(edgeMap: Map<string, Edge>) {
-  //   console.log('$$_renderColorizedEdges');
-  //   const documentColorizedFragment = document.createDocumentFragment();
-  //   const colorizedEdgeGenerator = line<Node>()
-  //     .x(node => node.screenX1)
-  //     .y(node => node.screenY1);
-  //   edgeMap.forEach(edge => {
-  //     const path = create('svg:path').node();
-  //     path.setAttribute('class', `topology-renderer__canvas__colorized-edge _${edge.name}_`);
-  //     path.setAttribute('d', colorizedEdgeGenerator([edge.from, edge.to]));
-  //     documentColorizedFragment.appendChild(path);
-  //   });
-
-  //   this._containerSelection.append('g')
-  //     .attr('class', 'topology-renderer__canvas__colorized-edge-container')
-  //     .node()
-  //     .appendChild(documentColorizedFragment);
-  // }
 
   private _renderNonSwitchNodes(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -1055,15 +1027,6 @@ export class TopologyRenderer extends Component<Props, State> {
                 style='accent'
                 onClick={this.togglePowerFlowDirectionIndicator} />
             </Tooltip>
-            {/** 🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥 */}
-            <Tooltip content='Show Colorized feeder sections.'>
-              <IconButton
-                className={`topology-renderer__toolbox__toggle-colorized-feeder-section-indicator${this.state.showColorizedFeederSectionIndicator ? '' : ' off'}`}
-                icon='check_circle'
-                size='small'
-                style='accent'
-                onClick={this.toggleColorizedFeederSectionIndicator} />
-            </Tooltip>
           </div>
         </div>
         <NodeSearcher
@@ -1385,15 +1348,6 @@ export class TopologyRenderer extends Component<Props, State> {
       this._containerSelection.selectAll('.normal-power-flow-direction,.reverse-power-flow-direction')
         // The ternary makes it more obvious than just this.state.showPowerFlowDirectionIndicator
         .classed('no-power-flow-direction-indicator', this.state.showPowerFlowDirectionIndicator ? false : true);
-    });
-  }
-
-  toggleColorizedFeederSectionIndicator() {
-    this.setState({
-      showColorizedFeederSectionIndicator: !this.state.showColorizedFeederSectionIndicator
-    }, () => {
-      this._containerSelection.selectAll('.normal-power-flow-direction,.reverse-power-flow-direction')
-      .classed('no-colorized-feeder-section-indicator', this.state.showColorizedFeederSectionIndicator ? false : true);
     });
   }
 
