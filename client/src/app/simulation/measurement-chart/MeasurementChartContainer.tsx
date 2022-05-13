@@ -235,9 +235,15 @@ export class MeasurementChartContainer extends Component<Props, State> {
   private _deriveYAxisLabel(plotModel: PlotModel) {
     switch (plotModel.measurementType) {
       case MeasurementType.POWER:
-        return 'W';
+        if (plotModel.useMagnitude)
+          return 'W';
+        else
+          return 'Degrees';
       case MeasurementType.VOLTAGE:
-        return 'V';
+        if (plotModel.useMagnitude)
+          return 'V';
+        else
+          return 'Degrees';
       case MeasurementType.TAP:
         return '';
       default:
@@ -291,9 +297,10 @@ export class MeasurementChartContainer extends Component<Props, State> {
     let solarP = 0;
     let solarQ = 0;
 
+
     if (measurements) {
       let totalVoltage = 0;
-      let numberOfVoltageMeasurements = 0;  
+      let numberOfVoltageMeasurements = 0;
       measurements.forEach(measurement => {
         if (measurement.type === MeasurementType.VOLTAGE) {
           const nominalVoltage = this._nominalVoltageDivisorMap.get(measurement.connectivityNode);
@@ -309,10 +316,10 @@ export class MeasurementChartContainer extends Component<Props, State> {
             numberOfVoltageMeasurements++;
           }
         }
-        else if ((measurement.conductingEquipmentType === ConductingEquipmentType.EnergyConsumer) && measurement.type === MeasurementType.POWER) {
+        if (measurement.conductingEquipmentType === ConductingEquipmentType.EnergyConsumer) {
           const [p, q] = this._calculatePQValues(measurement);
           energyConsumerP += p;
-          energyConsumerQ += q; 
+          energyConsumerQ += q;
         } else if (measurement.name.startsWith('PowerElectronicsConnection_BatteryUnit')) {
           const [p, q] = this._calculatePQValues(measurement);
           batteryP += p;
