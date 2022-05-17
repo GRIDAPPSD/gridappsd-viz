@@ -6,6 +6,7 @@ import { BasicButton } from '@client:common/buttons';
 import { MessageBanner } from '@client:common/overlay/message-banner';
 import { Notification } from '@client:common/overlay/notification';
 import { FormArrayModel, SelectionOptionBuilder, FormControlModel, Select } from '@client:common/form';
+import { SimulationConfiguration } from '@client:common/simulation';
 
 import { ServiceConfigurationModel } from '../../models/ServiceConfigurationModel';
 
@@ -17,6 +18,7 @@ import './ServiceConfigurationTab.dark.scss';
 interface Props {
   parentFormArrayModel: FormArrayModel<ServiceConfigurationModel>;
   services: Service[];
+  uploadedServiceConfig: SimulationConfiguration['service_configs'];
 }
 
 interface State {
@@ -44,11 +46,46 @@ export class ServiceConfigurationTab extends Component<Props, State> {
 
   componentDidUpdate(prevProps: Props) {
     if (this.props.services !== prevProps.services) {
-      this.setState({
-        serviceOptionBuilder: new SelectionOptionBuilder(this.props.services, service => service.id)
-      });
+      if (this.props.uploadedServiceConfig && this.props.uploadedServiceConfig.length > 0) {
+        const filteredUploadedServices = this._handleFilteredUploadedServiceFile(this.props.services, this.props.uploadedServiceConfig);
+        this.setState({
+          serviceOptionBuilder: new SelectionOptionBuilder(this.props.services, service => service.id),
+          selectedServices: filteredUploadedServices
+        });
+      } else {
+        this.setState({
+          serviceOptionBuilder: new SelectionOptionBuilder(this.props.services, service => service.id)
+        });
+      }
     }
   }
+
+  private _handleFilteredUploadedServiceFile(allAvailableServices: Service[], uploadedServices: SimulationConfiguration['service_configs']) {
+    const uploadedServiceConfigsMap = new Map<string, any>();
+    for (const uploadedService of uploadedServices) {
+      uploadedServiceConfigsMap.set(uploadedService.id, uploadedService.user_options);
+    }
+
+    const overlappedServices = allAvailableServices.filter(s1 => uploadedServices.some(s2 => s1.id === s2.id));
+
+    const overlappedServicesMap = new Map<string, any>();
+    for (const overlap of overlappedServices) {
+      overlappedServicesMap.set(overlap.id, overlap.user_input);
+    }
+
+    for (const overlappedService of overlappedServicesMap.entries()) {
+      const overlappedServiceId = overlappedService[0];
+      const uploadedServicesMapValue = uploadedServiceConfigsMap.get(overlappedServiceId);
+      if (uploadedServicesMapValue) {
+        const overlapMapValue = overlappedServicesMap.get(overlappedServiceId);
+        for (const uploadedServicesMapValueKey of Object.keys(uploadedServicesMapValue)) {
+          overlapMapValue[uploadedServicesMapValueKey]['default_value'] = uploadedServicesMapValue[uploadedServicesMapValueKey];
+        }
+      }
+    }
+    return overlappedServices;
+  }
+
 
   componentDidMount() {
     this.internalFormArrayModel.validityChanges()
@@ -108,18 +145,28 @@ export class ServiceConfigurationTab extends Component<Props, State> {
           optional
           label='Available Services'
           selectionOptionBuilder={this.state.serviceOptionBuilder}
+          selectedOptionFinder={
+            service => {
+              for(const config of this.props.uploadedServiceConfig) {
+                if (service.id === config.id) {
+                  return true;
+                }
+              }
+              return false;
+            }
+          }
           formControlModel={this.availableServicesFormControl} />
         {
           this.state.selectedServices.length > 0
           &&
           <>
             {
-              this.state.selectedServices.map(service => (
+              this.state.selectedServices.map(service =>
                 <ServiceConfiguration
                   key={service.id}
                   service={service}
                   parentFormArrayModel={this.internalFormArrayModel} />
-              ))
+              )
             }
             <BasicButton
               className='service-configuration-tab__apply'

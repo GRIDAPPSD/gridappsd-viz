@@ -151,10 +151,11 @@ export class SimulationConfigurationEditor extends Component<Props, State> {
     this._stateStore.select('services')
       .pipe(takeUntil(this._unsubscriber))
       .subscribe({
-        next: services => this.setState({
-          services
-
-        })
+        next: services => {
+          this.setState({
+            services
+          });
+        }
       });
 
     const servicesAsSimulator = this.state.services.filter(service => 'category' as 'SIMULATOR' in service);
@@ -241,6 +242,7 @@ export class SimulationConfigurationEditor extends Component<Props, State> {
               <Tab label='Service Configuration'>
                 <ServiceConfigurationTab
                   parentFormArrayModel={this.formGroupModel.findControl('serviceConfig')}
+                  uploadedServiceConfig={this.currentConfig.service_configs}
                   services={this.state.services} />
               </Tab>
             </TabGroup>

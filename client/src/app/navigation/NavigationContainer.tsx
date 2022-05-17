@@ -7,6 +7,8 @@ import { ExpectedResultComparisonType } from '@client:common/ExpectedResultCompa
 import { StompClientConnectionStatus, StompClientService } from '@client:common/StompClientService';
 import { Simulation, SimulationQueue, SimulationConfiguration } from '@client:common/simulation';
 import { ConfigurationManager } from '@client:common/ConfigurationManager';
+import { FilePickerService } from '@client:common/file-picker';
+import { Notification } from '@client:common/overlay/notification';
 
 import { Navigation } from './Navigation';
 
@@ -32,6 +34,7 @@ export class NavigationContainer extends Component<Props, State> {
   private readonly _stompClientService = StompClientService.getInstance();
   private readonly _configurationManager = ConfigurationManager.getInstance();
   private readonly _unsubscriber = new Subject<void>();
+  private readonly _filePickerService = FilePickerService.getInstance();
 
   constructor(props: Props) {
     super(props);
@@ -44,6 +47,7 @@ export class NavigationContainer extends Component<Props, State> {
     };
 
     this.onSelectExpectedResultComparisonType = this.onSelectExpectedResultComparisonType.bind(this);
+    this.onShowUploadSimulationConfigFile = this.onShowUploadSimulationConfigFile.bind(this);
   }
 
   componentDidMount() {
@@ -101,6 +105,7 @@ export class NavigationContainer extends Component<Props, State> {
         previousSimulations={this.state.previousSimulations}
         activeSimulationIds={this.state.activeSimulationIds}
         onShowSimulationConfigForm={this.props.onShowSimulationConfigForm}
+        onShowUploadSimulationConfigFile={this.onShowUploadSimulationConfigFile}
         onLogout={this.props.onLogout}
         onJoinActiveSimulation={this.props.onJoinActiveSimulation}
         onSelectExpectedResultComparisonType={this.onSelectExpectedResultComparisonType}>
@@ -116,4 +121,16 @@ export class NavigationContainer extends Component<Props, State> {
     this.props.onShowExpectedResultViewer();
   }
 
+  onShowUploadSimulationConfigFile() {
+    this._filePickerService.open()
+      .readFileAsJson<any>()
+      .subscribe({
+        next: fileContent => {
+          this.props.onShowSimulationConfigForm(fileContent);
+        },
+        error: errorMessage => {
+          Notification.open(errorMessage);
+        }
+      });
+  }
 }

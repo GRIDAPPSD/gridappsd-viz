@@ -6,6 +6,7 @@ import { ExpectedResultComparisonType } from '@client:common/ExpectedResultCompa
 import { StompClientConnectionStatus } from '@client:common/StompClientService';
 import { SimulationConfiguration, Simulation } from '@client:common/simulation';
 import { Restricted } from '@client:common/authenticator';
+import { FilePicker } from '@client:common/file-picker';
 
 import { Drawer } from './views/drawer/Drawer';
 import { ToolBar } from './views/tool-bar/ToolBar';
@@ -23,6 +24,7 @@ interface Props {
   version: string;
   activeSimulationIds: string[];
   onShowSimulationConfigForm: (config: SimulationConfiguration) => void;
+  onShowUploadSimulationConfigFile: () => void;
   onLogout: () => void;
   onJoinActiveSimulation: (simulationId: string) => void;
   onSelectExpectedResultComparisonType: (selectedType: ExpectedResultComparisonType) => void;
@@ -77,10 +79,19 @@ export class Navigation extends Component<Props, unknown> {
             </DrawerItemGroup>
           }
           <Restricted roles={['testmanager']}>
-            <DrawerItem onClick={() => this.props.onShowSimulationConfigForm(null)}>
-              <DrawerItemIcon icon='assignment' />
-              <DrawerItemLabel value='Configure New Simulation' />
-            </DrawerItem>
+            <DrawerItemGroup
+            header='Configure New Simulation'
+            icon='assignment'>
+              <DrawerItem onClick={() => this.props.onShowSimulationConfigForm(null)}>
+                <DrawerItemIcon icon='assignment' />
+                <DrawerItemLabel value='Configure New Simulation' />
+              </DrawerItem>
+              <DrawerItem onClick={() => this.props.onShowUploadSimulationConfigFile()}>
+                <DrawerItemIcon icon='cloud_upload' />
+                <DrawerItemLabel value='Upload A Simulation Configuration File' />
+              </DrawerItem>
+              <FilePicker />
+            </DrawerItemGroup>
           </Restricted>
           <DrawerItemGroup
             header='Select Comparison Type'
