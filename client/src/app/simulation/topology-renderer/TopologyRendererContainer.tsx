@@ -539,17 +539,22 @@ export class TopologyRendererContainer extends Component<Props, State> {
   }
 
   private _toggleRegulatorManualMode(regulator: Regulator) {
-    const toggleRegulatorManualModeRequest = new ToggleRegulatorManualModeRequest({
-      componentMRID: this.props.mRIDs.get(regulator.name) as string,
-      simulationId: this._simulationQueue.getActiveSimulation().id,
-      manual: regulator.manual,
-      differenceMRID: this.activeSimulationConfig.power_system_config.Line_name
-    });
-    this._stompClientService.send({
-      destination: toggleRegulatorManualModeRequest.url,
-      replyTo: toggleRegulatorManualModeRequest.replyTo,
-      body: JSON.stringify(toggleRegulatorManualModeRequest.requestBody)
-    });
+    (this.props.mRIDs.get(regulator.name) as string[])
+      .map((mRID, index) => {
+        return new ToggleRegulatorManualModeRequest({
+          componentMRID: mRID,
+          simulationId: this._simulationQueue.getActiveSimulation().id,
+          manual: regulator.manual,
+          differenceMRID: this.activeSimulationConfig.power_system_config.Line_name
+        });
+      })
+      .forEach(request => {
+        this._stompClientService.send({
+          destination: request.url,
+          replyTo: request.replyTo,
+          body: JSON.stringify(request.requestBody)
+        });
+      });
   }
 
   private _sendRegulatorTapChangerRequestForAllPhases(regulator: Regulator) {

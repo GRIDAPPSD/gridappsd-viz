@@ -32,7 +32,7 @@ export class CapacitorVarUpdateRequest implements MessageRequest {
             {
               object: inputs.componentMRID,
               attribute: 'RegulatingControl.mode',
-              value: 0
+              value: 2
             },
             {
               object: inputs.componentMRID,
