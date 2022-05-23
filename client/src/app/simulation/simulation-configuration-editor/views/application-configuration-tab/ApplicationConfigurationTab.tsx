@@ -41,6 +41,19 @@ export class ApplicationConfigurationTab extends Component<Props, State> {
 
   }
 
+  // Todo
+  // private _setupFormModel() {
+  //   const previousSelectedApplication = this.props.applicationConfig.applications[0];
+  //   if (previousSelectedApplication) {
+  //     this.nameFormControlModel.setValue(previousSelectedApplication.name);
+  //     this.configStringFormControlModel.setValue(previousSelectedApplication.config_string);
+  //   }
+
+  //   this.props.parentFormGroupModel.findControl('applications').setValue(this.props.applicationConfig.applications);
+  //   console.log('alex=>', this.props.parentFormGroupModel.findControl('applications').getValue());
+  // }
+
+  // * Original setup
   private _setupFormModel() {
     const previousSelectedApplication = this.props.applicationConfig.applications[0];
     if (previousSelectedApplication) {

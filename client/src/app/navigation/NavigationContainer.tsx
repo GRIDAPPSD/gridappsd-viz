@@ -127,9 +127,11 @@ export class NavigationContainer extends Component<Props, State> {
       .subscribe({
         next: fileContent => {
           this.props.onShowSimulationConfigForm(fileContent);
+          this._filePickerService.clearSelection();
         },
         error: errorMessage => {
           Notification.open(errorMessage);
+          this._filePickerService.clearSelection();
         }
       });
   }

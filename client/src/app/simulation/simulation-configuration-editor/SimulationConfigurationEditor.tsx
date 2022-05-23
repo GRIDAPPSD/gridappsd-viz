@@ -283,6 +283,7 @@ export class SimulationConfigurationEditor extends Component<Props, State> {
       <TestConfigurationTab
         parentFormGroupModel={this.formGroupModel.findControl('testConfig')}
         modelDictionary={this.state.modelDictionary}
+        uploadedTestConfigs={this.currentConfig.test_config}
         simulationStartDateTime={this.simulationStartDate}
         simulationStopDateTime={+this.currentConfig.simulation_config.duration + this.simulationStartDate}
         modelDictionaryComponents={this.state.modelDictionaryComponents} />
@@ -326,20 +327,21 @@ export class SimulationConfigurationEditor extends Component<Props, State> {
   }
 
   private _populateApplicationConfigSection() {
-    // eslint-disable-next-line camelcase
-    this.currentConfig.application_config = this.formGroupModel.findControl('applicationConfig').getValue();
     // if "name" is an empty string, no app was selected, so we only
     // want to send an empty array in that case in the config
-    if (this.currentConfig.application_config.applications[0].name === '') {
+    if (this.currentConfig.application_config.applications.length > 0 && this.currentConfig.application_config.applications[0].name === '') {
       this.currentConfig.application_config.applications = [];
+    } else {
+      // eslint-disable-next-line camelcase
+      this.currentConfig.application_config = this.formGroupModel.findControl('applicationConfig').getValue();
     }
   }
 
   private _populateTestConfigSection() {
     const selectedApplication = this.currentConfig.application_config.applications[0];
     const testConfigFormValue = this.formGroupModel.findControl('testConfig').getValue();
-
     this.currentConfig.test_config.appId = selectedApplication?.name || '';
+    this.currentConfig.test_config.events = [];
     for (const outageEvent of testConfigFormValue.commOutageEvents) {
       this.currentConfig.test_config.events.push(this._transformOutageEventForSubmission(outageEvent));
     }
