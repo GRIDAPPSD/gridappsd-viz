@@ -13,7 +13,7 @@ import { Notification } from '@client:common/overlay/notification';
 import { Navigation } from './Navigation';
 
 interface Props {
-  onShowSimulationConfigForm: (config: SimulationConfiguration) => void;
+  onShowSimulationConfigForm: (config: SimulationConfiguration, isUploaded: boolean) => void;
   onLogout: () => void;
   onJoinActiveSimulation: (simulationId: string) => void;
   onShowExpectedResultViewer: () => void;
@@ -126,7 +126,7 @@ export class NavigationContainer extends Component<Props, State> {
       .readFileAsJson<any>()
       .subscribe({
         next: fileContent => {
-          this.props.onShowSimulationConfigForm(fileContent);
+          this.props.onShowSimulationConfigForm(fileContent, true);
           this._filePickerService.clearSelection();
         },
         error: errorMessage => {

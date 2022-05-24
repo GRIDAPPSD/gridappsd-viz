@@ -77,4 +77,33 @@ export class DateTimeService {
     return parsedDateTime ? (parsedDateTime.getTime() - this._timeZoneOffsetInMilliseconds) / 1000 : null;
   }
 
+  /**
+   * Parse the given Epoch time number and return Date in YYYY-MM-DD HH:MM:SS
+   *
+   * @param epochTime Epoch time
+   */
+  parseEpoch(epochTime: number) {
+    const baseTime = new Date(epochTime * 1000);
+    const year = baseTime.getFullYear().toString();
+    let month = (baseTime.getMonth() + 1).toString();
+    const day = baseTime.getDate().toString();
+    let hour = baseTime.getHours().toString();
+    let minute = baseTime.getMinutes().toString();
+    let second = baseTime.getSeconds().toString();
+    if (month.length === 1) {
+      month = '0' + month;
+    }
+    if (hour.length === 1) {
+      hour = '0' + hour;
+    }
+    if (minute.length === 1) {
+      minute = '0' + minute;
+    }
+    if (second.length === 1) {
+      second = '0' + second;
+    }
+    const dateTime = year + '-' + month + '-' + day + ' ' + hour + ':' + minute + ':' + second;
+    return dateTime;
+  }
+
 }

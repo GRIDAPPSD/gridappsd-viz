@@ -15,6 +15,7 @@ import { IconButton } from '@client:common/buttons';
 import { Validators } from '@client:common/form/validation';
 import { SimulationConfiguration } from '@client:common/simulation';
 import { Service } from '@client:common/Service';
+import { DateTimeService } from '@client:common/DateTimeService';
 
 import { SimulationConfigurationTabModel } from '../../models/SimulationConfigurationTabModel';
 
@@ -26,6 +27,7 @@ interface Props {
   simulationConfig: SimulationConfiguration['simulation_config'];
   simulators: string[];
   services: Service[];
+  isUploaded: boolean;
 }
 
 interface State {
@@ -33,6 +35,8 @@ interface State {
 }
 
 export class SimulationConfigurationTab extends Component<Props, State> {
+
+  readonly dateTimeService = DateTimeService.getInstance();
 
   constructor(props: Props) {
     super(props);
@@ -58,13 +62,23 @@ export class SimulationConfigurationTab extends Component<Props, State> {
   }
 
   private _setupFormGroupModelForSimulationConfigurationTab() {
-    this.props.parentFormGroupModel.setControl(
-      'start_time',
-      new FormControlModel(
-        this.props.simulationConfig.start_time,
-        [Validators.checkNotEmpty('Start time'), Validators.checkValidDateTime('Start time')]
-      )
-    );
+    if (this.props.isUploaded) {
+      this.props.parentFormGroupModel.setControl(
+        'start_time',
+        new FormControlModel(
+          this.dateTimeService.parseEpoch(+this.props.simulationConfig.start_time),
+          [Validators.checkNotEmpty('Start time'), Validators.checkValidDateTime('Start time')]
+        )
+      );
+    } else {
+      this.props.parentFormGroupModel.setControl(
+        'start_time',
+        new FormControlModel(
+          this.props.simulationConfig.start_time,
+          [Validators.checkNotEmpty('Start time'), Validators.checkValidDateTime('Start time')]
+        )
+      );
+    }
     this.props.parentFormGroupModel.setControl(
       'duration',
       new FormControlModel(

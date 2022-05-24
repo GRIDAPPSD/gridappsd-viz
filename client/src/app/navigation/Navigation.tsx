@@ -23,7 +23,7 @@ interface Props {
   stompClientConnectionStatus: StompClientConnectionStatus;
   version: string;
   activeSimulationIds: string[];
-  onShowSimulationConfigForm: (config: SimulationConfiguration) => void;
+  onShowSimulationConfigForm: (config: SimulationConfiguration, isUploaded: boolean) => void;
   onShowUploadSimulationConfigFile: () => void;
   onLogout: () => void;
   onJoinActiveSimulation: (simulationId: string) => void;
@@ -82,7 +82,7 @@ export class Navigation extends Component<Props, unknown> {
             <DrawerItemGroup
             header='Configure New Simulation'
             icon='assignment'>
-              <DrawerItem onClick={() => this.props.onShowSimulationConfigForm(null)}>
+              <DrawerItem onClick={() => this.props.onShowSimulationConfigForm(null, false)}>
                 <DrawerItemIcon icon='assignment' />
                 <DrawerItemLabel value='Configure New Simulation' />
               </DrawerItem>
@@ -119,7 +119,7 @@ export class Navigation extends Component<Props, unknown> {
                 this.props.previousSimulations.map(simulation => (
                   <DrawerItem
                     key={simulation.id}
-                    onClick={() => this.props.onShowSimulationConfigForm(simulation.config)}>
+                    onClick={() => this.props.onShowSimulationConfigForm(simulation.config, false)}>
                     <strong>Name:&nbsp;</strong>
                     {simulation.name}
                     &nbsp;&mdash;&nbsp;

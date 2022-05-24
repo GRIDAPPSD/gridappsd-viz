@@ -34,6 +34,7 @@ import './SimulationConfigurationEditor.light.scss';
 import './SimulationConfigurationEditor.dark.scss';
 
 interface Props {
+  isUploaded: boolean;
   initialConfig: SimulationConfiguration;
   feederModel: FeederModel;
   availableApplications: Application[];
@@ -88,14 +89,13 @@ export class SimulationConfigurationEditor extends Component<Props, State> {
       services: [],
       simulators: []
     };
-
-    this.currentConfig = this._cloneConfigObject(props.initialConfig);
+    this.currentConfig = this._cloneConfigObject(props.initialConfig, this.props.isUploaded);
 
     this.closeForm = this.closeForm.bind(this);
     this.onSubmitForm = this.onSubmitForm.bind(this);
   }
 
-  private _cloneConfigObject(original: SimulationConfiguration): SimulationConfiguration {
+  private _cloneConfigObject(original: SimulationConfiguration, isUploaded: boolean): SimulationConfiguration {
     return {
       // eslint-disable-next-line camelcase
       power_system_config: {
@@ -111,7 +111,7 @@ export class SimulationConfigurationEditor extends Component<Props, State> {
       simulation_config: {
         ...original.simulation_config,
         // eslint-disable-next-line camelcase
-        start_time: this.dateTimeService.format(this.simulationStartDate)
+        start_time: isUploaded ? original.simulation_config.start_time : this.dateTimeService.format(this.simulationStartDate)
       },
       // eslint-disable-next-line camelcase
       test_config: {
@@ -225,6 +225,7 @@ export class SimulationConfigurationEditor extends Component<Props, State> {
               </Tab>
               <Tab label='Simulation Configuration'>
                 <SimulationConfigurationTab
+                  isUploaded={this.props.isUploaded}
                   parentFormGroupModel={this.formGroupModel.findControl('simulationConfig')}
                   simulationConfig={this.currentConfig.simulation_config}
                   simulators={this.state.simulators}
