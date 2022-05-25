@@ -334,7 +334,13 @@ export class SimulationConfigurationEditor extends Component<Props, State> {
       this.currentConfig.application_config.applications = [];
     } else {
       // eslint-disable-next-line camelcase
-      this.currentConfig.application_config = this.formGroupModel.findControl('applicationConfig').getValue();
+      const applicationConfig = this.formGroupModel.findControl('applicationConfig').getValue();
+      if (applicationConfig.applications[0].name === '' || applicationConfig.applications[0].config_string === '') {
+        this.currentConfig.application_config.applications = [];
+      } else {
+        // eslint-disable-next-line camelcase
+        this.currentConfig.application_config = this.formGroupModel.findControl('applicationConfig').getValue();
+      }
     }
   }
 
