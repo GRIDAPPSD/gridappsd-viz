@@ -17,6 +17,7 @@ import { SimulationConfiguration, SimulationManagementService } from '@client:co
 import { ThreeDots } from '@client:common/three-dots';
 import { TabGroup, Tab } from '@client:common/tabs';
 import { SimulationStatus } from '@project:common/SimulationStatus';
+import { Notification } from '@client:common/overlay/notification';
 
 import { PowerSystemConfigurationTab } from './views/power-system-configuration-tab';
 import { SimulationConfigurationTab } from './views/simulation-configuration-tab';
@@ -28,7 +29,6 @@ import { ApplicationConfigurationModel } from './models/ApplicationConfiguration
 import { ServiceConfigurationTab } from './views/service-configuration-tab';
 import { ServiceConfigurationModel } from './models/ServiceConfigurationModel';
 import { TestConfigurationModel } from './models/TestConfigurationModel';
-
 
 import './SimulationConfigurationEditor.light.scss';
 import './SimulationConfigurationEditor.dark.scss';
@@ -96,33 +96,105 @@ export class SimulationConfigurationEditor extends Component<Props, State> {
   }
 
   private _cloneConfigObject(original: SimulationConfiguration, isUploaded: boolean): SimulationConfiguration {
-    return {
-      // eslint-disable-next-line camelcase
-      power_system_config: {
-        ...original.power_system_config
-      },
-      // eslint-disable-next-line camelcase
-      application_config: {
-        applications: original.application_config.applications.length > 0
-          ? [{ ...original.application_config.applications[0] }]
-          : []
-      },
-      // eslint-disable-next-line camelcase
-      simulation_config: {
-        ...original.simulation_config,
-        // eslint-disable-next-line camelcase
-        start_time: isUploaded ? original.simulation_config.start_time : this.dateTimeService.format(this.simulationStartDate)
-      },
-      // eslint-disable-next-line camelcase
-      test_config: {
-        events: original.test_config.events.map(event => Object.assign({}, event)),
-        appId: original.test_config.appId
-      },
-      // eslint-disable-next-line camelcase
-      service_configs: [
-        ...original.service_configs
-      ]
-    };
+    const errorMessage = this._validateFileContent(original);
+    let result: any = {};
+    try {
+      if (isUploaded && errorMessage.length > 0) {
+        // eslint-disable-next-line no-throw-literal
+        throw new Error('Wrong Format Json File.');
+      } else {
+        result = {
+          // eslint-disable-next-line camelcase
+          power_system_config: {
+            ...original.power_system_config
+          },
+          // eslint-disable-next-line camelcase
+          application_config: {
+            applications: original.application_config.applications.length > 0
+              ? [{ ...original.application_config.applications[0] }]
+              : []
+          },
+          // eslint-disable-next-line camelcase
+          simulation_config: {
+            ...original.simulation_config,
+            // eslint-disable-next-line camelcase
+            start_time: isUploaded ? original.simulation_config.start_time : this.dateTimeService.format(this.simulationStartDate)
+          },
+          // eslint-disable-next-line camelcase
+          test_config: {
+            events: original.test_config.events.map(event => Object.assign({}, event)),
+            appId: original.test_config.appId
+          },
+          // eslint-disable-next-line camelcase
+          service_configs: [
+            ...original.service_configs
+          ]
+        };
+        return result;
+      }
+    } catch (error) {
+      Notification.open(errorMessage);
+    }
+
+    return null;
+  }
+
+  private _validateFileContent(fileContent: SimulationConfiguration): string {
+    let errorMessage = '';
+    if (fileContent === null || fileContent === undefined) {
+      errorMessage += 'File is empty. Please upload a new one.';
+    } else {
+      const requiredConfigs = [
+        'power_system_config',
+        'simulation_config',
+        'application_config',
+        'service_configs',
+        'test_config'
+      ];
+      const requiredPowerSystemConfigs = [
+        'GeographicalRegion_name',
+        'SubGeographicalRegion_name',
+        'Line_name'
+      ];
+      const requiredSimulationConfigs = [
+        'start_time',
+        'duration',
+        'simulator',
+        'run_realtime',
+        'timestep_frequency',
+        'timestep_increment',
+        'simulation_name',
+        'power_flow_solver_method',
+        'model_creation_config'
+      ];
+      const requiredTestConfigs = ['events', 'appId'];
+      const objKeys = Object.keys(fileContent);
+
+      for (const config of requiredConfigs) {
+        if (!objKeys.includes(config)) {
+          errorMessage += `Missing ${config}. `;
+        }
+      }
+
+      if (errorMessage.length === 0) {
+        for (const config of requiredPowerSystemConfigs) {
+          if (!Object.prototype.hasOwnProperty.call(fileContent['power_system_config'], config)) {
+            errorMessage += `Missing power_system_config: ${config}. `;
+          }
+        }
+        for (const config of requiredSimulationConfigs) {
+          if (!Object.prototype.hasOwnProperty.call(fileContent['simulation_config'], config)) {
+            errorMessage += `Missing simulation_config: ${config}. `;
+          }
+        }
+        for (const config of requiredTestConfigs) {
+          if (!Object.prototype.hasOwnProperty.call(fileContent['test_config'], config)) {
+            errorMessage += `Missing test_config: ${config}. `;
+          }
+        }
+      }
+    }
+    return errorMessage;
   }
 
   componentDidMount() {
@@ -180,21 +252,23 @@ export class SimulationConfigurationEditor extends Component<Props, State> {
       .valueChanges()
       .subscribe({
         next: formValue => {
-          if ('line' in formValue) {
-            if (formValue.line) {
-              this.props.onMRIDChanged(formValue.line.id);
-              this.setState({
-                lineName: formValue.line.id
-              });
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              this.formGroupModel.findControl('simulationConfig.simulation_name' as any)
-                .setValue(formValue.line.name);
-            } else {
-              this.setState({
-                lineName: ''
-              });
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              this.formGroupModel.findControl('simulationConfig.simulation_name' as any).setValue('');
+          if (formValue) {
+            if ('line' in formValue) {
+              if (formValue.line) {
+                this.props.onMRIDChanged(formValue.line.id);
+                this.setState({
+                  lineName: formValue.line.id
+                });
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                this.formGroupModel.findControl('simulationConfig.simulation_name' as any)
+                  .setValue(formValue.line.name);
+              } else {
+                this.setState({
+                  lineName: ''
+                });
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                this.formGroupModel.findControl('simulationConfig.simulation_name' as any).setValue('');
+              }
             }
           }
         }
@@ -208,60 +282,64 @@ export class SimulationConfigurationEditor extends Component<Props, State> {
   }
 
   render() {
-    return (
-      <Dialog
-        open={this.state.show}
-        onAfterClosed={this.props.onClose}>
-        <DialogContent>
-          <Form
-            className='simulation-configuration-form'
-            formGroupModel={this.formGroupModel}>
-            <TabGroup>
-              <Tab label='Power System Configuration'>
-                <PowerSystemConfigurationTab
-                  parentFormGroupModel={this.formGroupModel.findControl('powerSystemConfig')}
-                  powerSystemConfig={this.currentConfig.power_system_config}
-                  feederModel={this.props.feederModel} />
-              </Tab>
-              <Tab label='Simulation Configuration'>
-                <SimulationConfigurationTab
-                  isUploaded={this.props.isUploaded}
-                  parentFormGroupModel={this.formGroupModel.findControl('simulationConfig')}
-                  simulationConfig={this.currentConfig.simulation_config}
-                  simulators={this.state.simulators}
-                  services={this.state.services} />
-              </Tab>
-              <Tab label='Application Configuration'>
-                <ApplicationConfigurationTab
-                  parentFormGroupModel={this.formGroupModel.findControl('applicationConfig')}
-                  applicationConfig={this.currentConfig.application_config}
-                  availableApplications={this.props.availableApplications} />
-              </Tab>
-              <Tab label='Test Configuration'>
-                {this.showCurrentComponentForTestConfigurationTab()}
-              </Tab>
-              <Tab label='Service Configuration'>
-                <ServiceConfigurationTab
-                  parentFormArrayModel={this.formGroupModel.findControl('serviceConfig')}
-                  uploadedServiceConfig={this.currentConfig.service_configs}
-                  services={this.state.services} />
-              </Tab>
-            </TabGroup>
-          </Form>
-        </DialogContent>
-        <DialogActionGroup>
-          <BasicButton
-            label='Close'
-            type='negative'
-            onClick={this.closeForm} />
-          <BasicButton
-            label='Submit'
-            type='positive'
-            disabled={this.state.disableSubmitButton}
-            onClick={this.onSubmitForm} />
-        </DialogActionGroup>
-      </Dialog>
-    );
+    if (this.currentConfig !== null) {
+      return (
+        <Dialog
+          open={this.state.show}
+          onAfterClosed={this.props.onClose}>
+          <DialogContent>
+            <Form
+              className='simulation-configuration-form'
+              formGroupModel={this.formGroupModel}>
+              <TabGroup>
+                <Tab label='Power System Configuration'>
+                  <PowerSystemConfigurationTab
+                    parentFormGroupModel={this.formGroupModel.findControl('powerSystemConfig')}
+                    powerSystemConfig={this.currentConfig.power_system_config}
+                    feederModel={this.props.feederModel} />
+                </Tab>
+                <Tab label='Simulation Configuration'>
+                  <SimulationConfigurationTab
+                    isUploaded={this.props.isUploaded}
+                    parentFormGroupModel={this.formGroupModel.findControl('simulationConfig')}
+                    simulationConfig={this.currentConfig.simulation_config}
+                    simulators={this.state.simulators}
+                    services={this.state.services} />
+                </Tab>
+                <Tab label='Application Configuration'>
+                  <ApplicationConfigurationTab
+                    parentFormGroupModel={this.formGroupModel.findControl('applicationConfig')}
+                    applicationConfig={this.currentConfig.application_config}
+                    availableApplications={this.props.availableApplications} />
+                </Tab>
+                <Tab label='Test Configuration'>
+                  {this.showCurrentComponentForTestConfigurationTab()}
+                </Tab>
+                <Tab label='Service Configuration'>
+                  <ServiceConfigurationTab
+                    parentFormArrayModel={this.formGroupModel.findControl('serviceConfig')}
+                    uploadedServiceConfig={this.currentConfig.service_configs}
+                    services={this.state.services} />
+                </Tab>
+              </TabGroup>
+            </Form>
+          </DialogContent>
+          <DialogActionGroup>
+            <BasicButton
+              label='Close'
+              type='negative'
+              onClick={this.closeForm} />
+            <BasicButton
+              label='Submit'
+              type='positive'
+              disabled={this.state.disableSubmitButton}
+              onClick={this.onSubmitForm} />
+          </DialogActionGroup>
+        </Dialog>
+      );
+    } else {
+      return null;
+    }
   }
 
   showCurrentComponentForTestConfigurationTab() {
