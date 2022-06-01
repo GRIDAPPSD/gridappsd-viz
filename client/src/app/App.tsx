@@ -53,10 +53,11 @@ export function App(props: Props) {
   const navigate = useNavigate();
   const [simulationRequest, setSimulationRequest] = useState(null);
 
-  const onShowSimulationConfigForm = (config: SimulationConfiguration) => {
+  const onShowSimulationConfigForm = (config: SimulationConfiguration, isUploaded: boolean) => {
     const portalRenderer = new PortalRenderer();
     portalRenderer.mount(
       <SimulationConfigurationEditor
+        isUploaded={isUploaded}
         feederModel={props.feederModel}
         onSubmit={updatedConfig => {
           setSimulationRequest(updatedConfig);
