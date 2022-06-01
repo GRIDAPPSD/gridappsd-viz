@@ -58,6 +58,7 @@ export class ServiceConfigurationTab extends Component<Props, State> {
         });
       }
     }
+    this.props.parentFormArrayModel.setValue(this.internalFormArrayModel.getValue());
   }
 
   private _handleFilteredUploadedServiceFile(allAvailableServices: Service[], uploadedServices: SimulationConfiguration['service_configs']) {
