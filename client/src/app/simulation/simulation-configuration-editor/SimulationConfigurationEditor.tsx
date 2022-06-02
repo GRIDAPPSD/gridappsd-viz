@@ -408,17 +408,10 @@ export class SimulationConfigurationEditor extends Component<Props, State> {
   private _populateApplicationConfigSection() {
     // if "name" is an empty string, no app was selected, so we only
     // want to send an empty array in that case in the config
-    if (this.currentConfig.application_config.applications.length > 0 && this.currentConfig.application_config.applications[0].name === '') {
+    if (this.formGroupModel.findControl('applicationConfig').getValue().applications[0].name === '') {
       this.currentConfig.application_config.applications = [];
     } else {
-      // eslint-disable-next-line camelcase
-      const applicationConfig = this.formGroupModel.findControl('applicationConfig').getValue();
-      if (applicationConfig.applications[0].name === '' || applicationConfig.applications[0].config_string === '') {
-        this.currentConfig.application_config.applications = [];
-      } else {
-        // eslint-disable-next-line camelcase
-        this.currentConfig.application_config = this.formGroupModel.findControl('applicationConfig').getValue();
-      }
+      this.currentConfig.application_config.applications = this.formGroupModel.findControl('applicationConfig').getValue().applications;
     }
   }
 

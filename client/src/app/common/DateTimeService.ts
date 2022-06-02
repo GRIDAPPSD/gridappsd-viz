@@ -86,12 +86,15 @@ export class DateTimeService {
     const baseTime = new Date(epochTime * 1000);
     const year = baseTime.getFullYear().toString();
     let month = (baseTime.getMonth() + 1).toString();
-    const day = baseTime.getDate().toString();
+    let day = baseTime.getDate().toString();
     let hour = baseTime.getHours().toString();
     let minute = baseTime.getMinutes().toString();
     let second = baseTime.getSeconds().toString();
     if (month.length === 1) {
       month = '0' + month;
+    }
+    if (day.length === 1) {
+      day = '0' + day;
     }
     if (hour.length === 1) {
       hour = '0' + hour;
