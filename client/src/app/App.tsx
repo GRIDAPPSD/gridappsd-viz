@@ -13,6 +13,7 @@ import { FeederModel } from '@client:common/topology';
 import { ThreeDots } from '@client:common/three-dots';
 import { AuthenticatorContainer } from '@client:common/authenticator';
 import { TabGroup, Tab } from '@client:common/tabs';
+import { DateTimeService } from '@client:common/DateTimeService';
 
 import { AvailableApplicationsAndServicesContainer } from './available-applications-and-services';
 import { DataBrowser } from './data-browser';
@@ -50,6 +51,7 @@ interface Props {
 export function App(props: Props) {
   const tabGroupRef = useRef<TabGroup>(null);
   const stateStore = StateStore.getInstance();
+  const dateTimeService = DateTimeService.getInstance();
   const navigate = useNavigate();
   const [simulationRequest, setSimulationRequest] = useState(null);
 
@@ -94,9 +96,11 @@ export function App(props: Props) {
   };
 
   const downloadSimulationConfiguration = () => {
-    const reshapedStartTime = (new Date(simulationRequest.simulation_config.start_time).getTime() / 1000).toString();
+    // convert start_time to GMT and save it to the exported configuration file.
+    const convertStartTimeToGMT = dateTimeService.convertToGMT(simulationRequest.simulation_config.start_time).toString();
+    // When other users in different time zones, recevied this file, they only need to convert the GMT to their time zone time
     // eslint-disable-next-line camelcase
-    const simulationConfigRequestToDownload = {...simulationRequest, simulation_config:{...simulationRequest.simulation_config, start_time: reshapedStartTime}};
+    const simulationConfigRequestToDownload = {...simulationRequest, simulation_config:{...simulationRequest.simulation_config, start_time: convertStartTimeToGMT}};
     download('simulationRequestConfig', JSON.stringify(simulationConfigRequestToDownload), DownloadType.JSON);
   };
 
