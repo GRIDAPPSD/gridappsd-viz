@@ -1,7 +1,9 @@
 import { timeFormat, timeParse } from 'd3-time-format';
 
 export const enum TimeZone {
+  EDT = 'EDT',
   EST = 'EST',
+  PDT = 'PDT',
   PST = 'PST',
   UTC = 'UTC',
   LOCAL = 'LOCAL'
@@ -41,6 +43,16 @@ export class DateTimeService {
       case TimeZone.UTC:
         this._timeZoneOffsetInMilliseconds = new Date().getTimezoneOffset() * 60 * 1000;
         this._timeZoneOffsetGMTInHours = 0;
+        break;
+      case TimeZone.EDT:
+        // Eastern Daylight time is 4 hours behind UTC
+        this._timeZoneOffsetInMilliseconds = new Date().getTimezoneOffset() * 60 * 1000 - 4 * 60 * 60 * 1000;
+        this._timeZoneOffsetGMTInHours = 4;
+        break;
+      case TimeZone.PDT:
+        // Pacific Daylight time is 7 hours behind UTC
+        this._timeZoneOffsetInMilliseconds = new Date().getTimezoneOffset() * 60 * 1000 - 7 * 60 * 60 * 1000;
+        this._timeZoneOffsetGMTInHours = 7;
         break;
       case TimeZone.EST:
         this._timeZoneOffsetInMilliseconds = new Date().getTimezoneOffset() * 60 * 1000 - 5 * 60 * 60 * 1000;
