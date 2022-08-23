@@ -236,16 +236,16 @@ export class MeasurementChartContainer extends Component<Props, State> {
     switch (plotModel.measurementType) {
       case MeasurementType.POWER:
         if (plotModel.useMagnitude) {
-return 'kVA';
-} else {
-return 'Degrees';
-}
+          return 'kVA';
+        } else {
+          return 'Degrees';
+        }
       case MeasurementType.VOLTAGE:
         if (plotModel.useMagnitude) {
-return 'V';
-} else {
-return 'Degrees';
-}
+          return 'V';
+        } else {
+          return 'Degrees';
+        }
       case MeasurementType.TAP:
         return '';
       default:
