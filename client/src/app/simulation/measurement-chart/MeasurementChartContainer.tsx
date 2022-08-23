@@ -410,10 +410,10 @@ export class MeasurementChartContainer extends Component<Props, State> {
           return measurement[plotModel.useMagnitude ? 'magnitude' : 'angle'];
         case MeasurementType.POWER:
           if (plotModel.useMagnitude) {
-return measurement['magnitude'] / 1000;
-} else {
-return measurement['angle'];
-}
+            return measurement['magnitude'] / 1000;
+          } else {
+            return measurement['angle'];
+          }
         case MeasurementType.TAP:
           return measurement.value;
       }
