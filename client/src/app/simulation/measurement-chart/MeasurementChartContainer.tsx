@@ -80,7 +80,7 @@ export class MeasurementChartContainer extends Component<Props, State> {
       finalChartModels.push(renderableChartModel);
     }
     if (finalChartModels[1].yAxisLabel === '') {
-      finalChartModels[1].yAxisLabel = 'KVA';
+      finalChartModels[1].yAxisLabel = 'kVA';
     }
     this.setState({
       renderableChartModels: finalChartModels
@@ -212,7 +212,7 @@ export class MeasurementChartContainer extends Component<Props, State> {
     // If Load Demand chart has no Y-axis label
     // we want to set it now
     if (renderableChartModels[1].yAxisLabel === '') {
-      renderableChartModels[1].yAxisLabel = 'KVA';
+      renderableChartModels[1].yAxisLabel = 'kVA';
     }
     this.setState({
       renderableChartModels
