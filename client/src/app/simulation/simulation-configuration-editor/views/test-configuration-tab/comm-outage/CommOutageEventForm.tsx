@@ -65,23 +65,42 @@ export class CommOutageEventForm extends Component<Props, State> {
       previousModelDictionary = props.modelDictionary;
     }
 
+    const labels = [];
+    if (this.props.modelDictionary.capacitors.length > 0) {
+      labels.push({label: 'Capacitor', id: 'capacitors'});
+    }
+    if (this.props.modelDictionary.disconnectors.length > 0) {
+      labels.push({label: 'disconnectors', id: 'disconnectors'});
+    }
+    if (this.props.modelDictionary.switches.length > 0) {
+      labels.push({label: 'switches', id: 'switches'});
+    }
+    if (this.props.modelDictionary.batteries.length > 0) {
+      labels.push({label: 'Battery', id: 'batteries'});
+    }
+    if (this.props.modelDictionary.breakers.length > 0) {
+      labels.push({label: 'Breaker', id: 'breakers'});
+    }
+    if (this.props.modelDictionary.fuses.length > 0) {
+      labels.push({label: 'Fuse', id: 'fuses'});
+    }
+    if (this.props.modelDictionary.reclosers.length > 0) {
+      labels.push({label: 'Recloser', id: 'reclosers'});
+    }
+    if (this.props.modelDictionary.regulators.length > 0) {
+      labels.push({label: 'Regulator', id: 'regulators'});
+    }
+    if (this.props.modelDictionary.sectionalisers.length > 0) {
+      labels.push({label: 'Sectionaliser', id: 'sectionalisers'});
+    }
+    if (this.props.modelDictionary.solarpanels.length > 0) {
+      labels.push({label: 'Solar Panel', id: 'solarpanels'});
+    }
+    if (this.props.modelDictionary.synchronousmachines.length > 0) {
+      labels.push({label: 'Synchronous Machine', id: 'synchronousmachines'});
+    }
     this.state = {
-      inputEquipmentTypeOptionBuilder: new SelectionOptionBuilder(
-        [
-          { id: 'batteries', label: 'Battery' },
-          { id: 'breakers', label: 'Breaker' },
-          { id: 'capacitors', label: 'Capacitor' },
-          { id: 'disconnectors', label: 'Disconnector' },
-          { id: 'fuses', label: 'Fuse' },
-          { id: 'reclosers', label: 'Recloser' },
-          { id: 'regulators', label: 'Regulator' },
-          { id: 'sectionalisers', label: 'Sectionaliser' },
-          { id: 'solarpanels', label: 'Solar Panel' },
-          { id: 'switches', label: 'Switch' },
-          { id: 'synchronousmachines', label: 'Synchronous Machine' }
-        ],
-        type => type.label
-      ),
+      inputEquipmentTypeOptionBuilder: new SelectionOptionBuilder(labels, type => type.label),
       inputComponentOptionBuilder: SelectionOptionBuilder.defaultBuilder(),
       inputPhaseOptionBuilder: SelectionOptionBuilder.defaultBuilder(),
       inputAttributeOptionBuilder: SelectionOptionBuilder.defaultBuilder(),
