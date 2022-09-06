@@ -80,7 +80,7 @@ export class MeasurementChartContainer extends Component<Props, State> {
       finalChartModels.push(renderableChartModel);
     }
     if (finalChartModels[1].yAxisLabel === '') {
-      finalChartModels[1].yAxisLabel = 'KVA';
+      finalChartModels[1].yAxisLabel = 'kVA';
     }
     this.setState({
       renderableChartModels: finalChartModels
@@ -212,7 +212,7 @@ export class MeasurementChartContainer extends Component<Props, State> {
     // If Load Demand chart has no Y-axis label
     // we want to set it now
     if (renderableChartModels[1].yAxisLabel === '') {
-      renderableChartModels[1].yAxisLabel = 'KVA';
+      renderableChartModels[1].yAxisLabel = 'kVA';
     }
     this.setState({
       renderableChartModels
@@ -235,15 +235,17 @@ export class MeasurementChartContainer extends Component<Props, State> {
   private _deriveYAxisLabel(plotModel: PlotModel) {
     switch (plotModel.measurementType) {
       case MeasurementType.POWER:
-        if (plotModel.useMagnitude)
-          return 'W';
-        else
+        if (plotModel.useMagnitude) {
+          return 'kVA';
+        } else {
           return 'Degrees';
+        }
       case MeasurementType.VOLTAGE:
-        if (plotModel.useMagnitude)
+        if (plotModel.useMagnitude) {
           return 'V';
-        else
+        } else {
           return 'Degrees';
+        }
       case MeasurementType.TAP:
         return '';
       default:
@@ -342,7 +344,7 @@ export class MeasurementChartContainer extends Component<Props, State> {
 
     const loadDemandPlotModel = this._plotModels[1];
     const loadDemandRenderableChartModel = this._createDefaultRenderableChartModel(loadDemandPlotModel);
-    loadDemandRenderableChartModel.yAxisLabel = 'KVA';
+    loadDemandRenderableChartModel.yAxisLabel = 'kVA';
     loadDemandRenderableChartModel.timeSeries = [
       this._addValueToTimeSeries(this._findOrCreateTimeSeries(loadDemandPlotModel, loadDemandPlotModel.components[0]), energyConsumerP / 1000),
       this._addValueToTimeSeries(this._findOrCreateTimeSeries(loadDemandPlotModel, loadDemandPlotModel.components[1]), energyConsumerQ / 1000),
@@ -405,8 +407,13 @@ export class MeasurementChartContainer extends Component<Props, State> {
     if (measurement !== undefined) {
       switch (plotModel.measurementType) {
         case MeasurementType.VOLTAGE:
-        case MeasurementType.POWER:
           return measurement[plotModel.useMagnitude ? 'magnitude' : 'angle'];
+        case MeasurementType.POWER:
+          if (plotModel.useMagnitude) {
+            return measurement['magnitude'] / 1000;
+          } else {
+            return measurement['angle'];
+          }
         case MeasurementType.TAP:
           return measurement.value;
       }
