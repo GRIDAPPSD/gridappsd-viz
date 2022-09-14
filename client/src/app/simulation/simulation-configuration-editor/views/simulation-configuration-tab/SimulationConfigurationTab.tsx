@@ -15,6 +15,7 @@ import { IconButton } from '@client:common/buttons';
 import { Validators } from '@client:common/form/validation';
 import { SimulationConfiguration } from '@client:common/simulation';
 import { Service } from '@client:common/Service';
+import { DateTimeService } from '@client:common/DateTimeService';
 
 import { SimulationConfigurationTabModel } from '../../models/SimulationConfigurationTabModel';
 
@@ -26,6 +27,7 @@ interface Props {
   simulationConfig: SimulationConfiguration['simulation_config'];
   simulators: string[];
   services: Service[];
+  isUploaded: boolean;
 }
 
 interface State {
@@ -33,6 +35,8 @@ interface State {
 }
 
 export class SimulationConfigurationTab extends Component<Props, State> {
+
+  readonly dateTimeService = DateTimeService.getInstance();
 
   constructor(props: Props) {
     super(props);
@@ -58,46 +62,58 @@ export class SimulationConfigurationTab extends Component<Props, State> {
   }
 
   private _setupFormGroupModelForSimulationConfigurationTab() {
-    this.props.parentFormGroupModel.setControl(
-      'start_time',
-      new FormControlModel(
-        this.props.simulationConfig.start_time,
-        [Validators.checkNotEmpty('Start time'), Validators.checkValidDateTime('Start time')]
-      )
-    );
-    this.props.parentFormGroupModel.setControl(
-      'duration',
-      new FormControlModel(
-        this.props.simulationConfig.duration,
-        [Validators.checkNotEmpty('Duration'), Validators.checkValidNumber('Duration')]
-      )
-    );
-    this.props.parentFormGroupModel.setControl(
-      'simulator',
-      // new FormControlModel('')
-      new FormControlModel(this.props.simulationConfig.simulator)
-    );
-    this.props.parentFormGroupModel.setControl(
-      'run_realtime',
-      new FormControlModel(this.props.simulationConfig.run_realtime)
-    );
-    this.props.parentFormGroupModel.setControl(
-      'simulation_name',
-      new FormControlModel(
-        this.props.simulationConfig.simulation_name,
-        [Validators.checkNotEmpty('Simulation name')]
-      )
-    );
-    this.props.parentFormGroupModel.setControl(
-      'model_creation_config',
-      new FormControlModel(
-        this.props.simulationConfig.model_creation_config,
-        [
-          Validators.checkNotEmpty('Model creation config'),
-          Validators.checkValidJSON('Model creation config')
-        ]
-      )
-    );
+    if (this.props.simulationConfig && this.props.simulationConfig !== null) {
+      if (this.props.isUploaded) {
+        this.props.parentFormGroupModel.setControl(
+          'start_time',
+          new FormControlModel(
+            this.dateTimeService.parseEpoch(+this.props.simulationConfig.start_time),
+            [Validators.checkNotEmpty('Start time'), Validators.checkValidDateTime('Start time')]
+          )
+        );
+      } else {
+        this.props.parentFormGroupModel.setControl(
+          'start_time',
+          new FormControlModel(
+            this.props.simulationConfig.start_time,
+            [Validators.checkNotEmpty('Start time'), Validators.checkValidDateTime('Start time')]
+          )
+        );
+      }
+      this.props.parentFormGroupModel.setControl(
+        'duration',
+        new FormControlModel(
+          this.props.simulationConfig.duration,
+          [Validators.checkNotEmpty('Duration'), Validators.checkValidNumber('Duration')]
+        )
+      );
+      this.props.parentFormGroupModel.setControl(
+        'simulator',
+        // new FormControlModel('')
+        new FormControlModel(this.props.simulationConfig.simulator)
+      );
+      this.props.parentFormGroupModel.setControl(
+        'run_realtime',
+        new FormControlModel(this.props.simulationConfig.run_realtime)
+      );
+      this.props.parentFormGroupModel.setControl(
+        'simulation_name',
+        new FormControlModel(
+          this.props.simulationConfig.simulation_name,
+          [Validators.checkNotEmpty('Simulation name')]
+        )
+      );
+      this.props.parentFormGroupModel.setControl(
+        'model_creation_config',
+        new FormControlModel(
+          this.props.simulationConfig.model_creation_config,
+          [
+            Validators.checkNotEmpty('Model creation config'),
+            Validators.checkValidJSON('Model creation config')
+          ]
+        )
+      );
+    }
   }
 
   render() {

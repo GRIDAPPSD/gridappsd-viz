@@ -6,6 +6,7 @@ import { ExpectedResultComparisonType } from '@client:common/ExpectedResultCompa
 import { StompClientConnectionStatus } from '@client:common/StompClientService';
 import { SimulationConfiguration, Simulation } from '@client:common/simulation';
 import { Restricted } from '@client:common/authenticator';
+import { FilePicker } from '@client:common/file-picker';
 
 import { Drawer } from './views/drawer/Drawer';
 import { ToolBar } from './views/tool-bar/ToolBar';
@@ -22,7 +23,8 @@ interface Props {
   stompClientConnectionStatus: StompClientConnectionStatus;
   version: string;
   activeSimulationIds: string[];
-  onShowSimulationConfigForm: (config: SimulationConfiguration) => void;
+  onShowSimulationConfigForm: (config: SimulationConfiguration, isUploaded: boolean) => void;
+  onShowUploadSimulationConfigFile: () => void;
   onLogout: () => void;
   onJoinActiveSimulation: (simulationId: string) => void;
   onSelectExpectedResultComparisonType: (selectedType: ExpectedResultComparisonType) => void;
@@ -77,10 +79,19 @@ export class Navigation extends Component<Props, unknown> {
             </DrawerItemGroup>
           }
           <Restricted roles={['testmanager']}>
-            <DrawerItem onClick={() => this.props.onShowSimulationConfigForm(null)}>
-              <DrawerItemIcon icon='assignment' />
-              <DrawerItemLabel value='Configure New Simulation' />
-            </DrawerItem>
+            <DrawerItemGroup
+            header='Configure New Simulation'
+            icon='assignment'>
+              <DrawerItem onClick={() => this.props.onShowSimulationConfigForm(null, false)}>
+                <DrawerItemIcon icon='assignment' />
+                <DrawerItemLabel value='Configure New Simulation' />
+              </DrawerItem>
+              <DrawerItem onClick={() => this.props.onShowUploadSimulationConfigFile()}>
+                <DrawerItemIcon icon='cloud_upload' />
+                <DrawerItemLabel value='Upload A Simulation Configuration File' />
+              </DrawerItem>
+              <FilePicker />
+            </DrawerItemGroup>
           </Restricted>
           <DrawerItemGroup
             header='Select Comparison Type'
@@ -108,7 +119,7 @@ export class Navigation extends Component<Props, unknown> {
                 this.props.previousSimulations.map(simulation => (
                   <DrawerItem
                     key={simulation.id}
-                    onClick={() => this.props.onShowSimulationConfigForm(simulation.config)}>
+                    onClick={() => this.props.onShowSimulationConfigForm(simulation.config, false)}>
                     <strong>Name:&nbsp;</strong>
                     {simulation.name}
                     &nbsp;&mdash;&nbsp;

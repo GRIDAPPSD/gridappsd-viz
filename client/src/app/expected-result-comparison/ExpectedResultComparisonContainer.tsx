@@ -186,6 +186,33 @@ export class ExpectedResultComparisonContainer extends Component<Props, State> {
     });
   }
 
+  private _dynamicallyFetchResponse(request: MessageRequest) {
+    this._responseSubscription = this._stompClientService.readFrom<any[] | any>(request.replyTo)
+    .pipe(
+      takeWhile(data => data.status !== 'finish')
+    )
+    .subscribe({
+      next: data => {
+        if (data.status !== 'start') {
+          this.setState({
+            comparisonResult: [...this.state.comparisonResult, data]
+          });
+        }
+      },
+      complete: () => {
+        Notification.open('Fetching Comparison Result Table is Done.');
+      },
+      error: errorMessage => {
+        Notification.open(errorMessage);
+      }
+    });
+    this._stompClientService.send({
+      destination: request.url,
+      body: JSON.stringify(request.requestBody),
+      replyTo: request.replyTo
+    });
+  }
+
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   onSimulationVsTimeSeriesFormSubmit(simulationId: number, simulationConfiguration: any) {
     this._fetchResponse(new SimulationVsTimeSeriesRequest(simulationConfiguration, simulationId));
@@ -197,7 +224,7 @@ export class ExpectedResultComparisonContainer extends Component<Props, State> {
   }
 
   onTimeSeriesVsTimeSeriesFormSubmit(firstSimulationId: number, secondSimulationId: number) {
-    this._fetchResponse(new TimeSeriesVsTimeSeriesRequest(firstSimulationId, secondSimulationId));
+    this._dynamicallyFetchResponse(new TimeSeriesVsTimeSeriesRequest(firstSimulationId, secondSimulationId));
   }
 
 }

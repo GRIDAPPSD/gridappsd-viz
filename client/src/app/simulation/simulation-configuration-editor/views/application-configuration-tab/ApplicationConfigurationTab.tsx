@@ -18,6 +18,7 @@ interface Props {
 
 interface State {
   availableApplicationOptionBuilder: SelectionOptionBuilder<string>;
+  configString: string;
 }
 
 export class ApplicationConfigurationTab extends Component<Props, State> {
@@ -34,11 +35,10 @@ export class ApplicationConfigurationTab extends Component<Props, State> {
     this.state = {
       availableApplicationOptionBuilder: new SelectionOptionBuilder(
         (props.availableApplications || []).map(app => app.id)
-      )
+      ),
+      configString: ''
     };
-
     this._setupFormModel();
-
   }
 
   private _setupFormModel() {
@@ -59,7 +59,43 @@ export class ApplicationConfigurationTab extends Component<Props, State> {
     );
   }
 
+  private _updateFormModel() {
+    const previousSelectedApplication = this.props.applicationConfig.applications[0];
+    if (previousSelectedApplication) {
+      this.nameFormControlModel.setValue(previousSelectedApplication.name);
+      this.configStringFormControlModel.setValue(previousSelectedApplication.config_string);
+      this.setState({
+        configString: previousSelectedApplication.config_string
+      });
+    }
+    this.props.parentFormGroupModel.setControl(
+      'applications',
+      new FormArrayModel([
+        new FormGroupModel({
+          name: this.nameFormControlModel,
+          // eslint-disable-next-line camelcase
+          config_string: this.configStringFormControlModel
+        })
+      ])
+    );
+  }
+
+  componentDidUpdate(prevProps: Readonly<Props>, prevState: Readonly<State>): void {
+    if (this.state.configString !== prevState.configString) {
+      this._updateFormModel();
+    }
+  }
+
   componentDidMount() {
+    this._updateFormModel();
+    this.configStringFormControlModel.valueChanges()
+      .subscribe({
+        next: configString => {
+          this.setState({
+            configString
+          });
+        }
+      });
     this.nameFormControlModel.valueChanges()
       .subscribe({
         next: name => {

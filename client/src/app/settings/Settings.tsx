@@ -37,8 +37,10 @@ export class Settings extends Component<Props, State> {
     this.state = {
       showSettingsMenu: false,
       timeZoneOptionBuilder: new SelectionOptionBuilder([
-        TimeZone.EST,
         TimeZone.LOCAL,
+        TimeZone.EDT,
+        TimeZone.EST,
+        TimeZone.PDT,
         TimeZone.PST,
         TimeZone.UTC
       ])

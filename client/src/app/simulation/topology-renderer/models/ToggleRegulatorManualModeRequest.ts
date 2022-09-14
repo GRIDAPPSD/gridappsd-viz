@@ -29,12 +29,7 @@ export class ToggleRegulatorManualModeRequest implements MessageRequest {
             {
               object: inputs.componentMRID,
               attribute: 'RegulatingControl.enabled',
-              value: !inputs.manual
-            },
-            {
-              object: inputs.componentMRID,
-              attribute: 'RegulatingControlModeKind',
-              value: 'RegulatingControlModeKind.voltage'
+              value: inputs.manual
             }
           ],
           // eslint-disable-next-line camelcase
@@ -42,12 +37,7 @@ export class ToggleRegulatorManualModeRequest implements MessageRequest {
             {
               object: inputs.componentMRID,
               attribute: 'RegulatingControl.enabled',
-              value: inputs.manual
-            },
-            {
-              object: inputs.componentMRID,
-              attribute: 'RegulatingControlModeKind',
-              value: 'RegulatingControlModeKind.voltage'
+              value: !inputs.manual
             }
           ]
         }

@@ -29,32 +29,48 @@ export class TimeSeriesVsTimeSeriesChartResult extends Component<Props, State> {
   constructor(props: Props) {
     super(props);
 
+    this.state={
+      chartModels: []
+    };
+  }
+
+  componentDidMount() {
+      this._buildDefaultChart();
+  }
+
+  componentDidUpdate(prevProps: Readonly<Props>): void {
+      if(prevProps.result.length !== this.props.result.length) {
+        this._buildDefaultChart();
+      }
+  }
+
+  private _buildDefaultChart() {
     const chartModelMap = new Map<string, LineChartModel>();
     const anchorTimeStamp = Date.now();
+    if(this.props.result.length > 1) {
+      for(const datum of this.props.result) {
+        if(!chartModelMap.has(datum.attribute)) {
+          chartModelMap.set(datum.attribute, this._createLineChartModelForAttribute(datum.attribute));
+        }
+        const chartModel = chartModelMap.get(datum.attribute);
+        const expectedValueTimeSeries = chartModel.timeSeries[0];
+        const actualValueTimeSeries = chartModel.timeSeries[1];
+        const nextTimeStamp = new Date(anchorTimeStamp + expectedValueTimeSeries.points.length + 1);
 
-    for (const datum of props.result) {
-      if (!chartModelMap.has(datum.attribute)) {
-        chartModelMap.set(datum.attribute, this._createLineChartModelForAttribute(datum.attribute));
+        expectedValueTimeSeries.points.push({
+          timestamp: nextTimeStamp,
+          measurement: +datum.expected
+        });
+
+        actualValueTimeSeries.points.push({
+          timestamp: nextTimeStamp,
+          measurement: +datum.actual
+        });
       }
-      const chartModel = chartModelMap.get(datum.attribute);
-      const expectedValueTimeSeries = chartModel.timeSeries[0];
-      const actualValueTimeSeries = chartModel.timeSeries[1];
-      const nextTimeStamp = new Date(anchorTimeStamp + expectedValueTimeSeries.points.length + 1);
-
-      expectedValueTimeSeries.points.push({
-        timestamp: nextTimeStamp,
-        measurement: +datum.expected
-      });
-
-      actualValueTimeSeries.points.push({
-        timestamp: nextTimeStamp,
-        measurement: +datum.actual
+      this.setState({
+        chartModels: [...chartModelMap.values()]
       });
     }
-
-    this.state = {
-      chartModels: [...chartModelMap.values()]
-    };
   }
 
   private _createLineChartModelForAttribute(attribute: string): LineChartModel {
@@ -79,11 +95,13 @@ export class TimeSeriesVsTimeSeriesChartResult extends Component<Props, State> {
     return (
       <div className='time-series-vs-time-series-chart-result'>
         {
-          this.state.chartModels.map(model => (
-            <LineChart
+          this.state.chartModels.map(model => {
+            return (
+              <LineChart
               key={model.name}
               lineChartModel={model} />
-          ))
+            );
+          })
         }
       </div>
     );

@@ -291,7 +291,7 @@ export class SimulationManagementService {
     const measurementMap = new Map<string, SimulationOutputMeasurement>();
     for (const [mrid, rawSimulationOutputMeasurement] of Object.entries(payload.message.measurements)) {
       const measurementInModelDictionary = this._modelDictionaryMeasurementMap.get(mrid);
-      if (measurementInModelDictionary) {
+      if (measurementInModelDictionary) {   
         const measurement: SimulationOutputMeasurement = {
           name: measurementInModelDictionary.name,
           type: measurementInModelDictionary.measurementType,
@@ -306,8 +306,8 @@ export class SimulationManagementService {
           conductingEquipmentMRID: measurementInModelDictionary.ConductingEquipment_mRID
         };
         measurementMap.set(mrid, measurement);
-        measurementMap.set(measurementInModelDictionary.ConductingEquipment_name, measurement);
-        measurementMap.set(measurementInModelDictionary.ConnectivityNode, measurement);
+        //measurementMap.set(measurementInModelDictionary.ConductingEquipment_name, measurement);
+        //measurementMap.set(measurementInModelDictionary.ConnectivityNode, measurement);
       }
     }
     this._simulationOutputMeasurementMapStream.next(measurementMap);
