@@ -14,6 +14,7 @@ import {
 } from '@client:common/topology/model-dictionary';
 
 import { ScheduledCommandEventFormService } from '../../../services/ScheduledCommandEventFormService';
+import { COMPONENT_ATTRIBUTES } from '../../../models/component-attributes';
 
 import './ScheduledCommandEventForm.light.scss';
 import './ScheduledCommandEventForm.dark.scss';
@@ -166,7 +167,13 @@ export class ScheduledCommandEventForm extends Component<Props, State> {
               componentName,
               mRID: selectedComponent.mRID
             });
-            if (this.state.selectedComponentType !== 'Regulator') {
+            if (this.state.selectedComponentType === 'Synchronous Machine') {
+              this.setState({
+                attributeOptionBuilder: new SelectionOptionBuilder(
+                  COMPONENT_ATTRIBUTES['synchronousmachines']
+                )
+              });
+            } else if (this.state.selectedComponentType !== 'Regulator') {
               this._formService.fetchAttributes(
                 typeof selectedComponent.mRID === 'string' ? selectedComponent.mRID : selectedComponent.mRID[0],
                 this.props.modelDictionary.mRID,
@@ -220,7 +227,7 @@ export class ScheduledCommandEventForm extends Component<Props, State> {
           label='Component'
           selectionOptionBuilder={this.state.componentOptionBuilder}
           formControlModel={this.selectedComponentFormControl} />
-        {
+       {
           this.state.selectedComponentType !== 'Regulator'
             ? (
               <Select

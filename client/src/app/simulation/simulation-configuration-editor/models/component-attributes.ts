@@ -21,5 +21,9 @@ export const COMPONENT_ATTRIBUTES = {
   ],
   switches: [
     'Switch.open'
+  ],
+  synchronousmachines: [
+    'RotatingMachine.p',
+    'RotatingMachine.q'
   ]
 };
