@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 import { Component, createRef } from 'react';
 import { line } from 'd3-shape';
 import { select, Selection, create } from 'd3-selection';
@@ -617,7 +616,9 @@ export class TopologyRenderer extends Component<Props, State> {
       .y(node => node.screenY1);
     edgeMap.forEach(edge => {
       const path = create('svg:path').node();
-      path.setAttribute('class', `topology-renderer__canvas__edge _${edge.name}_`);
+      if (!edge.name.startsWith('tpx')) {
+        path.setAttribute('class', `topology-renderer__canvas__edge _${edge.name}_`);
+      }
       path.setAttribute('d', edgeGenerator([edge.from, edge.to]));
       documentFragment.appendChild(path);
     });
@@ -724,66 +725,6 @@ export class TopologyRenderer extends Component<Props, State> {
       const fragment = document.createDocumentFragment();
       for (const datum of nodes) {
         const symbol = create('svg:g');
-        // if(nodeType === 'transformer' && (datum.name === 't21197413c' || datum.name === 't21399326c' || datum.name === 'hvmv69_11sub3')) {
-        //   console.log('#####datum for transformer####');
-        //   console.log(datum.name);
-        //   console.log(datum);
-          // datum.name=t21399326c
-          // configuration: "ct25:Iii"
-          // from: "l2879092"
-          // mRIDs: []
-          // name: "t21399326c"
-          // phases: "C"
-          // screenX1: 187.08333333333334
-          // screenY1: 750.9589041095891
-          // to: "x2879092c"
-          // type: "transformer"
-          // x1: -26453
-          // x2: -119.2386
-          // y1: 6572
-          // y2: 13099.3138
-
-          // datum.name=t21197413c
-          // configuration: "ct75:Iii"
-          // from: "l3141411"
-          // mRIDs: []
-          // name: "t21197413c"
-          // phases: "C"
-          // screenX1: 187.08333333333334
-          // screenY1: 750.9589041095891
-          // to: "x3141411c"
-          // type: "transformer"
-          // x1: -26453
-          // x2: -119.2382
-          // y1: 6572
-          // y2: 13099.313
-
-          // datum.name=hvmv69_11sub3
-          // configuration: "Yy"
-          // from: "hvmv69sub3_hsb"
-          // mRIDs: []
-          // name: "hvmv69_11sub3"
-          // phases: "ABC"
-          // screenX1: 166.25
-          // screenY1: 812.7054794520548
-          // to: "regxfmr_hvmv11sub3_lsb"
-          // type: "transformer"
-          // x1: -26455
-          // x2: -119.2406805
-          // y1: 6578
-          // y2: 13099.31915062
-        // }
-        // if(nodeType === 'transformer' && datum.name === 't21197413c') {
-        //   datum.screenX1 = datum.screenX1 + 100;
-        //   console.log('after increase');
-        //   console.log(datum);
-        // }
-        if(datum.name === 't21399229a') {
-          console.log('#t21399229a#', datum);
-        }
-        if(datum.name === 't21399305a') {
-          console.log('#t21399305a#', datum);
-        }
         symbol.attr('class', `topology-renderer__canvas__symbol-container ${nodeType}`)
           .style('transform-origin', this._calculateSymbolTransformOrigin(datum))
           .style('transform', this._calculateSymbolTransform(datum, nodeNameToEdgeMap))
@@ -802,7 +743,6 @@ export class TopologyRenderer extends Component<Props, State> {
   private _calculateSymbolTransformOrigin(node: Node) {
     const width = this._symbolDimensions[node.type]?.width || symbolSize;
     const height = this._symbolDimensions[node.type]?.height || symbolSize;
-    // [NodeType.TRANSFORMER]: { width: 30, height: 25 },
     if (node.type === NodeType.CAPACITOR || node.type === NodeType.REGULATOR) {
       return `${node.screenX1 + (width / 2)}px ${node.screenY1}px`;
     }

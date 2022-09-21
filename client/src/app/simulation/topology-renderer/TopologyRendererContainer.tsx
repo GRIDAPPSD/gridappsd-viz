@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 import { Component } from 'react';
 import { Subject, Subscription } from 'rxjs';
 import { takeUntil, takeWhile } from 'rxjs/operators';
@@ -152,23 +151,6 @@ export class TopologyRendererContainer extends Component<Props, State> {
   private _processModelForRendering(topologyModel: TopologyModel) {
     waitUntil(() => this.props.mRIDs.size > 0)
       .then(() => {
-        // console.log('#####topologyModel.feeders####');
-        // console.log(topologyModel.feeders); // [{...}]
-        // 0:
-        //   mRID: "_EE71F6C9-56F0-4167-A14E-7F4C71F10EAA"
-        //   name: "final9500node"
-        //   batteries:[{...}, {...}]
-        //   transformers: Array(1304)
-        //     2:
-        //       configuration: "Yy"
-        //       from: "hvmv69sub3_hsb"
-        //       name: "hvmv69_11sub3"
-        //       phases: "ABC"
-        //       to: "regxfmr_hvmv11sub3_lsb"
-        //       x1: -119.2404194
-        //       x2: -119.2406805
-        //       y1: 46.6799782
-        //       y2: 46.68084938
         this.setState({
           topology: this._transformModelForRendering(topologyModel),
           isFetching: false
@@ -187,13 +169,11 @@ export class TopologyRendererContainer extends Component<Props, State> {
       edgeMap: new Map(),
       inverted: false
     };
-
     for (const group of ['batteries', 'switches', 'solarpanels', 'swing_nodes', 'transformers', 'capacitors', 'regulators']) {
       for (const datum of feeder[group]) {
         const mRIDs = this.props.mRIDs.get(datum.name) || [];
         const resolvedMRIDs = Array.isArray(mRIDs) ? mRIDs : [mRIDs];
         let node: Node;
-
         switch (group) {
           case 'swing_nodes':
             node = this._createNewNode({
@@ -357,8 +337,12 @@ export class TopologyRendererContainer extends Component<Props, State> {
 
   private _latLongToXY(longitude: number, lat: number): { x: number; y: number } {
     return {
-      x: Math.floor(136.0 * (longitude + 77.0292) / (-77.0075 + 77.0292)) / 10,
-      y: Math.floor(117.0 * (lat - 38.8762) / (38.8901 - 38.8762)) / 10
+      // Archive the old method of calculating Lat and Long to xy coordinations
+      // x: Math.floor(136.0 * (longitude + 77.0292) / (-77.0075 + 77.0292)) / 10,
+      // y: Math.floor(117.0 * (lat - 38.8762) / (38.8901 - 38.8762)) / 10
+
+      x: 136.0 * (longitude + 77.0292) / 0.00217,
+      y: 114.0 * (lat - 38.8762) / 0.00139
     };
   }
 
