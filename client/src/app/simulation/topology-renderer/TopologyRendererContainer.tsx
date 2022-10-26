@@ -169,13 +169,11 @@ export class TopologyRendererContainer extends Component<Props, State> {
       edgeMap: new Map(),
       inverted: false
     };
-
     for (const group of ['batteries', 'switches', 'solarpanels', 'swing_nodes', 'transformers', 'capacitors', 'regulators']) {
       for (const datum of feeder[group]) {
         const mRIDs = this.props.mRIDs.get(datum.name) || [];
         const resolvedMRIDs = Array.isArray(mRIDs) ? mRIDs : [mRIDs];
         let node: Node;
-
         switch (group) {
           case 'swing_nodes':
             node = this._createNewNode({
@@ -339,8 +337,12 @@ export class TopologyRendererContainer extends Component<Props, State> {
 
   private _latLongToXY(longitude: number, lat: number): { x: number; y: number } {
     return {
-      x: Math.floor(136.0 * (longitude + 77.0292) / (-77.0075 + 77.0292)) / 10,
-      y: Math.floor(117.0 * (lat - 38.8762) / (38.8901 - 38.8762)) / 10
+      // Archive the old method of calculating Lat and Long to xy coordinations
+      // x: Math.floor(136.0 * (longitude + 77.0292) / (-77.0075 + 77.0292)) / 10,
+      // y: Math.floor(117.0 * (lat - 38.8762) / (38.8901 - 38.8762)) / 10
+
+      x: 136.0 * (longitude + 77.0292) / 0.00217,
+      y: 114.0 * (lat - 38.8762) / 0.00139
     };
   }
 
