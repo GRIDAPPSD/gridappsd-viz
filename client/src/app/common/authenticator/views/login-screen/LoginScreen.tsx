@@ -1,11 +1,12 @@
 import { Component } from 'react';
 import { Observable, Subscription } from 'rxjs';
 
-import { Input, Form, FormGroupModel, FormControlModel } from '@client:common/form';
+import { Input, Form, FormGroupModel, FormControlModel, Select, SelectionOptionBuilder } from '@client:common/form';
 import { BasicButton, IconButton } from '@client:common/buttons';
 import { Validators } from '@client:common/form/validation';
 import { Tooltip } from '@client:common/tooltip';
 import { ProgressIndicator } from '@client:common/overlay/progress-indicator';
+import { DisplayMode } from '@client:common/authenticator/models/DisplayMode';
 
 import './LoginScreen.light.scss';
 import './LoginScreen.dark.scss';
@@ -18,13 +19,15 @@ interface Props {
 interface State {
   passwordVisible: boolean;
   showSpinner: boolean;
+  displayModeOptionBuilder: SelectionOptionBuilder<DisplayMode>;
 }
 
 export class LoginScreen extends Component<Props, State> {
 
   readonly formGroupModel = new FormGroupModel({
     username: new FormControlModel('system', [Validators.checkNotEmpty('Username')]),
-    password: new FormControlModel('manager', [Validators.checkNotEmpty('Password')])
+    password: new FormControlModel('manager', [Validators.checkNotEmpty('Password')]),
+    displayMode: new FormControlModel<DisplayMode>(null)
   });
 
   private _subscription: Subscription;
@@ -34,7 +37,8 @@ export class LoginScreen extends Component<Props, State> {
 
     this.state = {
       passwordVisible: false,
-      showSpinner: false
+      showSpinner: false,
+      displayModeOptionBuilder: new SelectionOptionBuilder([DisplayMode.FIELD, DisplayMode.SIMULATION])
     };
 
     this.login = this.login.bind(this);
@@ -77,6 +81,12 @@ export class LoginScreen extends Component<Props, State> {
                 style='accent'
                 onClick={this.togglePasswordVisibility} />
             </Tooltip>
+          </div>
+          <div className='login-screen-form__mode-container'>
+            <Select
+              label='Mode'
+              formControlModel={this.formGroupModel.findControl('displayMode')}
+              selectionOptionBuilder={this.state.displayModeOptionBuilder} />
           </div>
           <BasicButton
             className='login-screen-form__login-button'

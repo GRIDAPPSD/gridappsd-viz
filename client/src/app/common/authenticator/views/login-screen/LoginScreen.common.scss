@@ -38,3 +38,14 @@
         left: 85%;
     }
 }
+
+.login-screen-form__mode-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 20px;
+
+    .form-control__label {
+        margin-left: -27px;
+    }
+}
