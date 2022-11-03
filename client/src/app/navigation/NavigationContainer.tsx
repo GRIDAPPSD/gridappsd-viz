@@ -13,6 +13,7 @@ import { Notification } from '@client:common/overlay/notification';
 import { Navigation } from './Navigation';
 
 interface Props {
+  selectedDisplayMode: string;
   onShowSimulationConfigForm: (config: SimulationConfiguration, isUploaded: boolean) => void;
   onLogout: () => void;
   onJoinActiveSimulation: (simulationId: string) => void;
@@ -100,6 +101,7 @@ export class NavigationContainer extends Component<Props, State> {
   render() {
     return (
       <Navigation
+        selectedDisplayMode={this.props.selectedDisplayMode}
         version={this.state.version}
         stompClientConnectionStatus={this.state.stompClientConnectionStatus}
         previousSimulations={this.state.previousSimulations}

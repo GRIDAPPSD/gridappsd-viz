@@ -7,6 +7,7 @@ import { StompClientConnectionStatus } from '@client:common/StompClientService';
 import { SimulationConfiguration, Simulation } from '@client:common/simulation';
 import { Restricted } from '@client:common/authenticator';
 import { FilePicker } from '@client:common/file-picker';
+import { DisplayMode } from '@client:common/authenticator/models/DisplayMode';
 
 import { Drawer } from './views/drawer/Drawer';
 import { ToolBar } from './views/tool-bar/ToolBar';
@@ -19,6 +20,7 @@ import './Navigation.light.scss';
 import './Navigation.dark.scss';
 
 interface Props {
+  selectedDisplayMode: string;
   previousSimulations: Simulation[];
   stompClientConnectionStatus: StompClientConnectionStatus;
   version: string;
@@ -40,7 +42,80 @@ export class Navigation extends Component<Props, unknown> {
     this.openDrawer = this.openDrawer.bind(this);
   }
 
+  renderSimulationModeMenuItems = () => {
+    return (
+      <>
+        <Restricted roles={['testmanager']}>
+          <DrawerItemGroup
+            header='Configure New Simulation'
+            icon='assignment'>
+            <DrawerItem onClick={() => this.props.onShowSimulationConfigForm(null, false)}>
+              <DrawerItemIcon icon='assignment' />
+              <DrawerItemLabel value='Configure New Simulation' />
+            </DrawerItem>
+            <DrawerItem onClick={() => this.props.onShowUploadSimulationConfigFile()}>
+              <DrawerItemIcon icon='cloud_upload' />
+              <DrawerItemLabel value='Upload A Simulation Configuration File' />
+            </DrawerItem>
+            <FilePicker />
+          </DrawerItemGroup>
+        </Restricted>
+        <DrawerItemGroup
+          header='Select Comparison Type'
+          icon='compare_arrows'>
+          <DrawerItem onClick={() => this.props.onSelectExpectedResultComparisonType(ExpectedResultComparisonType.SIMULATION_VS_EXPECTED)}>
+            1. {ExpectedResultComparisonType.SIMULATION_VS_EXPECTED}
+          </DrawerItem>
+          <DrawerItem onClick={() => this.props.onSelectExpectedResultComparisonType(ExpectedResultComparisonType.SIMULATION_VS_TIME_SERIES)}>
+            2. {ExpectedResultComparisonType.SIMULATION_VS_TIME_SERIES}
+          </DrawerItem>
+          <DrawerItem onClick={() => this.props.onSelectExpectedResultComparisonType(ExpectedResultComparisonType.EXPECTED_VS_TIME_SERIES)}>
+            3. {ExpectedResultComparisonType.EXPECTED_VS_TIME_SERIES}
+          </DrawerItem>
+          <DrawerItem onClick={() => this.props.onSelectExpectedResultComparisonType(ExpectedResultComparisonType.TIME_SERIES_VS_TIME_SERIES)}>
+            4. {ExpectedResultComparisonType.TIME_SERIES_VS_TIME_SERIES}
+          </DrawerItem>
+        </DrawerItemGroup>
+        {
+          this.props.previousSimulations.length > 0
+          &&
+          <DrawerItemGroup
+            header='Previous simulations'
+            icon='memory'>
+            {
+              this.props.previousSimulations.map(simulation => (
+                <DrawerItem
+                  key={simulation.id}
+                  onClick={() => this.props.onShowSimulationConfigForm(simulation.config, false)}>
+                  <strong>Name:&nbsp;</strong>
+                  {simulation.name}
+                  &nbsp;&mdash;&nbsp;
+                  <strong>ID:&nbsp;</strong>
+                  {simulation.id}
+                </DrawerItem>
+              ))
+            }
+          </DrawerItemGroup>
+        }
+      </>
+    );
+  };
+
+  renderFieldModeMenuItems = () => {
+    return (
+      <>
+        <DrawerItem>
+          <Link to='/display-mode'>
+            <DrawerItemIcon icon='analytics' />
+            <DrawerItemLabel value='Display Mode' />
+          </Link>
+        </DrawerItem>
+      </>
+    );
+  };
+
   render() {
+    const { selectedDisplayMode } = this.props;
     return (
       <>
         <ToolBar>
@@ -78,58 +153,8 @@ export class Navigation extends Component<Props, unknown> {
               }
             </DrawerItemGroup>
           }
-          <Restricted roles={['testmanager']}>
-            <DrawerItemGroup
-            header='Configure New Simulation'
-            icon='assignment'>
-              <DrawerItem onClick={() => this.props.onShowSimulationConfigForm(null, false)}>
-                <DrawerItemIcon icon='assignment' />
-                <DrawerItemLabel value='Configure New Simulation' />
-              </DrawerItem>
-              <DrawerItem onClick={() => this.props.onShowUploadSimulationConfigFile()}>
-                <DrawerItemIcon icon='cloud_upload' />
-                <DrawerItemLabel value='Upload A Simulation Configuration File' />
-              </DrawerItem>
-              <FilePicker />
-            </DrawerItemGroup>
-          </Restricted>
-          <DrawerItemGroup
-            header='Select Comparison Type'
-            icon='compare_arrows'>
-            <DrawerItem onClick={() => this.props.onSelectExpectedResultComparisonType(ExpectedResultComparisonType.SIMULATION_VS_EXPECTED)}>
-              1. {ExpectedResultComparisonType.SIMULATION_VS_EXPECTED}
-            </DrawerItem>
-            <DrawerItem onClick={() => this.props.onSelectExpectedResultComparisonType(ExpectedResultComparisonType.SIMULATION_VS_TIME_SERIES)}>
-              2. {ExpectedResultComparisonType.SIMULATION_VS_TIME_SERIES}
-            </DrawerItem>
-            <DrawerItem onClick={() => this.props.onSelectExpectedResultComparisonType(ExpectedResultComparisonType.EXPECTED_VS_TIME_SERIES)}>
-              3. {ExpectedResultComparisonType.EXPECTED_VS_TIME_SERIES}
-            </DrawerItem>
-            <DrawerItem onClick={() => this.props.onSelectExpectedResultComparisonType(ExpectedResultComparisonType.TIME_SERIES_VS_TIME_SERIES)}>
-              4. {ExpectedResultComparisonType.TIME_SERIES_VS_TIME_SERIES}
-            </DrawerItem>
-          </DrawerItemGroup>
-          {
-            this.props.previousSimulations.length > 0
-            &&
-            <DrawerItemGroup
-              header='Previous simulations'
-              icon='memory'>
-              {
-                this.props.previousSimulations.map(simulation => (
-                  <DrawerItem
-                    key={simulation.id}
-                    onClick={() => this.props.onShowSimulationConfigForm(simulation.config, false)}>
-                    <strong>Name:&nbsp;</strong>
-                    {simulation.name}
-                    &nbsp;&mdash;&nbsp;
-                    <strong>ID:&nbsp;</strong>
-                    {simulation.id}
-                  </DrawerItem>
-                ))
-              }
-            </DrawerItemGroup>
-          }
+          {selectedDisplayMode === DisplayMode.SIMULATION && this.renderSimulationModeMenuItems()}
+          {selectedDisplayMode === DisplayMode.FIELD && this.renderFieldModeMenuItems()}
           <DrawerItem>
             <Link to='/applications-and-services'>
               <DrawerItemIcon icon='storage' />

@@ -13,7 +13,8 @@ import './LoginScreen.dark.scss';
 
 interface Props {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  onLogin: (username: string, password: string) => Observable<any>;
+  onLogin: (username: string, password: string, displayMode: string) => Observable<any>;
+  getDisplayMode: (displayMode: string) => void;
 }
 
 interface State {
@@ -111,7 +112,8 @@ export class LoginScreen extends Component<Props, State> {
       showSpinner: true
     });
     const credentials = this.formGroupModel.getValue();
-    this._subscription = this.props.onLogin(credentials.username, credentials.password)
+    this.props.getDisplayMode(credentials.displayMode);
+    this._subscription = this.props.onLogin(credentials.username, credentials.password, credentials.displayMode)
       .subscribe({
         complete: () => {
           this.setState({

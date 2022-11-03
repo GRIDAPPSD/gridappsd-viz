@@ -37,6 +37,7 @@ interface Props {
 }
 
 interface State {
+  selectedDisplayMode: string;
   feederModel: FeederModel;
   availableApplications: Application[];
   stompClientConnectionStatus: StompClientConnectionStatus;
@@ -58,6 +59,7 @@ export class AppContainer extends Component<Props, State> {
     super(props);
 
     this.state = {
+      selectedDisplayMode: '',
       feederModel: null,
       availableApplications: null,
       stompClientConnectionStatus: StompClientConnectionStatus.UNINITIALIZED
@@ -65,6 +67,7 @@ export class AppContainer extends Component<Props, State> {
 
     this._stateStore.initialize(DEFAULT_APPLICATION_STATE);
 
+    this.getDisplayMode = this.getDisplayMode.bind(this);
     this.retrieveModelDictionary = this.retrieveModelDictionary.bind(this);
     this.onSimulationConfigFormSubmitted = this.onSimulationConfigFormSubmitted.bind(this);
   }
@@ -181,6 +184,8 @@ export class AppContainer extends Component<Props, State> {
   render() {
     return (
       <App
+        getDisplayMode={this.getDisplayMode}
+        selectedDisplayMode={this.state.selectedDisplayMode}
         stompClientConnectionStatus={this.state.stompClientConnectionStatus}
         feederModel={this.state.feederModel}
         availableApplications={this.state.availableApplications}
@@ -191,6 +196,10 @@ export class AppContainer extends Component<Props, State> {
         onSimulationConfigFormSubmitted={this.onSimulationConfigFormSubmitted}
         onJoinActiveSimulation={this.simulationManagementService.requestToJoinActiveSimulation} />
     );
+  }
+
+  getDisplayMode(selectedMode: string) {
+    this.setState({selectedDisplayMode: selectedMode});
   }
 
   retrieveModelDictionary(mRID: string) {

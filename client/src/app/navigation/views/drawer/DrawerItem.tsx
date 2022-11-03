@@ -25,7 +25,7 @@ export function DrawerItem(props: DrawerItemProps) {
 }
 
 interface DrawerItemIconProps {
-  icon: 'assignment' | 'storage' | 'search' | 'laptop' | 'memory' | 'power_settings_new' | 'merge_type' | 'compare_arrows' | 'cloud_upload';
+  icon: 'assignment' | 'storage' | 'search' | 'laptop' | 'memory' | 'power_settings_new' | 'merge_type' | 'compare_arrows' | 'cloud_upload' | 'analytics';
 }
 
 export function DrawerItemIcon(props: DrawerItemIconProps) {

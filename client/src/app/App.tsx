@@ -37,6 +37,7 @@ import './App.light.scss';
 import './App.dark.scss';
 
 interface Props {
+  selectedDisplayMode: string;
   feederModel: FeederModel;
   availableApplications: Application[];
   componentMRIDs: Map<string, string | string[]>;
@@ -46,6 +47,7 @@ interface Props {
   onMRIDChanged: (mRID: string) => void;
   onSimulationConfigFormSubmitted: (simulationConfig: SimulationConfiguration) => void;
   onJoinActiveSimulation: (simulationId: string) => void;
+  getDisplayMode: (displayMode: string) => void;
 }
 
 export function App(props: Props) {
@@ -109,8 +111,9 @@ export function App(props: Props) {
       <Route
         path='/'
         element={
-          <AuthenticatorContainer>
+          <AuthenticatorContainer getDisplayMode={props.getDisplayMode}>
             <NavigationContainer
+              selectedDisplayMode = {props.selectedDisplayMode}
               onShowSimulationConfigForm={onShowSimulationConfigForm}
               onLogout={props.onLogout}
               onJoinActiveSimulation={onJoinActiveSimulation}
@@ -162,6 +165,9 @@ export function App(props: Props) {
                 <MeasurementChartContainer />
               </div>
             </div>} />
+        <Route
+          path='display-mode'
+          element={<div><h1>This is the display mode page</h1></div>} />
         <Route
           path='applications-and-services'
           element={<AvailableApplicationsAndServicesContainer />} />

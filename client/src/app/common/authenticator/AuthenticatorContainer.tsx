@@ -8,6 +8,7 @@ import { AuthenticationStatusCode } from './models/AuthenticationStatusCode';
 import { AuthenticationResult } from './models/AuthenticationResult';
 
 interface Props {
+  getDisplayMode: (displayMode: string) => void;
 }
 
 interface State {
@@ -55,7 +56,8 @@ export class AuthenticatorContainer extends Component<Props, State> {
     return (
       <Authenticator
         authenticationResult={this.state.authenticationResult}
-        tryLogin={this.tryLogin}>
+        tryLogin={this.tryLogin}
+        getDisplayMode={this.props.getDisplayMode}>
         {this.props.children}
       </Authenticator>
     );

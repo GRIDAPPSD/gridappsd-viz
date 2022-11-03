@@ -9,7 +9,8 @@ import { AuthenticationResult } from './models/AuthenticationResult';
 
 interface Props {
   authenticationResult: AuthenticationResult;
-  tryLogin: (username: string, password: string) => Observable<AuthenticationResult>;
+  tryLogin: (username: string, password: string, displayMode: string) => Observable<AuthenticationResult>;
+  getDisplayMode: (displayMode: string) => void;
 }
 
 interface State {
@@ -39,7 +40,9 @@ export class Authenticator extends Component<Props, State> {
       return this.props.children;
     }
     return (
-      <LoginScreen onLogin={this.props.tryLogin} />
+      <LoginScreen
+        onLogin={this.props.tryLogin}
+        getDisplayMode={this.props.getDisplayMode}/>
     );
   }
 
