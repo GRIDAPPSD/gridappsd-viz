@@ -616,7 +616,9 @@ export class TopologyRenderer extends Component<Props, State> {
       .y(node => node.screenY1);
     edgeMap.forEach(edge => {
       const path = create('svg:path').node();
-      path.setAttribute('class', `topology-renderer__canvas__edge _${edge.name}_`);
+      if (!edge.name.startsWith('tpx')) {
+        path.setAttribute('class', `topology-renderer__canvas__edge _${edge.name}_`);
+      }
       path.setAttribute('d', edgeGenerator([edge.from, edge.to]));
       documentFragment.appendChild(path);
     });
