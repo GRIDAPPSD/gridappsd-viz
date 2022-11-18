@@ -7,6 +7,7 @@ interface RequestBody {
   services: boolean;
   appInstances: boolean;
   serviceInstances: boolean;
+  field: boolean;
 }
 
 export class GetAvailableApplicationsAndServicesRequest implements MessageRequest {
@@ -17,7 +18,8 @@ export class GetAvailableApplicationsAndServicesRequest implements MessageReques
     applications: true,
     services: true,
     appInstances: false,
-    serviceInstances: false
+    serviceInstances: false,
+    field: true
   };
 
 }
