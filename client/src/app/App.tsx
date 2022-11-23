@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Outlet, Route, Routes, useNavigate } from 'react-router-dom';
 
 import { Application } from '@client:common/Application';
@@ -37,7 +37,7 @@ import './App.light.scss';
 import './App.dark.scss';
 
 interface Props {
-  selectedDisplayMode: string;
+  fieldModelMrid: string;
   feederModel: FeederModel;
   availableApplications: Application[];
   componentMRIDs: Map<string, string | string[]>;
@@ -46,8 +46,8 @@ interface Props {
   onLogout: () => void;
   onMRIDChanged: (mRID: string) => void;
   onSimulationConfigFormSubmitted: (simulationConfig: SimulationConfiguration) => void;
+  // onFieldModelSimulationConfigFormSubmitted: (displayFieldModelSimulationConfig: FieldModelSimulationConfiguration) => void;
   onJoinActiveSimulation: (simulationId: string) => void;
-  getDisplayMode: (displayMode: string) => void;
 }
 
 export function App(props: Props) {
@@ -56,6 +56,13 @@ export function App(props: Props) {
   const dateTimeService = DateTimeService.getInstance();
   const navigate = useNavigate();
   const [simulationRequest, setSimulationRequest] = useState(null);
+
+  useEffect(() => {
+    if (props.fieldModelMrid && props.fieldModelMrid !== '') {
+      // props.onFieldModelSimulationConfigFormSubmitted(DEFAULT_FIELD_MODEL_SIMULATION_CONFIGURATION);
+      navigate('/field-model');
+    }
+  }, [navigate, props, props.fieldModelMrid]);
 
   const onShowSimulationConfigForm = (config: SimulationConfiguration, isUploaded: boolean) => {
     const portalRenderer = new PortalRenderer();
@@ -74,6 +81,25 @@ export function App(props: Props) {
         initialConfig={config || DEFAULT_SIMULATION_CONFIGURATION} />
     );
   };
+  // const onShowFieldModelSimulationConfigForm = (config: FieldModelSimulationConfiguration) => {
+  //   const portalRenderer = new PortalRenderer();
+  //   portalRenderer.mount(
+  //     <FieldModelSimulationConfigurationEditor
+  //       fieldModelMrid={props.fieldModelMrid}
+  //       feederModel={props.feederModel}
+  //       onSubmit={updatedConfig => {
+  //         setSimulationRequest(updatedConfig);
+  //         props.onFieldModelSimulationConfigFormSubmitted(updatedConfig);
+  //         setTimeout(() => navigate('/field-model'), 500);
+  //       }}
+  //       onClose={portalRenderer.unmount}
+  //       initialConfig={config || DEFAULT_FIELD_MODEL_SIMULATION_CONFIGURATION}
+  //       onMRIDChanged={props.onMRIDChanged}
+  //       directToTopoChart={() => setTimeout(() => navigate('/simulation'), 1000)}
+  //     />
+  //   );
+  // };
+
 
   const onJoinActiveSimulation = (simulationId: string) => {
     navigate('/simulation');
@@ -102,7 +128,7 @@ export function App(props: Props) {
     const convertStartTimeToGMT = dateTimeService.convertToGMT(simulationRequest.simulation_config.start_time).toString();
     // When other users in different time zones, recevied this file, they only need to convert the GMT to their time zone time
     // eslint-disable-next-line camelcase
-    const simulationConfigRequestToDownload = {...simulationRequest, simulation_config:{...simulationRequest.simulation_config, start_time: convertStartTimeToGMT}};
+    const simulationConfigRequestToDownload = { ...simulationRequest, simulation_config: { ...simulationRequest.simulation_config, start_time: convertStartTimeToGMT } };
     download('simulationRequestConfig', JSON.stringify(simulationConfigRequestToDownload), DownloadType.JSON);
   };
 
@@ -111,10 +137,11 @@ export function App(props: Props) {
       <Route
         path='/'
         element={
-          <AuthenticatorContainer getDisplayMode={props.getDisplayMode}>
+          <AuthenticatorContainer>
             <NavigationContainer
-              selectedDisplayMode = {props.selectedDisplayMode}
+              fieldModelMrid={props.fieldModelMrid}
               onShowSimulationConfigForm={onShowSimulationConfigForm}
+              // onShowFieldModelSimulationConfigForm={onShowFieldModelSimulationConfigForm}
               onLogout={props.onLogout}
               onJoinActiveSimulation={onJoinActiveSimulation}
               onShowExpectedResultViewer={onShowExpectedResultViewer}>
@@ -138,7 +165,7 @@ export function App(props: Props) {
           element={
             <div className='topology-renderer-simulation-status-logger-measurement-graphs'>
               <div>
-                <SimulationControlContainer exportSimulationConfiguration={downloadSimulationConfiguration}/>
+                <SimulationControlContainer exportSimulationConfiguration={downloadSimulationConfiguration} />
                 <TabGroup ref={tabGroupRef}>
                   <Tab label='Simulation'>
                     <TopologyRendererContainer
@@ -165,9 +192,70 @@ export function App(props: Props) {
                 <MeasurementChartContainer />
               </div>
             </div>} />
+        {/* {// * Temporary route to redirect user to field-model UI, use Simulation code for demo purpose, wait for DNP3 service got released, then can subscribe to /topic/goss.gridappsd.field.input} */}
         <Route
-          path='display-mode'
-          element={<div><h1>This is the display mode page</h1></div>} />
+          path='field-model'
+          element={
+            <div className='topology-renderer-simulation-status-logger-measurement-graphs'>
+              <div>
+                <SimulationControlContainer exportSimulationConfiguration={downloadSimulationConfiguration} />
+                <TabGroup ref={tabGroupRef}>
+                  <Tab label='Simulation'>
+                    <TopologyRendererContainer
+                      mRIDs={props.componentMRIDs}
+                      phases={props.componentPhases} />
+                    <SimulationStatusLogContainer />
+                    <MeasurementValueTableContainer />
+                    <VoltageViolationContainer />
+                  </Tab>
+                  <Tab label='Events'>
+                    <EventSummary />
+                  </Tab>
+                  <Tab label='Applications'>
+                    <AvailableApplicationList />
+                  </Tab>
+                  <Tab label='Alarms'>
+                    <AlarmsContainer
+                      onNewAlarmsConfirmed={() => tabGroupRef.current.setSelectedTabIndex(3)}
+                      onLocateNodeForAlarm={onLocateNodeForAlarm} />
+                  </Tab>
+                </TabGroup>
+              </div>
+              <div className='measurement-charts'>
+                <MeasurementChartContainer />
+              </div>
+            </div>} />
+        {/* {// * This is route for rendering the UI for field model topology and plots interface.} */}
+        {/* <Route
+          path='field-model'
+          element={
+            <div className='field-model-topology-renderer-status-logger-measurement-graphs'>
+              <div>
+                <FieldModelSimulationControlContainer />
+                <TabGroup ref={tabGroupRef}>
+                  <Tab label='Display Field Model'>
+                    <TopologyRendererContainer
+                      mRIDs={props.componentMRIDs}
+                      phases={props.componentPhases} />
+                    <SimulationStatusLogContainer />
+                    <MeasurementValueTableContainer />
+                    <VoltageViolationContainer />
+                  </Tab>
+                  <Tab label='Events'>
+                    <EventSummary />
+                  </Tab>
+                  <Tab label='Applications'>
+                    <AvailableApplicationList />
+                  </Tab>
+                  <Tab label='Alarms'>
+                    <AlarmsContainer
+                      onNewAlarmsConfirmed={() => tabGroupRef.current.setSelectedTabIndex(3)}
+                      onLocateNodeForAlarm={onLocateNodeForAlarm} />
+                  </Tab>
+                </TabGroup>
+              </div>
+            </div>
+          } /> */}
         <Route
           path='applications-and-services'
           element={<AvailableApplicationsAndServicesContainer />} />

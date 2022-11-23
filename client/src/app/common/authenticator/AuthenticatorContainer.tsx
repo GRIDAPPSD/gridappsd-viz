@@ -7,9 +7,7 @@ import { AuthenticatorService } from './services/AuthenticatorService';
 import { AuthenticationStatusCode } from './models/AuthenticationStatusCode';
 import { AuthenticationResult } from './models/AuthenticationResult';
 
-interface Props {
-  getDisplayMode: (displayMode: string) => void;
-}
+interface Props { }
 
 interface State {
   authenticationResult: AuthenticationResult;
@@ -57,7 +55,7 @@ export class AuthenticatorContainer extends Component<Props, State> {
       <Authenticator
         authenticationResult={this.state.authenticationResult}
         tryLogin={this.tryLogin}
-        getDisplayMode={this.props.getDisplayMode}>
+      >
         {this.props.children}
       </Authenticator>
     );

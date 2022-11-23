@@ -5,7 +5,12 @@ import { takeUntil, map } from 'rxjs/operators';
 import { StateStore } from '@client:common/state-store';
 import { ExpectedResultComparisonType } from '@client:common/ExpectedResultComparisonType';
 import { StompClientConnectionStatus, StompClientService } from '@client:common/StompClientService';
-import { Simulation, SimulationQueue, SimulationConfiguration } from '@client:common/simulation';
+import {
+  Simulation,
+  SimulationQueue,
+  SimulationConfiguration
+  // FieldModelSimulationConfiguration
+} from '@client:common/simulation';
 import { ConfigurationManager } from '@client:common/ConfigurationManager';
 import { FilePickerService } from '@client:common/file-picker';
 import { Notification } from '@client:common/overlay/notification';
@@ -13,8 +18,9 @@ import { Notification } from '@client:common/overlay/notification';
 import { Navigation } from './Navigation';
 
 interface Props {
-  selectedDisplayMode: string;
+  fieldModelMrid: string;
   onShowSimulationConfigForm: (config: SimulationConfiguration, isUploaded: boolean) => void;
+  // onShowFieldModelSimulationConfigForm: (config: FieldModelSimulationConfiguration) => void;
   onLogout: () => void;
   onJoinActiveSimulation: (simulationId: string) => void;
   onShowExpectedResultViewer: () => void;
@@ -101,12 +107,13 @@ export class NavigationContainer extends Component<Props, State> {
   render() {
     return (
       <Navigation
-        selectedDisplayMode={this.props.selectedDisplayMode}
+        fieldModelMrid={this.props.fieldModelMrid}
         version={this.state.version}
         stompClientConnectionStatus={this.state.stompClientConnectionStatus}
         previousSimulations={this.state.previousSimulations}
         activeSimulationIds={this.state.activeSimulationIds}
         onShowSimulationConfigForm={this.props.onShowSimulationConfigForm}
+        // onShowFieldModelSimulationConfigForm={this.props.onShowFieldModelSimulationConfigForm}
         onShowUploadSimulationConfigFile={this.onShowUploadSimulationConfigFile}
         onLogout={this.props.onLogout}
         onJoinActiveSimulation={this.props.onJoinActiveSimulation}

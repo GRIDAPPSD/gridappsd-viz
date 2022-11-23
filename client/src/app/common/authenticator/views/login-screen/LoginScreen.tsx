@@ -1,34 +1,30 @@
 import { Component } from 'react';
 import { Observable, Subscription } from 'rxjs';
 
-import { Input, Form, FormGroupModel, FormControlModel, Select, SelectionOptionBuilder } from '@client:common/form';
+import { Input, Form, FormGroupModel, FormControlModel } from '@client:common/form';
 import { BasicButton, IconButton } from '@client:common/buttons';
 import { Validators } from '@client:common/form/validation';
 import { Tooltip } from '@client:common/tooltip';
 import { ProgressIndicator } from '@client:common/overlay/progress-indicator';
-import { DisplayMode } from '@client:common/authenticator/models/DisplayMode';
 
 import './LoginScreen.light.scss';
 import './LoginScreen.dark.scss';
 
 interface Props {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  onLogin: (username: string, password: string, displayMode: string) => Observable<any>;
-  getDisplayMode: (displayMode: string) => void;
+  onLogin: (username: string, password: string) => Observable<any>;
 }
 
 interface State {
   passwordVisible: boolean;
   showSpinner: boolean;
-  displayModeOptionBuilder: SelectionOptionBuilder<DisplayMode>;
 }
 
 export class LoginScreen extends Component<Props, State> {
 
   readonly formGroupModel = new FormGroupModel({
     username: new FormControlModel('system', [Validators.checkNotEmpty('Username')]),
-    password: new FormControlModel('manager', [Validators.checkNotEmpty('Password')]),
-    displayMode: new FormControlModel<DisplayMode>(null)
+    password: new FormControlModel('manager', [Validators.checkNotEmpty('Password')])
   });
 
   private _subscription: Subscription;
@@ -38,8 +34,7 @@ export class LoginScreen extends Component<Props, State> {
 
     this.state = {
       passwordVisible: false,
-      showSpinner: false,
-      displayModeOptionBuilder: new SelectionOptionBuilder([DisplayMode.FIELD, DisplayMode.SIMULATION])
+      showSpinner: false
     };
 
     this.login = this.login.bind(this);
@@ -83,12 +78,6 @@ export class LoginScreen extends Component<Props, State> {
                 onClick={this.togglePasswordVisibility} />
             </Tooltip>
           </div>
-          <div className='login-screen-form__mode-container'>
-            <Select
-              label='Mode'
-              formControlModel={this.formGroupModel.findControl('displayMode')}
-              selectionOptionBuilder={this.state.displayModeOptionBuilder} />
-          </div>
           <BasicButton
             className='login-screen-form__login-button'
             type='positive'
@@ -112,8 +101,7 @@ export class LoginScreen extends Component<Props, State> {
       showSpinner: true
     });
     const credentials = this.formGroupModel.getValue();
-    this.props.getDisplayMode(credentials.displayMode);
-    this._subscription = this.props.onLogin(credentials.username, credentials.password, credentials.displayMode)
+    this._subscription = this.props.onLogin(credentials.username, credentials.password)
       .subscribe({
         complete: () => {
           this.setState({

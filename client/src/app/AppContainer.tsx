@@ -15,8 +15,10 @@ import {
 import {
   SimulationConfiguration,
   Simulation,
+  // FieldModelSimulation,
   SimulationQueue,
   SimulationManagementService
+  // FieldModelSimulationConfiguration
 } from '@client:common/simulation';
 import { ConductingEquipmentType } from '@client:common/topology/model-dictionary';
 import { AuthenticatorService } from '@client:common/authenticator';
@@ -37,10 +39,10 @@ interface Props {
 }
 
 interface State {
-  selectedDisplayMode: string;
   feederModel: FeederModel;
   availableApplications: Application[];
   stompClientConnectionStatus: StompClientConnectionStatus;
+  fieldModelMrid: string;
 }
 
 export class AppContainer extends Component<Props, State> {
@@ -59,17 +61,17 @@ export class AppContainer extends Component<Props, State> {
     super(props);
 
     this.state = {
-      selectedDisplayMode: '',
       feederModel: null,
       availableApplications: null,
-      stompClientConnectionStatus: StompClientConnectionStatus.UNINITIALIZED
+      stompClientConnectionStatus: StompClientConnectionStatus.UNINITIALIZED,
+      fieldModelMrid: ''
     };
 
     this._stateStore.initialize(DEFAULT_APPLICATION_STATE);
 
-    this.getDisplayMode = this.getDisplayMode.bind(this);
     this.retrieveModelDictionary = this.retrieveModelDictionary.bind(this);
     this.onSimulationConfigFormSubmitted = this.onSimulationConfigFormSubmitted.bind(this);
+    // this.onFieldModelSimulationConfigFormSubmitted = this.onFieldModelSimulationConfigFormSubmitted.bind(this);
   }
 
   componentDidMount() {
@@ -120,9 +122,16 @@ export class AppContainer extends Component<Props, State> {
             applications: payload.applications,
             services: payload.services
           });
-          this.setState({
-            availableApplications: payload.applications
-          });
+          if (payload.fieldModelMrid && payload.fieldModelMrid !== undefined && payload.fieldModelMrid !== '') {
+            this.setState({
+              fieldModelMrid: payload.fieldModelMrid,
+              availableApplications: payload.applications
+            });
+          } else {
+            this.setState({
+              availableApplications: payload.applications
+            });
+          }
         }
       });
   }
@@ -184,8 +193,7 @@ export class AppContainer extends Component<Props, State> {
   render() {
     return (
       <App
-        getDisplayMode={this.getDisplayMode}
-        selectedDisplayMode={this.state.selectedDisplayMode}
+        fieldModelMrid={this.state.fieldModelMrid}
         stompClientConnectionStatus={this.state.stompClientConnectionStatus}
         feederModel={this.state.feederModel}
         availableApplications={this.state.availableApplications}
@@ -194,12 +202,9 @@ export class AppContainer extends Component<Props, State> {
         onLogout={this.authenticatorService.logout}
         onMRIDChanged={this.retrieveModelDictionary}
         onSimulationConfigFormSubmitted={this.onSimulationConfigFormSubmitted}
+        // onFieldModelSimulationConfigFormSubmitted={this.onFieldModelSimulationConfigFormSubmitted}
         onJoinActiveSimulation={this.simulationManagementService.requestToJoinActiveSimulation} />
     );
-  }
-
-  getDisplayMode(selectedMode: string) {
-    this.setState({selectedDisplayMode: selectedMode});
   }
 
   retrieveModelDictionary(mRID: string) {
@@ -321,5 +326,12 @@ export class AppContainer extends Component<Props, State> {
       simulationId: ''
     });
   }
+
+  // onFieldModelSimulationConfigFormSubmitted(config: FieldModelSimulationConfiguration) {
+  //   this._simulationQueue.pushFieldModelSimulation(new FieldModelSimulation(config));
+  //   this._stateStore.update({
+  //     simulationId: ''
+  //   });
+  // }
 
 }

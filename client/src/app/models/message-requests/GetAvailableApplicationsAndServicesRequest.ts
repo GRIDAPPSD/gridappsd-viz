@@ -10,7 +10,8 @@ interface RequestBody {
   field: boolean;
 }
 
-export class GetAvailableApplicationsAndServicesRequest implements MessageRequest {
+export class GetAvailableApplicationsAndServicesRequest
+  implements MessageRequest {
 
   readonly url = 'goss.gridappsd.process.request.status.platform';
   readonly replyTo = 'available-applications-and-services';
@@ -20,6 +21,7 @@ export class GetAvailableApplicationsAndServicesRequest implements MessageReques
     appInstances: false,
     serviceInstances: false,
     field: true
+    // field: false
   };
 
 }
@@ -27,4 +29,5 @@ export class GetAvailableApplicationsAndServicesRequest implements MessageReques
 export interface GetAvailableApplicationsRequestPayload {
   applications: Application[];
   services: Service[];
+  fieldModelMrid?: string;
 }

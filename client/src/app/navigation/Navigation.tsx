@@ -7,7 +7,6 @@ import { StompClientConnectionStatus } from '@client:common/StompClientService';
 import { SimulationConfiguration, Simulation } from '@client:common/simulation';
 import { Restricted } from '@client:common/authenticator';
 import { FilePicker } from '@client:common/file-picker';
-import { DisplayMode } from '@client:common/authenticator/models/DisplayMode';
 
 import { Drawer } from './views/drawer/Drawer';
 import { ToolBar } from './views/tool-bar/ToolBar';
@@ -20,12 +19,13 @@ import './Navigation.light.scss';
 import './Navigation.dark.scss';
 
 interface Props {
-  selectedDisplayMode: string;
+  fieldModelMrid: string;
   previousSimulations: Simulation[];
   stompClientConnectionStatus: StompClientConnectionStatus;
   version: string;
   activeSimulationIds: string[];
   onShowSimulationConfigForm: (config: SimulationConfiguration, isUploaded: boolean) => void;
+  // onShowFieldModelSimulationConfigForm: (config: FieldModelSimulationConfiguration) => void;
   onShowUploadSimulationConfigFile: () => void;
   onLogout: () => void;
   onJoinActiveSimulation: (simulationId: string) => void;
@@ -104,18 +104,20 @@ export class Navigation extends Component<Props, unknown> {
   renderFieldModeMenuItems = () => {
     return (
       <>
-        <DrawerItem>
-          <Link to='/display-mode'>
-            <DrawerItemIcon icon='analytics' />
-            <DrawerItemLabel value='Display Mode' />
-          </Link>
+        <DrawerItem
+        // onClick={() => this.props.onShowFieldModelSimulationConfigForm(null)}
+        >
+          {/* <Link to='/display-mode'> */}
+          <DrawerItemIcon icon='analytics' />
+          <DrawerItemLabel value='Display Mode' />
+          {/* </Link> */}
         </DrawerItem>
       </>
     );
   };
 
   render() {
-    const { selectedDisplayMode } = this.props;
+    const { fieldModelMrid } = this.props;
     return (
       <>
         <ToolBar>
@@ -153,8 +155,8 @@ export class Navigation extends Component<Props, unknown> {
               }
             </DrawerItemGroup>
           }
-          {selectedDisplayMode === DisplayMode.SIMULATION && this.renderSimulationModeMenuItems()}
-          {selectedDisplayMode === DisplayMode.FIELD && this.renderFieldModeMenuItems()}
+          {!fieldModelMrid && this.renderSimulationModeMenuItems()}
+          {fieldModelMrid && this.renderFieldModeMenuItems()}
           <DrawerItem>
             <Link to='/applications-and-services'>
               <DrawerItemIcon icon='storage' />
