@@ -15,11 +15,10 @@ import {
 import {
   SimulationConfiguration,
   Simulation,
-  // FieldModelSimulation,
   SimulationQueue,
   SimulationManagementService
-  // FieldModelSimulationConfiguration
 } from '@client:common/simulation';
+import { FieldModelConfiguration, FieldModel } from '@client:common/field-model-datastream';
 import { ConductingEquipmentType } from '@client:common/topology/model-dictionary';
 import { AuthenticatorService } from '@client:common/authenticator';
 import { Notification } from '@client:common/overlay/notification';
@@ -71,7 +70,7 @@ export class AppContainer extends Component<Props, State> {
 
     this.retrieveModelDictionary = this.retrieveModelDictionary.bind(this);
     this.onSimulationConfigFormSubmitted = this.onSimulationConfigFormSubmitted.bind(this);
-    // this.onFieldModelSimulationConfigFormSubmitted = this.onFieldModelSimulationConfigFormSubmitted.bind(this);
+    this.onFieldModelSimulationConfigFormAutoSubmitted = this.onFieldModelSimulationConfigFormAutoSubmitted.bind(this);
   }
 
   componentDidMount() {
@@ -202,7 +201,7 @@ export class AppContainer extends Component<Props, State> {
         onLogout={this.authenticatorService.logout}
         onMRIDChanged={this.retrieveModelDictionary}
         onSimulationConfigFormSubmitted={this.onSimulationConfigFormSubmitted}
-        // onFieldModelSimulationConfigFormSubmitted={this.onFieldModelSimulationConfigFormSubmitted}
+        onFieldModelSimulationConfigFormAutoSubmitted={this.onFieldModelSimulationConfigFormAutoSubmitted}
         onJoinActiveSimulation={this.simulationManagementService.requestToJoinActiveSimulation} />
     );
   }
@@ -327,11 +326,11 @@ export class AppContainer extends Component<Props, State> {
     });
   }
 
-  // onFieldModelSimulationConfigFormSubmitted(config: FieldModelSimulationConfiguration) {
-  //   this._simulationQueue.pushFieldModelSimulation(new FieldModelSimulation(config));
-  //   this._stateStore.update({
-  //     simulationId: ''
-  //   });
-  // }
+  onFieldModelSimulationConfigFormAutoSubmitted(config: FieldModelConfiguration) {
+    this._simulationQueue.push(new FieldModel(config));
+    this._stateStore.update({
+      simulationId: ''
+    });
+  }
 
 }

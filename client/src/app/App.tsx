@@ -9,6 +9,7 @@ import { waitUntil, download, DownloadType } from '@client:common/misc';
 import { Dialog } from '@client:common/overlay/dialog';
 import { StompClientConnectionStatus } from '@client:common/StompClientService';
 import { SimulationConfiguration, DEFAULT_SIMULATION_CONFIGURATION } from '@client:common/simulation';
+import { FieldModelConfiguration, DEFAULT_FIELD_MODEL_CONFIGURATION } from '@client:common/field-model-datastream';
 import { FeederModel } from '@client:common/topology';
 import { ThreeDots } from '@client:common/three-dots';
 import { AuthenticatorContainer } from '@client:common/authenticator';
@@ -46,7 +47,7 @@ interface Props {
   onLogout: () => void;
   onMRIDChanged: (mRID: string) => void;
   onSimulationConfigFormSubmitted: (simulationConfig: SimulationConfiguration) => void;
-  // onFieldModelSimulationConfigFormSubmitted: (displayFieldModelSimulationConfig: FieldModelSimulationConfiguration) => void;
+  onFieldModelSimulationConfigFormAutoSubmitted: (displayFieldModelSimulationConfig: FieldModelConfiguration) => void;
   onJoinActiveSimulation: (simulationId: string) => void;
 }
 
@@ -59,8 +60,9 @@ export function App(props: Props) {
 
   useEffect(() => {
     if (props.fieldModelMrid && props.fieldModelMrid !== '') {
-      // props.onFieldModelSimulationConfigFormSubmitted(DEFAULT_FIELD_MODEL_SIMULATION_CONFIGURATION);
-      navigate('/field-model');
+      props.onMRIDChanged(props.fieldModelMrid);
+      props.onFieldModelSimulationConfigFormAutoSubmitted(DEFAULT_FIELD_MODEL_CONFIGURATION);
+      setTimeout(() => navigate('/field-model'), 500);
     }
   }, [navigate, props, props.fieldModelMrid]);
 
@@ -81,25 +83,6 @@ export function App(props: Props) {
         initialConfig={config || DEFAULT_SIMULATION_CONFIGURATION} />
     );
   };
-  // const onShowFieldModelSimulationConfigForm = (config: FieldModelSimulationConfiguration) => {
-  //   const portalRenderer = new PortalRenderer();
-  //   portalRenderer.mount(
-  //     <FieldModelSimulationConfigurationEditor
-  //       fieldModelMrid={props.fieldModelMrid}
-  //       feederModel={props.feederModel}
-  //       onSubmit={updatedConfig => {
-  //         setSimulationRequest(updatedConfig);
-  //         props.onFieldModelSimulationConfigFormSubmitted(updatedConfig);
-  //         setTimeout(() => navigate('/field-model'), 500);
-  //       }}
-  //       onClose={portalRenderer.unmount}
-  //       initialConfig={config || DEFAULT_FIELD_MODEL_SIMULATION_CONFIGURATION}
-  //       onMRIDChanged={props.onMRIDChanged}
-  //       directToTopoChart={() => setTimeout(() => navigate('/simulation'), 1000)}
-  //     />
-  //   );
-  // };
-
 
   const onJoinActiveSimulation = (simulationId: string) => {
     navigate('/simulation');
@@ -200,7 +183,7 @@ export function App(props: Props) {
               <div>
                 <SimulationControlContainer exportSimulationConfiguration={downloadSimulationConfiguration} />
                 <TabGroup ref={tabGroupRef}>
-                  <Tab label='Simulation'>
+                  <Tab label='Display Model Datastream'>
                     <TopologyRendererContainer
                       mRIDs={props.componentMRIDs}
                       phases={props.componentPhases} />
@@ -225,37 +208,6 @@ export function App(props: Props) {
                 <MeasurementChartContainer />
               </div>
             </div>} />
-        {/* {// * This is route for rendering the UI for field model topology and plots interface.} */}
-        {/* <Route
-          path='field-model'
-          element={
-            <div className='field-model-topology-renderer-status-logger-measurement-graphs'>
-              <div>
-                <FieldModelSimulationControlContainer />
-                <TabGroup ref={tabGroupRef}>
-                  <Tab label='Display Field Model'>
-                    <TopologyRendererContainer
-                      mRIDs={props.componentMRIDs}
-                      phases={props.componentPhases} />
-                    <SimulationStatusLogContainer />
-                    <MeasurementValueTableContainer />
-                    <VoltageViolationContainer />
-                  </Tab>
-                  <Tab label='Events'>
-                    <EventSummary />
-                  </Tab>
-                  <Tab label='Applications'>
-                    <AvailableApplicationList />
-                  </Tab>
-                  <Tab label='Alarms'>
-                    <AlarmsContainer
-                      onNewAlarmsConfirmed={() => tabGroupRef.current.setSelectedTabIndex(3)}
-                      onLocateNodeForAlarm={onLocateNodeForAlarm} />
-                  </Tab>
-                </TabGroup>
-              </div>
-            </div>
-          } /> */}
         <Route
           path='applications-and-services'
           element={<AvailableApplicationsAndServicesContainer />} />
