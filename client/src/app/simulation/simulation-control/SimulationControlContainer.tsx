@@ -12,6 +12,7 @@ import { SimulationControl } from './SimulationControl';
 
 interface Props {
   exportSimulationConfiguration: () => void;
+  fieldModelMrid: string;
 }
 
 interface State {
@@ -104,6 +105,7 @@ export class SimulationControlContainer extends Component<Props, State> {
   render() {
     return (
       <SimulationControl
+        fieldModelMrid={this.props.fieldModelMrid}
         simulationId={this.state.activeSimulationId}
         simulationStatus={this.state.simulationStatus}
         existingPlotModels={this.state.existingPlotModels}

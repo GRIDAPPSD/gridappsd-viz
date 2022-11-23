@@ -124,7 +124,6 @@ export function App(props: Props) {
             <NavigationContainer
               fieldModelMrid={props.fieldModelMrid}
               onShowSimulationConfigForm={onShowSimulationConfigForm}
-              // onShowFieldModelSimulationConfigForm={onShowFieldModelSimulationConfigForm}
               onLogout={props.onLogout}
               onJoinActiveSimulation={onJoinActiveSimulation}
               onShowExpectedResultViewer={onShowExpectedResultViewer}>
@@ -148,7 +147,10 @@ export function App(props: Props) {
           element={
             <div className='topology-renderer-simulation-status-logger-measurement-graphs'>
               <div>
-                <SimulationControlContainer exportSimulationConfiguration={downloadSimulationConfiguration} />
+                <SimulationControlContainer
+                  exportSimulationConfiguration={downloadSimulationConfiguration}
+                  fieldModelMrid={props.fieldModelMrid}
+                />
                 <TabGroup ref={tabGroupRef}>
                   <Tab label='Simulation'>
                     <TopologyRendererContainer
@@ -181,9 +183,12 @@ export function App(props: Props) {
           element={
             <div className='topology-renderer-simulation-status-logger-measurement-graphs'>
               <div>
-                <SimulationControlContainer exportSimulationConfiguration={downloadSimulationConfiguration} />
+                <SimulationControlContainer
+                  exportSimulationConfiguration={downloadSimulationConfiguration}
+                  fieldModelMrid={props.fieldModelMrid}
+                />
                 <TabGroup ref={tabGroupRef}>
-                  <Tab label='Display Model Datastream'>
+                  <Tab label='Display Field Model'>
                     <TopologyRendererContainer
                       mRIDs={props.componentMRIDs}
                       phases={props.componentPhases} />
