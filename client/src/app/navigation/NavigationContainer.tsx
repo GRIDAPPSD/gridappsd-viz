@@ -9,7 +9,6 @@ import {
   Simulation,
   SimulationQueue,
   SimulationConfiguration
-  // FieldModelSimulationConfiguration
 } from '@client:common/simulation';
 import { ConfigurationManager } from '@client:common/ConfigurationManager';
 import { FilePickerService } from '@client:common/file-picker';
@@ -20,7 +19,7 @@ import { Navigation } from './Navigation';
 interface Props {
   fieldModelMrid: string;
   onShowSimulationConfigForm: (config: SimulationConfiguration, isUploaded: boolean) => void;
-  // onShowFieldModelSimulationConfigForm: (config: FieldModelSimulationConfiguration) => void;
+  redirectAndStartFieldModel: () => void;
   onLogout: () => void;
   onJoinActiveSimulation: (simulationId: string) => void;
   onShowExpectedResultViewer: () => void;
@@ -113,7 +112,7 @@ export class NavigationContainer extends Component<Props, State> {
         previousSimulations={this.state.previousSimulations}
         activeSimulationIds={this.state.activeSimulationIds}
         onShowSimulationConfigForm={this.props.onShowSimulationConfigForm}
-        // onShowFieldModelSimulationConfigForm={this.props.onShowFieldModelSimulationConfigForm}
+        redirectAndStartFieldModel={this.props.redirectAndStartFieldModel}
         onShowUploadSimulationConfigFile={this.onShowUploadSimulationConfigFile}
         onLogout={this.props.onLogout}
         onJoinActiveSimulation={this.props.onJoinActiveSimulation}

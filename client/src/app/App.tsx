@@ -58,13 +58,29 @@ export function App(props: Props) {
   const navigate = useNavigate();
   const [simulationRequest, setSimulationRequest] = useState(null);
 
+  function usePrevious<T>(value: T): T {
+    const ref: any = useRef<T>();
+    useEffect(() => {
+      ref.current = value;
+    }, [value]);
+    return ref.current;
+  }
+
+  const prevFieldMrid = usePrevious(props.fieldModelMrid);
+
   useEffect(() => {
-    if (props.fieldModelMrid && props.fieldModelMrid !== '') {
+    if (props.fieldModelMrid && props.fieldModelMrid !== '' && props.fieldModelMrid !== prevFieldMrid) {
       props.onMRIDChanged(props.fieldModelMrid);
       props.onFieldModelSimulationConfigFormAutoSubmitted(DEFAULT_FIELD_MODEL_CONFIGURATION);
       setTimeout(() => navigate('/field-model'), 500);
     }
-  }, [navigate, props, props.fieldModelMrid]);
+  }, [navigate, props, props.fieldModelMrid, prevFieldMrid]);
+
+  const redirectAndStartFieldModel = () => {
+    props.onMRIDChanged(props.fieldModelMrid);
+    props.onFieldModelSimulationConfigFormAutoSubmitted(DEFAULT_FIELD_MODEL_CONFIGURATION);
+    setTimeout(() => navigate('/field-model'), 500);
+  };
 
   const onShowSimulationConfigForm = (config: SimulationConfiguration, isUploaded: boolean) => {
     const portalRenderer = new PortalRenderer();
@@ -124,6 +140,7 @@ export function App(props: Props) {
             <NavigationContainer
               fieldModelMrid={props.fieldModelMrid}
               onShowSimulationConfigForm={onShowSimulationConfigForm}
+              redirectAndStartFieldModel={redirectAndStartFieldModel}
               onLogout={props.onLogout}
               onJoinActiveSimulation={onJoinActiveSimulation}
               onShowExpectedResultViewer={onShowExpectedResultViewer}>

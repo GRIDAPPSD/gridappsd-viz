@@ -25,7 +25,7 @@ interface Props {
   version: string;
   activeSimulationIds: string[];
   onShowSimulationConfigForm: (config: SimulationConfiguration, isUploaded: boolean) => void;
-  // onShowFieldModelSimulationConfigForm: (config: FieldModelSimulationConfiguration) => void;
+  redirectAndStartFieldModel: () => void;
   onShowUploadSimulationConfigFile: () => void;
   onLogout: () => void;
   onJoinActiveSimulation: (simulationId: string) => void;
@@ -105,12 +105,10 @@ export class Navigation extends Component<Props, unknown> {
     return (
       <>
         <DrawerItem
-        // onClick={() => this.props.onShowFieldModelSimulationConfigForm(null)}
+          onClick={() => this.props.redirectAndStartFieldModel()}
         >
-          {/* <Link to='/display-mode'> */}
           <DrawerItemIcon icon='analytics' />
           <DrawerItemLabel value='Display Mode' />
-          {/* </Link> */}
         </DrawerItem>
       </>
     );
