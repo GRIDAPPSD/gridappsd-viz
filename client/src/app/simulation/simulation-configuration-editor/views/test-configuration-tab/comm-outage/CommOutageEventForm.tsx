@@ -70,10 +70,10 @@ export class CommOutageEventForm extends Component<Props, State> {
       labels.push({label: 'Capacitor', id: 'capacitors'});
     }
     if (this.props.modelDictionary.disconnectors.length > 0) {
-      labels.push({label: 'disconnectors', id: 'disconnectors'});
+      labels.push({label: 'Disconnector', id: 'disconnectors'});
     }
     if (this.props.modelDictionary.switches.length > 0) {
-      labels.push({label: 'switches', id: 'switches'});
+      labels.push({label: 'Switch', id: 'switches'});
     }
     if (this.props.modelDictionary.batteries.length > 0) {
       labels.push({label: 'Battery', id: 'batteries'});
@@ -94,7 +94,7 @@ export class CommOutageEventForm extends Component<Props, State> {
       labels.push({label: 'Sectionaliser', id: 'sectionalisers'});
     }
     if (this.props.modelDictionary.solarpanels.length > 0) {
-      labels.push({label: 'Solar Panel', id: 'solarpanels'});
+      labels.push({label: 'Solar PV', id: 'solarpanels'});
     }
     if (this.props.modelDictionary.synchronousmachines.length > 0) {
       labels.push({label: 'Synchronous Machine', id: 'synchronousmachines'});

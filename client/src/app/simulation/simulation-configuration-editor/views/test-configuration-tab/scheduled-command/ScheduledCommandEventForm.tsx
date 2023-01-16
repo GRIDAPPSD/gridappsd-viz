@@ -4,7 +4,6 @@ import { BasicButton } from '@client:common/buttons';
 import { Select, Input, SelectionOptionBuilder, FormGroupModel, FormControlModel } from '@client:common/form';
 import { ScheduledCommandEvent } from '@client:common/test-manager';
 import { Validators } from '@client:common/form/validation';
-import { Notification } from '@client:common/overlay/notification';
 import {
   ModelDictionary,
   ModelDictionaryCapacitor,
@@ -50,10 +49,10 @@ export class ScheduledCommandEventForm extends Component<Props, State> {
       labels.push({label: 'Capacitor', id: 'capacitors'});
     }
     if (this.props.modelDictionary.disconnectors.length > 0) {
-      labels.push({label: 'disconnectors', id: 'disconnectors'});
+      labels.push({label: 'Disconnector', id: 'disconnectors'});
     }
     if (this.props.modelDictionary.switches.length > 0) {
-      labels.push({label: 'switches', id: 'switches'});
+      labels.push({label: 'Switch', id: 'switches'});
     }
     if (this.props.modelDictionary.batteries.length > 0) {
       labels.push({label: 'Battery', id: 'batteries'});
@@ -74,7 +73,7 @@ export class ScheduledCommandEventForm extends Component<Props, State> {
       labels.push({label: 'Sectionaliser', id: 'sectionalisers'});
     }
     if (this.props.modelDictionary.solarpanels.length > 0) {
-      labels.push({label: 'Solar Panel', id: 'solarpanels'});
+      labels.push({label: 'Solar PV', id: 'solarpanels'});
     }
     if (this.props.modelDictionary.synchronousmachines.length > 0) {
       labels.push({label: 'Synchronous Machine', id: 'synchronousmachines'});
@@ -167,7 +166,52 @@ export class ScheduledCommandEventForm extends Component<Props, State> {
               componentName,
               mRID: selectedComponent.mRID
             });
-            if (this.state.selectedComponentType === 'Synchronous Machine') {
+            // Display attributes based on COMPONENT_ATTRIBUTES file
+            switch (this.state.selectedComponentType) {
+              case 'Synchronous Machine':
+                this.setState({
+                  attributeOptionBuilder: new SelectionOptionBuilder(
+                    COMPONENT_ATTRIBUTES['synchronousmachines']
+                  )
+                });
+                break;
+              case 'Capacitor':
+                this.setState({
+                  attributeOptionBuilder: new SelectionOptionBuilder(
+                    COMPONENT_ATTRIBUTES['capacitors']
+                  )
+                });
+                break;
+              case 'Switch':
+                this.setState({
+                  attributeOptionBuilder: new SelectionOptionBuilder(
+                    COMPONENT_ATTRIBUTES['switches']
+                  )
+                });
+                break;
+              case 'Solar PV':
+              case 'Battery':
+                this.setState({
+                  attributeOptionBuilder: new SelectionOptionBuilder(
+                    COMPONENT_ATTRIBUTES['der']
+                  )
+                });
+                break;
+              case 'Regulator':
+                this.setState({
+                  attributeOptionBuilder: new SelectionOptionBuilder(
+                    COMPONENT_ATTRIBUTES['regulators']
+                  )
+                });
+                break;
+              default:
+                this.setState({
+                  attributeOptionBuilder: SelectionOptionBuilder.defaultBuilder()
+                });
+            }
+
+            // Fetch attributes from platform
+            /* if (this.state.selectedComponentType === 'Synchronous Machine') {
               this.setState({
                 attributeOptionBuilder: new SelectionOptionBuilder(
                   COMPONENT_ATTRIBUTES['synchronousmachines']
@@ -196,7 +240,7 @@ export class ScheduledCommandEventForm extends Component<Props, State> {
                     Notification.open(reason);
                   }
                 });
-            }
+            }*/
           } else {
             this.eventFormGroupModel.setValue({
               componentName: '',

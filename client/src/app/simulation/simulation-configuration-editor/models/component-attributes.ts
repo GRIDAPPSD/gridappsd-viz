@@ -1,19 +1,9 @@
 export const COMPONENT_ATTRIBUTES = {
   capacitors: [
-    'RegulatingControl.mode',
-    'RegulatingControl.targetDeadband',
-    'RegulatingControl.targetValue',
-    'ShuntCompensator.aVRDelay',
     'ShuntCompensator.sections'
   ],
   regulators: [
-    'RegulatingControl.targetDeadband',
-    'RegulatingControl.targetValue',
-    'TapChanger.initialDelay',
-    'TapChanger.step',
-    'TapChanger.lineDropCompensation',
-    'TapChanger.lineDropR',
-    'TapChanger.lineDropX'
+    'TapChanger.step'
   ],
   inverters: [
     'PowerElectronicsConnection.p',
@@ -25,5 +15,9 @@ export const COMPONENT_ATTRIBUTES = {
   synchronousmachines: [
     'RotatingMachine.p',
     'RotatingMachine.q'
+  ],
+  der: [
+    'PowerElectronicsConnection.p',
+    'PowerElectronicsConnection.q'
   ]
 };
