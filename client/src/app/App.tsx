@@ -232,7 +232,19 @@ export function App(props: Props) {
             </div>} />
         <Route
           path='applications-and-services'
-          element={<AvailableApplicationsAndServicesContainer />} />
+          element={
+              <AvailableApplicationsAndServicesContainer
+                fieldModelMrid={props.fieldModelMrid}
+                availableApplications={props.availableApplications}
+                initialFieldModelConfig={DEFAULT_FIELD_MODEL_CONFIGURATION}
+                fieldModelConfigTabSubmit={updatedConfig => {
+                  setSimulationRequest(updatedConfig);
+                  props.onFieldModelSimulationConfigFormAutoSubmitted(updatedConfig);
+                  setTimeout(() => navigate('/field-model'), 500);
+                }}
+              />
+            }
+        />
         <Route
           path='stomp-client'
           element={<StompClientContainer />} />

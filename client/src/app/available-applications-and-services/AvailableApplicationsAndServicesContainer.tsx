@@ -1,13 +1,18 @@
 import { Component } from 'react';
 
 import { StompClientService } from '@client:common/StompClientService';
+import { Application } from '@client:common/Application';
+import { FieldModelConfiguration } from '@client:common/field-model-datastream';
 
 import { GetAvailableApplicationsAndServicesRequest } from './models/GetAvailableApplicationsAndServicesRequest';
 import { ResponseBody } from './models/ResponseBody';
 import { AvailableApplicationsAndServices } from './AvailableApplicationsAndServices';
 
 interface Props {
-
+  fieldModelMrid?: string;
+  availableApplications: Application[];
+  initialFieldModelConfig: FieldModelConfiguration;
+  fieldModelConfigTabSubmit: (config: FieldModelConfiguration) => void;
 }
 
 interface State {
@@ -59,7 +64,13 @@ export class AvailableApplicationsAndServicesContainer extends Component<Props, 
 
   render() {
     return (
-      <AvailableApplicationsAndServices responseBody={this.state.responseBody} />
+      <AvailableApplicationsAndServices
+        availableApplications={this.props.availableApplications}
+        responseBody={this.state.responseBody}
+        fieldModelMrid={this.props.fieldModelMrid}
+        initialFieldModelConfig={this.props.initialFieldModelConfig}
+        onSubmit={updatedConfig => this.props.fieldModelConfigTabSubmit(updatedConfig)}
+      />
     );
   }
 
