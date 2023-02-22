@@ -71,6 +71,8 @@ export function App(props: Props) {
   useEffect(() => {
     if (props.fieldModelMrid && props.fieldModelMrid !== '' && props.fieldModelMrid !== prevFieldMrid) {
       props.onMRIDChanged(props.fieldModelMrid);
+      // eslint-disable-next-line camelcase
+      DEFAULT_FIELD_MODEL_CONFIGURATION.power_system_config.Line_name = props.fieldModelMrid;
       props.onFieldModelSimulationConfigFormAutoSubmitted(DEFAULT_FIELD_MODEL_CONFIGURATION);
       setTimeout(() => navigate('/field-model'), 500);
     }
@@ -78,6 +80,8 @@ export function App(props: Props) {
 
   const redirectAndStartFieldModel = () => {
     props.onMRIDChanged(props.fieldModelMrid);
+    // eslint-disable-next-line camelcase
+    DEFAULT_FIELD_MODEL_CONFIGURATION.power_system_config.Line_name = props.fieldModelMrid;
     props.onFieldModelSimulationConfigFormAutoSubmitted(DEFAULT_FIELD_MODEL_CONFIGURATION);
     setTimeout(() => navigate('/field-model'), 500);
   };

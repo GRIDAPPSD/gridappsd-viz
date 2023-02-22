@@ -26,6 +26,7 @@ interface Props {
   modelDictionaryComponents: ModelDictionaryComponent[];
   fieldModelMrid: string;
   onStartSimulation: () => void;
+  onStartFieldModelSimulation: () => void;
   onExportSimulationConfiguration: () => void;
   onStopSimulation: () => void;
   onPauseSimulation: () => void;
@@ -185,7 +186,7 @@ export class SimulationControl extends Component<Props, State> {
                 icon='play_arrow'
                 disabled={this.props.modelDictionaryComponents.length === 0}
                 className='simulation-control__action start'
-                onClick={this.props.onStartSimulation} />
+                onClick={this.props.onStartFieldModelSimulation} />
             </Tooltip>
           </>
         );

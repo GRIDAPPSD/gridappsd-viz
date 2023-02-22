@@ -120,6 +120,7 @@ export class SimulationControlContainer extends Component<Props, State> {
         simulationStatus={this.state.simulationStatus}
         existingPlotModels={this.state.existingPlotModels}
         onStartSimulation={this.simulationManagementService.startSimulation}
+        onStartFieldModelSimulation={this.simulationManagementService.startFieldModelSimulation}
         onExportSimulationConfiguration={this.props.exportSimulationConfiguration}
         modelDictionaryComponents={this.state.modelDictionaryComponents}
         onStopSimulation={this.simulationManagementService.stopSimulation}

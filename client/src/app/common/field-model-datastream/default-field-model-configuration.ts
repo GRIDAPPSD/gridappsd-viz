@@ -5,7 +5,9 @@ export const DEFAULT_FIELD_MODEL_CONFIGURATION: FieldModelConfiguration = {
   power_system_config: {
     GeographicalRegion_name: '_73C512BD-7249-4F50-50DA-D93849B89C43', // IEEE
     SubGeographicalRegion_name: '_A1170111-942A-6ABD-D325-C64886DC4D7D', // Large
-    Line_name: '_49AD8E07-3BF9-A4E2-CB8F-C3722F837B62' // ieee13nodeckt
+    // Line_name: '_49AD8E07-3BF9-A4E2-CB8F-C3722F837B62' // ieee13nodeckt
+    // Line_name: '_C1C3E687-6FFD-C753-582B-632A27E28507' // 123
+    Line_name: ''
   },
   simulation_config: {
     start_time: '2022-11-23 00:00:00',
