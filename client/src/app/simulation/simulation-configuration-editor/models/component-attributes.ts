@@ -16,7 +16,11 @@ export const COMPONENT_ATTRIBUTES = {
     'RotatingMachine.p',
     'RotatingMachine.q'
   ],
-  der: [
+  batteries: [
+    'PowerElectronicsConnection.p',
+    'PowerElectronicsConnection.q'
+  ],
+  solarpanels: [
     'PowerElectronicsConnection.p',
     'PowerElectronicsConnection.q'
   ]

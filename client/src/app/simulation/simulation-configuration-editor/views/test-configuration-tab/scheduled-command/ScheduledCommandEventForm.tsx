@@ -128,16 +128,7 @@ export class ScheduledCommandEventForm extends Component<Props, State> {
       .subscribe({
         next: selectedType => {
           if (selectedType) {
-            /*
-              If the new selected type is Regulator or the previous one was Regulator,
-              we want to add a new `FormControlModel` for the attribute
-            */
-            if (selectedType.label === 'Regulator' || this.state.selectedComponentType === 'Regulator') {
-              const newFormControl = new FormControlModel('', [Validators.checkNotEmpty('Attribute')]);
 
-              this.eventFormGroupModel.setControl('attribute', newFormControl);
-              newFormControl.dependsOn(this.selectedComponentFormControl);
-            }
             this.setState({
               componentOptionBuilder: new SelectionOptionBuilder(
                 this.props.modelDictionary[selectedType.id] || [],
@@ -190,10 +181,16 @@ export class ScheduledCommandEventForm extends Component<Props, State> {
                 });
                 break;
               case 'Solar PV':
+                this.setState({
+                  attributeOptionBuilder: new SelectionOptionBuilder(
+                    COMPONENT_ATTRIBUTES['solarpanels']
+                  )
+                });
+                break;
               case 'Battery':
                 this.setState({
                   attributeOptionBuilder: new SelectionOptionBuilder(
-                    COMPONENT_ATTRIBUTES['der']
+                    COMPONENT_ATTRIBUTES['batteries']
                   )
                 });
                 break;
@@ -210,37 +207,6 @@ export class ScheduledCommandEventForm extends Component<Props, State> {
                 });
             }
 
-            // Fetch attributes from platform
-            /* if (this.state.selectedComponentType === 'Synchronous Machine') {
-              this.setState({
-                attributeOptionBuilder: new SelectionOptionBuilder(
-                  COMPONENT_ATTRIBUTES['synchronousmachines']
-                )
-              });
-            } else if (this.state.selectedComponentType !== 'Regulator') {
-              this._formService.fetchAttributes(
-                typeof selectedComponent.mRID === 'string' ? selectedComponent.mRID : selectedComponent.mRID[0],
-                this.props.modelDictionary.mRID,
-                'LinearShuntCompensator'
-              ).then(attributes => {
-                if (attributes.length === 0) {
-                  Notification.open(
-                    <>
-                      <span>Attribute list is empty for&nbsp;</span>
-                      <strong style={{ color: '#ffa500' }}>{componentName}</strong>
-                    </>
-                  );
-                }
-                this.setState({
-                  attributeOptionBuilder: new SelectionOptionBuilder(attributes)
-                });
-              })
-                .catch(reason => {
-                  if (reason) {
-                    Notification.open(reason);
-                  }
-                });
-            }*/
           } else {
             this.eventFormGroupModel.setValue({
               componentName: '',
@@ -271,20 +237,11 @@ export class ScheduledCommandEventForm extends Component<Props, State> {
           label='Component'
           selectionOptionBuilder={this.state.componentOptionBuilder}
           formControlModel={this.selectedComponentFormControl} />
-       {
-          this.state.selectedComponentType !== 'Regulator'
-            ? (
-              <Select
-                optional
-                label='Attribute'
-                selectionOptionBuilder={this.state.attributeOptionBuilder}
-                formControlModel={this.eventFormGroupModel.findControl('attribute')} />
-            ) : (
-              <Input
-                label='Attribute'
-                formControlModel={this.eventFormGroupModel.findControl('attribute')} />
-            )
-        }
+        <Select
+          optional
+          label='Attribute'
+          selectionOptionBuilder={this.state.attributeOptionBuilder}
+          formControlModel={this.eventFormGroupModel.findControl('attribute')} />
         <Input
           label='Reverse difference value'
           formControlModel={this.eventFormGroupModel.findControl('reverseDifferenceValue')}
