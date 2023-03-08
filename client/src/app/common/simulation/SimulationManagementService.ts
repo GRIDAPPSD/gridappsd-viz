@@ -14,7 +14,7 @@ import { DateTimeService } from '@client:common/DateTimeService';
 import { Simulation } from './Simulation';
 import { SimulationStatusLogMessage } from './SimulationStatusLogMessage';
 import { SimulationQueue } from './SimulationQueue';
-import { START_SIMULATION_TOPIC, START_FIELD_MODEL_SIMULATION_TOPIC, CONTROL_SIMULATION_TOPIC, SIMULATION_OUTPUT_TOPIC, SIMULATION_STATUS_LOG_TOPIC } from './topics';
+import { START_SIMULATION_TOPIC, FIELD_OUTPUT_TOPIC, CONTROL_SIMULATION_TOPIC, SIMULATION_OUTPUT_TOPIC, SIMULATION_STATUS_LOG_TOPIC } from './topics';
 import { SimulationConfiguration } from './SimulationConfiguration';
 
 import { SimulationOutputMeasurement, SimulationOutputPayload } from '.';
@@ -302,8 +302,8 @@ export class SimulationManagementService {
       // before sending the message
       setTimeout(() => {
         this._stompClientService.send({
-          destination: START_FIELD_MODEL_SIMULATION_TOPIC,
-          replyTo: START_FIELD_MODEL_SIMULATION_TOPIC,
+          destination: FIELD_OUTPUT_TOPIC,
+          replyTo: FIELD_OUTPUT_TOPIC,
           body: JSON.stringify(config)
         });
       }, 1000);
@@ -311,7 +311,7 @@ export class SimulationManagementService {
   }
 
   private _subscribeToStartFieldModelSimulationTopic() {
-    this._stompClientService.readOnceFrom<SimulationStartedEventResponse>(START_FIELD_MODEL_SIMULATION_TOPIC)
+    this._stompClientService.readOnceFrom<SimulationStartedEventResponse>(FIELD_OUTPUT_TOPIC)
       .subscribe({
         next: payload => {
           this._currentSimulationId = payload.simulationId;

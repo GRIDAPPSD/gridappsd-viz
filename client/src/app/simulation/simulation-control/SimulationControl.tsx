@@ -54,6 +54,14 @@ export class SimulationControl extends Component<Props, State> {
     this.showPlotModelCreator = this.showPlotModelCreator.bind(this);
   }
 
+  componentDidUpdate(prevProps: Readonly<Props>): void {
+    if (prevProps.modelDictionaryComponents !== this.props.modelDictionaryComponents) {
+      if (this.props.modelDictionaryComponents.length !== 0) {
+        this.props.onStartFieldModelSimulation();
+      }
+    }
+  }
+
   renderWithOutFieldModel() {
     return (
       <div className='simulation-control'>
@@ -179,17 +187,20 @@ export class SimulationControl extends Component<Props, State> {
           </>
         );
       default:
-        return (
-          <>
-            <Tooltip content='Start field model'>
-              <IconButton
-                icon='play_arrow'
-                disabled={this.props.modelDictionaryComponents.length === 0}
-                className='simulation-control__action start'
-                onClick={this.props.onStartFieldModelSimulation} />
-            </Tooltip>
-          </>
-        );
+        // * Hide the Start Btn for Field Model Output
+        // Todo - Need to come back to refine the logic after receiving field model outputs.
+        // return (
+        //   <>
+        //     <Tooltip content='Start field model'>
+        //       <IconButton
+        //         icon='play_arrow'
+        //         disabled={this.props.modelDictionaryComponents.length === 0}
+        //         className='simulation-control__action start'
+        //         onClick={this.props.onStartFieldModelSimulation} />
+        //     </Tooltip>
+        //   </>
+        // );
+        return null;
     }
   }
 
