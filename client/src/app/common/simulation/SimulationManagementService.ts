@@ -14,7 +14,7 @@ import { DateTimeService } from '@client:common/DateTimeService';
 import { Simulation } from './Simulation';
 import { SimulationStatusLogMessage } from './SimulationStatusLogMessage';
 import { SimulationQueue } from './SimulationQueue';
-import { START_SIMULATION_TOPIC, FIELD_OUTPUT_TOPIC, CONTROL_SIMULATION_TOPIC, SIMULATION_OUTPUT_TOPIC, SIMULATION_STATUS_LOG_TOPIC } from './topics';
+import { START_SIMULATION_TOPIC, CONTROL_SIMULATION_TOPIC, SIMULATION_OUTPUT_TOPIC, SIMULATION_STATUS_LOG_TOPIC } from './topics';
 import { SimulationConfiguration } from './SimulationConfiguration';
 
 import { SimulationOutputMeasurement, SimulationOutputPayload } from '.';
@@ -78,7 +78,6 @@ export class SimulationManagementService {
     this._onSimulationOutputSnapshotStateReceived();
 
     this.startSimulation = this.startSimulation.bind(this);
-    this.startFieldModelSimulation = this.startFieldModelSimulation.bind(this);
     this.stopSimulation = this.stopSimulation.bind(this);
     this.pauseSimulation = this.pauseSimulation.bind(this);
     this.resumeSimulation = this.resumeSimulation.bind(this);
@@ -266,68 +265,6 @@ export class SimulationManagementService {
         });
       }, 1000);
     }
-  }
-
-  // * This is a temporary method for starting the field model by mocking it as a simulation
-  startFieldModelSimulation() {
-    if (this._currentSimulationStatus !== SimulationStatus.STARTED && this._currentSimulationStatus !== SimulationStatus.STARTING) {
-      const activeSimulation = this._simulationQueue.getActiveSimulation();
-      const simulationConfig = activeSimulation.config;
-      const startTime = DateTimeService.getInstance().parse(simulationConfig.simulation_config.start_time);
-      const config: SimulationConfiguration = {
-        ...simulationConfig,
-        // eslint-disable-next-line camelcase
-        simulation_config: {
-          ...simulationConfig.simulation_config,
-          // eslint-disable-next-line camelcase
-          start_time: String(startTime)
-        }
-      };
-      activeSimulation.didRun = true;
-      this._didUserStartActiveSimulation = true;
-      this._isUserInActiveSimulation = true;
-      this._currentSimulationStatus = SimulationStatus.STARTING;
-      this._currentSimulationStatusNotifer.next(SimulationStatus.STARTING);
-      if (!this._simulationOutputSubscription) {
-        this._simulationOutputSubscription = this._subscribeToSimulationOutputTopic();
-      }
-      this._subscribeToStartFieldModelSimulationTopic();
-      this._readSimulationProcessStatusFromSimulationLogStream();
-      // Reset this state
-      this.syncSimulationSnapshotState({
-        simulationOutput: null
-      });
-
-      // Let's wait for all the subscriptions in other components to this topic to complete
-      // before sending the message
-      setTimeout(() => {
-        this._stompClientService.send({
-          destination: FIELD_OUTPUT_TOPIC,
-          replyTo: FIELD_OUTPUT_TOPIC,
-          body: JSON.stringify(config)
-        });
-      }, 1000);
-    }
-  }
-
-  private _subscribeToStartFieldModelSimulationTopic() {
-    this._stompClientService.readOnceFrom<SimulationStartedEventResponse>(FIELD_OUTPUT_TOPIC)
-      .subscribe({
-        next: payload => {
-          this._currentSimulationId = payload.simulationId;
-          this._simulationQueue.updateIdOfActiveSimulation(payload.simulationId);
-          if (payload.events) {
-            this._stateStore.update({
-              simulationId: payload.simulationId,
-              faultMRIDs: payload.events.map(event => event.faultMRID)
-            });
-          } else {
-            this._stateStore.update({
-              simulationId: payload.simulationId
-            });
-          }
-        }
-      });
   }
 
   private _subscribeToSimulationOutputTopic() {

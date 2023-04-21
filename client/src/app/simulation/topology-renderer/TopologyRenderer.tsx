@@ -27,6 +27,7 @@ import { PortalRenderer } from '@client:common/overlay/portal-renderer';
 import { SimulationOutputMeasurement } from '@client:common/simulation';
 import { CurrentLimit } from '@client:common/measurement-limits';
 import { CanvasTransformService } from '@client:common/CanvasTransformService';
+import { FieldModelOutputMeasurement } from '@client:common/field-model-datastream';
 
 import { SwitchControlMenu } from './views/switch-control-menu/SwitchControlMenu';
 import { CapacitorControlMenu } from './views/capacitor-control-menu/CapacitorControlMenu';
@@ -42,6 +43,7 @@ import './TopologyRenderer.dark.scss';
 interface Props {
   topology: RenderableTopology;
   simulationOutputMeasurements: SimulationOutputMeasurement[];
+  fieldModelOutputMeasurements?: FieldModelOutputMeasurement[];
   // keys are conducting equipment MRID's
   currentLimitMap: Map<string, CurrentLimit>;
   onToggleSwitch: (swjtch: Switch, open: boolean) => void;
@@ -126,7 +128,13 @@ export class TopologyRenderer extends Component<Props, State> {
   }
 
   shouldComponentUpdate(nextProps: Props) {
-    if (this.props.simulationOutputMeasurements !== nextProps.simulationOutputMeasurements) {
+    if (this.props.fieldModelOutputMeasurements && this.props.fieldModelOutputMeasurements !== nextProps.fieldModelOutputMeasurements) {
+      for (const measurement of nextProps.fieldModelOutputMeasurements) {
+        this._toggleSwitchesBasedOnSimulationOutputMeasurement(measurement);
+        this._toggleACLineSegmentsWithNoPower(measurement);
+        this._addPowerFlowDirectionIndicator(measurement);
+      }
+    } else if (this.props.simulationOutputMeasurements !== nextProps.simulationOutputMeasurements) {
       for (const measurement of nextProps.simulationOutputMeasurements) {
         this._toggleSwitchesBasedOnSimulationOutputMeasurement(measurement);
         this._toggleACLineSegmentsWithNoPower(measurement);
@@ -137,7 +145,7 @@ export class TopologyRenderer extends Component<Props, State> {
     return true;
   }
 
-  private _toggleSwitchesBasedOnSimulationOutputMeasurement(measurement: SimulationOutputMeasurement) {
+  private _toggleSwitchesBasedOnSimulationOutputMeasurement(measurement: SimulationOutputMeasurement | FieldModelOutputMeasurement) {
     const swjtch = this._switchMap.get(measurement.conductingEquipmentMRID);
     if (measurement.type === MeasurementType.TAP && swjtch) {
       swjtch.open = measurement.value === 0;
@@ -155,7 +163,7 @@ export class TopologyRenderer extends Component<Props, State> {
     }
   }
 
-  private _toggleACLineSegmentsWithNoPower(measurement: SimulationOutputMeasurement) {
+  private _toggleACLineSegmentsWithNoPower(measurement: SimulationOutputMeasurement | FieldModelOutputMeasurement) {
     if (measurement.conductingEquipmentType === ConductingEquipmentType.ACLineSegment) {
       const edge = this.props.topology.edgeMap.get(measurement.conductingEquipmentName);
       if (edge) {
@@ -199,7 +207,7 @@ export class TopologyRenderer extends Component<Props, State> {
     return foundNode;
   }
 
-  private _addPowerFlowDirectionIndicator(measurement: SimulationOutputMeasurement) {
+  private _addPowerFlowDirectionIndicator(measurement: SimulationOutputMeasurement | FieldModelOutputMeasurement) {
     if (-90 <= measurement.angle && measurement.angle <= 90) {
       this._showPowerFlowDirectionIndicators(measurement.conductingEquipmentName, 'normal');
       this._thickenACLineSegmentBasedOnPowerFlow(measurement);
@@ -233,7 +241,7 @@ export class TopologyRenderer extends Component<Props, State> {
     }
   }
 
-  private _thickenACLineSegmentBasedOnPowerFlow(measurement: SimulationOutputMeasurement) {
+  private _thickenACLineSegmentBasedOnPowerFlow(measurement: SimulationOutputMeasurement  | FieldModelOutputMeasurement) {
     const mrid = measurement.conductingEquipmentMRID;
     const currentLimit = this.props.currentLimitMap.get(mrid);
     const magnitude = measurement.magnitude;

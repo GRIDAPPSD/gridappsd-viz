@@ -9,6 +9,7 @@ import { TimeZone } from '@client:common/DateTimeService';
 
 export interface ApplicationState {
   simulationId: string;
+  fieldModelId: string;
   faultMRIDs: string[];
   commOutageEvents: CommOutageEvent[];
   faultEvents: FaultEvent[];

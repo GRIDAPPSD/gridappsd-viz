@@ -18,7 +18,7 @@ import {
   SimulationQueue,
   SimulationManagementService
 } from '@client:common/simulation';
-import { FieldModelConfiguration, FieldModel } from '@client:common/field-model-datastream';
+import { FieldModelConfiguration, FieldModel, FieldModelQueue, FieldModelManagementService } from '@client:common/field-model-datastream';
 import { ConductingEquipmentType } from '@client:common/topology/model-dictionary';
 import { AuthenticatorService } from '@client:common/authenticator';
 import { Notification } from '@client:common/overlay/notification';
@@ -50,10 +50,12 @@ export class AppContainer extends Component<Props, State> {
   readonly componentPhases = new Map<string, string[]>();
   readonly authenticatorService = AuthenticatorService.getInstance();
   readonly simulationManagementService = SimulationManagementService.getInstance();
+  readonly fieldModelManagementService = FieldModelManagementService.getInstance();
 
   private readonly _stateStore = StateStore.getInstance();
   private readonly _stompClientService = StompClientService.getInstance();
   private readonly _simulationQueue = SimulationQueue.getInstance();
+  private readonly _fieldModelQueue = FieldModelQueue.getInstance();
   private readonly _availableModelDictionaries = new Map<string, ModelDictionary>();
 
   constructor(props: Props) {
@@ -117,6 +119,8 @@ export class AppContainer extends Component<Props, State> {
     this._stompClientService.readOnceFrom<GetAvailableApplicationsRequestPayload>(destination)
       .subscribe({
         next: payload => {
+          // Todo - For Field Model to receive Min/Avg/Max Voltages chart, fieldModelMrid needs to be '_C1C3E687-6FFD-C753-582B-632A27E28507'
+          // payload.fieldModelMrid = '_C1C3E687-6FFD-C753-582B-632A27E28507';
           this._stateStore.update({
             applications: payload.applications,
             services: payload.services
@@ -254,6 +258,7 @@ export class AppContainer extends Component<Props, State> {
       modelDictionaryMeasurementMap.set(measurement.mRID, measurement);
     }
     this._collectMRIDsAndPhasesForComponents(modelDictionary);
+    this.fieldModelManagementService.updateModelDictionaryMeasurementMap(modelDictionaryMeasurementMap);
     this.simulationManagementService.updateModelDictionaryMeasurementMap(modelDictionaryMeasurementMap);
     this._findAllPhasesForEachComponentThenGroupThem(modelDictionary);
     this._stateStore.update({
@@ -327,9 +332,9 @@ export class AppContainer extends Component<Props, State> {
   }
 
   onFieldModelSimulationConfigFormAutoSubmitted(config: FieldModelConfiguration) {
-    this._simulationQueue.push(new FieldModel(config));
+    this._fieldModelQueue.push(new FieldModel(config));
     this._stateStore.update({
-      simulationId: ''
+      fieldModelId: '' // todo - Now the _stateStore has the fieldModelId, lets see how can we use it in other components
     });
   }
 

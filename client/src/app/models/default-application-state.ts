@@ -3,6 +3,7 @@ import { TimeZone } from '@client:common/DateTimeService';
 
 export const DEFAULT_APPLICATION_STATE: ApplicationState = {
   simulationId: '',
+  fieldModelId: '',
   faultMRIDs: [],
   faultEvents: [],
   commOutageEvents: [],

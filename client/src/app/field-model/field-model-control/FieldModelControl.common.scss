@@ -1,0 +1,178 @@
+.simulation-control {
+    height: 50px;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    position: absolute;
+    top: -2px;
+    right: 20px;
+    width: 100%;
+}
+
+.simulation-control__simulation-id {
+    display: inline-flex;
+    justify-content: flex-start;
+    box-sizing: border-box;
+    padding-left: 10px;
+    align-items: center;
+    font-size: 0.7em;
+    margin: 0 12px;
+}
+
+.simulation-control__simulation-id__label {
+    display: inline-block;
+    padding: 8px 10px;
+    border-top-left-radius: 10px;
+}
+
+.simulation-control__simulation-id__value-wrapper {
+    position: relative;
+    display: inline-block;
+    z-index: 1;
+}
+
+.simulation-control__simulation-id__value__copied-successfully-tooltip {
+    position: absolute;
+    display: inline-block;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    cursor: pointer;
+}
+
+.simulation-control__simulation-id__value {
+    position: relative;
+    display: inline-block;
+    border-left: none;
+    border-bottom-right-radius: 10px;
+    cursor: pointer;
+}
+
+.simulation-control__simulation-is-starting-message {
+    position: relative;
+    margin-left: auto;
+    display: inline-block;
+    font-size: 1em;
+    white-space: nowrap;
+}
+
+.simulation-control__action {
+    z-index: 1;
+
+    &:not(:last-of-type) {
+        margin-right: 5px;
+
+        &:first-of-type {
+            margin-left: auto;
+        }
+    }
+}
+
+.simulation-control__action-wrapper {
+    padding-right: 5px;
+    display: inline-block;
+}
+
+.simulation-control__delayed-pause-duration-input-container .backdrop {
+    pointer-events: all;
+}
+
+.simulation-control__delayed-pause-duration-input {
+    position: absolute;
+    top: 55px;
+    border-radius: 2px;
+    z-index: 15;
+    white-space: pre-wrap;
+    font-family: 'Roboto', sans-serif;
+    animation-duration: 0.5s;
+    animation-timing-function: cubic-bezier(0, 0.61, 0.2, 1.01);
+    animation-fill-mode: forwards;
+    width: 315px;
+
+    &.hidden {
+        animation-name: simulation-control__leaving;
+        animation-delay: 0s;
+    }
+
+    &.visible {
+        animation-name: simulation-control__entering;
+        pointer-events: all;
+        transition-delay: 0.25s;
+    }
+
+    @keyframes simulation-control__entering {
+        from {
+            opacity: 0;
+            visibility: hidden;
+            transform: translate(2px, -5px);
+        }
+
+        to {
+            opacity: 1;
+            visibility: visible;
+            transform: translate(2px, 10px);
+        }
+    }
+
+    @keyframes simulation-control__leaving {
+        from {
+            opacity: 1;
+            visibility: visible;
+            transform: translate(2px, 10px);
+        }
+
+        to {
+            opacity: 0;
+            visibility: hidden;
+            transform: translate(2px, 0px);
+        }
+    }
+
+    &__arrow {
+        overflow: hidden;
+        position: absolute;
+        top: -20px;
+        left: 2%;
+        width: 20px;
+        height: 20px;
+
+        &::after {
+            content: '';
+            position: relative;
+            width: inherit;
+            height: inherit;
+            display: inline-block;
+            transform: translateY(16px) rotate(45deg);
+        }
+    }
+
+    .form-control__label {
+        width: 125px;
+    }
+
+    .input-field-wrapper::after {
+        content: 'Seconds';
+        position: absolute;
+        font-size: 0.8em;
+        display: inline-block;
+        transform: translate(5px, 7px);
+    }
+
+    .input-field__input {
+        width: 95px;
+    }
+}
+
+.simulation-control__delayed-pause-duration-input__action-container .basic-button {
+    margin: 5px;
+    margin-bottom: 10px;
+
+    &:first-child {
+        margin-left: 10px;
+    }
+
+    &:last-child {
+        margin-left: 0;
+    }
+}

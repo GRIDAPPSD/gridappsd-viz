@@ -24,9 +24,7 @@ interface Props {
   simulationId: string;
   existingPlotModels: PlotModel[];
   modelDictionaryComponents: ModelDictionaryComponent[];
-  fieldModelMrid: string;
   onStartSimulation: () => void;
-  onStartFieldModelSimulation: () => void;
   onExportSimulationConfiguration: () => void;
   onStopSimulation: () => void;
   onPauseSimulation: () => void;
@@ -54,15 +52,7 @@ export class SimulationControl extends Component<Props, State> {
     this.showPlotModelCreator = this.showPlotModelCreator.bind(this);
   }
 
-  componentDidUpdate(prevProps: Readonly<Props>): void {
-    if (prevProps.modelDictionaryComponents !== this.props.modelDictionaryComponents) {
-      if (this.props.modelDictionaryComponents.length !== 0) {
-        this.props.onStartFieldModelSimulation();
-      }
-    }
-  }
-
-  renderWithOutFieldModel() {
+  renderContent() {
     return (
       <div className='simulation-control'>
         <div
@@ -105,30 +95,8 @@ export class SimulationControl extends Component<Props, State> {
     );
   }
 
-  renderWithFieldModel() {
-    return (
-      <div className='simulation-control'>
-        <Restricted roles={['testmanager']}>
-          {this.showFieldModelControlButtons()}
-          <Tooltip content='Edit plots'>
-            <IconButton
-              icon='show_chart'
-              className='simulation-control__action add-component-to-plot'
-              disabled={this.props.modelDictionaryComponents.length === 0}
-              onClick={this.showPlotModelCreator} />
-          </Tooltip>
-        </Restricted>
-      </div>
-    );
-  }
-
   render() {
-    const { fieldModelMrid } = this.props;
-    if (fieldModelMrid) {
-      return this.renderWithFieldModel();
-    } else {
-      return this.renderWithOutFieldModel();
-    }
+    return this.renderContent();
   }
 
   saveSimulationIdToClipboard(event: React.SyntheticEvent) {
@@ -141,67 +109,6 @@ export class SimulationControl extends Component<Props, State> {
         simulationIdCopiedSuccessfully: false
       });
     }, 2000);
-  }
-
-  showFieldModelControlButtons() {
-    switch (this.props.simulationStatus) {
-      case SimulationStatus.STARTING:
-        return (
-          <span className='simulation-control__simulation-is-starting-message'>
-            Field Model is starting<ThreeDots />
-          </span>
-        );
-      case SimulationStatus.STARTED:
-      case SimulationStatus.RESUMED:
-        return (
-          <>
-            <Tooltip content='Pause field model'>
-              <IconButton
-                icon='pause'
-                className='simulation-control__action'
-                onClick={this.props.onPauseSimulation} />
-            </Tooltip>
-            <Tooltip content='Stop field model'>
-              <IconButton
-                icon='stop'
-                className='simulation-control__action'
-                onClick={this.props.onStopSimulation} />
-            </Tooltip>
-          </>
-        );
-      case SimulationStatus.PAUSED:
-        return (
-          <>
-            <Tooltip content='Resume field model'>
-              <IconButton
-                icon='play_arrow'
-                className='simulation-control__action resume'
-                onClick={this.showDelayedPauseDurationInputBox} />
-            </Tooltip>
-            <Tooltip content='Stop field model'>
-              <IconButton
-                icon='stop'
-                className='simulation-control__action'
-                onClick={this.props.onStopSimulation} />
-            </Tooltip>
-          </>
-        );
-      default:
-        // * Hide the Start Btn for Field Model Output
-        // Todo - Need to come back to refine the logic after receiving field model outputs.
-        // return (
-        //   <>
-        //     <Tooltip content='Start field model'>
-        //       <IconButton
-        //         icon='play_arrow'
-        //         disabled={this.props.modelDictionaryComponents.length === 0}
-        //         className='simulation-control__action start'
-        //         onClick={this.props.onStartFieldModelSimulation} />
-        //     </Tooltip>
-        //   </>
-        // );
-        return null;
-    }
   }
 
   showSimulationControlButtons() {

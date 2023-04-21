@@ -8,7 +8,9 @@ import { MeasurementType, ConductingEquipmentType } from '@client:common/topolog
 import { StompClientService } from '@client:common/StompClientService';
 import { PlotModel, PlotModelComponent } from '@client:common/plot-model';
 import { SimulationStatus } from '@project:common/SimulationStatus';
+import { FieldModelOutputStatus } from '@project:common/FieldModelOutputStatus';
 import { SimulationQueue } from '@client:common/simulation';
+import { FieldModelManagementService, FieldModelOutputMeasurement, FieldModelQueue } from '@client:common/field-model-datastream';
 
 import { TimeSeriesDataPoint } from './models/TimeSeriesDataPoint';
 import { TimeSeries } from './models/TimeSeries';
@@ -17,6 +19,7 @@ import { MeasurementChart } from './MeasurementChart';
 import { FetchLimitsFileRequest, FetchLimitsFileRequestPayload } from './models/FetchLimitsFileRequest';
 
 interface Props {
+  fieldModelMrid?: string;
 }
 
 interface State {
@@ -30,14 +33,17 @@ export class MeasurementChartContainer extends Component<Props, State> {
 
   private readonly _stateStore = StateStore.getInstance();
   private readonly _simulationManagementService = SimulationManagementService.getInstance();
+  private readonly _fieldModelManagementService = FieldModelManagementService.getInstance();
   private readonly _stompClientService = StompClientService.getInstance();
   private readonly _timeSeries = new Map<string, TimeSeries>();
   private readonly _unsubscriber = new Subject<void>();
   private readonly _nominalVoltageDivisorMap = new Map<string, number>();
   private readonly _simulationQueue = SimulationQueue.getInstance();
+  private readonly _fieldModelQueue = FieldModelQueue.getInstance();
 
   private _plotModels: PlotModel[] = [];
   private _activeSimulationStream: Subscription = null;
+  private _activeFieldModelOutputStream: Subscription = null;
 
   constructor(props: Props) {
     super(props);
@@ -47,16 +53,33 @@ export class MeasurementChartContainer extends Component<Props, State> {
   }
 
   componentDidMount() {
-    this._observeActiveSimulationChangeEvent();
-    this._pickRenderableChartModelsFromSimulationSnapshotStream();
-    this._subscribeToPlotModelsStateStore();
-    this._subscribeToSimulationOutputMeasurementMapStream();
-    this._fetchLimitsFileWhenSimulationIdChanges();
-    this._resetRenderableChartModelsWhenSimulationStarts();
+    if (this.props.fieldModelMrid) {
+      this._observeActiveFieldModelChangeEvent();
+      this._subscribeToPlotModelsStateStore();
+      this._subscribeToFieldModelOutputMeasurementMapStream();
+      this._fetchLimitsFileWhenSimulationIdChanges();
+      this._resetRenderableChartModelsWhenFieldModelStarts();
+    } else {
+      this._observeActiveSimulationChangeEvent();
+      this._pickRenderableChartModelsFromSimulationSnapshotStream();
+      this._subscribeToPlotModelsStateStore();
+      this._subscribeToSimulationOutputMeasurementMapStream();
+      this._fetchLimitsFileWhenSimulationIdChanges();
+      this._resetRenderableChartModelsWhenSimulationStarts();
+    }
   }
 
   private _observeActiveSimulationChangeEvent() {
     this._activeSimulationStream = this._simulationQueue.queueChanges()
+      .subscribe({
+        next: () => {
+          this._resetChartToDefault();
+        }
+      });
+  }
+
+  private _observeActiveFieldModelChangeEvent() {
+    this._activeFieldModelOutputStream = this._fieldModelQueue.queueChanges()
       .subscribe({
         next: () => {
           this._resetChartToDefault();
@@ -288,7 +311,31 @@ export class MeasurementChartContainer extends Component<Props, State> {
       });
   }
 
-  private _createDefaultCharts(measurements: Map<string, SimulationOutputMeasurement>) {
+  /**
+   * @receive Field Model Output data
+   * @returns Re-shaped FieldModelOutput data for plotting the charts.
+   */
+  private _subscribeToFieldModelOutputMeasurementMapStream(): Subscription {
+    return this._fieldModelManagementService.fieldModelOutputMeasurementMapReceived()
+      .pipe(
+        takeUntil(this._unsubscriber),
+        filter(() => this._fieldModelManagementService.didUserStartActiveFieldModelOutput())
+      )
+      .subscribe({
+        next: measurementMap => {
+          const renderableChartModels = this._createDefaultCharts(measurementMap);
+          // Skip the first 2 elements because they are the Min/Average/Max and Load Demand PlotModels
+          for (let i = 2; i < this._plotModels.length; i++) {
+            renderableChartModels.push(this._createRenderableChartModel(this._plotModels[i], measurementMap));
+          }
+          this.setState({
+            renderableChartModels
+          });
+        }
+      });
+  }
+
+  private _createDefaultCharts(measurements: Map<string, SimulationOutputMeasurement> | Map<string, FieldModelOutputMeasurement>) {
     let minVoltage = Infinity;
     let maxVoltage = -Infinity;
     let averageVoltage = Infinity;
@@ -305,7 +352,9 @@ export class MeasurementChartContainer extends Component<Props, State> {
       let numberOfVoltageMeasurements = 0;
       measurements.forEach(measurement => {
         if (measurement.type === MeasurementType.VOLTAGE) {
-          const nominalVoltage = this._nominalVoltageDivisorMap.get(measurement.connectivityNode);
+          // Todo - Need to know what nominalVoltage is for field model output data
+          // const nominalVoltage = this._nominalVoltageDivisorMap.get(measurement.connectivityNode);
+          const nominalVoltage = this.props.fieldModelMrid ? 110 : this._nominalVoltageDivisorMap.get(measurement.connectivityNode);
           if (nominalVoltage) {
             const percentOfNominalVoltage = measurement.magnitude / nominalVoltage;
             if (percentOfNominalVoltage < minVoltage) {
@@ -360,8 +409,14 @@ export class MeasurementChartContainer extends Component<Props, State> {
     ];
   }
 
-  private _calculatePQValues(measurement: SimulationOutputMeasurement): [p: number, q: number] {
-    if (Number.isFinite(measurement.magnitude) && Number.isFinite(measurement.angle)) {
+  private _calculatePQValues(measurement: SimulationOutputMeasurement | FieldModelOutputMeasurement): [p: number, q: number] {
+    if (this.props.fieldModelMrid) {
+      const fieldAngleInRadian = measurement.angle * Math.PI / 180;
+      return [
+        measurement.magnitude * Math.cos(fieldAngleInRadian),
+        measurement.magnitude * Math.sin(fieldAngleInRadian)
+      ];
+    } else if (Number.isFinite(measurement.magnitude) && Number.isFinite(measurement.angle)){
       const angleInRadian = measurement.angle * Math.PI / 180;
       return [
         measurement.magnitude * Math.cos(angleInRadian),
@@ -377,14 +432,14 @@ export class MeasurementChartContainer extends Component<Props, State> {
         timeSeries.points.shift();
       }
       timeSeries.points.push({
-        timestamp: new Date(this._simulationManagementService.getOutputTimestamp() * 1000),
+        timestamp: new Date(this.props.fieldModelMrid ? this._fieldModelManagementService.getOutputTimestamp() * 1000 : this._simulationManagementService.getOutputTimestamp() * 1000),
         measurement: value
       } as TimeSeriesDataPoint);
     }
     return timeSeries;
   }
 
-  private _createRenderableChartModel(plotModel: PlotModel, measurements: Map<string, SimulationOutputMeasurement>): RenderableChartModel {
+  private _createRenderableChartModel(plotModel: PlotModel, measurements: Map<string, SimulationOutputMeasurement> | Map<string, FieldModelOutputMeasurement>): RenderableChartModel {
     return plotModel.components.map(component => this._createTimeSeries(plotModel, component, measurements.get(component.id)))
       .reduce((renderableChartModel: RenderableChartModel, timeSeries: TimeSeries) => {
         renderableChartModel.timeSeries.push(timeSeries);
@@ -392,7 +447,7 @@ export class MeasurementChartContainer extends Component<Props, State> {
       }, this._createDefaultRenderableChartModel(plotModel));
   }
 
-  private _createTimeSeries(plotModel: PlotModel, component: PlotModelComponent, measurement: SimulationOutputMeasurement) {
+  private _createTimeSeries(plotModel: PlotModel, component: PlotModelComponent, measurement: SimulationOutputMeasurement | FieldModelOutputMeasurement) {
     const timeSeries = this._findOrCreateTimeSeries(plotModel, component);
     const nextMeasurementValue = this._getNextMeasurementValue(plotModel, measurement);
 
@@ -403,7 +458,7 @@ export class MeasurementChartContainer extends Component<Props, State> {
     return this._addValueToTimeSeries(timeSeries, nextMeasurementValue);
   }
 
-  private _getNextMeasurementValue(plotModel: PlotModel, measurement: SimulationOutputMeasurement) {
+  private _getNextMeasurementValue(plotModel: PlotModel, measurement: SimulationOutputMeasurement | FieldModelOutputMeasurement) {
     if (measurement !== undefined) {
       switch (plotModel.measurementType) {
         case MeasurementType.VOLTAGE:
@@ -426,6 +481,17 @@ export class MeasurementChartContainer extends Component<Props, State> {
       .pipe(
         takeUntil(this._unsubscriber),
         filter(status => status === SimulationStatus.STARTING && this._simulationManagementService.didUserStartActiveSimulation())
+      )
+      .subscribe({
+        next: () => this._updateRenderableChartModels(true)
+      });
+  }
+
+  private _resetRenderableChartModelsWhenFieldModelStarts() {
+    this._fieldModelManagementService.fieldModelOutputStatusChanges()
+      .pipe(
+        takeUntil(this._unsubscriber),
+        filter(status => status === FieldModelOutputStatus.STARTING && this._fieldModelManagementService.didUserStartActiveFieldModelOutput())
       )
       .subscribe({
         next: () => this._updateRenderableChartModels(true)
@@ -471,7 +537,11 @@ export class MeasurementChartContainer extends Component<Props, State> {
   componentWillUnmount() {
     this._unsubscriber.next();
     this._unsubscriber.complete();
-    this._activeSimulationStream.unsubscribe();
+    if (this.props.fieldModelMrid) {
+      this._activeFieldModelOutputStream.unsubscribe();
+    } else {
+      this._activeSimulationStream.unsubscribe();
+    }
   }
 
   render() {

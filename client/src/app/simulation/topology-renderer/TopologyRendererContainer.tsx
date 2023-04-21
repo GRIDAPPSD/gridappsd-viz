@@ -12,6 +12,12 @@ import {
   DEFAULT_SIMULATION_CONFIGURATION,
   SimulationOutputMeasurement
 } from '@client:common/simulation';
+import {
+  FieldModelQueue,
+  FieldModelConfiguration,
+  DEFAULT_FIELD_MODEL_CONFIGURATION,
+  FieldModelOutputMeasurement
+} from '@client:common/field-model-datastream';
 import { StompClientService } from '@client:common/StompClientService';
 import {
   Node,
@@ -25,7 +31,7 @@ import {
   Edge
 } from '@client:common/topology';
 import { SimulationManagementService } from '@client:common/simulation';
-
+import { FieldModelManagementService } from '@client:common/field-model-datastream';
 
 import { TopologyRenderer } from './TopologyRenderer';
 import { OpenOrCloseCapacitorRequest } from './models/OpenOrCloseCapacitorRequest';
@@ -43,12 +49,14 @@ import { RenderableTopology } from './models/RenderableTopology';
 interface Props {
   mRIDs: Map<string, string | string[]>;
   phases: Map<string, string[]>;
+  fieldModelMrid?: string;
 }
 
 interface State {
   topology: RenderableTopology;
   isFetching: boolean;
   simulationOutputMeasurements: SimulationOutputMeasurement[];
+  fieldModelOutputMeasurements: FieldModelOutputMeasurement[];
 }
 
 const topologyModelCache = new Map<string, TopologyModel>();
@@ -59,30 +67,35 @@ export class TopologyRendererContainer extends Component<Props, State> {
   readonly currentLimitMap = new Map<string, CurrentLimit>();
 
   activeSimulationConfig: SimulationConfiguration = DEFAULT_SIMULATION_CONFIGURATION;
+  activeFieldModelConfig: FieldModelConfiguration = DEFAULT_FIELD_MODEL_CONFIGURATION;
 
   private readonly _stompClientService = StompClientService.getInstance();
   private readonly _simulationQueue = SimulationQueue.getInstance();
+  private readonly _fieldModelQueue = FieldModelQueue.getInstance();
   private readonly _simulationManagementService = SimulationManagementService.getInstance();
+  private readonly _fieldModelManagementService = FieldModelManagementService.getInstance();
   private readonly _stateStore = StateStore.getInstance();
   private readonly _unsubscriber = new Subject<void>();
 
-  private _activeSimulationStream: Subscription = null;
+  private _activeDataStream: Subscription = null;
 
   constructor(props: Props) {
     super(props);
 
     this.state = {
       topology: {
-        name: this.activeSimulationConfig.simulation_config.simulation_name,
+        name: this.activeSimulationConfig.simulation_config.simulation_name ? this.activeFieldModelConfig.simulation_config.simulation_name : '',
         nodeMap: new Map(),
         edgeMap: new Map(),
         inverted: false
       },
       isFetching: true,
-      simulationOutputMeasurements: []
+      simulationOutputMeasurements: [],
+      fieldModelOutputMeasurements: []
     };
 
     this.activeSimulationConfig = this._simulationQueue.getActiveSimulation()?.config || DEFAULT_SIMULATION_CONFIGURATION;
+    this.activeFieldModelConfig = this._fieldModelQueue.getActiveFieldModel()?.config || DEFAULT_FIELD_MODEL_CONFIGURATION;
 
     this.onToggleSwitchState = this.onToggleSwitchState.bind(this);
     this.onCapacitorControlMenuFormSubmitted = this.onCapacitorControlMenuFormSubmitted.bind(this);
@@ -91,34 +104,53 @@ export class TopologyRendererContainer extends Component<Props, State> {
 
   componentDidMount() {
     this._observeActiveSimulationChangeEvent();
-    this._subscribeToSimulationOutputMeasurementMapStream();
+    this._subscribeToOutputMeasurementMapStream();
     this._updateRenderableTopologyOnSimulationSnapshotReceived();
     this._fetchCurrentLimitsFromStateStore();
   }
 
   private _observeActiveSimulationChangeEvent() {
-    this._activeSimulationStream = this._simulationQueue.activeSimulationChanged()
+    const { fieldModelMrid } = this.props;
+    if (fieldModelMrid) {
+      this._activeDataStream = this._fieldModelQueue.activeFieldModelChanged()
       .subscribe({
-        next: simulation => {
-          this.activeSimulationConfig = simulation.config;
-          // If the user received a new simulation config object
-          // and currently not in a simulation, they were the one that created
-          // it. Otherwise, they received it by joining an active simulation,
-          // in that case, we don't want to do anything here
-          if (!this._simulationManagementService.isUserInActiveSimulation()) {
-            const lineName = simulation.config.power_system_config.Line_name;
+        next: activeFieldModelOutput => {
+          this.activeFieldModelConfig = activeFieldModelOutput.config;
+          if (!this._fieldModelManagementService.isUserInActiveFieldModelOutput()) {
+            const lineName = activeFieldModelOutput.config.power_system_config.Line_name;
             if (topologyModelCache.has(lineName)) {
               const topologyModel = topologyModelCache.get(lineName);
               this._processModelForRendering(topologyModel);
-              this._simulationManagementService.syncSimulationSnapshotState({
-                topologyModel
-              });
             } else {
               this._fetchTopologyModel(lineName);
             }
           }
         }
       });
+    } else {
+      this._activeDataStream = this._simulationQueue.activeSimulationChanged()
+        .subscribe({
+          next: simulation => {
+            this.activeSimulationConfig = simulation.config;
+            // If the user received a new simulation config object
+            // and currently not in a simulation, they were the one that created
+            // it. Otherwise, they received it by joining an active simulation,
+            // in that case, we don't want to do anything here
+            if (!this._simulationManagementService.isUserInActiveSimulation()) {
+              const lineName = simulation.config.power_system_config.Line_name;
+              if (topologyModelCache.has(lineName)) {
+                const topologyModel = topologyModelCache.get(lineName);
+                this._processModelForRendering(topologyModel);
+                this._simulationManagementService.syncSimulationSnapshotState({
+                  topologyModel
+                });
+              } else {
+                this._fetchTopologyModel(lineName);
+              }
+            }
+          }
+        });
+    }
   }
 
   private _fetchTopologyModel(lineName: string) {
@@ -136,7 +168,7 @@ export class TopologyRendererContainer extends Component<Props, State> {
 
   private _subscribeToTopologyModelTopic(destination: string) {
     this._stompClientService.readOnceFrom<TopologyModel>(destination)
-      .pipe(takeWhile(() => !this._activeSimulationStream.closed))
+      .pipe(takeWhile(() => !this._activeDataStream.closed))
       .subscribe({
         next: (topologyModel: TopologyModel) => {
           this._processModelForRendering(topologyModel);
@@ -354,16 +386,29 @@ export class TopologyRendererContainer extends Component<Props, State> {
     });
   }
 
-  private _subscribeToSimulationOutputMeasurementMapStream() {
-    this._simulationManagementService.simulationOutputMeasurementMapReceived()
-      .pipe(takeUntil(this._unsubscriber))
-      .subscribe({
-        next: measurements => {
-          this.setState({
-            simulationOutputMeasurements: [...measurements.values()]
-          });
-        }
-      });
+  private _subscribeToOutputMeasurementMapStream() {
+    const { fieldModelMrid } = this.props;
+    if (fieldModelMrid) {
+      this._fieldModelManagementService.fieldModelOutputMeasurementMapReceived()
+        .pipe(takeUntil(this._unsubscriber))
+        .subscribe({
+          next: measurements => {
+            this.setState({
+              fieldModelOutputMeasurements: [...measurements.values()]
+            });
+          }
+        });
+    } else {
+      this._simulationManagementService.simulationOutputMeasurementMapReceived()
+        .pipe(takeUntil(this._unsubscriber))
+        .subscribe({
+          next: measurements => {
+            this.setState({
+              simulationOutputMeasurements: [...measurements.values()]
+            });
+          }
+        });
+    }
   }
 
   private _updateRenderableTopologyOnSimulationSnapshotReceived() {
@@ -398,7 +443,7 @@ export class TopologyRendererContainer extends Component<Props, State> {
   componentWillUnmount() {
     this._unsubscriber.next();
     this._unsubscriber.complete();
-    this._activeSimulationStream.unsubscribe();
+    this._activeDataStream.unsubscribe();
   }
 
   render() {
@@ -407,6 +452,7 @@ export class TopologyRendererContainer extends Component<Props, State> {
         <TopologyRenderer
           topology={this.state.topology}
           simulationOutputMeasurements={this.state.simulationOutputMeasurements}
+          fieldModelOutputMeasurements={this.state.fieldModelOutputMeasurements}
           currentLimitMap={this.currentLimitMap}
           onToggleSwitch={this.onToggleSwitchState}
           onCapacitorControlMenuFormSubmitted={this.onCapacitorControlMenuFormSubmitted}
@@ -542,7 +588,7 @@ export class TopologyRendererContainer extends Component<Props, State> {
 
   private _toggleRegulatorManualMode(regulator: Regulator) {
     (this.props.mRIDs.get(regulator.name) as string[])
-      .map((mRID, index) => {
+      .map((mRID) => {
         return new ToggleRegulatorManualModeRequest({
           componentMRID: mRID,
           simulationId: this._simulationQueue.getActiveSimulation().id,

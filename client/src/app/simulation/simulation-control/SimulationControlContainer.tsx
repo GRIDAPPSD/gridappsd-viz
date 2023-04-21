@@ -12,7 +12,6 @@ import { SimulationControl } from './SimulationControl';
 
 interface Props {
   exportSimulationConfiguration: () => void;
-  fieldModelMrid: string;
 }
 
 interface State {
@@ -43,20 +42,10 @@ export class SimulationControlContainer extends Component<Props, State> {
   }
 
   componentDidMount() {
-    this._stopSimulationWhenRedirect();
     this._subscribeToSimulationStatusChanges();
     this._subscribeToPlotModelsStateChanges();
     this._subscribeToComponentsWithConsolidatedPhasesStateChanges();
     this._subscribeToSimulationIdChanges();
-  }
-
-  private _stopSimulationWhenRedirect() {
-    if (this.props.fieldModelMrid && this.props.fieldModelMrid !== '') {
-      this.simulationManagementService.stopSimulation();
-      this.setState({
-        simulationStatus: SimulationStatus.STOPPED
-      });
-    }
   }
 
   private _subscribeToSimulationStatusChanges() {
@@ -115,12 +104,10 @@ export class SimulationControlContainer extends Component<Props, State> {
   render() {
     return (
       <SimulationControl
-        fieldModelMrid={this.props.fieldModelMrid}
         simulationId={this.state.activeSimulationId}
         simulationStatus={this.state.simulationStatus}
         existingPlotModels={this.state.existingPlotModels}
         onStartSimulation={this.simulationManagementService.startSimulation}
-        onStartFieldModelSimulation={this.simulationManagementService.startFieldModelSimulation}
         onExportSimulationConfiguration={this.props.exportSimulationConfiguration}
         modelDictionaryComponents={this.state.modelDictionaryComponents}
         onStopSimulation={this.simulationManagementService.stopSimulation}

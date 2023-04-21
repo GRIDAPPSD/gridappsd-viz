@@ -22,6 +22,7 @@ import { MeasurementValueTableContainer } from './simulation/measurement-value-t
 import { MeasurementChartContainer } from './simulation/measurement-chart';
 import { SimulationConfigurationEditor } from './simulation/simulation-configuration-editor';
 import { SimulationControlContainer } from './simulation/simulation-control';
+import { FieldModelControlContainer } from './field-model/field-model-control/FieldModelControlContainer';
 import { SimulationStatusLogContainer } from './simulation/simulation-status-logger';
 import { StompClientContainer } from './stomp-client';
 import { TopologyRendererContainer } from './simulation/topology-renderer';
@@ -170,7 +171,6 @@ export function App(props: Props) {
               <div>
                 <SimulationControlContainer
                   exportSimulationConfiguration={downloadSimulationConfiguration}
-                  fieldModelMrid={props.fieldModelMrid}
                 />
                 <TabGroup ref={tabGroupRef}>
                   <Tab label='Simulation'>
@@ -198,19 +198,16 @@ export function App(props: Props) {
                 <MeasurementChartContainer />
               </div>
             </div>} />
-        {/* {// * Temporary route to redirect user to field-model UI, use Simulation code for demo purpose, wait for DNP3 service got released, then can subscribe to /topic/goss.gridappsd.field.input} */}
         <Route
           path='field-model'
           element={
             <div className='topology-renderer-simulation-status-logger-measurement-graphs'>
               <div>
-                <SimulationControlContainer
-                  exportSimulationConfiguration={downloadSimulationConfiguration}
-                  fieldModelMrid={props.fieldModelMrid}
-                />
+                <FieldModelControlContainer fieldModelMrid={props.fieldModelMrid} />
                 <TabGroup ref={tabGroupRef}>
                   <Tab label='Display Field Model'>
                     <TopologyRendererContainer
+                      fieldModelMrid={props.fieldModelMrid}
                       mRIDs={props.componentMRIDs}
                       phases={props.componentPhases} />
                     <SimulationStatusLogContainer />
@@ -231,7 +228,9 @@ export function App(props: Props) {
                 </TabGroup>
               </div>
               <div className='measurement-charts'>
-                <MeasurementChartContainer />
+                <MeasurementChartContainer
+                  fieldModelMrid={props.fieldModelMrid}
+                />
               </div>
             </div>} />
         <Route

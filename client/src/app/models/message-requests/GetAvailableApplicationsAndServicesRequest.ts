@@ -20,8 +20,8 @@ export class GetAvailableApplicationsAndServicesRequest
     services: true,
     appInstances: false,
     serviceInstances: false,
-    field: true
-    // field: false //* <- Set false to not go into Display Field Model
+    // field: true
+    field: false //* <- Set false to not go into Display Field Model
   };
 
 }
