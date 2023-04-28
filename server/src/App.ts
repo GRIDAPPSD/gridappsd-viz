@@ -28,7 +28,18 @@ export class App {
     this._expressInstance.use(express.static(path.resolve(__dirname, '..', '..', '..', 'assets')));
     this._expressInstance.use((_, response, next) => {
       response.redirect('/');
-      next();
+
+      /**
+       * To solve the error “[ERR_HTTP_HEADERS_SENT]:  Can't set headers after they are sent to the client”,
+       * always make sure you are only sending single response for a single request.
+       *
+       * Also ensure you are not using res.setHeader() or next() in middlewares after sending a response to the client.
+       */
+      if (response.headersSent) {
+        return;
+      } else {
+        next();
+      }
     });
   }
 
