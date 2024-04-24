@@ -554,8 +554,9 @@ export class TopologyRenderer extends Component<Props, State> {
     nodeMap.forEach(node => {
       node.y1 = minYCoordinate + (maxYCoordinate - node.y1);
       if ('y2' in node) {
+        const nodey2 = node['y2'] as any;
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (node as any).y2 = minYCoordinate + (maxYCoordinate - node['y2']);
+        (node as any).y2 = minYCoordinate + (maxYCoordinate - nodey2);
       }
     });
   }

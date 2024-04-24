@@ -90,10 +90,10 @@ export class AppContainer extends Component<Props, State> {
           this._fetchFeederModels();
         }
       });
-    zip(
-      this.simulationManagementService.selectSimulationSnapshotState('stateStore'),
-      this.simulationManagementService.selectSimulationSnapshotState('topologyModel')
-    )
+      zip(
+        this.simulationManagementService.selectSimulationSnapshotState('stateStore'),
+        this.simulationManagementService.selectSimulationSnapshotState('topologyModel')
+      )
       .subscribe({
         next: (tuple: [ApplicationState, TopologyModel]) => {
           const modelMRID = tuple[1].feeders[0].mRID;
@@ -119,7 +119,7 @@ export class AppContainer extends Component<Props, State> {
     this._stompClientService.readOnceFrom<GetAvailableApplicationsRequestPayload>(destination)
       .subscribe({
         next: payload => {
-          // Todo - For Field Model to receive Min/Avg/Max Voltages chart, fieldModelMrid needs to be '_C1C3E687-6FFD-C753-582B-632A27E28507'
+          // * You can hard code mRID that you wanted to use here.
           // payload.fieldModelMrid = '_C1C3E687-6FFD-C753-582B-632A27E28507';
           this._stateStore.update({
             applications: payload.applications,

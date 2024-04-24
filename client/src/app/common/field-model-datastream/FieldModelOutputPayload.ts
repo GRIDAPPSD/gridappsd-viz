@@ -5,6 +5,6 @@ export interface FieldModelOutputPayload {
       measurements: {
         [mrid: string]: { magnitude: number; angle: number; mrid: string };
       };
+      timestamp: number;
     };
-    timestamp: number;
   }

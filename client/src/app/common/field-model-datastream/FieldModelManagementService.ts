@@ -174,7 +174,7 @@ export class FieldModelManagementService {
   }
 
   private _broadcastFieldModelOutputMeasurements(payload: FieldModelOutputPayload) {
-    this._outputTimestamp = payload.timestamp;
+    this._outputTimestamp = payload.message.timestamp;
     const measurementMap = new Map<string, FieldModelOutputMeasurement>();
     for (const [mrid,rawFieldModelOutputMeasurement] of Object.entries(payload.message.measurements)) {
       const measurementInModelDictionary = this._modelDictionaryMeasurementMap.get(mrid);

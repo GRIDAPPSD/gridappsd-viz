@@ -57,7 +57,7 @@ export class MeasurementChartContainer extends Component<Props, State> {
       this._observeActiveFieldModelChangeEvent();
       this._subscribeToPlotModelsStateStore();
       this._subscribeToFieldModelOutputMeasurementMapStream();
-      this._fetchLimitsFileWhenSimulationIdChanges();
+      // this._fetchLimitsFileWhenSimulationIdChanges(); // * Looks like Field Model doesn't need it
       this._resetRenderableChartModelsWhenFieldModelStarts();
     } else {
       this._observeActiveSimulationChangeEvent();
