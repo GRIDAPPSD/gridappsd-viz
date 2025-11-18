@@ -84,7 +84,7 @@ export class SimulationConfigurationEditor extends Component<Props, State> {
       show: true,
       modelDictionary: null,
       disableSubmitButton: true,
-      lineName: props.initialConfig.power_system_config.Line_name,
+      lineName: props.initialConfig.power_system_configs[0].Line_name,
       modelDictionaryComponents: [],
       services: [],
       simulators: []
@@ -106,7 +106,7 @@ export class SimulationConfigurationEditor extends Component<Props, State> {
         result = {
           // eslint-disable-next-line camelcase
           power_system_config: {
-            ...original.power_system_config
+            ...original.power_system_configs[0]
           },
           // eslint-disable-next-line camelcase
           application_config: {
@@ -178,7 +178,7 @@ export class SimulationConfigurationEditor extends Component<Props, State> {
 
       if (errorMessage.length === 0) {
         for (const config of requiredPowerSystemConfigs) {
-          if (!Object.prototype.hasOwnProperty.call(fileContent['power_system_config'], config)) {
+          if (!Object.prototype.hasOwnProperty.call(fileContent['power_system_configs'], config)) {
             errorMessage += `Missing power_system_config: ${config}. `;
           }
         }
@@ -295,14 +295,14 @@ export class SimulationConfigurationEditor extends Component<Props, State> {
                 <Tab label='Power System Configuration'>
                   <PowerSystemConfigurationTab
                     parentFormGroupModel={this.formGroupModel.findControl('powerSystemConfig')}
-                    powerSystemConfig={this.currentConfig.power_system_config}
+                    powerSystemConfig={this.currentConfig.power_system_configs}
                     feederModel={this.props.feederModel} />
                 </Tab>
                 <Tab label='Simulation Configuration'>
                   <SimulationConfigurationTab
                     isUploaded={this.props.isUploaded}
                     parentFormGroupModel={this.formGroupModel.findControl('simulationConfig')}
-                    simulationConfig={this.currentConfig.simulation_config}
+                    simulationConfigs={this.currentConfig}
                     simulators={this.state.simulators}
                     services={this.state.services} />
                 </Tab>
@@ -390,11 +390,11 @@ export class SimulationConfigurationEditor extends Component<Props, State> {
   private _populatePowerSystemConfigSection() {
     const powerSystemConfigFormValue = this.formGroupModel.findControl('powerSystemConfig').getValue();
     // eslint-disable-next-line camelcase
-    this.currentConfig.power_system_config.GeographicalRegion_name = powerSystemConfigFormValue.region.id;
+    this.currentConfig.power_system_configs[0].GeographicalRegion_name = powerSystemConfigFormValue.region.id;
     // eslint-disable-next-line camelcase
-    this.currentConfig.power_system_config.SubGeographicalRegion_name = powerSystemConfigFormValue.subregion.id;
+    this.currentConfig.power_system_configs[0].SubGeographicalRegion_name = powerSystemConfigFormValue.subregion.id;
     // eslint-disable-next-line camelcase
-    this.currentConfig.power_system_config.Line_name = powerSystemConfigFormValue.line.id;
+    this.currentConfig.power_system_configs[0].Line_name = powerSystemConfigFormValue.line.id;
   }
 
   private _populateSimulationConfigSection() {

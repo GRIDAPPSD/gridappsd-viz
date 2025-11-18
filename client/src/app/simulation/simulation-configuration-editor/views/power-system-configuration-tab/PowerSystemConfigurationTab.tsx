@@ -12,7 +12,7 @@ import './PowerSystemConfigurationTab.dark.scss';
 interface Props {
   parentFormGroupModel: FormGroupModel<PowerSystemConfigurationModel>;
   feederModel: FeederModel;
-  powerSystemConfig: SimulationConfiguration['power_system_config'];
+  powerSystemConfig: SimulationConfiguration['power_system_configs'];
 }
 
 interface State {
@@ -108,7 +108,7 @@ export class PowerSystemConfigurationTab extends Component<Props, State> {
           formControlModel={this.regionFormControlModel}
           selectionOptionBuilder={this.state.regionOptionBuilder}
           selectedOptionFinder={
-            region => region.id === this.props.powerSystemConfig.GeographicalRegion_name
+            region => region.id === this.props.powerSystemConfig[0].GeographicalRegion_name
           } />
 
         <Select
@@ -116,14 +116,14 @@ export class PowerSystemConfigurationTab extends Component<Props, State> {
           formControlModel={this.subregionFormControlModel}
           selectionOptionBuilder={this.state.subregionOptionBuilder}
           selectedOptionFinder={
-            subregion => subregion.id === this.props.powerSystemConfig.SubGeographicalRegion_name
+            subregion => subregion.id === this.props.powerSystemConfig[0].SubGeographicalRegion_name
           } />
 
         <Select
           label='Line name'
           formControlModel={this.lineNameFormControlModel}
           selectionOptionBuilder={this.state.lineOptionBuilder}
-          selectedOptionFinder={line => line.id === this.props.powerSystemConfig.Line_name} />
+          selectedOptionFinder={line => line.id === this.props.powerSystemConfig[0].Line_name} />
       </FormGroup>
     );
   }
