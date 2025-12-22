@@ -41,7 +41,7 @@ export const DEFAULT_SIMULATION_CONFIGURATION: SimulationConfiguration = {
       {
          SubGeographicalRegion_name: '_A1170111-942A-6ABD-D325-C64886DC4D7D',
          GeographicalRegion_name: '_73C512BD-7249-4F50-50DA-D93849B89C43',
-         Line_name: 'C1C3E687-6FFD-C753-582B-632A27E28507',
+         Line_name: '',
          simulator_config: {
             simulator: 'GridLAB-D',
             simulation_output: {},

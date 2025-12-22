@@ -90,7 +90,6 @@ export class SimulationConfigurationEditor extends Component<Props, State> {
       simulators: []
     };
     this.currentConfig = this._cloneConfigObject(props.initialConfig, this.props.isUploaded);
-
     this.closeForm = this.closeForm.bind(this);
     this.onSubmitForm = this.onSubmitForm.bind(this);
   }
@@ -105,9 +104,7 @@ export class SimulationConfigurationEditor extends Component<Props, State> {
       } else {
         result = {
           // eslint-disable-next-line camelcase
-          power_system_config: {
-            ...original.power_system_configs[0]
-          },
+          power_system_configs: [...original.power_system_configs],
           // eslint-disable-next-line camelcase
           application_config: {
             applications: original.application_config.applications.length > 0
@@ -154,18 +151,19 @@ export class SimulationConfigurationEditor extends Component<Props, State> {
       const requiredPowerSystemConfigs = [
         'GeographicalRegion_name',
         'SubGeographicalRegion_name',
-        'Line_name'
+        'Line_name',
+        'simulator_config'
       ];
       const requiredSimulationConfigs = [
         'start_time',
         'duration',
-        'simulator',
+        // 'simulator',
         'run_realtime',
         'timestep_frequency',
         'timestep_increment',
         'simulation_name',
-        'power_flow_solver_method',
-        'model_creation_config'
+        'power_flow_solver_method'
+        // 'model_creation_config'
       ];
       const requiredTestConfigs = ['events', 'appId'];
       const objKeys = Object.keys(fileContent);
@@ -399,9 +397,14 @@ export class SimulationConfigurationEditor extends Component<Props, State> {
 
   private _populateSimulationConfigSection() {
     // eslint-disable-next-line camelcase
+   const { model_creation_config, simulator, ...rest} = this.formGroupModel.findControl('simulationConfig').getValue();
+   this.currentConfig.power_system_configs[0].simulator_config.simulator = simulator;
+    // eslint-disable-next-line camelcase
+   this.currentConfig.power_system_configs[0].simulator_config.model_creation_config = model_creation_config;
+    // eslint-disable-next-line camelcase
     this.currentConfig.simulation_config = {
       ...this.currentConfig.simulation_config,
-      ...this.formGroupModel.findControl('simulationConfig').getValue()
+      ...rest
     };
   }
 
