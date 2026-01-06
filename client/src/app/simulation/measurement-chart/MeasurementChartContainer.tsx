@@ -437,7 +437,11 @@ export class MeasurementChartContainer extends Component<Props, State> {
       .pipe(
         takeUntil(this._unsubscriber),
         filter(simulationId => simulationId !== ''),
-        map(simulationId => new FetchLimitsFileRequest(simulationId))
+        map(simulationId => {
+          const activeSimulation = this._simulationQueue.getActiveSimulation();
+          const modelId = activeSimulation?.config?.power_system_configs?.[0]?.Line_name || '';
+          return new FetchLimitsFileRequest(simulationId, modelId);
+        })
       )
       .subscribe({
         next: request => {

@@ -24,7 +24,7 @@ import './SimulationConfigurationTab.dark.scss';
 
 interface Props {
   parentFormGroupModel: FormGroupModel<SimulationConfigurationTabModel>;
-  simulationConfig: SimulationConfiguration['simulation_config'];
+  simulationConfigs: SimulationConfiguration;
   simulators: string[];
   services: Service[];
   isUploaded: boolean;
@@ -62,12 +62,12 @@ export class SimulationConfigurationTab extends Component<Props, State> {
   }
 
   private _setupFormGroupModelForSimulationConfigurationTab() {
-    if (this.props.simulationConfig && this.props.simulationConfig !== null) {
+    if (this.props.simulationConfigs && this.props.simulationConfigs !== null) {
       if (this.props.isUploaded) {
         this.props.parentFormGroupModel.setControl(
           'start_time',
           new FormControlModel(
-            this.dateTimeService.parseEpoch(+this.props.simulationConfig.start_time),
+            this.dateTimeService.parseEpoch(+this.props.simulationConfigs.simulation_config.start_time),
             [Validators.checkNotEmpty('Start time'), Validators.checkValidDateTime('Start time')]
           )
         );
@@ -75,7 +75,7 @@ export class SimulationConfigurationTab extends Component<Props, State> {
         this.props.parentFormGroupModel.setControl(
           'start_time',
           new FormControlModel(
-            this.props.simulationConfig.start_time,
+            this.props.simulationConfigs.simulation_config.start_time,
             [Validators.checkNotEmpty('Start time'), Validators.checkValidDateTime('Start time')]
           )
         );
@@ -83,30 +83,30 @@ export class SimulationConfigurationTab extends Component<Props, State> {
       this.props.parentFormGroupModel.setControl(
         'duration',
         new FormControlModel(
-          this.props.simulationConfig.duration,
+          this.props.simulationConfigs.simulation_config.duration,
           [Validators.checkNotEmpty('Duration'), Validators.checkValidNumber('Duration')]
         )
       );
       this.props.parentFormGroupModel.setControl(
         'simulator',
         // new FormControlModel('')
-        new FormControlModel(this.props.simulationConfig.simulator)
+        new FormControlModel(this.props.simulationConfigs.power_system_configs[0].simulator_config.simulator)
       );
       this.props.parentFormGroupModel.setControl(
         'run_realtime',
-        new FormControlModel(this.props.simulationConfig.run_realtime)
+        new FormControlModel(this.props.simulationConfigs.simulation_config.run_realtime)
       );
       this.props.parentFormGroupModel.setControl(
         'simulation_name',
         new FormControlModel(
-          this.props.simulationConfig.simulation_name,
+          this.props.simulationConfigs.simulation_config.simulation_name,
           [Validators.checkNotEmpty('Simulation name')]
         )
       );
       this.props.parentFormGroupModel.setControl(
         'model_creation_config',
         new FormControlModel(
-          this.props.simulationConfig.model_creation_config,
+          this.props.simulationConfigs.power_system_configs[0].simulator_config.model_creation_config,
           [
             Validators.checkNotEmpty('Model creation config'),
             Validators.checkValidJSON('Model creation config')
@@ -137,7 +137,7 @@ export class SimulationConfigurationTab extends Component<Props, State> {
             formControlModel={this.props.parentFormGroupModel.findControl('simulator')}
             selectionOptionBuilder={this.state.simulatorOptionBuilder}
             // selectedOptionFinder={simulator => simulator === 'GridLAB-D'} />
-            selectedOptionFinder={simulator => simulator === this.props.simulationConfig.simulator} />
+            selectedOptionFinder={simulator => simulator === this.props.simulationConfigs.power_system_configs[0].simulator_config.simulator} />
           <div className='accompanying-text'>
             <div>Power flow solver method</div>
             <div>NR</div>

@@ -306,11 +306,12 @@ export class AppContainer extends Component<Props, State> {
     });
   }
 
-  onSimulationConfigFormSubmitted(config: SimulationConfiguration) {
-    this._simulationQueue.push(new Simulation(config));
-    this._stateStore.update({
-      simulationId: ''
-    });
-  }
+   onSimulationConfigFormSubmitted(config: SimulationConfiguration) {
+      const simulation = new Simulation(config);
+      this._simulationQueue.push(simulation);
+      this._stateStore.update({
+         simulationId: ''
+      });
+   }
 
 }
