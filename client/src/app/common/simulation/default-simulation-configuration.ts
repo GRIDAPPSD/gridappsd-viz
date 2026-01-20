@@ -45,6 +45,7 @@ export const DEFAULT_SIMULATION_CONFIGURATION: SimulationConfiguration = {
          simulator_config: {
             simulator: 'GridLAB-D',
             simulation_output: {},
+            power_flow_solver_method: 'NR',
             model_creation_config: {
                load_scaling_factor: '1.0',
                schedule_name: 'ieeezipload',
@@ -70,7 +71,6 @@ export const DEFAULT_SIMULATION_CONFIGURATION: SimulationConfiguration = {
       timestep_increment: '1000',
       run_realtime: true,
       simulation_name: '',
-      power_flow_solver_method: 'NR'
 	},
    application_config: {
       applications: []

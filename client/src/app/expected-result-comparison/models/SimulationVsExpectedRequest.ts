@@ -15,6 +15,7 @@ export class SimulationVsExpectedRequest implements MessageRequest {
       simulator_config: {
          simulation_output: {},
          simulator: 'GridLAB-D',
+         power_flow_solver_method: 'NR',
          model_creation_config: {
             load_scaling_factor: '1.0',
             schedule_name: 'ieeezipload',
@@ -34,7 +35,6 @@ export class SimulationVsExpectedRequest implements MessageRequest {
    }
 ],
     simulation_config: {
-      power_flow_solver_method: 'NR',
       duration: '60',
       simulation_name: 'ieee123',
       start_time: '1248202800',

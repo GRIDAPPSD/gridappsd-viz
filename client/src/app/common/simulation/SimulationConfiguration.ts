@@ -45,6 +45,7 @@ interface PowerSystemConfig {
    simulator_config: {
       simulator: string;
       simulation_output: object;
+      power_flow_solver_method: string;
       model_creation_config: {
          load_scaling_factor: string;
          schedule_name: string;
@@ -72,7 +73,6 @@ export interface SimulationConfiguration {
       timestep_frequency: string;
       timestep_increment: string;
       simulation_name: string;
-      power_flow_solver_method: string;
    };
    application_config: {
       applications: Array<{ name: string; config_string: string }>;
@@ -81,5 +81,6 @@ export interface SimulationConfiguration {
    test_config: {
       events: Array<any>;
       appId: string;
+      compareWithSimId?: number;
    };
 }
