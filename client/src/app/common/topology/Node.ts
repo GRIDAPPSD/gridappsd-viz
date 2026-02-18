@@ -15,6 +15,7 @@ export interface Node {
   type: NodeType;
   x1: number;
   y1: number;
+  y2?: number;
   screenX1: number;
   screenY1: number;
   mRIDs: string[];

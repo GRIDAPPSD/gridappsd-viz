@@ -6,36 +6,40 @@ export class SimulationVsTimeSeriesRequest implements MessageRequest {
   readonly url = 'goss.gridappsd.process.request.simulation';
 
   readonly requestBody = {
-    power_system_config: {
-      SubGeographicalRegion_name: '_1CD7D2EE-3C91-3248-5662-A43EFEFAC224',
-      GeographicalRegion_name: '_24809814-4EC6-29D2-B509-7F8BFB646437',
-      Line_name: '_C1C3E687-6FFD-C753-582B-632A27E28507' // IEEE123
-    },
+    power_system_config: [
+      {
+         SubGeographicalRegion_name: '_1CD7D2EE-3C91-3248-5662-A43EFEFAC224',
+         GeographicalRegion_name: '_24809814-4EC6-29D2-B509-7F8BFB646437',
+         Line_name: '_C1C3E687-6FFD-C753-582B-632A27E28507', // IEEE123
+         simulator_config: {
+            simulator: 'GridLAB-D',
+            power_flow_solver_method: 'NR',
+            simulation_output: {},
+            model_creation_config: {
+               load_scaling_factor: '1.0',
+               triplex: 'y',
+               encoding: 'u',
+               system_frequency: '60',
+               voltage_multiplier: '1.0',
+               power_unit_conversion: '1.0',
+               unique_names: 'y',
+               schedule_name: 'ieeezipload',
+               z_fraction: '0.0',
+               i_fraction: '1.0',
+               p_fraction: '0.0',
+               randomize_zipload_fractions: false,
+               use_houses: false
+            }
+         }
+      }
+    ],
     simulation_config: {
-      power_flow_solver_method: 'NR',
-      duration: 60,
-      simulation_name: 'ieee123',
-      simulator: 'GridLAB-D',
-      start_time: 1248156000,
-      run_realtime: true,
-      simulation_output: {},
-      model_creation_config: {
-        load_scaling_factor: 1.0,
-        triplex: 'y',
-        encoding: 'u',
-        system_frequency: 60,
-        voltage_multiplier: 1.0,
-        power_unit_conversion: 1.0,
-        unique_names: 'y',
-        schedule_name: 'ieeezipload',
-        z_fraction: 0.0,
-        i_fraction: 1.0,
-        p_fraction: 0.0,
-        randomize_zipload_fractions: false,
-        use_houses: false
-      },
-      simulation_broker_port: 52798,
-      simulation_broker_location: '127.0.0.1'
+       start_time: '1248156000',
+       duration: '60',
+       simulation_broker_port: '52798',
+       simulation_broker_location: '127.0.0.1',
+       run_realtime: true,
+       simulation_name: 'ieee123'
     },
     application_config: {
       applications: [
