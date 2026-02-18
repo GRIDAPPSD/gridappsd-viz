@@ -1,34 +1,30 @@
-const { resolve } = require('path');
+const { resolve } = require("path");
 
 module.exports = () => {
-  const baseConfig = require('./webpack.base.config')('development');
+   const baseConfig = require("./webpack.base.config")("development");
 
-  baseConfig.module.rules.push({
-    test: /(\.tsx?)$/,
-    use: 'ts-loader'
-  });
+   baseConfig.module.rules.push({
+      test: /(\.tsx?)$/,
+      use: "ts-loader",
+   });
 
-  return {
-    ...baseConfig,
+   return {
+      ...baseConfig,
 
-    devServer: {
-      port: 3000,
-      open: true,
-      hot: false,
-      static: [
-        resolve(__dirname, 'assets'),
-        resolve(__dirname, 'dist')
-      ],
-      historyApiFallback: {
-        disableDotRule: true,
-        htmlAcceptHeaders: ['text/html', 'application/xhtml+xml']
+      devServer: {
+         port: 3000,
+         open: true,
+         hot: false,
+         static: [resolve(__dirname, "assets"), resolve(__dirname, "dist")],
+         historyApiFallback: {
+            disableDotRule: true,
+            htmlAcceptHeaders: ["text/html", "application/xhtml+xml"],
+         },
+         proxy: {
+            "/": {
+               target: "http://localhost:8080",
+            },
+         },
       },
-      proxy: {
-        '/': {
-          target: 'http://localhost:8092'
-        }
-      }
-    }
-
-  };
+   };
 };

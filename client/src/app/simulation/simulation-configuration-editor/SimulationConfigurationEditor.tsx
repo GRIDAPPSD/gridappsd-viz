@@ -84,13 +84,12 @@ export class SimulationConfigurationEditor extends Component<Props, State> {
       show: true,
       modelDictionary: null,
       disableSubmitButton: true,
-      lineName: props.initialConfig.power_system_config.Line_name,
+      lineName: props.initialConfig.power_system_configs[0].Line_name,
       modelDictionaryComponents: [],
       services: [],
       simulators: []
     };
     this.currentConfig = this._cloneConfigObject(props.initialConfig, this.props.isUploaded);
-
     this.closeForm = this.closeForm.bind(this);
     this.onSubmitForm = this.onSubmitForm.bind(this);
   }
@@ -105,9 +104,7 @@ export class SimulationConfigurationEditor extends Component<Props, State> {
       } else {
         result = {
           // eslint-disable-next-line camelcase
-          power_system_config: {
-            ...original.power_system_config
-          },
+          power_system_configs: [...original.power_system_configs],
           // eslint-disable-next-line camelcase
           application_config: {
             applications: original.application_config.applications.length > 0
@@ -154,18 +151,19 @@ export class SimulationConfigurationEditor extends Component<Props, State> {
       const requiredPowerSystemConfigs = [
         'GeographicalRegion_name',
         'SubGeographicalRegion_name',
-        'Line_name'
+        'Line_name',
+        'simulator_config'
       ];
       const requiredSimulationConfigs = [
         'start_time',
         'duration',
-        'simulator',
+        // 'simulator',
         'run_realtime',
         'timestep_frequency',
         'timestep_increment',
         'simulation_name',
-        'power_flow_solver_method',
-        'model_creation_config'
+        'power_flow_solver_method'
+        // 'model_creation_config'
       ];
       const requiredTestConfigs = ['events', 'appId'];
       const objKeys = Object.keys(fileContent);
@@ -178,8 +176,8 @@ export class SimulationConfigurationEditor extends Component<Props, State> {
 
       if (errorMessage.length === 0) {
         for (const config of requiredPowerSystemConfigs) {
-          if (!Object.prototype.hasOwnProperty.call(fileContent['power_system_config'], config)) {
-            errorMessage += `Missing power_system_config: ${config}. `;
+          if (!Object.prototype.hasOwnProperty.call(fileContent['power_system_configs'], config)) {
+            errorMessage += `Missing power_system_configs: ${config}. `;
           }
         }
         for (const config of requiredSimulationConfigs) {
@@ -295,14 +293,14 @@ export class SimulationConfigurationEditor extends Component<Props, State> {
                 <Tab label='Power System Configuration'>
                   <PowerSystemConfigurationTab
                     parentFormGroupModel={this.formGroupModel.findControl('powerSystemConfig')}
-                    powerSystemConfig={this.currentConfig.power_system_config}
+                    powerSystemConfig={this.currentConfig.power_system_configs}
                     feederModel={this.props.feederModel} />
                 </Tab>
                 <Tab label='Simulation Configuration'>
                   <SimulationConfigurationTab
                     isUploaded={this.props.isUploaded}
                     parentFormGroupModel={this.formGroupModel.findControl('simulationConfig')}
-                    simulationConfig={this.currentConfig.simulation_config}
+                    simulationConfigs={this.currentConfig}
                     simulators={this.state.simulators}
                     services={this.state.services} />
                 </Tab>
@@ -390,18 +388,23 @@ export class SimulationConfigurationEditor extends Component<Props, State> {
   private _populatePowerSystemConfigSection() {
     const powerSystemConfigFormValue = this.formGroupModel.findControl('powerSystemConfig').getValue();
     // eslint-disable-next-line camelcase
-    this.currentConfig.power_system_config.GeographicalRegion_name = powerSystemConfigFormValue.region.id;
+    this.currentConfig.power_system_configs[0].GeographicalRegion_name = powerSystemConfigFormValue.region.id;
     // eslint-disable-next-line camelcase
-    this.currentConfig.power_system_config.SubGeographicalRegion_name = powerSystemConfigFormValue.subregion.id;
+    this.currentConfig.power_system_configs[0].SubGeographicalRegion_name = powerSystemConfigFormValue.subregion.id;
     // eslint-disable-next-line camelcase
-    this.currentConfig.power_system_config.Line_name = powerSystemConfigFormValue.line.id;
+    this.currentConfig.power_system_configs[0].Line_name = powerSystemConfigFormValue.line.id;
   }
 
   private _populateSimulationConfigSection() {
     // eslint-disable-next-line camelcase
+   const { model_creation_config, simulator, ...rest} = this.formGroupModel.findControl('simulationConfig').getValue();
+   this.currentConfig.power_system_configs[0].simulator_config.simulator = simulator;
+    // eslint-disable-next-line camelcase
+   this.currentConfig.power_system_configs[0].simulator_config.model_creation_config = model_creation_config;
+    // eslint-disable-next-line camelcase
     this.currentConfig.simulation_config = {
       ...this.currentConfig.simulation_config,
-      ...this.formGroupModel.findControl('simulationConfig').getValue()
+      ...rest
     };
   }
 
