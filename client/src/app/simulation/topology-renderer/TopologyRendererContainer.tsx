@@ -106,7 +106,7 @@ export class TopologyRendererContainer extends Component<Props, State> {
           // it. Otherwise, they received it by joining an active simulation,
           // in that case, we don't want to do anything here
           if (!this._simulationManagementService.isUserInActiveSimulation()) {
-            const lineName = simulation.config.power_system_config.Line_name;
+            const lineName = simulation.config.power_system_configs[0].Line_name;
             if (topologyModelCache.has(lineName)) {
               const topologyModel = topologyModelCache.get(lineName);
               this._processModelForRendering(topologyModel);
@@ -143,7 +143,7 @@ export class TopologyRendererContainer extends Component<Props, State> {
           this._simulationManagementService.syncSimulationSnapshotState({
             topologyModel
           });
-          topologyModelCache.set(this.activeSimulationConfig.power_system_config.Line_name, topologyModel);
+          topologyModelCache.set(this.activeSimulationConfig.power_system_configs[0].Line_name, topologyModel);
         }
       });
   }
@@ -421,7 +421,7 @@ export class TopologyRendererContainer extends Component<Props, State> {
       componentMRID: this.props.mRIDs.get(swjtch.name) as string,
       simulationId: this._simulationQueue.getActiveSimulation().id,
       open,
-      differenceMRID: this.activeSimulationConfig.power_system_config.Line_name
+      differenceMRID: this.activeSimulationConfig.power_system_configs[0].Line_name
     });
     this._stompClientService.send({
       destination: toggleSwitchStateRequest.url,
@@ -469,7 +469,7 @@ export class TopologyRendererContainer extends Component<Props, State> {
       componentMRID: this.props.mRIDs.get(capacitor.name) as string,
       simulationId: this._simulationQueue.getActiveSimulation().id,
       manual: capacitor.manual,
-      differenceMRID: this.activeSimulationConfig.power_system_config.Line_name
+      differenceMRID: this.activeSimulationConfig.power_system_configs[0].Line_name
     });
     this._stompClientService.send({
       destination: toggleCapacitorManualModeRequest.url,
@@ -483,7 +483,7 @@ export class TopologyRendererContainer extends Component<Props, State> {
       componentMRID: this.props.mRIDs.get(capacitor.name) as string,
       simulationId: this._simulationQueue.getActiveSimulation().id,
       open: capacitor.open,
-      differenceMRID: this.activeSimulationConfig.power_system_config.Line_name
+      differenceMRID: this.activeSimulationConfig.power_system_configs[0].Line_name
     });
     this._stompClientService.send({
       destination: openOrCloseCapacitorRequest.url,
@@ -498,7 +498,7 @@ export class TopologyRendererContainer extends Component<Props, State> {
       simulationId: this._simulationQueue.getActiveSimulation().id,
       target: capacitor.var.target,
       deadband: capacitor.var.deadband,
-      differenceMRID: this.activeSimulationConfig.power_system_config.Line_name
+      differenceMRID: this.activeSimulationConfig.power_system_configs[0].Line_name
     });
     this._stompClientService.send({
       destination: capacitorVarUpdateRequest.url,
@@ -513,7 +513,7 @@ export class TopologyRendererContainer extends Component<Props, State> {
       simulationId: this._simulationQueue.getActiveSimulation().id,
       target: capacitor.volt.target,
       deadband: capacitor.volt.deadband,
-      differenceMRID: this.activeSimulationConfig.power_system_config.Line_name
+      differenceMRID: this.activeSimulationConfig.power_system_configs[0].Line_name
     });
     this._stompClientService.send({
       destination: capacitorVoltUpdateRequest.url,
@@ -547,7 +547,7 @@ export class TopologyRendererContainer extends Component<Props, State> {
           componentMRID: mRID,
           simulationId: this._simulationQueue.getActiveSimulation().id,
           manual: regulator.manual,
-          differenceMRID: this.activeSimulationConfig.power_system_config.Line_name
+          differenceMRID: this.activeSimulationConfig.power_system_configs[0].Line_name
         });
       })
       .forEach(request => {
@@ -567,7 +567,7 @@ export class TopologyRendererContainer extends Component<Props, State> {
         return new RegulatorTapChangerRequest({
           mRID,
           simulationId: this._simulationQueue.getActiveSimulation().id,
-          differenceMRID: this.activeSimulationConfig.power_system_config.Line_name,
+          differenceMRID: this.activeSimulationConfig.power_system_configs[0].Line_name,
           phase,
           tapValue: phaseValue.tap
         });
@@ -589,7 +589,7 @@ export class TopologyRendererContainer extends Component<Props, State> {
         return new RegulatorLineDropUpdateRequest({
           mRID,
           simulationId: this._simulationQueue.getActiveSimulation().id,
-          differenceMRID: this.activeSimulationConfig.power_system_config.Line_name,
+          differenceMRID: this.activeSimulationConfig.power_system_configs[0].Line_name,
           lineDropR: phaseValue.lineDropR,
           lineDropX: phaseValue.lineDropX,
           phase

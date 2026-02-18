@@ -1,4 +1,4 @@
-FROM node:14.17-buster-slim
+FROM node:14.21.3-slim
 
 ARG TIMESTAMP
 ARG VERSION
@@ -9,11 +9,11 @@ COPY . /gridappsd/viz/
 
 WORKDIR /gridappsd/viz/client
 RUN npm install \
-    && npm run build version=$VERSION
+   && npm run build version=$VERSION
 
 WORKDIR /gridappsd/viz/server
 RUN npm install \
-    && npm run build
+   && npm run build
 
 RUN echo $TIMESTAMP > /gridappsd/viz/dockerbuildversion.txt
 
