@@ -177,7 +177,7 @@ export class SimulationConfigurationEditor extends Component<Props, State> {
       if (errorMessage.length === 0) {
         for (const config of requiredPowerSystemConfigs) {
           if (!Object.prototype.hasOwnProperty.call(fileContent['power_system_configs'], config)) {
-            errorMessage += `Missing power_system_config: ${config}. `;
+            errorMessage += `Missing power_system_configs: ${config}. `;
           }
         }
         for (const config of requiredSimulationConfigs) {
